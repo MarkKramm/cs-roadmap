@@ -26,9 +26,18 @@ Start here: [`career-roadmaps/README.md`](career-roadmaps/README.md) — it expl
 
 ```text
 .
+├── .editorconfig          # Save-time: UTF-8, LF, indent rules
 ├── .gitattributes         # LF normalization policy (see below)
 ├── .gitignore
 ├── README.md              # this file
+├── AGENTS.md              # Guidance for contributors and agents
+├── CHANGELOG.md           # Notable changes
+├── CONTRIBUTING.md        # Human entry point into the repo
+├── LICENSE                # CC BY 4.0
+├── .github/workflows/     # CI — lint, build, smoke test (see below)
+├── docs/                  # Meta-documentation about the project
+├── scripts/               # Content tooling — build and lint the Markdown
+├── learning-site/         # React + Vite site that renders the curriculum
 └── career-roadmaps/
     ├── README.md          # main strategy document
     ├── it-roadmap/        # 00-overview + 9 phases + checklists
@@ -44,4 +53,6 @@ Start here: [`career-roadmaps/README.md`](career-roadmaps/README.md) — it expl
 
 ## Status
 
-Content baseline complete and committed.
+Curriculum content complete. Learning Site M2 complete (dashboard, tools library, portfolio tracker, application tracker). CI runs the content linter, the production build, and the render smoke test on every push and pull request — verified green.
+
+Deploying the site is the one open item; see [`docs/ROADMAP.md`](docs/ROADMAP.md).

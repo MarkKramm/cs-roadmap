@@ -13,6 +13,9 @@ This repository holds a self-study curriculum in Markdown, plus a small React le
 ```text
 career-roadmaps/    the study material — this is what most changes touch
 docs/               meta-documentation about the project itself
+scripts/            content tooling — build and lint the Markdown
+learning-site/      React + Vite site that renders the curriculum
+.github/workflows/  CI — runs the checks on every push and pull request
 ```
 
 Full breakdown in [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md).
@@ -27,6 +30,8 @@ Full breakdown in [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md).
    - `chore:` — tooling, config, housekeeping
    - `fix:` — corrections to broken content or formatting
 5. Verify the tree is clean: `git status --short`.
+
+CI runs the same checks on every push and pull request: the content linter (no install), then the production build and the render smoke test under `learning-site/`. See [`.github/workflows/ci.yml`](.github/workflows/ci.yml) and [`docs/DECISIONS.md`](docs/DECISIONS.md) → D-008. To run them locally, see "How to verify quickly" in [`docs/CHECKPOINT.md`](docs/CHECKPOINT.md).
 
 ## Common pitfalls
 
