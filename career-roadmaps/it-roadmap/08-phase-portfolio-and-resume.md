@@ -1,3 +1,16 @@
+---
+id: it-08-portfolio-and-resume
+track: it
+phase: 8
+order: 80
+title: "Phase 8 — Portfolio and Resume"
+duration: "2 weeks"
+duration_weeks: 2
+energy_mix: [low, normal]
+deliverable: ""
+exit_criteria: "A stranger can open your portfolio and understand what you practiced, what tools you used, and what role you want."
+---
+
 # Phase 8 — Portfolio and Resume
 
 ## Goal of this phase
@@ -80,13 +93,13 @@ entry-level-it-portfolio/
 
 ## Checklist
 
-- [ ] I created a portfolio folder or GitHub repo.
-- [ ] I added at least 5 proof-of-work artifacts.
-- [ ] I wrote a one-page resume.
-- [ ] I added 3–5 projects to my resume.
-- [ ] I updated LinkedIn headline/About.
-- [ ] I removed exaggerated claims.
-- [ ] I can explain every resume bullet honestly.
+- [ ] I created a portfolio folder or GitHub repo. <!-- id: it-08-c01 energy: normal -->
+- [ ] I added at least 5 proof-of-work artifacts. <!-- id: it-08-c02 energy: normal -->
+- [ ] I wrote a one-page resume. <!-- id: it-08-c03 energy: normal -->
+- [ ] I added 3–5 projects to my resume. <!-- id: it-08-c04 energy: normal -->
+- [ ] I updated LinkedIn headline/About. <!-- id: it-08-c05 energy: normal -->
+- [ ] I removed exaggerated claims. <!-- id: it-08-c06 energy: normal -->
+- [ ] I can explain every resume bullet honestly. <!-- id: it-08-c07 energy: low -->
 
 ## You're ready to move on when...
 

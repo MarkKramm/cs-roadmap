@@ -1,3 +1,16 @@
+---
+id: cyber-05-specialization-choice
+track: cyber
+phase: 5
+order: 50
+title: "Phase 5 — Specialization Choice"
+duration: "4 weeks"
+duration_weeks: 4
+energy_mix: [low, normal]
+deliverable: "portfolio/cyber/05-specialization-choice.md"
+exit_criteria: "You can say: “My target cyber role is ____. My portfolio will prove it using these 3 projects: ____.”"
+---
+
 # Phase 5 — Specialization Choice
 
 ## Goal of this phase
@@ -116,14 +129,14 @@ Create `portfolio/cyber/05-specialization-choice.md` with:
 
 ## Checklist
 
-- [ ] I explored SOC/Blue Team.
-- [ ] I explored GRC.
-- [ ] I explored IT Security Analyst work.
-- [ ] I explored Junior Pentest labs.
-- [ ] I reviewed 20 job posts.
-- [ ] I chose one primary path.
-- [ ] I chose one backup path.
-- [ ] I wrote a 90-day specialization plan.
+- [ ] I explored SOC/Blue Team. <!-- id: cyber-05-c01 energy: normal -->
+- [ ] I explored GRC. <!-- id: cyber-05-c02 energy: normal -->
+- [ ] I explored IT Security Analyst work. <!-- id: cyber-05-c03 energy: normal -->
+- [ ] I explored Junior Pentest labs. <!-- id: cyber-05-c04 energy: normal -->
+- [ ] I reviewed 20 job posts. <!-- id: cyber-05-c05 energy: normal -->
+- [ ] I chose one primary path. <!-- id: cyber-05-c06 energy: normal -->
+- [ ] I chose one backup path. <!-- id: cyber-05-c07 energy: normal -->
+- [ ] I wrote a 90-day specialization plan. <!-- id: cyber-05-c08 energy: normal -->
 
 ## You're ready to move on when...
 

@@ -1,3 +1,16 @@
+---
+id: cyber-07-certifications
+track: cyber
+phase: 7
+order: 70
+title: "Phase 7 — Certifications"
+duration: "4–12 weeks optional"
+duration_weeks: 12
+energy_mix: [low, normal]
+deliverable: "portfolio/cyber/07-certification-decision.md"
+exit_criteria: "You can explain exactly why a certification helps your target job and how your projects prove skills beyond the exam."
+---
+
 # Phase 7 — Certifications
 
 ## Goal of this phase
@@ -78,13 +91,13 @@ Create `portfolio/cyber/07-certification-decision.md` with:
 
 ## Checklist
 
-- [ ] I checked current official pricing.
-- [ ] I compared certification requirements against job posts.
-- [ ] I completed free training first.
-- [ ] I mapped knowledge gaps.
-- [ ] I have hands-on projects independent of the certificate.
-- [ ] I decided whether to take an exam or delay.
-- [ ] I will not claim a certification before earning it.
+- [ ] I checked current official pricing. <!-- id: cyber-07-c01 energy: normal -->
+- [ ] I compared certification requirements against job posts. <!-- id: cyber-07-c02 energy: normal -->
+- [ ] I completed free training first. <!-- id: cyber-07-c03 energy: normal -->
+- [ ] I mapped knowledge gaps. <!-- id: cyber-07-c04 energy: normal -->
+- [ ] I have hands-on projects independent of the certificate. <!-- id: cyber-07-c05 energy: normal -->
+- [ ] I decided whether to take an exam or delay. <!-- id: cyber-07-c06 energy: normal -->
+- [ ] I will not claim a certification before earning it. <!-- id: cyber-07-c07 energy: normal -->
 
 ## You're ready to move on when...
 

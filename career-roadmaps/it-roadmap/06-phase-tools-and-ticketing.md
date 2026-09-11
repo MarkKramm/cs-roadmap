@@ -1,3 +1,16 @@
+---
+id: it-06-tools-and-ticketing
+track: it
+phase: 6
+order: 60
+title: "Phase 6 — Tools and Ticketing"
+duration: "2 weeks"
+duration_weeks: 2
+energy_mix: [low, normal]
+deliverable: "portfolio/it/06-tools-and-ticketing.md"
+exit_criteria: "You can explain how a ticket moves through a support team and show sample tickets that look professional."
+---
+
 # Phase 6 — Tools and Ticketing
 
 ## Goal of this phase
@@ -67,13 +80,13 @@ Create `portfolio/it/06-tools-and-ticketing.md` with:
 
 ## Checklist
 
-- [ ] I understand incident, request, problem, change, asset, and KB.
-- [ ] I compared Jira, Zendesk, Freshdesk, ServiceNow, and osTicket.
-- [ ] I created an asset inventory.
-- [ ] I created ticket templates.
-- [ ] I created a change request template.
-- [ ] I created a monitoring alert runbook.
-- [ ] I understand safe remote support behavior.
+- [ ] I understand incident, request, problem, change, asset, and KB. <!-- id: it-06-c01 energy: low -->
+- [ ] I compared Jira, Zendesk, Freshdesk, ServiceNow, and osTicket. <!-- id: it-06-c02 energy: normal -->
+- [ ] I created an asset inventory. <!-- id: it-06-c03 energy: normal -->
+- [ ] I created ticket templates. <!-- id: it-06-c04 energy: normal -->
+- [ ] I created a change request template. <!-- id: it-06-c05 energy: normal -->
+- [ ] I created a monitoring alert runbook. <!-- id: it-06-c06 energy: normal -->
+- [ ] I understand safe remote support behavior. <!-- id: it-06-c07 energy: low -->
 
 ## You're ready to move on when...
 

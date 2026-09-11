@@ -1,3 +1,16 @@
+---
+id: it-09-job-application-plan
+track: it
+phase: 9
+order: 90
+title: "Phase 9 — Job Application Plan"
+duration: "8–12 weeks alongside study"
+duration_weeks: 12
+energy_mix: [low, normal]
+deliverable: ""
+exit_criteria: "You are actively applying every week, improving based on feedback, and can explain your labs confidently in interviews."
+---
+
 # Phase 9 — Job Application Plan
 
 ## Goal of this phase
@@ -84,14 +97,14 @@ Avoid as first targets unless clearly junior:
 
 ## Checklist
 
-- [ ] I created an application tracker.
-- [ ] I created OnlineJobs.ph, LinkedIn, JobStreet, and Kalibrr profiles.
-- [ ] I prepared 2 resume versions.
-- [ ] I applied to at least 50 roles over time.
-- [ ] I wrote answers for common interview questions.
-- [ ] I practiced technical Q&A.
-- [ ] I followed up professionally.
-- [ ] I watched for scams and unrealistic offers.
+- [ ] I created an application tracker. <!-- id: it-09-c01 energy: normal -->
+- [ ] I created OnlineJobs.ph, LinkedIn, JobStreet, and Kalibrr profiles. <!-- id: it-09-c02 energy: normal -->
+- [ ] I prepared 2 resume versions. <!-- id: it-09-c03 energy: normal -->
+- [ ] I applied to at least 50 roles over time. <!-- id: it-09-c04 energy: normal -->
+- [ ] I wrote answers for common interview questions. <!-- id: it-09-c05 energy: normal -->
+- [ ] I practiced technical Q&A. <!-- id: it-09-c06 energy: normal -->
+- [ ] I followed up professionally. <!-- id: it-09-c07 energy: normal -->
+- [ ] I watched for scams and unrealistic offers. <!-- id: it-09-c08 energy: normal -->
 
 ## You're ready to move on when...
 

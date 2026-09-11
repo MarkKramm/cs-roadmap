@@ -1,3 +1,16 @@
+---
+id: cyber-03-security-fundamentals
+track: cyber
+phase: 3
+order: 30
+title: "Phase 3 — Security Fundamentals"
+duration: "6 weeks"
+duration_weeks: 6
+energy_mix: [low, normal]
+deliverable: "portfolio/cyber/03-security-fundamentals.md"
+exit_criteria: "You can explain a simple attack like phishing or web login abuse and name the logs, controls, and response steps involved."
+---
+
 # Phase 3 — Security Fundamentals
 
 ## Goal of this phase
@@ -108,14 +121,14 @@ Create `portfolio/cyber/03-security-fundamentals.md` with:
 
 ## Checklist
 
-- [ ] I understand identity security basics.
-- [ ] I understand endpoint security basics.
-- [ ] I understand network security basics.
-- [ ] I understand OWASP Top 10 at a basic level.
-- [ ] I completed 5 PortSwigger labs.
-- [ ] I inspected Windows security/process logs.
-- [ ] I summarized 5 CVEs.
-- [ ] I wrote a mock incident timeline.
+- [ ] I understand identity security basics. <!-- id: cyber-03-c01 energy: low -->
+- [ ] I understand endpoint security basics. <!-- id: cyber-03-c02 energy: low -->
+- [ ] I understand network security basics. <!-- id: cyber-03-c03 energy: low -->
+- [ ] I understand OWASP Top 10 at a basic level. <!-- id: cyber-03-c04 energy: low -->
+- [ ] I completed 5 PortSwigger labs. <!-- id: cyber-03-c05 energy: normal -->
+- [ ] I inspected Windows security/process logs. <!-- id: cyber-03-c06 energy: normal -->
+- [ ] I summarized 5 CVEs. <!-- id: cyber-03-c07 energy: normal -->
+- [ ] I wrote a mock incident timeline. <!-- id: cyber-03-c08 energy: normal -->
 
 ## You're ready to move on when...
 

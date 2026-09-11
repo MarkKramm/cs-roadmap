@@ -1,3 +1,16 @@
+---
+id: cyber-01-foundations
+track: cyber
+phase: 1
+order: 10
+title: "Phase 1 — Cybersecurity Foundations"
+duration: "4 weeks"
+duration_weeks: 4
+energy_mix: [low, normal]
+deliverable: "portfolio/cyber/01-foundations.md"
+exit_criteria: "You can explain basic cybersecurity concepts without memorized buzzwords and can describe one simple attack from attacker action to defender response."
+---
+
 # Phase 1 — Cybersecurity Foundations
 
 ## Goal of this phase
@@ -72,14 +85,14 @@ Create `portfolio/cyber/01-foundations.md` with:
 
 ## Checklist
 
-- [ ] I can explain CIA triad.
-- [ ] I can explain risk, threat, vulnerability, exploit, and control.
-- [ ] I created a 50-term glossary.
-- [ ] I enabled MFA on important accounts.
-- [ ] I summarized OWASP Top 10.
-- [ ] I summarized 5 MITRE ATT&CK techniques.
-- [ ] I wrote a phishing analysis report.
-- [ ] I understand legal boundaries for labs.
+- [ ] I can explain CIA triad. <!-- id: cyber-01-c01 energy: low -->
+- [ ] I can explain risk, threat, vulnerability, exploit, and control. <!-- id: cyber-01-c02 energy: low -->
+- [ ] I created a 50-term glossary. <!-- id: cyber-01-c03 energy: normal -->
+- [ ] I enabled MFA on important accounts. <!-- id: cyber-01-c04 energy: normal -->
+- [ ] I summarized OWASP Top 10. <!-- id: cyber-01-c05 energy: normal -->
+- [ ] I summarized 5 MITRE ATT&CK techniques. <!-- id: cyber-01-c06 energy: normal -->
+- [ ] I wrote a phishing analysis report. <!-- id: cyber-01-c07 energy: normal -->
+- [ ] I understand legal boundaries for labs. <!-- id: cyber-01-c08 energy: low -->
 
 ## You're ready to move on when...
 

@@ -1,3 +1,16 @@
+---
+id: it-05-sysadmin-basics
+track: it
+phase: 5
+order: 50
+title: "Phase 5 — Sysadmin Basics"
+duration: "4 weeks"
+duration_weeks: 4
+energy_mix: [low, normal]
+deliverable: "portfolio/it/05-sysadmin-basics.md"
+exit_criteria: "You can explain how you would onboard a new remote employee: create account, assign groups, enable MFA, install apps, document device, and provide first-login instructions."
+---
+
 # Phase 5 — Sysadmin Basics
 
 ## Goal of this phase
@@ -87,14 +100,14 @@ Create `portfolio/it/05-sysadmin-basics.md` with:
 
 ## Checklist
 
-- [ ] I understand local vs domain vs cloud identity.
-- [ ] I can explain Active Directory at a beginner level.
-- [ ] I understand users, groups, OUs, GPOs, and MFA conceptually.
-- [ ] I practiced local users/groups.
-- [ ] I practiced folder permissions.
-- [ ] I wrote a simple PowerShell inventory script.
-- [ ] I documented M365 and Google Workspace admin workflows.
-- [ ] I created a patching checklist.
+- [ ] I understand local vs domain vs cloud identity. <!-- id: it-05-c01 energy: low -->
+- [ ] I can explain Active Directory at a beginner level. <!-- id: it-05-c02 energy: low -->
+- [ ] I understand users, groups, OUs, GPOs, and MFA conceptually. <!-- id: it-05-c03 energy: low -->
+- [ ] I practiced local users/groups. <!-- id: it-05-c04 energy: normal -->
+- [ ] I practiced folder permissions. <!-- id: it-05-c05 energy: normal -->
+- [ ] I wrote a simple PowerShell inventory script. <!-- id: it-05-c06 energy: normal -->
+- [ ] I documented M365 and Google Workspace admin workflows. <!-- id: it-05-c07 energy: normal -->
+- [ ] I created a patching checklist. <!-- id: it-05-c08 energy: normal -->
 
 ## You're ready to move on when...
 

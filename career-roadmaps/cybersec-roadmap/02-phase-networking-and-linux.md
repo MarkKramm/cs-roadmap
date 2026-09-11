@@ -1,3 +1,16 @@
+---
+id: cyber-02-networking-and-linux
+track: cyber
+phase: 2
+order: 20
+title: "Phase 2 — Networking and Linux for Cybersecurity"
+duration: "6 weeks"
+duration_weeks: 6
+energy_mix: [low, normal]
+deliverable: "portfolio/cyber/02-networking-linux.md"
+exit_criteria: "You can look at a simple Nmap result or Wireshark capture and explain what service/protocol is involved."
+---
+
 # Phase 2 — Networking and Linux for Cybersecurity
 
 ## Goal of this phase
@@ -88,13 +101,13 @@ Create `portfolio/cyber/02-networking-linux.md` with:
 
 ## Checklist
 
-- [ ] I can explain OSI/TCP-IP models.
-- [ ] I understand IPv4, IPv6 basics, DNS, DHCP, NAT, TCP, UDP, ICMP, HTTP, TLS.
-- [ ] I can use Linux permissions and users.
-- [ ] I can SSH into my own VM.
-- [ ] I can use Nmap safely on my own lab.
-- [ ] I captured and explained DNS traffic.
-- [ ] I completed Bandit levels 0–10.
+- [ ] I can explain OSI/TCP-IP models. <!-- id: cyber-02-c01 energy: low -->
+- [ ] I understand IPv4, IPv6 basics, DNS, DHCP, NAT, TCP, UDP, ICMP, HTTP, TLS. <!-- id: cyber-02-c02 energy: low -->
+- [ ] I can use Linux permissions and users. <!-- id: cyber-02-c03 energy: normal -->
+- [ ] I can SSH into my own VM. <!-- id: cyber-02-c04 energy: normal -->
+- [ ] I can use Nmap safely on my own lab. <!-- id: cyber-02-c05 energy: normal -->
+- [ ] I captured and explained DNS traffic. <!-- id: cyber-02-c06 energy: normal -->
+- [ ] I completed Bandit levels 0–10. <!-- id: cyber-02-c07 energy: normal -->
 
 ## You're ready to move on when...
 

@@ -1,3 +1,16 @@
+---
+id: it-07-soft-skills
+track: it
+phase: 7
+order: 70
+title: "Phase 7 — Soft Skills for IT Support"
+duration: "1–2 weeks"
+duration_weeks: 2
+energy_mix: [low, normal]
+deliverable: "portfolio/it/07-soft-skills.md"
+exit_criteria: "You can write a ticket update that is clear, polite, and useful even when the issue is not solved yet."
+---
+
 # Phase 7 — Soft Skills for IT Support
 
 ## Goal of this phase
@@ -82,12 +95,12 @@ Create `portfolio/it/07-soft-skills.md` with:
 
 ## Checklist
 
-- [ ] I wrote 5 professional support replies.
-- [ ] I wrote diagnostic questions for login and network issues.
-- [ ] I created 5 STAR stories.
-- [ ] I recorded or scripted a 2-minute troubleshooting explanation.
-- [ ] I drafted my LinkedIn About section.
-- [ ] I can explain technical steps without sounding condescending.
+- [ ] I wrote 5 professional support replies. <!-- id: it-07-c01 energy: normal -->
+- [ ] I wrote diagnostic questions for login and network issues. <!-- id: it-07-c02 energy: normal -->
+- [ ] I created 5 STAR stories. <!-- id: it-07-c03 energy: normal -->
+- [ ] I recorded or scripted a 2-minute troubleshooting explanation. <!-- id: it-07-c04 energy: normal -->
+- [ ] I drafted my LinkedIn About section. <!-- id: it-07-c05 energy: normal -->
+- [ ] I can explain technical steps without sounding condescending. <!-- id: it-07-c06 energy: low -->
 
 ## You're ready to move on when...
 

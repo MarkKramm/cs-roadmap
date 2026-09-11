@@ -1,3 +1,16 @@
+---
+id: cyber-08-job-application
+track: cyber
+phase: 8
+order: 80
+title: "Phase 8 — Cybersecurity Job Application"
+duration: "8–16 weeks alongside work/study"
+duration_weeks: 16
+energy_mix: [low, normal]
+deliverable: ""
+exit_criteria: "You can explain your transition from IT to cyber, walk through a project with evidence, and answer basic technical questions calmly."
+---
+
 # Phase 8 — Cybersecurity Job Application
 
 ## Goal of this phase
@@ -72,14 +85,14 @@ Use IT support as a bridge, not a failure. Real account, endpoint, network, and 
 
 ## Checklist
 
-- [ ] I chose a primary cyber role family.
-- [ ] I created a targeted cyber resume.
-- [ ] I linked 3–5 completed projects.
-- [ ] I updated LinkedIn/GitHub.
-- [ ] I created an application tracker.
-- [ ] I applied to at least 50 targeted roles over time.
-- [ ] I practiced technical and behavioral interviews.
-- [ ] I honestly separate labs from professional experience.
+- [ ] I chose a primary cyber role family. <!-- id: cyber-08-c01 energy: normal -->
+- [ ] I created a targeted cyber resume. <!-- id: cyber-08-c02 energy: normal -->
+- [ ] I linked 3–5 completed projects. <!-- id: cyber-08-c03 energy: normal -->
+- [ ] I updated LinkedIn/GitHub. <!-- id: cyber-08-c04 energy: normal -->
+- [ ] I created an application tracker. <!-- id: cyber-08-c05 energy: normal -->
+- [ ] I applied to at least 50 targeted roles over time. <!-- id: cyber-08-c06 energy: normal -->
+- [ ] I practiced technical and behavioral interviews. <!-- id: cyber-08-c07 energy: normal -->
+- [ ] I honestly separate labs from professional experience. <!-- id: cyber-08-c08 energy: normal -->
 
 ## You're ready to move on when...
 

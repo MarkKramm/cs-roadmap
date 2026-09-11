@@ -1,3 +1,16 @@
+---
+id: it-01-computer-fundamentals
+track: it
+phase: 1
+order: 10
+title: "Phase 1 — Computer Fundamentals"
+duration: "2 weeks"
+duration_weeks: 2
+energy_mix: [low, normal]
+deliverable: "portfolio/it/01-computer-fundamentals.md"
+exit_criteria: "You can explain your own computer specs to a non-technical person and troubleshoot at least three simple issues: slow PC, low storage, and device not detected."
+---
+
 # Phase 1 — Computer Fundamentals
 
 ## Goal of this phase
@@ -75,13 +88,13 @@ Create `portfolio/it/01-computer-fundamentals.md` containing:
 
 ## Checklist
 
-- [ ] I can explain CPU vs RAM vs storage.
-- [ ] I can identify common laptop/desktop ports.
-- [ ] I can open Task Manager and explain CPU/RAM/disk/network usage.
-- [ ] I can open Device Manager and identify a driver/device issue.
-- [ ] I can check storage health and free disk space.
-- [ ] I created my PC parts cheat sheet.
-- [ ] I documented 10 common hardware symptoms and possible causes.
+- [ ] I can explain CPU vs RAM vs storage. <!-- id: it-01-c01 energy: low -->
+- [ ] I can identify common laptop/desktop ports. <!-- id: it-01-c02 energy: normal -->
+- [ ] I can open Task Manager and explain CPU/RAM/disk/network usage. <!-- id: it-01-c03 energy: normal -->
+- [ ] I can open Device Manager and identify a driver/device issue. <!-- id: it-01-c04 energy: normal -->
+- [ ] I can check storage health and free disk space. <!-- id: it-01-c05 energy: normal -->
+- [ ] I created my PC parts cheat sheet. <!-- id: it-01-c06 energy: normal -->
+- [ ] I documented 10 common hardware symptoms and possible causes. <!-- id: it-01-c07 energy: normal -->
 
 ## You're ready to move on when...
 

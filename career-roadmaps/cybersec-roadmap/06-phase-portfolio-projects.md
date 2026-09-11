@@ -1,3 +1,16 @@
+---
+id: cyber-06-portfolio-projects
+track: cyber
+phase: 6
+order: 60
+title: "Phase 6 — Portfolio Projects"
+duration: "8–12 weeks"
+duration_weeks: 12
+energy_mix: [low, normal]
+deliverable: "wazuh-siem-lab-report.md"
+exit_criteria: "You have 3 portfolio reports that are clear, honest, evidence-based, and aligned with your target cyber role."
+---
+
 # Phase 6 — Portfolio Projects
 
 ## Goal of this phase
@@ -103,14 +116,14 @@ A portfolio with at least 3 completed reports:
 
 ## Checklist
 
-- [ ] I created a cyber portfolio repo/folder.
-- [ ] I completed Wazuh SIEM lab report.
-- [ ] I completed network traffic analysis report.
-- [ ] I completed an incident report.
-- [ ] I completed at least one specialization project.
-- [ ] I included screenshots/evidence.
-- [ ] I included remediation advice.
-- [ ] I can explain every project in interviews.
+- [ ] I created a cyber portfolio repo/folder. <!-- id: cyber-06-c01 energy: normal -->
+- [ ] I completed Wazuh SIEM lab report. <!-- id: cyber-06-c02 energy: normal -->
+- [ ] I completed network traffic analysis report. <!-- id: cyber-06-c03 energy: normal -->
+- [ ] I completed an incident report. <!-- id: cyber-06-c04 energy: normal -->
+- [ ] I completed at least one specialization project. <!-- id: cyber-06-c05 energy: normal -->
+- [ ] I included screenshots/evidence. <!-- id: cyber-06-c06 energy: normal -->
+- [ ] I included remediation advice. <!-- id: cyber-06-c07 energy: normal -->
+- [ ] I can explain every project in interviews. <!-- id: cyber-06-c08 energy: low -->
 
 ## You're ready to move on when...
 

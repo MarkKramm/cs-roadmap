@@ -1,3 +1,16 @@
+---
+id: it-02-operating-systems
+track: it
+phase: 2
+order: 20
+title: "Phase 2 — Operating Systems"
+duration: "3 weeks"
+duration_weeks: 3
+energy_mix: [low, normal]
+deliverable: "portfolio/it/02-operating-systems.md"
+exit_criteria: "You can troubleshoot a basic Windows issue and a basic Linux issue without following every step blindly."
+---
+
 # Phase 2 — Operating Systems
 
 ## Goal of this phase
@@ -77,13 +90,13 @@ Create `portfolio/it/02-operating-systems.md` with:
 
 ## Checklist
 
-- [ ] I installed a Linux VM.
-- [ ] I can navigate Windows system tools.
-- [ ] I can explain admin vs standard user.
-- [ ] I can use 20 basic Windows commands.
-- [ ] I can use 20 basic Linux commands.
-- [ ] I can check logs in Windows and Linux.
-- [ ] I can install/update software safely.
+- [ ] I installed a Linux VM. <!-- id: it-02-c01 energy: normal -->
+- [ ] I can navigate Windows system tools. <!-- id: it-02-c02 energy: normal -->
+- [ ] I can explain admin vs standard user. <!-- id: it-02-c03 energy: low -->
+- [ ] I can use 20 basic Windows commands. <!-- id: it-02-c04 energy: normal -->
+- [ ] I can use 20 basic Linux commands. <!-- id: it-02-c05 energy: normal -->
+- [ ] I can check logs in Windows and Linux. <!-- id: it-02-c06 energy: normal -->
+- [ ] I can install/update software safely. <!-- id: it-02-c07 energy: normal -->
 
 ## You're ready to move on when...
 

@@ -1,3 +1,16 @@
+---
+id: it-04-helpdesk-skills
+track: it
+phase: 4
+order: 40
+title: "Phase 4 — Helpdesk Skills"
+duration: "3 weeks"
+duration_weeks: 3
+energy_mix: [low, normal]
+deliverable: "portfolio/it/04-helpdesk-skills.md"
+exit_criteria: "You can receive a vague complaint like “my internet is broken,” ask good questions, test likely causes, document what happened, and explain when to escalate."
+---
+
 # Phase 4 — Helpdesk Skills
 
 ## Goal of this phase
@@ -90,14 +103,14 @@ Create `portfolio/it/04-helpdesk-skills.md` with:
 
 ## Checklist
 
-- [ ] I understand incident vs service request.
-- [ ] I understand priority, severity, and SLA.
-- [ ] I created 10 sample tickets.
-- [ ] I wrote 2 knowledge base articles.
-- [ ] I practiced or simulated remote support.
-- [ ] I can troubleshoot 8 common helpdesk issues.
-- [ ] I can write a calm response to an angry user.
-- [ ] I started applying for entry-level IT roles after this phase.
+- [ ] I understand incident vs service request. <!-- id: it-04-c01 energy: low -->
+- [ ] I understand priority, severity, and SLA. <!-- id: it-04-c02 energy: low -->
+- [ ] I created 10 sample tickets. <!-- id: it-04-c03 energy: normal -->
+- [ ] I wrote 2 knowledge base articles. <!-- id: it-04-c04 energy: normal -->
+- [ ] I practiced or simulated remote support. <!-- id: it-04-c05 energy: normal -->
+- [ ] I can troubleshoot 8 common helpdesk issues. <!-- id: it-04-c06 energy: normal -->
+- [ ] I can write a calm response to an angry user. <!-- id: it-04-c07 energy: normal -->
+- [ ] I started applying for entry-level IT roles after this phase. <!-- id: it-04-c08 energy: normal -->
 
 ## You're ready to move on when...
 

@@ -1,3 +1,16 @@
+---
+id: cyber-04-hands-on-labs
+track: cyber
+phase: 4
+order: 40
+title: "Phase 4 — Hands-On Labs"
+duration: "8–12 weeks"
+duration_weeks: 12
+energy_mix: [low, normal]
+deliverable: "portfolio/cyber/04-hands-on-labs.md"
+exit_criteria: "You can show a hiring manager logs flowing into a SIEM, explain what triggered an alert, and write a short incident report."
+---
+
 # Phase 4 — Hands-On Labs
 
 ## Goal of this phase
@@ -86,15 +99,15 @@ Create `portfolio/cyber/04-hands-on-labs.md` with:
 
 ## Checklist
 
-- [ ] I built a lab diagram.
-- [ ] I installed at least one Linux VM.
-- [ ] I installed Wazuh or documented why hardware blocks it.
-- [ ] I forwarded logs from a VM.
-- [ ] I generated safe test events.
-- [ ] I wrote 3 detection rules or rule modifications.
-- [ ] I completed 10 PortSwigger labs.
-- [ ] I completed 2 blue-team labs.
-- [ ] I wrote one incident report.
+- [ ] I built a lab diagram. <!-- id: cyber-04-c01 energy: normal -->
+- [ ] I installed at least one Linux VM. <!-- id: cyber-04-c02 energy: normal -->
+- [ ] I installed Wazuh or documented why hardware blocks it. <!-- id: cyber-04-c03 energy: normal -->
+- [ ] I forwarded logs from a VM. <!-- id: cyber-04-c04 energy: normal -->
+- [ ] I generated safe test events. <!-- id: cyber-04-c05 energy: normal -->
+- [ ] I wrote 3 detection rules or rule modifications. <!-- id: cyber-04-c06 energy: normal -->
+- [ ] I completed 10 PortSwigger labs. <!-- id: cyber-04-c07 energy: normal -->
+- [ ] I completed 2 blue-team labs. <!-- id: cyber-04-c08 energy: normal -->
+- [ ] I wrote one incident report. <!-- id: cyber-04-c09 energy: normal -->
 
 ## You're ready to move on when...
 

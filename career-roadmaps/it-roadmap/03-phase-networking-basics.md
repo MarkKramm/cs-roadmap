@@ -1,3 +1,16 @@
+---
+id: it-03-networking-basics
+track: it
+phase: 3
+order: 30
+title: "Phase 3 — Networking Basics"
+duration: "4 weeks"
+duration_weeks: 4
+energy_mix: [low, normal]
+deliverable: "portfolio/it/03-networking-basics.md"
+exit_criteria: "You can troubleshoot a basic internet issue using IP, gateway, DNS, and Wi-Fi checks, and explain your process clearly in a ticket."
+---
+
 # Phase 3 — Networking Basics
 
 ## Goal of this phase
@@ -96,14 +109,14 @@ Create `portfolio/it/03-networking-basics.md` with:
 
 ## Checklist
 
-- [ ] I can explain LAN, WAN, router, switch, modem, firewall, and access point.
-- [ ] I can explain IPv4 address, subnet mask, gateway, DNS, and DHCP.
-- [ ] I understand IPv6 basics and AAAA DNS records.
-- [ ] I memorized at least 15 common ports.
-- [ ] I can use `ipconfig`, `ping`, `tracert`, and `nslookup`.
-- [ ] I captured DNS traffic in Wireshark.
-- [ ] I built a simple Packet Tracer network.
-- [ ] I wrote a no-internet troubleshooting guide.
+- [ ] I can explain LAN, WAN, router, switch, modem, firewall, and access point. <!-- id: it-03-c01 energy: low -->
+- [ ] I can explain IPv4 address, subnet mask, gateway, DNS, and DHCP. <!-- id: it-03-c02 energy: low -->
+- [ ] I understand IPv6 basics and AAAA DNS records. <!-- id: it-03-c03 energy: low -->
+- [ ] I memorized at least 15 common ports. <!-- id: it-03-c04 energy: low -->
+- [ ] I can use `ipconfig`, `ping`, `tracert`, and `nslookup`. <!-- id: it-03-c05 energy: normal -->
+- [ ] I captured DNS traffic in Wireshark. <!-- id: it-03-c06 energy: normal -->
+- [ ] I built a simple Packet Tracer network. <!-- id: it-03-c07 energy: normal -->
+- [ ] I wrote a no-internet troubleshooting guide. <!-- id: it-03-c08 energy: normal -->
 
 ## You're ready to move on when...
 
