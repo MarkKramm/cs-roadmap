@@ -7,15 +7,16 @@ A snapshot of the repository's current state. Update this when a meaningful mile
 | Item | Value |
 |---|---|
 | Branch | `main` |
-| HEAD | `chore: add CC BY 4.0 license and fix CHANGELOG links` |
-| Commits | 8 |
-| Tracked files | 49 |
-| Working tree | Clean |
+| HEAD | `feat(site): dashboard with energy modes and next-task picker (M1 step 4)` |
+| Commits | 12 |
+| Tracked files | 60 |
+| Working tree | Clean (4 commits ahead of `origin/main` at close of M1 Step 4) |
 | Line endings | LF everywhere (Windows scripts excepted) |
 | Encoding | UTF-8, no BOM |
-| Remote | `origin` → https://github.com/MarkKramm/cs-roadmap (pushed, in sync) |
+| Remote | `origin` → https://github.com/MarkKramm/cs-roadmap |
 | License | CC BY 4.0 |
-| Build step | None (React + Vite pending under `learning-site/`) |
+| Build step | `learning-site/` — React + Vite. `npm run dev` / `npm run build` |
+| Milestone | M1 complete — site renders both tracks, tracks progress, picks a daily task |
 
 ## Structure
 

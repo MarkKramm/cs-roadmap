@@ -22,6 +22,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - `scripts/build-content.mjs` — content pipeline (M1 Step 2c) that reads `career-roadmaps/**/*.md` and emits `learning-site/src/data/generated/{it,cyber}.json`. Fails loudly on missing sections, missing task IDs, or paid tools without a free alternative.
 - `scripts/add-frontmatter.mjs` — one-time migration helper used in Step 2b.
 - `npm run build:content` script, wired to run before `dev` and `build`.
+- `learning-site/` app shell (M1 Step 3): sidebar with track switcher and phase list, dashboard with next-task picker, and a phase detail view rendered from the generated JSON.
+- `learning-site/` dashboard energy modes (M1 Step 4): low / normal / high selector, persisted in `localStorage`, which filters the recommended next task. `useEnergyMode` hook and `EnergyModeSelector` component.
+- Site components: `ProgressBar`, `PhaseCard`, `ChecklistItem`, `ToolCard`, `EnergyModeSelector`.
+- `useProgress` hook — progress keyed by stable task IDs and persisted in `localStorage`.
+- `src/data/roadmaps.js` — loads the generated JSON and exposes the two tracks.
 
 ### Changed
 - `AGENTS.md` rule 3 scoped: build tooling permitted only under `learning-site/` and `scripts/`.

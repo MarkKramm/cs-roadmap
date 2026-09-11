@@ -37,7 +37,41 @@ learning-site/
 
 ## Status
 
-Milestone M1, Step 1: scaffold only. Navigation, phase rendering, and the dashboard are Steps 3–4. The site does not read the Markdown directly — a build script will emit JSON and the UI will read only that, per [`docs/CONTENT-SCHEMA.md`](../docs/CONTENT-SCHEMA.md).
+Milestone M1 complete. The site renders both tracks from generated JSON, tracks progress in `localStorage` (keyed by stable task IDs), and answers "what should I do today?" with a next-task picker filtered by an energy mode.
+
+The site never reads the Markdown directly. `scripts/build-content.mjs` emits JSON and the UI reads only that, per [`docs/CONTENT-SCHEMA.md`](../docs/CONTENT-SCHEMA.md).
+
+Next: M2 — tools library, portfolio tracker, application tracker.
+
+## Layout
+
+```text
+learning-site/
+├── index.html
+├── package.json
+├── vite.config.js
+└── src/
+    ├── main.jsx                      entry point
+    ├── App.jsx                       shell, view state, sidebar
+    ├── data/
+    │   ├── roadmaps.js               loads the generated JSON
+    │   └── generated/                build output (git-ignored)
+    ├── hooks/
+    │   ├── useProgress.js            task progress in localStorage
+    │   └── useEnergyMode.js          energy preference in localStorage
+    ├── components/
+    │   ├── ProgressBar.jsx
+    │   ├── PhaseCard.jsx
+    │   ├── ChecklistItem.jsx
+    │   ├── ToolCard.jsx
+    │   └── EnergyModeSelector.jsx
+    ├── pages/
+    │   ├── Dashboard.jsx
+    │   └── PhaseDetail.jsx
+    └── styles/
+        ├── tokens.css                design tokens (docs/DESIGN-SYSTEM.md)
+        └── global.css                base styles
+```
 
 ## Conventions
 
