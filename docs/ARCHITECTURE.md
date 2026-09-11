@@ -55,4 +55,8 @@ Keep new phases consistent with this shape.
 
 - **Encoding:** UTF-8 without BOM, real typographic characters.
 - **Line endings:** LF everywhere except Windows-native scripts.
-- **No dependencies:** nothing that requires installing a toolchain.
+- **Dependencies are confined:** the content (`career-roadmaps/`, `docs/`) has no dependencies and stays readable with just `git` and a text editor. Build tooling lives only under `learning-site/` and `scripts/` (D-005), and CI lives only under `.github/workflows/` (D-008). The CI carve-out is check-only — no deploy, no secrets — so it never becomes a dependency of reading the content.
+
+## Continuous integration
+
+`.github/workflows/ci.yml` runs on every push to `main` and every pull request, as two jobs: **Content integrity** (`node scripts/lint-content.mjs`, no install) and **Learning site** (`npm ci`, `npm run build`, `npm run test:smoke`, under `learning-site/`). Node 24. It is check-only; deployment is a separate, unscheduled concern (see [`ROADMAP.md`](ROADMAP.md)).

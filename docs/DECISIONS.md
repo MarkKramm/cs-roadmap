@@ -33,6 +33,7 @@ A lightweight decision log (ADR-style). Newest first.
 - **Context:** Rule 3 in `AGENTS.md` forbids build tooling repo-wide. A personal learning site (see [`ROADMAP.md`](ROADMAP.md) → Learning Site M1) will need a bundler and a `package.json`.
 - **Decision:** Permit build tooling **only** under `learning-site/` (and `scripts/` for content tooling). The rest of the repository stays build-free, so `career-roadmaps/` and `docs/` remain readable with just `git` and a text editor.
 - **Consequences:** Rule 3 in `AGENTS.md` is amended with explicit scope. Future contributors know the exception is bounded.
+- **Amended by:** D-008 (a second, check-only carve-out for `.github/workflows/`).
 
 ## D-004 — Add `.editorconfig` alongside `.gitattributes`
 
@@ -49,6 +50,7 @@ A lightweight decision log (ADR-style). Newest first.
 - **Context:** The content is plain Markdown. A static-site generator was considered but would add dependencies and a toolchain.
 - **Decision:** Ship content only. No `package.json`, no bundler. A site, if ever built, must be a separate opt-in.
 - **Consequences:** Maximum portability and zero setup cost; less flashy presentation.
+- **Amended by:** D-005 (build tooling scoped to `learning-site/` + `scripts/`) and D-008 (CI under `.github/workflows/`). The content itself stays build-free.
 
 ## D-002 — Standardize on UTF-8 (no BOM) with real typographic characters
 

@@ -7,8 +7,6 @@ A snapshot of the repository's current state. Update this when a meaningful mile
 | Item | Value |
 |---|---|
 | Branch | `main` |
-| HEAD | `fe04ed3 docs: record the CI session across checkpoint, roadmap, and changelog` |
-| Commits | 33 |
 | Tracked files | 81 |
 | Working tree | Clean, in sync with `origin/main` |
 | Line endings | LF everywhere (Windows scripts excepted) |
@@ -18,12 +16,12 @@ A snapshot of the repository's current state. Update this when a meaningful mile
 | License | CC BY 4.0 |
 | Build step | `learning-site/` — React + Vite. `npm run dev` / `npm run build` |
 | Checks | `npm run lint:content`, `npm run build`, `npm run test:smoke` — all passing |
-| CI | `.github/workflows/ci.yml` — two jobs on push to `main` and on PRs (D-008) |
+| CI | `.github/workflows/ci.yml` — two jobs on push to `main` and on PRs (D-008); verified green |
 | Milestone | M2 complete — tools library, portfolio tracker, application tracker |
 
-The HEAD and count above describe the last commit before this file's own
-commit — a checkpoint cannot contain its own hash. For the exact current
-state, run `git --no-pager log --oneline -n 1`.
+This file deliberately carries no commit hash or commit count: a checkpoint
+cannot contain its own hash, so those numbers drift by one commit on every
+edit. For the exact current state, run `git --no-pager log --oneline -n 1`.
 
 ## Structure
 
@@ -32,6 +30,7 @@ state, run `git --no-pager log --oneline -n 1`.
 ├── .editorconfig
 ├── .gitattributes
 ├── .gitignore
+├── .github/                 (CI workflow — D-008)
 ├── README.md
 ├── AGENTS.md
 ├── CHANGELOG.md
@@ -39,7 +38,7 @@ state, run `git --no-pager log --oneline -n 1`.
 ├── LICENSE
 ├── docs/
 ├── scripts/                 (content tooling)
-├── learning-site/           (React + Vite; 5 pages, 7 components, 5 hooks;
+├── learning-site/           (React + Vite; 5 pages, 6 components, 4 hooks;
 │                             generated/ and dist/ ignored)
 └── career-roadmaps/
     ├── README.md
@@ -55,12 +54,12 @@ state, run `git --no-pager log --oneline -n 1`.
 - [x] All files valid UTF-8; no CR bytes.
 - [x] `.gitattributes` and `.editorconfig` in place.
 - [x] Remote configured and `main` pushed.
-- [x] `lint-content.mjs` passes — 80 files, 0 issues. (`LICENSE` is scanned; it is extensionless, so it is matched by name.)
+- [x] `lint-content.mjs` passes — 81 files, 0 issues. (`LICENSE` is scanned; it is extensionless, so it is matched by name. The workflow file is scanned too.)
 - [x] `ToolCard` renders tool data; the M1 crash on opening a phase is fixed.
 - [x] `test:smoke` now covers every page as well as every phase — 31 renders.
 - [x] Tools library lists all 112 tools with search and cost/track filters.
 - [x] Portfolio and application trackers persist under their own `localStorage` keys.
-- [x] CI runs the content linter, the production build, and the render smoke test on every push and pull request.
+- [x] CI runs the content linter, the production build, and the render smoke test on every push and pull request — verified green on GitHub (2 runs, both jobs passing on `ubuntu-latest`, Node 24).
 
 ## Open items
 
