@@ -7,8 +7,8 @@ A snapshot of the repository's current state. Update this when a meaningful mile
 | Item | Value |
 |---|---|
 | Branch | `main` |
-| HEAD | `7056e21 feat(site): add the application tracker` |
-| Commits | 26 |
+| HEAD | `80c9055 fix(tooling): scan LICENSE and fail loudly on malformed resource lines` |
+| Commits | 28 |
 | Tracked files | 80 |
 | Working tree | Clean, in sync with `origin/main` |
 | Line endings | LF everywhere (Windows scripts excepted) |
@@ -54,8 +54,7 @@ state, run `git --no-pager log --oneline -n 1`.
 - [x] All files valid UTF-8; no CR bytes.
 - [x] `.gitattributes` and `.editorconfig` in place.
 - [x] Remote configured and `main` pushed.
-- [x] `lint-content.mjs` passes — 72 files, 0 issues.
-- [x] `test:smoke` passes — 26 renders across 17 phases and 112 tools.
+- [x] `lint-content.mjs` passes — 80 files, 0 issues. (`LICENSE` is scanned; it is extensionless, so it is matched by name.)
 - [x] `ToolCard` renders tool data; the M1 crash on opening a phase is fixed.
 - [x] `test:smoke` now covers every page as well as every phase — 31 renders.
 - [x] Tools library lists all 112 tools with search and cost/track filters.

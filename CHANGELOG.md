@@ -54,6 +54,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - `learning-site/src/components/ToolCard.jsx` contained `PhaseCard`'s implementation verbatim — same body, same `{ phase, done, total, onOpen }` signature — while its only call site passed `{ tool }`. Opening any phase threw a `TypeError` and blanked the view. Both `npm run build` and `npm run dev` passed, because a component whose signature does not match its call site still compiles. Now renders name, purpose, cost badge, mini-task, free alternative, and the official link.
 - `learning-site/src/pages/Dashboard.jsx` pointed at "Settings" for resetting progress; no Settings page exists. Now points at the sidebar.
 - `docs/DESIGN-SYSTEM.md` listed sidebar links (Tools / Portfolio / Applications / Settings) that do not exist.
+- `scripts/lint-content.mjs` never scanned `LICENSE`. The file is extensionless, so it missed both the extension allow-list and the `CHECK_NAMES` set, and the repository's own license was the one text file exempt from the text-integrity check. Now matched by name; the lint count went 79 → 80 files.
+- `scripts/build-content.mjs` degraded silently on a malformed resource line. A line that did not match `Name — https://…` produced `{ name, url: null }` and the build passed, so a broken link surfaced later in the UI rather than at the point of the mistake. It now fails with one of two messages — a URL present but the wrong separator, or no URL at all — matching the script's existing promise that a contract violation stops the build. All 92 existing resource lines already satisfy the rule, so no content changed.
 
 ## [0.1.0] — 2026-09-11
 
