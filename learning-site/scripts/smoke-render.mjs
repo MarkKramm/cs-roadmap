@@ -104,6 +104,7 @@ try {
   const ToolCard = await load("/src/components/ToolCard.jsx");
   const EnergyModeSelector = await load("/src/components/EnergyModeSelector.jsx");
   const EmptyState = await load("/src/components/EmptyState.jsx");
+  const ToolsLibrary = await load("/src/pages/ToolsLibrary.jsx");
 
   allPhases = tracks.flatMap((t) => t.phases);
   allTools = allPhases.flatMap((p) => p.tools);
@@ -244,6 +245,31 @@ try {
       "EnergyModeSelector",
       createElement(EnergyModeSelector, { mode: "normal", onChange: noop })
     );
+  }
+
+  if (ToolsLibrary) {
+    const html = render(
+      "ToolsLibrary",
+      createElement(ToolsLibrary, { onOpenPhase: noop })
+    );
+    if (html) {
+      assert(
+        "ToolsLibrary: heading",
+        html.includes("Tools library"),
+        "page heading not rendered"
+      );
+      assert(
+        "ToolsLibrary: lists a known tool",
+        html.includes(allTools[0].name),
+        "no tool card rendered"
+      );
+      assert(
+        "ToolsLibrary: count line",
+        html.includes(allTools.length + " tools") ||
+          html.includes("of " + allTools.length),
+        "tool count not rendered"
+      );
+    }
   }
 
   if (EmptyState) {

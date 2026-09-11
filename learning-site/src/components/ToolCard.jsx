@@ -1,18 +1,10 @@
 // One tool from a phase's tools table.
 // See docs/DESIGN-SYSTEM.md → <ToolCard>.
-
-// Maps a tools-table "Cost" cell to a badge tone.
 //
-// Order matters: "Freemium" contains "free", so freemium is checked first.
-// A tool with any paid tier is not labelled free even when a free tier exists
-// ("Free self-hosted/paid hosted" lands on paid), because the badge answers
-// "might this cost me money?".
-function costTone(cost) {
-  const c = String(cost || "").toLowerCase();
-  if (c.includes("freemium")) return "freemium";
-  if (c.includes("paid")) return "paid";
-  return "free";
-}
+// The cost → badge tone mapping lives in ../data/tools.js, because the tools
+// library filters on the same mapping and two copies would drift.
+
+import { costTone } from "../data/tools.js";
 
 export default function ToolCard({ tool }) {
   return (

@@ -8,10 +8,14 @@ import { useProgress, countDone } from "./hooks/useProgress.js";
 import { useEnergyMode } from "./hooks/useEnergyMode.js";
 import Dashboard from "./pages/Dashboard.jsx";
 import PhaseDetail from "./pages/PhaseDetail.jsx";
+import ToolsLibrary from "./pages/ToolsLibrary.jsx";
 
 // Every destination the sidebar can reach. Adding a page means adding an entry
 // here and a branch in the content switch below.
-const VIEWS = [{ id: "dashboard", label: "Dashboard" }];
+const VIEWS = [
+  { id: "dashboard", label: "Dashboard" },
+  { id: "tools", label: "Tools" },
+];
 
 // Progress lives in localStorage, keyed by stable task IDs.
 
@@ -135,6 +139,8 @@ export default function App() {
             onToggle={toggle}
             onBack={goBack}
           />
+        ) : view === "tools" ? (
+          <ToolsLibrary onOpenPhase={openPhase} />
         ) : (
           <Dashboard
             track={track}

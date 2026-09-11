@@ -379,6 +379,120 @@ a:hover {
   font-size: var(--text-sm);
 }
 
+/* --- Tools library --- */
+
+.tools-filters {
+  margin-top: var(--space-5);
+}
+
+.tools-filters__row {
+  display: flex;
+  gap: var(--space-4);
+  flex-wrap: wrap;
+}
+
+.tools-filters__field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  flex: 1 1 220px;
+}
+
+.tools-filters__label {
+  font-size: var(--text-xs);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--text-muted);
+}
+
+.tools-filters__input,
+.tools-filters__select {
+  font: inherit;
+  color: var(--text);
+  background: var(--bg-subtle);
+  border: 1px solid var(--border);
+  border-radius: var(--space-1);
+  padding: var(--space-2) var(--space-3);
+}
+
+.tools-filters__tones {
+  border: none;
+  padding: 0;
+  margin: var(--space-4) 0 0;
+}
+
+.tools-filters__chips {
+  display: flex;
+  gap: var(--space-2);
+  flex-wrap: wrap;
+  margin-top: var(--space-1);
+}
+
+.chip {
+  font: inherit;
+  font-size: var(--text-sm);
+  color: var(--text-muted);
+  background: var(--bg-subtle);
+  border: 1px solid var(--border);
+  border-radius: var(--space-1);
+  padding: var(--space-1) var(--space-3);
+  cursor: pointer;
+  transition: border-color var(--transition-fast), color var(--transition-fast);
+}
+
+.chip:hover {
+  color: var(--text);
+}
+
+.chip.is-active {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.chip__count {
+  color: var(--text-muted);
+  font-size: var(--text-xs);
+}
+
+.tools-count {
+  font-size: var(--text-sm);
+}
+
+/* A button that reads as inline text — used for "clear filters". */
+.link-btn {
+  background: none;
+  border: none;
+  padding: 0;
+  font: inherit;
+  color: var(--accent);
+  cursor: pointer;
+  text-decoration: none;
+}
+
+.link-btn:hover {
+  color: var(--accent-hover);
+  text-decoration: underline;
+}
+
+.tool-result__from {
+  display: block;
+  width: 100%;
+  text-align: left;
+  background: none;
+  border: none;
+  font: inherit;
+  font-size: var(--text-xs);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--text-muted);
+  padding: 0 0 var(--space-1);
+  cursor: pointer;
+}
+
+.tool-result__from:hover {
+  color: var(--accent);
+}
+
 /* --- Energy mode --- */
 
 .energy {
