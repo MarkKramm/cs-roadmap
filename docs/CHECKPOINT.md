@@ -7,13 +7,14 @@ A snapshot of the repository's current state. Update this when a meaningful mile
 | Item | Value |
 |---|---|
 | Branch | `main` |
-| HEAD | `feat(site): dashboard with energy modes and next-task picker (M1 step 4)` |
-| Commits | 12 |
-| Tracked files | 60 |
-| Working tree | Clean (4 commits ahead of `origin/main` at close of M1 Step 4) |
+| HEAD | `fe27daf docs: close out M1 and record the session` |
+| Commits | 16 |
+| Tracked files | 71 |
+| Working tree | Clean, in sync with `origin/main` |
 | Line endings | LF everywhere (Windows scripts excepted) |
 | Encoding | UTF-8, no BOM |
 | Remote | `origin` → https://github.com/MarkKramm/cs-roadmap |
+| Visibility | Private — not publicly reachable |
 | License | CC BY 4.0 |
 | Build step | `learning-site/` — React + Vite. `npm run dev` / `npm run build` |
 | Milestone | M1 complete — site renders both tracks, tracks progress, picks a daily task |
@@ -31,6 +32,8 @@ A snapshot of the repository's current state. Update this when a meaningful mile
 ├── CONTRIBUTING.md
 ├── LICENSE
 ├── docs/
+├── scripts/                 (content tooling)
+├── learning-site/           (React + Vite; generated/ and dist/ ignored)
 └── career-roadmaps/
     ├── README.md
     ├── it-roadmap/          (13 files)
@@ -48,7 +51,7 @@ A snapshot of the repository's current state. Update this when a meaningful mile
 
 ## Open items
 
-- [ ] Learning Site Milestone M1 — scaffold, content pipeline, app shell, dashboard.
+- [ ] Learning Site Milestone M2 — scope to be defined at kickoff (tools library, portfolio tracker, application tracker).
 
 ## How to verify quickly
 
