@@ -66,6 +66,17 @@ It flags CRLF, UTF-8 BOM, U+FFFD replacement characters, invalid UTF-8, and ASCI
 
 Note: when creating a new file, the editor in this environment has repeatedly written CRLF and, once, a U+FFFD pair. Run the linter after creating any file. If it reports CRLF, normalize with the `Remove-Item` + `git checkout --` recipe above, or a direct UTF-8 rewrite for untracked files.
 
+## Continuous integration
+
+`.github/workflows/ci.yml` runs on every push to `main` and every pull request. It has two jobs, split so a content typo fails fast without paying for a dependency install:
+
+| Job | What it runs | Working directory |
+|---|---|---|
+| Content integrity | `node scripts/lint-content.mjs` | repository root |
+| Learning site | `npm ci` → `npm run build` → `npm run test:smoke` | `learning-site/` |
+
+Both jobs use Node 24, matching the local toolchain. The workflow is check-only: it does not deploy, publish, or touch secrets — see [`DECISIONS.md`](DECISIONS.md) → D-008. To reproduce it locally, run the commands under "How to verify quickly" in [`CHECKPOINT.md`](CHECKPOINT.md).
+
 ## Checklist before committing
 
 - [ ] `node scripts/lint-content.mjs` reports no issues.

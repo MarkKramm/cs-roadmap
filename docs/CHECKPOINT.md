@@ -7,10 +7,10 @@ A snapshot of the repository's current state. Update this when a meaningful mile
 | Item | Value |
 |---|---|
 | Branch | `main` |
-| HEAD | `4fbccd7 docs: refresh checkpoint and record the tooling fixes` |
-| Commits | 29 |
-| Tracked files | 80 |
-| Working tree | Clean, in sync with `origin/main` |
+| HEAD | `1a75006 chore(ci): add the CI workflow` |
+| Commits | 32 |
+| Tracked files | 81 |
+| Working tree | Clean; 3 commits ahead of `origin/main` |
 | Line endings | LF everywhere (Windows scripts excepted) |
 | Encoding | UTF-8, no BOM |
 | Remote | `origin` → https://github.com/MarkKramm/cs-roadmap |
@@ -18,6 +18,7 @@ A snapshot of the repository's current state. Update this when a meaningful mile
 | License | CC BY 4.0 |
 | Build step | `learning-site/` — React + Vite. `npm run dev` / `npm run build` |
 | Checks | `npm run lint:content`, `npm run build`, `npm run test:smoke` — all passing |
+| CI | `.github/workflows/ci.yml` — two jobs on push to `main` and on PRs (D-008) |
 | Milestone | M2 complete — tools library, portfolio tracker, application tracker |
 
 The HEAD and count above describe the last commit before this file's own
@@ -59,10 +60,10 @@ state, run `git --no-pager log --oneline -n 1`.
 - [x] `test:smoke` now covers every page as well as every phase — 31 renders.
 - [x] Tools library lists all 112 tools with search and cost/track filters.
 - [x] Portfolio and application trackers persist under their own `localStorage` keys.
+- [x] CI runs the content linter, the production build, and the render smoke test on every push and pull request.
 
 ## Open items
 
-- [ ] CI — run the three checks on every push. Blocked on a scope decision: `.github/workflows/` is outside the `learning-site/` + `scripts/` exception in `AGENTS.md` rule 3, so it needs a D-008 entry first.
 - [ ] Deploy the site — blocked on the private-repo visibility decision. GitHub Pages from a private repo generally needs a paid plan, but Netlify, Vercel, and Cloudflare Pages all deploy private repos on free tiers, so this is less blocked than it first appeared.
 
 ## How to verify quickly

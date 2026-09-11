@@ -34,6 +34,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - Portfolio tracker (M2) — `learning-site/src/pages/Portfolio.jsx` and `src/hooks/usePortfolio.js`. Add artifacts you built, link a phase and a repository or live URL, track status. Persisted under `cs-roadmap:portfolio:v1`.
 - Application tracker (M2) — `learning-site/src/pages/Applications.jsx` and `src/hooks/useApplications.js`. Company, role, source, dates, status pipeline, and a follow-up date that surfaces when due. Persisted under `cs-roadmap:applications:v1`.
 - `EmptyState` component — specified in `docs/DESIGN-SYSTEM.md` since the design pass, implemented here and used by both trackers.
+- CI workflow — `.github/workflows/ci.yml` runs on every push to `main` and every pull request. Two jobs, split so a content typo fails fast without paying for a dependency install: **Content integrity** (`node scripts/lint-content.mjs`, no install) and **Learning site** (`npm ci` → `npm run build` → `npm run test:smoke`, under `learning-site/`). Node 24, matching the local toolchain; `permissions: contents: read`. Permitted by D-008.
 
 ### Changed
 - `AGENTS.md` rule 3 scoped: build tooling permitted only under `learning-site/` and `scripts/`.

@@ -2,6 +2,28 @@
 
 A chronological record of working sessions. Newest first.
 
+## 2026-09-11 — CI
+
+**Goal:** Add continuous integration — the only item under `ROADMAP.md` → Next.
+
+**Scope decision:** `.github/workflows/` sits outside the `learning-site/` + `scripts/` carve-out that D-005 granted under `AGENTS.md` rule 3, so the workflow needed a decision before it could exist. Recorded as **D-008**: CI is permitted, deploy is not. The carve-out is deliberately check-only — no deploy step, no secrets, no credentials — so the dependency-free guarantee for `career-roadmaps/` and `docs/` survives.
+
+**Done:**
+- `docs/DECISIONS.md` — D-008, inserted newest-first above D-007.
+- `AGENTS.md` — rule 3 now names the CI carve-out and cites D-008 alongside the existing D-005 reference.
+- `.github/workflows/ci.yml` — two jobs. **Content integrity** runs `node scripts/lint-content.mjs` with no install, so a CRLF, BOM, or stray `?` fails in seconds. **Learning site** runs `npm ci`, `npm run build`, and `npm run test:smoke` under `learning-site/`. Node 24, matching local v24.19.0; `permissions: contents: read`.
+
+**Verified:**
+- `node scripts/lint-content.mjs` from the root — clean. It now scans the workflow file itself (`.yml` is already in `CHECK_EXT`), so the new file has to satisfy the rule it enforces.
+- `npm run build` and `npm run test:smoke` under `learning-site/`.
+- `ci.yml` is LF, UTF-8, no BOM.
+
+**Notes:**
+- `npm ci` requires a committed `learning-site/package-lock.json`; confirmed present before writing the job.
+- `learning-site/package.json` has no `engines` field, so the Node version is pinned in the workflow rather than read from the manifest. Adding `engines` would be a change to the site's contract, not the CI task, so it was left as a possible follow-up.
+
+**Next:** Deploy the site — still gated on the private-repo visibility decision. GitHub Pages from a private repo generally needs a paid plan; Netlify, Vercel, and Cloudflare Pages all deploy private repos on free tiers.
+
 ## 2026-09-11 — Tooling hardening
 
 **Goal:** Close the two deferred defects from the audit, then record the state for a pause.
