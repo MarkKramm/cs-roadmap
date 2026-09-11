@@ -7,9 +7,9 @@ A snapshot of the repository's current state. Update this when a meaningful mile
 | Item | Value |
 |---|---|
 | Branch | `main` |
-| HEAD | `chore: add .editorconfig to enforce LF/UTF-8 at save time` |
-| Commits | 3 |
-| Tracked files | 33 (before this docs batch) |
+| HEAD | `docs: add CONTRIBUTING.md and reconcile project state` |
+| Commits | 7 |
+| Tracked files | 48 |
 | Working tree | Clean |
 | Line endings | LF everywhere (Windows scripts excepted) |
 | Encoding | UTF-8, no BOM |

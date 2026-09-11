@@ -2,6 +2,14 @@
 
 A lightweight decision log (ADR-style). Newest first.
 
+## D-005 — Scoped build-tooling exception for the future learning site
+
+- **Date:** 2026-09-11
+- **Status:** Accepted
+- **Context:** Rule 3 in `AGENTS.md` forbids build tooling repo-wide. A personal learning site (see [`ROADMAP.md`](ROADMAP.md) → Learning Site M1) will need a bundler and a `package.json`.
+- **Decision:** Permit build tooling **only** under `learning-site/` (and `scripts/` for content tooling). The rest of the repository stays build-free, so `career-roadmaps/` and `docs/` remain readable with just `git` and a text editor.
+- **Consequences:** Rule 3 in `AGENTS.md` is amended with explicit scope. Future contributors know the exception is bounded.
+
 ## D-004 — Add `.editorconfig` alongside `.gitattributes`
 
 - **Date:** 2026-09-11

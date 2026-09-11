@@ -9,6 +9,18 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 ### Added
 - `docs/` meta-documentation: `ARCHITECTURE.md`, `WORKFLOW.md`, `SETUP.md`, `ROADMAP.md`, `DECISIONS.md`, `CHECKPOINT.md`, `SESSION-LOG.md`.
 - `AGENTS.md` (contributor/agent guidance) and this `CHANGELOG.md`.
+- `docs/CONTENT-GUIDE.md` — authoring standard for phase files.
+- `docs/FAQ.md` — design rationale behind the curriculum.
+- `docs/TROUBLESHOOTING.md` — recovery playbook for Git and encoding incidents.
+- `docs/CONTENT-SCHEMA.md` — planned md→JSON contract for the learning site.
+- `docs/DESIGN-SYSTEM.md` — framework-agnostic UI tokens for the learning site.
+- `CONTRIBUTING.md` — human entry point into the repo.
+- `D-005` in `docs/DECISIONS.md` — scoped build-tooling exception for `learning-site/`.
+
+### Changed
+- `AGENTS.md` rule 3 scoped: build tooling permitted only under `learning-site/` and `scripts/`.
+- `docs/CHECKPOINT.md` refreshed to the current commit and file counts.
+- `docs/ROADMAP.md` updated: new docs recorded as done; Learning Site M1 moved to Next.
 
 ## [0.1.0] — 2026-09-11
 

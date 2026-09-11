@@ -28,7 +28,7 @@ A **content-only** self-study curriculum. It holds Markdown roadmaps for a begin
 
 1. **Line endings are LF.** Enforced by `.gitattributes` (`* text=auto eol=lf`) and `.editorconfig`. Windows-native scripts (`.bat`, `.cmd`, `.ps1`) are the only CRLF exception.
 2. **Encoding is UTF-8 without BOM.** Use real typographic characters (`—` em-dash, `–` en-dash, `“ ”` curly quotes, `├──` box drawing) — **never** ASCII substitutes like `?` or `--`.
-3. **No build tooling.** Do not add `package.json`, bundlers, or dependencies unless the maintainer explicitly asks.
+3. **No build tooling outside `learning-site/`.** The study content and docs must stay dependency-free. Build tooling is permitted only under `learning-site/` and `scripts/` — see [`docs/DECISIONS.md`](docs/DECISIONS.md) → D-005.
 4. **Preserve the pedagogy.** The content is intentionally beginner-friendly and budget-aware ($0). Do not inflate scope or add paid requirements.
 
 ## Making changes

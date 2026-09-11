@@ -10,16 +10,18 @@ The roadmap for the **repository itself** (for the study curriculum, see [`../ca
 - [x] Add root `README.md` and `.gitignore`.
 - [x] Add `.editorconfig` to enforce UTF-8/LF at save time.
 - [x] Add `docs/` meta-documentation, `AGENTS.md`, and `CHANGELOG.md`.
+- [x] Add `docs/CONTENT-GUIDE.md`, `docs/FAQ.md`, and `docs/TROUBLESHOOTING.md`.
+- [x] Add site-prep specs: `docs/CONTENT-SCHEMA.md` and `docs/DESIGN-SYSTEM.md`.
+- [x] Add root `CONTRIBUTING.md`.
 
 ## Next
 
 - [ ] Publish to a Git remote (GitHub) and push `main`.
 - [ ] Decide on a license (or keep private).
-- [ ] Optionally add `docs/CONTENT-SCHEMA.md` if the phase format needs a formal spec.
+- [ ] Learning Site Milestone M1 — scaffold `learning-site/`, build the content pipeline, add the app shell and dashboard.
 
 ## Later / optional
 
-- [ ] Static learning site that renders the roadmaps (only if the maintainer opts in; the repo is intentionally build-free).
 - [ ] A script to lint content for stray `?` substitutes and CRLF.
 
 ## Explicitly out of scope
