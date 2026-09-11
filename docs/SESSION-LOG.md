@@ -2,6 +2,24 @@
 
 A chronological record of working sessions. Newest first.
 
+## 2026-09-11 — CI verification and docs coherence
+
+**Goal:** Confirm the CI workflow actually runs green on GitHub, then bring the entry-point docs in line with the repository.
+
+**Verified — CI is green:**
+- Two runs on `main`, both passing: `fe04ed3` and `8cfc2d4` (the current tip).
+- Both jobs pass in each run — **Content integrity** and **Learning site** — on `ubuntu-latest`, Node 24.
+- This closes the gap the CI session left open ("the first push is the real test"). The lockfile concern was also checked directly: `learning-site/package-lock.json` carries the Linux optional binaries (`@rollup/rollup-linux-x64-gnu`, `@esbuild/linux-x64`) with correct `os`/`cpu` markers, so `npm ci` resolves on the runner.
+
+**Docs aligned (the entry-point files had drifted):**
+- `README.md` — layout tree rebuilt to the real structure; the stale "Content baseline complete" status replaced.
+- `CONTRIBUTING.md` — structure block expanded to all four areas plus `.github/`; CI added to the change loop.
+- `docs/ARCHITECTURE.md` — the "No dependencies" invariant qualified per D-005/D-008, and CI documented.
+- `docs/CHECKPOINT.md` — corrected component/hook counts (7→6, 5→4), file count (80→81), added `.github/` to the tree, and **removed the `HEAD`/`Commits` rows**. A checkpoint cannot contain its own hash, so those numbers drifted on every edit; the file now points at `git log` for the exact commit.
+- `docs/DECISIONS.md` — D-003 and D-005 carry an "Amended by D-008" note. The log is ADR-style: entries are dated snapshots, superseded rather than rewritten.
+
+**Next:** Deploy the site — still the only open `ROADMAP.md` item, and it needs its own decision (D-009) before any config lands.
+
 ## 2026-09-11 — CI
 
 **Goal:** Add continuous integration — the only item under `ROADMAP.md` → Next.

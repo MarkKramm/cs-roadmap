@@ -35,8 +35,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - Application tracker (M2) — `learning-site/src/pages/Applications.jsx` and `src/hooks/useApplications.js`. Company, role, source, dates, status pipeline, and a follow-up date that surfaces when due. Persisted under `cs-roadmap:applications:v1`.
 - `EmptyState` component — specified in `docs/DESIGN-SYSTEM.md` since the design pass, implemented here and used by both trackers.
 - CI workflow — `.github/workflows/ci.yml` runs on every push to `main` and every pull request. Two jobs, split so a content typo fails fast without paying for a dependency install: **Content integrity** (`node scripts/lint-content.mjs`, no install) and **Learning site** (`npm ci` → `npm run build` → `npm run test:smoke`, under `learning-site/`). Node 24, matching the local toolchain; `permissions: contents: read`. Permitted by D-008.
+- CI verification — the workflow was confirmed green on GitHub: 2 runs on `main`, both jobs passing on `ubuntu-latest`, Node 24.
 
 ### Changed
+- `README.md`, `CONTRIBUTING.md`, `docs/ARCHITECTURE.md`, `docs/CHECKPOINT.md` — entry-point docs aligned with the current repository: CI and `.github/` documented, stale structure trees rebuilt, and the checkpoint's component/hook counts (7→6, 5→4) and file count (80→81) corrected. The checkpoint's `HEAD`/`Commits` rows were removed — a checkpoint cannot contain its own hash, so they drifted by one commit on every edit.
+- `docs/DECISIONS.md` — D-003 and D-005 carry an "Amended by" cross-reference to D-008. Entries are dated snapshots and were not rewritten.
 - `AGENTS.md` rule 3 scoped: build tooling permitted only under `learning-site/` and `scripts/`.
 - `docs/CHECKPOINT.md` refreshed to the current commit and file counts.
 - `docs/ROADMAP.md` updated: new docs recorded as done; Learning Site M1 moved to Next.
