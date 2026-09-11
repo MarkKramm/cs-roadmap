@@ -1,0 +1,77 @@
+# ---------------------------------------------------------------------------
+# Line-ending & normalization policy
+# ---------------------------------------------------------------------------
+# Normalize every text file to LF in the repository (index) AND in the
+# working tree. This prevents whole-file diffs caused by CRLF churn, which
+# would otherwise destroy the readability of every content/encoding fix.
+#
+# Deploys to GitHub Pages and Node tooling both prefer LF, so LF is the
+# repository-wide default.
+#
+# NOTE: gitattributes is read from the WORKING TREE when `git add` runs, so
+# it must exist before the first `git add` for the policy to apply.
+* text=auto eol=lf
+
+# --- Explicit text types (belt-and-braces; * above already covers these) ---
+*.md          text eol=lf
+*.mdx         text eol=lf
+*.txt         text eol=lf
+*.json        text eol=lf
+*.jsonc       text eol=lf
+*.js          text eol=lf
+*.jsx         text eol=lf
+*.mjs         text eol=lf
+*.cjs         text eol=lf
+*.ts          text eol=lf
+*.tsx         text eol=lf
+*.css         text eol=lf
+*.scss        text eol=lf
+*.html        text eol=lf
+*.htm         text eol=lf
+*.svg         text eol=lf
+*.yml         text eol=lf
+*.yaml        text eol=lf
+*.toml        text eol=lf
+*.ini         text eol=lf
+*.cfg         text eol=lf
+*.sh          text eol=lf
+*.gitignore   text eol=lf
+*.gitattributes text eol=lf
+*.editorconfig  text eol=lf
+
+# --- Windows-native scripts keep CRLF (conventional on Windows) ---
+*.bat         text eol=crlf
+*.cmd         text eol=crlf
+*.ps1         text eol=crlf
+*.psm1        text eol=crlf
+*.psd1        text eol=crlf
+
+# --- Binary assets: never normalize, never diff as text ---
+*.png         binary
+*.jpg         binary
+*.jpeg        binary
+*.gif         binary
+*.webp        binary
+*.avif        binary
+*.bmp         binary
+*.ico         binary
+*.icns        binary
+*.pdf         binary
+*.zip         binary
+*.gz          binary
+*.tgz         binary
+*.7z          binary
+*.rar         binary
+*.woff        binary
+*.woff2       binary
+*.ttf         binary
+*.otf         binary
+*.eot         binary
+*.mp3         binary
+*.mp4         binary
+*.webm        binary
+
+# --- Lockfiles: generated, noisy in diffs, never hand-merged ---
+package-lock.json   -diff linguist-generated
+pnpm-lock.yaml      -diff linguist-generated
+yarn.lock           -diff linguist-generated
