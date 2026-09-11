@@ -7,6 +7,7 @@
   "scripts": {
     "build:content": "node ../scripts/build-content.mjs",
     "lint:content": "node ../scripts/lint-content.mjs",
+    "test:smoke": "npm run build:content && node scripts/smoke-render.mjs",
     "dev": "npm run build:content && vite",
     "build": "npm run build:content && vite build",
     "preview": "vite preview"

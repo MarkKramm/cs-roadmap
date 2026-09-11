@@ -1,17 +1,47 @@
-import ProgressBar from "./ProgressBar.jsx";
+// One tool from a phase's tools table.
+// See docs/DESIGN-SYSTEM.md → <ToolCard>.
 
-// Summary card for one phase. Click opens the phase detail.
-// See docs/DESIGN-SYSTEM.md → <PhaseCard>.
+// Maps a tools-table "Cost" cell to a badge tone.
+//
+// Order matters: "Freemium" contains "free", so freemium is checked first.
+// A tool with any paid tier is not labelled free even when a free tier exists
+// ("Free self-hosted/paid hosted" lands on paid), because the badge answers
+// "might this cost me money?".
+function costTone(cost) {
+  const c = String(cost || "").toLowerCase();
+  if (c.includes("freemium")) return "freemium";
+  if (c.includes("paid")) return "paid";
+  return "free";
+}
 
-export default function PhaseCard({ phase, done, total, onOpen }) {
+export default function ToolCard({ tool }) {
   return (
-    <button type="button" className="phase-card" onClick={() => onOpen(phase.id)}>
-      <div className="phase-card__head">
-        <h3 className="phase-card__title">{phase.title}</h3>
-        <span className="muted phase-card__duration">{phase.duration}</span>
+    <div className="tool-card">
+      <div className="tool-card__head">
+        <span className="tool-card__name">{tool.name}</span>
+        <span className={"badge badge--" + costTone(tool.cost)}>
+          {tool.cost}
+        </span>
       </div>
-      <p className="phase-card__goal muted">{phase.goal}</p>
-      <ProgressBar done={done} total={total} />
-    </button>
+      <p className="tool-card__purpose muted">{tool.purpose}</p>
+      <p className="tool-card__task">
+        <strong>Practice:</strong> {tool.task}
+      </p>
+      {tool.freeAlternative && (
+        <p className="tool-card__alt muted">
+          <strong>Free alternative:</strong> {tool.freeAlternative}
+        </p>
+      )}
+      {tool.url && (
+        <a
+          className="tool-card__link"
+          href={tool.url}
+          target="_blank"
+          rel="noreferrer"
+        >
+          Official site
+        </a>
+      )}
+    </div>
   );
 }
