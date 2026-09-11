@@ -2,6 +2,14 @@
 
 A lightweight decision log (ADR-style). Newest first.
 
+## D-006 — Learning site is built with React and Vite
+
+- **Date:** 2026-09-11
+- **Status:** Accepted
+- **Context:** Milestone M1 (see [`ROADMAP.md`](ROADMAP.md)) needs a UI with real interactive state: per-task checkboxes, progress computation, energy-mode filtering, and a daily-task recommendation. A hand-written DOM layer would grow quickly and slow iteration.
+- **Decision:** Build the learning site with React and Vite under `learning-site/`, scoped by D-005. Plain CSS, no component library, no state-management library. Progress persists in `localStorage`. There is no backend, no auth, and no database.
+- **Consequences:** `learning-site/` gains `package.json` and a build step. The study content and `docs/` stay dependency-free, so the rest of the repository is unaffected. Framework-specific choices (routing, icon set, animation) remain open.
+
 ## D-005 — Scoped build-tooling exception for the future learning site
 
 - **Date:** 2026-09-11

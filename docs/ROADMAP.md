@@ -13,12 +13,16 @@ The roadmap for the **repository itself** (for the study curriculum, see [`../ca
 - [x] Add `docs/CONTENT-GUIDE.md`, `docs/FAQ.md`, and `docs/TROUBLESHOOTING.md`.
 - [x] Add site-prep specs: `docs/CONTENT-SCHEMA.md` and `docs/DESIGN-SYSTEM.md`.
 - [x] Add root `CONTRIBUTING.md`.
+- [x] Publish to a Git remote (GitHub) and push `main`.
+- [x] Decide on a license — CC BY 4.0.
+
+## In progress
+
+- [ ] Learning Site Milestone M1 — scaffold `learning-site/`, build the content pipeline, add the app shell and dashboard.
 
 ## Next
 
-- [ ] Publish to a Git remote (GitHub) and push `main`.
-- [ ] Decide on a license (or keep private).
-- [ ] Learning Site Milestone M1 — scaffold `learning-site/`, build the content pipeline, add the app shell and dashboard.
+- [ ] Nothing queued. M2 scope is defined when M1 closes.
 
 ## Later / optional
 

@@ -17,12 +17,14 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - `CONTRIBUTING.md` — human entry point into the repo.
 - `D-005` in `docs/DECISIONS.md` — scoped build-tooling exception for `learning-site/`.
 - `LICENSE` — CC BY 4.0, covering the study curriculum and project documentation.
+- `D-006` in `docs/DECISIONS.md` — learning site built with React and Vite.
 
 ### Changed
 - `AGENTS.md` rule 3 scoped: build tooling permitted only under `learning-site/` and `scripts/`.
 - `docs/CHECKPOINT.md` refreshed to the current commit and file counts.
 - `docs/ROADMAP.md` updated: new docs recorded as done; Learning Site M1 moved to Next.
 - `CHANGELOG.md` compare and release links now point at the real repository URL.
+- `docs/ROADMAP.md` — publish and license items closed; M1 moved to In progress.
 
 ## [0.1.0] — 2026-09-11
 
