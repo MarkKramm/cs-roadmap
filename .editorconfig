@@ -1,0 +1,41 @@
+# ---------------------------------------------------------------------------
+# EditorConfig — https://editorconfig.org
+# ---------------------------------------------------------------------------
+# Works alongside .gitattributes:
+#   .gitattributes normalizes line endings at git time (index/checkout).
+#   .editorconfig normalizes them at SAVE time, in any compliant editor.
+# Together they stop CRLF churn and encoding drift from returning.
+root = true
+
+# --- Defaults for every file ---
+[*]
+charset = utf-8
+end_of_line = lf
+insert_final_newline = true
+trim_trailing_whitespace = true
+indent_style = space
+indent_size = 2
+
+# --- Markdown: trailing double-space is a meaningful line break ---
+[*.md]
+trim_trailing_whitespace = false
+
+# --- Windows-native scripts stay CRLF (matches .gitattributes) ---
+[*.{bat,cmd,ps1,psm1,psd1}]
+end_of_line = crlf
+
+# --- YAML and JSON: 2-space indent is the common convention ---
+[*.{yml,yaml,json,jsonc}]
+indent_size = 2
+
+# --- Shell scripts ---
+[*.sh]
+indent_size = 2
+
+# --- Makefiles require hard tabs ---
+[Makefile]
+indent_style = tab
+
+# --- Git internals ---
+[.gitattributes]
+indent_size = 2
