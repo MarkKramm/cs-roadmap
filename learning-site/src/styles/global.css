@@ -112,6 +112,11 @@ a:hover {
   color: var(--text-muted);
 }
 
+/* The trailing paragraph margin would leave a gap when no action follows. */
+.empty-state > :last-child {
+  margin-bottom: 0;
+}
+
 /* --- Sidebar --- */
 
 .sidebar__section {

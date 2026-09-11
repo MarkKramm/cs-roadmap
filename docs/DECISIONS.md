@@ -2,6 +2,14 @@
 
 A lightweight decision log (ADR-style). Newest first.
 
+## D-007 — View navigation is local state, not a router
+
+- **Date:** 2026-09-11
+- **Status:** Accepted
+- **Context:** M2 adds three destinations (tools library, portfolio tracker, application tracker) alongside the dashboard and the per-phase detail view. D-006 left routing open. The site is a single-user local tool: no server, no shareable URLs, no deep links, no analytics. A router would add a dependency and a URL surface to solve problems this tool does not have.
+- **Decision:** Keep navigation in `App.jsx` as a single `view` string — `dashboard` | `phase` | `tools` | `portfolio` | `applications` — alongside the existing `trackId` and `openPhaseId`. No router dependency.
+- **Consequences:** No new dependency. The browser's back and forward buttons do not move between views; the sidebar and the in-page Back button are the only navigation, which is why both stay visible on every view. If deep links are ever wanted, the switch in `App.jsx` is the single seam to replace — no component below it needs to change.
+
 ## D-006 — Learning site is built with React and Vite
 
 - **Date:** 2026-09-11

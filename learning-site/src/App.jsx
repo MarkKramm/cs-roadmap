@@ -1,5 +1,6 @@
-// M1 Step 1 shell. Navigation, phase rendering, and the dashboard land in
-// Steps 3 and 4. Nothing here reads the Markdown yet — see docs/CONTENT-SCHEMA.md.
+// App shell. Navigation is a single `view` string held in local state — no
+// router, see docs/DECISIONS.md → D-007. Content is rendered from the JSON
+// emitted by scripts/build-content.mjs; see docs/CONTENT-SCHEMA.md.
 
 import { useState } from "react";
 import { tracks, findTrack } from "./data/roadmaps.js";
@@ -8,30 +9,63 @@ import { useEnergyMode } from "./hooks/useEnergyMode.js";
 import Dashboard from "./pages/Dashboard.jsx";
 import PhaseDetail from "./pages/PhaseDetail.jsx";
 
-// View state is deliberately local and minimal: which track, and whether a
-// phase is open. No router — see docs/DECISIONS.md D-006.
+// Every destination the sidebar can reach. Adding a page means adding an entry
+// here and a branch in the content switch below.
+const VIEWS = [{ id: "dashboard", label: "Dashboard" }];
+
 // Progress lives in localStorage, keyed by stable task IDs.
 
 export default function App() {
+  const [view, setView] = useState("dashboard");
   const [trackId, setTrackId] = useState("it");
   const [openPhaseId, setOpenPhaseId] = useState(null);
   const { done, toggle, reset } = useProgress();
   const { mode, change: changeMode } = useEnergyMode();
 
   const track = findTrack(trackId);
-  const openPhase = openPhaseId
+  const activePhase = openPhaseId
     ? track.phases.find((p) => p.id === openPhaseId) || null
     : null;
 
   function switchTrack(id) {
     setTrackId(id);
     setOpenPhaseId(null);
+    setView("dashboard");
+  }
+
+  function openPhase(id) {
+    setOpenPhaseId(id);
+    setView("phase");
+  }
+
+  function goBack() {
+    setOpenPhaseId(null);
+    setView("dashboard");
   }
 
   return (
     <div className="app-shell">
       <nav className="sidebar">
         <div className="sidebar__title">CS Roadmap</div>
+
+        <div className="sidebar__section">Views</div>
+        <div className="sidebar__nav">
+          {VIEWS.map((v) => (
+            <button
+              key={v.id}
+              type="button"
+              className={
+                "sidebar__link" + (v.id === view ? " is-active" : "")
+              }
+              onClick={() => {
+                setOpenPhaseId(null);
+                setView(v.id);
+              }}
+            >
+              {v.label}
+            </button>
+          ))}
+        </div>
 
         <div className="sidebar__section">Tracks</div>
         <div className="sidebar__nav">
@@ -65,7 +99,7 @@ export default function App() {
                   (complete ? " is-complete" : "") +
                   (p.id === openPhaseId ? " is-active" : "")
                 }
-                onClick={() => setOpenPhaseId(p.id)}
+                onClick={() => openPhase(p.id)}
               >
                 {p.title.replace(/^Phase \d+ — /, "")}
               </button>
@@ -94,12 +128,12 @@ export default function App() {
       </nav>
 
       <main className="content">
-        {openPhase ? (
+        {view === "phase" && activePhase ? (
           <PhaseDetail
-            phase={openPhase}
+            phase={activePhase}
             done={done}
             onToggle={toggle}
-            onBack={() => setOpenPhaseId(null)}
+            onBack={goBack}
           />
         ) : (
           <Dashboard
@@ -108,7 +142,7 @@ export default function App() {
             mode={mode}
             onModeChange={changeMode}
             onOpenTrack={switchTrack}
-            onOpenPhase={setOpenPhaseId}
+            onOpenPhase={openPhase}
           />
         )}
       </main>

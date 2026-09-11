@@ -103,6 +103,7 @@ try {
   const ChecklistItem = await load("/src/components/ChecklistItem.jsx");
   const ToolCard = await load("/src/components/ToolCard.jsx");
   const EnergyModeSelector = await load("/src/components/EnergyModeSelector.jsx");
+  const EmptyState = await load("/src/components/EmptyState.jsx");
 
   allPhases = tracks.flatMap((t) => t.phases);
   allTools = allPhases.flatMap((p) => p.tools);
@@ -242,6 +243,28 @@ try {
     render(
       "EnergyModeSelector",
       createElement(EnergyModeSelector, { mode: "normal", onChange: noop })
+    );
+  }
+
+  if (EmptyState) {
+    const bare = render(
+      "EmptyState (message only)",
+      createElement(EmptyState, { message: "Nothing here yet." })
+    );
+    if (bare) {
+      assert(
+        "EmptyState: message",
+        bare.includes("Nothing here yet."),
+        "message not rendered"
+      );
+    }
+    render(
+      "EmptyState (with action)",
+      createElement(
+        EmptyState,
+        { message: "Nothing here yet." },
+        createElement("button", { type: "button", className: "btn" }, "Add one")
+      )
     );
   }
 } finally {
