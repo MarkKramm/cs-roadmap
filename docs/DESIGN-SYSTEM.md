@@ -1,8 +1,8 @@
 # Design System
 
-Visual and interaction tokens for the future personal learning site (see [`ROADMAP.md`](ROADMAP.md) → Learning Site M1).
+Visual and interaction tokens for the personal learning site.
 
-**Status: design intent, not implementation.** Framework-agnostic on purpose — the tokens below survive whether the site is React, vanilla JS, or anything else. Concrete values land when the site is scaffolded.
+**Status: implemented.** Token values live in [`learning-site/src/styles/tokens.css`](../learning-site/src/styles/tokens.css); base styles in `global.css`; components in `learning-site/src/components/`. This document is the design reference — the CSS is authoritative for values.
 
 ## Purpose
 
@@ -107,7 +107,7 @@ Shown when a list is empty (no applications yet, no artifacts yet). Always sugge
 
 - **Sidebar:** fixed left, ~260px on desktop. Collapses to a drawer on mobile.
 - **Content max-width:** ~760px for reading. Wider (~1100px) for tables and dashboards.
-- **Sidebar contents:** track switcher (IT / Cyber), phase list, links to Tools / Portfolio / Applications / Settings.
+- **Sidebar contents:** track switcher (IT / Cyber), the current track's phase list, and Reset progress. Tools / Portfolio / Applications links arrive with M2. There is no Settings page.
 - **Header:** on the dashboard, shows the current recommended task and the current energy mode.
 
 ## Interaction rules
@@ -135,11 +135,12 @@ Do not:
 - Contrast ratios meet WCAG AA for text.
 - No information conveyed by color alone.
 
-## What is deliberately not decided here
+## Decided at M1
 
-- **Framework.** React vs vanilla vs anything else.
-- **CSS approach.** Plain CSS, CSS modules, or a utility framework.
-- **Icon set.** Deferred until the framework is picked.
-- **Animation library.** Probably none.
+- **Framework.** React 18 + Vite 6 — see [`DECISIONS.md`](DECISIONS.md) → D-006.
+- **CSS approach.** Plain CSS with custom-property tokens. No utility framework, no CSS-in-JS.
 
-Concrete values and component code land with Milestone M1.
+## Still open
+
+- **Icon set.** None. Components use text labels and a single check glyph.
+- **Animation library.** None. Transitions are CSS-only and under 150ms, per the anti-patterns above.

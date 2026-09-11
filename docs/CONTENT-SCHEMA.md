@@ -1,8 +1,8 @@
 # Content Schema
 
-The planned contract between the study content (`career-roadmaps/**/*.md`) and any tool that consumes it — most immediately, the future learning site (see [`ROADMAP.md`](ROADMAP.md) → Learning Site M1).
+The contract between the study content (`career-roadmaps/**/*.md`) and any tool that consumes it. It is implemented by [`scripts/build-content.mjs`](../scripts/build-content.mjs), which runs before every `dev` and `build` and fails loudly on a contract violation.
 
-**Status: planned, not yet implemented.** This document records the design so that the content and the pipeline agree before either is built. Do not treat it as a running specification until the build script exists.
+**Status: implemented.** The build script and the generated JSON exist. Where this document and the script disagree, the script is authoritative — correct this document to match.
 
 ## Why this exists
 
