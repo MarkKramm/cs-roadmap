@@ -54,8 +54,21 @@ Use real characters, not ASCII substitutes:
 
 Keep the subject line imperative and under ~72 characters.
 
+## Linting
+
+Run the text-integrity linter before committing content or docs:
+
+```powershell
+node scripts/lint-content.mjs
+```
+
+It flags CRLF, UTF-8 BOM, U+FFFD replacement characters, invalid UTF-8, and ASCII `?` standing in for typographic characters. Exit code is non-zero on any issue, so it can gate a commit. It does not rewrite files — repair procedures are in [`TROUBLESHOOTING.md`](TROUBLESHOOTING.md).
+
+Note: when creating a new file, the editor in this environment has repeatedly written CRLF and, once, a U+FFFD pair. Run the linter after creating any file. If it reports CRLF, normalize with the `Remove-Item` + `git checkout --` recipe above, or a direct UTF-8 rewrite for untracked files.
+
 ## Checklist before committing
 
+- [ ] `node scripts/lint-content.mjs` reports no issues.
 - [ ] File is LF (no CR bytes) unless it is a Windows-native script.
 - [ ] File is UTF-8 without BOM.
 - [ ] Typographic characters are real, not `?` substitutes.

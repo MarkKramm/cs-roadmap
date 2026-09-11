@@ -27,6 +27,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - Site components: `ProgressBar`, `PhaseCard`, `ChecklistItem`, `ToolCard`, `EnergyModeSelector`.
 - `useProgress` hook — progress keyed by stable task IDs and persisted in `localStorage`.
 - `src/data/roadmaps.js` — loads the generated JSON and exposes the two tracks.
+- `scripts/lint-content.mjs` — text-integrity linter. Flags CRLF, UTF-8 BOM, U+FFFD replacement characters, invalid UTF-8, and ASCII `?` standing in for typographic characters. Read-only; exits non-zero on any issue. Wired as `npm run lint:content`.
 
 ### Changed
 - `AGENTS.md` rule 3 scoped: build tooling permitted only under `learning-site/` and `scripts/`.

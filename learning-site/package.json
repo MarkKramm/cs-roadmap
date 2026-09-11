@@ -6,6 +6,7 @@
   "description": "Personal learning site that renders the career-roadmaps curriculum.",
   "scripts": {
     "build:content": "node ../scripts/build-content.mjs",
+    "lint:content": "node ../scripts/lint-content.mjs",
     "dev": "npm run build:content && vite",
     "build": "npm run build:content && vite build",
     "preview": "vite preview"
