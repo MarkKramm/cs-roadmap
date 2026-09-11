@@ -20,6 +20,11 @@ The roadmap for the **repository itself** (for the study curriculum, see [`../ca
 - [x] Render smoke test — `learning-site/scripts/smoke-render.mjs` renders every page and every phase with real data, catching the class of bug a build cannot.
 
 - [x] Learning Site Milestone M2 — view navigation (D-007), tools library, portfolio tracker, application tracker. Five commits; the render smoke test was extended in the same commit as each new page.
+- [x] Tooling hardening — the linter scans `LICENSE`, and `build-content.mjs` fails loudly on a malformed resource line instead of emitting `url: null`.
+
+## Next
+
+- [ ] CI — run `lint:content`, `build`, and `test:smoke` on every push. Needs a recorded decision first: `.github/workflows/` is outside the `learning-site/` + `scripts/` scope that rule 3 permits, so this requires a D-008 entry or an explicit exemption.
 
 ## Later / optional
 

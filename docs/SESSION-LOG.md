@@ -2,6 +2,30 @@
 
 A chronological record of working sessions. Newest first.
 
+## 2026-09-11 — Tooling hardening
+
+**Goal:** Close the two deferred defects from the audit, then record the state for a pause.
+
+**Done (two commits):**
+- Commit 1 (`80c9055`) — `fix(tooling): scan LICENSE and fail loudly on malformed resource lines`.
+- Commit 2 (`4fbccd7`) — `docs: refresh checkpoint and record the tooling fixes`.
+
+**The two defects:**
+- `scripts/lint-content.mjs` never scanned `LICENSE`. The file is extensionless, so it missed both the extension allow-list and the three-entry `CHECK_NAMES` set — the repository's own license was the only text file exempt from the text-integrity check. It is matched by name now; the lint count went 79 → 80 files.
+- `scripts/build-content.mjs` degraded silently on a malformed resource line. A line that did not match `Name — https://…` produced `{ name, url: null }` and the build passed, so a broken link surfaced later in the UI rather than at the point of the mistake. It now fails with one of two messages — a URL present but the wrong separator, or no URL at all.
+
+**Verified (negative test, four directions):**
+- Clean content → exit 0.
+- `- Name - https://example.com` (hyphen separator) → exit 1, reporting that a URL is present but the separator is wrong.
+- `- Name` (no URL) → exit 1, "resource line has no URL".
+- Original bytes restored → exit 0, and `git diff career-roadmaps/` empty. The test left no residue.
+
+**Notes:**
+- All 92 existing resource lines already satisfied the rule, so no content changed. The fix closed a latent fragility, not live corruption. An earlier sweep that appeared to show 92 of 92 malformed was a bug in the check, not the repository: PowerShell's `Get-Content` decodes with the ANSI code page, which mangled the em-dash. `build-content.mjs` reads UTF-8 and was always correct.
+- Session-log numbers are historical by design. Entries record what was true during their own session; current-state counts live in `docs/CHECKPOINT.md`.
+
+**Next:** CI — run `lint:content`, `build`, and `test:smoke` on every push. Needs a recorded decision first (D-008): `.github/workflows/` sits outside the `learning-site/` + `scripts/` scope that `AGENTS.md` rule 3 permits.
+
 ## 2026-09-11 — Learning Site Milestone M2
 
 **Goal:** Build the three features M2 committed to — a tools library, a portfolio tracker, and an application tracker.
