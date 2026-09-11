@@ -16,11 +16,13 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - `docs/DESIGN-SYSTEM.md` — framework-agnostic UI tokens for the learning site.
 - `CONTRIBUTING.md` — human entry point into the repo.
 - `D-005` in `docs/DECISIONS.md` — scoped build-tooling exception for `learning-site/`.
+- `LICENSE` — CC BY 4.0, covering the study curriculum and project documentation.
 
 ### Changed
 - `AGENTS.md` rule 3 scoped: build tooling permitted only under `learning-site/` and `scripts/`.
 - `docs/CHECKPOINT.md` refreshed to the current commit and file counts.
 - `docs/ROADMAP.md` updated: new docs recorded as done; Learning Site M1 moved to Next.
+- `CHANGELOG.md` compare and release links now point at the real repository URL.
 
 ## [0.1.0] — 2026-09-11
 
@@ -37,5 +39,5 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 ### Changed
 - Established the baseline commit for `career-roadmaps/`.
 
-[Unreleased]: https://example.com/compare/0.1.0...HEAD
-[0.1.0]: https://example.com/releases/tag/0.1.0
+[Unreleased]: https://github.com/MarkKramm/cs-roadmap/compare/0.1.0...HEAD
+[0.1.0]: https://github.com/MarkKramm/cs-roadmap/releases/tag/0.1.0
