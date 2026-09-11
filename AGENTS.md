@@ -34,7 +34,7 @@ The curriculum itself is content-only. `career-roadmaps/` and `docs/` are plain 
 
 1. **Line endings are LF.** Enforced by `.gitattributes` (`* text=auto eol=lf`) and `.editorconfig`. Windows-native scripts (`.bat`, `.cmd`, `.ps1`) are the only CRLF exception.
 2. **Encoding is UTF-8 without BOM.** Use real typographic characters (`—` em-dash, `–` en-dash, `“ ”` curly quotes, `├──` box drawing) — **never** ASCII substitutes like `?` or `--`.
-3. **No build tooling outside `learning-site/`.** The study content and docs must stay dependency-free. Build tooling is permitted only under `learning-site/` and `scripts/` — see [`docs/DECISIONS.md`](docs/DECISIONS.md) → D-005.
+3. **No build tooling outside `learning-site/`.** The study content and docs must stay dependency-free. Build tooling is permitted only under `learning-site/` and `scripts/` — see [`docs/DECISIONS.md`](docs/DECISIONS.md) → D-005. Continuous integration under `.github/workflows/` is the one other carve-out, and it is limited to checks — see [`docs/DECISIONS.md`](docs/DECISIONS.md) → D-008.
 4. **Preserve the pedagogy.** The content is intentionally beginner-friendly and budget-aware ($0). Do not inflate scope or add paid requirements.
 
 ## Making changes

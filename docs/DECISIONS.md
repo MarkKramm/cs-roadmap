@@ -2,6 +2,14 @@
 
 A lightweight decision log (ADR-style). Newest first.
 
+## D-008 — CI is permitted, deploy is not
+
+- **Date:** 2026-09-11
+- **Status:** Accepted
+- **Context:** The roadmap's remaining Next item is CI — run `lint:content`, `build`, and `test:smoke` on every push. A GitHub Actions workflow lives at `.github/workflows/`, which is outside the `learning-site/` + `scripts/` scope that D-005 permits under rule 3 of `AGENTS.md`. The rule blocks the workflow file even though CI adds no runtime dependency to the content.
+- **Decision:** Permit `.github/workflows/` **solely for continuous integration** — linting, building, and smoke-testing the repository on push and on pull request. No deploy step, no publishing, no secrets, no credentials. Deployment stays out of scope.
+- **Consequences:** Rule 3 in `AGENTS.md` gains a second explicit, bounded carve-out. The dependency-free guarantee survives intact, because CI *checks* the content rather than becoming a dependency of reading it — `career-roadmaps/` and `docs/` are still readable with just `git` and a text editor. A future contributor knows CI is allowed and deployment is not; publishing the site would need a decision of its own.
+
 ## D-007 — View navigation is local state, not a router
 
 - **Date:** 2026-09-11
