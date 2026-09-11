@@ -195,6 +195,7 @@ function buildPhase(file) {
     duration: fm.duration,
     durationWeeks: fm.duration_weeks,
     energyMix: fm.energy_mix || [],
+    deliverable: fm.deliverable || null,
     goal: firstPara(sec["Goal of this phase"] || []),
     skills: bullets(sec["Skills you'll gain"] || []),
     topics,
