@@ -106,6 +106,7 @@ try {
   const EmptyState = await load("/src/components/EmptyState.jsx");
   const ToolsLibrary = await load("/src/pages/ToolsLibrary.jsx");
   const Portfolio = await load("/src/pages/Portfolio.jsx");
+  const Applications = await load("/src/pages/Applications.jsx");
 
   allPhases = tracks.flatMap((t) => t.phases);
   allTools = allPhases.flatMap((p) => p.tools);
@@ -294,6 +295,30 @@ try {
         "Portfolio: add affordance",
         html.includes("Add an entry"),
         "no way to add the first entry"
+      );
+    }
+  }
+
+  if (Applications) {
+    // Same reasoning as Portfolio: localStorage is unavailable in the server
+    // renderer, so load() returns an empty list and this is the empty-state
+    // branch — what a first-time visitor sees.
+    const html = render("Applications", createElement(Applications));
+    if (html) {
+      assert(
+        "Applications: heading",
+        html.includes("Applications"),
+        "page heading not rendered"
+      );
+      assert(
+        "Applications: empty state",
+        html.includes("No applications yet"),
+        "empty-state message not rendered"
+      );
+      assert(
+        "Applications: add affordance",
+        html.includes("Add an application"),
+        "no way to add the first application"
       );
     }
   }

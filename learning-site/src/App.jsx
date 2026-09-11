@@ -10,6 +10,7 @@ import Dashboard from "./pages/Dashboard.jsx";
 import PhaseDetail from "./pages/PhaseDetail.jsx";
 import ToolsLibrary from "./pages/ToolsLibrary.jsx";
 import Portfolio from "./pages/Portfolio.jsx";
+import Applications from "./pages/Applications.jsx";
 
 // Every destination the sidebar can reach. Adding a page means adding an entry
 // here and a branch in the content switch below.
@@ -17,6 +18,7 @@ const VIEWS = [
   { id: "dashboard", label: "Dashboard" },
   { id: "tools", label: "Tools" },
   { id: "portfolio", label: "Portfolio" },
+  { id: "applications", label: "Applications" },
 ];
 
 // Progress lives in localStorage, keyed by stable task IDs.
@@ -145,6 +147,8 @@ export default function App() {
           <ToolsLibrary onOpenPhase={openPhase} />
         ) : view === "portfolio" ? (
           <Portfolio />
+        ) : view === "applications" ? (
+          <Applications />
         ) : (
           <Dashboard
             track={track}

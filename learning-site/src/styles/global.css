@@ -563,6 +563,82 @@ a:hover {
   color: var(--success);
 }
 
+/* --- Application tracker --- */
+
+.entry-form__row {
+  display: flex;
+  gap: var(--space-4);
+  flex-wrap: wrap;
+}
+
+.entry-form__row .entry-form__field {
+  flex: 1 1 200px;
+}
+
+/* A follow-up that has come due. Warning, never danger — a missed reminder
+   is not an error state. See docs/DESIGN-SYSTEM.md → Anti-patterns. */
+.chip--due {
+  color: var(--warning);
+  border-color: var(--warning);
+}
+
+.app-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--text-sm);
+}
+
+.app-table th {
+  text-align: left;
+  font-size: var(--text-xs);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--text-muted);
+  font-weight: 400;
+  padding: 0 var(--space-3) var(--space-2) 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.app-table td {
+  padding: var(--space-3) var(--space-3) var(--space-3) 0;
+  border-bottom: 1px solid var(--border);
+  vertical-align: top;
+}
+
+.app-table tr:last-child td {
+  border-bottom: none;
+}
+
+.app-table__company {
+  font-weight: 600;
+}
+
+.app-table__sub {
+  display: block;
+  color: var(--text-muted);
+  font-size: var(--text-xs);
+}
+
+.app-table select {
+  font: inherit;
+  font-size: var(--text-sm);
+}
+
+.app-table__actions {
+  white-space: nowrap;
+}
+
+/* Overdue follow-up date, marked with a weight change as well as colour so it
+   is not conveyed by colour alone. See DESIGN-SYSTEM.md → Accessibility. */
+.app-due {
+  color: var(--warning);
+  font-weight: 600;
+}
+
+.app-table-wrap {
+  overflow-x: auto;
+}
+
 /* --- Energy mode --- */
 
 .energy {
