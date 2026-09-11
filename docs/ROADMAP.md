@@ -17,10 +17,9 @@ The roadmap for the **repository itself** (for the study curriculum, see [`../ca
 - [x] Decide on a license — CC BY 4.0.
 - [x] Learning Site Milestone M1 — scaffold `learning-site/`, build the content pipeline, add the app shell and dashboard.
 - [x] Content linter — `scripts/lint-content.mjs` checks CRLF, BOM, U+FFFD, invalid UTF-8, and stray `?` substitutes.
+- [x] Render smoke test — `learning-site/scripts/smoke-render.mjs` renders every page and every phase with real data, catching the class of bug a build cannot.
 
-## In progress
-
-- [ ] Learning Site Milestone M2 — scoped at kickoff: view navigation (D-007), tools library, portfolio tracker, application tracker. Five commits; the render smoke test is extended in the same commit as each new page.
+- [x] Learning Site Milestone M2 — view navigation (D-007), tools library, portfolio tracker, application tracker. Five commits; the render smoke test was extended in the same commit as each new page.
 
 ## Later / optional
 

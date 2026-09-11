@@ -28,6 +28,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - `useProgress` hook — progress keyed by stable task IDs and persisted in `localStorage`.
 - `src/data/roadmaps.js` — loads the generated JSON and exposes the two tracks.
 - `scripts/lint-content.mjs` — text-integrity linter. Flags CRLF, UTF-8 BOM, U+FFFD replacement characters, invalid UTF-8, and ASCII `?` standing in for typographic characters. Read-only; exits non-zero on any issue. Wired as `npm run lint:content`.
+- `learning-site/scripts/smoke-render.mjs` — render smoke test (M1 fix, extended through M2). Renders every phase and every page with real data using `react-dom/server` and Vite's `ssrLoadModule`. No new dependencies. Wired as `npm run test:smoke`.
+- `D-007` in `docs/DECISIONS.md` — view navigation is local state, not a router.
+- Tools library (M2) — `learning-site/src/pages/ToolsLibrary.jsx`. Browse all 112 tools across both tracks, with search over name and purpose, a cost filter, and a track filter. Each result links back to its phase. Cost mapping extracted to `src/data/tools.js` so the badge and the filter cannot drift.
+- Portfolio tracker (M2) — `learning-site/src/pages/Portfolio.jsx` and `src/hooks/usePortfolio.js`. Add artifacts you built, link a phase and a repository or live URL, track status. Persisted under `cs-roadmap:portfolio:v1`.
+- Application tracker (M2) — `learning-site/src/pages/Applications.jsx` and `src/hooks/useApplications.js`. Company, role, source, dates, status pipeline, and a follow-up date that surfaces when due. Persisted under `cs-roadmap:applications:v1`.
+- `EmptyState` component — specified in `docs/DESIGN-SYSTEM.md` since the design pass, implemented here and used by both trackers.
 
 ### Changed
 - `AGENTS.md` rule 3 scoped: build tooling permitted only under `learning-site/` and `scripts/`.
@@ -39,6 +45,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - `docs/CONTENT-SCHEMA.md`, `docs/DESIGN-SYSTEM.md` — marked as implemented and pointed at the code that implements them, replacing the earlier "planned" and "design intent" status lines.
 - `docs/CHECKPOINT.md` — refreshed to the current commit, file count, and checks.
 - `docs/SESSION-LOG.md` — added the audit/fix session; corrected the oldest entry's "Next", which still described configuring the remote.
+- `learning-site/src/App.jsx` — navigation is now a single `view` string covering Dashboard, Tools, Portfolio, and Applications, replacing the phase-open boolean. See D-007.
+- `docs/DESIGN-SYSTEM.md` — sidebar contents updated to the Views list that actually exists; the three M2 pages no longer described as forthcoming.
+- `docs/ROADMAP.md` — M2 moved to Done; the render smoke test recorded as a completed item.
+- `learning-site/README.md` — removed a duplicated `## Layout` section; documented the new pages, hooks, and commands; status brought up to M2.
 
 ### Fixed
 - `learning-site/src/components/ToolCard.jsx` contained `PhaseCard`'s implementation verbatim — same body, same `{ phase, done, total, onOpen }` signature — while its only call site passed `{ tool }`. Opening any phase threw a `TypeError` and blanked the view. Both `npm run build` and `npm run dev` passed, because a component whose signature does not match its call site still compiles. Now renders name, purpose, cost badge, mini-task, free alternative, and the official link.

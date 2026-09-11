@@ -7,9 +7,9 @@ A snapshot of the repository's current state. Update this when a meaningful mile
 | Item | Value |
 |---|---|
 | Branch | `main` |
-| HEAD | `8adfd58 docs: mark site-prep specs as implemented` |
-| Commits | 21 |
-| Tracked files | 73 |
+| HEAD | `7056e21 feat(site): add the application tracker` |
+| Commits | 26 |
+| Tracked files | 80 |
 | Working tree | Clean, in sync with `origin/main` |
 | Line endings | LF everywhere (Windows scripts excepted) |
 | Encoding | UTF-8, no BOM |
@@ -18,7 +18,7 @@ A snapshot of the repository's current state. Update this when a meaningful mile
 | License | CC BY 4.0 |
 | Build step | `learning-site/` — React + Vite. `npm run dev` / `npm run build` |
 | Checks | `npm run lint:content`, `npm run build`, `npm run test:smoke` — all passing |
-| Milestone | M1 complete — site renders both tracks, tracks progress, picks a daily task |
+| Milestone | M2 complete — tools library, portfolio tracker, application tracker |
 
 The HEAD and count above describe the last commit before this file's own
 commit — a checkpoint cannot contain its own hash. For the exact current
@@ -38,7 +38,8 @@ state, run `git --no-pager log --oneline -n 1`.
 ├── LICENSE
 ├── docs/
 ├── scripts/                 (content tooling)
-├── learning-site/           (React + Vite; generated/ and dist/ ignored)
+├── learning-site/           (React + Vite; 5 pages, 7 components, 5 hooks;
+│                             generated/ and dist/ ignored)
 └── career-roadmaps/
     ├── README.md
     ├── it-roadmap/          (13 files)
@@ -56,10 +57,13 @@ state, run `git --no-pager log --oneline -n 1`.
 - [x] `lint-content.mjs` passes — 72 files, 0 issues.
 - [x] `test:smoke` passes — 26 renders across 17 phases and 112 tools.
 - [x] `ToolCard` renders tool data; the M1 crash on opening a phase is fixed.
+- [x] `test:smoke` now covers every page as well as every phase — 31 renders.
+- [x] Tools library lists all 112 tools with search and cost/track filters.
+- [x] Portfolio and application trackers persist under their own `localStorage` keys.
 
 ## Open items
 
-- [ ] Learning Site Milestone M2 — scope to be defined at kickoff (tools library, portfolio tracker, application tracker).
+- [ ] Deploy the site — blocked on the private-repo visibility decision. GitHub Pages from a private repo generally needs a paid plan.
 
 ## How to verify quickly
 

@@ -107,7 +107,7 @@ Shown when a list is empty (no applications yet, no artifacts yet). Always sugge
 
 - **Sidebar:** fixed left, ~260px on desktop. Collapses to a drawer on mobile.
 - **Content max-width:** ~760px for reading. Wider (~1100px) for tables and dashboards.
-- **Sidebar contents:** a Views list (Dashboard, plus the tools library, portfolio tracker, and application tracker as each lands), the track switcher (IT / Cyber), the current track's phase list, and Reset progress. There is no Settings page.
+- **Sidebar contents:** a Views list (Dashboard, Tools, Portfolio, Applications), the track switcher (IT / Cyber), the current track's phase list, and Reset progress. There is no Settings page.
 - **Header:** on the dashboard, shows the current recommended task and the current energy mode.
 
 ## Interaction rules

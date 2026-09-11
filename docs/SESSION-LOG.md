@@ -2,6 +2,32 @@
 
 A chronological record of working sessions. Newest first.
 
+## 2026-09-11 — Learning Site Milestone M2
+
+**Goal:** Build the three features M2 committed to — a tools library, a portfolio tracker, and an application tracker.
+
+**Done (five commits):**
+- Commit 1 (`7642aa3`) — `feat(site): add view navigation and EmptyState`. `App.jsx` navigation became a single `view` string; recorded as D-007. `EmptyState` implemented against the spec and the `.empty-state` class that already existed.
+- Commit 2 (`9fe6360`) — `feat(site): add the tools library`. 112 tools flattened with track/phase provenance. Search, cost filter, track filter. `costTone()` moved out of `ToolCard` into `src/data/tools.js` so the badge and the filter share one definition.
+- Commit 3 (`dedd8ec`) — `feat(site): add the portfolio tracker`. `usePortfolio` hook, `Portfolio` page, status filter, phase and URL links.
+- Commit 4 (`7056e21`) — `feat(site): add the application tracker`. `useApplications` hook, `Applications` page, status pipeline, follow-up dates flagged when due.
+- Commit 5 — docs: CHECKPOINT, ROADMAP, SESSION-LOG, CHANGELOG, `learning-site/README.md`.
+
+**Scope decision:** the three features were approved as a set at kickoff. The nav work was split so that each destination's sidebar link landed in the same commit as its page — no commit in the sequence ships a link to a page that does not exist.
+
+**Verified after every commit:**
+- `npm run test:smoke` — grew 26 → 31 renders as pages were added; 0 failures. Each new page was added to the smoke test in the same commit that created it.
+- `npm run lint:content` — 79 files, 0 issues.
+- `npm run build` — succeeds.
+- All edited files LF, no BOM, no U+FFFD.
+
+**Notes:**
+- The editor's 6000-character cap was hit twice (`Portfolio.jsx`, `Applications.jsx`). Both were split into create-then-append writes and verified afterward — the hazard was known and did not cause a silent drop.
+- The portfolio tracker's `update()` was removed before commit: nothing called it, and dead mutators in a fresh file are worth deleting rather than keeping "just in case".
+- `crypto.randomUUID` was deliberately avoided in both new hooks — it requires a secure context, which a local `file://` page is not.
+
+**Next:** deploy the site, still blocked on the private-repo visibility decision (see `ROADMAP.md` → Later / optional).
+
 ## 2026-09-11 — Audit, ToolCard fix, and doc-accuracy pass
 
 **Goal:** Audit the M1 work for real bugs and false claims, then fix what the audit found.
