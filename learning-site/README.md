@@ -18,7 +18,7 @@ npm run build    # production build into dist/
 npm run preview  # serve the built output
 ```
 
-`npm run build:content` is added in Milestone M1 Step 2 and will generate `src/data/generated/{it,cyber}.json` from the Markdown.
+`npm run build:content` generates `src/data/generated/{it,cyber}.json` from the Markdown via [`scripts/build-content.mjs`](../scripts/build-content.mjs). It runs automatically before `dev` and `build`. The generated files are git-ignored — the Markdown is the single source of truth.
 
 ## Layout
 

@@ -19,6 +19,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - `LICENSE` — CC BY 4.0, covering the study curriculum and project documentation.
 - `D-006` in `docs/DECISIONS.md` — learning site built with React and Vite.
 - `learning-site/` — React + Vite scaffold (Milestone M1, Step 1): app shell, design tokens, base styles, and a local `.gitignore`.
+- `scripts/build-content.mjs` — content pipeline (M1 Step 2c) that reads `career-roadmaps/**/*.md` and emits `learning-site/src/data/generated/{it,cyber}.json`. Fails loudly on missing sections, missing task IDs, or paid tools without a free alternative.
+- `scripts/add-frontmatter.mjs` — one-time migration helper used in Step 2b.
+- `npm run build:content` script, wired to run before `dev` and `build`.
 
 ### Changed
 - `AGENTS.md` rule 3 scoped: build tooling permitted only under `learning-site/` and `scripts/`.
