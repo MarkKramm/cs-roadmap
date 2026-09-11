@@ -53,6 +53,6 @@ Start here: [`career-roadmaps/README.md`](career-roadmaps/README.md) — it expl
 
 ## Status
 
-Curriculum content complete. Learning Site M2 complete (dashboard, tools library, portfolio tracker, application tracker). CI runs the content linter, the production build, and the render smoke test on every push and pull request — verified green.
+Curriculum structure complete — all 17 phases with tools, resources, tasks, deliverables, and checklists. The phase files are a syllabus: they say what to learn and where to find it, not yet full lesson prose. Deepening them is the next task; see [`docs/ROADMAP.md`](docs/ROADMAP.md). Learning Site M2 complete (dashboard, tools library, portfolio tracker, application tracker). CI runs the content linter, the production build, and the render smoke test on every push and pull request — verified green.
 
-Deploying the site is the one open item; see [`docs/ROADMAP.md`](docs/ROADMAP.md).
+Two items remain: deepening the phase files into lesson prose, and deploying the site. Both are tracked in [`docs/ROADMAP.md`](docs/ROADMAP.md).

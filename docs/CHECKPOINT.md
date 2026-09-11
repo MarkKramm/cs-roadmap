@@ -18,6 +18,7 @@ A snapshot of the repository's current state. Update this when a meaningful mile
 | Checks | `npm run lint:content`, `npm run build`, `npm run test:smoke` — all passing |
 | CI | `.github/workflows/ci.yml` — two jobs on push to `main` and on PRs (D-008); verified green |
 | Milestone | M2 complete — tools library, portfolio tracker, application tracker |
+| Content depth | Syllabus only — phases say *what* to learn, not *how*. A `## Lesson` pilot on IT Phase 1 is the next task (see `SESSION-LOG.md`) |
 
 This file deliberately carries no commit hash or commit count: a checkpoint
 cannot contain its own hash, so those numbers drift by one commit on every
@@ -63,6 +64,7 @@ edit. For the exact current state, run `git --no-pager log --oneline -n 1`.
 
 ## Open items
 
+- [ ] Content-depth pilot — deepen IT Phase 1 with a `## Lesson` section (Markdown-only), then judge before repeating. See [`SESSION-LOG.md`](SESSION-LOG.md).
 - [ ] Deploy the site — blocked on the private-repo visibility decision. GitHub Pages from a private repo generally needs a paid plan, but Netlify, Vercel, and Cloudflare Pages all deploy private repos on free tiers, so this is less blocked than it first appeared.
 
 ## How to verify quickly

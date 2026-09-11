@@ -25,7 +25,7 @@ The roadmap for the **repository itself** (for the study curriculum, see [`../ca
 
 ## Next
 
-- Nothing scheduled. The one remaining item is optional — see below.
+- [ ] **Content-depth pilot** — deepen `career-roadmaps/it-roadmap/01-phase-computer-fundamentals.md` with a `## Lesson` section (~3,000 words), read via the site's "read the full guide" link. Markdown-only: no pipeline or renderer change, no new dependency. The phases are currently a syllabus (what to learn and where to find it), not lesson prose. Judge the effort on this one phase before repeating for the others. Agreed, not yet started — see [`SESSION-LOG.md`](SESSION-LOG.md).
 
 ## Later / optional
 

@@ -40,6 +40,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 ### Changed
 - `README.md`, `CONTRIBUTING.md`, `docs/ARCHITECTURE.md`, `docs/CHECKPOINT.md` — entry-point docs aligned with the current repository: CI and `.github/` documented, stale structure trees rebuilt, and the checkpoint's component/hook counts (7→6, 5→4) and file count (80→81) corrected. The checkpoint's `HEAD`/`Commits` rows were removed — a checkpoint cannot contain its own hash, so they drifted by one commit on every edit.
 - `docs/DECISIONS.md` — D-003 and D-005 carry an "Amended by" cross-reference to D-008. Entries are dated snapshots and were not rewritten.
+- `README.md`, `docs/ROADMAP.md`, `docs/CHECKPOINT.md`, `docs/SESSION-LOG.md` — record a content-depth assessment: the phase files are a syllabus (what to learn, where to find it), not lesson prose, and an unknown `##` heading is ignored by the build. The next task is a Markdown-only `## Lesson` pilot on IT Phase 1, so no content was written yet. The README status no longer claims the curriculum is "complete" without qualification.
 - `AGENTS.md` rule 3 scoped: build tooling permitted only under `learning-site/` and `scripts/`.
 - `docs/CHECKPOINT.md` refreshed to the current commit and file counts.
 - `docs/ROADMAP.md` updated: new docs recorded as done; Learning Site M1 moved to Next.

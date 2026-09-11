@@ -2,6 +2,35 @@
 
 A chronological record of working sessions. Newest first.
 
+## 2026-09-11 — Pause: content-depth assessment
+
+**Goal:** Wrap up for the day, and check whether the curriculum is teachable material or only a syllabus.
+
+**Finding — the content is a syllabus, not a textbook:**
+- 29 files, roughly 20,000 words total; 693–916 words per phase.
+- Each phase says *what* to learn and *where* to find it (goal → skills → topics → tools → resources → tasks → deliverable → checklist → exit bar). It does not teach the subject itself. `- CPU: cores, threads, clock speed, overheating symptoms` is a topic line, not a lesson.
+- `docs/CONTENT-GUIDE.md` calls its 11 sections "mandatory", but none of them is a lesson body.
+
+**Pipeline constraint confirmed (so the plan is safe):**
+- `scripts/build-content.mjs` reads only its known `##` headings. An unknown heading is never read, so arbitrary prose under a new heading cannot fail the build.
+- `learning-site/src/pages/PhaseDetail.jsx` renders only the extracted fields, so prose in a phase file does not appear in the site. The site's existing "read the full guide" link (`PhaseDetail.jsx:23`) opens the Markdown on GitHub — that is the channel deep content would be read through.
+
+**Agreed next task — planned, NOT executed (no content was written this session):**
+- Pilot one phase: `career-roadmaps/it-roadmap/01-phase-computer-fundamentals.md`, adding a `## Lesson` section after `## Specific topics to learn`.
+- Target ~3,000 words. Five beats per topic — what it is, how to check yours, what the numbers mean, what failure looks like, what you would do — plus a guided walkthrough with real commands and expected output (`winver`, `msinfo32`, `dxdiag`, the four Task Manager tabs, Device Manager, `Get-PhysicalDisk`).
+- Markdown-only: the lesson lives in the phase file and is read via the "read the full guide" link. No pipeline or renderer change, no new dependency.
+- Then document `## Lesson` in `docs/CONTENT-GUIDE.md` (allowed authoring section) and `docs/CONTENT-SCHEMA.md` (deliberately not extracted), so a later reader does not delete prose the parser ignores.
+- Judge the effort on that one phase before repeating for the other 16.
+
+**Carry-over fix spotted, not yet applied:** `01-phase-computer-fundamentals.md` line 62 offers `wmic diskdrive` as the free alternative to CrystalDiskInfo. `wmic` is deprecated and being removed from Windows; `Get-PhysicalDisk` is the current replacement.
+
+**State verified before pausing:**
+- `node scripts/lint-content.mjs` — 81 files, 0 issues.
+- `npm run build` — exit 0. `npm run test:smoke` — 31 renders across 17 phases and 112 tools, 0 failures.
+- Working tree clean, in sync with `origin/main`.
+
+**Next:** run the IT Phase 1 lesson pilot described above.
+
 ## 2026-09-11 — CI verification and docs coherence
 
 **Goal:** Confirm the CI workflow actually runs green on GitHub, then bring the entry-point docs in line with the repository.
