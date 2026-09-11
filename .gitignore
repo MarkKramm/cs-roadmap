@@ -1,0 +1,53 @@
+# ---------------------------------------------------------------------------
+# Ignore policy
+# ---------------------------------------------------------------------------
+# This repo is plain Markdown/text, so almost nothing should be ignored yet.
+# The rules below keep OS, editor, and scratch noise out of history now, and
+# cover common tooling in case a site/build pipeline is added later.
+
+# --- OS junk ---
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+.DS_Store
+*.lnk
+
+# --- Editor / IDE ---
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.json
+*.code-workspace
+
+# --- Temp / scratch files ---
+*.tmp
+*.temp
+.tmp-*
+*~
+
+# --- Logs ---
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# --- Node (if tooling is added later) ---
+node_modules/
+dist/
+build/
+coverage/
+.cache/
+.npm/
+.pnpm-store/
+
+# --- Python (if scripting is added later) ---
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+
+# --- Secrets / local environment ---
+.env
+.env.*
+!.env.example
+*.local
