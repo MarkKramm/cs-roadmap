@@ -12,8 +12,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - `docs/CONTENT-GUIDE.md` — authoring standard for phase files.
 - `docs/FAQ.md` — design rationale behind the curriculum.
 - `docs/TROUBLESHOOTING.md` — recovery playbook for Git and encoding incidents.
-- `docs/CONTENT-SCHEMA.md` — planned md→JSON contract for the learning site.
-- `docs/DESIGN-SYSTEM.md` — framework-agnostic UI tokens for the learning site.
+- `docs/CONTENT-SCHEMA.md` — the md→JSON contract for the learning site, implemented by `scripts/build-content.mjs`.
+- `docs/DESIGN-SYSTEM.md` — UI tokens for the learning site, implemented in `learning-site/src/styles/`.
 - `CONTRIBUTING.md` — human entry point into the repo.
 - `D-005` in `docs/DECISIONS.md` — scoped build-tooling exception for `learning-site/`.
 - `LICENSE` — CC BY 4.0, covering the study curriculum and project documentation.
@@ -35,6 +35,15 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - `docs/ROADMAP.md` updated: new docs recorded as done; Learning Site M1 moved to Next.
 - `CHANGELOG.md` compare and release links now point at the real repository URL.
 - `docs/ROADMAP.md` — publish and license items closed; M1 moved to In progress.
+- `AGENTS.md`, `CONTRIBUTING.md`, `README.md`, `docs/ARCHITECTURE.md`, `docs/SETUP.md` — corrected the claim that the repository has no build step or dependencies. The curriculum stays dependency-free; the learning site and content tooling do not.
+- `docs/CONTENT-SCHEMA.md`, `docs/DESIGN-SYSTEM.md` — marked as implemented and pointed at the code that implements them, replacing the earlier "planned" and "design intent" status lines.
+- `docs/CHECKPOINT.md` — refreshed to the current commit, file count, and checks.
+- `docs/SESSION-LOG.md` — added the audit/fix session; corrected the oldest entry's "Next", which still described configuring the remote.
+
+### Fixed
+- `learning-site/src/components/ToolCard.jsx` contained `PhaseCard`'s implementation verbatim — same body, same `{ phase, done, total, onOpen }` signature — while its only call site passed `{ tool }`. Opening any phase threw a `TypeError` and blanked the view. Both `npm run build` and `npm run dev` passed, because a component whose signature does not match its call site still compiles. Now renders name, purpose, cost badge, mini-task, free alternative, and the official link.
+- `learning-site/src/pages/Dashboard.jsx` pointed at "Settings" for resetting progress; no Settings page exists. Now points at the sidebar.
+- `docs/DESIGN-SYSTEM.md` listed sidebar links (Tools / Portfolio / Applications / Settings) that do not exist.
 
 ## [0.1.0] — 2026-09-11
 

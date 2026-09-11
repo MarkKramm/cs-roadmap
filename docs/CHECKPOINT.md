@@ -7,9 +7,9 @@ A snapshot of the repository's current state. Update this when a meaningful mile
 | Item | Value |
 |---|---|
 | Branch | `main` |
-| HEAD | `fe27daf docs: close out M1 and record the session` |
-| Commits | 16 |
-| Tracked files | 71 |
+| HEAD | `8adfd58 docs: mark site-prep specs as implemented` |
+| Commits | 21 |
+| Tracked files | 73 |
 | Working tree | Clean, in sync with `origin/main` |
 | Line endings | LF everywhere (Windows scripts excepted) |
 | Encoding | UTF-8, no BOM |
@@ -17,7 +17,12 @@ A snapshot of the repository's current state. Update this when a meaningful mile
 | Visibility | Private — not publicly reachable |
 | License | CC BY 4.0 |
 | Build step | `learning-site/` — React + Vite. `npm run dev` / `npm run build` |
+| Checks | `npm run lint:content`, `npm run build`, `npm run test:smoke` — all passing |
 | Milestone | M1 complete — site renders both tracks, tracks progress, picks a daily task |
+
+The HEAD and count above describe the last commit before this file's own
+commit — a checkpoint cannot contain its own hash. For the exact current
+state, run `git --no-pager log --oneline -n 1`.
 
 ## Structure
 
@@ -48,6 +53,9 @@ A snapshot of the repository's current state. Update this when a meaningful mile
 - [x] All files valid UTF-8; no CR bytes.
 - [x] `.gitattributes` and `.editorconfig` in place.
 - [x] Remote configured and `main` pushed.
+- [x] `lint-content.mjs` passes — 72 files, 0 issues.
+- [x] `test:smoke` passes — 26 renders across 17 phases and 112 tools.
+- [x] `ToolCard` renders tool data; the M1 crash on opening a phase is fixed.
 
 ## Open items
 
@@ -59,4 +67,8 @@ A snapshot of the repository's current state. Update this when a meaningful mile
 git --no-pager log --oneline -n 5
 git --no-pager status --short
 git --no-pager ls-files
+node scripts/lint-content.mjs          # content integrity
+cd learning-site
+npm run build                          # production build
+npm run test:smoke                     # render every phase with real data
 ```

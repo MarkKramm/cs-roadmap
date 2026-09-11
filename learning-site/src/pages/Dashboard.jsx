@@ -67,8 +67,8 @@ export default function Dashboard({
           </p>
         ) : (
           <p>
-            Every task in this track is complete. Switch tracks or reset
-            progress in Settings.
+            Every task in this track is complete. Switch tracks, or use Reset
+            progress in the sidebar to start over.
           </p>
         )}
         <EnergyModeSelector mode={mode} onChange={onModeChange} />
