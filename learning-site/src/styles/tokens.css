@@ -1,0 +1,48 @@
+/* Design tokens — concrete values for docs/DESIGN-SYSTEM.md.
+   Dark-first. Semantic names only; components never hard-code hex values. */
+
+:root {
+  /* Surfaces */
+  --bg: #12141a;
+  --bg-elevated: #1a1d26;
+  --bg-subtle: #222634;
+  --border: #2e3346;
+
+  /* Text */
+  --text: #e6e9f0;
+  --text-muted: #9aa1b5;
+
+  /* Accent and state */
+  --accent: #5b8cff;
+  --accent-hover: #7ba3ff;
+  --success: #4ac48a;
+  --warning: #d9a441;
+  --danger: #e0605e;
+
+  /* Spacing scale */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 24px;
+  --space-6: 32px;
+  --space-7: 48px;
+  --space-8: 64px;
+
+  /* Type scale */
+  --text-xs: 12px;
+  --text-sm: 14px;
+  --text-base: 16px;
+  --text-lg: 18px;
+  --text-xl: 20px;
+  --text-2xl: 24px;
+  --text-3xl: 30px;
+
+  /* Layout */
+  --sidebar-width: 260px;
+  --content-reading: 760px;
+  --content-wide: 1100px;
+
+  /* Motion — nothing that delays reading */
+  --transition-fast: 120ms ease;
+}

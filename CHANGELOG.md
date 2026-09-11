@@ -18,6 +18,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - `D-005` in `docs/DECISIONS.md` — scoped build-tooling exception for `learning-site/`.
 - `LICENSE` — CC BY 4.0, covering the study curriculum and project documentation.
 - `D-006` in `docs/DECISIONS.md` — learning site built with React and Vite.
+- `learning-site/` — React + Vite scaffold (Milestone M1, Step 1): app shell, design tokens, base styles, and a local `.gitignore`.
 
 ### Changed
 - `AGENTS.md` rule 3 scoped: build tooling permitted only under `learning-site/` and `scripts/`.
