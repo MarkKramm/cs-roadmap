@@ -1,18 +1,32 @@
 import ProgressBar from "../components/ProgressBar.jsx";
 import PhaseCard from "../components/PhaseCard.jsx";
+import EnergyModeSelector, {
+  acceptsTask,
+} from "../components/EnergyModeSelector.jsx";
 import { countDone } from "../hooks/useProgress.js";
 import { tracks, allTasks } from "../data/roadmaps.js";
 
 // The dashboard answers one question: "What should I do today?"
-// It shows the next unfinished task in the current track, then overall
-// progress. Nothing else competes for attention.
+// It shows the next unfinished task that fits today's energy level, then
+// overall progress. Nothing else competes for attention.
 // See docs/DESIGN-SYSTEM.md → Purpose.
 
-export default function Dashboard({ track, done, onOpenTrack, onOpenPhase }) {
+export default function Dashboard({
+  track,
+  done,
+  mode,
+  onModeChange,
+  onOpenTrack,
+  onOpenPhase,
+}) {
   const tasks = allTasks(track);
   const trackDone = countDone(done, tasks);
 
-  const nextTask = tasks.find((t) => !done[t.id]) || null;
+  const remaining = tasks.filter((t) => !done[t.id]);
+  const nextTask = remaining.find((t) => acceptsTask(mode, t)) || null;
+  // Distinguish "nothing left" from "nothing left at this energy level" —
+  // otherwise a low-energy day at the end of a track falsely reads as done.
+  const blockedByEnergy = !nextTask && remaining.length > 0;
   const nextPhase = nextTask
     ? track.phases.find((p) => p.checklist.some((c) => c.id === nextTask.id))
     : null;
@@ -46,12 +60,18 @@ export default function Dashboard({ track, done, onOpenTrack, onOpenPhase }) {
               )}
             </div>
           </>
+        ) : blockedByEnergy ? (
+          <p>
+            Nothing left at <strong>{mode}</strong> energy. Switch to a higher
+            energy level, or rest — an off day is part of the plan.
+          </p>
         ) : (
           <p>
             Every task in this track is complete. Switch tracks or reset
             progress in Settings.
           </p>
         )}
+        <EnergyModeSelector mode={mode} onChange={onModeChange} />
       </div>
 
       <div className="card">

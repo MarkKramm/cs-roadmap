@@ -374,6 +374,49 @@ a:hover {
   font-size: var(--text-sm);
 }
 
+/* --- Energy mode --- */
+
+.energy {
+  border: none;
+  padding: 0;
+  margin: var(--space-5) 0 0;
+}
+
+.energy__legend {
+  font-size: var(--text-xs);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--text-muted);
+  padding: 0;
+  margin-bottom: var(--space-2);
+}
+
+.energy__options {
+  display: flex;
+  gap: var(--space-2);
+}
+
+.energy__option {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-size: var(--text-sm);
+  padding: var(--space-1) var(--space-3);
+  border: 1px solid var(--border);
+  border-radius: var(--space-1);
+  cursor: pointer;
+  color: var(--text-muted);
+}
+
+.energy__option.is-active {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.energy__option input {
+  accent-color: var(--accent);
+}
+
 @media (max-width: 720px) {
   .app-shell {
     flex-direction: column;

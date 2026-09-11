@@ -4,6 +4,7 @@
 import { useState } from "react";
 import { tracks, findTrack } from "./data/roadmaps.js";
 import { useProgress, countDone } from "./hooks/useProgress.js";
+import { useEnergyMode } from "./hooks/useEnergyMode.js";
 import Dashboard from "./pages/Dashboard.jsx";
 import PhaseDetail from "./pages/PhaseDetail.jsx";
 
@@ -15,6 +16,7 @@ export default function App() {
   const [trackId, setTrackId] = useState("it");
   const [openPhaseId, setOpenPhaseId] = useState(null);
   const { done, toggle, reset } = useProgress();
+  const { mode, change: changeMode } = useEnergyMode();
 
   const track = findTrack(trackId);
   const openPhase = openPhaseId
@@ -103,6 +105,8 @@ export default function App() {
           <Dashboard
             track={track}
             done={done}
+            mode={mode}
+            onModeChange={changeMode}
             onOpenTrack={switchTrack}
             onOpenPhase={setOpenPhaseId}
           />
