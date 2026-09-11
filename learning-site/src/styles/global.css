@@ -493,6 +493,76 @@ a:hover {
   color: var(--accent);
 }
 
+/* --- Portfolio and applications --- */
+
+.entry-form__field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  margin-bottom: var(--space-3);
+}
+
+.entry-form__actions {
+  display: flex;
+  gap: var(--space-2);
+  margin-top: var(--space-4);
+}
+
+.entry-list {
+  display: flex;
+  flex-direction: column;
+}
+
+.entry__head {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: var(--space-3);
+}
+
+.entry__title {
+  font-size: var(--text-lg);
+  margin: 0;
+}
+
+.entry__notes {
+  font-size: var(--text-sm);
+  margin: var(--space-2) 0;
+}
+
+.entry__meta {
+  display: flex;
+  gap: var(--space-3);
+  flex-wrap: wrap;
+  font-size: var(--text-sm);
+  margin-bottom: var(--space-3);
+}
+
+.entry__actions {
+  display: flex;
+  align-items: flex-end;
+  gap: var(--space-4);
+  flex-wrap: wrap;
+}
+
+.entry__status {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.badge--idea {
+  color: var(--text-muted);
+}
+
+.badge--in-progress {
+  color: var(--warning);
+}
+
+.badge--done {
+  color: var(--success);
+}
+
 /* --- Energy mode --- */
 
 .energy {

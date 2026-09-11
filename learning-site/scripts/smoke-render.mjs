@@ -105,6 +105,7 @@ try {
   const EnergyModeSelector = await load("/src/components/EnergyModeSelector.jsx");
   const EmptyState = await load("/src/components/EmptyState.jsx");
   const ToolsLibrary = await load("/src/pages/ToolsLibrary.jsx");
+  const Portfolio = await load("/src/pages/Portfolio.jsx");
 
   allPhases = tracks.flatMap((t) => t.phases);
   allTools = allPhases.flatMap((p) => p.tools);
@@ -268,6 +269,31 @@ try {
         html.includes(allTools.length + " tools") ||
           html.includes("of " + allTools.length),
         "tool count not rendered"
+      );
+    }
+  }
+
+  if (Portfolio) {
+    // usePortfolio's load() touches window.localStorage inside a try/catch, so
+    // in the server renderer it falls back to an empty list rather than
+    // throwing. That makes this the empty-state path, which is the branch a
+    // first-time visitor actually sees.
+    const html = render("Portfolio", createElement(Portfolio));
+    if (html) {
+      assert(
+        "Portfolio: heading",
+        html.includes("Portfolio"),
+        "page heading not rendered"
+      );
+      assert(
+        "Portfolio: empty state",
+        html.includes("No portfolio entries yet"),
+        "empty-state message not rendered"
+      );
+      assert(
+        "Portfolio: add affordance",
+        html.includes("Add an entry"),
+        "no way to add the first entry"
       );
     }
   }
