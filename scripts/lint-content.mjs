@@ -27,7 +27,7 @@ const CHECK_EXT = new Set([
 ]);
 
 // Extensionless files that still matter.
-const CHECK_NAMES = new Set([".gitattributes", ".gitignore", ".editorconfig"]);
+const CHECK_NAMES = new Set([".gitattributes", ".gitignore", ".editorconfig", "LICENSE"]);
 
 // CRLF is correct for these; LF everywhere else.
 const CRLF_EXT = new Set([".bat", ".cmd", ".ps1", ".psm1", ".psd1"]);

@@ -200,9 +200,24 @@ function buildPhase(file) {
     skills: bullets(sec["Skills you'll gain"] || []),
     topics,
     tools: parseTools(sec["Tools for This Phase"] || [], rel),
+    // A resource line must be "Name — https://…". CONTENT-GUIDE.md requires
+    // names and links, so a line that does not match is an authoring error, not
+    // an entry without a link. Failing loudly here keeps this script's promise
+    // that a contract violation stops the build; a silent { url: null } would
+    // surface later as an unlinked resource in the UI, far from its cause.
     resources: bullets(sec["Free/cheap resources"] || []).map((b) => {
       const m = b.match(/^(.*?)\s+—\s+(https?:\/\/\S+)$/);
-      return m ? { name: m[1].trim(), url: m[2] } : { name: b, url: null };
+      if (!m) {
+        const hasUrl = /https?:\/\//.test(b);
+        fail(
+          rel,
+          hasUrl
+            ? 'resource line has a URL but the separator is not " — ": ' + b
+            : "resource line has no URL — expected \"Name — https://…\": " + b
+        );
+        return { name: b, url: null };
+      }
+      return { name: m[1].trim(), url: m[2] };
     }),
     tasks: numbered(sec["Hands-on practice tasks"] || []),
     deliverableItems: bullets(sec["Deliverable / proof of work"] || []),
