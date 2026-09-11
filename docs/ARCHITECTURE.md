@@ -6,7 +6,8 @@ This document describes how the repository is organized and why.
 
 The project is deliberately **content-first and build-free**:
 
-- **Plain Markdown only.** No static-site generator, no bundler, no `node_modules`. A newcomer with `git` and a text editor can read and edit everything.
+- **Markdown is the source of truth.** The curriculum ships as plain Markdown. A newcomer with `git` and a text editor can read and edit all of it without installing anything.
+- **Build tooling is quarantined.** The learning site (`learning-site/`) and the content tooling (`scripts/`) are the only places that carry dependencies. Neither is required to read the curriculum.
 - **Zero cost.** Every resource referenced is free or free-tier. The repo mirrors that constraint.
 - **Portable.** Files render correctly on GitHub, in a local editor, or in any Markdown viewer.
 

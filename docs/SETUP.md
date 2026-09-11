@@ -8,7 +8,7 @@ How to get this repository onto a machine and confirm it is intact.
 |---|---|
 | [Git](https://git-scm.com/) | Any recent version |
 | A text editor | VS Code, Notepad++, Vim, etc. Most read `.editorconfig` natively or via a plugin |
-| Nothing else | No Node, Python, or package manager required |
+| Node.js + npm | Only needed to run the learning site or the content tooling. Reading and editing the curriculum requires neither |
 
 ## Clone
 

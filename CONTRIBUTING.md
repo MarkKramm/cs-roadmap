@@ -1,6 +1,6 @@
 # Contributing
 
-This repository is a content-only self-study curriculum. Contributions are welcome, but the content has a specific shape and tone worth understanding before you edit.
+This repository holds a self-study curriculum in Markdown, plus a small React learning site that renders it. Contributions are welcome, but the curriculum has a specific shape and tone worth understanding before you edit.
 
 ## Before you change anything
 

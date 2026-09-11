@@ -4,7 +4,9 @@ Guidance for AI agents and contributors working in this repository.
 
 ## What this repository is
 
-A **content-only** self-study curriculum. It holds Markdown roadmaps for a beginner moving from remote entry-level IT into cybersecurity. There is **no build step, no dependencies, and no runtime code** — just text files.
+A self-study curriculum for a beginner moving from remote entry-level IT into cybersecurity, plus a small personal learning site that renders it.
+
+The curriculum itself is content-only. `career-roadmaps/` and `docs/` are plain Markdown, readable with nothing but `git` and a text editor, and they stay dependency-free. The site under `learning-site/` is a React + Vite application — build tooling is confined there and in `scripts/`, per rule 3 below.
 
 ## Repository structure
 
@@ -16,7 +18,11 @@ A **content-only** self-study curriculum. It holds Markdown roadmaps for a begin
 ├── README.md              # Project landing page
 ├── AGENTS.md              # This file
 ├── CHANGELOG.md           # Notable changes
+├── CONTRIBUTING.md        # Human entry point into the repo
+├── LICENSE                # CC BY 4.0
 ├── docs/                  # Meta-documentation about the project
+├── scripts/               # Content tooling — build and lint the Markdown
+├── learning-site/         # React + Vite site that renders the curriculum
 └── career-roadmaps/       # The actual study content
     ├── README.md          # Strategy document (start here)
     ├── it-roadmap/        # 00-overview + 9 phases + checklists

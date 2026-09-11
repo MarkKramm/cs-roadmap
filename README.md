@@ -40,7 +40,7 @@ Start here: [`career-roadmaps/README.md`](career-roadmaps/README.md) — it expl
 
 - **Line endings:** all text files are normalized to **LF** via [`.gitattributes`](.gitattributes) (`* text=auto eol=lf`). Windows-native scripts (`.bat`, `.cmd`, `.ps1`) stay CRLF; binary assets are declared `binary`.
 - **Encoding:** all files are **UTF-8 without BOM**, using real typographic characters (`—` em-dash, `–` en-dash, `“ ”` curly quotes) instead of ASCII substitutes.
-- **Format:** plain Markdown and text only — no build step, no dependencies.
+- **Format:** the curriculum is plain Markdown and text. The learning site under [`learning-site/`](learning-site/) is React + Vite and has its own dependencies — see [`learning-site/README.md`](learning-site/README.md).
 
 ## Status
 
