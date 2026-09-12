@@ -77,6 +77,17 @@ The build script reads these `##` headings. Missing mandatory headings are a bui
 
 Optional headings (`## Specific topics to learn`, `## Lab setup options`, `## Path options`, `## Required projects`, `## Recommended order`, `## Target roles`) map to `topics` as an array of `{ heading, items }`.
 
+### Sections deliberately NOT extracted
+
+Two headings appear in phase files but are **not** mapped to any JSON key. This is intentional, not an omission:
+
+| Heading | Why it is excluded |
+|---|---|
+| `## Lesson` | Long-form teaching prose, minimum 3,000 words. It is reading material, not structured data. Rendering it in the UI as a field would duplicate the Markdown, which this schema exists to prevent — and it would bloat the generated JSON for every phase. The lesson stays in the Markdown file and is read there. |
+| `## Common Pitfalls` | Present in some phases as a distinct list of mistakes to avoid. It is advisory prose rather than a checklist or task list, and the site has no pitfalls component. Kept in Markdown only. |
+
+Because neither is extracted, the build does **not** validate their presence or contents. The authoring requirements for `## Lesson` live in [`CONTENT-GUIDE.md`](CONTENT-GUIDE.md).
+
 ### Tools table parsing
 
 Each row becomes:

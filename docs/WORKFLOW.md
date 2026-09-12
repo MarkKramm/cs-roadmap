@@ -66,6 +66,31 @@ It flags CRLF, UTF-8 BOM, U+FFFD replacement characters, invalid UTF-8, and ASCI
 
 Note: when creating a new file, the editor in this environment has repeatedly written CRLF and, once, a U+FFFD pair. Run the linter after creating any file. If it reports CRLF, normalize with the `Remove-Item` + `git checkout --` recipe above, or a direct UTF-8 rewrite for untracked files.
 
+## Verifying a content edit changed nothing structural
+
+The build turns the phase Markdown into `learning-site/src/data/generated/{it,cyber}.json`, and that JSON is what the site renders. To prove an edit was content-only — a lesson, a reworded paragraph — capture the JSON before and after and diff it, ignoring `generatedAt`:
+
+```powershell
+Copy-Item 'learning-site\src\data\generated\it.json' 'it.baseline.json'
+# ... make the edit ...
+node scripts/build-content.mjs
+Copy-Item 'learning-site\src\data\generated\it.json' 'it.current.json'
+# diff the two copies
+```
+
+Delete both copies when you are done. The linter walks the whole repository and counts every file with a checkable extension, `.json` included, so leaving them at the root inflates the file count it reports.
+
+A pre-edit baseline only proves the document did not move. It cannot tell you the document was already correct — if the damage predates the baseline, the baseline records the damage. To check against the last commit instead, build the committed content in a scratch worktree:
+
+```powershell
+git worktree add '.head-check' HEAD
+cd '.head-check'; node scripts/build-content.mjs
+# compare .head-check/learning-site/src/data/generated/it.json with the working tree's
+cd ..; git worktree remove '.head-check' --force
+```
+
+**Do this whenever a phase file's structure is edited, not just its prose.** Tool-table rows carry no IDs, so no task-ID or checklist-ID comparison can see one go missing; the only symptom is a smaller tools library. `HEAD` may not build at all — `build-content.mjs` writes no output when it fails — in which case copy the current version of the offending file into the worktree first.
+
 ## Continuous integration
 
 `.github/workflows/ci.yml` runs on every push to `main` and every pull request. It has two jobs, split so a content typo fails fast without paying for a dependency install:
@@ -84,3 +109,4 @@ Both jobs use Node 24, matching the local toolchain. The workflow is check-only:
 - [ ] File is UTF-8 without BOM.
 - [ ] Typographic characters are real, not `?` substitutes.
 - [ ] `git status --short` is clean after committing.
+- [ ] For a structural change to a phase file, `it.json` diffed against a scratch worktree at `HEAD` shows only the differences you intended — see "Verifying a content edit changed nothing structural".

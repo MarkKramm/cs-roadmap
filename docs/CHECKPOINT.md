@@ -2,23 +2,23 @@
 
 A snapshot of the repository's current state. Update this when a meaningful milestone is reached.
 
-## Current state — 2026-09-11
+## Current state — 2026-09-13
 
 | Item | Value |
 |---|---|
 | Branch | `main` |
 | Tracked files | 81 |
-| Working tree | Clean, in sync with `origin/main` |
+| Working tree | Modified: IT Phases 1–9 (lessons; structural repairs on 1–4), `README.md`, `CHANGELOG.md`, and the `docs/` set. See `git status` |
 | Line endings | LF everywhere (Windows scripts excepted) |
 | Encoding | UTF-8, no BOM |
 | Remote | `origin` → https://github.com/MarkKramm/cs-roadmap |
 | Visibility | Private — not publicly reachable |
 | License | CC BY 4.0 |
 | Build step | `learning-site/` — React + Vite. `npm run dev` / `npm run build` |
-| Checks | `npm run lint:content`, `npm run build`, `npm run test:smoke` — all passing |
+| Checks | `node scripts/lint-content.mjs` passes (81 files, 0 issues); `npm run build` passes; `it.json` total phase task IDs: 129 |
 | CI | `.github/workflows/ci.yml` — two jobs on push to `main` and on PRs (D-008); verified green |
 | Milestone | M2 complete — tools library, portfolio tracker, application tracker |
-| Content depth | Syllabus only — phases say *what* to learn, not *how*. A `## Lesson` pilot on IT Phase 1 is the next task (see `SESSION-LOG.md`) |
+| Content depth | **IT lesson pass complete** — all 9 IT phases carry `## Lesson` sections of 3,000+ words (4,430 / 4,337 / 3,370 / 6,137 / 3,039 / 3,126 / 3,343 / 3,214 / 3,757). The 8 cyber phases remain syllabus-only |
 
 This file deliberately carries no commit hash or commit count: a checkpoint
 cannot contain its own hash, so those numbers drift by one commit on every
@@ -55,7 +55,11 @@ edit. For the exact current state, run `git --no-pager log --oneline -n 1`.
 - [x] All files valid UTF-8; no CR bytes.
 - [x] `.gitattributes` and `.editorconfig` in place.
 - [x] Remote configured and `main` pushed.
-- [x] `lint-content.mjs` passes — 81 files, 0 issues. (`LICENSE` is scanned; it is extensionless, so it is matched by name. The workflow file is scanned too.)
+- [x] `lint-content.mjs` passes — 81 files, 0 issues. (`LICENSE` is scanned; it is extensionless, so it is matched by name. The workflow file is scanned too. 81 is the whole repository: every walked file currently has a checkable extension, and it equals `git ls-files`.)
+- [x] `build-content.mjs` passes — 129 phase task IDs, up from 116 before the stranded-task repair.
+- [x] Structural integrity verified — 75 element IDs in `it.json` before and after the Phase 1–4 repairs, zero missing, zero extra, zero count changes.
+- [x] Structural integrity re-verified for Phases 5–9 — `it.json` diffed against a baseline captured before any edit: identical, 1,585 lines, **zero diffs**. Per-phase task counts unchanged at 7 / 6 / 6 / 7 / 7, checklist counts unchanged at 8 / 7 / 6 / 7 / 8. This proves the document did not move; it cannot prove the document was *correct*, because the baseline was taken from a working tree that already contained the Phase 4 tools regression.
+- [x] Structural integrity checked against `HEAD` — JSON built from a `git worktree` at `HEAD` and diffed field-by-field against the working tree: 3 intended differences (the `wmic` → `Get-PhysicalDisk` fix, and the tasks recovered on Phases 3 and 4), 0 unintended. **This is the check that found the two missing tools** — tool rows carry no IDs, so ID-based comparisons miss them. IT tools 56, both tracks 112.
 - [x] `ToolCard` renders tool data; the M1 crash on opening a phase is fixed.
 - [x] `test:smoke` now covers every page as well as every phase — 31 renders.
 - [x] Tools library lists all 112 tools with search and cost/track filters.
@@ -64,7 +68,9 @@ edit. For the exact current state, run `git --no-pager log --oneline -n 1`.
 
 ## Open items
 
-- [ ] Content-depth pilot — deepen IT Phase 1 with a `## Lesson` section (Markdown-only), then judge before repeating. See [`SESSION-LOG.md`](SESSION-LOG.md).
+- [ ] **Commit the working tree — this is the first priority.** `HEAD` does not build: its Phase 2 has six resource lines with no URL, and `build-content.mjs` refuses to write output when it fails. Every Phase 1–9 repair and all nine lessons exist only in the working tree.
+- [ ] Phase 1's legacy `### Hands-On Tasks` block — verbose `#### Task 1–5` walkthroughs inside `## Specific topics to learn`, duplicating the five one-line tasks in `## Hands-on practice tasks`. It feeds nothing into the generated JSON, so it is invisible to the site, but it holds the step-by-step detail the task list lacks. Fold it into the task section rather than deleting it.
+- [ ] Content-depth continuation — extend `## Lesson` sections to the 8 cyber-track phases. This is an open scope decision rather than a defect: the cyber phases are deliberately syllabus-first. See [`ROADMAP.md`](ROADMAP.md) and [`SESSION-LOG.md`](SESSION-LOG.md).
 - [ ] Deploy the site — blocked on the private-repo visibility decision. GitHub Pages from a private repo generally needs a paid plan, but Netlify, Vercel, and Cloudflare Pages all deploy private repos on free tiers, so this is less blocked than it first appeared.
 
 ## How to verify quickly

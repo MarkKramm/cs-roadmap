@@ -12,19 +12,22 @@ Every writing choice should serve that reader.
 
 ## Phase file shape
 
-Every `NN-phase-*.md` file uses the same structure. The **11 mandatory sections**, in order:
+Every `NN-phase-*.md` file uses the same structure. The **12 mandatory sections**, in order. Ten of these are enforced by the build script (`scripts/build-content.mjs`); `## Lesson` and `## Specific topics to learn` are required by authoring convention and reviewed by hand.
 
 1. **Title + Goal of this phase** — one or two sentences. What the phase produces, not what it "covers".
 2. **Estimated time** — realistic weeks, not optimistic ones. Include buffer. Be honest if something takes longer for a beginner.
 3. **Skills you'll gain** — observable abilities, written as "can do X".
 4. **Specific topics to learn** — concrete subtopics. Not "networking" but "IPv4, IPv6, DNS, DHCP, NAT, TCP/UDP, common ports".
-5. **Tools for This Phase** — a table. See the Tools-table contract below.
-6. **Free/cheap resources** — actual names and links. Free only; paid resources belong in the Free vs Paid section.
-7. **Hands-on practice tasks** — numbered, actionable, doable on a single computer with free software.
-8. **Deliverable / proof of work** — one specific file or artifact the learner produces.
-9. **Checklist** — `- [ ]` lines. One line per checkable outcome.
-10. **You're ready to move on when…** — a single sentence describing the exit bar.
-11. **Free vs Paid** — three sub-sections: What's free and enough, What's paid and why you'd upgrade, When it's worth paying.
+5. **Lesson** — the teaching unit. Minimum 3,000 words. See "The Lesson section" below.
+6. **Tools for This Phase** — a table. See the Tools-table contract below.
+7. **Free/cheap resources** — actual names and links. Free only; paid resources belong in the Free vs Paid section.
+8. **Hands-on practice tasks** — numbered, actionable, doable on a single computer with free software.
+9. **Deliverable / proof of work** — one specific file or artifact the learner produces.
+10. **Checklist** — `- [ ]` lines. One line per checkable outcome.
+11. **You're ready to move on when…** — a single sentence describing the exit bar.
+12. **Free vs Paid** — three sub-sections: What's free and enough, What's paid and why you'd upgrade, When it's worth paying.
+
+The order above is the contract: mandatory sections appear in this sequence, with the optional section (if any) slotted after `## Specific topics to learn`.
 
 **Five optional sections** slot in after "Skills you'll gain" when they apply:
 
@@ -36,6 +39,25 @@ Every `NN-phase-*.md` file uses the same structure. The **11 mandatory sections*
 - **Target roles** — job-application phases
 
 Use one; do not stack them unless the phase genuinely needs more than one view.
+
+## The Lesson section
+
+**`## Lesson` is a mandatory section for every IT roadmap phase, positioned immediately after `## Specific topics to learn` and before `## Tools for This Phase`.** It is deliberately placed after the topic list: the topic list tells the learner *what* to cover, and the lesson explains *why it matters and how it works*.
+
+**When a phase has no `## Specific topics to learn`**, the rule generalises to: the lesson goes after the **last** structural section and before `## Tools for This Phase`. Two IT phases need this case — Phase 8 (`## Portfolio structure` then `## Resume sections`) and Phase 9 (`## Target roles` then `## PH-friendly job boards`) — and in both the lesson follows the final structural section, preserving the order *skills → structure → lesson → tools*. The invariant that matters is the one thing the order never changes: **the lesson always sits after every structural section and before `## Tools for This Phase`.** One intervening section is permitted: Phase 1 carries a `## Common Pitfalls` list between the lesson and the tools table, which the pitfalls policy below explicitly allows. Every other IT phase places the lesson directly against `## Tools for This Phase`.
+
+Requirements:
+
+- **Minimum 3,000 words.** A phase lesson is a real teaching unit, not a summary. It is the single largest prose block in the file.
+- **Use `### Part N — <title>` sub-headings** to break the lesson into 4–6 parts. Each part covers one coherent idea.
+- **Open with a "Why this lesson exists" part.** Explain what the learner gets from it and why it is worth their time.
+- **Define every term the first time it appears.** There is no glossary to fall back on.
+- **Include concrete commands, outputs, and worked examples.** A lesson about networking should contain real `ipconfig` and `nslookup` output; a lesson about tickets should contain real ticket text.
+- **Close with "Key takeaways" and "Practice this next"** so the lesson points back at the tasks below.
+
+The lesson is **not extracted into the generated JSON** — see [`CONTENT-SCHEMA.md`](CONTENT-SCHEMA.md). It exists purely as Markdown reading material. This is intentional: the site renders topic lists, tasks, and checklists as structured data, while the lesson stays a document.
+
+If a phase has a genuine hands-on dimension, a **`### Common pitfalls`** sub-heading inside the lesson is encouraged, as is a **`## Common Pitfalls`** top-level section when the pitfalls are distinct enough to stand apart from the teaching narrative. Keep one or the other; do not duplicate the same list in both places.
 
 ## Tools-table contract
 
@@ -107,7 +129,8 @@ Do not:
 
 Before committing a content change, confirm:
 
-- [ ] All 11 mandatory sections present, in order.
+- [ ] All 12 mandatory sections present, in order.
+- [ ] `## Lesson` is at least 3,000 words and sits after `## Specific topics to learn`.
 - [ ] At most one optional section used, and only where it fits.
 - [ ] Tools table has exactly 6 columns, and every paid row has a free alternative.
 - [ ] Deliverable is a specific artifact, not a vague outcome.

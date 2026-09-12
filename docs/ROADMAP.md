@@ -22,14 +22,25 @@ The roadmap for the **repository itself** (for the study curriculum, see [`../ca
 - [x] Learning Site Milestone M2 — view navigation (D-007), tools library, portfolio tracker, application tracker. Five commits; the render smoke test was extended in the same commit as each new page.
 - [x] Tooling hardening — the linter scans `LICENSE`, and `build-content.mjs` fails loudly on a malformed resource line instead of emitting `url: null`.
 - [x] CI — `.github/workflows/ci.yml` runs the three checks on every push to `main` and every pull request, as two jobs: content integrity (no install) and learning site (`npm ci`, build, smoke test). Permitted by D-008.
+- [x] **Content-depth pilot** — `career-roadmaps/it-roadmap/01-phase-computer-fundamentals.md` deepened with a 4,430-word `## Lesson` section. Markdown-only: no pipeline or renderer change, no new dependency. Pilot judged successful.
+- [x] **IT lesson writing, Phases 1–4** — `## Lesson` sections written for Phases 1–4 (4,430 / 4,337 / 3,370 / 6,181 words). Structural repairs made in the same pass:
+  - Phase 1: duplicate `## Deliverable` and `## Checklist` removed; orphaned bullets folded into topics; redundant `## Resources` dropped; deprecated `wmic` replaced with `Get-PhysicalDisk`.
+  - Phase 2: rebuilt from the Git original to restore the section contract.
+  - Phases 3 and 4: lessons were mis-inserted between `## Goal` and `## Estimated time`, `## Estimated time` was duplicated, tasks were stranded under a non-contract `### Hands-on Tasks` heading, and lesson prose had leaked into `## Specific topics`. All fixed.
+- [x] **Stranded-task recovery** — Phases 1, 3, and 4 were generating **zero** practice tasks in `it.json` because their tasks sat under `### Hands-on Tasks` rather than the contract heading `## Hands-on practice tasks`. Restoring the heading took the totals from 0/0/0 to 5/8/6. Structural diff against the pre-repair baseline: 75 IDs before and after, zero missing, zero extra, zero count changes.
+
+- [x] **IT lesson writing, Phases 5–9** — `## Lesson` sections written for Phases 5–9 (3,039 / 3,126 / 3,343 / 3,214 / 3,757 words). **No structural repair was required:** all five phases already had clean section order and their Markdown task counts matched the extracted JSON exactly (7 / 6 / 6 / 7 / 7), so this was pure content work. Phases 8 and 9 have no `## Specific topics to learn`, so the lesson was placed after the last structural section (`## Resume sections` and `## PH-friendly job boards` respectively), keeping the order skills → structure → lesson → tools.
+- [x] **IT track lesson pass complete** — all nine IT phases carry 3,000+ word `## Lesson` sections. Structural diff against the pre-edit baseline: `it.json` identical, 1,585 lines, zero diffs. A further diff against a scratch worktree at `HEAD` found a regression no earlier check could see: **Phase 4's tools table had lost two rows** (`Microsoft Teams`, `Google Workspace Admin Help`), which had been left stranded mid-lesson and had quietly cut the tools library from 112 tools to 110. Rows restored; tools back to 112. Tool rows carry no IDs, so ID-based comparison was blind to it — see [`WORKFLOW.md`](WORKFLOW.md).
 
 ## Next
 
-- [ ] **Content-depth pilot** — deepen `career-roadmaps/it-roadmap/01-phase-computer-fundamentals.md` with a `## Lesson` section (~3,000 words), read via the site's "read the full guide" link. Markdown-only: no pipeline or renderer change, no new dependency. The phases are currently a syllabus (what to learn and where to find it), not lesson prose. Judge the effort on this one phase before repeating for the others. Agreed, not yet started — see [`SESSION-LOG.md`](SESSION-LOG.md).
+- [ ] **Commit the working tree** — `HEAD` does not build (Phase 2's six URL-less resource lines stop `build-content.mjs`), so every Phase 1–9 repair and all nine lessons exist only in the working tree.
+- [ ] **Cyber-track lessons** — 8 phases, currently syllabus-only. Extending the lesson format there is an open scope decision, not a defect.
+- [ ] **Deploy the site** — blocked on the private-repo visibility decision. GitHub Pages from a private repo generally needs a paid plan, but Netlify, Vercel, and Cloudflare Pages all deploy private repos on free tiers, so this is less blocked than it first appeared.
 
 ## Later / optional
 
-- [ ] Deploy the site (GitHub Pages or equivalent). Blocked on a visibility decision — Pages from a private repo generally needs a paid plan.
+- [ ] Cyber track site UI for surfacing lessons, if the lessons need to be reachable in the app rather than only in Markdown.
 
 ## Explicitly out of scope
 

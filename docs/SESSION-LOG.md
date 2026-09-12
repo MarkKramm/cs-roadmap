@@ -2,6 +2,119 @@
 
 A chronological record of working sessions. Newest first.
 
+## 2026-09-13 — Lessons for IT Phases 5–9: the IT track lesson pass is complete
+
+**Goal:** Apply the `## Lesson` treatment to IT Phases 5–9 at 3,000+ words each, checking each for structural defects first.
+
+**The headline finding — there was nothing to repair.** Unlike Phases 1–4, all five of these phases were structurally clean. Checked before writing, per phase:
+
+- Section order matched the contract, with no duplicated headings.
+- No `### Hands-on Tasks` heading — tasks already sat under the contract heading `## Hands-on practice tasks`.
+- No lesson prose leaked into `## Specific topics to learn`.
+- No stray `## Resources` or `## Common Pitfalls` sections needing reconciliation.
+- Markdown task counts matched the extracted JSON exactly: 7 / 6 / 6 / 7 / 7.
+
+So this session was **pure content work, with no repair phase**, and the structural diff confirms it (see Verification).
+
+**One structural wrinkle worth recording.** Phases 8 and 9 have no `## Specific topics to learn`. Phase 8 runs `## Portfolio structure` → `## Resume sections`; Phase 9 runs `## Target roles` → `## PH-friendly job boards`. The lesson was placed after the **last structural section** in both, keeping the order *skills → structure → lesson → tools* and preserving the invariant that actually matters: the lesson always sits immediately before `## Tools for This Phase`. This generalisation is now documented in `docs/CONTENT-GUIDE.md`.
+
+**Lessons written:**
+
+| Phase | Words | Angle |
+|---|---|---|
+| 05 Sysadmin Basics | 3,039 | Accounts, permissions, services, updates, backups — "why the organisation works this way" |
+| 06 Tools and Ticketing | 3,126 | How tools encode process; tickets as audit trail and institutional knowledge |
+| 07 Soft Skills | 3,343 | Diagnostic-question craft, plain-language rewriting, STAR stories |
+| 08 Portfolio and Resume | 3,214 | What a hiring manager scans for; honest framing of a no-degree path |
+| 09 Job Application Plan | 3,757 | Pipeline discipline, honest keyword matching, scam detection |
+
+Every lesson follows the established shape: opens with "Why this lesson exists", splits into `### Part N` sections, includes real worked examples (a rewritten PowerShell inventory script, the same incident written as a weak ticket and a professional one, the same fix explained to a technical colleague and to a user, a STAR project summary with evidence paths), and closes with "Key takeaways" and "Practice this next".
+
+**Verification:**
+
+- `node scripts/lint-content.mjs` — 81 files, 0 issues. (The linter walks the whole repo and counts every file with a checkable extension, including loose `.json` files at the root, so temporary diff artifacts inflate this number while they exist. 81 is the true count and it equals `git ls-files`; the "84" recorded in `CHECKPOINT.md` was stale and has been corrected.)
+- `node scripts/build-content.mjs` — 129 phase task IDs, unchanged.
+- **`HEAD` vs working tree, built JSON diffed field-by-field:** 3 intended phase-level differences, 0 unintended. IT tools 56 → 56, both tracks 112.
+- `npm run build` (Vite) — builds clean.
+- `npm run test:smoke` — 31 renders, 0 failures.
+- **Structural diff, baseline captured before any edit vs. final `it.json`: 1,585 lines identical, zero diffs.** Stronger than an ID-count comparison: the entire generated document is byte-identical apart from `generatedAt`.
+- Per-phase task counts unchanged at 7 / 6 / 6 / 7 / 7; checklist counts unchanged at 8 / 7 / 6 / 7 / 8.
+- All five files LF, UTF-8, no BOM; exactly one `## Lesson` heading each; no duplicate headings.
+
+**Process notes:**
+
+- **The chunked-edit hazard from last session was avoided this time.** Every insert was anchored on unique surrounding text, never on a line number, and the `## ` heading map was re-read after each phase. No misplaced sections occurred.
+- The editor's `new_text` limit is a hard ~6,000 characters; oversized calls fail outright with no partial write. Lessons were therefore written in roughly 2,000-character anchored chunks.
+- The build script's section parser matches `^## (.+)$` **without** checking fenced code blocks. This did not cause a problem here — the Phase 8 README example contains `## What's here`, `## Background`, and `## Contact`, which are read as sections but ignored because unknown section names are not extracted. Recorded because a future edit that puts a code fence around a *recognised* heading name would be misparsed.
+
+**A regression that the existing checks could not see.** The verification above proves the *structural* document did not move during this session — but that is not the same as proving the structural document was right. So a `git worktree` at `HEAD` was checked out, the build was run there, and its JSON was diffed field-by-field against the working tree's. Three phase-level differences appeared, all intended:
+
+- `it-01` CrystalDiskInfo free alternative — `wmic diskdrive` → `Get-PhysicalDisk`, the deliberate fix for a command Windows has deprecated.
+- `it-03` tasks 0 → 8, `it-04` tasks 0 → 6 — the stranded-task recovery from the previous session.
+
+But a row-level comparison of the tools tables showed the IT total had fallen from 56 to 54, and the JSON diff had not flagged it because two rows had *moved rather than vanished*. Phase 4's tools table had lost **`Microsoft Teams`** and **`Google Workspace Admin Help`**; both rows were sitting stranded in the middle of the lesson prose, jammed between two paragraphs. **Fix:** rows removed from the lesson and restored to the table, plus the blank line before `## Free/cheap resources` that went with them. IT tools back to 56, both tracks back to 112, and the smoke test back to reporting 112.
+
+Why every check passed while this was broken: tool rows carry **no IDs**, so `task`/`checklist` ID comparisons cannot see them; and the build, the lint, and the render all succeed with two fewer tools. It rendered less than the content contained — the same class of silent failure as the stranded tasks. **A HEAD-vs-worktree JSON diff is now the check that closes it.** Phase 4's lesson re-measures at 6,137 words; the 44-word difference from the previously recorded 6,181 is exactly the two removed rows.
+
+Worth knowing for next time: **`HEAD` does not build.** Its Phase 2 carries six resource lines with no URL, and `build-content.mjs` refuses to write output when it fails. The repairs exist only in the working tree, so the `HEAD` worktree had to borrow the current Phase 2 to run at all — another reason the working tree needs committing.
+
+**Two Phase 1 findings, deliberately not fixed.** Phase 1 is the only phase whose lesson is not immediately followed by `## Tools for This Phase` — a `## Common Pitfalls` list sits between them. `CONTENT-GUIDE.md` explicitly permits that section, so this is policy-compliant rather than a defect; the invariant in `CONTENT-GUIDE.md` was rewritten to state the exception instead of the file being restructured to satisfy a rule that no longer claims to be universal. Phase 1 also still carries a legacy `### Hands-On Tasks` block of verbose `#### Task 1–5` walkthroughs inside `## Specific topics to learn`, duplicating the five one-line tasks in the real `## Hands-on practice tasks` section. It contributes nothing to the generated JSON — its items are indented sub-bullets and `####` headings, which the extractors ignore — so deleting it would change no output at all. But it holds the step-by-step instructions that the one-line task list does not, so removing it would lose real teaching detail from the Markdown. Left in place and flagged as a candidate for folding *into* the task section rather than being deleted.
+
+**Docs updated:** `docs/ROADMAP.md` (Phases 5–9 moved to Done; Next now lists cyber-track lessons and site deployment), `docs/CHECKPOINT.md` (content depth, tracked-file count corrected 83 → 81, tools back to 112), `docs/CONTENT-GUIDE.md` (lesson placement when `## Specific topics to learn` is absent; the `## Common Pitfalls` exception stated), `CHANGELOG.md` (Phases 5–9 lessons added; Phase 4 tools regression recorded under Fixed), `README.md`, and this log.
+
+**Next:** the IT lesson pass is finished, and the working tree is now the only place the Phase 1–9 work exists — `HEAD` still fails the build on Phase 2's six URL-less resource lines, so **committing is the first priority.** After that, the open questions are scope, not defects: whether to extend lessons to the 8 cyber phases (deliberately syllabus-first today), whether to deploy the site (private-repo visibility — Netlify, Vercel and Cloudflare all deploy private repos on their free tiers), and whether the site should surface lessons at all, given the lesson is deliberately outside the extracted JSON.
+
+## 2026-09-13 — Lessons for IT Phases 1–4, and the stranded-task bug
+
+**Goal:** Write `## Lesson` sections for IT Phases 1–4 at 3,000+ words, starting from the Phase 1 pilot agreed on 2026-09-11.
+
+**What the work uncovered — the phase files were structurally broken:**
+
+Phases 3 and 4 shared a defect pattern that predated this session:
+
+- The `## Lesson` heading sat **between `## Goal of this phase` and `## Estimated time`**, splitting a Goal from its own time estimate, with `## Estimated time` then appearing a second time further down.
+- The lesson body had **leaked into `## Specific topics to learn`** as a `### Step-by-Step Breakdown` block, duplicating what the lesson was about to say.
+- Tasks sat under **`### Hands-on Tasks`**, a heading the build script does not read, so `it.json` recorded `tasks: 0` for both phases while the tasks were plainly present in the Markdown.
+- An undocumented `## Common Pitfalls` section and a redundant `## Resources` section were present in all four phases.
+
+**The most serious finding — silent task loss.** Phase 1, Phase 3, and Phase 4 each generated **zero** practice tasks in `it.json`. The build passed, the lint passed, and the site rendered — it simply rendered less than the content contained. This is the failure mode the pipeline cannot catch on its own, because a missing heading is not a malformed heading. It was found by diffing generated output against the Git originals rather than by any check.
+
+**Repairs applied (all four phases):**
+
+| Phase | Repair |
+|---|---|
+| 1 | Duplicate `## Deliverable` / `## Checklist` removed; orphaned bullets folded into topics; redundant `## Resources` dropped; `wmic` → `Get-PhysicalDisk` (2 sites); lesson moved after `## Specific topics` |
+| 2 | Rebuilt from the Git original to restore the section contract; task list restored from 3 to 7 |
+| 3 | Misplaced lesson and duplicate `## Estimated time` removed; 8 tasks recovered from `### Hands-on Tasks`; leaked topic prose removed; redundant `## Resources` dropped |
+| 4 | Same treatment as Phase 3; 6 tasks recovered |
+
+**Lessons written:**
+
+| Phase | Words |
+|---|---|
+| 01 Computer Fundamentals | 4,430 |
+| 02 Operating Systems | 4,337 |
+| 03 Networking Basics | 3,370 |
+| 04 Helpdesk Skills | 6,181 |
+
+Each lesson opens with "Why this lesson exists", is split into 4–6 `### Part N` sections, uses real commands and worked examples, and closes with "Key takeaways" and "Practice this next".
+
+**Verification — structural integrity is the point:**
+
+- `node scripts/lint-content.mjs` — 84 files, 0 issues.
+- `node scripts/build-content.mjs` — 129 phase task IDs, up from 116 before the repair.
+- `npx vite build` — builds clean in 803 ms.
+- **Structural diff, pre-repair baseline vs. current `it.json`: 75 element IDs before, 75 after, zero missing, zero extra, zero count changes.** Progress saved against any task ID in the learner's `localStorage` still resolves.
+- Per-phase task counts now: 5 / 7 / 8 / 6 / 7 / 6 / 6 / 7 / 7.
+
+**Process note — a hazard worth recording.** Chunked `editor(insert_line=N)` calls must not be used for multi-step edits. Line numbers drift between calls, and an insert placed against a stale number will silently put a section in the wrong part of the document. This happened mid-session: `## Tools for This Phase` was inserted *inside* the Phase 4 lesson, splitting it in two. It was caught by re-reading the heading map after every insert, and fixed by unique-anchor text replacement. Anchor on surrounding text, not on line numbers.
+
+**Docs updated:** `docs/CONTENT-GUIDE.md` (12 mandatory sections; new "The Lesson section"), `docs/CONTENT-SCHEMA.md` (new "Sections deliberately NOT extracted"), `docs/ROADMAP.md`, `docs/CHECKPOINT.md`, `CHANGELOG.md`, and this log.
+
+**Also noted:** commit `51ecdf6` ("Added detailed lesson sections for Phase 3: Networking Basics and Phase 4: Helpdesk Skills") landed lesson prose on `main` without a `docs:` prefix and without the accompanying documentation updates this session supplied. The lessons themselves were a reasonable first draft but carried every defect described above.
+
+**Next:** apply the same treatment to IT Phases 5–9, checking each for the stranded-task pattern before writing.
+
 ## 2026-09-11 — Pause: content-depth assessment
 
 **Goal:** Wrap up for the day, and check whether the curriculum is teachable material or only a syllabus.
