@@ -17,6 +17,66 @@ exit_criteria: "You can receive a vague complaint like “my internet is broken,
 
 Learn the actual daily work of entry-level IT support: intake, troubleshooting, tickets, remote support, escalation, and customer communication.
 
+## Lesson: Helpdesk Skills
+
+### Introduction
+
+Helpdesk skills are essential for providing effective IT support. This lesson will guide you through the ticket lifecycle, structured troubleshooting, and communication techniques to handle common IT issues professionally.
+
+## Estimated time
+
+**3 weeks**. Start job applications after this phase even if later phases are unfinished.
+
+### Step-by-Step Breakdown
+
+#### Ticket Lifecycle
+
+- **New:** Ticket is created when an issue is reported.
+- **Assigned:** Ticket is assigned to a support technician.
+- **In Progress:** Technician is actively working on the issue.
+- **Waiting on User:** Issue requires user action to proceed.
+- **Escalated:** Issue is passed to a higher-level technician or team.
+- **Resolved:** Issue has been fixed.
+- **Closed:** Ticket is closed after resolution.
+
+- **Incident vs Service Request:**
+  - **Incident:** An unplanned disruption of service.
+  - **Service Request:** A user request for a service or support.
+
+- **Priority vs Severity:**
+  - **Priority:** How urgent the issue is to the user.
+  - **Severity:** The impact of the issue on the organization.
+
+- **SLA (Service Level Agreement):** Defines the expected response and resolution times for issues.
+
+- **Internal Notes vs User-Facing Comments:**
+  - **Internal Notes:** Used for private communication between support staff.
+  - **User-Facing Comments:** Responses visible to the user.
+
+#### Troubleshooting Structure
+
+1. **Confirm User Identity and Issue:** Verify who the user is and clearly understand the issue.
+2. **Ask What Changed:** Determine if there were any recent changes that might have caused the issue.
+3. **Reproduce if Possible:** Attempt to replicate the issue.
+4. **Check Simple Causes First:** Start with basic troubleshooting steps.
+5. **Isolate Scope:** Determine if the issue affects one user, device, network, or all users.
+6. **Apply Fix or Workaround:** Implement a solution or temporary fix.
+7. **Document Exact Steps:** Record all actions taken for future reference.
+8. **Escalate with Useful Evidence:** Provide detailed information when escalating an issue.
+
+#### Common Helpdesk Scenarios
+
+- **Password Reset/Account Unlock:** Guide users through resetting passwords or unlocking accounts.
+- **MFA Phone Changed:** Help users update their Multi-Factor Authentication (MFA) phone number.
+- **VPN Issues:** Troubleshoot connectivity problems with VPNs.
+- **Email Issues:** Address problems with Outlook, Gmail, or email synchronization.
+- **Browser Cache/Cookies:** Clear browser cache and cookies for users experiencing issues.
+- **Printer Offline:** Troubleshoot printer connectivity and status.
+- **Slow Laptop:** Diagnose and resolve performance issues on laptops.
+- **Audio/Video Issues in Zoom/Teams:** Fix audio and video problems during meetings.
+- **File Permission Problems:** Resolve issues with user permissions on files and folders.
+- **Suspicious Email Reports:** Handle reports of potentially malicious emails.
+
 ## Estimated time
 
 **3 weeks**. Start job applications after this phase even if later phases are unfinished.
@@ -82,15 +142,75 @@ Learn the actual daily work of entry-level IT support: intake, troubleshooting, 
 - Spiceworks IT articles — https://community.spiceworks.com/
 - HubSpot customer service communication tips — https://blog.hubspot.com/service/customer-service-skills
 
-## Hands-on practice tasks
+## Hands-on Tasks
 
-1. Install or explore osTicket/Spiceworks demo. If installation is too much, create a Google Sheets ticket tracker.
-2. Write 10 sample tickets using this structure: Summary, User, Device, Impact, Troubleshooting, Resolution, Next step.
-3. Create a knowledge base article: “How to troubleshoot no internet.”
-4. Create a knowledge base article: “How to clear browser cache and cookies.”
-5. Practice remote support with a family member or your own second device using Chrome Remote Desktop/RustDesk.
-6. Write 5 user-friendly replies for common issues.
-7. Write 3 escalation notes that include evidence, not just “doesn't work.”
+#### Task 1: Set Up a Ticketing System
+1. Install or explore **osTicket** or **Spiceworks** demo.
+   - If installation is complex, create a **Google Sheets ticket tracker** with columns for:
+     - Ticket ID
+     - Summary
+     - User
+     - Device
+     - Impact
+     - Status
+     - Resolution
+     - Next Steps
+
+#### Task 2: Create Sample Tickets
+1. Write **10 sample tickets** using the following structure:
+   - **Summary:** Brief description of the issue.
+   - **User:** Name and contact details of the user.
+   - **Device:** Device information (e.g., laptop, phone).
+   - **Impact:** How the issue affects the user.
+   - **Troubleshooting:** Steps taken to diagnose the issue.
+   - **Resolution:** Solution implemented.
+   - **Next Step:** Follow-up actions needed.
+
+#### Task 3: Develop Knowledge Base Articles
+1. Create **knowledge base articles** for the following common issues:
+   - **Article 1:** “How to Troubleshoot No Internet Connection.”
+     - Include steps for checking physical connections, IP configuration, and DNS.
+   - **Article 2:** “How to Clear Browser Cache and Cookies.”
+     - Provide instructions for Chrome, Firefox, and Edge.
+
+#### Task 4: Practice Remote Support
+1. Use **RustDesk** or **Chrome Remote Desktop** to practice remote support.
+   - Connect to a family member’s device or a second device/VM.
+   - Troubleshoot a simple issue (e.g., adjusting display settings, clearing cache).
+
+#### Task 5: Write User-Friendly Replies
+1. Write **5 user-friendly replies** for common helpdesk issues, such as:
+   - “My email isn’t syncing.”
+   - “I can’t connect to the VPN.”
+   - “My printer is offline.”
+   - “I forgot my password.”
+   - “My laptop is running slow.”
+   - Ensure replies are clear, polite, and include actionable steps.
+
+#### Task 6: Write Escalation Notes
+1. Write **3 escalation notes** that include:
+   - Detailed description of the issue.
+   - Steps taken to troubleshoot.
+   - Evidence (e.g., error messages, logs, screenshots).
+   - Reason for escalation.
+
+## Common Pitfalls
+
+- **Not Confirming User Identity:** Always verify who the user is before proceeding.
+- **Skipping Basic Troubleshooting:** Always check simple causes first.
+- **Poor Documentation:** Always record steps taken for future reference.
+- **Incomplete Escalation Notes:** Provide detailed information when escalating an issue.
+- **Ignoring User Communication:** Keep users informed about the progress and resolution.
+
+## Resources
+
+- **Google IT Support Syllabus:** [https://www.coursera.org/professional-certificates/google-it-support](https://www.coursera.org/professional-certificates/google-it-support)
+- **Microsoft Support Docs:** [https://support.microsoft.com/](https://support.microsoft.com/)
+- **Atlassian Incident Management Guide:** [https://www.atlassian.com/incident-management](https://www.atlassian.com/incident-management)
+- **Spiceworks IT Articles:** [https://community.spiceworks.com/](https://community.spiceworks.com/)
+- **HubSpot Customer Service Tips:** [https://blog.hubspot.com/service/customer-service-skills](https://blog.hubspot.com/service/customer-service-skills)
+
+## Hands-on practice tasks
 
 ## Deliverable / proof of work
 

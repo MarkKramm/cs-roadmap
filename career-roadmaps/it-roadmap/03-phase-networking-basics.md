@@ -17,6 +17,102 @@ exit_criteria: "You can troubleshoot a basic internet issue using IP, gateway, D
 
 Understand the networking topics that appear constantly in helpdesk, NOC, sysadmin, and cybersecurity work.
 
+## Lesson: Networking Basics
+
+### Introduction
+
+Networking is the backbone of IT support. Understanding how devices communicate over networks is essential for troubleshooting common issues like no internet, slow connections, and DNS problems. This lesson will guide you through core networking concepts, IP addressing, name resolution, and troubleshooting techniques.
+
+## Estimated time
+
+**4 weeks**. Networking is deep, so be honest: 2 weeks is usually not enough for a beginner.
+
+### Step-by-Step Breakdown
+
+#### Core Network Concepts
+
+- **LAN (Local Area Network):** A network confined to a small area, like a home or office.
+- **WAN (Wide Area Network):** A network spread over a large geographic area, like the internet.
+- **Internet:** The global system connecting millions of networks.
+- **Router:** Connects multiple networks and routes data between them.
+- **Switch:** Connects devices within a LAN and directs traffic.
+- **Modem:** Converts signals between your network and the internet.
+- **Firewall:** Protects the network from unauthorized access.
+- **Access Point:** Provides Wi-Fi connectivity within a network.
+- **ISP (Internet Service Provider):** Provides internet access to users.
+
+- **Client, Server, Peer-to-Peer:**
+  - **Client:** A device that requests services or resources from a server.
+  - **Server:** A device that provides services or resources to clients.
+  - **Peer-to-Peer:** Devices share resources directly without a central server.
+
+#### IP Addressing
+
+- **IPv4 Address:** A 32-bit address format, e.g., `192.168.1.10`.
+- **Private IP Ranges:**
+  - `10.0.0.0/8`
+  - `172.16.0.0/12`
+  - `192.168.0.0/16`
+- **Subnet Mask:** Defines the network portion of an IP address, e.g., `255.255.255.0` or `/24`.
+- **Default Gateway:** The IP address of the router that connects your network to other networks.
+- **Static IP vs Dynamic IP:**
+  - **Static IP:** Manually assigned and does not change.
+  - **Dynamic IP:** Assigned automatically by a DHCP server.
+
+- **IPv6 Basics:**
+  - **Why IPv6?** To address the limitation of IPv4.
+  - **Format:** Uses hexadecimal notation, e.g., `2001:0db8:85a3:0000:0000:8a2e:0370:7334`.
+  - **Link-Local Addresses:** Used for local communication within a network.
+
+### Name Resolution and Services
+
+- **DNS (Domain Name System):** Translates domain names to IP addresses.
+  - **Records:**
+    - **A:** Maps domain to IPv4 address.
+    - **AAAA:** Maps domain to IPv6 address.
+    - **CNAME:** Alias for another domain.
+    - **MX:** Mail exchange server.
+    - **TXT:** Text records for verification.
+    - **NS:** Name server for the domain.
+
+- **DHCP (Dynamic Host Configuration Protocol):** Automatically assigns IP addresses to devices.
+  - **Process:**
+    - **Discover:** Client broadcasts a request.
+    - **Offer:** DHCP server offers an IP address.
+    - **Request:** Client requests the offered IP.
+    - **Acknowledge:** DHCP server confirms the assignment.
+
+- **Common Ports:**
+  - **20/21:** FTP (File Transfer Protocol)
+  - **22:** SSH (Secure Shell)
+  - **25:** SMTP (Simple Mail Transfer Protocol)
+  - **53:** DNS
+  - **67/68:** DHCP
+  - **80:** HTTP (Hypertext Transfer Protocol)
+  - **110:** POP3 (Post Office Protocol)
+  - **143:** IMAP (Internet Message Access Protocol)
+  - **443:** HTTPS (HTTP Secure)
+  - **445:** SMB (Server Message Block)
+  - **3389:** RDP (Remote Desktop Protocol)
+
+- **TCP vs UDP:**
+  - **TCP (Transmission Control Protocol):** Connection-oriented, reliable, used for data integrity (e.g., web browsing).
+  - **UDP (User Datagram Protocol):** Connectionless, faster, used for real-time applications (e.g., video streaming).
+
+- **TLS/HTTPS Basics:**
+  - **TLS (Transport Layer Security):** Encrypts data between client and server.
+  - **HTTPS:** Secure version of HTTP using TLS.
+
+### Troubleshooting Flow
+
+- **Check Physical Connection/Wi-Fi:** Ensure cables are connected and Wi-Fi is enabled.
+- **Check IP Address:** Use `ipconfig` (Windows) or `ifconfig` (Linux/Mac) to verify IP settings.
+- **Check Gateway:** Ensure the gateway IP is correct.
+- **Check DNS:** Use `nslookup` to verify DNS resolution.
+- **Check Specific Site/Service:** Test connectivity to specific websites or services.
+- **Check Firewall/VPN/Proxy:** Ensure no restrictions are blocking traffic.
+- **Document Findings:** Record all steps and observations for future reference.
+
 ## Estimated time
 
 **4 weeks**. Networking is deep, so be honest: 2 weeks is usually not enough for a beginner.
@@ -86,16 +182,76 @@ Understand the networking topics that appear constantly in helpdesk, NOC, sysadm
 - Wireshark docs — https://www.wireshark.org/docs/
 - Professor Messer Network+ study groups/videos — https://www.professormesser.com/network-plus/n10-009/n10-009-video/n10-009-training-course/
 
-## Hands-on practice tasks
+## Hands-on Tasks
 
-1. Draw your current home network: ISP modem/router, devices, Wi-Fi, phone, laptop.
-2. Run `ipconfig /all` and identify IP, subnet mask, gateway, DHCP server, DNS server, MAC address.
-3. Run `ping` to your gateway, `1.1.1.1`, and `google.com`; explain differences.
-4. Run `nslookup google.com`, `nslookup -type=mx gmail.com`, and `nslookup -type=txt google.com`.
-5. Capture a DNS query in Wireshark using filter `dns`.
-6. Capture a TCP handshake in Wireshark using filter `tcp`.
-7. Build a Packet Tracer network with 2 PCs, 1 switch, 1 router, DHCP, and DNS labels.
-8. Write a troubleshooting guide for “connected to Wi-Fi but no internet.”
+#### Task 1: Draw Your Home Network
+1. Use **diagrams.net** to draw your current home network.
+   - Include ISP modem/router, devices (laptop, phone, etc.), Wi-Fi access points, and connections.
+
+#### Task 2: Check IP Configuration
+1. Open **Command Prompt** (Windows) or **Terminal** (Linux/Mac) and run:
+   - **Windows:** `ipconfig /all`
+   - **Linux/Mac:** `ifconfig` or `ip a`
+2. Identify:
+   - IP address
+   - Subnet mask
+   - Default gateway
+   - DHCP server
+   - DNS server
+   - MAC address
+
+#### Task 3: Test Connectivity
+1. Run `ping` to:
+   - Your gateway (e.g., `ping 192.168.1.1`)
+   - Public DNS server (e.g., `ping 1.1.1.1`)
+   - Google’s DNS server (e.g., `ping 8.8.8.8`)
+   - `google.com`
+2. Explain the differences in responses.
+
+#### Task 4: DNS Lookup
+1. Run `nslookup` commands:
+   - `nslookup google.com`
+   - `nslookup -type=mx gmail.com`
+   - `nslookup -type=txt google.com`
+2. Document the results and explain what each command reveals.
+
+#### Task 5: Capture DNS Traffic with Wireshark
+1. Open **Wireshark** and capture traffic using the filter `dns`.
+2. Identify a DNS query and explain how it resolves a domain name to an IP address.
+
+#### Task 6: Capture TCP Handshake
+1. Open **Wireshark** and capture traffic using the filter `tcp`.
+2. Identify a TCP handshake between your device and a server (e.g., `google.com`).
+3. Explain the three-way handshake process.
+
+#### Task 7: Build a Packet Tracer Network
+1. Open **Cisco Packet Tracer** and build a simple network with:
+   - 2 PCs
+   - 1 Switch
+   - 1 Router
+   - Configure DHCP and DNS on the router.
+2. Label all components and connections.
+
+#### Task 8: Write a Troubleshooting Guide
+1. Create a step-by-step guide for troubleshooting the issue: “Connected to Wi-Fi but no internet.”
+   - Include physical checks, IP configuration, DNS checks, and firewall considerations.
+
+## Common Pitfalls
+
+- **Ignoring Physical Connections:** Always check cables and Wi-Fi before diving into software.
+- **Misinterpreting IP Addresses:** Ensure you understand the difference between private and public IPs.
+- **Overlooking DNS Issues:** DNS problems can mimic internet connectivity issues.
+- **Not Documenting Steps:** Always record your troubleshooting process for future reference.
+
+## Resources
+
+- **Practical Networking:** [https://www.practicalnetworking.net/](https://www.practicalnetworking.net/)
+- **Cisco Networking Basics:** [https://skillsforall.com/course/networking-basics](https://skillsforall.com/course/networking-basics)
+- **Cloudflare DNS Learning Center:** [https://www.cloudflare.com/learning/dns/](https://www.cloudflare.com/learning/dns/)
+- **Wireshark Documentation:** [https://www.wireshark.org/docs/](https://www.wireshark.org/docs/)
+- **Professor Messer Network+ Study Materials:** [https://www.professormesser.com/network-plus/](https://www.professormesser.com/network-plus/)
+
+## Hands-on practice tasks
 
 ## Deliverable / proof of work
 

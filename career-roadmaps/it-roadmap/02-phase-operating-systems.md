@@ -17,6 +17,17 @@ exit_criteria: "You can troubleshoot a basic Windows issue and a basic Linux iss
 
 Become comfortable using and troubleshooting Windows and Linux at a beginner IT-support level.
 
+## Lesson: Operating Systems
+
+### Introduction
+
+Operating systems (OS) are the core software that manage hardware and software resources, provide a user interface, and enable applications to run. In this lesson, you'll learn about **Windows** and **Linux**, two of the most widely used operating systems in IT support.
+
+### Key Concepts
+
+- **Windows:** User-friendly, widely used in businesses and homes.
+- **Linux:** Open-source, highly customizable, and used in servers, cloud computing, and embedded systems.
+
 ## Estimated time
 
 **3 weeks**. Windows: 1.5 weeks. Linux: 1 week. Buffer/review: 0.5 week.
@@ -29,26 +40,97 @@ Become comfortable using and troubleshooting Windows and Linux at a beginner IT-
 - Use Linux commands for files, permissions, processes, packages, services, and logs.
 - Understand users, groups, permissions, updates, drivers, startup apps, and services.
 
+### Step-by-Step Breakdown
+
+#### Windows Operating System
+
+**1. Filesystem and Navigation:**
+- **`C:\`:** Primary drive where the OS and programs are installed.
+- **User Profiles:** Each user has a profile folder (e.g., `C:\Users\YourName`).
+- **Program Files:** Directory for installed applications (e.g., `C:\Program Files`).
+- **AppData:** Stores application settings and data (e.g., `C:\Users\YourName\AppData`).
+
+**2. Users and Permissions:**
+- **Local User:** User created directly on the computer.
+- **Microsoft Account:** User linked to Microsoft services.
+- **Admin vs Standard User:** Admins have full control; standard users have limited permissions.
+- **UAC (User Account Control):** Security feature that prompts for admin confirmation.
+
 ## Specific topics to learn
 
-### Windows
+#### 3. Updates and Maintenance
 
-- Filesystem: `C:\`, user profiles, Program Files, AppData
-- Users: local user, Microsoft account, admin vs standard user
-- Permissions: read/write/execute concept, UAC
-- Updates: Windows Update, driver updates, rollback basics
-- Tools: Task Manager, Event Viewer, Device Manager, Services, Disk Management
-- Commands: `ipconfig`, `ping`, `tracert`, `nslookup`, `net user`, `sfc /scannow`, `chkdsk`, `systeminfo`
-- PowerShell basics: `Get-Process`, `Get-Service`, `Get-EventLog`, `Get-ChildItem`, `Copy-Item`
+- **Windows Update:** Keeps the OS up-to-date with security patches and features.
+- **Driver Updates:** Ensures hardware compatibility and performance.
+- **Rollback Basics:** Reverting to a previous version if an update causes issues.
 
-### Linux
+#### 4. Tools and Commands
 
-- Filesystem: `/`, `/home`, `/etc`, `/var/log`, `/tmp`
-- Commands: `pwd`, `ls`, `cd`, `cat`, `less`, `cp`, `mv`, `rm`, `mkdir`, `grep`, `find`, `chmod`, `chown`, `sudo`
-- Users/groups: `adduser`, `passwd`, `groups`
-- Packages: `apt update`, `apt install`
-- Processes/services: `ps`, `top`, `systemctl`
-- Logs: `/var/log/auth.log`, `/var/log/syslog` or `journalctl`
+- **Task Manager:** Monitors processes, CPU, memory, and disk usage.
+- **Event Viewer:** Logs system events, errors, and warnings.
+- **Device Manager:** Manages hardware drivers and devices.
+- **Services:** Manages background processes and services.
+- **Disk Management:** Manages disk partitions and volumes.
+
+**Basic Commands:**
+- `ipconfig`: Displays network configuration.
+- `ping`: Tests network connectivity.
+- `tracert`: Traces the route packets take to reach a destination.
+- `nslookup`: Queries DNS to find IP addresses.
+- `net user`: Manages user accounts.
+- `sfc /scannow`: Checks and repairs system files.
+- `chkdsk`: Checks disk for errors.
+- `systeminfo`: Displays detailed system information.
+
+**PowerShell Basics:**
+- `Get-Process`: Lists running processes.
+- `Get-Service`: Lists running services.
+- `Get-EventLog`: Retrieves event logs.
+- `Get-ChildItem`: Lists files and directories.
+- `Copy-Item`: Copies files.
+
+#### Linux Operating System
+
+**1. Filesystem Structure:**
+- **`/` (Root):** The top-level directory.
+- **`/home`:** User home directories.
+- **`/etc`:** Configuration files.
+- **`/var/log`:** System logs.
+- **`/tmp`:** Temporary files.
+
+**2. Users and Groups:**
+- **User Management:** Commands like `adduser`, `passwd`, and `groups`.
+- **Permissions:** Commands like `chmod` and `chown` to manage file permissions.
+
+**3. Packages and Software Management:**
+- **`apt update`:** Updates package lists.
+- **`apt install`:** Installs software packages.
+
+**4. Processes and Services:**
+- **`ps`:** Lists running processes.
+- **`top`:** Monitors system processes and resource usage.
+- **`systemctl`:** Manages services.
+
+**5. Logs:**
+- **`/var/log/auth.log`:** Authentication logs.
+- **`/var/log/syslog`:** System logs.
+- **`journalctl`:** Queries systemd journal logs.
+
+**Basic Commands:**
+- `pwd`: Shows current working directory.
+- `ls`: Lists directory contents.
+- `cd`: Changes directory.
+- `cat`: Displays file contents.
+- `less`: Views file contents page by page.
+- `cp`: Copies files.
+- `mv`: Moves or renames files.
+- `rm`: Removes files.
+- `mkdir`: Creates directories.
+- `grep`: Searches for patterns in files.
+- `find`: Locates files based on criteria.
+- `chmod`: Changes file permissions.
+- `chown`: Changes file ownership.
+- `sudo`: Runs commands as superuser.
 
 ## Tools for This Phase
 
@@ -69,6 +151,78 @@ Become comfortable using and troubleshooting Windows and Linux at a beginner IT-
 - Ubuntu tutorials — https://ubuntu.com/tutorials
 - OverTheWire Bandit — https://overthewire.org/wargames/bandit/
 
+### Hands-On Tasks
+
+#### Windows Tasks
+1. **Navigate Windows Settings:**
+   - Open Control Panel and explore different categories.
+   - Use Task Manager to monitor running processes.
+
+2. **User Management:**
+   - Create a new local user and a Microsoft account.
+   - Explain the difference between admin and standard users.
+
+3. **Event Viewer:**
+   - Open Event Viewer and identify the last 3 warnings/errors.
+   - Summarize each event in simple language.
+
+4. **Command Line Practice:**
+   - Use `ipconfig`, `ping`, `nslookup`, and `tracert` to troubleshoot network connectivity.
+   - Use PowerShell to list services and export the list to a text file.
+
+5. **Troubleshooting:**
+   - Disable and re-enable a harmless startup app in Windows.
+   - Use `sfc /scannow` to check for and repair system file corruption.
+
+#### Linux Tasks
+1. **Install and Configure Ubuntu VM:**
+   - Install VirtualBox and set up an Ubuntu VM.
+   - Create a standard user and an admin/sudo user.
+
+2. **Basic Commands:**
+   - Navigate the filesystem using `ls`, `cd`, and `pwd`.
+   - Use `grep` to search for specific patterns in log files.
+   - Manage permissions with `chmod` and `chown`.
+
+3. **Package Management:**
+   - Update the package list with `apt update`.
+   - Install a package (e.g., `nano`) with `apt install`.
+
+4. **Process and Service Management:**
+   - Use `ps` and `top` to monitor processes.
+   - Use `systemctl` to start, stop, and enable services.
+
+5. **Logs:**
+   - Inspect `/var/log/auth.log` and `/var/log/syslog`.
+   - Use `journalctl` to view system logs.
+
+### Troubleshooting Common Issues
+
+#### Windows
+- **Slow Performance:**
+  - Check Task Manager for resource-heavy processes.
+  - Use `sfc /scannow` to repair system files.
+
+- **Login Issues:**
+  - Reset password using Safe Mode or Command Prompt.
+  - Check Event Viewer for login-related errors.
+
+- **Driver Issues:**
+  - Update drivers via Device Manager.
+  - Use `chkdsk` to check disk integrity.
+
+#### Linux
+- **Permission Issues:**
+  - Use `chmod` and `chown` to adjust permissions.
+
+- **Package Installation Errors:**
+  - Update package lists with `apt update`.
+  - Reinstall problematic packages.
+
+- **Service Not Running:**
+  - Check service status with `systemctl status`.
+  - Restart or enable the service as needed.
+
 ## Hands-on practice tasks
 
 1. Install VirtualBox and Ubuntu VM.
@@ -78,6 +232,34 @@ Become comfortable using and troubleshooting Windows and Linux at a beginner IT-
 5. Use `ls`, `grep`, `chmod`, `systemctl`, and `journalctl` on Linux.
 6. Disable and re-enable a harmless startup app in Windows.
 7. Export a list of running services using PowerShell.
+
+## Deliverable / proof of work
+
+Create `portfolio/it/02-operating-systems.md` containing:
+
+- **Screenshots:**
+  - Ubuntu VM setup and user creation.
+  - Task Manager and Event Viewer screenshots from Windows.
+
+- **Command Guides:**
+  - **Windows Commands:** 20 basic commands with explanations (e.g., `ipconfig`, `ping`, `sfc /scannow`).
+  - **Linux Commands:** 20 basic commands with explanations (e.g., `ls`, `cd`, `chmod`, `systemctl`).
+
+- **Troubleshooting Summaries:**
+  - 3 Event Viewer findings explained in simple language.
+  - Troubleshooting steps for common issues (e.g., slow performance, login issues, driver issues).
+
+- **Logs Analysis:**
+  - Insights from `/var/log/auth.log` and `/var/log/syslog` in Linux.
+  - Explanation of how to interpret logs using `journalctl`.
+
+## Resources
+
+- **Microsoft Windows Documentation:** [https://learn.microsoft.com/en-us/windows/](https://learn.microsoft.com/en-us/windows/)
+- **Microsoft PowerShell Docs:** [https://learn.microsoft.com/en-us/powershell/](https://learn.microsoft.com/en-us/powershell/)
+- **Linux Journey:** [https://linuxjourney.com/](https://linuxjourney.com/)
+- **Ubuntu Tutorials:** [https://ubuntu.com/tutorials](https://ubuntu.com/tutorials)
+- **OverTheWire Bandit:** [https://overthewire.org/wargames/bandit/](https://overthewire.org/wargames/bandit/)
 
 ## Deliverable / proof of work
 
