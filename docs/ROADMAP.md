@@ -32,9 +32,10 @@ The roadmap for the **repository itself** (for the study curriculum, see [`../ca
 - [x] **IT lesson writing, Phases 5–9** — `## Lesson` sections written for Phases 5–9 (3,039 / 3,126 / 3,343 / 3,214 / 3,757 words). **No structural repair was required:** all five phases already had clean section order and their Markdown task counts matched the extracted JSON exactly (7 / 6 / 6 / 7 / 7), so this was pure content work. Phases 8 and 9 have no `## Specific topics to learn`, so the lesson was placed after the last structural section (`## Resume sections` and `## PH-friendly job boards` respectively), keeping the order skills → structure → lesson → tools.
 - [x] **IT track lesson pass complete** — all nine IT phases carry 3,000+ word `## Lesson` sections. Structural diff against the pre-edit baseline: `it.json` identical, 1,585 lines, zero diffs. A further diff against a scratch worktree at `HEAD` found a regression no earlier check could see: **Phase 4's tools table had lost two rows** (`Microsoft Teams`, `Google Workspace Admin Help`), which had been left stranded mid-lesson and had quietly cut the tools library from 112 tools to 110. Rows restored; tools back to 112. Tool rows carry no IDs, so ID-based comparison was blind to it — see [`WORKFLOW.md`](WORKFLOW.md).
 
+- [x] **Committed the IT lesson pass** — Phases 1–9, the structural repairs, and the doc updates are in. Verified that `HEAD` builds in a scratch worktree and reproduces the working tree byte-for-byte apart from `generatedAt`.
+
 ## Next
 
-- [ ] **Commit the working tree** — `HEAD` does not build (Phase 2's six URL-less resource lines stop `build-content.mjs`), so every Phase 1–9 repair and all nine lessons exist only in the working tree.
 - [ ] **Cyber-track lessons** — 8 phases, currently syllabus-only. Extending the lesson format there is an open scope decision, not a defect.
 - [ ] **Deploy the site** — blocked on the private-repo visibility decision. GitHub Pages from a private repo generally needs a paid plan, but Netlify, Vercel, and Cloudflare Pages all deploy private repos on free tiers, so this is less blocked than it first appeared.
 

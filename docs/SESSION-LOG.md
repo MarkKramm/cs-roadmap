@@ -62,7 +62,9 @@ Worth knowing for next time: **`HEAD` does not build.** Its Phase 2 carries six 
 
 **Docs updated:** `docs/ROADMAP.md` (Phases 5–9 moved to Done; Next now lists cyber-track lessons and site deployment), `docs/CHECKPOINT.md` (content depth, tracked-file count corrected 83 → 81, tools back to 112), `docs/CONTENT-GUIDE.md` (lesson placement when `## Specific topics to learn` is absent; the `## Common Pitfalls` exception stated), `CHANGELOG.md` (Phases 5–9 lessons added; Phase 4 tools regression recorded under Fixed), `README.md`, and this log.
 
-**Next:** the IT lesson pass is finished, and the working tree is now the only place the Phase 1–9 work exists — `HEAD` still fails the build on Phase 2's six URL-less resource lines, so **committing is the first priority.** After that, the open questions are scope, not defects: whether to extend lessons to the 8 cyber phases (deliberately syllabus-first today), whether to deploy the site (private-repo visibility — Netlify, Vercel and Cloudflare all deploy private repos on their free tiers), and whether the site should surface lessons at all, given the lesson is deliberately outside the extracted JSON.
+**Committed at the end of this session:** three commits on `main` — `fix(it-roadmap)` for the Phase 1–4 repairs, lessons and restored tool rows; `docs(it-roadmap)` for the Phases 5–9 lessons; and `docs` for the doc set. `HEAD` was then verified to build in a scratch worktree and to reproduce the working tree byte-for-byte apart from `generatedAt` (1,602 lines each), which closes the "`HEAD` does not build" problem recorded above.
+
+**Next:** the open questions are scope, not defects: whether to extend lessons to the 8 cyber phases (deliberately syllabus-first today), whether to deploy the site (private-repo visibility — Netlify, Vercel and Cloudflare all deploy private repos on their free tiers), and whether the site should surface lessons at all, given the lesson is deliberately outside the extracted JSON.
 
 ## 2026-09-13 — Lessons for IT Phases 1–4, and the stranded-task bug
 
