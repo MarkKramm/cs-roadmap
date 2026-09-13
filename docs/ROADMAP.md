@@ -37,9 +37,11 @@ The roadmap for the **repository itself** (for the study curriculum, see [`../ca
 
 - [x] **Cyber lesson, Phase 2** — `cybersec-roadmap/02-phase-networking-and-linux.md` deepened with a 6,841-word `## Lesson` section, the longest in the cyber track. It is the first cyber lesson to need five `### Part N` sections plus the opener, because the phase spans two subject domains (networking depth, then Linux depth) and closes with lab setup and the Bandit learning path. **No structural repair was required** and the generated JSON is byte-identical to `HEAD`.
 
+- [x] **Cyber lesson, Phase 3** — `cybersec-roadmap/03-phase-security-fundamentals.md` deepened with a 8,158-word `## Lesson` section, the longest in the repository. The phase spans six topic domains, so the lesson carries six `### Part N` sections (identity; endpoint and malware behaviour; network; web; vulnerability management; incident response) and closes by tying them together with a worked phishing incident timeline that demonstrates the phase's exit criterion. **No structural repair was required** and the generated JSON is byte-identical to `HEAD`.
+
 ## Next
 
-- [ ] **Cyber-track lessons, Phases 3–8** — Phases 1 and 2 are done, so six phases remain: security fundamentals, hands-on labs, specialization choice, portfolio projects, certifications, and job application.
+- [ ] **Cyber-track lessons, Phases 4–8** — Phases 1–3 are done, so five phases remain: hands-on labs, specialization choice, portfolio projects, certifications, and job application.
 - [ ] **Deploy the site** — blocked on the private-repo visibility decision. GitHub Pages from a private repo generally needs a paid plan, but Netlify, Vercel, and Cloudflare Pages all deploy private repos on free tiers, so this is less blocked than it first appeared.
 
 ## Later / optional
