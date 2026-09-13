@@ -39,9 +39,11 @@ The roadmap for the **repository itself** (for the study curriculum, see [`../ca
 
 - [x] **Cyber lesson, Phase 3** — `cybersec-roadmap/03-phase-security-fundamentals.md` deepened with a 8,158-word `## Lesson` section, the longest in the repository. The phase spans six topic domains, so the lesson carries six `### Part N` sections (identity; endpoint and malware behaviour; network; web; vulnerability management; incident response) and closes by tying them together with a worked phishing incident timeline that demonstrates the phase's exit criterion. **No structural repair was required** and the generated JSON is byte-identical to `HEAD`.
 
+- [x] **Cyber lesson, Phase 4** — `cybersec-roadmap/04-phase-hands-on-labs.md` deepened with a 4,506-word `## Lesson` section. This phase carries the optional `## Lab setup options` section, so the lesson slots after it and before the tools table, per the placement rule. Three parts: designing the lab before building it (diagram, host-only isolation, static addressing, baselines), building it (install order, snapshots, what Wazuh is, the **source → decoder → rule → alert** pipeline with a real annotated custom rule), and generating evidence and writing it up (the generate-observe-adjust loop, incident report structure, and why blue-team labs simulate the actual job). **No structural repair was required** and the generated JSON is byte-identical to `HEAD`.
+
 ## Next
 
-- [ ] **Cyber-track lessons, Phases 4–8** — Phases 1–3 are done, so five phases remain: hands-on labs, specialization choice, portfolio projects, certifications, and job application.
+- [ ] **Cyber-track lessons, Phases 5–8** — Phases 1–4 are done, so four phases remain: specialization choice, portfolio projects, certifications, and job application.
 - [ ] **Deploy the site** — blocked on the private-repo visibility decision. GitHub Pages from a private repo generally needs a paid plan, but Netlify, Vercel, and Cloudflare Pages all deploy private repos on free tiers, so this is less blocked than it first appeared.
 
 ## Later / optional
