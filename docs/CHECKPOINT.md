@@ -18,7 +18,7 @@ A snapshot of the repository's current state. Update this when a meaningful mile
 | Checks | `node scripts/lint-content.mjs` passes (81 files, 0 issues); `npm run build` passes; `it.json` total phase task IDs: 129 |
 | CI | `.github/workflows/ci.yml` — two jobs on push to `main` and on PRs (D-008); verified green |
 | Milestone | M2 complete — tools library, portfolio tracker, application tracker |
-| Content depth | **IT lesson pass complete** — all 9 IT phases carry `## Lesson` sections of 3,000+ words (4,430 / 4,337 / 3,370 / 6,137 / 3,039 / 3,126 / 3,343 / 3,214 / 3,757). **Cyber pilot done** — Phase 1 carries a 4,965-word lesson; the other 7 cyber phases remain syllabus-only |
+| Content depth | **IT lesson pass complete** — all 9 IT phases carry `## Lesson` sections of 3,000+ words (4,430 / 4,337 / 3,370 / 6,137 / 3,039 / 3,126 / 3,343 / 3,214 / 3,757). **Cyber in progress** — Phases 1–2 carry lessons (4,965 / 6,841 words); Phases 3–8 remain syllabus-only |
 
 This file deliberately carries no commit hash or commit count: a checkpoint
 cannot contain its own hash, so those numbers drift by one commit on every
@@ -70,7 +70,7 @@ edit. For the exact current state, run `git --no-pager log --oneline -n 1`.
 ## Open items
 
 - [ ] Phase 1's legacy `### Hands-On Tasks` block — verbose `#### Task 1–5` walkthroughs inside `## Specific topics to learn`, duplicating the five one-line tasks in `## Hands-on practice tasks`. It feeds nothing into the generated JSON, so it is invisible to the site, but it holds the step-by-step detail the task list lacks. Fold it into the task section rather than deleting it.
-- [ ] Content-depth continuation — the cyber pilot is done (Phase 1, 4,965 words) and the format is proven to carry over, so Phases 2–8 are now a content-writing job rather than an open scope decision. See [`ROADMAP.md`](ROADMAP.md) and [`SESSION-LOG.md`](SESSION-LOG.md).
+- [ ] Content-depth continuation — cyber Phases 1–2 are done (4,965 / 6,841 words) and the format is proven, so Phases 3–8 remain. This is a content-writing job now, not an open scope decision. See [`ROADMAP.md`](ROADMAP.md) and [`SESSION-LOG.md`](SESSION-LOG.md).
 - [ ] Deploy the site — blocked on the private-repo visibility decision. GitHub Pages from a private repo generally needs a paid plan, but Netlify, Vercel, and Cloudflare Pages all deploy private repos on free tiers, so this is less blocked than it first appeared.
 
 ## How to verify quickly

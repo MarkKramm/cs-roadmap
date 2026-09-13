@@ -35,9 +35,11 @@ The roadmap for the **repository itself** (for the study curriculum, see [`../ca
 - [x] **Committed the IT lesson pass** — Phases 1–9, the structural repairs, and the doc updates are in. Verified that `HEAD` builds in a scratch worktree and reproduces the working tree byte-for-byte apart from `generatedAt`.
 - [x] **Cyber lesson pilot** — `cybersec-roadmap/01-phase-foundations.md` deepened with a 4,965-word `## Lesson` section, written to the IT standard: a "Why this lesson exists" opener, five `### Part N` sections, and closing "Key takeaways" / "Practice this next" that point back at the seven existing tasks. **No structural repair was required** — the phase already had clean section order. The generated JSON is byte-identical to `HEAD`, confirming the lesson is invisible to the pipeline as intended. Pilot judged successful; the format carries over.
 
+- [x] **Cyber lesson, Phase 2** — `cybersec-roadmap/02-phase-networking-and-linux.md` deepened with a 6,841-word `## Lesson` section, the longest in the cyber track. It is the first cyber lesson to need five `### Part N` sections plus the opener, because the phase spans two subject domains (networking depth, then Linux depth) and closes with lab setup and the Bandit learning path. **No structural repair was required** and the generated JSON is byte-identical to `HEAD`.
+
 ## Next
 
-- [ ] **Cyber-track lessons, Phases 2–8** — the pilot proved the format transfers, so the remaining seven phases are a content-writing job rather than an open scope question.
+- [ ] **Cyber-track lessons, Phases 3–8** — Phases 1 and 2 are done, so six phases remain: security fundamentals, hands-on labs, specialization choice, portfolio projects, certifications, and job application.
 - [ ] **Deploy the site** — blocked on the private-repo visibility decision. GitHub Pages from a private repo generally needs a paid plan, but Netlify, Vercel, and Cloudflare Pages all deploy private repos on free tiers, so this is less blocked than it first appeared.
 
 ## Later / optional
