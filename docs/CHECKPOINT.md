@@ -8,7 +8,7 @@ A snapshot of the repository's current state. Update this when a meaningful mile
 |---|---|
 | Branch | `main` |
 | Tracked files | 81 |
-| Working tree | Clean — the IT lesson pass, all Phase 1–9 structural repairs, and the doc updates are committed |
+| Working tree | Cyber Phases 6–8 lessons, the build-parser fence fix, and the doc updates are uncommitted |
 | Line endings | LF everywhere (Windows scripts excepted) |
 | Encoding | UTF-8, no BOM |
 | Remote | `origin` → https://github.com/MarkKramm/cs-roadmap |
@@ -18,7 +18,7 @@ A snapshot of the repository's current state. Update this when a meaningful mile
 | Checks | `node scripts/lint-content.mjs` passes (81 files, 0 issues); `npm run build` passes; `it.json` total phase task IDs: 129 |
 | CI | `.github/workflows/ci.yml` — two jobs on push to `main` and on PRs (D-008); verified green |
 | Milestone | M2 complete — tools library, portfolio tracker, application tracker |
-| Content depth | **IT lesson pass complete** — all 9 IT phases carry `## Lesson` sections of 3,000+ words (4,430 / 4,337 / 3,370 / 6,137 / 3,039 / 3,126 / 3,343 / 3,214 / 3,757). **Cyber in progress** — Phases 1–5 carry lessons (4,965 / 6,841 / 8,158 / 4,506 / 4,913 words); Phases 6–8 remain syllabus-only |
+| Content depth | **Both tracks complete.** All 9 IT phases carry `## Lesson` sections (3,039–6,137 words). All 8 cyber phases carry lessons (4,969 / 6,848 / 8,162 / 4,510 / 4,919 / 5,672 / **8,929** / 7,358). Every phase in the repository now has full lesson prose |
 
 This file deliberately carries no commit hash or commit count: a checkpoint
 cannot contain its own hash, so those numbers drift by one commit on every
@@ -66,11 +66,13 @@ edit. For the exact current state, run `git --no-pager log --oneline -n 1`.
 - [x] Tools library lists all 112 tools with search and cost/track filters.
 - [x] Portfolio and application trackers persist under their own `localStorage` keys.
 - [x] CI runs the content linter, the production build, and the render smoke test on every push and pull request — verified green on GitHub (2 runs, both jobs passing on `ubuntu-latest`, Node 24).
+- [x] **Cyber Phases 6–8 lessons verified as pipeline-invisible** — both `it.json` and `cyber.json` built from the working tree are byte-identical (excluding `generatedAt`) to a baseline built in a `git worktree` at `HEAD`. Phase task/checklist/tool counts unchanged at 6/7/6 for Phase 7 and 7/8/6 for Phase 8.
+- [x] **Build parser is fence-aware** — `sections()` and `subsections()` now track fenced code blocks, so a report template inside a ```text fence is no longer read as phase structure. Verified output-preserving against the `HEAD` baseline and verified by negative test: a fenced `## Checklist` injection failed the old parser (exit 1, no output) and is ignored by the new one.
+- [x] `npm run test:smoke` — 31 renders across 17 phases and 112 tools, 0 failures. `npm run build` — clean, 47 modules.
 
 ## Open items
 
 - [ ] Phase 1's legacy `### Hands-On Tasks` block — verbose `#### Task 1–5` walkthroughs inside `## Specific topics to learn`, duplicating the five one-line tasks in `## Hands-on practice tasks`. It feeds nothing into the generated JSON, so it is invisible to the site, but it holds the step-by-step detail the task list lacks. Fold it into the task section rather than deleting it.
-- [ ] Content-depth continuation — cyber Phases 1–5 are done (4,965 / 6,841 / 8,158 / 4,506 / 4,913 words) and the format is proven, so Phases 6–8 remain. This is a content-writing job now, not an open scope decision. See [`ROADMAP.md`](ROADMAP.md) and [`SESSION-LOG.md`](SESSION-LOG.md).
 - [ ] Deploy the site — blocked on the private-repo visibility decision. GitHub Pages from a private repo generally needs a paid plan, but Netlify, Vercel, and Cloudflare Pages all deploy private repos on free tiers, so this is less blocked than it first appeared.
 
 ## How to verify quickly

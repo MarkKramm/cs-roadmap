@@ -2,6 +2,60 @@
 
 A chronological record of working sessions. Newest first.
 
+## 2026-09-13 — Cyber Phases 6–8 lessons: the cyber track is complete, and a parser fix
+
+**Goal:** Finish the cyber-track lesson pass — Phases 6, 7, and 8 — following the established pattern (a `## Lesson` section placed after the last structural section and immediately before `## Tools for This Phase`).
+
+**Result — the whole repository is now lesson-complete.** All eight cyber phases carry `## Lesson` sections, joining the nine IT phases:
+
+| Phase | Words | Angle |
+|---|---|---|
+| 06 Portfolio Projects | 5,672 | Turning labs into evidence — two readers, report anatomy, three Wazuh rules showing three skills, honesty as an advantage |
+| 07 Certifications | **8,929** | What a certification actually does — the free-study/paid-exam split, the 30-post filter test, why GRC and pentest creds are not entry points |
+| 08 Job Application | 7,358 | Getting hired without experience — the funnel behind "50 applications", the IT-to-security bullet translation table, eight model technical answers |
+
+**No structural repair was required in any of the three phases** — a fourth consecutive clean pass. Section order was already correct, and both `it.json` and `cyber.json` remain **byte-identical to a `HEAD` baseline worktree** (excluding `generatedAt`), confirming the lessons are invisible to the pipeline as intended. Phase 7's counts are 6/7/6 (tasks/checklist/tools) and Phase 8's are 7/8/6 — unchanged.
+
+**The real find: the build parser was fence-blind.** `scripts/build-content.mjs` matched `^## ` and `^### ` without tracking fenced code blocks. This had been recorded as a known latent hazard in an earlier session ("a future edit that puts a code fence around a *recognised* heading name would be misparsed"), and Phase 6's lesson triggered it on the first try.
+
+The Phase 6 lesson includes a report template in a ```text fence. With the template unindented, the parser read `## Summary`, `## Objective and scope`, `## Environment`, `## Method`, `## Findings`, `## Evidence`, `## Impact`, `## Remediation`, `## Limitations`, `## Lessons learned`, and `## References` as eleven real sections — and then treated the template's `## Checklist` as *the* checklist section, failing the build with `checklist line without an id comment`. The section-order listing made it obvious: the file appeared to have twenty-three `## ` sections instead of twelve.
+
+**Two fixes were applied, in the right order.**
+
+1. **Immediate:** the template's headings were indented by two spaces, which the `^## ` regex does not match. This unblocked the content work but left the template slightly awkward to copy — a two-space indent inside a code fence is harmless but untidy.
+2. **Root cause:** `fenceTracker()` was added, and both `sections()` and `subsections()` now consult it. A ``` or ~~~ fence opens on its first occurrence, closes on the matching character, and any line inside is passed through without heading detection. The Phase 6 template was then **restored to unindented form**, since the workaround is no longer needed and the template now copies cleanly into a learner's own repository.
+
+**Verification of the parser fix, in both directions** — following the repository's own hardening precedent of a negative test:
+
+- **Output-preserving:** both `it.json` and `cyber.json` built from the working tree are byte-identical to the `HEAD` baseline, so the change alters no existing behaviour.
+- **Negative test, old parser:** a fenced `## Checklist` injected into cyber Phase 5 made the `HEAD` parser **fail the build** — exit 1, no JSON emitted, `cyber-05: checklist line without an id comment`. This confirms the vulnerability was real rather than theoretical.
+- **Negative test, new parser:** the same injected file built cleanly, and the injected item was absent from the output — Phase 5's checklist still measured exactly 8 items.
+- **Isolation:** the test ran in a temp-directory copy, because `build-content.mjs` resolves its paths from `__dirname`. The real repository was never touched, and the fixture was removed afterward.
+
+`docs/CONTENT-GUIDE.md` now documents the rule under a new "Fenced code blocks" section, along with the failure mode the fix introduces: **an unterminated fence reads the remainder of the document as inside it**, which surfaces as a "missing mandatory section" error naming a heading the author can plainly see. That is a real new failure mode and worth recording, though it is strictly less confusing than the old behaviour of silently parsing template headings as structure.
+
+**A word-count ceiling was removed from the authoring standard.** A delegated attempt at Phase 7 stalled and began *shortening* an already-written 7,000-word lesson to fit a 5,000-word target. The user's instruction was unambiguous — more detail is better, drop the target — and the guide now reads: **3,000 words is a floor, not a target; there is no upper bound; never trim a lesson to hit a word count, and close a gap by adding explanation rather than compressing prose.** Phase 7 was then written to 8,929 words, the longest lesson in the repository. Word-count ceilings are recorded in `docs/ROADMAP.md` under "Explicitly out of scope". The Phase 7 lesson was written in-session rather than delegated.
+
+**Verification:**
+
+- `node scripts/lint-content.mjs` — 81 files, 0 issues.
+- `node scripts/build-content.mjs` — 129 phase task IDs, unchanged; `it.json` phases=9/taskIds=66, `cyber.json` phases=8/taskIds=63.
+- **`HEAD` worktree baseline vs working tree, both JSON files diffed field-by-field: byte-identical** apart from `generatedAt`.
+- `npm run test:smoke` — 31 renders across 17 phases and 112 tools, 0 failures.
+- `npm run build` — clean, 47 modules, `dist/` produced.
+- All three edited phase files LF, UTF-8, no BOM; exactly one `## Lesson` each; section contract intact for all 17 phase files; `git diff` on the content shows insertions only — 627 added lines in Phases 6 and 8 before Phase 7, and **zero deleted lines**, so no pre-existing content was disturbed.
+- Encoding checked with explicit UTF-8 decoding after an initial measurement returned zero em-dashes — the `Get-Content` ANSI-decoding pitfall this log has recorded before. Correctly decoded, the new files carry 73 and 91 em-dashes, consistent with Phase 5's 68.
+
+**Process notes:**
+
+- The subagent delegation for Phase 7 **failed without writing anything**, leaving the file untouched — verified before proceeding. The in-session write then succeeded. Delegation remains useful for genuinely independent work, but a content task with a precise structural contract and a strict house voice proved faster to do directly.
+- Edits were again anchored on unique surrounding text rather than line numbers, and the `## ` heading map was re-read after every insert. No misplaced sections occurred.
+- The fence bug was caught by reading the parser rather than by trusting the build's exit code — the unindented template *did* fail loudly, but only because the template happened to contain a recognised heading with an invalid line under it. A template of purely unrecognised headings (as in IT Phase 8) parses silently and produces no error at all. Worth knowing: **passing build output is not evidence that the parser understood the document.**
+
+**Docs updated:** `docs/ROADMAP.md` (Phases 6–8 moved to Done; the fence fix recorded; Next reduced to deployment and the Phase 1 legacy task block; word-count ceilings added to out-of-scope), `docs/CHECKPOINT.md` (content depth now reads "both tracks complete", working-tree row updated, parser and JSON-identity health checks added, the content-depth open item closed), `CHANGELOG.md` (four Added entries, the parser fix under Fixed, the guide changes under Changed), `docs/CONTENT-GUIDE.md`, and this log.
+
+**Next:** deployment (needs the private-repo visibility decision — Netlify, Vercel, and Cloudflare all deploy private repos on free tiers) and the Phase 1 legacy `### Hands-On Tasks` fold-in. The content work is complete across both tracks; what remains is scope and deployment, not defects.
+
 ## 2026-09-13 — Lessons for IT Phases 5–9: the IT track lesson pass is complete
 
 **Goal:** Apply the `## Lesson` treatment to IT Phases 5–9 at 3,000+ words each, checking each for structural defects first.

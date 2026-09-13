@@ -48,8 +48,8 @@ Use one; do not stack them unless the phase genuinely needs more than one view.
 
 Requirements:
 
-- **Minimum 3,000 words.** A phase lesson is a real teaching unit, not a summary. It is the single largest prose block in the file.
-- **Use `### Part N — <title>` sub-headings** to break the lesson into 4–6 parts. Each part covers one coherent idea.
+- **3,000 words is a floor, not a target — there is no upper bound.** A phase lesson is a real teaching unit, not a summary. It is the single largest prose block in the file, and long lessons in this repository run to 8,000+ words. **Never trim a lesson to hit a word count, and never set a ceiling.** When a lesson is already substantial, the fix for a gap is to add the missing explanation, worked example, or table — not to compress existing prose to make room. More depth is the goal; a learner reading this is here to learn the subject, not to finish quickly.
+- **Use `### Part N — <title>` sub-headings** to break the lesson into 4–6 parts. Each part covers one coherent idea. A broad phase may carry more parts; match the structure to the material rather than to a count.
 - **Open with a "Why this lesson exists" part.** Explain what the learner gets from it and why it is worth their time.
 - **Define every term the first time it appears.** There is no glossary to fall back on.
 - **Include concrete commands, outputs, and worked examples.** A lesson about networking should contain real `ipconfig` and `nslookup` output; a lesson about tickets should contain real ticket text.
@@ -58,6 +58,12 @@ Requirements:
 The lesson is **not extracted into the generated JSON** — see [`CONTENT-SCHEMA.md`](CONTENT-SCHEMA.md). It exists purely as Markdown reading material. This is intentional: the site renders topic lists, tasks, and checklists as structured data, while the lesson stays a document.
 
 If a phase has a genuine hands-on dimension, a **`### Common pitfalls`** sub-heading inside the lesson is encouraged, as is a **`## Common Pitfalls`** top-level section when the pitfalls are distinct enough to stand apart from the teaching narrative. Keep one or the other; do not duplicate the same list in both places.
+
+## Fenced code blocks
+
+A lesson often shows a template, a sample report, or real command output inside a fenced block, and those blocks legitimately contain lines that begin with `## ` or `### `. `scripts/build-content.mjs` tracks fence state, so a heading inside a fence is **not** read as a section — you can show a report template with real `## Summary`, `## Findings` and `## Checklist` headings without it being parsed as phase structure.
+
+Keep fences **balanced and terminated**. The parser treats every line after an unterminated fence as still inside it, so a missing closing fence silently hides the remainder of the document from section extraction — which surfaces as a "missing mandatory section" error naming a heading that is plainly present in the file. If the build reports a missing section you can see with your own eyes, look for an unbalanced fence first.
 
 ## Tools-table contract
 
@@ -122,6 +128,7 @@ Do not:
 - Reference a paid resource without a free alternative.
 - Write a phase without a deliverable.
 - Use `--` for an em-dash, `?` for a curly quote, or `???` for a tree branch. See [`WORKFLOW.md`](WORKFLOW.md).
+- Leave a code fence unterminated. Everything after it is read as inside the fence, so the rest of the document vanishes from section extraction.
 - Inflate scope. A phase that claims 2 weeks for 4 weeks of work will cause burnout.
 - Copy the same tools table across every phase. Each phase's tools should reflect that phase's work.
 

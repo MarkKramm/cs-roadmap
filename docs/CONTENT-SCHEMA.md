@@ -88,6 +88,14 @@ Two headings appear in phase files but are **not** mapped to any JSON key. This 
 
 Because neither is extracted, the build does **not** validate their presence or contents. The authoring requirements for `## Lesson` live in [`CONTENT-GUIDE.md`](CONTENT-GUIDE.md).
 
+### Headings inside fenced code blocks
+
+Section detection **tracks fence state**. A line beginning with `## ` or `### ` inside a ```` ``` ```` or `~~~` fence is body text, not a heading, so a lesson can safely show a report template, a sample file, or real command output containing genuine Markdown headings.
+
+This matters because a lesson often demonstrates a document structure, and that example legitimately contains headings that collide by name with real contract sections — a portfolio report template, for instance, carries `## Summary`, `## Findings`, and `## Checklist`. Before fence tracking, such a template was parsed as phase structure: the phantom headings appeared in the section map, and the template's `## Checklist` was taken as *the* checklist section, failing the build with `checklist line without an id comment`.
+
+Fences must be **balanced**. Every line after an unterminated fence is read as still inside it, so a missing closing fence hides the remainder of the document from extraction — which surfaces as a missing-mandatory-section error naming a heading that is plainly present in the file.
+
 ### Tools table parsing
 
 Each row becomes:

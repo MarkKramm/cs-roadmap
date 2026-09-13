@@ -76,10 +76,31 @@ function parseFrontMatter(text, file) {
   return { data, body: text.slice(end + 5) };
 }
 
+// Fenced code blocks may legitimately contain lines that look like headings —
+// a Markdown report template inside a ```text fence, for example. Heading
+// detection therefore has to track fence state, or those lines are read as
+// real sections. See docs/CONTENT-GUIDE.md ("Fenced code blocks").
+function fenceTracker() {
+  let marker = null;
+  return (line) => {
+    const m = line.match(/^\s*(`{3,}|~{3,})/);
+    if (!m) return marker !== null;
+    const ch = m[1][0];
+    if (marker === null) marker = ch;
+    else if (marker === ch) marker = null;
+    return true;
+  };
+}
+
 function sections(body) {
   const map = {};
   let current = null;
+  const inFence = fenceTracker();
   for (const line of body.split("\n")) {
+    if (inFence(line)) {
+      if (current) map[current].push(line);
+      continue;
+    }
     const h2 = line.match(/^## (.+)$/);
     if (h2) {
       current = h2[1].trim();
@@ -94,7 +115,12 @@ function sections(body) {
 function subsections(lines) {
   const map = {};
   let current = null;
+  const inFence = fenceTracker();
   for (const line of lines) {
+    if (inFence(line)) {
+      if (current) map[current].push(line);
+      continue;
+    }
     const h3 = line.match(/^### (.+)$/);
     if (h3) {
       current = h3[1].trim();
