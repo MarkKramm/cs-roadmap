@@ -33,10 +33,11 @@ The roadmap for the **repository itself** (for the study curriculum, see [`../ca
 - [x] **IT track lesson pass complete** — all nine IT phases carry 3,000+ word `## Lesson` sections. Structural diff against the pre-edit baseline: `it.json` identical, 1,585 lines, zero diffs. A further diff against a scratch worktree at `HEAD` found a regression no earlier check could see: **Phase 4's tools table had lost two rows** (`Microsoft Teams`, `Google Workspace Admin Help`), which had been left stranded mid-lesson and had quietly cut the tools library from 112 tools to 110. Rows restored; tools back to 112. Tool rows carry no IDs, so ID-based comparison was blind to it — see [`WORKFLOW.md`](WORKFLOW.md).
 
 - [x] **Committed the IT lesson pass** — Phases 1–9, the structural repairs, and the doc updates are in. Verified that `HEAD` builds in a scratch worktree and reproduces the working tree byte-for-byte apart from `generatedAt`.
+- [x] **Cyber lesson pilot** — `cybersec-roadmap/01-phase-foundations.md` deepened with a 4,965-word `## Lesson` section, written to the IT standard: a "Why this lesson exists" opener, five `### Part N` sections, and closing "Key takeaways" / "Practice this next" that point back at the seven existing tasks. **No structural repair was required** — the phase already had clean section order. The generated JSON is byte-identical to `HEAD`, confirming the lesson is invisible to the pipeline as intended. Pilot judged successful; the format carries over.
 
 ## Next
 
-- [ ] **Cyber-track lessons** — 8 phases, currently syllabus-only. Extending the lesson format there is an open scope decision, not a defect.
+- [ ] **Cyber-track lessons, Phases 2–8** — the pilot proved the format transfers, so the remaining seven phases are a content-writing job rather than an open scope question.
 - [ ] **Deploy the site** — blocked on the private-repo visibility decision. GitHub Pages from a private repo generally needs a paid plan, but Netlify, Vercel, and Cloudflare Pages all deploy private repos on free tiers, so this is less blocked than it first appeared.
 
 ## Later / optional
