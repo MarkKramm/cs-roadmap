@@ -18,8 +18,9 @@ A snapshot of the repository's current state. Update this when a meaningful mile
 | Checks | `node scripts/lint-content.mjs` passes (81 files, 0 issues); `npm run build` passes; `it.json` total phase task IDs: 129 |
 | CI | `.github/workflows/ci.yml` — two jobs on push to `main` and on PRs (D-008); verified green |
 | Milestone | M2 complete — tools library, portfolio tracker, application tracker |
-| Content depth | **Both tracks complete.** All 9 IT phases carry `## Lesson` sections (3,039–6,137 words). All 8 cyber phases carry lessons (4,969 / 6,848 / 8,162 / 4,510 / 4,919 / 5,672 / **8,929** / 7,358). Every phase in the repository now has full lesson prose |
-| Phase 1 | Structurally repaired and deepened. Four rendering defects fixed, the legacy task block folded in, and the lesson taken from ~4,400 to ~23,400 words across 13 parts (evidence reading, the local→remote career route, working with real users, and five worked tickets). `it.json` verified byte-identical to baseline apart from `generatedAt`; 5 tasks / 7 checklists preserved. Tools 6 → 10, resources 4 → 11, skills 6 → 11 |
+| Content depth | **Both tracks complete, and the four foundational IT phases deepened.** All 9 IT phases carry `## Lesson` sections. All 8 cyber phases carry lessons (4,969 / 6,848 / 8,162 / 4,510 / 4,919 / 5,672 / **8,929** / 7,358). Every phase in the repository has full lesson prose |
+| Phase 1 | Structurally repaired and deepened. Four rendering defects fixed, the legacy task block folded in, and the lesson taken from ~4,400 to ~23,800 words across 13 parts (evidence reading, the local→remote career route, working with real users, and five worked tickets). `it.json` verified byte-identical to baseline apart from `generatedAt`; 5 tasks / 7 checklists preserved. Tools 6 → 10, resources 4 → 11, skills 6 → 11 |
+| Phases 2–4 | Deepened to the Phase 1 standard. Phase 2, 4,337 → 9,709 words. Phase 3, 3,370 → 16,680. Phase 4, 6,137 → 9,482. All Markdown-only and verified pipeline-neutral — phase counts unchanged from a pre-edit baseline, task IDs still 129. Phase 2 was the only phase file in the repository missing both required closing sections; it now has them |
 
 This file deliberately carries no commit hash or commit count: a checkpoint
 cannot contain its own hash, so those numbers drift by one commit on every

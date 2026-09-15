@@ -501,7 +501,481 @@ That is the cultural difference in one exercise. Windows uses proprietary format
 
 Notice the pattern in the "where to look first" column: **it is always a log, a status, or a resource reading.** Guessing is what people do when they do not know where the evidence lives. Your job is to always know where the evidence lives.
 
-### Part 8 — Self-check
+### Part 8 — Reading Windows like a technician
+
+Parts 2 to 4 told you *what* to run. This part teaches you to read what comes back. The commands are the easy half; the skill being hired is interpretation.
+
+#### Processes: the four numbers that explain a slow machine
+
+Task Manager shows you a list. `Get-Process` shows you the same list with numbers you can reason about. Four of those numbers carry almost all the diagnostic weight:
+
+```powershell
+Get-Process | Sort-Object WS -Descending |
+  Select-Object -First 10 Name, Id,
+  @{N='MemMB';E={[math]::Round($_.WS/1MB,0)}},
+  @{N='CPUsec';E={[math]::Round($_.CPU,1)}},
+  @{N='Threads';E={$_.Threads.Count}},
+  @{N='Handles';E={$_.HandleCount}}
+```
+
+```text
+Name          Id  MemMB CPUsec Threads Handles
+----          --  ----- ------ ------- -------
+chrome      8214   1842  412.7     142    2210
+Teams       6108    612  188.3      74    1487
+explorer    4020    298   61.2      98    1904
+```
+
+- **WS (Working Set)** is the physical RAM the process is actually holding right now, in bytes. This is the number that answers "what is using my memory?" A browser at 1.8 GB on an 8 GB machine is a real constraint, not a fault.
+- **CPU (seconds)** is *cumulative* processor time since the process started, not a percentage. A process at 400 CPU-seconds is not necessarily busy now — it may have been busy an hour ago and idle since. To see who is busy *now*, take two readings a few seconds apart and compare, or read Task Manager's live percentage.
+- **Threads** are the process's concurrent execution paths. A process with hundreds of threads is usually normal for a browser or a database, and alarming for a small utility.
+- **Handles** are references to operating-system resources — files, registry keys, network sockets. This is the number that matters for one specific failure: a **handle leak**. A process whose handle count climbs steadily over hours and never falls is leaking, and it will eventually fail. That is the diagnosis behind "the machine is fine in the morning and everything is broken by 4 p.m."
+
+That last pattern is worth internalising. A **memory leak** shows the same shape in the WS column: climbing steadily, never dropping. If a user reports a machine that degrades predictably over a working day, you are looking for a process with a rising WS or handle count, and the fix is to restart that process or update that application — not to add RAM.
+
+#### Services and their start types
+
+`Get-Service` reports a **Status** (is it running now?) and a **StartType** (should it start at boot?). Those are different questions, and the gap between them is where real faults hide:
+
+| Status | StartType | What it means |
+|---|---|---|
+| Running | Automatic | Healthy, and the normal state for a critical service |
+| Stopped | Automatic | **A fault nobody has noticed yet.** It should be running and is not |
+| Running | Manual | Normal. It started on demand |
+| Stopped | Disabled | Deliberately turned off. Someone made a decision — find out who and why |
+
+The second row is the one to hunt for:
+
+```powershell
+Get-Service | Where-Object { $_.StartType -eq 'Automatic' -and $_.Status -eq 'Stopped' } |
+  Select-Object Name, DisplayName, StartType
+```
+
+On a healthy machine this returns nothing or one or two benign entries. On a neglected machine it returns a list — a print spooler that died weeks ago, an update service that never recovered from a failed patch, a backup agent nobody noticed had stopped. Finding those before the user does is the difference between reactive and proactive support, and it is one of the easiest wins available to a new technician.
+
+The third row matters too, for a different reason. A service that is **Disabled** was disabled on purpose, by a person or by an installer. Do not re-enable it reflexively. Find out why it was disabled first, because re-enabling it may reintroduce whatever problem prompted the change.
+
+#### The event log: three levels, and the discipline of not panicking
+
+Windows logs at five levels. Three of them matter at this level:
+
+- **Error** — something failed. Frequent and often benign on a healthy machine.
+- **Warning** — something is degraded or might fail. Easy to ignore, occasionally the earliest clue.
+- **Critical** — a severe failure. Rare, and always worth reading.
+
+The discipline: **every healthy machine has hundreds of errors, and most are harmless.** A single `DCOM` error or a `DistributedCOM` timeout is noise — it appears on millions of Windows machines every day. What you are looking for is *repetition and correlation*: the same event ID, from the same provider, repeatedly, especially alongside a symptom the user has reported.
+
+```powershell
+# Errors and criticals from the last 24 hours, grouped by what keeps recurring
+Get-WinEvent -FilterHashtable @{LogName='System'; Level=1,2; StartTime=(Get-Date).AddDays(-1)} |
+  Group-Object ProviderName, Id |
+  Sort-Object Count -Descending |
+  Select-Object -First 10 Count, Name
+```
+
+```text
+Count Name
+----- ----
+   47 Disk, 7
+    9 Kernel-Power, 41
+    3 Service Control Manager, 7000
+```
+
+That output is a diagnosis. **Event ID 7 from the `Disk` provider is a bad block** — forty-seven of them in a day is a drive telling you it is failing. **Event 41, Kernel-Power** is an unclean shutdown, and nine of those means the machine is losing power or hard-crashing repeatedly. **Event 7000** is a service that failed to start, which is the event-log shadow of the stopped-Automatic-service check above.
+
+Grouping by provider and ID is the single most useful trick in Windows log analysis, because it converts an unusable wall of text into a ranked list of what is actually wrong. Learn it once and you will use it for the rest of your career.
+
+#### Where each kind of evidence lives
+
+Beginners lose time looking in the wrong log. This is the map:
+
+| Question | Where the answer is |
+|---|---|
+| Why did the machine reboot unexpectedly? | System log, Event 41 and 6008 |
+| Why did an application crash? | Application log, plus the app's own folder under `%LOCALAPPDATA%` |
+| Why did a service not start? | System log, Event 7000/7009, and the service's own logged reason |
+| Why is the disk slow or erroring? | System log, `Disk` provider; then S.M.A.R.T. (Phase 1) |
+| Why did an update fail? | `C:\Windows\WindowsUpdate.log`, and Setup log under `C:\Windows\Logs` |
+| Why was a login rejected? | Security log (needs elevated rights to read) |
+| Why did a driver misbehave? | System log; look for the driver name on the BSOD (Phase 1) |
+
+### Part 9 — Reading Linux like a technician
+
+The same four skills, in a different grammar. If you can read Windows evidence, you already understand the concepts; you are learning syntax and file locations.
+
+#### Processes, and the one command that ends most arguments
+
+```bash
+ps aux --sort=-%mem | head -10        # top ten by memory
+ps aux --sort=-%cpu | head -10        # top ten by CPU
+top -b -n 1 | head -20                # one-shot snapshot, good for notes
+```
+
+Reading `ps aux` output:
+
+```text
+USER   PID %CPU %MEM    VSZ   RSS TTY  STAT START   TIME COMMAND
+mysql  1187  2.1 18.4 1843200 745216 ?  Ssl  Feb10  88:14 /usr/sbin/mysqld
+root      1  0.0  0.1  169436  11264 ?  Ss   Feb10   0:14 /sbin/init
+```
+
+- **PID** is the process ID — the handle you use to act on it.
+- **%MEM** is the percentage of total RAM. **RSS** is the actual resident memory in kilobytes. `%MEM` is the number you quote in a ticket because it needs no arithmetic.
+- **STAT** is the process state, and it is genuinely useful. `S` is sleeping (normal — most processes are idle most of the time). `R` is running. **`D` is uninterruptible sleep, almost always waiting on disk I/O** — a process stuck in `D` is the signature of a storage problem, not a CPU problem. `Z` is a zombie: finished but not yet reaped by its parent, which indicates a bug in the parent.
+- **TIME** is cumulative CPU time, same caveat as Windows: not a live percentage.
+
+#### Services, and why `systemctl` is the first thing you run
+
+```bash
+systemctl status nginx
+```
+
+```text
+● nginx.service - A high performance web server
+     Loaded: loaded (/lib/systemd/system/nginx.service; enabled; preset: enabled)
+     Active: failed (Result: exit-code) since Wed 2024-02-14 09:41:02 UTC; 3min ago
+       Docs: man:nginx(8)
+    Process: 2214 ExecStartPre=/usr/sbin/nginx -t -q -g 'daemon on; master_process on;' (code=exited, status=1)
+   Main PID: 2214 (code=exited, status=1/FAILURE)
+
+Feb 14 09:41:02 web01 nginx[2214]: nginx: [emerg] bind() to 0.0.0.0:80 failed (98: Address already in use)
+```
+
+That single command answers the question. Read it top to bottom: the service is **failed**, it exited with **status 1**, the failing step was the **config test** (`ExecStartPre`), and the actual reason is in the last line — **port 80 is already in use**, meaning something else is listening there.
+
+That is the whole method: `systemctl status` gives you a verdict, the failing step, and the reason, in one output. Beginners restart the service and hope. Technicians read the reason. The four commands worth knowing:
+
+```bash
+systemctl status <unit>      # what is wrong, and why
+systemctl restart <unit>     # try again after fixing the cause
+systemctl enable <unit>      # start at boot (persist across reboots)
+systemctl list-units --failed   # everything currently broken, in one list
+```
+
+`list-units --failed` is the Linux equivalent of the stopped-Automatic-service check, and it is just as good at finding faults nobody reported.
+
+#### Logs, and the difference between reading and searching
+
+Linux logs are plain text, so the skill is not reading them — it is *filtering* them. You never read a log; you query it.
+
+```bash
+journalctl -u nginx --since "1 hour ago" --no-pager
+journalctl -p err -b                        # errors since this boot
+journalctl -u ssh -o short-precise | tail -20
+grep -c "Failed password" /var/log/auth.log  # how many failed logins
+grep "Failed password" /var/log/auth.log | tail -5   # the last five, with source IPs
+```
+
+The distinction that matters: `journalctl -p err` filters by **priority**, `--since` filters by **time**, and `-u` filters by **unit**. Combining all three is how you go from a machine that produces thousands of lines a day to the four lines that answer the question.
+
+One habit worth building early: **note the timestamp of the failure before you search.** "It broke yesterday afternoon" plus `journalctl --since "yesterday 12:00" --until "yesterday 18:00"` is a targeted query. Without the timestamp you are scrolling, and scrolling is not diagnosis.
+
+#### File permissions, read properly
+
+Part 4 showed you `-rw-r--r--`. Here is how to read any permission string in one pass.
+
+```text
+-rwxr-xr--  1 alice  devs  4096 Feb 14 09:41 deploy.sh
+│└┬┘└┬┘└┬┘
+│ │  │  └── others: r--  = read only
+│ │  └───── group:  r-x  = read and execute
+│ └──────── owner:  rwx  = read, write and execute
+└────────── type:   -    = regular file  (d = directory, l = symlink)
+```
+
+The three triads are always **owner, group, others**, in that order, and each triad is always **read, write, execute**. Nine characters, three questions. Once you see it that way it stops being a string to decode and becomes three answers.
+
+The support consequence is in the *order of the questions*. When a user cannot open a file:
+
+1. **Is it a permission problem or a path problem?** "Permission denied" and "No such file or directory" are different failures with different fixes. Reading the exact error is the whole job here.
+2. **If it is permissions: which triad applies to this user?** Is the user the owner? If not, are they in the group? If neither, only `others` applies — and `others` is often empty.
+3. **Fix the membership, not the file.** Adding the user to the right group is reversible and auditable. Running `chmod 777` is neither, and it is how access control quietly degrades across an organisation. If you find yourself typing `777` on a shared system, you have almost certainly misdiagnosed the problem.
+
+### Part 10 — Guided walkthrough: read the evidence
+
+Extend Part 6's walkthrough with these reading exercises. Part 6 had you *run* commands; this has you *interpret* their output, which is the skill being tested.
+
+#### Check 1 — Find a leaking process (or prove there is none)
+
+Take two readings of the same process five minutes apart and compare:
+
+```powershell
+# First reading
+Get-Process chrome | Select-Object Name, @{N='MemMB';E={[math]::Round($_.WS/1MB,0)}}, HandleCount
+
+# Wait five minutes, then take the second
+Get-Process chrome | Select-Object Name, @{N='MemMB';E={[math]::Round($_.WS/1MB,0)}}, HandleCount
+```
+
+Expected: broadly similar numbers, fluctuating up and down as tabs open and close. A steady, monotonic climb across both readings is a leak. Record which process it was and what the user would experience.
+
+#### Check 2 — Hunt stopped-automatic services
+
+```powershell
+Get-Service | Where-Object { $_.StartType -eq 'Automatic' -and $_.Status -eq 'Stopped' } |
+  Select-Object Name, DisplayName, StartType
+```
+
+Expected: a short list, possibly empty. **For each entry, find out what it does before doing anything.** Then check whether it has been failing repeatedly:
+
+```powershell
+Get-WinEvent -FilterHashtable @{LogName='System'; Id=7000,7009} -MaxEvents 10 |
+  Select-Object TimeCreated, Id, Message
+```
+
+A service that failed once months ago is history. A service that failed this morning is a live fault.
+
+#### Check 3 — Group the log and rank the faults
+
+```powershell
+Get-WinEvent -FilterHashtable @{LogName='System'; Level=1,2; StartTime=(Get-Date).AddDays(-7)} |
+  Group-Object ProviderName, Id | Sort-Object Count -Descending |
+  Select-Object -First 10 Count, Name
+```
+
+Expected: a ranked list. **Write down the top three and, for each, state in one sentence what it means and whether it matters.** This is the exercise that converts log-reading from a chore into a skill, and the output is directly usable in a ticket note or an interview answer.
+
+#### Check 4 — Same exercise on Linux
+
+Inside your VM:
+
+```bash
+systemctl list-units --failed
+journalctl -p err -b --no-pager | tail -30
+journalctl -p err -b | awk '{print $5}' | sort | uniq -c | sort -rn | head -10
+```
+
+Expected: the failed-units list, the recent errors, and a ranked count of which process is producing the most errors. Compare the shape of that last output to Check 3 on Windows — **the technique is identical, only the syntax differs.** Noticing that is the point of the exercise.
+
+#### Check 5 — Prove the permission model
+
+Inside your VM, create a file and change who can touch it:
+
+```bash
+cd /tmp
+touch permtest.txt
+ls -l permtest.txt                      # note owner, group, others triads
+chmod 640 permtest.txt                  # owner rw, group r, others nothing
+ls -l permtest.txt                      # confirm the triads changed as predicted
+sudo adduser demo                        # create a second user (if not present)
+su - demo -c 'cat /tmp/permtest.txt'    # as someone else: should be denied
+```
+
+Expected: the third command fails with "Permission denied". **Then answer: which triad applied to `demo`, and why?** If you can answer that without looking anything up, you have understood the model.
+
+### Part 11 — Two worked tickets
+
+Two tickets at operating-system level, worked the way a first-line technician works them. The reasoning is the content; the specific fixes are almost incidental.
+
+#### Ticket 1 — "My computer is fine in the morning and unusable by the afternoon"
+
+**What the user said:**
+
+> "Every day it starts out fine and by about 3pm everything is crawling and I have to restart. It's been like this for two weeks. I've tried restarting more often but it's getting worse."
+
+**What you ask.**
+
+The reported shape — predictable, gradual, fixed by restart — is a strong clue, and you confirm it rather than assume it:
+
+1. "Does restarting actually fix it, and for how long?"
+2. "Is it every application, or mainly one — a browser, maybe?"
+3. "Does anything specific seem to set it off?"
+4. "How much RAM does the machine have?"
+
+The user answers: restarting fixes it for a few hours; it is worst in the browser but eventually everything; nothing specific; and the machine has 8 GB, though "IT said it was enough when I started".
+
+**What you observe.**
+
+The pattern — degrades over hours, fixed by restart, worse over time — points at resource accumulation rather than a fault. You take two readings of the top processes fifteen minutes apart:
+
+```powershell
+Get-Process | Sort-Object WS -Descending |
+  Select-Object -First 6 Name, Id,
+  @{N='MemMB';E={[math]::Round($_.WS/1MB,0)}}, HandleCount
+```
+
+First reading:
+
+```text
+Name       Id  MemMB HandleCount
+----       --  ----- -----------
+chrome   8214   2410       3120
+Teams    6108    740       1620
+```
+
+Fifteen minutes later:
+
+```text
+Name       Id  MemMB HandleCount
+----       --  ----- -----------
+chrome   8214   3180       4188
+Teams    6108    795       1706
+```
+
+Chrome has grown by 770 MB and over a thousand handles in fifteen minutes while the user was doing ordinary browsing. That is a **leak**, and it is the answer to the ticket. You confirm the machine is genuinely short of memory at the same time:
+
+```powershell
+Get-CimInstance Win32_OperatingSystem |
+  Select-Object @{N='TotalGB';E={[math]::Round($_.TotalVisibleMemorySize/1MB,1)}},
+                @{N='FreeGB';E={[math]::Round($_.FreePhysicalMemory/1MB,1)}}
+```
+
+```text
+TotalGB FreeGB
+------- ------
+    7.9    0.6
+```
+
+0.6 GB free on a 7.9 GB machine. The machine is not broken; it is full.
+
+**What you do.**
+
+You resist the temptation to declare "you need more RAM" and stop. That is a real answer but an expensive one, and it may not be the right one. Instead:
+
+1. **Identify the cause before spending money.** Chrome grew 770 MB in fifteen minutes. That is abnormal, and the usual cause is extensions — a leaked extension or a corrupted profile grows without bound, while a healthy browser releases memory when tabs close.
+2. **Test the hypothesis cheaply.** Ask the user to run for a day in a private window with extensions disabled, or disable extensions one at a time. If the growth stops, you have found it without buying anything. This is the professional move: a free test before a paid fix.
+3. **Reduce the baseline while you are there.** Check startup programs and open tabs. On a 7.9 GB machine, every background application is competing for a scarce resource.
+4. **Recommend more RAM only if it is genuinely warranted.** 8 GB is the floor for modern work; if this user runs Teams, a browser, and Office all day, 16 GB is the honest long-term answer. Say so — but say it *after* ruling out the leak, not instead of.
+
+**How you verify.**
+
+Not "is it faster?" — that invites a yes. You ask them to work a normal day and report at the end of it:
+
+> "Could you use it as normal tomorrow and message me at the end of the day with how it felt at 3pm — specifically whether you still needed to restart?"
+
+The user reports no forced restart for the first time in two weeks, and free memory at end of day is 2.1 GB instead of 0.3 GB. That is evidence, not sentiment.
+
+**Final ticket note.**
+
+> **Reported:** Machine degrades predictably over the working day, unusable by mid-afternoon, fixed temporarily by restart. Worsening over two weeks. 8 GB RAM.
+> **Changed recently:** Nothing reported; gradual onset.
+> **Observed:** Two `Get-Process` readings 15 minutes apart showed chrome growing from 2410 MB / 3120 handles to 3180 MB / 4188 handles during ordinary browsing — a sustained monotonic increase. Free physical memory 0.6 GB of 7.9 GB. No errors in the System log correlating with the slowdown; no stopped automatic services.
+> **Action:** Identified the leak rather than assuming insufficient RAM. Had the user run a day with browser extensions disabled; growth stopped, confirming a faulty or leaked extension. Removed the offending extension and restarted the browser. Also reviewed startup programs and reduced the baseline load.
+> **Verified:** User worked a full day without a forced restart, reporting no 3pm slowdown. Free memory at end of day measured at 2.1 GB.
+> **Cause:** A browser extension leaking memory and handles. The machine had adequate RAM for its workload; adding RAM would have masked the fault for a few months and then recurred.
+> **For the next agent:** If the slowdown returns, repeat the two-reading check before recommending hardware. 8 GB remains the floor for this workload — a 16 GB upgrade is defensible if the user's application set grows, but document the leak check first so the same fault is not paid for twice.
+
+**Reasoning to take away:** The *shape* of a symptom is diagnostic. "Gradual, predictable, fixed by restart, worsening" is a resource-accumulation signature, and it is different from "sudden, constant, unaffected by restart", which points at a configuration or hardware fault. Take two readings rather than one, because a single snapshot cannot show you a trend — and a trend is the whole diagnosis here.
+
+#### Ticket 2 — "My files are gone" (they are not)
+
+**What the user said:**
+
+> "All my files in the shared drive are gone. I opened it this morning and the folder is empty. I did not delete anything. This is urgent, I have a deadline."
+
+**What you ask.**
+
+An "everything is gone" report has a short list of explanations, and almost none of them involve data loss. You work through them by question:
+
+1. "Are you on the same computer you normally use, or a different one?"
+2. "Can anyone else see the files right now?"
+3. "Does the folder say it is empty, or does it say you do not have access?"
+4. "Did anything change — a password reset, a laptop swap, working from home today?"
+
+The user answers: same computer; a colleague can see everything; the folder opens but shows nothing; and — after a pause — "oh, I was told to change my password yesterday because it was expiring."
+
+That last sentence is the answer. A **password change** plus **an empty folder that opens normally** plus **others can still see the files** is a permissions problem, not a data-loss problem.
+
+**What you observe.**
+
+The distinction in question 3 is the important one, and it is exactly the distinction Part 9 taught on the Linux side: "denied" and "empty" are different errors. The user has access to the share itself but not to the contents, which means the share-level permission is intact and the **file-level** permission is not.
+
+You check group membership:
+
+```powershell
+whoami /groups
+```
+
+```text
+GROUP INFORMATION
+-----------------
+Group Name                          Type
+=================================== ================
+CORP\Domain Users                   Group
+CORP\Finance-ReadWrite              Group
+BUILTIN\Users                       Alias
+```
+
+The user is in `Domain Users` but the `Finance-ReadWrite` entry is a **cached token from before the password change** — or, on a machine where the change has not propagated, the group membership has not refreshed. You can prove which by comparing against the server's view:
+
+```powershell
+# What groups does the account actually hold, per the domain?
+Get-ADPrincipalGroupMembership jsmith | Select-Object Name
+```
+
+```text
+Name
+----
+Domain Users
+Finance-ReadWrite
+Finance-All
+```
+
+The account *does* hold `Finance-ReadWrite`. The machine the user is sitting at is using a stale token. That is the diagnosis: **the password change invalidated the cached credential, and the new logon has not been fully applied to the session.**
+
+**What you do.**
+
+The fix is small, and almost insultingly so given the panic:
+
+1. **Reassure immediately and specifically.** "Your files are safe — I can see them from here, and your colleague can too. This is a permissions refresh, not data loss." The user has been panicking for however long; that sentence is part of the job.
+2. **Refresh the session.** Sign out and sign back in — not just lock and unlock, which reuses the existing token. In most cases this alone resolves it.
+3. **If it does not, force the group membership to refresh** by having the user reconnect to the share after the new logon.
+4. **Confirm the data was never at risk** by checking with the user that the files are visible, and by confirming from your side.
+
+**How you verify.**
+
+You ask the user to do the thing that was actually broken — open a specific known file, not just "look at the folder":
+
+> "Could you open the Q3 budget file — the one you needed for the deadline — and confirm it opens?"
+
+They do, and it does. You also confirm they can save, because read access and write access are separate permissions and a half-fix is worse than none.
+
+**Final ticket note.**
+
+> **Reported:** User reported all files in the Finance shared drive "gone"; folder opened but appeared empty; urgent deadline. User initially stated nothing had changed.
+> **Changed recently:** On further questioning, the user's domain password was changed the previous day on expiry.
+> **Observed:** Other users could access the same share normally, ruling out server-side or data loss. The folder opened without an access-denied error, so share-level permission was intact. `whoami /groups` on the user's machine showed a cached token; `Get-ADPrincipalGroupMembership` confirmed the account does hold `Finance-ReadWrite` and `Finance-All` on the domain side.
+> **Action:** Explained that no data was lost and confirmed the files were present server-side. Had the user sign out fully and sign back in to obtain a fresh token — a lock/unlock cycle would not have been sufficient. Confirmed the new session held the correct group memberships.
+> **Verified:** User opened the specific file required for their deadline and confirmed read access; also confirmed they could save to the share, since write is a separate permission.
+> **Cause:** Stale cached group membership following a password change. The account was correct on the domain; the user's session had not refreshed.
+> **For the next agent:** A password change followed by an apparently empty share is a recurring pattern in this organisation. If it recurs for this user without a password change, check group membership directly rather than assuming a token problem. No permissions were changed and none needed to be — do not adjust ACLs for this symptom.
+
+**Reasoning to take away:** "Everything is gone" is very rarely data loss. The fast questions — can anyone else see it, does it say denied or empty, what changed — split the problem before you touch anything. And the user's casual afterthought ("oh, I changed my password") is frequently the actual cause; ask twice when the first answer is "nothing changed".
+
+### Part 12 — Preventing the next ticket
+
+First-line support has a reactive half and a proactive half. Everything so far has been reactive: something broke, you diagnosed it. This part is the habit that makes you visibly better than your peers, and it costs nothing.
+
+**After you fix something, ask what would have prevented it.** Not philosophically — concretely:
+
+- A drive filled up → *what would have caught that earlier?* A free-space check, or the stopped-service scan you already know. Tell the user what to watch for.
+- A service silently died weeks ago → *why did nobody notice?* That is the `Automatic` + `Stopped` check from Part 8, and it is worth running on every machine you touch for any reason.
+- A password change broke access → *how would the user know this is normal?* One sentence of explanation saves the next ticket entirely.
+- A browser extension leaked memory → *what else is installed that nobody reviewed?* Extensions, startup programs, and scheduled tasks are the three places unwanted software hides.
+
+**Write the prevention into the ticket.** One line at the end — "recommend a DHCP reservation for this printer", "advise Storage Sense for temp files", "this machine needs a RAM review if workload grows" — converts a closed ticket into an improved environment. It takes seconds and it is the single clearest signal that you understand the job rather than the tool.
+
+**Do the free checks on every machine you touch.** Three commands, under a minute total:
+
+```powershell
+# 1. Free space
+Get-Volume | Where-Object DriveLetter |
+  Select-Object DriveLetter, @{N='FreePct';E={[math]::Round(100*$_.SizeRemaining/$_.Size,1)}}
+
+# 2. Services that should be running and are not
+Get-Service | Where-Object { $_.StartType -eq 'Automatic' -and $_.Status -eq 'Stopped' } |
+  Select-Object Name, DisplayName
+
+# 3. The top recurring errors this week
+Get-WinEvent -FilterHashtable @{LogName='System'; Level=1,2; StartTime=(Get-Date).AddDays(-7)} |
+  Group-Object ProviderName, Id | Sort-Object Count -Descending | Select-Object -First 5 Count, Name
+```
+
+You will find something on a meaningful share of machines. Fixing what you find — or logging it — is how a junior technician becomes the person whose machines do not generate repeat tickets.
+
+### Part 13 — Self-check
+
+Answer these without looking. If you cannot, go back to the relevant part.
 
 1. Name the five jobs of an operating system, and give one support symptom for each.
 2. A user says "the internet is down". Which two `ping` commands distinguish a connectivity failure from a DNS failure?
@@ -513,8 +987,39 @@ Notice the pattern in the "where to look first" column: **it is always a log, a 
 8. What is the difference between "permission denied" and "no such file or directory"?
 9. Why is `rm` more dangerous than deleting a file in Windows?
 10. If a user cannot access a shared folder, which two things do you check, and in what order?
+11. Why can a single reading of a process's memory usage never prove a leak, and what do you do instead?
+12. A machine degrades predictably over the working day and is fixed by a restart, while another fails suddenly and constantly. What does each pattern suggest?
+13. Name the three event levels that matter at this level, and explain why you should not react to a single error.
+14. What does it mean when a Linux process shows a state of `D`, and why is that a storage clue rather than a CPU one?
+15. A user reports a shared folder that opens but appears empty. List the three questions that resolve it fastest.
+16. Why is adding a user to a group better than changing a file's permissions, even when both would fix the symptom?
 
 If you can answer these, you can hold a conversation about operating systems with a hiring manager — which is the actual bar for this phase.
+
+### Part 14 — Key takeaways
+
+- **An operating system does five jobs** — process, memory, storage, device, and user management — and every support symptom maps to one of them. Name the job and you have narrowed the search.
+- **Read the trend, not the snapshot.** One reading of memory or handles tells you almost nothing; two readings a few minutes apart reveal a leak, and a leak is invisible in a single measurement.
+- **Status and StartType are different questions.** A service that is `Automatic` and `Stopped` is a fault nobody has reported. That query is the highest-value minute in routine support.
+- **Every healthy machine has hundreds of log errors.** What matters is repetition and correlation: group by provider and ID, rank by count, and read the top of the list.
+- **The technique transfers even when the syntax does not.** Grouping Windows events by provider and ID is the same skill as counting Linux journal errors by process. Learn the reasoning once and you can apply it to an unfamiliar system.
+- **"Denied" and "empty" are different failures.** Reading the exact error, rather than the user's summary of it, is often the whole diagnosis.
+- **Fix the group membership, not the file.** Adding a user to a group is reversible and auditable; `chmod 777` is neither, and it is how access control degrades across an organisation.
+- **Check before you spend.** A free test that isolates a leak beats a RAM upgrade that masks it. Recommend hardware after you have ruled out software, not instead of.
+- **"Everything is gone" is rarely data loss.** Can anyone else see it? Does it say denied or empty? What changed? Those three questions resolve most of these tickets before you touch anything.
+- **Always ask what changed — and ask twice.** The user's casual afterthought is frequently the cause; "nothing changed" is a first answer, not a final one.
+- **Afterwards, ask what would have prevented it.** One prevention line in the ticket turns a closed ticket into an improved environment.
+
+### Part 15 — Practice this next
+
+The lesson is the reasoning; the tasks below are the doing.
+
+1. **Run Part 10's five checks** on your own machine and in your VM, and record the output of each. This is deliverable material.
+2. **Take two process readings fifteen minutes apart** and decide, in writing, whether you are looking at normal fluctuation or a leak. Say which evidence supports your conclusion.
+3. **Hunt stopped-automatic services**, then look up what each one does before touching it. Write one sentence per service explaining whether it matters.
+4. **Group your event log by provider and ID**, and write the top three results in plain English as if for a ticket note. This is directly reusable in an interview answer.
+5. **Break and fix your VM.** Stop a service, break a file permission, fill a filesystem, then diagnose each using only the tools in this lesson. Reset from your snapshot afterwards.
+6. **Then work the two tickets in Part 11 on paper.** Cover the solution, read only what the user said, and write down what you would ask and check first. Compare your reasoning to the ticket's. This is the most useful exercise in the phase.
 
 ## Tools for This Phase
 

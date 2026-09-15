@@ -497,7 +497,230 @@ Everything in this phase is portable. The ticket discipline maps directly to inc
 - **Clicking a link to "check" a phishing report.** Never. Collect evidence without engaging.
 - **Letting knowledge base articles go stale.** An out-of-date article is worse than none.
 
-### Key takeaways
+### Part 6 — Identity verification, done properly
+
+Part 2 said "verify identity and issue" as step one, and Part 5 listed failing to do so as a pitfall. This part explains *why*, because a rule you do not understand is a rule you will abandon the first time it is inconvenient.
+
+#### Why password resets are the attack, not the chore
+
+To an attacker, the service desk is not an obstacle. It is the **front door**, and it is usually the softest one on the building.
+
+Consider what a password reset actually accomplishes for someone who should not have it. It grants access to an account, and therefore to email, and therefore to everything that trusts email — password reset links for every other system, shared documents, the ability to email colleagues *as* the real user asking for money or credentials. Security teams call this **social engineering**, and the service desk is its favourite target because the desk exists specifically to help people who cannot get in.
+
+The attack has a predictable shape:
+
+1. The attacker gathers a little information. A name from LinkedIn, a manager's name from a press release, a project name from a job posting, the company's email format.
+2. They call at a busy time — Monday morning, end of quarter, a Friday afternoon before a holiday — when the queue is long and the agent is moving fast.
+3. They sound like an employee in a hurry. They are slightly irritated. They have a meeting. They may already know the answer to a soft question and offer it unprompted, to build rapport.
+4. They ask for exactly one thing: a password reset, an MFA reset, or an account unlock.
+
+The whole attack depends on the agent taking a shortcut. Not on technical sophistication.
+
+#### What actually counts as verification
+
+A **knowledge-based question** — mother's maiden name, date of birth, employee ID — is weak on its own, because much of it is publicly discoverable or obtainable from a previous breach. This is why organisations moved to **MFA reset** procedures being treated as the highest-risk request of all: resetting someone's second factor hands over the account completely.
+
+What genuine verification looks like, roughly in order of strength:
+
+| Method | Strength | Why |
+|---|---|---|
+| Manager confirmation via a known directory number | Strong | Requires the attacker to also compromise the manager |
+| Video call with an ID check | Strong | Hard to fake, and expensive to attempt at scale |
+| Callback to the number on record, which you look up yourself | Strong | Defeats caller-ID spoofing — you initiate the call |
+| A one-time code to a registered device or address | Moderate | Good, unless that channel is what is broken |
+| Security questions, employee ID, date of birth | Weak alone | Often public or already breached |
+| "I know their name and department" | None | Not verification; this is small talk |
+
+The single highest-value habit: **you initiate the contact, from a number you looked up yourself.** Never from a number the caller gives you, because a confident caller can supply a number that rings back to them.
+
+#### The conversation, when something feels off
+
+The hard part is that verification is a social act, and you must do it without accusing anyone. A useful pattern:
+
+> *"I can absolutely help with that. Before I reset anything, I need to verify your identity — it is the same process for everyone including me, so please do not read anything into it. I am going to call you back on the number we have on file for you. What is your employee ID so I can look up the right record?"*
+
+That response does four things: it accepts the request, it normalises the check, it explains what happens next, and it extracts a detail to verify against. A genuine user cooperates. An attacker usually becomes vague, changes the subject, invents urgency, or asks for an exception:
+
+> *"I am on my mobile, I cannot take a call — can you just do it this once? My manager is in a meeting, she approved it already."*
+
+That sentence is the attack. "Approved already", "just this once", "cannot take a call" — each is a request to skip the process rather than to follow it.
+
+**You do not have to win the argument.** You are not trying to catch anyone. You are trying to complete a request safely, and the answer when verification is not possible is not "no" — it is "not yet, and here is how we get there":
+
+> *"I understand the timing is difficult. I cannot reset credentials without verification — that protects your account, not just the company's. Here is what I can do: I will note the ticket and escalate it, and someone from the team will call you back on your registered number within the hour."*
+
+Then **log it honestly**. A ticket that reads "caller unable to verify identity; declined reset pending verification; escalated" is a good ticket. It may be the single most valuable thing you produce that week, because repeated attempts like this are a signal the security team needs to see.
+
+#### The compromised-account warning signs
+
+You are often the first person in the organisation to notice an account is under attack, because you are the one looking at it. Worth escalating rather than just resetting:
+
+- The same account is locked out **repeatedly**, especially across days. Someone is guessing, or a device is retrying old credentials.
+- A user reports MFA prompts they did not initiate. Someone has the password and is trying to satisfy the second factor.
+- A reset request arrives shortly after the user's details appeared somewhere public, or after a colleague's account was accessed.
+- A user reports mail-rule changes, forwarding, or sent items they do not recognise. That is post-compromise behaviour.
+- The request comes from a caller who cannot answer questions about their own manager or team.
+
+**Recognising that something needs escalating rather than resolving is Phase 1-and-4 knowledge. Investigating the compromise is later-phase security work** — do not attempt the investigation, escalate it with the evidence you have.
+
+### Part 7 — Three worked tickets with the evidence
+
+Parts 1 to 5 taught the method. These three tickets show it applied, with the actual evidence and the written note. Read them for the **reasoning**, not the fixes.
+
+#### Ticket 1 — "My email is not working"
+
+**What the user said (ticket description):**
+
+> "My email is not working. I have not been able to send anything all morning. Can you fix it, I have an important client email going out today."
+
+**Step 1 — Confirm identity and issue.**
+
+The ticket is vague, and the scope of "not working" is enormous: cannot log in, can log in but cannot send, mail sits in Outbox, mail bounces, Outlook will not open, mail arrives in the wrong folder. You ask for the exact error:
+
+> "Before I look, can you tell me exactly what you see when you try to send? Not what you think is wrong — the exact wording on screen, and whether it is Outlook or webmail."
+
+The user reads out: *"Your message could not be delivered. The message is still in your Outbox."*
+
+That single sentence eliminates most of the possibilities. The account is authenticated — they are logged in. Outlook is functioning. The problem is transmission, not access.
+
+**Step 2 — Ask what changed.**
+
+> "Was this working yesterday?"
+
+*"Yes, fine. It started this morning."*
+
+The user then volunteers something useful unprompted: *"Actually, my password expired last week and I changed it on Wednesday."*
+
+**Step 3 — Isolate scope.**
+
+> "Is anyone else in your team having trouble sending today?"
+
+*"No, I asked and everyone else is fine."*
+
+One user, one device. Not a mail server outage. You have narrowed from "email is broken" to "one user cannot transmit mail, following a password change."
+
+**Step 4 — The evidence.**
+
+You connect with permission and look at the Outbox and the send/receive log:
+
+```text
+Task 'user@company.com - Sending' reported error (0x8004010F):
+'The operation failed. An object cannot be found.'
+```
+
+That error code reports a **profile problem**, not a network or server problem. Combined with the recent password change, the likely cause is that the stored credential in the Outlook profile is stale — the Windows credential cache still holds the old password, so the send fails even though the account itself is fine.
+
+**Step 5 — The fix, one change at a time.**
+
+You clear the stale credential from the Windows Credential Manager, then restart Outlook so it re-prompts for the current password. You do not reinstall Office. You do not rebuild the mail profile — which is the nuclear option and would take an hour of the user's time and lose their local settings.
+
+**Step 6 — Verify.**
+
+> "Could you send a test email to yourself now, and tell me when it arrives in your inbox?"
+
+Not "does it work?" — an actual send, with a visible result. It arrives. You then ask them to send the real client email, because that is the thing that actually matters, and you would rather it fail now than after you have closed the ticket.
+
+**Final ticket note.**
+
+> **Reported:** User unable to send mail since that morning; Outlook showed "Your message could not be delivered. The message is still in your Outbox."
+> **Changed recently:** On questioning, the user's domain password was changed the previous week on expiry.
+> **Observed:** Send/receive reported `0x8004010F — The operation failed. An object cannot be found`, a profile-level error rather than a connectivity error. No service-wide impact: other users in the same team sending normally, ruling out a mail server or transport issue. Windows Credential Manager held a credential entry for the mail account dated before the password change.
+> **Action:** Removed the stale cached credential for the mail account and restarted Outlook, which re-prompted for the current password. No profile rebuild and no Office repair were attempted.
+> **Verified:** User sent a test message to themselves and confirmed receipt, then sent the client email that had prompted the ticket and confirmed it delivered.
+> **Cause:** Stale cached credential in the Windows credential store following a password change. The account was healthy throughout.
+> **For the next agent:** This user's mail profile has now failed once after a password change. If it recurs, check the credential store first rather than rebuilding the profile. Other users on the same mail platform are unaffected, so do not raise this as a service issue.
+
+**Reasoning to take away:** The user's summary ("email is not working") was almost useless, and one question for the exact wording turned it into a specific, diagnosable fault. "Was this working yesterday?" and "who else is affected?" cost nothing and removed the two largest branches — a widespread outage and a broken account — before you looked at anything.
+
+#### Ticket 2 — "I got a strange email, I think I clicked it"
+
+**What the user said:**
+
+> "I got an email that looked like it was from HR about a salary review, and I clicked the link. Then it asked me to log in and I typed my password. Now I am worried. Was that a mistake?"
+
+**This ticket is different, and the difference matters.**
+
+Everything up to this point has been about restoring service. This one is about **containment**. The user has likely just handed their credentials to an attacker, and every minute changes the risk. There is a specific order of operations, and getting it wrong makes things worse.
+
+**What you do NOT do.**
+
+- **Do not click the link yourself to "check".** You are on a corporate machine; you would be the second victim, and you may trigger a payload.
+- **Do not tell the user to delete the email.** It is evidence.
+- **Do not tell them to change their password and leave it at that.** If the attacker is already in the mailbox, a password change alone may not evict them, and it destroys the trail.
+- **Do not keep it off the record** because the user is embarrassed. Embarrassed users hide incidents, and hidden incidents become breaches.
+
+**What you do, in order.**
+
+1. **Reassure, and mean it.** *"Thank you for telling me — that is exactly the right thing to do, and it is much better that you called. Let us deal with it now."* The single biggest predictor of whether an incident is contained quickly is whether users report it without fear. You are not there to judge; you are there to contain.
+2. **Gather the facts without touching anything.** Which email account? What was the exact subject and sender address? What time did they click? Did they enter credentials, and only credentials — or did anything download or install? Did anything happen after?
+3. **Escalate immediately, by whatever your organisation's process is.** A suspected credential compromise is a security incident, not a helpdesk ticket to solve alone. **This is the boundary: recognising and escalating is Phase 4; investigating is later-phase security work.**
+4. **Contain what you can, with authorisation.** Depending on your organisation's procedure: force a password reset and revoke active sessions, reset MFA, check for and remove mail-forwarding rules the attacker may have added, and review recent sign-ins for unfamiliar locations. Do these *with* your security team's process, not around it.
+5. **Preserve the evidence.** The original message, its headers, the URL, and the time of the click. Do not forward the original to anyone who might click it — share the details, not the live link.
+
+**Final ticket note.**
+
+> **Reported:** User reports clicking a link in an email impersonating HR regarding a salary review, and entering their credentials on the resulting page. User self-reported, concerned.
+> **Timeline:** Email received and link clicked at approximately 09:20; credentials entered; user contacted the service desk at 09:47.
+> **Observed:** Original message retained for analysis and NOT deleted. Sender address recorded (external domain resembling the company domain). Per user, no file was downloaded and no software was installed; credentials were entered on a web page.
+> **Action:** Escalated immediately to the security team as a suspected credential compromise per procedure. Under their direction: forced a password reset, revoked active sessions, reset MFA, and reviewed mail rules and recent sign-in activity for unfamiliar locations. User informed of next steps.
+> **Verified:** Security team confirmed no unfamiliar mail-forwarding rules present and no anomalous sign-ins after session revocation. User able to log in with the new credential and MFA re-enrolled.
+> **Cause:** Successful phishing of user credentials via a spoofed internal email.
+> **For the next agent:** Incident closed from the service desk side; security team holds the investigation. Do not delete the original message. If the user reports further suspicious mail or unexpected MFA prompts, treat as a new incident and escalate immediately.
+
+**Reasoning to take away:** Not every ticket is a repair. When the report involves credentials, a link, or possible data exposure, the goal shifts from restoring service to containing harm — and the correct first action is to escalate, not to investigate. The most valuable thing you did here was thank the user, because a culture where people report quickly is the single best defence an organisation has.
+
+#### Ticket 3 — "I need access to a folder I should already have"
+
+**What the user said:**
+
+> "I started on the new project team this week and I still cannot get into the project folder. My manager says I should have access. Can you add me?"
+
+**What you ask.**
+
+An access request looks trivial and is one of the highest-risk tickets you will handle, because it is the legitimate-looking version of a privilege escalation. Three questions:
+
+1. "Who approved this access, and are they aware of what the folder contains?"
+2. "Are you in the group that grants it, or do you need to be added?"
+3. "Has anyone else on the project team had trouble getting in?"
+
+**Check before you grant.**
+
+The instinct is to add the user to the group. The correct move is to find out whether that is actually the problem:
+
+```powershell
+# What does the account actually hold?
+Get-ADPrincipalGroupMembership jdelacruz | Select-Object Name
+
+# What does the folder require?
+(Get-Acl "\\fileserver\Projects\Atlas").Access |
+  Select-Object IdentityReference, FileSystemRights, AccessControlType
+```
+
+Suppose the output shows the user **is** already in `Project-Atlas-RW`, and the folder grants that group Modify. The account is correct. Adding them again changes nothing — and it is a real risk that the agent does it anyway, closes the ticket, and the user still cannot get in.
+
+You then find the actual cause: the user's session began before the group membership was applied, so the machine is holding a stale token. This is the same class of problem as the empty-shared-folder ticket in Phase 2, and it presents identically.
+
+**The security discipline.**
+
+Access tickets are where good helpdesk habits prevent real breaches. Three rules:
+
+- **Verify the approver, not just the requester.** "My manager says I should have it" is a claim. If your process requires a recorded approval, get the approval — not a verbal relay.
+- **Check whether access already exists before adding it.** A surprising share of "I need access" tickets are actually "access exists but is not taking effect". Adding permissions that already exist leaves the real fault in place while appearing to have done something.
+- **Never widen access to solve a convenience problem.** If the fix for a permissions issue appears to be granting a broader group, you have probably misdiagnosed it. The correct fix is usually to add the person to the right narrow group.
+
+**Final ticket note.**
+
+> **Reported:** New project team member unable to access `\\fileserver\Projects\Atlas`; manager reportedly approved access.
+> **Changed recently:** User joined the project team earlier in the week.
+> **Observed:** `Get-ADPrincipalGroupMembership` showed the account already holds `Project-Atlas-RW`. Folder ACL grants that group Modify, so permissions were correct on both sides. `whoami /groups` on the user's machine did not list the group — a stale session token, because the membership was applied after the user signed in.
+> **Action:** No permissions were changed — the requested access already existed. Had the user sign out fully and sign back in to obtain a fresh token, then re-test access.
+> **Verified:** User opened the project folder and successfully created and saved a test document, confirming both read and write access rather than read alone.
+> **Cause:** Stale cached group membership from a session that predates the membership change. Not a permissions fault.
+> **For the next agent:** A recurring pattern in this organisation after any group change. If a user reports newly granted access not working, check `whoami /groups` on their machine before touching any ACL. Do not add duplicate group memberships.
+
+**Reasoning to take away:** A request to grant access should trigger a check of the *current* state before any change. In this ticket, doing what was asked would have changed nothing, closed the ticket, and left the user still blocked — while silently adding redundant permissions. The same discipline protects you when the request is malicious: if you always verify approver and current state, an attacker's request fails at the same gate an honest user's succeeds through.
+
+### Part 8 — Key takeaways
 
 - A ticket is a **record**, not a receipt. Write so the next person never has to re-investigate.
 - **Incidents are broken things; service requests are wanted things.** Classify at intake.
@@ -508,9 +731,13 @@ Everything in this phase is portable. The ticket discipline maps directly to inc
 - **Verify the fix** before closing; do not take "it works now" on faith.
 - **Silence is the real complaint.** Regular updates make slow resolutions acceptable.
 - **Escalate with evidence and what you already tried**, not with hope.
-- **Verify identity before every access change.** Password and MFA resets are attack targets.
+- **Verify identity before every access change.** Password and MFA resets are attack targets, and the service desk is the front door, not an obstacle.
+- **You initiate the verification contact**, from a number you looked up yourself — never one the caller supplies.
+- **Not every ticket is a repair.** When credentials, links, or possible data exposure are involved, the goal becomes containment and the first action is escalation.
+- **Check the current state before changing anything.** Many "I need access" tickets are "access exists but has not taken effect", and granting again fixes nothing.
+- **Thank people who report their own mistakes.** A culture where users report phishing quickly is the strongest control an organisation has.
 
-### Practice this next
+### Part 9 — Practice this next
 
 The exercises below are the phase. Build the tracker, write the ten tickets, produce the knowledge base articles, practise remote support with a family member, write the user-friendly replies, and write the escalation notes. Keep every artefact — they become portfolio evidence and, later, interview stories.
 
