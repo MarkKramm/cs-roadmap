@@ -9,7 +9,7 @@ A snapshot of the repository's current state. Update this when a meaningful mile
 | Branch | `main` |
 | Tracked files | 106 |
 | Working tree | Clean — nothing uncommitted, nothing untracked |
-| Unpushed | None. `main` and `origin/main` are both at `2ec1871` |
+| Unpushed | None. `main` and `origin/main` are both at `5673af3` |
 | Line endings | LF everywhere (Windows scripts excepted) |
 | Encoding | UTF-8, no BOM |
 | Remote | `origin` → https://github.com/MarkKramm/cs-roadmap |
