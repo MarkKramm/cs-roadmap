@@ -119,6 +119,7 @@ try {
   const PhaseDetail = await load("/src/pages/PhaseDetail.jsx");
   PhaseDetailForSweep = PhaseDetail;
   const ProgressBar = await load("/src/components/ProgressBar.jsx");
+  const ProgressRing = await load("/src/components/ProgressRing.jsx");
   const PhaseCard = await load("/src/components/PhaseCard.jsx");
   const ChecklistItem = await load("/src/components/ChecklistItem.jsx");
   const ToolCard = await load("/src/components/ToolCard.jsx");
@@ -686,6 +687,82 @@ try {
       assert("ProgressBar: label", html.includes("3/10"), "expected a 3/10 label");
       assert("ProgressBar: aria", html.includes('role="progressbar"'), "missing progressbar role");
     }
+  }
+
+  // The ring is a chart, so the value must survive without it. These assertions
+  // are about that duty, not about the svg's geometry: the arc is drawn from the
+  // dash array, and the number the reader needs is also rendered as text.
+  if (ProgressRing) {
+    const html = render(
+      "ProgressRing",
+      createElement(ProgressRing, { value: 42, label: "42 of 100 tasks complete" })
+    );
+    if (html) {
+      assert(
+        "ProgressRing: accessible name",
+        html.includes("42 of 100 tasks complete"),
+        "the ring carries no accessible label"
+      );
+      assert(
+        "ProgressRing: filled arc is drawn",
+        html.includes("stroke-dasharray") && !html.includes("stroke-dasharray=\"0 "),
+        "no arc drawn for a 42% value"
+      );
+      assert(
+        "ProgressRing: track is drawn too",
+        html.includes("ring__track"),
+        "missing the unfilled track"
+      );
+    }
+
+    // Bounds. A percentage outside 0–100 must clamp rather than draw an arc
+    // longer than the circle, and a non-numeric value must not reach the dash
+    // arithmetic as NaN — which renders as no arc at all, silently.
+    const over = render(
+      "ProgressRing (over 100)",
+      createElement(ProgressRing, { value: 140, label: "clamped" })
+    );
+    assert(
+      "ProgressRing: clamps above 100",
+      over !== null && !over.includes("NaN"),
+      "an out-of-range value reached the geometry"
+    );
+
+    const junk = render(
+      "ProgressRing (non-numeric)",
+      createElement(ProgressRing, { value: "nonsense", label: "empty" })
+    );
+    assert(
+      "ProgressRing: survives a non-numeric value",
+      junk !== null && !junk.includes("NaN"),
+      "a non-numeric value reached the geometry"
+    );
+
+    // The arc must be proportional, not merely present. A ring whose arc never
+    // changed would satisfy every assertion above and still be a lie about the
+    // one number it exists to show.
+    const arcOf = (value) => {
+      const html = render(
+        "ProgressRing",
+        createElement(ProgressRing, { value })
+      );
+      const m = html && html.match(/stroke-dasharray="([\d.]+)/);
+      return m ? Number(m[1]) : null;
+    };
+    const smallArc = arcOf(10);
+    const largeArc = arcOf(80);
+    assert(
+      "ProgressRing: arc is proportional to the value",
+      smallArc !== null && largeArc !== null && largeArc > smallArc,
+      "an 80% ring does not draw a longer arc than a 10% one"
+    );
+
+    const zeroArc = arcOf(0);
+    assert(
+      "ProgressRing: zero draws an empty arc",
+      zeroArc === 0,
+      "a 0% ring drew a non-zero arc"
+    );
   }
 
   if (PhaseCard && allPhases[0]) {

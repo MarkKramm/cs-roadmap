@@ -42,6 +42,14 @@
   --sidebar-width: 260px;
   --content-reading: 760px;
   --content-wide: 1100px;
+  /* The outer cap for a page. Wider than --content-wide, which is the cap for
+     the one element allowed past the reading measure (tables). */
+  --content-max: 1400px;
+  /* The dashboard's reference column. Its fold-back width is NOT a token: the
+     value has to sit in the media query condition in global.css, and a custom
+     property is not valid there. Naming it twice would let the two drift, so it
+     is written once, as a literal, and documented in docs/DESIGN-SYSTEM.md. */
+  --rail-width: 320px;
 
   /* Motion — nothing that delays reading */
   --transition-fast: 120ms ease;

@@ -40,6 +40,40 @@ export function addWeeks(iso, weeks) {
 }
 
 /**
+ * A week count as a reader would say it: "2 weeks", "1w 3d", "4 days".
+ *
+ * Shared by the Schedule page and the dashboard's rail so the two cannot round
+ * the same number two different ways.
+ */
+export function fmtWeeks(w) {
+  if (w === null || w === undefined) return "—";
+  const whole = Math.floor(w);
+  const days = Math.round((w - whole) * 7);
+  if (whole === 0) return days + (days === 1 ? " day" : " days");
+  if (days === 0) return whole + (whole === 1 ? " week" : " weeks");
+  return whole + "w " + days + "d";
+}
+
+/**
+ * A YYYY-MM-DD date in the reader's own format.
+ *
+ * Parsed and formatted as UTC so the displayed day is the stored day. Formatting
+ * a UTC midnight in local time renders the previous day anywhere west of
+ * Greenwich, which turns a planned finish date into a wrong one.
+ */
+export function fmtDate(iso) {
+  if (!iso) return "—";
+  const t = Date.parse(iso + "T00:00:00Z");
+  if (!Number.isFinite(t)) return iso;
+  return new Date(t).toLocaleDateString(undefined, {
+    year: "numeric",
+    month: "short",
+    day: "numeric",
+    timeZone: "UTC",
+  });
+}
+
+/**
  * Where the plan stands.
  *
  * @param {object} track       a track from data/roadmaps.js

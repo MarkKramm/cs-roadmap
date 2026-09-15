@@ -9,7 +9,16 @@ import { useState, useEffect, useCallback } from "react";
 const KEY = "cs-roadmap:schedule:v1";
 const VALID_DATE = /^\d{4}-\d{2}-\d{2}$/;
 
-function load() {
+/**
+ * Read the stored start dates without subscribing to them.
+ *
+ * The dashboard's rail shows the same pace figures, but it must not own the
+ * preference: two live copies of one key drift, and the stale one writing back
+ * would overwrite a date the reader just set on the Schedule page. A reader only
+ * ever reads it on the dashboard, and the dashboard remounts on every view
+ * change — so a plain read at mount is both correct and safe.
+ */
+export function readStarts() {
   try {
     const raw = window.localStorage.getItem(KEY);
     const parsed = raw ? JSON.parse(raw) : null;
@@ -25,7 +34,7 @@ function load() {
 }
 
 export function useSchedule() {
-  const [starts, setStarts] = useState(load);
+  const [starts, setStarts] = useState(readStarts);
 
   useEffect(() => {
     try {

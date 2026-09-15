@@ -4,7 +4,13 @@ import EmptyState from "../components/EmptyState.jsx";
 import { tracks, findTrack, allTasks, firstUnfinishedPhase } from "../data/roadmaps.js";
 import { countDone } from "../hooks/useProgress.js";
 import { useSchedule } from "../hooks/useSchedule.js";
-import { paceFor, upcomingPhases, today, daysBetween } from "../lib/pace.js";
+import {
+  paceFor,
+  upcomingPhases,
+  today,
+  fmtWeeks,
+  fmtDate,
+} from "../lib/pace.js";
 
 // Schedule and pace for the current track.
 //
@@ -40,27 +46,6 @@ const VERDICT_COPY = {
     note: "Set a start date to compare work completed against time elapsed.",
   },
 };
-
-function fmtWeeks(w) {
-  if (w === null || w === undefined) return "—";
-  const whole = Math.floor(w);
-  const days = Math.round((w - whole) * 7);
-  if (whole === 0) return days + (days === 1 ? " day" : " days");
-  if (days === 0) return whole + (whole === 1 ? " week" : " weeks");
-  return whole + "w " + days + "d";
-}
-
-function fmtDate(iso) {
-  if (!iso) return "—";
-  const t = Date.parse(iso + "T00:00:00Z");
-  if (!Number.isFinite(t)) return iso;
-  return new Date(t).toLocaleDateString(undefined, {
-    year: "numeric",
-    month: "short",
-    day: "numeric",
-    timeZone: "UTC",
-  });
-}
 
 export default function Schedule({ trackId, done, onOpenPhase, onOpenTrack }) {
   const track = findTrack(trackId) || tracks[0];

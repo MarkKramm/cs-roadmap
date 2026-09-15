@@ -28,7 +28,14 @@ function newId() {
   );
 }
 
-function load() {
+/**
+ * Read the stored entries without subscribing to them.
+ *
+ * The dashboard's rail shows a count and must not own the list: two live copies
+ * of one key drift, and the stale one writing back would drop an entry the
+ * reader just added on the Portfolio page. Read-only is the whole contract.
+ */
+export function readPortfolio() {
   try {
     const raw = window.localStorage.getItem(KEY);
     const parsed = raw ? JSON.parse(raw) : [];
@@ -39,7 +46,7 @@ function load() {
 }
 
 export function usePortfolio() {
-  const [entries, setEntries] = useState(load);
+  const [entries, setEntries] = useState(readPortfolio);
 
   useEffect(() => {
     try {

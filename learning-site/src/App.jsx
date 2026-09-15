@@ -367,6 +367,7 @@ export default function App() {
             onOpenPhase={openPhase}
             lastPhaseId={lastTrackId === trackId ? lastPhaseId : ""}
             onGoToSchedule={() => goTo("schedule")}
+            onGoToView={goToView}
           />
         )}
       </main>

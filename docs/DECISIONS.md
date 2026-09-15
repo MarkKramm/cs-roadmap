@@ -2,6 +2,24 @@
 
 A lightweight decision log (ADR-style). Newest first.
 
+## D-015 — The shell centres, and the dashboard gets a reference rail
+
+- **Date:** 2026-09-15
+- **Status:** Accepted
+- **Context:** With the reader affordances in place (D-014), the dashboard's remaining defect was visible before anything was read: on a 1,919px viewport it filled the left half and left the right half empty. Two causes, and they were separate.
+  1. `.content` was capped at `--content-wide` (1,100px) and **left-aligned** against the sidebar. Even a page that wanted the width could not use it, and the dead band was a property of the shell, not of any page.
+  2. The dashboard itself was a single column of cards. Nothing in it was wrong, but nothing in it was wide either — and the figures a reader actually checks (how far in, how long left, what is ready) were either absent or buried in prose.
+  This matters more here than on a typical site because the curriculum is 34–112 weeks long. A reader returns for years; the page that answers "what should I do today" is the page they see most, and it was the least informative one.
+- **Decision:** Two changes.
+  1. **The shell centres and widens.** `--content-max` (1,400px) replaces `--content-wide` as the outer cap, applied with `margin-inline: auto`. `--content-wide` remains the cap for the one element allowed past the reading measure (tables). Centring is right here and left-alignment was not: every page is a column of cards, so the fix belongs to the shell.
+  2. **The dashboard becomes two columns above 1,180px** — content plus a sticky **reference rail** carrying the progress ring, the plan's dates, three read-only readiness counts, and the next two phases. Phase cards also tile two-up once there is width for two honest cards.
+- **Consequences:** The rail is the part that needs a boundary, and it has one. It is a reference column, not a second dashboard: no charts, no streaks, no leaderboards, per the anti-patterns in [`DESIGN-SYSTEM.md`](DESIGN-SYSTEM.md). Its only interactive elements are links to the page that owns each figure, and every count is phrased as "you have N" rather than "you are missing N".
+  - **A rail that owns state would be a second source of truth.** The plan's dates come from `readStarts()`, the counts from `readPortfolio()` and `readApplications()` — plain reads, deliberately **not** the hooks. Two live copies of one `localStorage` key drift, and the stale one writing back would drop a record the reader just added on the page that owns it. The dashboard remounts on every view change, so a read at mount is correct; the hooks keep their subscribing behaviour for the pages that mutate.
+  - **`fmtWeeks` and `fmtDate` moved into [`lib/pace.js`](../learning-site/src/lib/pace.js).** The rail and the Schedule page report the same numbers, and two copies of a formatter round them two different ways. `fmtDate` parses and formats as UTC, because formatting a UTC midnight in local time renders the previous day anywhere west of Greenwich — which turns a planned finish date into a wrong one.
+  - **The ring is a chart, so it obeys the rule charts obey here.** The percentage and the raw count are rendered as text beside it; the `svg` carries a label rather than being silent; and it animates nothing. A non-numeric or out-of-range value clamps instead of reaching the dash arithmetic as `NaN`, which would render as no arc at all, silently — both cases are now asserted.
+  - **Nothing is hidden at a narrow width.** Below the breakpoint the rail lays out as cards under the main column, in the same order. This is a reflow, not a truncation, and the 560px phone layout is unchanged apart from the phase grid dropping to one column.
+  - **The main bundle grew by 4 KB raw / 0.7 KB gzipped** — 398 KB and 117.7 KB — because the ring and the rail add code and no dependencies. The search index is untouched.
+
 ## D-014 — Progress has two axes, and a phase remembers where you were
 
 - **Date:** 2026-09-15

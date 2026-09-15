@@ -79,6 +79,10 @@ Named so the same name survives across frameworks.
 
 Horizontal bar. Shows track progress (phase-level) or overall progress. Label shows the percentage as text, not just visually.
 
+### `<ProgressRing value label />`
+
+A single-value ring, used once — on the dashboard's reference rail, for how far through the track the reader is. It is a chart, so it carries the same duty `ProgressBar` does and one more: the percentage and the raw count are rendered as text beside it, and the `svg` is labelled rather than left silent. **It animates nothing.** The arc is drawn at its final length with no transition, because this is a readout and not a reward. A non-numeric or out-of-range value clamps instead of reaching the dash arithmetic as `NaN`, which would render as no arc at all, silently — both cases are asserted in `test:smoke`.
+
 ### `<PhaseCard phase={...} />`
 
 Summary card for one phase: title, duration, progress, short goal. Click opens the phase detail.
@@ -122,7 +126,9 @@ The keyboard shortcut list, opened by `?` or from the sidebar. Moves focus into 
 ## Layout rules
 
 - **Sidebar:** fixed left, ~260px on desktop. Collapses to a drawer on mobile.
-- **Content max-width:** ~760px for reading. Wider (~1100px) for tables and dashboards.
+- **Content max-width:** the shell is capped at `--content-max` (1,400px) and **centred**, not pinned against the sidebar — a page capped and left-aligned on a 1,900px screen leaves a dead band nothing can use. Within that, the reading measure is ~760px and tables are allowed the full content width.
+- **Dashboard:** two columns above 1,180px — the next action and the phase list on the left, a **reference rail** on the right holding the progress ring, the plan's dates, three read-only readiness counts, and what comes up next. The rail is a reference column, not a second dashboard: no charts, no streaks, and its only controls are links to the page that owns each figure. Below the breakpoint it lays out as cards under the main column, in the same order, so nothing is hidden at a narrow width.
+- **Phase cards tile two-up** once there is width for two honest cards. A single column of fourteen full-width cards is a lot of scrolling for very little information per card.
 - **Sidebar contents:** a Views list (Dashboard, Schedule, Search, Tools, Portfolio, Applications), the track switcher (IT / Cyber), the current track's phase list, Keyboard shortcuts, and Reset progress. There is no Settings page; the preferences that would live there sit next to the thing they affect — energy mode and reading size on the page they change, the schedule's start date on the Schedule page.
 - **Header:** on the dashboard, shows the current recommended task and the current energy mode.
 
@@ -169,16 +175,17 @@ Do not:
 
 ## Breakpoints
 
-Two, and both are load-bearing.
+Three, and all three are load-bearing.
 
 | Width | What changes |
 |---|---|
+| ≥ 1180px | The dashboard becomes two columns: content plus the reference rail, which sticks so a figure you are checking against stays on screen. Below this the rail lays out as cards under the main column, in the same order — nothing is dropped, it just stops being a column. |
 | ≤ 860px | The sidebar becomes an off-canvas drawer behind a hamburger button in a sticky topbar, with Escape, backdrop-click and scroll locking. The reading bar runs the full width, because the sidebar no longer occupies a column. The lesson toolbar stops being sticky — the topbar owns the single `top: 0` slot and would otherwise sit over it. The lesson TOC drops to one column. |
-| ≤ 560px | Phone layout. Spacing tightens, the pager and plan rows stack, page headings step down a size, and the smallest touch target is brought to **40px** — a mis-tap on a 24,000-word lesson loses the reader's place. The per-section done control stops relying on hover and is always visible, since a touch device has no hover to reveal it with. That is the same rule the code-block copy button follows. |
+| ≤ 560px | Phone layout. Spacing tightens, the pager and plan rows stack, page headings step down a size, and the smallest touch target is brought to **40px** — a mis-tap on a 24,000-word lesson loses the reader's place. The per-section done control stops relying on hover and is always visible, since a touch device has no hover to reveal it with. That is the same rule the code-block copy button follows. The phase grid drops to a single column. |
 
 ## Still open
 
 - **Icon set.** None. Components use text labels and a single check glyph.
 - **Animation library.** None. Transitions are CSS-only and under 150ms, per the anti-patterns above. A `prefers-reduced-motion` block zeroes the duration for readers who ask the system for less motion.
 - **Print stylesheet.** A phase cannot yet be taken offline on paper.
-- **Progress export.** Progress, portfolio and applications live in three `localStorage` keys with no way to move them between machines or back them up.
+- **Progress export.** Progress, portfolio and applications live in three `localStorage` keys with no way to move them between machines or back them up. The dashboard rail now surfaces the counts, which makes the risk visible without closing it.

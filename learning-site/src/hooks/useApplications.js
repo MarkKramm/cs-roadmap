@@ -35,7 +35,13 @@ function newId() {
   );
 }
 
-function load() {
+/**
+ * Read the stored applications without subscribing to them.
+ *
+ * Same reasoning as readPortfolio: the dashboard's rail counts them, and a
+ * second live copy of the key would let a stale write drop an entry.
+ */
+export function readApplications() {
   try {
     const raw = window.localStorage.getItem(KEY);
     const parsed = raw ? JSON.parse(raw) : [];
@@ -46,7 +52,7 @@ function load() {
 }
 
 export function useApplications() {
-  const [entries, setEntries] = useState(load);
+  const [entries, setEntries] = useState(readApplications);
 
   useEffect(() => {
     try {

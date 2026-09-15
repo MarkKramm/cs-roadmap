@@ -96,11 +96,16 @@ a:hover {
   gap: var(--space-2);
 }
 
+/* The content column is centred rather than left-aligned against the sidebar.
+   On a wide screen a 1,400px block pinned to the left of a 1,919px viewport
+   leaves a dead band on the right that no page can use — and every page here is
+   a column of cards, so the fix belongs in the shell rather than in each page. */
 .content {
   flex: 1;
   min-width: 0;
   padding: var(--space-6);
-  max-width: var(--content-wide);
+  max-width: var(--content-max);
+  margin-inline: auto;
 }
 
 .muted {
@@ -1705,6 +1710,242 @@ p em {
 .track-card__weeks {
   font-size: var(--text-xs);
   margin: var(--space-2) 0 0;
+}
+
+/* --- Dashboard layout: main column and reference rail ---
+   The dashboard was a single 1,100px column, which on a wide screen left the
+   whole right half of the viewport empty. The fix is not more content — it is to
+   give the numbers a place of their own and let the phases tile.
+
+   The rail is a reference column, not a second dashboard: a progress ring, the
+   plan's dates, three read-only counts, and the next two phases. It carries no
+   charts and no streaks, per docs/DESIGN-SYSTEM.md → Anti-patterns. Below
+   1180px it stops being a column and lays out as cards under the main column,
+   in the same order, so nothing is hidden at a narrow width. */
+
+.dashboard__grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--space-5);
+  align-items: start;
+}
+
+@media (min-width: 1180px) {
+  .dashboard__grid {
+    grid-template-columns: minmax(0, 1fr) var(--rail-width);
+  }
+
+  /* The rail follows the reader down the page on a short viewport. It is a
+     reference column, and a reference you have to scroll back to is not one. */
+  .dashboard__rail {
+    position: sticky;
+    top: var(--space-6);
+  }
+}
+
+/* Phase cards tile two-up once there is width for two honest cards. A single
+   column of eleven full-width cards is a lot of scrolling for very little
+   information per card. */
+.phase-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: var(--space-3);
+  align-items: stretch;
+}
+
+.phase-grid .phase-card {
+  margin-bottom: 0;
+  height: 100%;
+}
+
+@media (max-width: 560px) {
+  .phase-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+/* --- Reference rail cards --- */
+
+.rail-card {
+  margin-bottom: var(--space-4);
+}
+
+.rail-card:last-child {
+  margin-bottom: 0;
+}
+
+.rail-card__title {
+  font-size: var(--text-sm);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--text-muted);
+  font-weight: 400;
+  margin: 0 0 var(--space-4);
+}
+
+.rail-card__cta {
+  display: block;
+  width: 100%;
+  text-align: left;
+  font-size: var(--text-sm);
+  padding: var(--space-2) 0 0;
+}
+
+.rail-card__note {
+  font-size: var(--text-sm);
+  margin: var(--space-4) 0 0;
+}
+
+/* --- Progress ring ---
+   A single-value readout. The percentage and the raw count are also rendered as
+   text beside it, so the ring is never the only carrier of the number — the same
+   rule ProgressBar follows, and the reason the svg carries an aria-label rather
+   than being left silent. */
+
+.rail-progress {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+}
+
+.rail-progress__text {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  font-size: var(--text-sm);
+  min-width: 0;
+}
+
+.rail-progress__value {
+  font-size: var(--text-2xl);
+  font-weight: 600;
+  line-height: 1.2;
+}
+
+.ring {
+  flex-shrink: 0;
+}
+
+.ring__track {
+  stroke: var(--bg-subtle);
+}
+
+.ring__fill {
+  stroke: var(--accent);
+  /* No transition. This is a readout, not a reward. */
+}
+
+/* --- Rail: plan facts --- */
+
+.rail-facts {
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.rail-fact {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-3);
+  font-size: var(--text-sm);
+}
+
+.rail-fact dt {
+  color: var(--text-muted);
+}
+
+.rail-fact dd {
+  margin: 0;
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+}
+
+/* --- Rail: readiness chips ---
+   Buttons, because each one navigates to the page that owns the count. Phrased
+   as "you have N", never "you are missing N". */
+
+.rail-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+.rail-chip {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 84px;
+  flex: 1 1 84px;
+  text-align: left;
+  font: inherit;
+  color: var(--text);
+  background: var(--bg-subtle);
+  border: 1px solid var(--border);
+  border-radius: var(--space-1);
+  padding: var(--space-2) var(--space-3);
+  cursor: pointer;
+  transition: border-color var(--transition-fast);
+}
+
+.rail-chip:hover {
+  border-color: var(--accent);
+}
+
+.rail-chip__value {
+  font-size: var(--text-xl);
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+.rail-chip__label {
+  font-size: var(--text-xs);
+  color: var(--text-muted);
+}
+
+/* --- Rail: what comes up next --- */
+
+.rail-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.rail-list__open {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  width: 100%;
+  text-align: left;
+  background: none;
+  border: none;
+  border-left: 2px solid var(--border);
+  padding: var(--space-1) 0 var(--space-1) var(--space-3);
+  color: var(--text);
+  font: inherit;
+  cursor: pointer;
+  transition: border-color var(--transition-fast);
+}
+
+.rail-list__open:hover {
+  border-left-color: var(--accent);
+}
+
+.rail-list__title {
+  font-size: var(--text-sm);
+}
+
+.rail-list__now {
+  color: var(--accent);
+  font-weight: 600;
+}
+
+.rail-list__meta {
+  font-size: var(--text-xs);
 }
 
 /* --- Schedule --- */
