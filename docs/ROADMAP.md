@@ -71,12 +71,21 @@ The roadmap for the **repository itself** (for the study curriculum, see [`../ca
 
 ## Next
 
+- [ ] **Fix six glued headings in three IT phases.** A fence-aware audit of all 17 phase files found headings with no blank line before them, so Markdown renders them as part of the preceding paragraph rather than as headings. Phase 1's defects were not unique. Confirmed locations:
+  - `02-phase-operating-systems.md:185` — `### Part 3 — Windows from the command line`
+  - `02-phase-operating-systems.md:260` — `### Part 4 — Linux: the same ideas, different grammar`
+  - `03-phase-networking-basics.md:140` — `### Part 2 — IP addressing without the fear`
+  - `03-phase-networking-basics.md:293` — `### Part 5 — Troubleshooting, in a fixed order`
+  - `03-phase-networking-basics.md:383` — `## Tools for This Phase` (a mandatory section, currently not rendering as a heading)
+  - `04-phase-helpdesk-skills.md:443` — `### Part 5 — What good looks like`
+
+  One-line fix per site, invisible to the generated JSON. The same audit found **no** empty sections, **no** duplicate headings, and **no** bisected lessons in either track, so Phase 1's other three defect classes were unique to it. The cyber track is clean on all three checks.
+- [ ] **Apply the Phase 1 depth standard to other IT phases** — S.M.A.R.T./BSOD evidence reading and ticket-lifecycle material exist only in Phase 1 so far.
 - [ ] **Deploy the site** — blocked on the private-repo visibility decision. GitHub Pages from a private repo generally needs a paid plan, but Netlify, Vercel, and Cloudflare Pages all deploy private repos on free tiers, so this is less blocked than it first appeared.
 
 ## Later / optional
 
 - [ ] Cyber track site UI for surfacing lessons, if the lessons need to be reachable in the app rather than only in Markdown.
-- [ ] Apply the Phase 1 depth standard to other IT phases — S.M.A.R.T./BSOD evidence reading and ticket-lifecycle material currently exist only in Phase 1.
 
 ## Explicitly out of scope
 
