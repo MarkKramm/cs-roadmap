@@ -82,6 +82,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - `learning-site/README.md` — removed a duplicated `## Layout` section; documented the new pages, hooks, and commands; status brought up to M2.
 
 ### Fixed
+- **Seven glued headings across three IT phases — and the defect class is now automated away.** A fence-aware audit of all 17 phase files found seven headings with no blank line before them, so Markdown folded each into the preceding paragraph and it never rendered as a heading. Phase 1's defects were not unique. Fixed with one inserted blank line per site, zero prose changed:
+  - `02-phase-operating-systems.md` — `### Part 2 — Windows: navigating like a technician`, `### Part 3 — Windows from the command line`, `### Part 4 — Linux: the same ideas, different grammar`
+  - `03-phase-networking-basics.md` — `### Part 2 — IP addressing without the fear`, `### Part 5 — Troubleshooting, in a fixed order`, and the mandatory `## Tools for This Phase`
+  - `04-phase-helpdesk-skills.md` — `### Part 5 — What good looks like`
+
+  **Verified JSON-neutral:** phases 2, 3 and 4 are byte-identical to the pre-fix baseline, so the fix is purely presentational. `scripts/lint-content.mjs` now checks heading spacing (fence-aware, so a heading inside a code fence is not flagged), and the rule was **verified by negative test**: reintroducing the defect fails the lint, naming the file, line, and heading. The same audit found no empty sections, no duplicate headings, and no bisected lessons in either track; the cyber track is clean on all three checks.
 - **Phase 1 rendered visibly broken, from four defects that all predated the fence fix.** `career-roadmaps/it-roadmap/01-phase-computer-fundamentals.md`:
   - **A missing blank line** between a paragraph and `### Part 2 — RAM: working memory` glued the heading to the text, so **Part 2 did not render as a heading at all**.
   - **Part 2's `#### What you would do` was empty**, and its five numbered actions sat orphaned inside Part 3 under a *second* `#### What you would do` heading — so RAM's remedy advice (memory diagnostic, reseating, testing sticks individually) appeared under Storage, and the RAM section offered no actions.

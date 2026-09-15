@@ -115,6 +115,7 @@ Operating system problems cluster into recognisable categories. Learn the catego
 - **Update problems** — a patch failed to install, or installed and broke something. Rollback and update history are your tools.
 - **Filesystem problems** — corruption, disk errors, a full disk, a drive that disappears.
 - **Boot problems** — the machine will not start, or starts into recovery. This is where OS troubleshooting meets the firmware knowledge from Phase 1.
+
 ### Part 2 — Windows: navigating like a technician
 
 #### The filesystem you will actually use
@@ -182,6 +183,7 @@ Guest          False
 That output is a genuine security review. A **Guest** account that is enabled, or an unexpected member of **Administrators**, is exactly the kind of finding that matters in a real support role — and noticing it is a skill you can demonstrate in an interview.
 
 **UAC (User Account Control)** is the prompt that appears when something needs elevation. It exists because most users should never run as administrator for daily work. When a user says "it keeps asking me for permission", the correct response is usually not "disable UAC" — it is "you are running as a standard user, and I will do that step for you". Never advise disabling UAC as a fix.
+
 ### Part 3 — Windows from the command line
 
 The command line matters because it is precise, scriptable, and remote-friendly. On a remote support call, you cannot see the user's screen, but you can ask them to type one command and read you the output.
@@ -257,6 +259,7 @@ Three event levels to care about:
 Two event IDs worth memorising for entry-level work. **Event ID 41, Kernel-Power** in the System log means the system shut down without a clean exit — a crash, a power loss, or a hard reset. It tells you *that* the machine died unexpectedly, not why. **Event ID 6008, EventLog** records an unexpected shutdown with a timestamp, which is invaluable for correlating "it restarts randomly" with what the user was doing.
 
 The technique is to filter, note the timestamp, and correlate. A user says "it crashed yesterday afternoon". You filter the System log to Error and Critical for that window and read what happened just before. Consistently, there will be a clue — a disk warning, a driver error, a memory fault.
+
 ### Part 4 — Linux: the same ideas, different grammar
 
 #### Why a Windows person should learn Linux

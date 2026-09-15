@@ -129,6 +129,7 @@ Do not:
 - Write a phase without a deliverable.
 - Use `--` for an em-dash, `?` for a curly quote, or `???` for a tree branch. See [`WORKFLOW.md`](WORKFLOW.md).
 - Leave a code fence unterminated. Everything after it is read as inside the fence, so the rest of the document vanishes from section extraction.
+- **Put a heading directly under a paragraph with no blank line between them.** Markdown folds the heading into the paragraph, so it renders as body text and the section silently disappears. This defect shipped seven times in this repository before it was automated — including a `### Part` heading and a mandatory `## Tools for This Phase` heading. `scripts/lint-content.mjs` now checks it, fence-aware, so a heading inside a code fence is not flagged.
 - Inflate scope. A phase that claims 2 weeks for 4 weeks of work will cause burnout.
 - Copy the same tools table across every phase. Each phase's tools should reflect that phase's work.
 

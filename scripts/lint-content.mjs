@@ -1,7 +1,10 @@
 // Text-integrity linter. Scans every tracked text file for the damage this
 // repository has actually suffered: CRLF, UTF-8 BOM, U+FFFD replacement
 // characters, invalid UTF-8, and ASCII "?" standing in for a typographic
-// character. Zero dependencies. Exits non-zero on any error.
+// character. It also checks Markdown heading spacing — a heading with no
+// blank line before it renders as body text, which has silently swallowed
+// whole sections in this repository. Zero dependencies. Exits non-zero on
+// any error.
 //
 // Scope is deliberately narrow. Structural validation of phase files
 // (mandatory sections, task IDs, tools-table columns) belongs to the build
@@ -34,6 +37,10 @@ const CRLF_EXT = new Set([".bat", ".cmd", ".ps1", ".psm1", ".psd1"]);
 
 // Files where "?" is an operator, not prose. Only these get the ? rules.
 const PROSE_EXT = new Set([".md", ".mdx", ".txt"]);
+
+// Markdown files where heading structure matters. Only these get the
+// blank-line-before-heading rule.
+const MARKDOWN_EXT = new Set([".md", ".mdx"]);
 
 // Each pattern is unambiguous: no legitimate English sentence produces it.
 const QUESTION_RULES = [
@@ -141,6 +148,45 @@ function checkProse(file, text) {
   }
 }
 
+// A heading needs a blank line before it. Without one, Markdown folds the
+// heading into the preceding paragraph and it renders as body text — so a
+// whole section can silently vanish. This repository has shipped that defect
+// seven times, which is why it is now checked rather than reviewed by eye.
+//
+// Fence-aware: a "## Something" line inside a code fence is sample content,
+// not a heading. Tables and blockquotes are excluded because a heading may
+// legitimately follow them without a blank line in neither case — the
+// excluded set is deliberately small to avoid false negatives.
+function checkHeadingSpacing(file, text) {
+  if (!MARKDOWN_EXT.has(extname(file).toLowerCase())) return;
+  const lines = text.split("\n");
+  let inFence = false;
+  for (let i = 0; i < lines.length; i++) {
+    const t = lines[i].trimStart();
+    if (t.startsWith("```") || t.startsWith("~~~")) {
+      inFence = !inFence;
+      continue;
+    }
+    if (inFence) continue;
+    if (!/^#{1,6} /.test(lines[i])) continue;
+    if (i === 0) continue;
+
+    const prev = lines[i - 1];
+    if (prev.trim() === "") continue;
+    if (/^#{1,6} /.test(prev)) continue;
+    if (/^\s*\|/.test(prev)) continue;
+    if (/^\s*>/.test(prev)) continue;
+    if (/^\s*<!--/.test(prev)) continue;
+
+    err(
+      file,
+      i + 1,
+      "heading has no blank line before it — it will render as body text: " +
+        lines[i].trim(),
+    );
+  }
+}
+
 const files = walk(ROOT).filter(shouldCheck).sort();
 
 for (const file of files) {
@@ -152,7 +198,10 @@ for (const file of files) {
     continue;
   }
   const text = checkBytes(file, bytes);
-  if (text !== null) checkProse(file, text);
+  if (text !== null) {
+    checkProse(file, text);
+    checkHeadingSpacing(file, text);
+  }
 }
 
 const rel = (f) => relative(ROOT, f).replace(/\\/g, "/");

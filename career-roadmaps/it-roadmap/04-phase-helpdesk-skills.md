@@ -440,6 +440,7 @@ Treat a report seriously and act carefully. **Never click links or open attachme
 #### File permissions
 
 Usually a permissions or group membership issue rather than a file problem. Identify what the user is trying to reach and which group grants access, then fix the membership rather than the file — changing file permissions directly is how access control quietly degrades over time.
+
 ### Part 5 — What good looks like
 
 #### Knowledge base articles are how you multiply yourself

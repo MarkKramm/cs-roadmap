@@ -137,6 +137,7 @@ Networking failures have a small set of recognisable shapes. Learn their names a
 - **Everything resolves, application fails** — the network is fine and the problem is a specific service, a firewall rule, or the application itself.
 
 That list is a decision tree. Run down it in order and you will locate the fault in under two minutes.
+
 ### Part 2 — IP addressing without the fear
 
 #### IPv4, in plain terms
@@ -290,6 +291,7 @@ You can see the handshake on your own machine. In Wireshark, filter on `tcp` and
 #### TLS and HTTPS in one paragraph
 
 **TLS (Transport Layer Security)** wraps a connection in encryption and proves the server's identity with a **certificate**. **HTTPS** is simply HTTP carried inside TLS, on port 443. The practical support consequence: certificate errors are a common, specific, and diagnosable class of ticket. "Your connection is not private" almost always means an expired certificate, a wrong system clock, a captive portal, or an inspecting proxy — not a virus.
+
 ### Part 5 — Troubleshooting, in a fixed order
 
 #### The layered checklist
@@ -380,6 +382,7 @@ Fix: point the device (or the router's DHCP scope) at a working resolver. This i
 ### Practice this next
 
 The exercises in *Hands-on practice tasks* below are not optional extras — they are the lesson. Draw your network, run the commands, watch a handshake in Wireshark, and build the Packet Tracer topology. If you can explain the DNS test and the DHCP failure mode out loud, without notes, you have learned this phase.
+
 ## Tools for This Phase
 
 | Tool | What it does | Cost | Official link | Mini-task | Free alternative |
