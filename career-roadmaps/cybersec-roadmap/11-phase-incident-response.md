@@ -969,6 +969,177 @@ You have also never handled evidence that would go to a court or a regulator. Th
 
 **Say it plainly:** “I can run the full process on a lab image, and I have written it up properly. I have not done it live. I have also not handled evidence with a legal standard attached.” Both halves of that sentence are useful to an interviewer. The second one tells them you know what you do not know.
 
+### Part 9 — One incident, start to finish
+
+The parts above taught the stages. This one runs a single incident through all of them, with the actual commands and the actual timestamps, so you can see what a complete investigation looks like before you run your own.
+
+**This is a lab.** The image, the user, the hostname and the timestamps are synthetic. The commands are real and safe to run on an image you made yourself. **You may only analyse systems and images you own or have written authorisation to examine.**
+
+#### The scenario
+
+You are the on-call analyst at a small company. At 09:20 on a Tuesday, the SIEM raises an alert on workstation `WKS-014`.
+
+| Field | Value |
+|---|---|
+| Alert | Suspicious process execution from a user temp directory |
+| Host | `WKS-014`, Windows 10, user `LAB\jsantos` |
+| Detection | EDR rule firing on `svchost.exe` running from `AppData\Local\Temp` |
+| Severity as reported | Medium |
+| Time | 09:20 local, 01:20 UTC |
+
+Your job is to determine whether this is real, contain it if it is, and write it up.
+
+#### Stage 1 — Triage: the first ten minutes
+
+Do not open the disk yet. Answer four questions from what you can see right now.
+
+| Question | What you check | What you find |
+|---|---|---|
+| Is it real or a false positive? | The process path and parent process | `svchost.exe` in `Temp` is never legitimate — real ones run from `System32` |
+| Is it still running? | EDR live process view | Yes, PID 4412, started 09:14:02 |
+| Is it spreading? | Other hosts with the same rule | One host only |
+| What is the business impact? | What the user does, what the host can reach | Finance workstation; has access to a shared drive holding client records |
+
+**Severity decision: upgrade to High.** The original Medium rating was based on a single host. The shared-drive access changes the assessment, because the impact is no longer confined to one machine.
+
+**Write this down now, with times.** Triage reasoning that is not recorded cannot be reviewed later, and "why did you call it High?" is the first question anyone asks.
+
+#### Stage 2 — Containment: isolate before you investigate
+
+The instinct to look around first is wrong. Every minute the process runs is a minute it can move.
+
+**Contain, then investigate. The evidence does not go anywhere once the host is isolated.**
+
+| Step | Action | Why this order |
+|---|---|---|
+| 1 | Network-isolate `WKS-014` via EDR | Stops command-and-control and lateral movement without destroying volatile state |
+| 2 | **Do not power it off** | Memory holds what you need most; a shutdown loses it |
+| 3 | Notify the user by phone, not email | The account may be compromised |
+| 4 | Disable the user's account, keep the mailbox | Stops the attacker using it while preserving mail evidence |
+| 5 | Log the time of each action | This is chain of custody starting now |
+
+| Action | Time | Who |
+|---|---|---|
+| Alert received | 09:20 | SIEM |
+| Confirmed suspicious | 09:24 | Analyst |
+| Host isolated | 09:31 | Analyst |
+| Account disabled | 09:36 | Analyst, approved by IT Manager |
+
+**The chief's question to expect:** "Why did you isolate before analysing?" The answer is that containment preserves more evidence than it destroys, because a live attacker destroys evidence deliberately and continuously.
+
+#### Stage 3 — Evidence acquisition, in volatility order
+
+Now capture, most volatile first. On a lab image, or on a host you own.
+
+```bash
+# 1. Memory first — it disappears when the machine stops
+#    On Windows, use a free tool such as WinPmem on the live host you own.
+#    On Linux:
+sudo dd if=/dev/mem of=/evidence/memory.img bs=1M    # where supported
+#    Better on Linux: LiME, which captures full physical memory
+sudo insmod lime.ko "path=/evidence/memory.lime format=lime"
+
+# 2. Then network state
+ss -tulpn > /evidence/netstat.txt
+ip route > /evidence/routes.txt
+arp -a > /evidence/arp.txt
+
+# 3. Then running processes
+ps auxww > /evidence/processes.txt
+
+# 4. Then a disk image, read-only, hashed as you go
+sudo dc3dd if=/dev/sda of=/evidence/disk.img hash=sha256 log=/evidence/acquire.log
+sha256sum /evidence/disk.img >> /evidence/hashes.txt
+```
+
+| Evidence item | Method | Hash | Custody |
+|---|---|---|---|
+| 001 | Memory capture | `sha256: a3f1…` | Analyst → evidence locker 09:48 |
+| 002 | Disk image | `sha256: 7b2c…` | Analyst → evidence locker 10:15 |
+| 003 | EDR process export | `sha256: 91de…` | Analyst → evidence locker 10:22 |
+| 004 | Firewall logs, 24h | `sha256: 4c88…` | Network team → evidence locker 10:40 |
+
+**Hash everything, immediately, and write the hash down somewhere that is not the evidence itself.** A hash recorded only inside the image proves nothing.
+
+#### Stage 4 — Analysis: building the timeline
+
+Now you look. Note that every line pairs a **fact** with its **source**.
+
+| Time (UTC) | Event | Source | Fact or inference? |
+|---|---|---|---|
+| 01:04:12 | User `jsantos` interactive logon, workstation `WKS-014` | Security event log 4624 | Fact |
+| 01:07:33 | Email with attachment `Invoice_2026-03.doc` received | Mail gateway log | Fact |
+| 01:11:02 | `WINWORD.EXE` spawns `cmd.exe` | EDR process tree | Fact |
+| 01:11:04 | `cmd.exe` writes `%TEMP%\svchost.exe` | EDR file write event | Fact |
+| 01:14:02 | `%TEMP%\svchost.exe` executes, PID 4412 | EDR | Fact |
+| 01:14:09 | Outbound connection to `203.0.113.47:443` | Firewall log | Fact |
+| 01:19:41 | `net use \\FS-02\ClientRecords` succeeds | Security event 5140 | Fact |
+| 01:22:16 | 340 files read from `\\FS-02\ClientRecords` | File server audit log | Fact |
+| 01:31:00 | Connection to `203.0.113.47` stops | Firewall log | Fact |
+
+**The inference column is where reports go wrong.** Notice what is *not* in the table: nobody has proven the user opened the attachment deliberately, and nobody has proven data left the network. Those are inferences, and they belong in the findings section as stated inferences, not in the timeline as facts.
+
+Two things the timeline *does* establish, and they matter:
+
+1. The malicious process started **2 minutes 58 seconds** after the document was received. That gap is consistent with automated execution, not a user manually exploring.
+2. Access to the client records share happened **5 minutes after** execution began. The attacker knew where to look, or the malware was configured to.
+
+#### Stage 5 — The root cause, stated properly
+
+Weak: "A user opened a malicious attachment."
+
+That is the mechanism, and it names nothing fixable. Compare:
+
+| Layer | Statement |
+|---|---|
+| Mechanism | A macro in a received document executed and dropped a payload into a user temp directory |
+| Root cause | Macro execution from internet-sourced documents was not blocked by policy, and the user's share access was broader than their role required |
+| Contributing | No email attachment sandboxing; EDR alerted but was not configured to auto-isolate |
+
+**Each root-cause line is something a control can close.** That is the test.
+
+#### Stage 6 — Detection gaps found
+
+An incident review that produces only a fix for the specific file has wasted the incident.
+
+| Gap | What should have happened | Change made |
+|---|---|---|
+| Alert was rated Medium automatically | Severity should account for what the host can reach | Host criticality added to the severity rule |
+| Three minutes between execution and analyst review | Auto-isolation on this rule class | EDR set to auto-isolate on temp-directory process execution |
+| Share access far exceeded the role | Least privilege on the file server | Access review scheduled; 42 users found over-provisioned |
+| No email sandboxing | Attachment detonation | Free-tier evaluation started |
+
+**The third row is the one worth noting.** The incident exposed an access problem that had nothing to do with malware, and it affected 42 users. Incidents routinely surface the largest findings in the least expected place.
+
+#### Stage 7 — The report, in the shape a reader needs
+
+| Section | Content |
+|---|---|
+| **Summary** | A finance workstation executed malware delivered by email. The host was isolated 11 minutes after the alert. Files on a shared drive were accessed; no evidence of exfiltration was found. |
+| **Impact** | One host rebuilt. Potential exposure of client records on `FS-02` requiring assessment against notification obligations. |
+| **Timeline** | The 9-row table above. |
+| **Root cause** | Macro execution not blocked; share permissions exceeded role. |
+| **Actions taken** | Isolate, disable account, image memory and disk, rebuild host. |
+| **Findings requiring decision** | Whether the client-record access triggers notification. Owner: Compliance. |
+| **Limitations** | Encryption of the outbound connection means exfiltration cannot be confirmed or excluded from network data alone. No memory artefact was recovered for the payload itself. |
+| **Detection improvements** | The four rows above. |
+
+**The limitations section is not a weakness.** "We cannot determine whether data left, because the connection was encrypted and we have no endpoint egress telemetry" is a precise, useful statement. It tells the business exactly what to fix next.
+
+#### Rehearse this out loud
+
+Pick any two of these and answer with no notes. They are what an interviewer actually asks.
+
+| Question | What a strong answer does |
+|---|---|
+| Why isolate before analysing? | Explains that a live attacker destroys evidence, and containment preserves more than it costs |
+| Why not power off the machine? | Names memory as the most volatile and often most valuable artefact |
+| How do you know it was malware? | Points at the path and parent process, not at a feeling |
+| What would you do differently? | Names a real gap — the Medium rating, or the three-minute review delay |
+| What did this incident teach the business? | Names the over-provisioned share access, which was the biggest finding and unrelated to malware |
+
+If you can give the fourth answer and the fifth, you have done the exercise properly. If you cannot, you have followed the steps without reviewing them.
+
 ### Key takeaways
 
 - **An incident is a process, not an event.** The quality of the response depends almost entirely on preparation done before anything happened.
