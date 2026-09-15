@@ -7,9 +7,9 @@ A snapshot of the repository's current state. Update this when a meaningful mile
 | Item | Value |
 |---|---|
 | Branch | `main` |
-| Tracked files | 131 |
-| Working tree | Clean — nothing uncommitted, nothing untracked |
-| Unpushed | None. `main` and `origin/main` are both at the same commit — run `git --no-pager log --oneline -n 1` for the exact hash, since this file cannot contain its own |
+| Tracked files | **140** — 131 plus the nine files this pass adds: `scripts/shared-content.mjs`, `learning-site/src/lib/today.js`, `learning-site/src/lib/yourWork.js`, `learning-site/src/hooks/useTimeBudget.js`, `learning-site/src/pages/Shared.jsx`, `learning-site/src/pages/YourWork.jsx`, `learning-site/src/components/TimeBudgetSelector.jsx`, `learning-site/scripts/test-work.mjs`, `learning-site/scripts/test-today.mjs` |
+| Working tree | **This pass is uncommitted.** The three features and these four doc updates are the pending change; everything before it is committed |
+| Unpushed | None beyond that pending commit. `main` and `origin/main` were level before this pass — run `git --no-pager log --oneline -n 1` for the exact hash, since this file cannot contain its own |
 | Line endings | LF everywhere (Windows scripts excepted) |
 | Encoding | UTF-8, no BOM |
 | Remote | `origin` → https://github.com/MarkKramm/cs-roadmap |
@@ -19,13 +19,17 @@ A snapshot of the repository's current state. Update this when a meaningful mile
 | Build step | `learning-site/` — React + Vite. `npm run dev` / `npm run build` |
 | Curriculum size | **272,959 lesson words** across 23 phases, 464 fenced code blocks, 252 checklist task IDs |
 | Hands-on density | **Every phase that can carry practice now does.** Measured as concrete instructions per 1,000 lesson words, IT Phase 4 rose from **0.11 → 2.8** and Phase 6 from 0.17, the two worst in the repository. Nine phases gained work totalling roughly +37,000 words, all additive, after this metric found that four IT and five cyber phases *taught* skills without ever having the reader perform them. The remaining low-density phases — soft skills, specialization choice, certifications, job application — are ones where prose is correct, because you cannot run a terminal command to practise an interview answer |
-| Checks | `lint-content` **131** files / 0 issues; `audit-content` 0 issues across 23 phases; `audit-lesson-ast` 23 lessons / 0 loss; `audit-readability` 0 of 23 outside target and **0 paragraphs over 90 words**; `test:smoke` **174** renders / 0 failures; `test:ui` **42** checks / pass; `test:data` **83** checks / pass; `test:notes` **28** checks / pass; `test:lesson-search` **77** checks / pass; `test:search` 41 checks / pass; `test:highlight` 37 checks / pass; production build clean |
-| The reader's own writing | **A note per phase and an answer per practice task**, in a ninth `localStorage` key (`cs-roadmap:notes:v1`) — D-019. It is deliberately unscored: no count, no percentage, nothing on the dashboard, and a smoke assertion forbids an `N of M` pattern from ever appearing in it. Practice tasks gained stable `<phase-id>-tNN` ids for this, so an answer cannot silently migrate to a different question. Registered in `transfer.js` on the day it was written, and the suite that hardcoded “eight keys” now reads nine — see the note below on how that surfaced |
-| Bundle | **429 KB raw / 126 KB gzipped** for the initial chunk, with 23 on-demand lesson chunks. Up 13 KB raw / 2.6 KB gzipped from the notes layer; no new dependency |
+| Checks | `lint-content` **140** files / 0 issues; `audit-content` 0 issues across 23 phases; `audit-lesson-ast` 23 lessons / 0 loss; `audit-readability` 0 of 23 outside target and **0 paragraphs over 90 words**; `test:highlight` 37; `test:ui` 42; `test:data` **86**; `test:notes` 28; **`test:work` 31**; **`test:today` 77**; `test:lesson-search` 77; `test:search` 41; `test:smoke` **181** renders / 0 failures; production build clean |
+| The reader's own writing | **A note per phase and an answer per practice task**, in a `localStorage` key (`cs-roadmap:notes:v1`) — D-019 — and now **readable back** through the new **Your work** view (D-020). It is deliberately unscored: no count, no percentage, nothing on the dashboard, and a smoke assertion forbids an `N of M` pattern from ever appearing in it. Practice tasks carry stable `<phase-id>-tNN` ids, so an answer cannot silently migrate to a different question |
+| Shared documents | **The three `career-roadmaps/shared/` documents are reachable from the site for the first time** (D-020) — they never were, because `build-content.mjs` walks for `*-phase-*.md` and they are not phase files. `scripts/shared-content.mjs` emits `generated/shared.json` (**3 documents, 40 blocks, 42 resources, 20 KB**) by reusing the lesson parser through a `headingBase` parameter rather than forking it. `pages/Shared.jsx` renders them as a chip picker and deliberately does **not** reuse `<Lesson>`, which is keyed by phase id throughout |
+| Your work | **Every note and every answer, on one page** (D-020) — `pages/YourWork.jsx` over the pure `lib/yourWork.js`, with a link back to the phase that owns each entry. Answers match to tasks **by id, never by position**, and an orphaned answer is **kept** and flagged rather than deleted. It carries **no denominator at all**: `summariseWork()` has no `total`/`percent`/`remaining` field, so the absence is structural rather than a rendering choice. It reads via `readNotes()` rather than `useNotes()`, so it never becomes a second live copy of the storage key |
+| Task durations | **All 183 practice tasks carry an authored `band` and `energy`** (D-021), and the dashboard now asks how long the reader has before it suggests one. Bands — quick 23, focused 115, deep 34, ongoing 11. Energy — low 26, normal 128, high 29. **Zero ids are minted from position.** `ongoing` is an exclusion path rather than a length, and `fitsBand` fails closed on it. Every band is an **authored estimate** — nobody has timed a single task — and the UI says so on the page |
+| Time budget | A **tenth `localStorage` key**, `cs-roadmap:time-budget:v1` (D-021), owned by `hooks/useTimeBudget.js` and registered in `transfer.js` → `KEYS`, so the backup registry grew **9 → 10**. It defaults to `focused`, because that is where 82% of the tasks actually sit. `ongoing` is deliberately not offered as a budget — that is a property of a task, not an amount of time a person can have |
+| Bundle & build output | Initial chunk **429 KB raw / 126 KB gzipped**, unchanged by this pass, with 23 on-demand lesson chunks (**1,997 KB** total). `search.json` **542 KB**; the new `shared.json` adds **20 KB**. **No new dependency** was added for any of the three features |
 | Task IDs | 252 total (IT 90, cyber 162) |
 | CI | `.github/workflows/ci.yml` — two jobs on push to `main` and on PRs (D-008). Runs lint, content audit, lesson-parser audit, readability audit, build, smoke and search. **`cyber-restructure-check.mjs` is deliberately excluded**: it reads a before-snapshot from `process.env.TEMP`, which is not in the repository, so it can only ever fail on a fresh clone. It is a one-off migration tool for a restructure pass, not a standing guard. Last verified green: `2ec1871` |
 | Milestone | M3 complete — the site renders the lessons themselves, not just the structured sections |
-| Search | Full-text across all 23 lessons, both tracks (D-013). A build-time inverted index (term → segment id, **no prose**) emitted as `generated/search.json` — 471 KB raw, 180 KB as a delivered chunk, and **not referenced by `index.html`**, so a reader who never searches pays nothing and the main bundle stays at 105 KB gzipped. Results deep-link across tracks to the matching heading. Three silent-failure bugs were found by testing the index against the engine and are now guarded by `test:search` |
+| Search | Full-text across all 23 lessons, both tracks (D-013). A build-time inverted index (term → segment id, **no prose**) emitted as `generated/search.json` — **1,128 segments / 11,374 terms / 542 KB, roughly 27% of the lesson bytes** — and **not referenced by `index.html`**, so a reader who never searches pays nothing. Results deep-link across tracks to the matching heading. Three silent-failure bugs were found by testing the index against the engine and are now guarded by `test:search` |
 | Content depth | **Both tracks complete and uniformly deep.** All 23 phases carry `## Lesson` sections, and **all 23 are inside every readability target**. Cyber runs 7,563–12,177 lesson words across 14 phases; IT runs 5,567–23,657 across 9 |
 | Paragraph density | **Zero paragraphs over 90 words anywhere in the repository.** The readability audit now counts per-paragraph density and fails the build on anything over 150 words; the previous per-phase *average* could not see a single 190-word wall among twenty short paragraphs, which is how 33 of them accumulated in the IT track. All 33 were split at natural seams with every word preserved — proved by `git diff --word-diff`, where inserting a blank line is invisible and four of the five files therefore report 0/0 tokens |
 | Cyber depth track | Six new modules added as Phases 9–14, because the core path lists cloud, detection, IR, scripting, GRC and web security as target roles but taught none of them: cloud and identity, detection engineering, incident response and DFIR, scripting and automation, GRC and compliance, and web application security. All $0, all with explicit legal-boundary sections |
@@ -44,6 +48,20 @@ A snapshot of the repository's current state. Update this when a meaningful mile
 Five audit scripts matched phase files with `^0[1-9]-`, which covers 01–09 only. Every guard was therefore blind to phases 10 and above — and `audit-lesson-ast.mjs`, written fresh, inherited the same bug and was checking 18 of 23 lessons. All five now match `^(?!00-)\d{2}-`, which includes 10+ while still excluding `00-overview`. The readability script's track summary also hardcoded the original eight cyber phase names, so the six new modules were averaged into the IT track; it now derives the track from the path.
 
 This is worth recording because the failure mode was silence: the guards printed a clean result while covering four fifths of the content.
+
+### The storage-key guard was rewritten, because the old one could not fail
+
+`learning-site/scripts/test-data.mjs` asserted `KEYS.length === 9` and compared the registry against a fixture **hand-maintained in the same file**. It was therefore comparing the test to itself, and could not detect the failure it existed to prevent: a storage key the site writes but the backup does not know about. It had already broken on **two consecutive key additions (8 → 9 → 10)** while catching nothing — a hardcoded length can only restate what someone already knew.
+
+It now scans `src/` for `cs-roadmap:*:vN` string literals and compares against `KEYS` in **both directions**: every key the site writes must be registered, and every registered key must actually be used. The duplicate, weaker `KEYS.length === 9` assertion in `scripts/test-notes.mjs` was deleted for the same reason. `test:data` is at **86 checks**.
+
+**This is the second time in this project a guard printed nothing and was read as green** — the first was the `^0[1-9]-` pattern that hid phases 10+. It is also the third time a key-count change broke the suite. The pattern is consistent: a check that restates a number someone already believes is not a check, and its failure mode is silence rather than a red result.
+
+### Never rendered in a browser
+
+An honest caveat that belongs at the top of any future session: **the notes UI, the dashboard rail, the print stylesheet, the Shared view, the Your work view and the new time-budget control have never been rendered in a browser.** They are verified structurally, by render smoke tests, and by their unit suites only. The print path has been verified as CSS, not by actually printing a page. `test:smoke` renders to a string and asserts on markup — it cannot see layout, CSS specificity, focus order, or a control that is present but unreachable. Two real responsive defects in the 561–860px band were found by reading the CSS against the markup rather than by any guard, and that remains the only method this project has for that class of bug.
+
+A second caveat of the same kind: **nobody has timed any curriculum task.** Every band and every energy value is an authored estimate, not a measurement, and the UI says so on the page.
 
 This file deliberately carries no commit hash or commit count: a checkpoint
 cannot contain its own hash, so those numbers drift by one commit on every
@@ -64,7 +82,7 @@ edit. For the exact current state, run `git --no-pager log --oneline -n 1`.
 ├── LICENSE
 ├── docs/
 ├── scripts/                 (content tooling)
-├── learning-site/           (React + Vite; 7 pages, 12 components, 11 hooks;
+├── learning-site/           (React + Vite; 9 pages, 18 components, 13 hooks;
 │                             generated/ and dist/ ignored)
 └── career-roadmaps/
     ├── README.md
@@ -99,7 +117,7 @@ All of the following were re-verified against a **from-scratch rebuild** — `ge
 
 Read this first.
 
-1. **Nothing is outstanding on CI or deploy.** Both are green on `9629c89` and the site is live. See the table above.
+1. **Commit this pass first, then re-check CI.** The three features and these four doc updates are uncommitted, so CI has not run against them. CI and the Pages deploy were green on `9629c89` for the previous pass, and the site is live. See the table above.
 2. **Rebuild before running the site.** `learning-site/src/data/generated/` is gitignored, so a fresh clone has no lesson JSON until `npm run build:content` (or `npm run dev` / `npm run build`, which both call it) has run.
 3. **Run the guards after touching the parser.** `node scripts/audit-lesson-ast.mjs` is the one that matters; see [`WORKFLOW.md`](WORKFLOW.md) → "Guards on the lesson renderer".
 4. **Beware inline `node -e` on Windows.** Backticks inside a PowerShell double-quoted string are mangled, which silently corrupts escape-sensitive regexes. Write a throwaway `.mjs` file instead — this cost two wrong measurements in one session.
@@ -109,11 +127,15 @@ Read this first.
 
 - [ ] **Split the remaining dense paragraphs.** `audit-readability.mjs` now computes per-paragraph density and **fails on any paragraph over 150 words**. See the entry below for the distribution.
 - [ ] **Consider tightening the gate from 150 to 110 words** once the backlog is cleared. 150 is a hard ceiling that fails only on genuine walls of text; 110 would enforce the editorial standard.
-- [ ] **Migrate practice-task ids from minted to authored**, if the task lists ever need reordering. `build-content.mjs` mints `<phase-id>-tNN` from position, so appending is safe and reordering is not — a reader's answer would follow the position rather than the question. An authored `<!-- id: -->` comment on task lines, as the checklist already does, removes the caveat. Not needed while the lists only grow. See D-019.
+- [x] **Migrate practice-task ids from minted to authored — done, and it went further than the id.** `build-content.mjs` no longer mints any id: all 183 practice tasks author `<!-- id: … band: … energy: … -->`, and the build reports `0 still minted from position`. The same comment carries the new duration band and energy value (D-021). A future task line without its comment raises the minted count rather than silently passing, which is the signal to author it. See D-019, D-021.
+- [ ] **Exercise the new views in a real browser.** The notes UI, the dashboard rail, the print stylesheet, the Shared view, the Your work view and the time-budget control are verified structurally and by unit suites only — see "Never rendered in a browser" above. The project has no guard that can see layout, CSS or focus order, and both defects it has found in that class were found by reading the CSS by hand.
 - [ ] **Five small follow-ups from the module review** — each closes a gap the review identified but deliberately did not fill. Listed in [`ROADMAP.md`](ROADMAP.md) → "Follow-ups from the module review".
 
 ### Closed in this pass
 
+- [x] **Surfaced the shared documents, and made the reader's writing readable back** (D-020). `career-roadmaps/shared/` had no path to it from the site at all; a `Shared` view now renders all three documents from a new `shared.json` (3 documents, 40 blocks, 42 resources, 20 KB) built by `scripts/shared-content.mjs`, which reuses the lesson parser via a `headingBase` parameter rather than forking it. A `Your work` view gathers every note and every answer across all 23 phases onto one page, matching answers **by id and never by position**, keeping orphans, and carrying **no denominator** at all — `summariseWork()` has no `total`/`percent`/`remaining` field, so the absence is structural rather than a rendering choice. Guarded by `test:work`, 31 checks.
+- [x] **Gave every task a duration, and asked the reader how long they have** (D-021). All 183 practice tasks now carry an authored band and energy value, and the dashboard draws its suggestion from practice tasks rather than the checklist. `ongoing` is an exclusion path, `fitsBand` fails closed, and a real defect was caught by the new test: an unaddressed `ongoing` task used to fall through to `all-addressed`, telling a reader **"nothing left" while they still had work**. Guarded by `test:today`, 77 checks. The time budget is a tenth `localStorage` key, and the backup registry grew 9 → 10.
+- [x] **Rewrote the storage-key guard so it can fail.** See "The storage-key guard was rewritten" above — it compared the test to itself and had broken twice while catching nothing.
 - [x] **Gave the reader somewhere to write** (D-019). A note per phase and an answer per practice task, in a ninth `localStorage` key. Deliberately unscored, and asserted to stay that way. Practice tasks gained stable ids for it, which they had never had.
 - [x] **A guard that failed silently, found by adding a key.** `test-data.mjs` hardcoded “eight keys” and seeded eight, so registering the ninth made its round-trip loop call `JSON.parse(undefined)` — which threw a stack trace and took the whole suite down, reporting **nothing** rather than reporting a failure. It now reports a missing fixture value as a failed check. This is the second time in this project that a guard printed nothing and was read as green; the first was the `^0[1-9]-` pattern that hid phases 10+.
 - [x] **Split every dense paragraph, and gated the audit so they stay split.** 33 paragraphs over 90 words → **0**. The old gate measured a per-phase *average*, which a single wall of text does not move.
@@ -135,7 +157,7 @@ From the repository root:
 
 ```powershell
 git --no-pager log --oneline -n 5
-git --no-pager status --short          # expect empty
+git --no-pager status --short          # expect the pending pass, then empty after committing
 git --no-pager log origin/main..HEAD --oneline   # expect empty after pushing
 
 node scripts/lint-content.mjs            # content integrity
@@ -150,9 +172,12 @@ npm run test:smoke                       # render every phase with real data
 npm run test:ui                          # pace, navigation, shortcuts, section keys
 npm run test:data                        # backup export/import, incl. the rejection cases
 npm run test:notes                       # the notes store and its merge rule
+npm run test:work                        # every note and answer reads back, orphans kept
+npm run test:today                       # bands, fitting, addressed rules, every reason
+npm run test:lesson-search               # in-lesson find agrees with the corpus engine
 npm run test:search                      # index and query engine agree
 ```
 
 Note: `cyber-restructure-check.mjs` exits 2 on a fresh clone because its baseline lives in `TEMP`. That is expected and it is why CI does not run it.
 
-Expected results: lint `131 files, 0 issues`; content audit `0 issues`; lesson AST `all 23 lessons, no content loss`; readability `0 of 23` outside target and `0 paragraphs over 90 words`; smoke `174 renders across 23 phases and 191 tools, 0 failures`; ui `42 checks, pass`; data `83 checks, pass`; notes `28 checks, pass`; lesson-search `77 checks, pass`; search `41 checks, pass`.
+Expected results: lint `140 files, 0 issues`; content audit `0 issues`; lesson AST `23 lessons, 0 loss`; readability `0 of 23` outside target and `0 paragraphs over 90 words`; smoke `181 renders across 23 phases and 191 tools, 0 failures`; highlight `37 checks, pass`; ui `42 checks, pass`; data `86 checks, pass`; notes `28 checks, pass`; work `31 checks, pass`; today `77 checks, pass`; lesson-search `77 checks, pass`; search `41 checks, pass`.

@@ -756,6 +756,105 @@ a:hover {
   accent-color: var(--accent);
 }
 
+/* --- Time budget ---
+   src/components/TimeBudgetSelector.jsx. Deliberately the same shape as the
+   energy control, because they are the same kind of question asked twice: the
+   reader answers both once and both persist. Two differently-styled controls
+   side by side would read as two different kinds of thing. */
+
+.budget {
+  border: none;
+  padding: 0;
+  margin: var(--space-5) 0 0;
+}
+
+.budget__legend {
+  font-size: var(--text-xs);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--text-muted);
+  padding: 0;
+  margin-bottom: var(--space-2);
+}
+
+.budget__options {
+  display: flex;
+  gap: var(--space-2);
+  flex-wrap: wrap;
+}
+
+.budget__option {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-size: var(--text-sm);
+  padding: var(--space-1) var(--space-3);
+  border: 1px solid var(--border);
+  border-radius: var(--space-1);
+  cursor: pointer;
+  color: var(--text-muted);
+}
+
+.budget__option.is-active {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.budget__option input {
+  accent-color: var(--accent);
+}
+
+/* The honesty label. Not muted to the point of invisibility: a reader deciding
+   whether to trust "30–90 minutes" needs to be able to read this, and a
+   disclaimer nobody notices is worse than none because it launders the guess. */
+.budget__note {
+  font-size: var(--text-xs);
+  color: var(--text-muted);
+  margin: var(--space-2) 0 0;
+  max-width: 34rem;
+}
+
+/* The two controls share a row above the narrow breakpoint so the focus card
+   does not grow by two stacked fieldsets. Below it they stack. */
+.focus__controls {
+  display: flex;
+  gap: var(--space-5);
+  flex-wrap: wrap;
+  align-items: flex-start;
+}
+
+.focus__controls > * {
+  margin-top: var(--space-5);
+}
+
+@media (max-width: 560px) {
+  .focus__controls {
+    flex-direction: column;
+    gap: 0;
+  }
+}
+
+/* --- Band badges ---
+   How long a task takes, shown on the suggested task. Colour is a reading aid,
+   not a severity scale: quick and deep are not good and bad, and neither is
+   emphasised over the other. All three inherit the neutral badge background. */
+
+.badge--band-quick {
+  color: var(--success);
+}
+
+.badge--band-focused {
+  color: var(--accent);
+}
+
+.badge--band-deep {
+  color: var(--warning);
+}
+
+.badge--band-ongoing {
+  color: var(--text-muted);
+}
+
 /* Below the breakpoint the sidebar becomes an off-canvas drawer. The previous
    behaviour stacked it above the content, which pushed the page down and left
    the nav just as far away as before. A drawer keeps the content at the top of
@@ -2705,6 +2804,200 @@ p em {
   }
 }
 
+/* --- Shared strategy documents ---
+   career-roadmaps/shared/ rendered by src/pages/Shared.jsx. These are reference
+   material rather than lessons, so the styling is deliberately flatter than a
+   lesson page: no reading bar, no per-section controls, nothing to tick. See
+   docs/DECISIONS.md → D-020. */
+
+.shared__header {
+  margin-bottom: var(--space-5);
+}
+
+.shared__header p {
+  max-width: var(--content-reading);
+}
+
+/* The document picker. Three chips, one per shared file — a row rather than a
+   select, because three is few enough that showing every option at once costs
+   less than hiding them behind a control the reader has to open. */
+.shared__picker {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  margin-bottom: var(--space-4);
+}
+
+.shared__doc {
+  max-width: var(--content-wide);
+}
+
+.shared__blurb {
+  margin-bottom: var(--space-5);
+}
+
+.shared__group {
+  margin-bottom: var(--space-5);
+}
+
+.shared__group h3 {
+  margin-bottom: var(--space-3);
+}
+
+/* The resource list is 42 links, so it is two columns above the reading
+   breakpoint rather than one long scroll. Column count is capped at two rather
+   than made fluid because a resource name is a short phrase, and three columns
+   of short phrases reads as a wall. */
+.shared__resources {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--space-2) var(--space-5);
+}
+
+@media (min-width: 700px) {
+  .shared__resources {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+.shared__resources li {
+  min-width: 0;
+}
+
+.shared__source {
+  margin-top: var(--space-5);
+  padding-top: var(--space-4);
+  border-top: 1px solid var(--border);
+  font-size: var(--text-sm);
+}
+
+/* --- Template checkboxes ---
+   A `- [ ]` line in the weekly tracker template. Drawn, not interactive: the
+   file is a template the reader is told to copy and fill in elsewhere, so a real
+   <input> would look tickable and do nothing — the same lie as a button that
+   goes nowhere. The span states "this is a checkbox" without promising it works. */
+
+.tmpl-item {
+  list-style: none;
+  margin-left: calc(-1 * var(--space-5));
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-2);
+}
+
+.tmpl-box {
+  flex-shrink: 0;
+  display: inline-block;
+  width: 13px;
+  height: 13px;
+  border: 1px solid var(--text-muted);
+  border-radius: 2px;
+  position: relative;
+  top: 1px;
+}
+
+.tmpl-box.is-checked::after {
+  content: "✓";
+  position: absolute;
+  inset: -4px 0 0 1px;
+  font-size: var(--text-xs);
+  line-height: 1;
+  color: var(--text-muted);
+}
+
+/* --- Your work: the read-back of the reader's own writing ---
+   src/pages/YourWork.jsx. Nothing here is styled to look like a metric: no
+   progress bar, no percentage, no completion treatment. It is a document, so it
+   gets document styling — a heading per phase and prose under it. */
+
+.work__header {
+  margin-bottom: var(--space-5);
+}
+
+.work__header p {
+  max-width: var(--content-reading);
+}
+
+.work__phase {
+  max-width: var(--content-reading);
+}
+
+.work__phase-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-4);
+  flex-wrap: wrap;
+  margin-bottom: var(--space-4);
+}
+
+.work__track {
+  font-size: var(--text-xs);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.work__title {
+  margin-bottom: 0;
+}
+
+.work__label {
+  font-size: var(--text-sm);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--text-muted);
+  margin-bottom: var(--space-2);
+}
+
+.work__note {
+  margin-bottom: var(--space-5);
+}
+
+/* The reader's own prose. `pre-wrap` because someone who writes a list or an
+   indented code snippet in a textarea means it, and collapsing that whitespace
+   would quietly reformat their writing. */
+.work__note-text,
+.work__answer-text {
+  white-space: pre-wrap;
+  margin-bottom: 0;
+}
+
+.work__answers {
+  margin-top: var(--space-4);
+}
+
+.work__answer {
+  padding: var(--space-4) 0 0;
+  border-top: 1px solid var(--border);
+  margin-top: var(--space-4);
+}
+
+.work__task {
+  color: var(--text-muted);
+  margin-bottom: var(--space-3);
+}
+
+.work__answer-text {
+  border-left: 2px solid var(--border);
+  padding-left: var(--space-4);
+}
+
+/* An answer whose task was renumbered by a curriculum edit. Marked, not hidden:
+   the writing is the reader's and it does not disappear because the question
+   moved. */
+.work__answer.is-orphaned {
+  opacity: 0.85;
+}
+
+@media (max-width: 560px) {
+  .work__phase-head {
+    flex-direction: column;
+  }
+}
+
 /* --- Print ---
    A phase is meant to be printable. The curriculum is 34–112 weeks and the
    whole point of this stylesheet is that a reader can take one phase offline on
@@ -2767,7 +3060,10 @@ p em {
   .resume,
   .shortcuts-backdrop,
   .modal-backdrop,
-  .sidebar__close {
+  .sidebar__close,
+  /* The two preference controls on the focus card. The chosen task prints —
+     that is useful on a train — but the dials it was chosen with do not. */
+  .focus__controls {
     display: none !important;
   }
 

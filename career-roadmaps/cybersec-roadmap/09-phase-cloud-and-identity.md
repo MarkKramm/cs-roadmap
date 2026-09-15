@@ -1116,14 +1116,14 @@ Then open `portfolio/cyber/09-cloud-and-identity.md` and assemble the deliverabl
 
 ## Hands-on practice tasks
 
-1. Create a free Microsoft Entra ID tenant and add two test users in a group.
-2. Enable MFA for one user and read the sign-in log entries it produces.
-3. Create an AWS free-tier account, set a one-dollar budget alarm, and create a no-permission IAM user.
-4. Write three IAM policies: read-only, scoped write, and deliberately over-permissive. List the excess permissions in the third.
-5. Create an S3 bucket with sample data, make it public, detect it with a script, then fix it and re-verify.
-6. Generate cloud activity and reconstruct the sequence from CloudTrail alone as a timeline.
-7. Write three detections: logging disruption, privilege escalation, and access-key creation.
-8. Produce an IAM access review table with keep, reduce, or remove recommendations for every identity.
+1. Create a free Microsoft Entra ID tenant and add two test users in a group. <!-- id: cyber-09-t01 band: focused energy: normal -->
+2. Enable MFA for one user and read the sign-in log entries it produces. <!-- id: cyber-09-t02 band: focused energy: normal -->
+3. Create an AWS free-tier account, set a one-dollar budget alarm, and create a no-permission IAM user. <!-- id: cyber-09-t03 band: focused energy: normal -->
+4. Write three IAM policies: read-only, scoped write, and deliberately over-permissive. List the excess permissions in the third. <!-- id: cyber-09-t04 band: focused energy: normal -->
+5. Create an S3 bucket with sample data, make it public, detect it with a script, then fix it and re-verify. <!-- id: cyber-09-t05 band: deep energy: high -->
+6. Generate cloud activity and reconstruct the sequence from CloudTrail alone as a timeline. <!-- id: cyber-09-t06 band: deep energy: high -->
+7. Write three detections: logging disruption, privilege escalation, and access-key creation. <!-- id: cyber-09-t07 band: focused energy: normal -->
+8. Produce an IAM access review table with keep, reduce, or remove recommendations for every identity. <!-- id: cyber-09-t08 band: focused energy: normal -->
 
 ## Deliverable / proof of work
 

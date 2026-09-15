@@ -33,6 +33,33 @@ export function allTasks(track) {
 }
 
 /**
+ * Every practice task across a track, flattened, each tagged with its phase.
+ *
+ * The checklist is the progress unit; a practice task is the work unit. They are
+ * two different lists answering two different questions — "have I ticked this
+ * off" versus "what could I actually do in the next hour" — and conflating them
+ * is what made the dashboard's focus card time-blind.
+ *
+ * Only practice tasks carry a `band`, because a checklist item is a statement
+ * about the reader ("I can use 20 basic Linux commands") while a practice task
+ * is an instruction to do something ("Run `ss -tulpn` and identify listening
+ * services"). Only the second has a duration. See lib/today.js and
+ * docs/DECISIONS.md → D-021.
+ */
+export function allPracticeTasks(track) {
+  return (track.phases || []).flatMap((p) =>
+    (p.tasks || []).map((t, i) => ({
+      ...t,
+      phaseId: p.id,
+      phaseTitle: p.title,
+      trackId: track.id,
+      trackLabel: track.label,
+      order: i,
+    }))
+  );
+}
+
+/**
  * The phase before and after `phaseId` within one track.
  *
  * Returns `{ prev, next, index, count }`. `prev`/`next` are `null` at the ends,

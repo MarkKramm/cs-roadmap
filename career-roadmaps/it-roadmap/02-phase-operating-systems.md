@@ -1042,13 +1042,13 @@ The lesson is the reasoning; the tasks below are the doing.
 
 ## Hands-on practice tasks
 
-1. Install VirtualBox and Ubuntu VM.
-2. Create one standard user and one admin/sudo user in Linux.
-3. In Windows, open Event Viewer and identify 3 warnings/errors.
-4. Use `ipconfig`, `ping`, `nslookup`, and `tracert` on Windows.
-5. Use `ls`, `grep`, `chmod`, `systemctl`, and `journalctl` on Linux.
-6. Disable and re-enable a harmless startup app in Windows.
-7. Export a list of running services using PowerShell.
+1. Install VirtualBox and Ubuntu VM. <!-- id: it-02-t01 band: deep energy: normal -->
+2. Create one standard user and one admin/sudo user in Linux. <!-- id: it-02-t02 band: focused energy: normal -->
+3. In Windows, open Event Viewer and identify 3 warnings/errors. <!-- id: it-02-t03 band: focused energy: normal -->
+4. Use `ipconfig`, `ping`, `nslookup`, and `tracert` on Windows. <!-- id: it-02-t04 band: focused energy: normal -->
+5. Use `ls`, `grep`, `chmod`, `systemctl`, and `journalctl` on Linux. <!-- id: it-02-t05 band: focused energy: normal -->
+6. Disable and re-enable a harmless startup app in Windows. <!-- id: it-02-t06 band: quick energy: low -->
+7. Export a list of running services using PowerShell. <!-- id: it-02-t07 band: quick energy: low -->
 
 ## Deliverable / proof of work
 
@@ -1086,7 +1086,3 @@ Paid VM tools like VMware Workstation Pro offer advanced features, but they are 
 ### When it's worth paying
 
 Not worth paying in this phase.
-4. Use `ipconfig`, `ping`, `nslookup`, and `tracert` on Windows.
-5. Use `ls`, `grep`, `chmod`, `systemctl`, and `journalctl` on Linux.
-6. Disable and re-enable a harmless startup app in Windows.
-7. Export a list of running services using PowerShell.

@@ -12,6 +12,7 @@ import { useProgress, countDone } from "./hooks/useProgress.js";
 import { useEnergyMode } from "./hooks/useEnergyMode.js";
 import { useReadingState } from "./hooks/useReadingState.js";
 import { useReadingSize, scaleFor } from "./hooks/useReadingSize.js";
+import { useTimeBudget } from "./hooks/useTimeBudget.js";
 import { useShortcuts } from "./hooks/useShortcuts.js";
 import Dashboard from "./pages/Dashboard.jsx";
 import PhaseDetail from "./pages/PhaseDetail.jsx";
@@ -20,6 +21,8 @@ import Portfolio from "./pages/Portfolio.jsx";
 import Applications from "./pages/Applications.jsx";
 import Search from "./pages/Search.jsx";
 import Schedule from "./pages/Schedule.jsx";
+import Shared from "./pages/Shared.jsx";
+import YourWork from "./pages/YourWork.jsx";
 import ShortcutHelp from "./components/ShortcutHelp.jsx";
 import DataTransfer from "./components/DataTransfer.jsx";
 
@@ -29,6 +32,8 @@ const VIEWS = [
   { id: "dashboard", label: "Dashboard" },
   { id: "schedule", label: "Schedule" },
   { id: "search", label: "Search" },
+  { id: "shared", label: "Shared" },
+  { id: "your-work", label: "Your work" },
   { id: "tools", label: "Tools" },
   { id: "portfolio", label: "Portfolio" },
   { id: "applications", label: "Applications" },
@@ -46,6 +51,7 @@ export default function App() {
   const [dataOpen, setDataOpen] = useState(false);
   const { done, toggle, reset } = useProgress();
   const { mode, change: changeMode } = useEnergyMode();
+  const { budget, change: changeBudget } = useTimeBudget();
   const { size, change: changeSize } = useReadingSize();
   const {
     lastTrackId,
@@ -363,6 +369,10 @@ export default function App() {
             onOpenPhase={openPhase}
             onOpenTrack={switchTrack}
           />
+        ) : view === "shared" ? (
+          <Shared />
+        ) : view === "your-work" ? (
+          <YourWork onOpenPhase={openPhase} />
         ) : view === "tools" ? (
           <ToolsLibrary onOpenPhase={openPhase} />
         ) : view === "portfolio" ? (
@@ -375,6 +385,8 @@ export default function App() {
             done={done}
             mode={mode}
             onModeChange={changeMode}
+            budget={budget}
+            onBudgetChange={changeBudget}
             onOpenTrack={switchTrack}
             onOpenPhase={openPhase}
             lastPhaseId={lastTrackId === trackId ? lastPhaseId : ""}

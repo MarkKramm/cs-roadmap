@@ -1288,13 +1288,13 @@ Then work this list, which turns the artefacts into something a stranger can act
 
 ## Hands-on practice tasks
 
-1. Create portfolio folder/repo.
-2. Add a README explaining your target role and labs.
-3. Add at least 5 artifacts from earlier phases.
-4. Write a one-page IT support resume.
-5. Create 8 project bullets using action verbs.
-6. Update LinkedIn headline: `Entry-Level IT Support | Windows, Linux, Networking, Helpdesk Labs | Remote-ready Philippines`.
-7. Ask one person or AI tool to review clarity, not exaggeration.
+1. Create portfolio folder/repo. <!-- id: it-08-t01 band: quick energy: low -->
+2. Add a README explaining your target role and labs. <!-- id: it-08-t02 band: focused energy: normal -->
+3. Add at least 5 artifacts from earlier phases. <!-- id: it-08-t03 band: focused energy: normal -->
+4. Write a one-page IT support resume. <!-- id: it-08-t04 band: deep energy: normal -->
+5. Create 8 project bullets using action verbs. <!-- id: it-08-t05 band: focused energy: normal -->
+6. Update LinkedIn headline: `Entry-Level IT Support | Windows, Linux, Networking, Helpdesk Labs | Remote-ready Philippines`. <!-- id: it-08-t06 band: quick energy: low -->
+7. Ask one person or AI tool to review clarity, not exaggeration. <!-- id: it-08-t07 band: focused energy: normal -->
 
 ## Deliverable / proof of work
 

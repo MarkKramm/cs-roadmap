@@ -1007,15 +1007,15 @@ The nine tasks are ordered roughly as a progression, and this is the reasoning b
 
 ## Hands-on practice tasks
 
-1. Install Ubuntu or Kali in VirtualBox.
-2. Create two Linux users and test file permissions.
-3. Enable SSH in your VM and connect from your host.
-4. Run `ss -tulpn` and identify listening services.
-5. Use `dig` or `nslookup` to inspect A, AAAA, MX, TXT records.
-6. Capture DNS and HTTP traffic with Wireshark.
-7. Run `nmap -sV` against your own VM IP only.
-8. Complete OverTheWire Bandit levels 0–10.
-9. Write a mini-report explaining one TCP handshake capture.
+1. Install Ubuntu or Kali in VirtualBox. <!-- id: cyber-02-t01 band: deep energy: normal -->
+2. Create two Linux users and test file permissions. <!-- id: cyber-02-t02 band: quick energy: normal -->
+3. Enable SSH in your VM and connect from your host. <!-- id: cyber-02-t03 band: focused energy: normal -->
+4. Run `ss -tulpn` and identify listening services. <!-- id: cyber-02-t04 band: quick energy: low -->
+5. Use `dig` or `nslookup` to inspect A, AAAA, MX, TXT records. <!-- id: cyber-02-t05 band: quick energy: low -->
+6. Capture DNS and HTTP traffic with Wireshark. <!-- id: cyber-02-t06 band: focused energy: normal -->
+7. Run `nmap -sV` against your own VM IP only. <!-- id: cyber-02-t07 band: quick energy: normal -->
+8. Complete OverTheWire Bandit levels 0–10. <!-- id: cyber-02-t08 band: deep energy: high -->
+9. Write a mini-report explaining one TCP handshake capture. <!-- id: cyber-02-t09 band: focused energy: normal -->
 
 ## Deliverable / proof of work
 

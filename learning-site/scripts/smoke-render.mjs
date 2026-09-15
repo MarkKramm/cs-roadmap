@@ -139,6 +139,17 @@ try {
   const LessonToolbar = await load("/src/components/LessonToolbar.jsx");
   const NotesPanel = await load("/src/components/NotesPanel.jsx");
   const TaskList = await load("/src/components/TaskList.jsx");
+  const TimeBudgetSelector = await load("/src/components/TimeBudgetSelector.jsx");
+  const Shared = await load("/src/pages/Shared.jsx");
+  const YourWork = await load("/src/pages/YourWork.jsx");
+  // The shared corpus is a build artifact, imported directly by Shared.jsx. It
+  // is loaded here too so the render assertions are checked against the real
+  // document count rather than a number copied into this file.
+  const sharedData = await server
+    .ssrLoadModule("/src/data/generated/shared.json")
+    .then((m) => m.default || m)
+    .catch(() => null);
+  if (!sharedData) failures.push("shared.json — not present (run the content build)");
 
   allPhases = tracks.flatMap((t) => t.phases);
   allTools = allPhases.flatMap((p) => p.tools);
@@ -345,8 +356,11 @@ try {
           done: {},
           mode: "normal",
           onModeChange: noop,
+          budget: "focused",
+          onBudgetChange: noop,
           onOpenTrack: noop,
           onOpenPhase: noop,
+          onGoToView: noop,
         })
       );
       if (html) {
@@ -354,6 +368,60 @@ try {
           "Dashboard " + track.id + ": prompt",
           html.includes("What should I do today?"),
           "missing the dashboard's primary question"
+        );
+        assert(
+          "Dashboard " + track.id + ": time control",
+          hasClass(html, "budget__options"),
+          "no time budget control rendered"
+        );
+        assert(
+          "Dashboard " + track.id + ": energy control",
+          hasClass(html, "energy__options"),
+          "no energy control rendered"
+        );
+        // The bands are authored estimates, not measurements. If this label ever
+        // disappears the page is presenting a guess with the confidence of a
+        // measurement, which is the failure it exists to prevent.
+        assert(
+          "Dashboard " + track.id + ": says the estimate is an estimate",
+          /estimate/i.test(html),
+          "the band estimate is presented without qualification"
+        );
+        // The suggestion must come from the practice tasks, which carry bands,
+        // and not from the checklist, which does not. With an empty `done` and a
+        // focused budget, a task is expected — so a "nothing" message here means
+        // the picker was wired to the wrong list.
+        assert(
+          "Dashboard " + track.id + ": offers a task",
+          !/No practice tasks left/.test(html),
+          "an untouched track reported no practice tasks"
+        );
+      }
+    }
+
+    // A budget of "quick" against a deep-only remainder must name what it is
+    // missing rather than claim the track is finished. Rendered against the
+    // second track so the first track's assertions above stay untouched.
+    if (tracks.length > 1) {
+      const blocked = render(
+        "Dashboard " + tracks[1].id + " (quick)",
+        createElement(Dashboard, {
+          track: tracks[1],
+          done: {},
+          mode: "normal",
+          onModeChange: noop,
+          budget: "quick",
+          onBudgetChange: noop,
+          onOpenTrack: noop,
+          onOpenPhase: noop,
+          onGoToView: noop,
+        })
+      );
+      if (blocked) {
+        assert(
+          "Dashboard (quick): never claims a non-empty track is complete",
+          !/No practice tasks left in this track/.test(blocked),
+          "a track with work left rendered the all-done message"
         );
       }
     }
@@ -933,6 +1001,160 @@ try {
       "EnergyModeSelector",
       createElement(EnergyModeSelector, { mode: "normal", onChange: noop })
     );
+  }
+
+  if (TimeBudgetSelector) {
+    const html = render(
+      "TimeBudgetSelector",
+      createElement(TimeBudgetSelector, { budget: "focused", onChange: noop })
+    );
+    if (html) {
+      assert(
+        "TimeBudgetSelector: all three budgets",
+        html.includes("Under 30 min") &&
+          html.includes("30–90 min") &&
+          html.includes("90 min +"),
+        "a budget option is missing from the control"
+      );
+      assert(
+        "TimeBudgetSelector: marks the active one",
+        hasClass(html, "is-active"),
+        "no option marked as selected"
+      );
+      // `ongoing` is a band a TASK can have, never an amount of time a reader
+      // can have. Offering it here would let a reader select a budget the
+      // picker fails closed on, which reads as a broken control.
+      assert(
+        "TimeBudgetSelector: does not offer ongoing as a budget",
+        !html.includes('value="ongoing"'),
+        "ongoing was offered as an amount of available time"
+      );
+      assert(
+        "TimeBudgetSelector: qualifies the estimate",
+        /estimate/i.test(html),
+        "the budget is presented as a measurement"
+      );
+    }
+  }
+
+  // --- Shared documents ---
+  // Every document the build emitted is rendered, so a new shared file fails
+  // here rather than silently never being reachable.
+  if (Shared && sharedData && Array.isArray(sharedData.docs)) {
+    assert(
+      "Shared: the corpus is non-empty",
+      sharedData.docs.length > 0,
+      "shared.json contains no documents"
+    );
+
+    for (const doc of sharedData.docs) {
+      const html = render(
+        "Shared: " + doc.id,
+        createElement(Shared, { initialId: doc.id })
+      );
+      if (!html) continue;
+
+      // The document the reader picked is the one on screen. Without this the
+      // render below could pass while showing a different document entirely.
+      assert(
+        "Shared: " + doc.id + " opens the named document",
+        html.includes(doc.title),
+        "the requested document is not the one rendered"
+      );
+
+      // The chip picker renders every document, so this is asserted once per
+      // render rather than per document — but it is the thing that makes the
+      // other documents reachable, so it is worth asserting.
+      assert(
+        "Shared: " + doc.id + " names every document",
+        sharedData.docs.every((d) => html.includes(d.title)),
+        "a document is not reachable from the picker"
+      );
+
+      // The heading levels are shifted (a standalone doc is authored at level 1
+      // and rendered under the page's own h1), so a literal "##" in the output
+      // means a block was rendered as raw text instead of parsed.
+      assert(
+        "Shared: " + doc.id + " renders no literal Markdown heading",
+        !/(^|>)##/.test(html),
+        "an unparsed heading marker reached the page"
+      );
+      assert(
+        "Shared: " + doc.id + " renders no literal table pipes",
+        !/\|\s*-{3,}/.test(html),
+        "an unparsed table reached the page"
+      );
+    }
+
+    // The resource list is the one document whose value depends on being
+    // clickable: 42 URLs rendered as prose would be 42 dead ends.
+    const resources = sharedData.docs.find((d) => d.kind === "resources");
+    if (resources) {
+      const html = render(
+        "Shared: resources render as links",
+        createElement(Shared, { initialId: resources.id })
+      );
+      if (html) {
+        // Every resource in the document, not just the first: a group whose
+        // renderer was missed would otherwise pass on the strength of a
+        // sibling that worked.
+        const missing = [];
+        for (const group of resources.groups) {
+          for (const r of group.resources) {
+            if (!html.includes('href="' + r.url + '"')) missing.push(r.name);
+          }
+        }
+        assert(
+          "Shared: every resource is a real anchor",
+          missing.length === 0,
+          missing.length + " unclickable: " + missing.slice(0, 3).join(", ")
+        );
+        assert(
+          "Shared: anchors open in a new tab",
+          /target="_blank"/.test(html),
+          "external links replace the app"
+        );
+        assert(
+          "Shared: no bare URL left as text",
+          !/>https?:\/\//.test(html),
+          "a URL was rendered as prose rather than a link"
+        );
+      }
+    } else {
+      failures.push("Shared: no resources document in shared.json");
+    }
+  }
+
+  // --- Your work ---
+  // Server rendering has no localStorage, so this is the empty state — which is
+  // also what a first-time visitor sees, and therefore worth pinning.
+  if (YourWork) {
+    const html = render("YourWork", createElement(YourWork, { onOpenPhase: noop }));
+    if (html) {
+      assert(
+        "YourWork: heading",
+        html.includes("Your work"),
+        "page heading not rendered"
+      );
+      assert(
+        "YourWork: empty state",
+        html.includes("Nothing written yet"),
+        "empty-state message not rendered"
+      );
+      assert(
+        "YourWork: points at where writing happens",
+        html.includes("Your notes"),
+        "the empty state does not say where to write"
+      );
+      // The whole point of this page is that it carries no denominator. A
+      // number here would turn a workspace into a report card, which the
+      // curriculum's design rules forbid.
+      assert(
+        "YourWork: no completion denominator",
+        !/\bof\s+\d+\b/.test(html) && !/\d+\s*%/.test(html),
+        "the page renders a count out of a total"
+      );
+    }
   }
 
   if (ToolsLibrary) {

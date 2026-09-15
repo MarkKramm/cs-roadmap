@@ -8,6 +8,7 @@ import { join, relative, dirname, basename } from "node:path";
 import { fileURLToPath } from "node:url";
 import { parseLesson } from "./lesson-ast.mjs";
 import { buildSearchIndex } from "./search-index.mjs";
+import { buildShared } from "./shared-content.mjs";
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
 const CONTENT = join(ROOT, "career-roadmaps");
@@ -164,11 +165,96 @@ const numbered = (lines) =>
 // Migrating to authored `<!-- id: -->` comments on task lines would remove this
 // caveat and is a one-line change here when wanted — the curriculum's task lists
 // have only ever grown, which is why it has not been needed yet.
-function numberedWithIds(lines, phaseId) {
-  return numbered(lines).map((text, i) => ({
-    id: phaseId + "-t" + String(i + 1).padStart(2, "0"),
-    text,
-  }));
+// A task's authored comment: `<!-- id: cyber-04-t07 band: deep energy: high -->`.
+// Both extra fields are optional, so a task can be given a stable id before
+// anyone has judged how long it takes or how hard it is. The order is fixed
+// (id, band, energy) and the parser is deliberately not order-tolerant: one
+// accepted spelling is easier to lint than several, and the migration is
+// mechanical anyway.
+const TASK_COMMENT =
+  /<!--\s*id:\s*([^\s>]+)(?:\s+band:\s*([a-z]+))?(?:\s+energy:\s*([a-z]+))?\s*-->/;
+
+// The energy values, matching the checklist's own vocabulary. Validated here
+// rather than trusted, because a typo would otherwise reach the picker as an
+// unknown string and silently behave like "normal".
+const ENERGIES = ["low", "normal", "high"];
+
+// The four bands. `ongoing` is not a duration — it marks a task that is not a
+// single timed sitting at all: a recurring weekly commitment, one gated on real
+// time passing, one that must span several sessions, or one that is
+// hardware-gated and may be impossible on the reader's machine. A time-aware
+// picker must exclude these rather than offer "30 minutes: apply to 5 roles".
+// See docs/DECISIONS.md → D-021.
+const BANDS = ["quick", "focused", "deep", "ongoing"];
+
+// Coverage counters, reported at the end. They exist because a half-migrated
+// corpus is the honest state during this change, and a summary line that says
+// "authored 70, minted 182" is a fact the next person needs — a build that
+// silently mints an id for a task nobody banded looks identical to one where
+// every task was banded.
+let authoredTaskCount = 0;
+let mintedTaskCount = 0;
+let bandedTaskCount = 0;
+let energisedTaskCount = 0;
+
+/**
+ * Practice tasks, with an id and a band.
+ *
+ * IDs are AUTHORED now, not minted. The previous version minted `<phase>-tNN`
+ * from array position, which made appending safe and reordering silently wrong —
+ * a reader's answer keyed to `t03` would follow the position rather than the
+ * question, and reappear under a different task. Migrating to authored comments
+ * on the task lines removes that caveat, which is what the note above the old
+ * implementation said it would be: a one-line change when it was wanted.
+ *
+ * MINTING IS KEPT AS A FALLBACK, deliberately. A task line without a comment
+ * still gets a positional id rather than failing the build, so a phase can be
+ * authored before it is banded and a partial migration is not a broken build.
+ * The counters above make the incompleteness visible instead of silent.
+ */
+function numberedWithIds(lines, phaseId, rel, fail) {
+  const out = [];
+  for (const line of lines) {
+    if (!/^\d+\.\s+/.test(line)) continue;
+
+    const body = line.replace(/^\d+\.\s+/, "");
+    const m = body.match(TASK_COMMENT);
+
+    let id;
+    let band = null;
+    let energy = null;
+    if (m) {
+      id = m[1];
+      band = m[2] || null;
+      energy = m[3] || null;
+      authoredTaskCount++;
+      if (band && !BANDS.includes(band)) {
+        fail(rel, 'task ' + id + ' has unknown band "' + band + '"');
+        band = null;
+      }
+      if (energy && !ENERGIES.includes(energy)) {
+        fail(rel, 'task ' + id + ' has unknown energy "' + energy + '"');
+        energy = null;
+      }
+    } else {
+      id = phaseId + "-t" + String(out.length + 1).padStart(2, "0");
+      mintedTaskCount++;
+    }
+    if (band) bandedTaskCount++;
+    if (energy) energisedTaskCount++;
+
+    // Strip the comment from the text. `cyber-05-t01` has indented sub-bullets
+    // under it, and they belong to the task's prose rather than to a separate
+    // task — the numbered-line filter above keeps them out of `out`, and the
+    // text itself is flattened to one line, which is how every other task reads.
+    out.push({
+      id,
+      text: body.replace(/<!--.*?-->/, "").replace(/\s+/g, " ").trim(),
+      band,
+      energy,
+    });
+  }
+  return out;
 }
 
 const textOf = (lines) => lines.join("\n").trim();
@@ -292,7 +378,7 @@ function buildPhase(file) {
       }
       return { name: m[1].trim(), url: m[2] };
     }),
-    tasks: numberedWithIds(sec["Hands-on practice tasks"] || [], fm.id),
+    tasks: numberedWithIds(sec["Hands-on practice tasks"] || [], fm.id, rel, fail),
     deliverableItems: bullets(sec["Deliverable / proof of work"] || []),
     checklist: parseChecklist(sec["Checklist"] || [], rel),
     lessonTitle,
@@ -325,6 +411,13 @@ for (const track of Object.keys(byTrack)) {
   const dupes = ids.filter((id, i) => ids.indexOf(id) !== i);
   if (dupes.length) fail(track, "duplicate phase id(s): " + [...new Set(dupes)].join(", "));
 }
+
+// The shared strategy documents are built BEFORE the error check, not after,
+// because `buildShared` reports contract violations through the same `fail`
+// channel. Calling it later would push errors into an array nobody reads again
+// — a build that fails silently, which is the failure mode this whole pipeline
+// exists to avoid.
+const shared = buildShared(join(CONTENT, "shared"), (m) => fail("shared", m));
 
 if (errors.length) {
   console.error("CONTENT BUILD FAILED — " + errors.length + " error(s):");
@@ -406,3 +499,37 @@ console.log("wrote search.json — " + search.segments.length + " segments, " +
   termCount + " terms (" + Math.round(searchBytes / 1024) + " KB, " +
   Math.round((searchBytes / totalLessonBytes) * 100) + "% of lesson bytes)");
 console.log("total phase task IDs: " + totalIds);
+
+const sharedText = JSON.stringify(shared, null, 2) + "\n";
+writeFileSync(join(OUT, "shared.json"), sharedText, "utf8");
+const sharedBytes = Buffer.byteLength(sharedText, "utf8");
+const resourceTotal = shared.docs.reduce((n, d) => n + (d.resourceCount || 0), 0);
+const blockTotal = shared.docs.reduce((n, d) => n + (d.blockCount || 0), 0);
+console.log(
+  "wrote shared.json — " + shared.docs.length + " document(s), " +
+  blockTotal + " block(s), " + resourceTotal + " resource(s) (" +
+  Math.round(sharedBytes / 1024) + " KB)"
+);
+
+// Task-band coverage. During the migration from minted to authored ids this
+// line is the honest state of the corpus, and it is printed rather than
+// asserted because a half-migrated curriculum is a valid build — a phase can be
+// written before it is banded. What would NOT be valid is that incompleteness
+// being invisible: a build that silently mints an id for a task nobody judged
+// looks identical to one where every task carries a band, and the time-aware
+// picker would then quietly offer unjudged tasks as if they had been measured.
+console.log(
+  "task bands: " + bandedTaskCount + " banded, " +
+  (authoredTaskCount - bandedTaskCount) + " authored without a band, " +
+  mintedTaskCount + " still minted from position"
+);
+console.log(
+  "task energy: " + energisedTaskCount + " of " + authoredTaskCount +
+  " practice task(s) carry an energy value"
+);
+if (mintedTaskCount > 0) {
+  console.log(
+    "  note: " + mintedTaskCount + " task(s) have no authored `<!-- id: … band: … -->` " +
+    "comment, so they carry a positional id and no band."
+  );
+}

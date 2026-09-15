@@ -952,16 +952,16 @@ Then open `portfolio/cyber/05-specialization-choice.md` and check it against the
 
 ## Hands-on practice tasks
 
-1. Do one mini-task from each path:
+1. Do one mini-task from each path: <!-- id: cyber-05-t01 band: deep energy: high -->
    - SOC: investigate one alert/lab and write summary.
    - GRC: create a 10-risk register for a small remote company.
    - IT Security: create an MFA rollout checklist.
    - Pentest: complete 5 PortSwigger labs and write remediation notes.
-2. Score each path from 1–5 for interest, difficulty, job availability, and portfolio confidence.
-3. Search PH/remote job boards for each role and list common requirements.
-4. Choose one primary path and one backup path.
-5. Write a 90-day specialization plan.
-6. Fill in the weighted decision matrix with your own criteria and weights, and write one sentence explaining which criterion drove your answer.
+2. Score each path from 1–5 for interest, difficulty, job availability, and portfolio confidence. <!-- id: cyber-05-t02 band: quick energy: low -->
+3. Search PH/remote job boards for each role and list common requirements. <!-- id: cyber-05-t03 band: focused energy: normal -->
+4. Choose one primary path and one backup path. <!-- id: cyber-05-t04 band: quick energy: low -->
+5. Write a 90-day specialization plan. <!-- id: cyber-05-t05 band: focused energy: normal -->
+6. Fill in the weighted decision matrix with your own criteria and weights, and write one sentence explaining which criterion drove your answer. <!-- id: cyber-05-t06 band: focused energy: normal -->
 
 ## Deliverable / proof of work
 

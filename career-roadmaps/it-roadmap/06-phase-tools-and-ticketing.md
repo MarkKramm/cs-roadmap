@@ -1196,19 +1196,19 @@ Then extend that work:
 
 ## Hands-on practice tasks
 
-1. Create a mini ITSM workflow diagram: request -> triage -> troubleshoot -> resolve -> close.
-2. Build a fake asset inventory with 10 devices in Snipe-IT or Google Sheets.
-3. Create a password vault for lab-only accounts using Bitwarden or KeePassXC.
-4. Create 5 ticket templates: password reset, VPN issue, printer issue, no internet, suspicious email.
-5. Create a change request template for “install software for user.”
-6. Create a monitoring alert response runbook for “website down” or “router unreachable.”
-7. Build the four-tab ticket queue from Part 7 and log five real tickets in it.
-8. Rewrite the five vague reports in Part 8 into structured tickets, then compare with the models.
-9. Work the ten-ticket lifecycle drill in Part 9 and justify your ordering in writing.
-10. Run one remote session on a device you own and write the session log.
-11. Compute the five metrics in Part 11 by hand, then recompute with your own ticket data.
-12. Complete the “what did I miss?” drill in Part 12 and produce the rewritten ticket.
-13. Triage the fifteen requests in Part 13 and link the three related tickets into one problem record.
+1. Create a mini ITSM workflow diagram: request -> triage -> troubleshoot -> resolve -> close. <!-- id: it-06-t01 band: quick energy: low -->
+2. Build a fake asset inventory with 10 devices in Snipe-IT or Google Sheets. <!-- id: it-06-t02 band: focused energy: normal -->
+3. Create a password vault for lab-only accounts using Bitwarden or KeePassXC. <!-- id: it-06-t03 band: quick energy: low -->
+4. Create 5 ticket templates: password reset, VPN issue, printer issue, no internet, suspicious email. <!-- id: it-06-t04 band: focused energy: normal -->
+5. Create a change request template for “install software for user.” <!-- id: it-06-t05 band: quick energy: low -->
+6. Create a monitoring alert response runbook for “website down” or “router unreachable.” <!-- id: it-06-t06 band: focused energy: normal -->
+7. Build the four-tab ticket queue from Part 7 and log five real tickets in it. <!-- id: it-06-t07 band: focused energy: normal -->
+8. Rewrite the five vague reports in Part 8 into structured tickets, then compare with the models. <!-- id: it-06-t08 band: focused energy: normal -->
+9. Work the ten-ticket lifecycle drill in Part 9 and justify your ordering in writing. <!-- id: it-06-t09 band: focused energy: normal -->
+10. Run one remote session on a device you own and write the session log. <!-- id: it-06-t10 band: focused energy: normal -->
+11. Compute the five metrics in Part 11 by hand, then recompute with your own ticket data. <!-- id: it-06-t11 band: focused energy: normal -->
+12. Complete the “what did I miss?” drill in Part 12 and produce the rewritten ticket. <!-- id: it-06-t12 band: focused energy: normal -->
+13. Triage the fifteen requests in Part 13 and link the three related tickets into one problem record. <!-- id: it-06-t13 band: deep energy: high -->
 
 ## Deliverable / proof of work
 

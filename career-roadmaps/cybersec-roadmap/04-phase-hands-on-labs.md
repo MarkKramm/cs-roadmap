@@ -902,16 +902,16 @@ Then assemble `portfolio/cyber/04-hands-on-labs.md` against the deliverable chec
 
 ## Hands-on practice tasks
 
-1. Build a lab diagram before installing anything.
-2. Install VirtualBox and at least one Linux VM.
-3. Install Wazuh using the official quickstart if your machine can handle it.
-4. Forward logs from one Windows or Linux VM to Wazuh.
-5. Generate safe test events: failed login, new user, suspicious command string in lab notes, service restart.
-6. Write 3 detection rules or rule modifications for your lab events.
-7. Complete 10 PortSwigger Apprentice labs.
-8. Complete 2 free blue-team labs from CyberDefenders/BTLO/LetsDefend.
-9. Write one incident report from a lab.
-10. Start a lab notebook and record at least 5 entries: the goal, the commands, the exact error text, and what you did next.
+1. Build a lab diagram before installing anything. <!-- id: cyber-04-t01 band: focused energy: normal -->
+2. Install VirtualBox and at least one Linux VM. <!-- id: cyber-04-t02 band: deep energy: normal -->
+3. Install Wazuh using the official quickstart if your machine can handle it. <!-- id: cyber-04-t03 band: ongoing energy: high -->
+4. Forward logs from one Windows or Linux VM to Wazuh. <!-- id: cyber-04-t04 band: focused energy: normal -->
+5. Generate safe test events: failed login, new user, suspicious command string in lab notes, service restart. <!-- id: cyber-04-t05 band: focused energy: normal -->
+6. Write 3 detection rules or rule modifications for your lab events. <!-- id: cyber-04-t06 band: focused energy: normal -->
+7. Complete 10 PortSwigger Apprentice labs. <!-- id: cyber-04-t07 band: deep energy: high -->
+8. Complete 2 free blue-team labs from CyberDefenders/BTLO/LetsDefend. <!-- id: cyber-04-t08 band: deep energy: high -->
+9. Write one incident report from a lab. <!-- id: cyber-04-t09 band: focused energy: normal -->
+10. Start a lab notebook and record at least 5 entries: the goal, the commands, the exact error text, and what you did next. <!-- id: cyber-04-t10 band: ongoing energy: low -->
 
 ## Deliverable / proof of work
 

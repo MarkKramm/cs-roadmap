@@ -558,13 +558,13 @@ Then open `portfolio/cyber/08-job-application.md` and confirm the deliverable li
 
 ## Hands-on practice tasks
 
-1. Create separate SOC, GRC, and IT security resume versions, then choose one primary.
-2. Add 3–5 projects with links and one-line business impact.
-3. Apply to 5–10 targeted roles/week.
-4. Track keywords appearing in job descriptions.
-5. Practice technical questions: DNS, TCP, Linux permissions, Windows Event IDs, phishing triage, SIEM alert triage, MFA, vulnerability prioritization.
-6. Practice explaining one project in 2 minutes and 10 minutes.
-7. Ask for referrals politely after building a genuine professional connection.
+1. Create separate SOC, GRC, and IT security resume versions, then choose one primary. <!-- id: cyber-08-t01 band: deep energy: normal -->
+2. Add 3–5 projects with links and one-line business impact. <!-- id: cyber-08-t02 band: focused energy: normal -->
+3. Apply to 5–10 targeted roles/week. <!-- id: cyber-08-t03 band: ongoing energy: normal -->
+4. Track keywords appearing in job descriptions. <!-- id: cyber-08-t04 band: ongoing energy: low -->
+5. Practice technical questions: DNS, TCP, Linux permissions, Windows Event IDs, phishing triage, SIEM alert triage, MFA, vulnerability prioritization. <!-- id: cyber-08-t05 band: deep energy: high -->
+6. Practice explaining one project in 2 minutes and 10 minutes. <!-- id: cyber-08-t06 band: focused energy: normal -->
+7. Ask for referrals politely after building a genuine professional connection. <!-- id: cyber-08-t07 band: ongoing energy: low -->
 
 ## Deliverable / proof of work
 

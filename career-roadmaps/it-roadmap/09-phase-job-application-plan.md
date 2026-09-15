@@ -838,13 +838,13 @@ Then work this list, which turns the plan into a running search:
 
 ## Hands-on practice tasks
 
-1. Create an application tracker with columns: Company, Role, Link, Date, Resume Version, Status, Follow-up, Notes.
-2. Apply to 5–10 roles/week at first; increase to 15/week once resume is stable.
-3. Customize the top third of your resume for each role type.
-4. Prepare answers for: Tell me about yourself, why IT, no degree explanation, difficult user, troubleshooting example.
-5. Practice 20 technical questions: DNS, DHCP, IP, VPN, password reset, MFA, Windows logs, Linux permissions.
-6. Send 5 polite LinkedIn connection requests/week to IT recruiters or support leads.
-7. Review failed applications every 2 weeks and adjust keywords.
+1. Create an application tracker with columns: Company, Role, Link, Date, Resume Version, Status, Follow-up, Notes. <!-- id: it-09-t01 band: focused energy: normal -->
+2. Apply to 5–10 roles/week at first; increase to 15/week once resume is stable. <!-- id: it-09-t02 band: ongoing energy: normal -->
+3. Customize the top third of your resume for each role type. <!-- id: it-09-t03 band: focused energy: normal -->
+4. Prepare answers for: Tell me about yourself, why IT, no degree explanation, difficult user, troubleshooting example. <!-- id: it-09-t04 band: focused energy: normal -->
+5. Practice 20 technical questions: DNS, DHCP, IP, VPN, password reset, MFA, Windows logs, Linux permissions. <!-- id: it-09-t05 band: deep energy: high -->
+6. Send 5 polite LinkedIn connection requests/week to IT recruiters or support leads. <!-- id: it-09-t06 band: ongoing energy: normal -->
+7. Review failed applications every 2 weeks and adjust keywords. <!-- id: it-09-t07 band: ongoing energy: normal -->
 
 ## Deliverable / proof of work
 

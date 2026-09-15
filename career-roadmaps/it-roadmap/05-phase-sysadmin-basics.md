@@ -1221,13 +1221,13 @@ The tasks below are the phase. Create the user and group, break and fix folder p
 
 ## Hands-on practice tasks
 
-1. Create a local Windows user called `test-support-user` and a local group called `TestSupportGroup`.
-2. Create a folder and practice read-only vs modify permissions.
-3. Write a PowerShell script that outputs computer name, OS version, disk free space, and running services.
-4. Read Microsoft 365 admin docs and document how to reset a password, enable MFA, and add a user to a group.
-5. Read Google Workspace admin docs and document how to reset a password, suspend a user, and create a group.
-6. Install Uptime Kuma locally or read its docs and design a simple monitoring plan.
-7. Create a patching checklist for a small remote company.
+1. Create a local Windows user called `test-support-user` and a local group called `TestSupportGroup`. <!-- id: it-05-t01 band: quick energy: low -->
+2. Create a folder and practice read-only vs modify permissions. <!-- id: it-05-t02 band: focused energy: normal -->
+3. Write a PowerShell script that outputs computer name, OS version, disk free space, and running services. <!-- id: it-05-t03 band: focused energy: normal -->
+4. Read Microsoft 365 admin docs and document how to reset a password, enable MFA, and add a user to a group. <!-- id: it-05-t04 band: focused energy: normal -->
+5. Read Google Workspace admin docs and document how to reset a password, suspend a user, and create a group. <!-- id: it-05-t05 band: focused energy: normal -->
+6. Install Uptime Kuma locally or read its docs and design a simple monitoring plan. <!-- id: it-05-t06 band: focused energy: normal -->
+7. Create a patching checklist for a small remote company. <!-- id: it-05-t07 band: focused energy: normal -->
 
 ## Deliverable / proof of work
 

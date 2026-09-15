@@ -1116,15 +1116,15 @@ Then open `portfolio/cyber/10-detection-engineering.md` and assemble the deliver
 
 ## Hands-on practice tasks
 
-1. Write a behaviour-to-log-source mapping for eight attacker behaviours in your own environment, noting the gaps.
-2. Install Sysmon with a community configuration, read the configuration file, and change one exclusion.
-3. Find and quote a successful logon, a failed logon, a service installation, and a process creation with its command line from your own logs.
-4. Write a four-part detection hypothesis — behaviour, signal, source, falsifier — for each of three detections.
-5. Write three Sigma rules and convert them into your lab SIEM's native language; keep them in a Git repository.
-6. Test each rule both ways using Atomic Red Team in an isolated VM, and record at least one failed test and its fix.
-7. Document one false positive fully, including the filter, the risk accepted, and a review date.
-8. Build an ATT&CK coverage map for your rules using sub-technique IDs, with a populated known-gap column.
-9. Do the alert-fatigue arithmetic for your lab's real volumes and state which rules you would retire first.
+1. Write a behaviour-to-log-source mapping for eight attacker behaviours in your own environment, noting the gaps. <!-- id: cyber-10-t01 band: focused energy: normal -->
+2. Install Sysmon with a community configuration, read the configuration file, and change one exclusion. <!-- id: cyber-10-t02 band: focused energy: normal -->
+3. Find and quote a successful logon, a failed logon, a service installation, and a process creation with its command line from your own logs. <!-- id: cyber-10-t03 band: focused energy: normal -->
+4. Write a four-part detection hypothesis — behaviour, signal, source, falsifier — for each of three detections. <!-- id: cyber-10-t04 band: focused energy: normal -->
+5. Write three Sigma rules and convert them into your lab SIEM's native language; keep them in a Git repository. <!-- id: cyber-10-t05 band: deep energy: high -->
+6. Test each rule both ways using Atomic Red Team in an isolated VM, and record at least one failed test and its fix. <!-- id: cyber-10-t06 band: deep energy: high -->
+7. Document one false positive fully, including the filter, the risk accepted, and a review date. <!-- id: cyber-10-t07 band: focused energy: normal -->
+8. Build an ATT&CK coverage map for your rules using sub-technique IDs, with a populated known-gap column. <!-- id: cyber-10-t08 band: focused energy: normal -->
+9. Do the alert-fatigue arithmetic for your lab's real volumes and state which rules you would retire first. <!-- id: cyber-10-t09 band: focused energy: normal -->
 
 ## Deliverable / proof of work
 

@@ -2,6 +2,34 @@
 
 A chronological record of working sessions. Newest first.
 
+## 2026-09-15 (later still) — The writing gets read back, and the dashboard learns what time it is
+
+**Goal:** Three workstreams chosen deliberately rather than by queue order — surface the shared strategy documents, give the reader's writing a reading side, and make "what should I do today?" time-aware.
+
+**Phase 1 — `career-roadmaps/shared/` was unreachable, and had been the whole time.** `build-content.mjs` walks for `*-phase-*.md`; the anti-burnout rules, the 42-resource list and the weekly tracker are not phase files, so three documents written *specifically for the reader on a 34–112 week plan* had no path to them from the site. The fix reuses the existing lesson parser rather than forking it: `lesson-ast.mjs` gained a `headingBase` parameter, because a lesson is authored inside a `## Lesson:` wrapper (headings start at level 3) and a standalone document is authored `# Title` (level 1). **The default path is byte-identical** — the lesson rebuild after the refactor produced exactly the same 1997 KB, 1128 segments, 11374 terms as the baseline, which is the evidence that matters for a change to a parser that 23 lessons depend on.
+
+The resource list is the part worth noting. It is `Name — https://url` lines, `renderInline` deliberately does not autolink, and rendering it as prose would have produced **42 unclickable URLs** — a document that looks complete and is useless. It is parsed into structured data and rendered as real anchors, and **the build fails** if the separator is wrong or a bullet appears before any category heading, because a silently mis-parsed catalogue is worse than a stopped build.
+
+**Phase 2 — a workspace with no reading side is a silo.** D-019 shipped the writing and deliberately nothing else: a note was reachable only by navigating to the phase that owned it, so finding your own writing meant remembering where you put it. `Your work` gathers every phase note and every task answer into one page. Answers are matched **by id, never by position**, and an answer whose task no longer exists is **kept and flagged, not dropped** — it is the reader's writing, and deleting it because the curriculum moved would destroy the one thing on this site that cannot be regenerated. It carries no denominator, no percentage, and no ordering by volume; `summariseWork()` has no `total` field at all, so the absence is structural rather than a rendering choice someone can undo by accident.
+
+**Phase 3 — and the defect the new test caught, which is the reason to write the test first.** The dashboard could not answer "I have forty minutes, is this a forty-minute task?" Nothing distinguished "plug in a USB stick" from "install VirtualBox and build a VM". A per-task minute count was rejected *after research, not by assumption*: 82% of the 183 practice tasks sit between 20 and 90 minutes, so any cut inside that range is an arbitrary line through a continuum. Only two honest edges exist — under ~20 minutes is essentially empty (4 tasks), and over ~90 minutes is *structurally* different, not merely longer. Word count and verb choice were measured and carry almost no signal: two tasks both 27 words long differ sixfold in real time, and "Install VirtualBox" (90 min) shares its phrasing family with "Install CrystalDiskInfo" (20 min).
+
+Then `test-today.mjs` failed on its first run, on a case written before the picker existed:
+
+> `✗ it is reported as not fitting — expected "none-fit", got "all-addressed"`
+
+The first `pickToday` collapsed three different reasons into one "does not fit". An unaddressed `ongoing` task left `smallestBlocking` null and fell through to `all-addressed` — so the dashboard would have told a reader **"nothing left" while they still had work**, just not work that fits in one sitting. That is the single sentence this page must never get wrong, and it would have shipped. The taxonomy was split rather than the expectation relaxed: `only-ongoing` and `unjudged` are now distinct reasons with their own honest messages.
+
+**`ongoing` as a band, and what it refuses to be.** Four bands, not three: the fourth is not a duration but a statement that a task is **not a single sitting** — recurring, week-gated, multi-session, or hardware-gated. More time does not turn a weekly retake into an afternoon, so it is an *exclusion path*: `fitsBand` fails closed on it in both directions. It is also deliberately absent from the time control, because it is a property a task can have, not an amount of time a person can have.
+
+**A guard rewritten because it could not fail.** `test-data.mjs` asserted `KEYS.length === 9` and compared the registry against a fixture hand-maintained in the same file — **it compared the test to itself**. It had already broken on two consecutive key additions (8 → 9 → 10) while catching nothing. It now scans `src/` for `cs-roadmap:*:vN` literals and compares against `KEYS` **in both directions**: every key the site writes must be registered, and every registered key must actually be used. The duplicate, weaker assertion in `test-notes.mjs` was deleted for the same reason. That is the third time a key-count change broke this suite and the second time a guard printed nothing and was read as green.
+
+**One content defect fixed in passing.** `it-roadmap/02-phase-operating-systems.md` had orphaned duplicate lines — verbatim copies of tasks 4–7 pasted after a `### When it's worth paying` heading. Pre-existing damage, not migration fallout. Removed.
+
+**The honest caveat.** The notes UI, the dashboard rail, the print stylesheet, the Shared view, the Your work view and the new time control have **never been rendered in a browser** — they are verified structurally, by 181 render smoke tests, and by their unit suites. The print path is verified as CSS, not by printing. And **nobody has timed any curriculum task**, so every band and every energy value is an authored estimate. The UI says so on the page, and the smoke test asserts the word *estimate* survives there.
+
+**Numbers.** 183 practice tasks banded (quick 23, focused 115, deep 34, ongoing 11) and 183 carrying energy (low 26, normal 128, high 29); **0 ids still minted from position**. Ten `localStorage` keys. Guard chain: 37 + 42 + 86 + 28 + 31 + 77 + 77 + 41 checks, 181 renders, build 453 KB raw / 133 KB gzipped, four repo-root audits clean.
+
 ## 2026-09-15 (latest) — Four read-only phases, found by a metric that could not lie
 
 **Goal:** Maximise curriculum building while API access lasts. Chosen by measurement rather than by topic.

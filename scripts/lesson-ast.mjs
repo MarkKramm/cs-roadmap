@@ -23,9 +23,23 @@
 // instead of silently disappearing from the page.
 
 const FENCE = /^\s*(`{3,}|~{3,})(.*)$/;
-const H3 = /^###\s+(.*)$/;
-const H4 = /^####\s+(.*)$/;
-const H5 = /^#####\s+(.*)$/;
+
+// Heading depth is matched relative to a BASE, because the two corpora this
+// parser reads start at different depths.
+//
+// A lesson is authored INSIDE `## Lesson: …`, so its headings are the third,
+// fourth and fifth levels — see the census above: h3 163, h4 569, h5 0. A shared
+// strategy document (career-roadmaps/shared/) is a standalone file with no
+// enclosing section, so it is authored `# Title`, `## Section`, `### Subsection`
+// — the first, second and third levels.
+//
+// Before this parameter existed, `## Minimum Effective Study Day` matched none of
+// the three anchored patterns and fell through to the paragraph branch, reaching
+// the page with its hashes visible to the reader. Silent content degradation is
+// the exact failure class `audit-lesson-ast.mjs` and the smoke sweep exist to
+// catch, so the depth is now declared rather than assumed. The default is 3,
+// which keeps the lesson path byte-identical.
+const headingRe = (level) => new RegExp("^" + "#".repeat(level) + "\\s+(.*)$");
 const BULLET = /^(\s*)[-*]\s+(.*)$/;
 const ORDERED = /^(\s*)\d+\.\s+(.*)$/;
 const QUOTE = /^>\s?(.*)$/;
@@ -132,18 +146,34 @@ function buildList(entries) {
       }
     }
 
-    stack[stack.length - 1].list.items.push({ text: e.text, children: [] });
+    // `checked` is omitted entirely for an ordinary bullet rather than written
+    // as null. The field only means something for a checkbox item, and carrying
+    // `"checked":null` on all ~1,300 list items across the 23 lessons cost a
+    // measurable 23 KB of lesson payload for a value that is never read on that
+    // path. A renderer tests `item.checked !== undefined` rather than for null.
+    const item = { text: e.text, children: [] };
+    if (e.checked !== null && e.checked !== undefined) item.checked = e.checked;
+    stack[stack.length - 1].list.items.push(item);
   }
 
   return root;
 }
 
-export function parseLesson(markdown) {
+export function parseLesson(markdown, { headingBase = 3 } = {}) {
   const lines = markdown.split("\n");
   const blocks = [];
   const toc = [];
   const seen = new Map();
   const unknown = [];
+
+  // The three depths this parser recognises, relative to the document's own
+  // base. Built per call so a lesson and a shared document can be parsed by the
+  // same function without either one's headings being wrong.
+  const HEAD = [
+    headingRe(headingBase),
+    headingRe(headingBase + 1),
+    headingRe(headingBase + 2),
+  ];
 
   let i = 0;
   let para = [];
@@ -176,16 +206,29 @@ export function parseLesson(markdown) {
     }
 
     // --- headings ---
-    const h3 = H3.exec(line);
-    const h4 = H4.exec(line);
-    const h5 = H5.exec(line);
-    if (h3 || h4 || h5) {
+    // Shallowest first, so `#### ` is never mistaken for `### ` plus a stray
+    // hash — the patterns are anchored, so the order is a readability choice
+    // rather than a correctness one.
+    let head = null;
+    let level = 0;
+    for (let d = 0; d < HEAD.length; d++) {
+      const m = HEAD[d].exec(line);
+      if (m) {
+        head = m;
+        level = headingBase + d;
+        break;
+      }
+    }
+    if (head) {
       flushPara();
-      const level = h3 ? 3 : h4 ? 4 : 5;
-      const text = (h3 || h4 || h5)[1].trim();
+      const text = head[1].trim();
       const id = slugify(text, seen);
       blocks.push({ type: "heading", level, text, id });
-      if (level <= 4) toc.push({ level, text, id });
+      // The TOC carries the two depths that own a section. For a lesson
+      // (base 3) that is h3 and h4, exactly as before; the third depth stays
+      // out because it is a paragraph-level label. A shared document's title
+      // and its sections are the equivalent pair at its own base.
+      if (level <= headingBase + 1) toc.push({ level, text, id });
       i++;
       continue;
     }
@@ -224,10 +267,25 @@ export function parseLesson(markdown) {
       const entries = [];
       while (i < lines.length && (BULLET.test(lines[i]) || ORDERED.test(lines[i]))) {
         const m = BULLET.exec(lines[i]) || ORDERED.exec(lines[i]);
+        // A task-list item — `- [ ] thing` — is a checkbox, not a bullet whose
+        // text happens to start with brackets. The shared weekly tracker is
+        // built almost entirely from these, and rendering `[ ]` as literal text
+        // would look like a parser bug rather than a blank box to fill in.
+        //
+        // `checked` is null for an ordinary bullet and true/false for a
+        // checkbox, so a renderer can tell "not a checkbox" from "unchecked".
+        let text = m[2].trim();
+        let checked = null;
+        const box = /^\[([ xX])\]\s*(.*)$/.exec(text);
+        if (box) {
+          checked = box[1].toLowerCase() === "x";
+          text = box[2];
+        }
         entries.push({
           indent: m[1].length,
           ordered: ORDERED.test(lines[i]),
-          text: m[2].trim(),
+          text,
+          checked,
         });
         i++;
       }

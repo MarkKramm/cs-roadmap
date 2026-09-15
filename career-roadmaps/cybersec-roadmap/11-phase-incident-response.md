@@ -1211,15 +1211,15 @@ Then open `portfolio/cyber/11-incident-response.md` and assemble the deliverable
 
 ## Hands-on practice tasks
 
-1. Write a first-hour checklist for three scenarios: a compromised account, suspected malware execution, and a data-exposure event.
-2. Check and record the retention window of every log source you can reach, and note the shortest one.
-3. Triage ten alerts in fifteen minutes each, recording severity, escalation decision, and the reason.
-4. Capture memory from a lab VM, hash it, roll the VM back, and answer three questions from the memory image alone.
-5. Image a disk with hashing, verify the hash, and build a timeline with `fls`, `mactime`, and Plaso.
-6. Create a timestomped file, a renamed binary in a user directory, and a scheduled task, then find all three from the image.
-7. Write and run a tabletop exercise inject list for a ransomware scenario, recording every point you could not answer.
-8. Write a full incident report with timeline, analysis, impact, root cause, recommendations, detection gaps, and limitations.
-9. Write a legal and ethical boundary note covering authorisation, personal data you may encounter, and who you route regulatory questions to.
+1. Write a first-hour checklist for three scenarios: a compromised account, suspected malware execution, and a data-exposure event. <!-- id: cyber-11-t01 band: focused energy: normal -->
+2. Check and record the retention window of every log source you can reach, and note the shortest one. <!-- id: cyber-11-t02 band: focused energy: normal -->
+3. Triage ten alerts in fifteen minutes each, recording severity, escalation decision, and the reason. <!-- id: cyber-11-t03 band: deep energy: high -->
+4. Capture memory from a lab VM, hash it, roll the VM back, and answer three questions from the memory image alone. <!-- id: cyber-11-t04 band: deep energy: high -->
+5. Image a disk with hashing, verify the hash, and build a timeline with `fls`, `mactime`, and Plaso. <!-- id: cyber-11-t05 band: deep energy: high -->
+6. Create a timestomped file, a renamed binary in a user directory, and a scheduled task, then find all three from the image. <!-- id: cyber-11-t06 band: focused energy: normal -->
+7. Write and run a tabletop exercise inject list for a ransomware scenario, recording every point you could not answer. <!-- id: cyber-11-t07 band: deep energy: high -->
+8. Write a full incident report with timeline, analysis, impact, root cause, recommendations, detection gaps, and limitations. <!-- id: cyber-11-t08 band: deep energy: high -->
+9. Write a legal and ethical boundary note covering authorisation, personal data you may encounter, and who you route regulatory questions to. <!-- id: cyber-11-t09 band: quick energy: low -->
 
 ## Deliverable / proof of work
 

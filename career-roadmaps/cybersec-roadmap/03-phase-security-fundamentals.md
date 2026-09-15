@@ -1132,13 +1132,13 @@ The seven tasks build on each other, and the ordering below is deliberate:
 
 ## Hands-on practice tasks
 
-1. Install Sysmon on a Windows VM or your own lab machine if safe.
-2. Generate a few safe events: open PowerShell, create a file, fail a login, install/uninstall a harmless app.
-3. Find related logs in Event Viewer.
-4. Complete 5 PortSwigger Apprentice-level labs.
-5. Use Burp Community or OWASP ZAP to intercept your own browser traffic to a training lab.
-6. Pick 5 CVEs from CISA KEV and summarize affected product, impact, and fix.
-7. Write a mock incident timeline for a phishing login.
+1. Install Sysmon on a Windows VM or your own lab machine if safe. <!-- id: cyber-03-t01 band: focused energy: normal -->
+2. Generate a few safe events: open PowerShell, create a file, fail a login, install/uninstall a harmless app. <!-- id: cyber-03-t02 band: focused energy: normal -->
+3. Find related logs in Event Viewer. <!-- id: cyber-03-t03 band: quick energy: low -->
+4. Complete 5 PortSwigger Apprentice-level labs. <!-- id: cyber-03-t04 band: deep energy: high -->
+5. Use Burp Community or OWASP ZAP to intercept your own browser traffic to a training lab. <!-- id: cyber-03-t05 band: focused energy: normal -->
+6. Pick 5 CVEs from CISA KEV and summarize affected product, impact, and fix. <!-- id: cyber-03-t06 band: focused energy: normal -->
+7. Write a mock incident timeline for a phishing login. <!-- id: cyber-03-t07 band: focused energy: normal -->
 
 ## Deliverable / proof of work
 

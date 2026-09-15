@@ -896,12 +896,12 @@ Then open `portfolio/cyber/07-certification-decision.md` and fill in all five se
 
 ## Hands-on practice tasks
 
-1. Read the official objectives for one certification.
-2. Mark each topic green/yellow/red.
-3. Use free training to close red gaps.
-4. Do not schedule an exam until you can explain the objectives and have practical proof.
-5. Compare the certification against 30 target job posts.
-6. Ask: does this cert remove a real hiring filter for my target role?
+1. Read the official objectives for one certification. <!-- id: cyber-07-t01 band: focused energy: low -->
+2. Mark each topic green/yellow/red. <!-- id: cyber-07-t02 band: focused energy: low -->
+3. Use free training to close red gaps. <!-- id: cyber-07-t03 band: ongoing energy: normal -->
+4. Do not schedule an exam until you can explain the objectives and have practical proof. <!-- id: cyber-07-t04 band: ongoing energy: normal -->
+5. Compare the certification against 30 target job posts. <!-- id: cyber-07-t05 band: focused energy: normal -->
+6. Ask: does this cert remove a real hiring filter for my target role? <!-- id: cyber-07-t06 band: quick energy: low -->
 
 ## Deliverable / proof of work
 

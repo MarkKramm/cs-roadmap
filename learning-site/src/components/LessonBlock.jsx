@@ -76,16 +76,38 @@ function List({ list, keyPrefix }) {
   const Tag = list.ordered ? "ol" : "ul";
   return (
     <Tag>
-      {list.items.map((item, i) => (
-        <li key={keyPrefix + "-" + i}>
-          {renderInline(item.text, keyPrefix + "-" + i)}
-          {item.children.map((child, j) =>
-            child.type === "list" ? (
-              <List key={j} list={child} keyPrefix={keyPrefix + "-" + i + "-" + j} />
-            ) : null
-          )}
-        </li>
-      ))}
+      {list.items.map((item, i) => {
+        // A checkbox item is drawn, not made interactive. The weekly tracker is
+        // a template the reader is told to copy and fill in on paper or in
+        // their own document, so a real <input> here would look tickable and do
+        // nothing — the same lie as a button that goes nowhere. A span styled
+        // into a box states "this is a checkbox" without promising it works.
+        const isBox = item.checked !== undefined;
+        return (
+          <li
+            key={keyPrefix + "-" + i}
+            className={isBox ? "tmpl-item" : undefined}
+          >
+            {isBox && (
+              <>
+                <span
+                  className={"tmpl-box" + (item.checked ? " is-checked" : "")}
+                  aria-hidden="true"
+                />
+                <span className="sr-only">
+                  {item.checked ? "Checked: " : "Unchecked: "}
+                </span>
+              </>
+            )}
+            {renderInline(item.text, keyPrefix + "-" + i)}
+            {item.children.map((child, j) =>
+              child.type === "list" ? (
+                <List key={j} list={child} keyPrefix={keyPrefix + "-" + i + "-" + j} />
+              ) : null
+            )}
+          </li>
+        );
+      })}
     </Tag>
   );
 }
@@ -154,18 +176,36 @@ export default function LessonBlock({
   sectionDone = false,
   onToggleSection,
   tickMode = false,
+  headingBase = 3,
+  headingTag = 3,
 }) {
   const key = "b" + index;
 
   switch (block.type) {
     case "heading": {
-      // The lesson's own h3/h4 sit inside a phase page that already has an h1
-      // and h2, so the levels are shifted down to keep the outline valid.
-      const Tag = block.level === 3 ? "h3" : block.level === 4 ? "h4" : "h5";
-      // Only h3/h4 appear in the TOC and therefore carry a done state; h5 is a
-      // paragraph-level label with no section identity of its own.
+      // The rendered heading level is computed from the block's own level
+      // relative to the document's base, so the page outline stays valid for
+      // both corpora without either one hard-coding the other's depths.
+      //
+      // A lesson is authored inside `## Lesson: …`, so its blocks start at level
+      // 3 and map to the page's h3/h4/h5 — the defaults, and byte-identical to
+      // the previous hard-coded mapping. A shared strategy document starts at
+      // level 1 because it has no enclosing section; its title maps to h2, so
+      // the page keeps exactly one h1 and its sections become h3 and h4.
+      //
+      // The alternative — a second renderer for the shared docs — would have
+      // duplicated table, code, quote and list rendering to change one line.
+      const Tag =
+        "h" + Math.min(headingTag + (block.level - headingBase), 5);
+      // Only the first two depths appear in the TOC and therefore carry a done
+      // state; the third is a paragraph-level label with no section identity of
+      // its own. Expressed against the base rather than as literal 3/4 so a
+      // shared document at base 1 does not accidentally make its subsections
+      // tickable — it passes no handler today, and this keeps that from being
+      // the only thing standing between it and a stray control.
       const togglable =
-        (block.level === 3 || block.level === 4) && typeof onToggleSection === "function";
+        (block.level === headingBase || block.level === headingBase + 1) &&
+        typeof onToggleSection === "function";
 
       return (
         <Tag

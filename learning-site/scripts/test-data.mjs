@@ -2,8 +2,8 @@
 //
 // WHY THIS EXISTS
 // `transfer.js` is the only code in the site that can DESTROY the reader's data.
-// Everything else adds to it; an import overwrites eight localStorage keys at
-// once. On a 34–112 week curriculum that is potentially years of checklist
+// Everything else adds to it; an import overwrites every registered localStorage
+// key at once. On a 34–112 week curriculum that is potentially years of checklist
 // progress, portfolio entries and job applications, and the failure is silent:
 // a malformed file that is accepted halfway leaves the reader with a
 // half-restored state that looks like data loss and is data loss.
@@ -20,6 +20,9 @@
 //
 // Run: npm run test:data   (from learning-site/)
 
+import { readdirSync, readFileSync } from "node:fs";
+import { join } from "node:path";
+import { fileURLToPath } from "node:url";
 import { exportAll, importAll, inspect, mergeValue, readKey, suggestedFilename, KEYS, FORMAT, VERSION } from "../src/lib/transfer.js";
 
 const failures = [];
@@ -81,6 +84,7 @@ const POPULATED = {
       answers: { "it-01-computer-fundamentals-t01": "CPU, RAM, disk, OS build." },
     },
   }),
+  "cs-roadmap:time-budget:v1": JSON.stringify("focused"),
 };
 
 // ---- export ---------------------------------------------------------------
@@ -93,7 +97,11 @@ const POPULATED = {
   eq(out.payload.format, FORMAT, "export: carries the format marker");
   eq(out.payload.version, VERSION, "export: carries the version");
   eq(out.payload.exportedAt, "2026-03-01T12:00:00.000Z", "export: stamps the time it was given");
-  eq(Object.keys(out.payload.data).length, 9, "export: captured all nine keys");
+  eq(
+    Object.keys(out.payload.data).length,
+    KEYS.length,
+    "export: captured every registered key"
+  );
   ok(out.payload.data["cs-roadmap:progress:v1"]["it-01-c01"] === true, "export: progress survived");
 }
 
@@ -133,7 +141,7 @@ const POPULATED = {
   const out = exportAll(s, "2026-03-01T12:00:00.000Z");
   ok(out.ok, "export: survives a storage read that throws");
   eq(Object.keys(out.payload.data).length, 0, "export: nothing captured when nothing is readable");
-  eq(out.skipped.length, 9, "export: every unreadable key is reported");
+  eq(out.skipped.length, KEYS.length, "export: every unreadable key is reported");
 }
 
 // ---- inspect: the rejection cases -----------------------------------------
@@ -241,11 +249,12 @@ const POPULATED = {
       "cs-roadmap:notes:v1": {
         "it-01-x": { note: "a note", answers: { "it-01-x-t01": "an answer" } },
       },
+      "cs-roadmap:time-budget:v1": "deep",
     },
   };
   const v = inspect(good);
   ok(v.ok, "inspect: accepts a fully valid payload", v.error);
-  eq(Object.keys(v.data).length, 9, "inspect: accepts all nine keys");
+  eq(Object.keys(v.data).length, KEYS.length, "inspect: accepts every registered key");
 }
 
 // ---- round trip -----------------------------------------------------------
@@ -259,7 +268,7 @@ const POPULATED = {
   const to = fakeStorage();
   const res = importAll(to, parsed, "replace");
   ok(res.ok, "round trip: import succeeds", res.error);
-  eq(res.written.length, 9, "round trip: all nine keys were written");
+  eq(res.written.length, KEYS.length, "round trip: every registered key was written");
 
   // Every key must be byte-identical after a JSON serialise/parse cycle.
   for (const { key } of KEYS) {
@@ -432,11 +441,60 @@ const POPULATED = {
 }
 
 {
-  // Every key the site actually uses must be in KEYS, or a backup would quietly
-  // omit it. This is asserted against a literal list so adding a ninth storage
-  // key without registering it fails here.
-  eq(KEYS.length, 9, "registry: knows exactly the nine keys the site writes");
-  eq(KEYS.map((k) => k.key).sort(), Object.keys(POPULATED).sort(), "registry: matches the keys in use");
+  // THE REGISTRY GUARD, rewritten to test the thing it claims to test.
+  //
+  // The previous version asserted `KEYS.length === 9` and compared KEYS against
+  // the POPULATED fixture above. Both sides of that comparison are maintained by
+  // hand in this file, so it could not detect the failure it existed to prevent:
+  // a storage key the SITE writes but the backup does not know about. It only
+  // ever caught someone editing this test. It has now broken on two consecutive
+  // key additions (8 → 9 → 10) while catching nothing.
+  //
+  // This version reads src/ and looks for every `cs-roadmap:*:vN` string
+  // literal in it. Anything the site can write must be in KEYS, or an export
+  // silently omits it — the reader backs up, sees "success", and their time
+  // budget is not in the file. That is the real defect, and this finds it.
+  const KEY_LITERAL = /cs-roadmap:[a-z0-9-]+:v\d+/g;
+  const registered = new Set(KEYS.map((k) => k.key));
+
+  const srcDir = fileURLToPath(new URL("../src", import.meta.url));
+  const found = new Set();
+  const filesScanned = [];
+
+  (function walk(dir) {
+    for (const dirent of readdirSync(dir, { withFileTypes: true })) {
+      const full = join(dir, dirent.name);
+      if (dirent.isDirectory()) {
+        // Build output and dependencies are not source of truth.
+        if (dirent.name === "generated" || dirent.name === "node_modules") continue;
+        walk(full);
+        continue;
+      }
+      if (!/\.(js|jsx)$/.test(dirent.name)) continue;
+      filesScanned.push(dirent.name);
+      const text = readFileSync(full, "utf8");
+      for (const m of text.match(KEY_LITERAL) || []) found.add(m);
+    }
+  })(srcDir);
+
+  ok(filesScanned.length > 10, "registry: scanned the source tree", filesScanned.length + " files");
+
+  const unregistered = [...found].filter((k) => !registered.has(k)).sort();
+  eq(unregistered, [], "registry: every storage key the site writes is registered in KEYS");
+
+  // And the reverse: a key registered but never written anywhere is dead weight
+  // in the backup format, and usually means a rename left the old entry behind.
+  const unused = [...registered].filter((k) => !found.has(k)).sort();
+  eq(unused, [], "registry: every registered key is actually used by the site");
+
+  // The fixture must cover every registered key, or the round-trip loop above
+  // skips one and reports it as a gap. Kept as its own check so a missing
+  // fixture row is a named failure rather than a vague count mismatch.
+  eq(
+    KEYS.map((k) => k.key).sort(),
+    Object.keys(POPULATED).sort(),
+    "registry: the round-trip fixture covers every registered key"
+  );
 }
 
 // ---- result ---------------------------------------------------------------

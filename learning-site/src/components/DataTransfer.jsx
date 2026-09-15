@@ -3,25 +3,25 @@
 // WHY THIS IS A MODAL AND NOT TWO SIDEBAR BUTTONS
 // Export is harmless — it reads and hands you a file. Import is the only action
 // in this entire site that can overwrite the reader's work, and it does so
-// across eight keys at once. So it does not get to be a one-click button in a
-// sidebar next to "Reset progress". It gets a panel that shows you, key by key,
-// exactly what the file contains before you commit to it, and it refuses to
-// apply anything until you have seen that list.
+// across every registered key at once. So it does not get to be a one-click
+// button in a sidebar next to "Reset progress". It gets a panel that shows you,
+// key by key, exactly what the file contains before you commit to it, and it
+// refuses to apply anything until you have seen that list.
 //
 // THE TWO MODES ARE NOT SYMMETRICAL, AND THE LABELS SAY SO
 // * **Merge** is the default and the safe one. It unions what you finished —
 //   checklist progress, section ticks, portfolio entries, applications — and
 //   keeps this machine's reading position and preferences. Importing the same
 //   file twice does nothing the second time.
-// * **Replace** overwrites all eight keys with the file's contents. It is the
-//   "I am restoring a backup onto a clean machine" action, and it is the one
+// * **Replace** overwrites every registered key with the file's contents. It is
+//   the "I am restoring a backup onto a clean machine" action, and it is the one
 //   that can lose work, so it is the second option and it is spelled out.
 //
 // WHY THE PAGE RELOADS AFTERWARDS
 // Every hook in this app reads its key once at mount and then owns it in React
 // state (useProgress, usePortfolio, useApplications, useReadingState, ...). An
 // import writes localStorage *underneath* those live copies. Telling each hook
-// to re-read would mean threading a refresh signal through eight of them and
+// to re-read would mean threading a refresh signal through all of them and
 // getting it right in every one; a reload is one line, cannot be partially
 // correct, and is the honest thing to do after restoring state. The reader is
 // not mid-task when they click this — they are on a settings errand.

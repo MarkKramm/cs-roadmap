@@ -1687,14 +1687,14 @@ Then work the new material in the same way, in this order:
 
 ## Hands-on practice tasks
 
-1. Draw your home network in diagrams.net. Include the ISP modem/router, your devices, Wi-Fi access points, and how they connect.
-2. Check your IP configuration. Run `ipconfig /all` on Windows, or `ifconfig` / `ip a` on Linux. Record your IP address, subnet mask, default gateway, DHCP server, DNS server, and MAC address.
-3. Test connectivity. Ping your gateway, `1.1.1.1`, `8.8.8.8`, and `google.com`. Explain why the responses differ.
-4. Run DNS lookups. Try `nslookup google.com`, `nslookup -type=mx gmail.com`, and `nslookup -type=txt google.com`. Document what each reveals.
-5. Capture DNS traffic in Wireshark. Filter on `dns`, identify a query, and explain how the name resolved to an IP address.
-6. Capture a TCP handshake in Wireshark. Filter on `tcp`, find a handshake between your device and a server, and explain the three-way handshake.
-7. Build a Packet Tracer network with 2 PCs, 1 switch, and 1 router. Configure DHCP and DNS on the router, then label every component and connection.
-8. Write a step-by-step troubleshooting guide for "connected to Wi-Fi but no internet", covering physical checks, IP configuration, DNS, and firewall considerations.
+1. Draw your home network in diagrams.net. Include the ISP modem/router, your devices, Wi-Fi access points, and how they connect. <!-- id: it-03-t01 band: focused energy: normal -->
+2. Check your IP configuration. Run `ipconfig /all` on Windows, or `ifconfig` / `ip a` on Linux. Record your IP address, subnet mask, default gateway, DHCP server, DNS server, and MAC address. <!-- id: it-03-t02 band: quick energy: low -->
+3. Test connectivity. Ping your gateway, `1.1.1.1`, `8.8.8.8`, and `google.com`. Explain why the responses differ. <!-- id: it-03-t03 band: focused energy: normal -->
+4. Run DNS lookups. Try `nslookup google.com`, `nslookup -type=mx gmail.com`, and `nslookup -type=txt google.com`. Document what each reveals. <!-- id: it-03-t04 band: focused energy: normal -->
+5. Capture DNS traffic in Wireshark. Filter on `dns`, identify a query, and explain how the name resolved to an IP address. <!-- id: it-03-t05 band: focused energy: normal -->
+6. Capture a TCP handshake in Wireshark. Filter on `tcp`, find a handshake between your device and a server, and explain the three-way handshake. <!-- id: it-03-t06 band: focused energy: normal -->
+7. Build a Packet Tracer network with 2 PCs, 1 switch, and 1 router. Configure DHCP and DNS on the router, then label every component and connection. <!-- id: it-03-t07 band: deep energy: normal -->
+8. Write a step-by-step troubleshooting guide for "connected to Wi-Fi but no internet", covering physical checks, IP configuration, DNS, and firewall considerations. <!-- id: it-03-t08 band: focused energy: normal -->
 
 ## Deliverable / proof of work
 

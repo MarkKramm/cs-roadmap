@@ -1289,15 +1289,15 @@ Then open `portfolio/cyber/14-web-app-security.md` and assemble the deliverables
 
 ## Hands-on practice tasks
 
-1. Set up Burp Suite Community with a browser profile for authorised testing, and run Juice Shop locally.
-2. Map an application with the proxy recording and produce an endpoint inventory with methods and parameters.
-3. Complete the PortSwigger access control Apprentice labs using two accounts and record each identifier change.
-4. Demonstrate the same-origin policy by hand with a cross-origin request, then repeat with permissive CORS.
-5. Complete the SQL injection Apprentice labs manually, then confirm one with sqlmap against localhost only.
-6. Complete the XSS and CSRF Apprentice labs covering all three XSS flavours and one token defeat.
-7. Write three findings in the full format with CVSS, reproduction, impact, remediation, and verification.
-8. Review a local deployment's headers, cookies, CORS, error pages, and directory listings, with a fix per observation.
-9. Write a one-page legal boundary note covering permission, disclosure steps, and what you will not test.
+1. Set up Burp Suite Community with a browser profile for authorised testing, and run Juice Shop locally. <!-- id: cyber-14-t01 band: focused energy: normal -->
+2. Map an application with the proxy recording and produce an endpoint inventory with methods and parameters. <!-- id: cyber-14-t02 band: focused energy: normal -->
+3. Complete the PortSwigger access control Apprentice labs using two accounts and record each identifier change. <!-- id: cyber-14-t03 band: deep energy: high -->
+4. Demonstrate the same-origin policy by hand with a cross-origin request, then repeat with permissive CORS. <!-- id: cyber-14-t04 band: focused energy: normal -->
+5. Complete the SQL injection Apprentice labs manually, then confirm one with sqlmap against localhost only. <!-- id: cyber-14-t05 band: deep energy: high -->
+6. Complete the XSS and CSRF Apprentice labs covering all three XSS flavours and one token defeat. <!-- id: cyber-14-t06 band: deep energy: high -->
+7. Write three findings in the full format with CVSS, reproduction, impact, remediation, and verification. <!-- id: cyber-14-t07 band: deep energy: high -->
+8. Review a local deployment's headers, cookies, CORS, error pages, and directory listings, with a fix per observation. <!-- id: cyber-14-t08 band: focused energy: normal -->
+9. Write a one-page legal boundary note covering permission, disclosure steps, and what you will not test. <!-- id: cyber-14-t09 band: quick energy: low -->
 
 ## Deliverable / proof of work
 

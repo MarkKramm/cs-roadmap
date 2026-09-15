@@ -767,13 +767,13 @@ The tasks below all build on this lesson, so a suggested order:
 
 ## Hands-on practice tasks
 
-1. Create a cybersecurity glossary with 50 terms in your own words.
-2. Set up Bitwarden or KeePassXC and move lab passwords into it.
-3. Enable MFA on your important personal accounts where possible.
-4. Read OWASP Top 10 and summarize each risk in 2–3 sentences.
-5. Pick 5 MITRE ATT&CK techniques and explain them simply.
-6. Write a one-page phishing analysis of a sample email from a safe training source.
-7. Read NIST CSF and write one example control for each function.
+1. Create a cybersecurity glossary with 50 terms in your own words. <!-- id: cyber-01-t01 band: deep energy: normal -->
+2. Set up Bitwarden or KeePassXC and move lab passwords into it. <!-- id: cyber-01-t02 band: focused energy: normal -->
+3. Enable MFA on your important personal accounts where possible. <!-- id: cyber-01-t03 band: focused energy: normal -->
+4. Read OWASP Top 10 and summarize each risk in 2–3 sentences. <!-- id: cyber-01-t04 band: focused energy: normal -->
+5. Pick 5 MITRE ATT&CK techniques and explain them simply. <!-- id: cyber-01-t05 band: focused energy: normal -->
+6. Write a one-page phishing analysis of a sample email from a safe training source. <!-- id: cyber-01-t06 band: focused energy: normal -->
+7. Read NIST CSF and write one example control for each function. <!-- id: cyber-01-t07 band: focused energy: normal -->
 
 ## Deliverable / proof of work
 

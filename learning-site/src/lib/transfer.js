@@ -2,16 +2,20 @@
 //
 // WHY THIS EXISTS
 // Progress, portfolio, applications, the schedule, reading position, section
-// ticks and two preferences live in **eight** localStorage keys. The site is
-// single-user and local-first by design (D-006), which is the right call — but
-// it means a cleared browser profile, a new laptop, or a reinstall destroys
-// months of work on a 34–112 week curriculum, and nothing in the UI even said
-// so. This module is the backup and the move.
+// ticks, the reader's notes and three preferences live in separate localStorage
+// keys. The site is single-user and local-first by design (D-006), which is the
+// right call — but it means a cleared browser profile, a new laptop, or a
+// reinstall destroys months of work on a 34–112 week curriculum, and nothing in
+// the UI even said so. This module is the backup and the move.
 //
 // WHAT IT IS NOT
 // It is not sync and not a server. There is no account, no upload, and no
-// network call anywhere in this file. It reads the eight keys, emits one JSON
-// document, and can read that document back.
+// network call anywhere in this file. It reads every registered key, emits one
+// JSON document, and can read that document back.
+//
+// The count is deliberately not written down here. It has changed twice, and a
+// number in a comment is one more place to forget — `KEYS` below is the list,
+// and `test-data.mjs` checks it against the source tree in both directions.
 //
 // DESIGN: PURE, AND TOTAL
 // Nothing here touches React, `window`, or the DOM. Storage is passed in as a
@@ -76,6 +80,11 @@ export const KEYS = [
     key: "cs-roadmap:notes:v1",
     kind: "map of phaseId -> { note, answers }",
     check: isNotesMap,
+  },
+  {
+    key: "cs-roadmap:time-budget:v1",
+    kind: "one of quick | focused | deep",
+    check: (v) => ["quick", "focused", "deep"].includes(v),
   },
 ];
 
@@ -322,6 +331,7 @@ export function labelFor(key) {
     "energy-mode": "Energy mode",
     "reading-size": "Reading size",
     notes: "Your notes and answers",
+    "time-budget": "Time available today",
   };
   return labels[short] || short;
 }

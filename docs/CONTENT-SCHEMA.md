@@ -61,15 +61,37 @@ Each `- [ ]` line under `## Checklist` gets a trailing HTML comment with a stabl
 
 ### Practice task IDs
 
-Each line under `## Hands-on practice tasks` gets an id at build time, `<phase-id>-t<NN>`:
+Each line under `## Hands-on practice tasks` gets an id, and every practice task in the curriculum now authors one inline rather than having one minted for it:
 
-```json
-{ "id": "it-03-t01", "text": "Run `ipconfig /all` and record …" }
+```markdown
+1. Run `ipconfig /all` and record … <!-- id: it-03-t01 band: quick energy: low -->
 ```
 
-These are **minted from position, not authored in the Markdown**, which is the one place this schema differs from checklist ids. The reason is that a reader's *answer* to a practice task is stored against the task's id (see `DECISIONS.md` → D-019), so an answer keyed by array position would silently reappear under a different question the moment a task was inserted above it.
+The comment carries three fields, and the **field order is fixed**: `id`, then `band`, then `energy`. The parser is deliberately not order-tolerant — a reordered comment is a build error rather than a guess, because a task whose metadata was silently misread would produce a wrong suggestion rather than no suggestion.
 
-The limitation that follows is real and is recorded rather than hidden: **appending** a task is safe, **reordering** one is not — the ids shift with the position, so an existing answer would follow the position rather than the question. Migrating to an authored `<!-- id: … -->` comment on each task line, as the checklist already does, removes the caveat. It has not been needed because these lists have only ever been appended to.
+- **`id`** is `<phase-id>-t<NN>`, zero-padded and sequential within the phase, on the same permanent-identity principle as checklist ids: adding a task appends an id, and a reader's *answer* is stored against the id (see `DECISIONS.md` → D-019), so it cannot migrate to a different question.
+- **`band`** describes how long one sitting takes. There are four values:
+
+  | Band | Meaning |
+  |---|---|
+  | `quick` | Under 30 minutes. |
+  | `focused` | 30–90 minutes. |
+  | `deep` | Over 90 minutes. |
+  | `ongoing` | **Not a single timed sitting.** Recurring, week-gated, multi-session or hardware-gated work. |
+
+  `ongoing` is an exclusion rather than a length: it means *more time would not help*, so a task carrying it is never offered as a time-boxed suggestion (see `DECISIONS.md` → D-021).
+- **`energy`** is one of `low`, `normal`, `high`, matching the checklist's `energy:` hint. All 183 practice tasks carry a value.
+
+**Positional minting is now a fallback, not the normal path.** The build still mints `<phase-id>-tNN` from position for any task line that carries no `<!-- id: … -->` comment, so a partially migrated file cannot fail the build — but it **reports the count**, because a silently minted id is the one thing that would let an answer follow a position rather than a question. The build prints both numbers on every run:
+
+```text
+task bands:  183 banded, 0 authored without a band, 0 still minted from position
+task energy: 183 of 183 practice task(s) carry an energy value
+```
+
+The minted-from-position count is currently **0**. A future edit that adds a task without its comment raises that number instead of passing quietly, which is the signal to author the comment rather than to accept the mint.
+
+The same `band`/`energy` pair is parsed for the dashboard's "what should I do today?" picker; `scripts/lesson-ast.mjs` and the site's `src/lib/today.js` both fail **closed** on an unknown or missing band, so an unrecognised value can never be treated as fitting every budget.
 
 ### Sections to extract
 

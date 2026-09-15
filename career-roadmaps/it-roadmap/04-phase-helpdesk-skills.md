@@ -1571,16 +1571,16 @@ Real ones carry the detail that only comes from having been there: the exact err
 
 ## Hands-on practice tasks
 
-1. Set up a ticketing system. Install or explore the **osTicket** demo, or if that is too complex, build a **Google Sheets ticket tracker** with columns for ticket ID, summary, user, device, impact, status, resolution, and next steps.
-2. Write 10 sample tickets using a consistent structure: summary, user, device, impact, troubleshooting steps, resolution, and next step.
-3. Write 2 knowledge base articles: one on troubleshooting a no-internet connection (physical checks, IP configuration, DNS), and one on clearing browser cache and cookies in Chrome, Firefox, and Edge.
-4. Practise remote support. Use **RustDesk** or **Chrome Remote Desktop** to connect to a family member's device or a second VM, and fix a simple issue such as display settings or a cache problem.
-5. Write 5 user-friendly replies to common helpdesk issues — email not syncing, VPN not connecting, printer offline, forgotten password, and a slow laptop. Each reply must be clear, polite, and contain actionable steps.
-6. Write 3 escalation notes, each including a detailed description, the troubleshooting already performed, supporting evidence such as error messages or logs, and the reason for escalation. Score each draft against the eight rows of the Part 12 handover table, and rewrite any that scores below six.
-7. Run every command in the Part 10 command table on your own machine, and write down what each result tells you. Add the output to `portfolio/it/04-healthy-baseline.md` with one sentence describing what would look different if it were broken.
-8. Work Part 11's six tickets on paper before reading the model replies. Write your triage questions, your reply to the user, and the internal note for each. Then compare your reply against the strong example and write two sentences on what you would change.
-9. Retake the Part 13 drill a week later, without rereading the answer key first. Anything you get wrong twice is the thing to practise, and the two most commonly missed situations are the ones worth checking first.
-10. Write one knowledge base article from a fault you fixed on your own machine while running the Part 10 checks. Use a command's unexpected output as the subject — it is a real finding, it is yours, and it is more convincing in a portfolio than a generic article.
+1. Set up a ticketing system. Install or explore the **osTicket** demo, or if that is too complex, build a **Google Sheets ticket tracker** with columns for ticket ID, summary, user, device, impact, status, resolution, and next steps. <!-- id: it-04-t01 band: focused energy: normal -->
+2. Write 10 sample tickets using a consistent structure: summary, user, device, impact, troubleshooting steps, resolution, and next step. <!-- id: it-04-t02 band: deep energy: normal -->
+3. Write 2 knowledge base articles: one on troubleshooting a no-internet connection (physical checks, IP configuration, DNS), and one on clearing browser cache and cookies in Chrome, Firefox, and Edge. <!-- id: it-04-t03 band: focused energy: normal -->
+4. Practise remote support. Use **RustDesk** or **Chrome Remote Desktop** to connect to a family member's device or a second VM, and fix a simple issue such as display settings or a cache problem. <!-- id: it-04-t04 band: focused energy: normal -->
+5. Write 5 user-friendly replies to common helpdesk issues — email not syncing, VPN not connecting, printer offline, forgotten password, and a slow laptop. Each reply must be clear, polite, and contain actionable steps. <!-- id: it-04-t05 band: focused energy: normal -->
+6. Write 3 escalation notes, each including a detailed description, the troubleshooting already performed, supporting evidence such as error messages or logs, and the reason for escalation. Score each draft against the eight rows of the Part 12 handover table, and rewrite any that scores below six. <!-- id: it-04-t06 band: focused energy: high -->
+7. Run every command in the Part 10 command table on your own machine, and write down what each result tells you. Add the output to `portfolio/it/04-healthy-baseline.md` with one sentence describing what would look different if it were broken. <!-- id: it-04-t07 band: focused energy: normal -->
+8. Work Part 11's six tickets on paper before reading the model replies. Write your triage questions, your reply to the user, and the internal note for each. Then compare your reply against the strong example and write two sentences on what you would change. <!-- id: it-04-t08 band: focused energy: high -->
+9. Retake the Part 13 drill a week later, without rereading the answer key first. Anything you get wrong twice is the thing to practise, and the two most commonly missed situations are the ones worth checking first. <!-- id: it-04-t09 band: ongoing energy: normal -->
+10. Write one knowledge base article from a fault you fixed on your own machine while running the Part 10 checks. Use a command's unexpected output as the subject — it is a real finding, it is yours, and it is more convincing in a portfolio than a generic article. <!-- id: it-04-t10 band: focused energy: normal -->
 
 ## Deliverable / proof of work
 

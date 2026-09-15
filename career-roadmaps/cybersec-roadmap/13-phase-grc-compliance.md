@@ -1347,15 +1347,15 @@ Then open `portfolio/cyber/13-grc-compliance.md` and assemble the deliverables. 
 
 ## Hands-on practice tasks
 
-1. Invent a small organisation with an asset inventory of at least fifteen assets, each classified.
-2. Publish a risk scoring scale with likelihood and impact definitions and matrix bands.
-3. Build a risk register with ten risks written as cause, event, and impact, scored inherent and residual.
-4. Read NIST CSF 2.0 and write your own paraphrase of ten subcategories with their identifiers.
-5. Build a control matrix mapping ten controls to subcategories and to a second framework.
-6. Write an acceptable use policy including a compliance and exceptions section.
-7. Complete a vendor assessment with a decision of "approve with conditions" and a stated residual risk.
-8. Write an audit finding response with a cause, owned actions, dates, and an accepted position.
-9. Outline the evidence required for each control and state which ones you could not evidence.
+1. Invent a small organisation with an asset inventory of at least fifteen assets, each classified. <!-- id: cyber-13-t01 band: focused energy: normal -->
+2. Publish a risk scoring scale with likelihood and impact definitions and matrix bands. <!-- id: cyber-13-t02 band: focused energy: normal -->
+3. Build a risk register with ten risks written as cause, event, and impact, scored inherent and residual. <!-- id: cyber-13-t03 band: deep energy: high -->
+4. Read NIST CSF 2.0 and write your own paraphrase of ten subcategories with their identifiers. <!-- id: cyber-13-t04 band: focused energy: normal -->
+5. Build a control matrix mapping ten controls to subcategories and to a second framework. <!-- id: cyber-13-t05 band: focused energy: normal -->
+6. Write an acceptable use policy including a compliance and exceptions section. <!-- id: cyber-13-t06 band: focused energy: normal -->
+7. Complete a vendor assessment with a decision of "approve with conditions" and a stated residual risk. <!-- id: cyber-13-t07 band: focused energy: normal -->
+8. Write an audit finding response with a cause, owned actions, dates, and an accepted position. <!-- id: cyber-13-t08 band: focused energy: normal -->
+9. Outline the evidence required for each control and state which ones you could not evidence. <!-- id: cyber-13-t09 band: focused energy: normal -->
 
 ## Deliverable / proof of work
 

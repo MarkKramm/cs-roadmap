@@ -4,16 +4,20 @@ import ProgressRing from "../components/ProgressRing.jsx";
 import EnergyModeSelector, {
   acceptsTask,
 } from "../components/EnergyModeSelector.jsx";
+import TimeBudgetSelector from "../components/TimeBudgetSelector.jsx";
 import { countDone } from "../hooks/useProgress.js";
 import { readStarts } from "../hooks/useSchedule.js";
 import { readPortfolio } from "../hooks/usePortfolio.js";
 import { readApplications } from "../hooks/useApplications.js";
+import { readNotes } from "../hooks/useNotes.js";
 import { renderInline } from "../lib/renderInline.jsx";
 import { paceFor, fmtWeeks, fmtDate } from "../lib/pace.js";
 import { allTools } from "../data/tools.js";
+import { pickToday, addressedTaskIds, bandInfo } from "../lib/today.js";
 import {
   tracks,
   allTasks,
+  allPracticeTasks,
   firstUnfinishedPhase,
   findPhase,
   trackWeeks,
@@ -41,11 +45,78 @@ import {
 // as often as "what now", and it is not answerable from a percentage. It is
 // hidden when the reader is already looking at the phase it would offer.
 
+// Why there is nothing to suggest, said honestly.
+//
+// The old version had two messages — "every task is complete" and "nothing left
+// at this energy level" — and they were the only two cases it knew about. The
+// picker now distinguishes six, and three of them were previously rendered as
+// "every task in this track is complete", which is a lie: the reader has real
+// work left, it just cannot be offered as a sitting right now. Saying "done"
+// when the reader is not done is the one failure this page must never have.
+//
+// See lib/today.js → pickToday for the taxonomy.
+function NothingToday({ reason, smallestBlocking, ongoingCount, mode, onGoToView }) {
+  if (reason === "all-addressed" || reason === "empty") {
+    return (
+      <p>
+        No practice tasks left in this track. Switch tracks, or use Reset progress
+        in the sidebar to start over.
+      </p>
+    );
+  }
+
+  if (reason === "none-fit") {
+    const band = smallestBlocking ? bandInfo(smallestBlocking) : null;
+    return (
+      <p>
+        The next task needs{" "}
+        <strong>{band ? band.label.toLowerCase() : "a longer sitting"}</strong>.
+        Tell the page you have more time, or do something small from{" "}
+        {onGoToView ? (
+          <button type="button" className="link-btn" onClick={() => onGoToView("shared")}>
+            Shared
+          </button>
+        ) : (
+          "Shared"
+        )}
+        .
+      </p>
+    );
+  }
+
+  if (reason === "none-fit-energy") {
+    return (
+      <p>
+        Nothing left fits <strong>{mode}</strong> energy today. Switch to a higher
+        energy level, or rest — an off day is part of the plan.
+      </p>
+    );
+  }
+
+  if (reason === "only-ongoing") {
+    return (
+      <p>
+        What is left is not a single sitting —{" "}
+        {ongoingCount === 1 ? "one commitment" : ongoingCount + " commitments"}{" "}
+        that build up over weeks rather than finish in an afternoon. Open the phase
+        to pick one up.
+      </p>
+    );
+  }
+
+  // `unjudged` and `no-budget` are not reachable in normal use, and are written
+  // out rather than folded into a catch-all so that if one ever IS reached the
+  // reader sees a true sentence instead of a wrong "you are done".
+  return <p>No suggestion available right now. Open a phase to pick a task.</p>;
+}
+
 export default function Dashboard({
   track,
   done,
   mode,
   onModeChange,
+  budget,
+  onBudgetChange,
   onOpenTrack,
   onOpenPhase,
   onGoToView,
@@ -56,13 +127,28 @@ export default function Dashboard({
   const trackDone = countDone(done, tasks);
   const pct = tasks.length > 0 ? Math.round((trackDone / tasks.length) * 100) : 0;
 
-  const remaining = tasks.filter((t) => !done[t.id]);
-  const nextTask = remaining.find((t) => acceptsTask(mode, t)) || null;
-  // Distinguish "nothing left" from "nothing left at this energy level" —
-  // otherwise a low-energy day at the end of a track falsely reads as done.
-  const blockedByEnergy = !nextTask && remaining.length > 0;
+  // The suggestion is drawn from the PRACTICE TASKS, not the checklist.
+  //
+  // The checklist is a list of things the reader can say about themselves ("I
+  // can use 20 basic Linux commands"); a practice task is an instruction to do
+  // something ("Run `ss -tulpn` and identify listening services"). Only the
+  // second has a duration, so only the second can answer "what fits in the time
+  // I have". Progress still counts the checklist — the two lists are different
+  // on purpose and this page is the only place they meet.
+  //
+  // See lib/today.js and docs/DECISIONS.md → D-021.
+  const practice = allPracticeTasks(track);
+  const addressed = addressedTaskIds(readNotes(), done, track.phases);
+  const pick = pickToday({
+    tasks: practice,
+    budget,
+    energy: mode,
+    addressed,
+    accepts: acceptsTask,
+  });
+  const nextTask = pick.task;
   const nextPhase = nextTask
-    ? track.phases.find((p) => p.checklist.some((c) => c.id === nextTask.id))
+    ? track.phases.find((p) => p.id === nextTask.phaseId)
     : null;
 
   // The phase the reader was last inside, if it is in this track and is not
@@ -131,6 +217,14 @@ export default function Dashboard({
                   {renderInline(nextTask.text, "focus-task")}
                 </p>
                 <div className="focus__meta">
+                  {nextTask.band && bandInfo(nextTask.band) && (
+                    <span
+                      className={"badge badge--band-" + nextTask.band}
+                      title={bandInfo(nextTask.band).note}
+                    >
+                      {bandInfo(nextTask.band).label}
+                    </span>
+                  )}
                   {nextTask.energy && (
                     <span className={"badge badge--" + nextTask.energy}>
                       {nextTask.energy} energy
@@ -147,18 +241,19 @@ export default function Dashboard({
                   )}
                 </div>
               </>
-            ) : blockedByEnergy ? (
-              <p>
-                Nothing left at <strong>{mode}</strong> energy. Switch to a higher
-                energy level, or rest — an off day is part of the plan.
-              </p>
             ) : (
-              <p>
-                Every task in this track is complete. Switch tracks, or use Reset
-                progress in the sidebar to start over.
-              </p>
+              <NothingToday
+                reason={pick.reason}
+                smallestBlocking={pick.smallestBlocking}
+                ongoingCount={pick.ongoingCount}
+                mode={mode}
+                onGoToView={onGoToView}
+              />
             )}
-            <EnergyModeSelector mode={mode} onChange={onModeChange} />
+            <div className="focus__controls">
+              <TimeBudgetSelector budget={budget} onChange={onBudgetChange} />
+              <EnergyModeSelector mode={mode} onChange={onModeChange} />
+            </div>
           </div>
 
           {showCarryOn && (

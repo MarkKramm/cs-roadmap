@@ -11,9 +11,9 @@
 //   2. A merge never overwrites something written on this machine with an older
 //      draft from another one.
 //
-// The second is the same class of bug `test-data.mjs` guards for the other eight
-// keys, but notes nest one level deeper than anything there, so the per-task
-// union has its own suite rather than riding on that one.
+// The second is the same class of bug `test-data.mjs` guards for every other
+// registered key, but notes nest one level deeper than anything there, so the
+// per-task union has its own suite rather than riding on that one.
 //
 // The pure helpers are exercised under plain Node. The React hook is not, since
 // it needs a renderer — what it delegates to is what is tested, and the smoke
@@ -44,11 +44,17 @@ const entry = KEYS.find((k) => k.key === "cs-roadmap:notes:v1");
 
 ok(Boolean(entry), "notes key is registered in KEYS");
 ok(entry && entry.kind.includes("phaseId"), "notes key documents its shape");
-ok(
-  KEYS.length === 9,
-  "the site owns exactly nine keys now",
-  "found " + KEYS.length
-);
+ok(entry && typeof entry.check === "function", "notes key carries a validator");
+
+// There is deliberately NO `KEYS.length === N` assertion here.
+//
+// There used to be, and it broke on two consecutive key additions (8 → 9 → 10)
+// while catching nothing: it restated a number maintained by hand in this file,
+// so it could only ever fail when someone edited the registry on purpose. The
+// question it was trying to ask — "is every key the site writes registered?" —
+// is answered properly in test-data.mjs, which scans src/ for `cs-roadmap:*:vN`
+// literals and compares them against KEYS in both directions. Duplicating a
+// weaker version of that check here only adds a second place to update.
 
 // --- the validator --------------------------------------------------------
 

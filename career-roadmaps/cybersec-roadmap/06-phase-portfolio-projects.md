@@ -1181,14 +1181,14 @@ Then open `portfolio/cyber/06-portfolio-projects.md`, link the three repository 
 
 ## Hands-on practice tasks
 
-1. Create a cyber portfolio repo/folder.
-2. Build Project 1 and write a report.
-3. Build Project 2 and write a report.
-4. Complete one blue-team lab and write Project 3 incident report.
-5. Choose 1–2 specialization projects.
-6. Add screenshots, commands used, lessons learned, and limitations.
-7. Rewrite reports so a non-technical manager can understand the impact.
-8. Write out the follow-up questions each project invites and answer them out loud without notes.
+1. Create a cyber portfolio repo/folder. <!-- id: cyber-06-t01 band: quick energy: low -->
+2. Build Project 1 and write a report. <!-- id: cyber-06-t02 band: deep energy: high -->
+3. Build Project 2 and write a report. <!-- id: cyber-06-t03 band: deep energy: high -->
+4. Complete one blue-team lab and write Project 3 incident report. <!-- id: cyber-06-t04 band: deep energy: high -->
+5. Choose 1–2 specialization projects. <!-- id: cyber-06-t05 band: quick energy: low -->
+6. Add screenshots, commands used, lessons learned, and limitations. <!-- id: cyber-06-t06 band: focused energy: normal -->
+7. Rewrite reports so a non-technical manager can understand the impact. <!-- id: cyber-06-t07 band: focused energy: normal -->
+8. Write out the follow-up questions each project invites and answer them out loud without notes. <!-- id: cyber-06-t08 band: focused energy: normal -->
 
 ## Deliverable / proof of work
 

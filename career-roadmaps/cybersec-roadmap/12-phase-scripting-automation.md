@@ -1432,15 +1432,15 @@ Then open `portfolio/cyber/12-scripting-automation.md` and assemble the delivera
 
 ## Hands-on practice tasks
 
-1. Write a Python script that reads a real log file line by line and counts failures by source address.
-2. Extend it to find any successful login that followed a burst of failures from the same address.
-3. Add tests for a malformed line, an empty file, and a file with an invalid byte, and fix what breaks.
-4. Write an API function with a timeout, explicit status handling, retry with backoff, and errors returned rather than raised.
-5. Run the API tool over a list of hashes and produce a CSV report with a verdict per row.
-6. Move the API key to an environment variable, add `.env.example` and `.gitignore`, and run a secret scan over the history.
-7. Write a read-only PowerShell triage script that collects processes, connections, services, tasks, and recent events into timestamped CSVs.
-8. Have a Python script consume the PowerShell CSV output, apply a documented filter, and produce a short report.
-9. Write the README with all six sections, pin the dependencies, and follow your own setup instructions in a fresh directory.
+1. Write a Python script that reads a real log file line by line and counts failures by source address. <!-- id: cyber-12-t01 band: focused energy: normal -->
+2. Extend it to find any successful login that followed a burst of failures from the same address. <!-- id: cyber-12-t02 band: focused energy: normal -->
+3. Add tests for a malformed line, an empty file, and a file with an invalid byte, and fix what breaks. <!-- id: cyber-12-t03 band: focused energy: normal -->
+4. Write an API function with a timeout, explicit status handling, retry with backoff, and errors returned rather than raised. <!-- id: cyber-12-t04 band: focused energy: normal -->
+5. Run the API tool over a list of hashes and produce a CSV report with a verdict per row. <!-- id: cyber-12-t05 band: focused energy: normal -->
+6. Move the API key to an environment variable, add `.env.example` and `.gitignore`, and run a secret scan over the history. <!-- id: cyber-12-t06 band: focused energy: normal -->
+7. Write a read-only PowerShell triage script that collects processes, connections, services, tasks, and recent events into timestamped CSVs. <!-- id: cyber-12-t07 band: deep energy: high -->
+8. Have a Python script consume the PowerShell CSV output, apply a documented filter, and produce a short report. <!-- id: cyber-12-t08 band: focused energy: normal -->
+9. Write the README with all six sections, pin the dependencies, and follow your own setup instructions in a fresh directory. <!-- id: cyber-12-t09 band: focused energy: normal -->
 
 ## Deliverable / proof of work
 

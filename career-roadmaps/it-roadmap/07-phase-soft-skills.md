@@ -644,12 +644,12 @@ Then push further:
 
 ## Hands-on practice tasks
 
-1. Rewrite 5 bad ticket responses into professional responses.
-2. Create 10 troubleshooting questions for “internet is slow.”
-3. Create 10 troubleshooting questions for “I cannot log in.”
-4. Record a 2-minute screen walkthrough explaining how to check IP/DNS.
-5. Write 5 STAR stories: learning fast, fixing a problem, dealing with conflict, admitting a mistake, helping a user.
-6. Draft a short LinkedIn About section.
+1. Rewrite 5 bad ticket responses into professional responses. <!-- id: it-07-t01 band: focused energy: normal -->
+2. Create 10 troubleshooting questions for “internet is slow.” <!-- id: it-07-t02 band: focused energy: normal -->
+3. Create 10 troubleshooting questions for “I cannot log in.” <!-- id: it-07-t03 band: focused energy: normal -->
+4. Record a 2-minute screen walkthrough explaining how to check IP/DNS. <!-- id: it-07-t04 band: focused energy: normal -->
+5. Write 5 STAR stories: learning fast, fixing a problem, dealing with conflict, admitting a mistake, helping a user. <!-- id: it-07-t05 band: focused energy: normal -->
+6. Draft a short LinkedIn About section. <!-- id: it-07-t06 band: quick energy: normal -->
 
 ## Deliverable / proof of work
 
