@@ -181,7 +181,7 @@ If you work with colleagues or clients in other time zones, three habits prevent
 
 The single most common failure in support is not incompetence. It is a ticket that went quiet. The technician got busy, the user assumed they were forgotten, and a solvable problem became a complaint.
 
-**Follow-up discipline is a habit, not a personality trait.** The reliable version: every open ticket gets an update at a defined interval — daily, or twice a day for high priority — even when the update is "still investigating, no news yet". Put it in whatever system you use to manage your own work. It takes ninety seconds per ticket.
+**Follow-up discipline is a habit, not a personality trait.** The reliable version: every open ticket gets an update at a defined interval — daily, or twice a day for high priority — even when the update is "still investigating, no news yet". Put it somewhere you will actually see it — a calendar reminder, or the ticket sheet from Phase 6 if you have built one. Studying alone with no live tickets yet, the honest version is to pick one real ongoing task of your own and apply the same interval to it.
 
 #### Explaining with screenshots
 
@@ -401,7 +401,7 @@ Interviewers probe, because a memorised answer has no depth beneath it. Prepare 
 
 ### Part 7 — Model answers you can compare against
 
-Parts 1 to 6 taught the moves. Part 8 gave you reps. This part gives you the thing that is missing when you study alone: **something to check your work against**.
+Parts 1 to 6 taught the moves. The practice list in "Practice this next" gave you reps. This part gives you the thing that is missing when you study alone: **something to check your work against**.
 
 Soft skills are the hardest thing to self-teach, because there is no compiler to tell you that you got it wrong. Below is a weak attempt and a strong attempt for each of the situations this phase covers. Write yours first, then compare. Do not read the strong version first — the gap between your attempt and it is the lesson.
 
@@ -544,7 +544,7 @@ The facts are identical. Only the packaging changed. **Being able to do this on 
 
 > I do not have a degree. What I have is a year of self-directed study and a portfolio you can check.
 >
-> I built a Wazuh lab on my own hardware and wrote up three investigations from it, including one where my first detection rule generated 340 false positives in an hour and I had to work out why. That write-up is in the portfolio I sent you.
+> I built the ticket set and the runbook from my own home lab and wrote up three investigations from it, including one where my first alert threshold fired on a known false positive and I had to work out why. Those write-ups are in the portfolio I sent you.
 >
 > What that shows is not that I know everything. It is that when I do not know something, I can find it and prove I found it.
 

@@ -571,7 +571,13 @@ touch troubleshooting-writeups/.gitkeep networking/.gitkeep windows-linux/.gitke
 touch ticketing-samples/.gitkeep scripts/.gitkeep resume/.gitkeep
 ```
 
-On Windows PowerShell, `touch` is not a command. Use `New-Item -ItemType File` followed by the path instead, once per file.
+On Windows PowerShell, `touch` is not a command. Use this instead, once per folder — for example:
+
+```powershell
+New-Item -ItemType File -Path networking/.gitkeep
+```
+
+Repeat it for each of the six folders.
 
 #### Step 5 — Write the README for real
 
@@ -1094,7 +1100,7 @@ The line under test, as a beginner might write it:
 
 | Cut this | Replace with this |
 |---|---|
-| Experienced with Active Directory and Windows Server administration. | Studied Active Directory concepts and practised user and group management, permissions, and least privilege on a standalone Windows 11 machine; next step is a Windows Server domain controller lab. |
+| Experienced with Active Directory and Windows Server administration. | Studied Active Directory concepts and practised user and group management, permissions, and least privilege on a standalone Windows 11 machine; a Windows Server domain controller lab is a later goal, not something this phase expects you to have done. |
 
 The replacement is longer, entirely true, and much stronger. It names what you did, names what you have not done, and shows you know the difference. Interviewers hire the second version and distrust the first.
 
@@ -1253,7 +1259,7 @@ Everything above, scheduled. Roughly 45–60 minutes a day, on a modest laptop, 
 
 ### Part 17 — Practice this next
 
-The tasks below produce three artefacts and one demonstration. The artefacts are a static site with your write-ups and diagrams, a README that ties the work together, and the workbook PDF. The demonstration is a recorded walkthrough, and it is the one that changes how people read everything else.
+The tasks below produce three artefacts and one demonstration. The artefacts are your write-up repository with its diagrams, the README that ties the work together, and the Phase 6 workbook (a spreadsheet). The demonstration is a recorded walkthrough, and it is the one that changes how people read everything else.
 
 Then work this list, which turns the artefacts into something a stranger can actually evaluate:
 

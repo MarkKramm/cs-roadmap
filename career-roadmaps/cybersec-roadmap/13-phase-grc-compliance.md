@@ -121,7 +121,7 @@ The three words are used as one acronym and they describe three different jobs. 
 
 | Function | The question it answers | Who owns it | The artefact |
 |---|---|---|---|
-| **Governance** | Who decides, and by what authority? | Board, steering committee, CISO | Charter, policy set, roles and responsibilities, reporting |
+| **Governance** | Who decides, and by what authority? | Board, steering committee, CISO (Chief Information Security Officer) | Charter, policy set, roles and responsibilities, reporting |
 | **Risk** | What could go wrong, how bad, and what are we doing about it? | Risk owner, with the security team advising | Risk register, risk assessment, treatment plan |
 | **Compliance** | Can we demonstrate we meet the standard? | Compliance or audit function | Control matrix, evidence pack, audit report |
 
@@ -133,7 +133,7 @@ A concrete illustration:
 |---|---|---|
 | Governance | "We will not accept more than a moderate risk of customer data exposure." | The board, in the risk appetite statement |
 | Risk | "The customer database has a high likelihood of exposure because three administrators share one credential." | The risk register |
-| Compliance | "Control A.9.2.3 (management of privileged access) is not met; here is the gap, and here is the remediation plan." | The control matrix and audit finding |
+| Compliance | "Control 8.2 (privileged access rights) is not met; here is the gap, and here is the remediation plan." | The control matrix and audit finding |
 
 Read those three lines in order and you have the whole discipline. The board said what matters. The risk register measured it. Compliance found the specific gap.
 
@@ -531,6 +531,8 @@ SOC 2 is not a standard you implement. It is a report an auditor produces about 
 | **GDPR** | You process personal data of EU residents | Lawful basis, data subject rights, records of processing, breach notification within 72 hours where required | EU supervisory authorities |
 
 **One control satisfies several frameworks**, and this is the observation that makes control mapping efficient rather than exhausting.
+
+The identifiers in the right-hand column are framework-specific. `PR.AA`, `DE.CM` and `PR.AT` are NIST CSF categories; `CC1`–`CC9` are the SOC 2 Common Criteria (CC6 is logical access, CC7 is system operations, CC1 and CC2 cover the control environment and communication); `ISO 27001` and `PCI DSS requirement N` are exactly what they say. You are not expected to memorise them — you are expected to look each one up once, from the framework's own published list.
 
 | Control activity | Satisfies |
 |---|---|

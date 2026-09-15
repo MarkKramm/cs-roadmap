@@ -561,7 +561,7 @@ Each should appear in the report next to a sentence saying what you were looking
 for when you used it. A filter list with no explanation is a cheat sheet, not
 evidence of skill.
 
-**Commit the pcap.** The capture file is the artifact. Anyone can write a
+**Commit the pcap — as `.pcap`, not `.pcapng`.** The capture file is the artifact. Anyone can write a
 paragraph claiming they saw a suspicious pattern; the pcap lets a reviewer verify
 it. Add a note recording how the traffic was generated, so the capture is
 reproducible.
@@ -949,7 +949,9 @@ mkdir -p assets
 Create a `.gitignore` immediately, because lab work generates files that should never be published:
 
 ```gitignore
-# Never commit these
+# Never commit these raw exports.
+# Note: save the capture you *do* want reviewed as .pcap, and copy the log
+# lines you quote into your write-up — an ignored extension cannot be committed.
 *.pcapng
 *.evtx
 *.log
@@ -1012,7 +1014,7 @@ While you work, keep an evidence log. One line per action, with a timestamp.
 
 | Time | Action | Command or click | Result | Evidence file |
 |---|---|---|---|---|
-| 14:02 | Started lab VM | `vagrant up` | VM booted, IP 192.168.56.10 | `01-vm-boot.png` |
+| 14:02 | Started lab VM | VirtualBox → `lab-ubuntu` → Start | VM booted, IP 192.168.56.10 | `01-vm-boot.png` |
 | 14:09 | Generated test traffic | `nmap -sS 192.168.56.10` | 3 open ports found | `02-scan.png` |
 | 14:15 | Confirmed alert fired | Wazuh dashboard | Rule 5710 triggered | `03-alert.png` |
 
@@ -1074,7 +1076,7 @@ Strong version:
 > My first rule alerted on any failed login, which fired 340 times in the first
 > hour because a service account retries on a schedule. I narrowed it to five
 > failures from the same source within sixty seconds, excluding the service
-> account by SID. Alerts dropped to two that hour, and both were worth
+> account by SID (the Windows security identifier for that account). Alerts dropped to two that hour, and both were worth
 > investigating. The tradeoff is that a slow password spray — one attempt per
 > minute across many accounts — would now be missed, which is why I added a
 > second rule for that pattern.

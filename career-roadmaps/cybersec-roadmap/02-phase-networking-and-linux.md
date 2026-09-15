@@ -241,7 +241,7 @@ You can see your own ARP table with `ip neigh` on Linux or `arp -a` on Windows. 
 | **AAAA** | Name → IPv6 address | Same, for IPv6 |
 | **CNAME** | Alias to another name | Common in phishing infrastructure |
 | **MX** | Mail server for the domain | Used to judge whether email *could* be legitimate |
-| **TXT** | Arbitrary text | Holds SPF/DKIM/DMARC anti-spoofing records |
+| **TXT** | Arbitrary text | Holds **SPF** (Sender Policy Framework), **DKIM** (DomainKeys Identified Mail), and **DMARC** anti-spoofing records |
 | **NS** | Authoritative nameservers | Who controls the domain |
 
 #### Recursive resolvers versus authoritative servers
@@ -419,7 +419,7 @@ Two failure modes to know:
 | Failure mode | What it means |
 |---|---|
 | An expired certificate | A configuration problem — the owner forgot to renew |
-| A **valid but wrong** certificate | Right domain, so the browser is happy, but not the host you think you are talking to. This is a potential interception |
+| A **valid but wrong** certificate | Right domain, so the browser is happy, but not the host you think you are talking to. The certificate is trusted because it was issued by a CA in your trust store — which is exactly what a corporate TLS-inspection proxy or a compromised CA would produce. This is a potential interception |
 
 That distinction is why certificate inspection is a real investigative step rather than a formality.
 
@@ -528,7 +528,7 @@ Ownership changes with `chown user:group file`. Only root can give a file away t
 
 **`sudo`** lets a permitted user run a command as root.
 
-It is the mechanism behind **least privilege** (Phase 1): instead of logging in as root, you work as a normal user and escalate only for the specific command that needs it.
+It is the mechanism behind **least privilege** — giving each account only the access its job needs: instead of logging in as root, you work as a normal user and escalate only for the specific command that needs it.
 
 Every `sudo` invocation is logged, which is why it also serves the **accounting** part of AAA. Reading `/etc/sudoers` shows who has been granted what — and a common finding in security reviews is that far too many users are in the sudo group.
 
@@ -748,7 +748,7 @@ The pipe (`|`) is the concept to internalise. It takes one command's output and 
 This works because Unix programs follow a convention — read text in, write text out. That convention is why a security analyst can answer “how many distinct IPs failed to log in today?” with one line:
 
 ```bash
-grep "Failed password" /var/log/auth.log | awk '{print $11}' | sort | uniq -c | sort -rn | head
+grep "Failed password" /var/log/auth.log | awk '{print $8}' | sort | uniq -c | sort -rn | head
 ```
 
 Read that left to right.

@@ -25,7 +25,7 @@ Learn how cloud environments are attacked and defended, why identity is the cont
 
 - Explain the shared responsibility model and say precisely which controls are yours in each cloud service model.
 - Read and interpret an IAM policy in AWS or Azure and identify what it actually allows, not what it appears to allow.
-- Configure MFA and a conditional access policy in Microsoft Entra ID at no cost.
+- Configure MFA in Microsoft Entra ID at no cost, and explain what a conditional access policy does and where the free tier stops.
 - Recognise the five cloud misconfigurations that cause most real breaches.
 - Read cloud audit logs — AWS CloudTrail and Azure Activity Log — and reconstruct a sequence of actions.
 - Explain what a service principal, managed identity, and instance metadata service are, and why the metadata endpoint is a target.
@@ -74,10 +74,10 @@ You are not starting from nothing. You have three things this phase builds direc
 | What you have | Where it came from | How this phase uses it |
 |---|---|---|
 | Identity fundamentals — authentication, authorisation, accounting | Phase 3 | Cloud IAM is those three ideas expressed as JSON |
-| Log-reading discipline | Phase 4 and Phase 10 | CloudTrail records are just another log source |
+| Log-reading discipline | Phase 4 (reinforced later in Phase 10) | CloudTrail records are just another log source |
 | A working lab habit | Phase 4 | Free-tier cloud accounts are labs with the same rules |
 
-The vocabulary is genuinely new — tenant, subscription, principal, role assumption. The underlying ideas are not.
+The vocabulary is genuinely new — tenant (your organisation's own directory in the cloud), subscription (the billing and management container your resources live in, not a paid plan by itself), principal, and role assumption. The underlying ideas are not.
 
 #### Time to complete
 
@@ -231,6 +231,8 @@ Here is a habit worth building now, because it transfers to every cloud and ever
 That fifth question is the one you will use in interviews, and it is the one that produces a remediation instead of a complaint.
 
 You can answer the first two mechanically, without reading a policy by eye.
+
+**Before any of this works you need the AWS CLI**: install it, then run `aws configure` once with the IAM user's access key, secret, and a default region. Every command below reads those stored credentials, so a bare `aws` command with no configuration fails immediately.
 
 ```bash
 # Every policy attached to one identity, in one pass.
@@ -1057,7 +1059,7 @@ You can now read a CloudTrail event and tell whether it is routine or worth chas
 - **Stolen credentials and misconfiguration dominate cloud incidents**, not software exploits. The defence is fewer permissions, shorter-lived credentials, stronger authentication, and useful logs.
 - **The shared responsibility model is a work-allocation document.** Identity and logging stay yours in every service model. Patching on IaaS stays yours too, and that is the row teams forget.
 - **A policy states permission, not intent.** Read every policy for the furthest reach it grants, not for the task it was written to support.
-- **Wildcard actions and wildcard resources are the two largest amplifiers in cloud security.** `iam:PassRole`, `iam:Attach*`, and `s3:*` on `*` are the specific patterns to hunt.
+- **Wildcard actions and wildcard resources are the two largest amplifiers in cloud security.** `iam:PassRole` lets an identity hand a role to another service, so a low-privilege caller can borrow a more privileged one; `iam:Attach*` grants new permissions outright; `s3:*` on `*` is unrestricted object storage. Those three are the specific patterns to hunt.
 - **Managed identities beat long-lived keys whenever they are available**, because you cannot leak a secret you never hold. A credential you can copy is a credential that will be copied.
 - **The metadata service at `169.254.169.254` is a credential-dispensing endpoint**, and SSRF against a cloud application is therefore credential theft. IMDSv2 exists because of this.
 - **Public storage buckets are the most reported cloud misconfiguration in the world.** Detect the configuration *change* with `PutBucketAcl` and `PutBucketPolicy`, not the resulting state a day later.

@@ -80,7 +80,7 @@ You cannot troubleshoot what you cannot name. This lesson gives you the vocabula
 
 We will work through the machine in the order a support technician actually thinks about it: processor, memory, storage, motherboard, and then the boot sequence that ties them together. For each part you will learn five things: **what it is**, **how to check yours**, **what the numbers mean**, **what failure looks like**, and **what you would actually do about it**. Then you will run six guided checks on your own computer with real commands and real output.
 
-**Time to complete:** 2–4 hours if you follow along on your own machine. Do not just read this — open the tools and look at your own hardware. The reading is worth a fraction of the doing.
+**Time to complete:** 2–4 hours per Part if you follow along on your own machine; the six checks in Part 7 are a separate 2–3 hour session. Do not just read this — open the tools and look at your own hardware. The reading is worth a fraction of the doing.
 
 ### Part 1 — CPU: the processor
 
@@ -390,7 +390,7 @@ The interpretation rule is simple, and it is about *direction* rather than absol
 
 **This is the reasoning that separates a technician from a parts-swapper.** "CrystalDiskInfo says Caution" is a fact. "Reallocated sectors are at 248 and climbing, pending sectors appeared since last check, so the drive is degrading and I have backed the user's data up and raised a replacement" is a diagnosis. The second one gets you hired and promoted.
 
-Note that **SSDs report different attributes** and have a **wear-levelling count** and a **percentage used** figure instead of the mechanical attributes above. An SSD does not fail gradually the way a spinning disk does — it works perfectly until it does not. That is why backing up matters more, not less, on an SSD.
+Note that **SSDs report different attributes** and have a **wear-levelling count** and a **percentage used** figure instead of the mechanical attributes above. An SSD reports wear and pending sectors rather than mechanical noise, so the S.M.A.R.T. trend matters more than the sound — which is why backing up matters more, not less, on an SSD.
 
 #### Memory errors: why they look random
 
@@ -895,7 +895,7 @@ Here is the same ticket written two ways.
 
 | Weak note | Strong note |
 |---|---|
-| **Ticket:** "User cannot print."<br><br>**Note:** "Checked printer, seems fine now. User will monitor. Closing ticket." | **Ticket:** "User cannot print to the Finance department printer (FIN-HP-02)."<br><br>**Note:** "User reported that documents sent to FIN-HP-02 stay in the queue and never print; started this morning; no changes to their PC reported. Asked the user to print a test page from Notepad — it printed successfully from the printer's own panel test, but the job from their PC stayed queued. Checked Printers and devices: FIN-HP-02 was set as default and showed 'Offline'. The printer's IP address in the port settings did not match the address shown on the printer's network configuration page. Removed the old printer entry and re-added it using the current address; printed a test page from Notepad — printed immediately. Asked the user to print the original Excel report that failed; it printed correctly and they confirmed. Cause: printer's IP address had changed, so the PC was sending jobs to an address nothing was listening on. Note for the next agent: this printer is on DHCP and may change address again — recommend a DHCP reservation." |
+| **Ticket:** "User cannot print."<br><br>**Note:** "Checked printer, seems fine now. User will monitor. Closing ticket." | **Ticket:** "User cannot print to the Finance department printer (FIN-HP-02)."<br><br>**Note:** "User reported that documents sent to FIN-HP-02 stay in the queue and never print; started this morning; no changes to their PC reported. Asked the user to print a test page from Notepad — it printed successfully from the printer's own panel test, but the job from their PC stayed queued. Checked Printers and devices: FIN-HP-02 was set as default and showed 'Offline'. The printer's IP address in the port settings did not match the address shown on the printer's network configuration page. Removed the old printer entry and re-added it using the current address; printed a test page from Notepad — printed immediately. Asked the user to print the original Excel report that failed; it printed correctly and they confirmed. Cause: printer's IP address had changed, so the PC was sending jobs to an address nothing was listening on. Note for the next agent: this printer takes its address automatically and may change again — recommend a fixed IP address so it stops moving (DHCP itself is covered in Phase 3)." |
 
 The difference is not length for its own sake. Look at exactly what changed:
 
@@ -1011,7 +1011,7 @@ Result: `C:` FreeGB moves from **4.1 GB to 24.6 GB**. That is the single largest
 
 *Change 2 — startup programs.*
 
-You do **not** disable items by editing the registry or hunting through folders. You open **Task Manager → Startup apps** and set the non-work entries to **Disabled** — Spotify, Steam, and Discord. You leave OneDrive and Teams alone, because those are work tools and the user relies on them, and you leave the Adobe updater alone unless the user confirms they do not use Adobe. You tell the user exactly what you disabled and why, and that they can re-enable any of them.
+You do **not** disable items by editing the registry (Windows' internal settings database, covered in Phase 2) or hunting through folders. You open **Task Manager → Startup apps** and set the non-work entries to **Disabled** — Spotify, Steam, and Discord. You leave OneDrive and Teams alone, because those are work tools and the user relies on them, and you leave the Adobe updater alone unless the user confirms they do not use Adobe. You tell the user exactly what you disabled and why, and that they can re-enable any of them.
 
 You check what is actually running right now, for the note:
 

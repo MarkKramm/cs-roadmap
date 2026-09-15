@@ -372,7 +372,7 @@ Expect **training on the tools, then a queue**.
 |---|---|
 | 1–2 | Reading playbooks and watching someone else triage. You are shadowing, and you will feel useless. That is normal, not a signal about your ability |
 | 3–4 | Taking your first alerts, but every one gets reviewed before you close it. You are learning the house standard for what "benign" looks like |
-| 5–8 | Working the queue independently. You are graded on whether your dispositions agree with your reviewer's |
+| 5–8 | Working the queue independently. You are graded on whether your dispositions — your recorded verdict on each alert: true positive, false positive, or escalate — agree with your reviewer's |
 | 9–13 | Given a shift and a queue of your own. Escalations are still reviewed, but you are trusted to decide what to escalate |
 
 **What a specific day contains.** You log in and pick up the queue — fifteen to forty alerts, mostly the same three or four patterns you have seen fifty times: a scheduled scan, an administrator running a script, a user who mistyped their password. You close those with a one-line justification.
@@ -510,7 +510,7 @@ The four-axis scoring in task 2 is the exercise the phase asks for. This is how 
 | Learning-curve fit | ×2 | 4 | 3 | 5 | 3 |
 | Ceiling and transferability | ×1 | 5 | 4 | 4 | 5 |
 | Shift and lifestyle | ×1 | 2 | 5 | 4 | 3 |
-| **Weighted total** | | **82** | **63** | **88** | **61** |
+| **Weighted total** | | **58** | **47** | **61** | **44** |
 
 Those totals are one learner's numbers, not a verdict. Fill in your own, and expect them to differ — the value is in doing the arithmetic, because it forces you to notice which criterion is actually driving your answer.
 

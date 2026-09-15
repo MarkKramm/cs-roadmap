@@ -256,7 +256,7 @@ The alert is a prompt to investigate, not a conclusion.
 
 #### Least privilege, RBAC, and access reviews
 
-**Least privilege** and **access review** were defined in Phase 1. The new material here is **RBAC** — Role-Based Access Control — which is how least privilege is actually implemented at scale.
+**Least privilege** means giving each account only the access its job needs, and an **access review** is the periodic check that those grants are still justified. The new material here is **RBAC** — Role-Based Access Control — which is how least privilege is actually implemented at scale.
 
 Rather than granting permissions to individuals, you define **roles** that bundle the permissions a job function needs, and you assign people to roles.
 
@@ -363,7 +363,13 @@ The phase's tools table gives you the free end of each category.
 
 Event ID **4688** (process creation) is the endpoint equivalent of the identity event IDs, and it has one important practical caveat the phase hints at with “if enabled”: **process creation auditing is not on by default on Windows.**
 
-You must enable it, which is itself a lesson about detection — *the absence of an event does not mean the absence of activity; it may mean nobody turned the logging on.*
+You must enable it, which is itself a lesson about detection — *the absence of an event does not mean the absence of activity; it may mean nobody turned the logging on.* Turn it on from an elevated prompt:
+
+```powershell
+auditpol /set /subcategory:"Process Creation" /success:enable
+```
+
+(Or the equivalent Group Policy path: Computer Configuration → Windows Settings → Security Settings → Advanced Audit Policy Configuration → Detailed Tracking → Audit Process Creation.)
 
 #### Parent-child relationships are where detection lives
 
@@ -1024,7 +1030,7 @@ In your browser's developer tools, on **a site you built yourself**:
 
 If you have an old project, you will almost certainly find that your session cookie lacks `HttpOnly`. That discovery is worth more than reading the OWASP Top 10, because you found it yourself in your own code.
 
-**Do not test any site you do not own.** If you want to practise against something realistic, use a purpose-built target like OWASP Juice Shop or DVWA in a local container — both are free and both are designed for exactly this.
+**Do not test any site you do not own.** If you want to practise against something realistic, use a purpose-built target like OWASP Juice Shop or DVWA, installed in the VirtualBox VM you built in Phase 2 — both are free and both are designed for exactly this.
 
 #### Domain 5 — Vulnerability management: build a real triage table
 

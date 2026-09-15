@@ -590,9 +590,9 @@ Every exercise below runs on the laptop you already own, costs nothing, and touc
 
 #### Exercise 1 — Write your own glossary, in your own words
 
-The phase glossary has about 50 terms. Copying definitions is not learning; rewriting them is.
+Copying definitions is not learning; rewriting them is.
 
-Work through the terms and for each one write **one sentence in your own words** plus, for at least ten of them, a concrete example. A term with no example you can produce is a term you have not understood yet — go back rather than move on.
+Work through the bolded terms in this lesson and for each one write **one sentence in your own words** plus, for at least ten of them, a concrete example. A term with no example you can produce is a term you have not understood yet — go back rather than move on.
 
 Here is the difference between a copied definition and an owned one:
 

@@ -325,7 +325,7 @@ That answer shows method, real commands, reasoning about scope, and an honest bo
 
 *"I wouldn't click anything in it. First I'd look at the headers — the actual sender address and the Return-Path, not just the display name, since spoofing the display name is trivial.*
 
-*Then the authentication results: SPF, DKIM, and DMARC, which the receiving server usually records in the headers. A DMARC fail on a message claiming to be a known brand is a strong signal.*
+*Then the authentication results: SPF, DKIM, and DMARC, which the receiving server usually records in the headers. SPF lists which servers may send for the domain; DKIM is a cryptographic signature proving the message really came from it; DMARC is the domain's published policy for what a receiver should do when either of those fails. A DMARC fail on a message claiming to be a known brand is a strong signal.*
 
 *Then the content. Hover over links to see the real destination without visiting it, and check whether the domain is a lookalike — a character substitution or a different TLD. If there's an attachment, note the type; macro-enabled Office files and archives are the risky ones, and I would not open them outside an isolated environment.*
 
@@ -341,7 +341,7 @@ That answer shows method, real commands, reasoning about scope, and an honest bo
 
 *Based on that I'd either close it as benign with a documented reason, or escalate with the evidence attached. And if it turns out to be benign-but-noisy, that's where I'd tune the rule so the next analyst isn't woken up for it."*
 
-Notice this answer deliberately includes the *tuning* instinct from Phase 6. That is a Phase-A-quality answer.
+Notice this answer deliberately includes the *tuning* instinct from Phase 6. That is a Phase 6 portfolio-quality answer.
 
 **MFA — "What are the weaknesses of MFA, and how do attackers get around it?"**
 

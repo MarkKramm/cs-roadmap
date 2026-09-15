@@ -98,7 +98,7 @@ When a user reports a problem, ask which of these five jobs is failing. Is it a 
 
 #### Windows and Linux in one paragraph each
 
-**Windows** is commercial, GUI-first, and dominant in business. Its defining features for a support technician are the Start menu, Settings versus Control Panel (both exist, and you need both), the registry, Windows Update, Active Directory in corporate environments, and an enormous library of built-in administrative tools. It is closed source, and it deliberately hides complexity behind friendly screens — which is why so many fixes require you to go behind those screens.
+**Windows** is commercial, GUI-first, and dominant in business. Its defining features for a support technician are the Start menu, Settings versus Control Panel (both exist, and you need both), the registry (its internal settings database), Windows Update, Active Directory (the corporate directory that holds domain accounts and groups) in corporate environments, and an enormous library of built-in administrative tools. It is closed source, and it deliberately hides complexity behind friendly screens — which is why so many fixes require you to go behind those screens.
 
 **Linux** is open source, terminal-first, and dominant on servers. It is built from small single-purpose tools that you combine. It is case-sensitive — `File.txt` and `file.txt` are different files, which trips up every Windows user at least once. It has no single standard GUI; different distributions bundle different desktop environments. Its permissions model is central rather than bolted on, and its logs are plain text files you can read with `cat`.
 
@@ -363,6 +363,7 @@ The `update` then `upgrade` pair is a distinction beginners constantly get wrong
 ```bash
 ps aux                   # every running process with details
 top                      # live resource view — q to quit
+sudo apt install openssh-server   # Ubuntu Desktop ships no ssh server
 systemctl status ssh     # is this service running, and why?
 sudo systemctl restart ssh
 sudo systemctl enable ssh    # start automatically at boot
@@ -488,7 +489,7 @@ That is the cultural difference in one exercise. Windows uses proprietary format
 |---|---|---|
 | Machine is slow | `Get-Process \| Sort WorkingSet -Descending` or `top` | Identify the process; stop or restart it; check RAM |
 | Cannot log in | Account disabled or locked | `Get-LocalUser`; re-enable or reset the password |
-| Access denied to a folder | NTFS permissions or Linux mode bits | Check group membership; `icacls` or `ls -l` |
+| Access denied to a folder | NTFS permissions or Linux mode bits | Check group membership; `icacls C:\path` on Windows, `ls -l` on Linux |
 | Printer disappeared | Print Spooler service, then driver | Restart the spooler; reinstall the driver |
 | No sound | Audio service and the output device | Check the default device; restart the audio service |
 | Wi-Fi missing | Adapter driver | Device Manager status; reinstall the vendor driver |
@@ -496,7 +497,7 @@ That is the cultural difference in one exercise. Windows uses proprietary format
 | Service will not start | Its own log entries | `systemctl status` or Event Viewer; read the stated reason |
 | Disk full | `Get-Volume` or `df -h` | Disk Cleanup, temp files, old update files, logs |
 | Application crashes repeatedly | Application log, plus its AppData `Local` folder | Reset the app's profile; check for updates |
-| VM will not start | Host RAM or virtualisation disabled | Reduce VM RAM; enable VT-x/AMD-V in firmware |
+| VM will not start | Host RAM or virtualisation disabled | Reduce VM RAM; enable virtualisation in firmware — restart, press F2 or Del at power-on, open the CPU section, set Intel VT-x or AMD-V to Enabled |
 | Forgot a Linux password | Single-user recovery | Boot to recovery, reset from the root shell |
 
 Notice the pattern in the "where to look first" column: **it is always a log, a status, or a resource reading.** Guessing is what people do when they do not know where the evidence lives. Your job is to always know where the evidence lives.
@@ -743,6 +744,8 @@ Inside your VM:
 systemctl list-units --failed
 journalctl -p err -b --no-pager | tail -30
 journalctl -p err -b | awk '{print $5}' | sort | uniq -c | sort -rn | head -10
+#   awk '{print $N}' extracts whitespace-separated field N from each line.
+#   Here field 5 is the process name in a standard journalctl error line.
 ```
 
 Expected: the failed-units list, the recent errors, and a ranked count of which process is producing the most errors. Compare the shape of that last output to Check 3 on Windows — **the technique is identical, only the syntax differs.** Noticing that is the point of the exercise.
@@ -761,7 +764,7 @@ sudo adduser demo                        # create a second user (if not present)
 su - demo -c 'cat /tmp/permtest.txt'    # as someone else: should be denied
 ```
 
-Expected: the third command fails with "Permission denied". **Then answer: which triad applied to `demo`, and why?** If you can answer that without looking anything up, you have understood the model.
+Expected: the `su - demo -c 'cat /tmp/permtest.txt'` command fails with "Permission denied". **Then answer: which triad applied to `demo`, and why?** If you can answer that without looking anything up, you have understood the model.
 
 ### Part 11 — Two worked tickets
 
@@ -892,11 +895,12 @@ GROUP INFORMATION
 Group Name                          Type
 =================================== ================
 CORP\Domain Users                   Group
-CORP\Finance-ReadWrite              Group
 BUILTIN\Users                       Alias
 ```
 
-The user is in `Domain Users` but the `Finance-ReadWrite` entry is a **cached token from before the password change** — or, on a machine where the change has not propagated, the group membership has not refreshed. You can prove which by comparing against the server's view:
+The token on this machine does not carry `Finance-ReadWrite` at all: it is a **cached token from before the password change**, and the new membership has not reached the session.
+
+**Ticket 2 is a domain scenario** — it is the shape of problem you meet on the job, not something you can reproduce on a home PC. The command below needs the RSAT Active Directory module and a domain-joined machine, so read it as an illustration of how the check is made rather than something to run tonight. The technique is to compare the machine's cached view against the server's authoritative one:
 
 ```powershell
 # What groups does the account actually hold, per the domain?

@@ -424,6 +424,7 @@ First, the pattern across users, not the problem in front of you:
 
 ```powershell
 # Are these users all in the same group, site, or OU?
+# Needs the RSAT Active Directory module and a domain — illustration only, not runnable at home.
 Get-ADUser -Filter "SamAccountName -eq 'areyes'" -Properties MemberOf, PasswordLastSet, pwdLastSet |
   Select-Object Name, PasswordLastSet, @{n="Groups";e={$_.MemberOf -join "; "}}
 ```
@@ -551,9 +552,8 @@ Type `INC-1001` in `A2`. Then in `A3` put this formula and drag it down:
 Priority should never be typed. Put this in `I2` and drag it down:
 
 ```text
-=IF(OR($G2="","",$H2=""),"", INDEX(Lists!$C$2:$C$5,
- MATCH($G2&"|"&$H2, {"Enterprise|Critical";"Enterprise|High";
- "Department|High";"Individual|Medium";"Individual|Low";"Single Site|Low"}, 0)))
+=IF(OR($G2="",$H2=""),"", IFERROR(VLOOKUP($G2&$H2,
+ Lists!$A$2:$C$17, 3, FALSE), "Check the grid"))
 ```
 
 That is fiddly to read, so here is the lookup table it encodes. Use this directly if the formula fights you — a `VLOOKUP` against a helper column works too.
@@ -1170,7 +1170,7 @@ Then extend that work:
 3. **Produce evidence for one machine the way Part 5 does.** Capture `Get-PSDrive`, a largest-directory scan, and timestamps on the biggest files. Write the "what this shows" paragraph. This is the portfolio artefact: it demonstrates that you read evidence rather than guessing.
 4. **Reconstruct the eleven-ticket pattern from Part 6 with your own numbers.** Invent a recurring ticket that appears across three weeks and write the query or search that would reveal the pattern. Then write the problem record that links them.
 5. **Take the metrics table and argue against yourself.** Pick one metric and describe precisely how you could improve it without improving support. Being able to explain the gaming of a metric is what shows you understand it.
-6. **Write the escalation note from Part 5's structure** — reported, tried, ruled out, hypothesis, impact and urgency, how to reach the user — for a problem you cannot fix, and keep it under 150 words. Brevity here is a real skill.
+6. **Write the escalation note from Part 4's structure** — reported, tried, ruled out, hypothesis, impact and urgency, how to reach the user — for a problem you cannot fix, and keep it under 150 words. Brevity here is a real skill.
 7. **Build your ten-device inventory with a warranty date and a patch group** for each device, then answer this question from the sheet alone: which two devices would you replace first next quarter, and why? If the sheet cannot answer it, the sheet is missing a field.
 8. **Write one KB article from a ticket you have already closed.** The test is whether someone else could follow it without asking you a question. If they could not, the article is a note, not a KB article.
 

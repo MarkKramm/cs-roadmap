@@ -841,8 +841,11 @@ icacls 'C:\P5-AccessLab\Child' /deny "$env:USERNAME:(R)"
 
 icacls 'C:\P5-AccessLab\Child'
 
-# Try to read the file you put in the parent folder
-Get-Content 'C:\P5-AccessLab\sample.txt'
+# Put the test file inside the folder you just denied
+Set-Content -Path 'C:\P5-AccessLab\Child\sample.txt' -Value 'Phase 5 permission lab'
+
+# Try to read the file that is inside the denied folder
+Get-Content 'C:\P5-AccessLab\Child\sample.txt'
 ```
 
 **Record:** the ACE list showing a `(DENY)` entry, and what happened when you tried to work in that folder.
@@ -983,7 +986,7 @@ The group has `Modify` on NTFS and `Change` on the share. Both sides allow, so e
 
 Have the user **sign out completely and sign back in**. Not lock the screen — sign out. On a domain machine this rebuilds the token from the domain controller, and since the user is on the VPN, the domain controller is reachable.
 
-If a full sign-out does not resolve it, the next checks are, in order: confirm the machine can reach a domain controller on the VPN (`nltest /dsgetdc:company.local`), and confirm the group change actually replicated (checking the group’s membership from the server rather than from `net user` on the laptop, which may be reading a cached profile). Only after those do you touch a permission — and you would still not touch it, because the evidence says it is correct.
+If a full sign-out does not resolve it, the next checks are, in order: confirm the machine can reach a domain controller on the VPN (`nltest /dsgetdc:company.local` — `nltest` is a domain-controller diagnostic; a successful result names a DC and its site), and confirm the group change actually replicated (checking the group’s membership from the server rather than from `net user` on the laptop, which may be reading a cached profile). Only after those do you touch a permission — and you would still not touch it, because the evidence says it is correct.
 
 **Step 6 — Verify.**
 
@@ -1089,7 +1092,8 @@ You do **not** stop the service and declare victory, and you do **not** change t
 Reschedule the nightly job to 01:30, clear of the agent’s scan window, then **run the job manually** rather than waiting until tomorrow:
 
 ```text
-Start-BackupJob -Name 'FILESERVER-Daily'
+# Illustrative — use your backup product's own "run now" action.
+# Windows Server Backup's equivalent is: Start-WBBackup -Policy FILESERVER-Daily
 ```
 
 Result: `Completed — 1,286 GB written.` The job succeeds.

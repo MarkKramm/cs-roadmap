@@ -345,7 +345,7 @@ That is a five-minute edit, not a rewrite, and it keeps the volume sustainable.
 
 #### The follow-up, which almost nobody sends
 
-Two weeks after applying, if you have heard nothing, send one short message. Once, and then stop.
+Seven days after applying — the date the tracker's formula set — if you have heard nothing, send one short message. Once, and then stop.
 
 ```text
 Hello [Name],
@@ -527,7 +527,7 @@ time zone; first point of contact for tickets from ~60 client sites.
 
 Do: triage tickets by email/chat/phone; reset passwords and unlock
 accounts; manage M365 users; troubleshoot Windows 10/11, printers,
-and VPN; document every ticket in our PSA (ConnectWise); escalate
+and VPN; document every ticket in our PSA (professional services automation — the ticketing and billing system MSPs run; here, ConnectWise); escalate
 network issues to Tier 2.
 
 Need: 1+ year helpdesk experience (strong candidates without it
@@ -548,7 +548,7 @@ Nice to have: CompTIA A+, M365 admin, PowerShell.
 | Excellent written English | Must | You write to clients all day; the cover note is the test |
 | 8am–5pm Pacific overlap | Must | Non-negotiable logistics; address it first |
 | M365 account management | Must-ish | Named twice in responsibilities; you have lab experience |
-| CompTIA A+ | Wish | "Nice to have" is a wish list. Do not self-reject |
+| CompTIA A+ | Wish | A paid two-exam vendor certification; "nice to have" is a wish list. Do not self-reject |
 | PowerShell | Wish | Bonus, and you have a script to show |
 | ConnectWise | Wish | Every PSA is learnable in a week; never a reason to skip |
 
@@ -742,7 +742,7 @@ This is the template that makes Part 7 operational. Open a second sheet named `P
 
 #### Exercise 7 — Your week, as a checklist
 
-Five to eight quality applications a week is the honest number alongside study, not fifteen. Fifteen is reachable only once your resume is stable and your templates exist. Here is the shape of a real week.
+Five to eight quality applications a week is the honest number alongside study — the "rising to 15" figure from Part 2 is for once your resume is stable and your templates exist, not for now. Fifteen is reachable only once your resume is stable and your templates exist. Here is the shape of a real week.
 
 | Day | Task | Time | Why that day |
 |---|---|---|---|

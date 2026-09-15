@@ -508,7 +508,7 @@ The phase's task 5 lists four safe events to generate: a failed login, a new use
 
 - **Failed login** — the highest-volume real-world signal, and the one where *pattern* matters more than any single event. Your rule should encode a threshold, as the example above does.
 - **New user created** — a persistence technique (Phase 3 listed it as ATT&CK-adjacent behaviour: account creation for continued access). The important detail is that a new user is *legitimate administration* most of the time, which makes it a perfect example of a rule that must be tuned rather than a rule that simply fires.
-- **Suspicious command string** — detecting known-abused tooling. Restrict it to your own lab notes and never point it at anything you do not own.
+- **Suspicious command string** — detecting known-abused tooling. Run the string inside your isolated victim VM and nowhere else, so the rule has a real event to fire on; the "restrict it to your lab notes" rule is about never pointing it at a system you do not own.
 - **Service restart** — availability-relevant, and a useful case for discussing why a restart matters in some contexts (a database) and not others (a printer spooler). It teaches that **not every detection should be an alert**; some are just records.
 
 The rule-writing discipline, in five questions you should be able to answer for each rule you write:
@@ -735,7 +735,7 @@ A structure that works, adapted to a lab incident:
 | **Evidence** | The log lines and the alert, quoted, with timestamps in UTC |
 | **Timeline** | A short table, as in Phase 3 |
 | **Impact** | In a lab, honestly: none. Saying so is correct and professional |
-| **Root cause** | The control gap. For brute force, the honest answer is usually that a control was *absent* — no key-only SSH, no fail2ban — and your detection is what surfaced the behaviour |
+| **Root cause** | The control gap. For brute force, the honest answer is usually that a control was *absent* — no key-only SSH, no fail2ban (the tool that blocks an IP after repeated authentication failures) — and your detection is what surfaced the behaviour |
 | **Recommendations** | Specific and prioritised. "Disable password authentication in favour of keys" is a recommendation; "improve SSH security" is not |
 
 Two things make a lab report read as professional rather than academic.
