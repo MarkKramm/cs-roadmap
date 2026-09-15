@@ -25,8 +25,15 @@ jobs:
         run: node scripts/audit-lesson-ast.mjs
       - name: Audit readability
         run: node scripts/audit-readability.mjs
-      - name: Verify no cyber phase shrank
-        run: node scripts/cyber-restructure-check.mjs
+      # cyber-restructure-check.mjs is deliberately NOT run here. It compares the
+      # cyber phases against a "before" snapshot captured at the start of the
+      # 2026 restructure pass, and reads it from process.env.TEMP — a
+      # machine-local file that is not in the repository. It therefore cannot
+      # pass on a fresh clone, and running it in CI would only ever fail. It is
+      # a one-off migration tool, not a standing guard. The perpetual guarantee
+      # that content is not lost is audit-lesson-ast.mjs (parser drops nothing)
+      # and the word counts in cyber-restructure-check's own baseline concept is
+      # superseded by it.
 
   site:
     name: Learning site

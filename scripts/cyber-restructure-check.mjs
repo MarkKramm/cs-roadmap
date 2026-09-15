@@ -4,6 +4,19 @@
 // fact quietly disappears. This compares every phase against the baseline
 // captured before the pass began and fails if any lesson got shorter.
 //
+// NOT A STANDING GUARD, and deliberately not run in CI.
+//
+// The baseline lives in process.env.TEMP — a machine-local file that is not in
+// the repository — so this cannot pass on a fresh clone and would only ever fail
+// in CI. It is a one-off migration tool for the duration of a restructure: take
+// the baseline before you start, run this while you work, and stop when the pass
+// ends. That pass finished, so this now reports the totals it always did and
+// proves nothing new.
+//
+// The permanent guarantee that content is not lost is audit-lesson-ast.mjs,
+// which is what CI runs. Use this only if you begin another bulk edit of the
+// cyber phases, and regenerate the baseline first.
+//
 // Run: node scripts/cyber-restructure-check.mjs
 import fs from 'node:fs';
 import path from 'node:path';
