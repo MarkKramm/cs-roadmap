@@ -247,7 +247,218 @@ The last point matters more than it sounds. A user who thinks they are being ign
 
 The corresponding duty is on the receiving end: when you are handed work, respect the notes you were given. Repeating diagnostics someone already documented wastes everyone's time and signals that you did not read the handover.
 
-### Key takeaways
+### Part 5 — Working a runbook, with real monitoring output
+
+Part 3 explained what a runbook contains. This part shows one being used, because a runbook you have only read about is a document, and a runbook you have followed is a skill.
+
+#### The alert, as it actually arrives
+
+Monitoring alerts do not arrive as tidy sentences. They arrive as a wall of fields, and the first job is to read them fast:
+
+```text
+ALERT: Disk space low
+Host:     FS01 (file server)
+Check:    Free disk space on C:
+Value:    8.2% free (3.9 GB of 47.6 GB)
+Threshold: below 10% for 15 minutes
+Severity: Warning
+Fired:    2026-03-14 02:17 UTC
+```
+
+Four things matter in that block, and they are the four things to read in any alert:
+
+1. **Which host** — `FS01`. One machine, not a fleet.
+2. **What was measured** — free space on `C:`, not on a data volume.
+3. **How far past the threshold** — 8.2% against a 10% limit. Marginally over.
+4. **When it fired** — 02:17, outside working hours, so nobody is being blocked right now.
+
+That fourth point is the one beginners skip, and it changes the response. An alert at 02:17 on a file server is not an emergency; it is the first task of the morning *unless* something else indicates otherwise. Knowing the difference between "this is on fire" and "this will be on fire by Thursday" is most of what monitoring experience means.
+
+#### Applying the runbook
+
+The runbook for this alert, written in advance, says:
+
+```text
+RUNBOOK: Disk space low on a file server
+
+Means:        The volume is filling. At 0% the server stops writing,
+              which breaks file shares for everyone who uses them.
+First checks: 1. Which volume, and how fast is it growing?
+              2. Is it log files, user data, or a runaway process?
+              3. Was there a recent large copy or a failed backup writing locally?
+Escalate to:  Infrastructure team if growth is unexplained or the volume is
+              below 5% and falling.
+Record:       Volume, size, free space, growth rate, largest directories,
+              and what was cleared (if anything).
+Known false
+positives:    Fires after the monthly backup job stages files locally; clears
+              itself within 24 hours. Verify against the backup log first.
+```
+
+Work the checks in order. First, which volume and how fast it is growing:
+
+```powershell
+Get-PSDrive -PSProvider FileSystem |
+  Select-Object Name, @{n="UsedGB";e={[math]::Round($_.Used/1GB,1)}},
+                       @{n="FreeGB";e={[math]::Round($_.Free/1GB,1)}}
+```
+
+```text
+Name UsedGB FreeGB
+---- ------ ------
+C     43.7    3.9
+D    210.4  255.6
+```
+
+So `C:` is the nearly-full volume and `D:` is comfortable. That single comparison already tells you the data volume is not the problem, which means this is probably not "the file server is full of user files" — the more common and more expensive diagnosis.
+
+Second, is it logs or data? Find the largest directories:
+
+```powershell
+Get-ChildItem C:\ -Directory -Force -ErrorAction SilentlyContinue |
+  ForEach-Object {
+    $size = (Get-ChildItem $_.FullName -Recurse -File -Force -ErrorAction SilentlyContinue |
+             Measure-Object Length -Sum).Sum
+    [PSCustomObject]@{ Folder = $_.FullName; GB = [math]::Round($size/1GB, 2) }
+  } | Sort-Object GB -Descending | Select-Object -First 5
+```
+
+```text
+Folder                    GB
+------                    --
+C:\Windows\Temp        18.41
+C:\Windows\Logs         9.72
+C:\Users                8.10
+C:\ProgramData          4.02
+C:\Program Files        2.88
+```
+
+`C:\Windows\Temp` at 18.41 GB is the answer, and it is not user data. Something has been writing temporary files and never cleaning them up.
+
+Check the backup log before going further, because the runbook lists this as a known false positive:
+
+```powershell
+Get-WinEvent -LogName Application -MaxEvents 20 |
+  Where-Object { $_.ProviderName -like "*Backup*" } |
+  Select-Object TimeCreated, Id, Message -First 3
+```
+
+No backup entries in the last 20 events, so the false positive is eliminated — this is real growth, not the monthly job.
+
+Third, what is in Temp, and when was it written:
+
+```powershell
+Get-ChildItem C:\Windows\Temp -File -Force |
+  Sort-Object Length -Descending | Select-Object -First 5 Name, Length, LastWriteTime
+```
+
+```text
+Name                        Length LastWriteTime
+----                        ------ -------------
+sql_dump_20260301.tmp   4823449600 2026-03-01 01:04
+sql_dump_20260302.tmp   5100273664 2026-03-02 01:02
+sql_dump_20260303.tmp   4982162063 2026-03-03 01:01
+```
+
+A file appearing every day at about 01:00, roughly 5 GB each, never deleted. That is not a Windows problem — something is running a nightly job that writes a dump and fails to clean up after itself. The dates line up with the alert: thirteen days of dumps is roughly 18 GB.
+
+#### What you do, and what you do not
+
+You have found the cause quickly and safely. Now the temptation is to delete the files, close the ticket, and move on. Resist three parts of that:
+
+- **Do not just delete and close.** Something creates these files nightly. Deleting them buys about four days and the alert returns — and now nobody remembers why. The ticket should be linked to a *problem* record so the nightly job gets fixed.
+- **Do not delete files you cannot identify.** These are identifiable (name, daily schedule, size, timestamp) and clearly disposable, so clearing them is reasonable. If they had been unfamiliar database files, the same action would have been destructive. Identify first, delete second.
+- **Do not skip the recording step.** Volume, growth rate, largest directories, what you cleared, and the pattern you found. That note is what lets the next person (or you in six months) solve the recurrence in two minutes instead of twenty.
+
+#### The ticket note this produces
+
+> **Alert:** Disk space low on FS01, `C:` at 8.2% free (3.9 GB of 47.6 GB), 02:17 UTC.
+> **Investigated:** `Get-PSDrive` confirmed only `C:` affected; `D:` has 255.6 GB free, so the data volume is healthy and this is not user-data growth. Largest-directory scan showed `C:\Windows\Temp` at 18.41 GB, of which the largest files were `sql_dump_*.tmp` dated daily from 2026-03-01, ~5 GB each. Backup log checked first per runbook known-false-positive — no backup events, so the false positive was eliminated rather than assumed.
+> **Cause:** A nightly job outside the service desk's ownership is writing ~5 GB of temporary dump files to `C:\Windows\Temp` and never removing them. Thirteen days of accumulation took the volume to the alert threshold.
+> **Action:** Cleared `C:\Windows\Temp` dump files after confirming their identity and daily pattern. Did **not** delete unfamiliar files. Raised a problem record so the owning team fixes the cleanup, because the files regenerate nightly.
+> **Verified:** `C:` back to 46% free immediately after clearing; alert cleared on the next monitoring cycle.
+> **For the next agent:** If this alert fires again, check `C:\Windows\Temp` first and look for `sql_dump_*.tmp`. The root cause is not fixed — the nightly job is with the application team. Growth is ~5 GB per day, so the volume has roughly four days of headroom.
+
+Notice what the note does that a "deleted temp files, disk ok" note would not: it names the growth rate, so the next person knows the urgency without investigating; it records the *problem* as still open, so nobody thinks it is solved; and it says which check was done first and why, so the reasoning is repeatable.
+
+#### The metrics a service desk is actually measured on
+
+You will be asked about these in interviews, and the terms matter more than the numbers. Nobody expects a beginner to quote targets, but you should know what each one means and which way is good.
+
+| Metric | Plain meaning | Watch for |
+|---|---|---|
+| **First response time** | How long until a human replies to a new ticket | The metric users notice most; a fast holding reply beats a slow perfect one |
+| **Mean time to resolve (MTTR)** | Average time from logged to resolved | Can be gamed by closing tickets early — always read it with reopen rate |
+| **First contact resolution (FCR)** | Share of tickets fixed on the first interaction | The efficiency number; a high FCR with high reopen rate is a lie |
+| **Reopen rate** | Share of tickets that come back after closing | The honesty check on FCR and MTTR |
+| **Backlog** | Tickets open and not being worked | The clearest sign a team is understaffed |
+| **SLA compliance** | Share of tickets met within their promised time | Always read alongside severity, or teams meet it by ignoring small tickets |
+| **Customer satisfaction (CSAT)** | Post-ticket rating | Low response rates make it noisy; treat single low scores as a signal to read the ticket, not a verdict |
+
+The pattern in the right-hand column is the real lesson: **almost every support metric can be improved by making the work look better rather than by doing it better.** Closing tickets without confirming the fix raises FCR and lowers MTTR, while reopen rate quietly rises. This is why mature teams report these together rather than one at a time. When you are asked in an interview how you would measure your own performance, saying "I would look at reopen rate as well, because it is the check on the other numbers" signals that you understand the system rather than just the tool.
+
+### Part 6 — The ticket that should have been a problem
+
+This is a worked ticket about *process*, not technology, because that is what this phase is about. The fix in it is trivial. The lesson is in recognising what the ticket really is.
+
+**The situation.** Over three weeks, a password-expiry ticket appears eleven times. Each one is closed within twenty minutes. Every agent considers their ticket a success.
+
+```text
+INC-4471  Password expired - A. Reyes          resolved  18 min
+INC-4498  Password expired - M. Santos        resolved  15 min
+INC-4530  Password expired - A. Reyes         resolved  19 min
+INC-4556  Password expired - J. Cruz          resolved  12 min
+...
+INC-4902  Password expired - A. Reyes         resolved  17 min
+```
+
+**What a beginner sees.** Eleven tickets, eleven quick fixes, a good week.
+
+**What a technician sees.** The same user appears three times. That repetition is the signal Part 1 described: *an incident is a symptom; a problem is the cause.* Something is making people's passwords expire at a rate that generates eleven tickets in three weeks — and the same person hitting it three times means the fix is not holding.
+
+**What to investigate.**
+
+First, the pattern across users, not the problem in front of you:
+
+```powershell
+# Are these users all in the same group, site, or OU?
+Get-ADUser -Filter "SamAccountName -eq 'areyes'" -Properties MemberOf, PasswordLastSet, pwdLastSet |
+  Select-Object Name, PasswordLastSet, @{n="Groups";e={$_.MemberOf -join "; "}}
+```
+
+```text
+Name       PasswordLastSet      Groups
+----       ---------------      ------
+A. Reyes   2026-03-01 09:12:04  CN=Sales,OU=Manila,DC=company,DC=local; CN=VPN-Users,...
+```
+
+`PasswordLastSet` is recent — the user *did* change it. So the reset is working and something is expiring it again.
+
+Second, check whether a policy is shorter than the users believe:
+
+```powershell
+Get-ADDefaultDomainPasswordPolicy | Select-Object MinPasswordAge, MaxPasswordAge, LockoutThreshold
+```
+
+```text
+MinPasswordAge    MaxPasswordAge    LockoutThreshold
+--------------    --------------    ----------------
+1.00:00:00        30.00:00:00       5
+```
+
+Thirty days is the maximum password age. `MinPasswordAge` is one day.
+
+**Now the cause is visible.** Somewhere in this organisation there is a scheduled task, a script, or a service account using a *stored* credential for these users — most likely the VPN client profile or a mapped drive with saved credentials. When the password expires and is changed, the stored credential still holds the old one. It retries, fails, and in environments with a lockout policy it can lock the account. Meanwhile the user's password is fine, so the ticket gets closed as "reset password, user working" — and then it recurs.
+
+That is why A. Reyes appears three times. Each reset fixed the symptom. None of them found the stored credential.
+
+**The actual fix** is to find the stale credential: check the VPN client's saved profile, the Windows Credential Manager, and any scheduled task running as that user. Then the *problem* record says: "Stored credentials in VPN client profiles are not updated on password change. Affects users with saved VPN profiles. Fix: document the update step in the password-change KB, and update the VPN client's saved credential as part of the reset procedure."
+
+**Why this is the most valuable ticket in the phase.** Eleven fast resolutions look like excellent performance on every metric in the table above — low MTTR, high FCR, good CSAT because each user got a quick fix. The only number that tells the truth is the recurring pattern, which no single ticket shows.
+
+**The habit to take away:** when you notice you have fixed the same thing for the same person, or the same team, more than twice, stop closing and start linking. That is the moment an incident becomes a problem, and noticing it is what separates a ticket-taker from a support engineer.
+
+### Part 7 — Key takeaways
 
 - **Tools encode process.** A ticketing system is a model of how work flows, not a complaint database.
 - **Incident = symptom; problem = cause.** Repeating incidents are a signal to investigate, not to keep closing.
@@ -258,10 +469,27 @@ The corresponding duty is on the receiving end: when you are handed work, respec
 - **Inventory needs a warranty date**, because age changes the repair decision.
 - **A runbook without "known false positives"** will be ignored within a month.
 - Support workflow is a loop: **escalation out, reopen back in.**
+- Read an alert for **four things**: which host, what was measured, how far past the threshold, and when it fired. The time tells you whether it is an emergency or tomorrow's first task.
+- A runbook's **known false positives** are what stop you investigating the same non-event weekly — check them before you investigate.
+- **Identify before you delete.** Clearing 18 GB of identifiable daily temp files is routine; the same action on unfamiliar files is destructive.
+- A fix that does not address the **recurrence** is about four days of headroom, not a resolution.
+- **Almost every support metric can be gamed** by making work look better rather than doing it better. Read reopen rate alongside FCR and MTTR, because it is the honesty check.
+- When you have fixed **the same thing for the same person twice**, stop closing and start linking tickets. That is the moment an incident becomes a problem.
 
-### Practice this next
+### Part 8 — Practice this next
 
 The tasks below produce five artefacts, and each one is interview evidence. Build the workflow diagram with the escalation and reopen arrows included. Populate the inventory with ten fictional devices. Write the five templates *and use one on a real problem you have* — that is the only way to find out whether your diagnostic questions are the right ones. Then write your one runbook, and finish with the change request template for "install software for user", because it forces you to think about approval, licence, and rollback.
+
+Then extend that work:
+
+1. **Write your runbook with a real threshold and a real false positive.** Pick an alert you can actually observe on your own machine — low disk, high CPU, a service that stops. Give it a specific threshold, a first-check list, an escalation line, and at least one known false positive you have genuinely seen. A runbook with no false positives is untested.
+2. **Trigger your own alert deliberately.** Fill a volume, or stop a service you do not need. Watch the alert fire, then follow your runbook exactly as written. Where you had to improvise is where the runbook is incomplete — rewrite those steps.
+3. **Produce evidence for one machine the way Part 5 does.** Capture `Get-PSDrive`, a largest-directory scan, and timestamps on the biggest files. Write the "what this shows" paragraph. This is the portfolio artefact: it demonstrates that you read evidence rather than guessing.
+4. **Reconstruct the eleven-ticket pattern from Part 6 with your own numbers.** Invent a recurring ticket that appears across three weeks and write the query or search that would reveal the pattern. Then write the problem record that links them.
+5. **Take the metrics table and argue against yourself.** Pick one metric and describe precisely how you could improve it without improving support. Being able to explain the gaming of a metric is what shows you understand it.
+6. **Write the escalation note from Part 5's structure** — reported, tried, ruled out, hypothesis, impact and urgency, how to reach the user — for a problem you cannot fix, and keep it under 150 words. Brevity here is a real skill.
+7. **Build your ten-device inventory with a warranty date and a patch group** for each device, then answer this question from the sheet alone: which two devices would you replace first next quarter, and why? If the sheet cannot answer it, the sheet is missing a field.
+8. **Write one KB article from a ticket you have already closed.** The test is whether someone else could follow it without asking you a question. If they could not, the article is a note, not a KB article.
 
 ## Tools for This Phase
 
