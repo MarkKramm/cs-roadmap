@@ -24,6 +24,16 @@ $RECYCLE.BIN/
 *.temp
 .tmp-*
 *~
+# Throwaway analysis scripts: agents and contributors write these next to the
+# content to measure it. They are working notes, never deliverables, and
+# `git add -A` has already swept one into a commit once. Anchored to the repo
+# root on purpose, so a real `_`-prefixed file inside a package is unaffected.
+/_*.mjs
+/_*.js
+/_*.md
+/_*.txt
+/tmp-*
+/scripts/tmp-*
 
 # --- Logs ---
 *.log
