@@ -21,6 +21,7 @@ import Applications from "./pages/Applications.jsx";
 import Search from "./pages/Search.jsx";
 import Schedule from "./pages/Schedule.jsx";
 import ShortcutHelp from "./components/ShortcutHelp.jsx";
+import DataTransfer from "./components/DataTransfer.jsx";
 
 // Every destination the sidebar can reach. Adding a page means adding an entry
 // here and a branch in the content switch below.
@@ -42,6 +43,7 @@ export default function App() {
   const [trackId, setTrackId] = useState("it");
   const [openPhaseId, setOpenPhaseId] = useState(null);
   const [navOpen, setNavOpen] = useState(false);
+  const [dataOpen, setDataOpen] = useState(false);
   const { done, toggle, reset } = useProgress();
   const { mode, change: changeMode } = useEnergyMode();
   const { size, change: changeSize } = useReadingSize();
@@ -287,6 +289,16 @@ export default function App() {
             type="button"
             className="sidebar__link"
             onClick={() => {
+              setDataOpen(true);
+              setNavOpen(false);
+            }}
+          >
+            Back up &amp; restore
+          </button>
+          <button
+            type="button"
+            className="sidebar__link"
+            onClick={() => {
               if (
                 window.confirm(
                   "Reset all progress? This cannot be undone."
@@ -373,6 +385,7 @@ export default function App() {
       </main>
 
       <ShortcutHelp open={helpOpen} onClose={() => setHelpOpen(false)} />
+      <DataTransfer open={dataOpen} onClose={() => setDataOpen(false)} />
     </div>
   );
 }

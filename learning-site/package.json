@@ -11,7 +11,9 @@
     "test:smoke": "npm run build:content && node scripts/smoke-render.mjs",
     "test:highlight": "node scripts/test-highlight.mjs",
     "test:ui": "node scripts/test-ui.mjs",
-    "test": "npm run test:highlight && npm run test:ui && npm run test:search && npm run test:smoke",
+    "test:data": "node scripts/test-data.mjs",
+    "test:lesson-search": "node scripts/test-lesson-search.mjs",
+    "test": "npm run test:highlight && npm run test:ui && npm run test:data && npm run test:lesson-search && npm run test:search && npm run test:smoke",
     "dev": "npm run build:content && vite",
     "build": "npm run build:content && vite build",
     "preview": "vite preview"

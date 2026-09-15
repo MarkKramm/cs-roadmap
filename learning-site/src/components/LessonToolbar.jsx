@@ -27,6 +27,8 @@ export default function LessonToolbar({
   onToggleTickMode,
   size,
   onSizeChange,
+  findOpen = false,
+  onToggleFind,
 }) {
   const pct = total > 0 ? Math.round((doneCount / total) * 100) : 0;
 
@@ -49,6 +51,23 @@ export default function LessonToolbar({
       </div>
 
       <div className="lesson-tools__actions">
+        {typeof onToggleFind === "function" && (
+          <button
+            type="button"
+            className={"chip" + (findOpen ? " is-active" : "")}
+            aria-pressed={findOpen}
+            aria-expanded={findOpen}
+            onClick={onToggleFind}
+            title={
+              findOpen
+                ? "Close the in-lesson finder"
+                : "Find a word in this lesson without leaving it"
+            }
+          >
+            Find in lesson
+          </button>
+        )}
+
         <button
           type="button"
           className={"chip" + (tickMode ? " is-active" : "")}

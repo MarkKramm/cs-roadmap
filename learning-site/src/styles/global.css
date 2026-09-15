@@ -2105,8 +2105,23 @@ p em {
   white-space: nowrap;
 }
 
-/* --- Shortcut help --- */
+/* --- Modal shell --- */
+/*
+ * One backdrop and one panel, shared by every overlay in the site.
+ *
+ * The selector lists below carry two names each on purpose. The `.shortcuts*`
+ * names came first (the keyboard-shortcut panel) and are still in the markup;
+ * `.modal*` is the generic name the backup panel uses. Listing both means there
+ * is exactly ONE rule set rather than two that drift — the failure being a
+ * backdrop that dims at 55% in one panel and 60% in the other because someone
+ * edited one copy.
+ *
+ * `data-transfer` is a modifier, not a variant: it only widens the panel,
+ * because a key-by-key list of what a backup file contains needs more room than
+ * a list of keyboard shortcuts.
+ */
 
+.modal-backdrop,
 .shortcuts-backdrop {
   position: fixed;
   inset: 0;
@@ -2118,6 +2133,7 @@ p em {
   padding: var(--space-4);
 }
 
+.modal,
 .shortcuts {
   background: var(--bg-elevated);
   border: 1px solid var(--border);
@@ -2128,6 +2144,12 @@ p em {
   overflow-y: auto;
 }
 
+/* A wider panel for the backup review, which lists one row per data set. */
+.data-transfer {
+  width: min(100%, 560px);
+}
+
+.modal__head,
 .shortcuts__head {
   display: flex;
   align-items: baseline;
@@ -2135,11 +2157,13 @@ p em {
   gap: var(--space-3);
 }
 
+.modal__head h2,
 .shortcuts__head h2 {
   font-size: var(--text-xl);
   margin: 0 0 var(--space-4);
 }
 
+.modal__close,
 .shortcuts__close {
   background: none;
   border: none;
@@ -2152,6 +2176,7 @@ p em {
   border-radius: var(--space-1);
 }
 
+.modal__close:hover,
 .shortcuts__close:hover {
   color: var(--text);
   background: var(--bg-subtle);
@@ -2180,6 +2205,132 @@ p em {
 .shortcuts__note {
   font-size: var(--text-sm);
   margin: var(--space-5) 0 0;
+}
+
+/* --- Backup panel --- */
+
+.data-transfer__block {
+  margin: var(--space-5) 0 0;
+  padding: var(--space-4) 0 0;
+  border-top: 1px solid var(--border);
+}
+
+.data-transfer__block h3 {
+  margin: 0 0 var(--space-2);
+  font-size: var(--text-base);
+}
+
+.data-transfer__block p {
+  margin: 0 0 var(--space-3);
+  font-size: var(--text-sm);
+}
+
+/*
+ * The native file input is hidden and driven by the label styled as a button.
+ * A bare `<input type="file">` renders as an unstyled OS control that ignores
+ * the design tokens entirely, and its "No file chosen" text cannot be
+ * translated or reworded. The label keeps the real input focusable and
+ * keyboard-operable — this is a visual replacement, not a click hijack.
+ */
+.data-transfer__file {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.data-transfer__pick {
+  display: inline-block;
+  cursor: pointer;
+}
+
+.data-transfer__file:focus-visible + .data-transfer__pick {
+  outline: 2px solid var(--focus, var(--text));
+  outline-offset: 2px;
+}
+
+.data-transfer__review {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.data-transfer__review-title {
+  font-size: var(--text-sm);
+  font-weight: 600;
+}
+
+.data-transfer__list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  border: 1px solid var(--border);
+  border-radius: var(--space-1);
+}
+
+.data-transfer__row {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--space-3);
+  padding: var(--space-2) var(--space-3);
+  font-size: var(--text-sm);
+}
+
+.data-transfer__row + .data-transfer__row {
+  border-top: 1px solid var(--border);
+}
+
+/*
+ * A refused row is greyed, not red. Nothing has gone wrong with the reader's
+ * data — a key in the file did not match what this version expects — and
+ * colouring it as an error would read as "your backup is broken", which is the
+ * shame framing the anti-patterns rule out.
+ */
+.data-transfer__row.is-refused {
+  color: var(--text-muted);
+}
+
+.data-transfer__count {
+  color: var(--text-muted);
+  white-space: nowrap;
+}
+
+.data-transfer__modes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+.data-transfer__hint {
+  font-size: var(--text-sm);
+}
+
+.data-transfer__warn,
+.data-transfer__notice,
+.data-transfer__error {
+  font-size: var(--text-sm);
+  margin: var(--space-3) 0 0;
+}
+
+.data-transfer__warn,
+.data-transfer__error {
+  color: var(--text-muted);
+}
+
+.data-transfer__error {
+  font-weight: 600;
+}
+
+@media (max-width: 560px) {
+  .data-transfer__modes {
+    flex-direction: column;
+    align-items: stretch;
+  }
 }
 
 /* --- Topbar: the help control --- */
@@ -2302,5 +2453,319 @@ p em {
     transition-duration: 0.01ms !important;
     animation-duration: 0.01ms !important;
     scroll-behavior: auto !important;
+  }
+}
+
+/* --- In-lesson finder ---
+   Sits directly under the sticky lesson toolbar, which is where the reader's
+   attention already is when they decide they want to find something. Collapsed
+   by default (see LessonFinder.jsx) so it costs a 15,000-word reading page
+   nothing until it is asked for. */
+
+.lesson-find {
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: var(--space-2);
+  padding: var(--space-3) var(--space-4);
+  margin-bottom: var(--space-4);
+}
+
+.lesson-find__bar {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.lesson-find__input {
+  flex: 1;
+  font: inherit;
+  font-size: var(--text-sm);
+  color: var(--text);
+  background: var(--bg-subtle);
+  border: 1px solid var(--border);
+  border-radius: var(--space-1);
+  padding: var(--space-2) var(--space-3);
+}
+
+.lesson-find__input:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
+  border-color: var(--accent);
+}
+
+.lesson-find__close {
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  font: inherit;
+  font-size: var(--text-base);
+  line-height: 1;
+  padding: var(--space-1) var(--space-2);
+  border-radius: var(--space-1);
+  cursor: pointer;
+}
+
+.lesson-find__close:hover {
+  color: var(--text);
+  background: var(--bg-subtle);
+}
+
+.lesson-find__results {
+  margin-top: var(--space-3);
+}
+
+.lesson-find__count {
+  font-size: var(--text-xs);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--text-muted);
+  margin: 0 0 var(--space-2);
+}
+
+.lesson-find__note {
+  font-size: var(--text-sm);
+  color: var(--text-muted);
+  margin: var(--space-3) 0 0;
+}
+
+.lesson-find__list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  max-height: 45vh;
+  overflow-y: auto;
+}
+
+.lesson-find__item + .lesson-find__item {
+  border-top: 1px solid var(--border);
+}
+
+.lesson-find__link {
+  display: block;
+  width: 100%;
+  text-align: left;
+  background: none;
+  border: none;
+  font: inherit;
+  color: var(--text);
+  padding: var(--space-2) var(--space-2);
+  border-radius: var(--space-1);
+  cursor: pointer;
+}
+
+.lesson-find__link:hover {
+  background: var(--bg-subtle);
+}
+
+.lesson-find__where {
+  display: block;
+  font-size: var(--text-xs);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--text-muted);
+  margin-bottom: var(--space-1);
+}
+
+.lesson-find__snippet {
+  display: block;
+  font-size: var(--text-sm);
+  line-height: 1.5;
+  color: var(--text);
+}
+
+.lesson-find__snippet mark {
+  background: var(--accent-soft, rgba(120, 160, 255, 0.28));
+  color: inherit;
+  border-radius: 2px;
+  padding: 0 1px;
+}
+
+/* --- Print ---
+   A phase is meant to be printable. The curriculum is 34–112 weeks and the
+   whole point of this stylesheet is that a reader can take one phase offline on
+   paper — on a train, in a lab with no network, or just away from a screen.
+
+   Everything that only exists to operate a browser is hidden: the sidebar, the
+   off-canvas nav toggle, the sticky reading bar, the sticky lesson toolbar, the
+   in-lesson finder, the per-section tick controls, the code copy buttons, the
+   resume prompt, the prev/next pager, and every modal or overlay. What prints is
+   the prose, the code, the tables, the checklist and the phase's structured
+   sections — the lesson itself.
+
+   Link URLs are NOT expanded inline. The curriculum's links are mostly to
+   documentation the reader will look up when back online, and appending the URL
+   to every one of them would bury the prose in query strings on paper.
+
+   Page-break rules matter more than anything else here: a code block split across
+   a page boundary is unreadable, and a table split mid-row is worse. */
+
+@media print {
+  /* Repaint for paper. The dark theme would empty a toner cartridge and is
+     unreadable on a laser printout anyway; the site's own tokens are overridden
+     rather than each rule being rewritten, so component styles carry over. */
+  :root {
+    --bg: #ffffff;
+    --bg-subtle: #ffffff;
+    --bg-elevated: #ffffff;
+    --text: #000000;
+    --text-muted: #333333;
+    --border: #999999;
+    --accent: #000000;
+  }
+
+  body {
+    background: #ffffff;
+    color: #000000;
+  }
+
+  /* The shell is a fixed-sidebar grid on screen; on paper it is one column. */
+  .app-shell {
+    display: block !important;
+  }
+
+  .content {
+    padding: 0 !important;
+    margin: 0 !important;
+    max-width: none !important;
+    width: auto !important;
+  }
+
+  .sidebar,
+  .sidebar-backdrop,
+  .content__topbar,
+  .nav-toggle,
+  .reading-bar,
+  .lesson-tools,
+  .lesson-find,
+  .lesson__done,
+  .lesson__copy,
+  .resume,
+  .shortcuts-backdrop,
+  .modal-backdrop,
+  .sidebar__close {
+    display: none !important;
+  }
+
+  /* The pager is navigation, not content. The exit criteria and the phase's own
+     text are what the reader printed it for. */
+  .phase-nav,
+  .phase-detail__topbar {
+    display: none !important;
+  }
+
+  /* Nothing is sticky on paper. */
+  .sidebar,
+  .lesson-tools,
+  .content__topbar {
+    position: static !important;
+  }
+
+  /* Cards stop being panels: a border box around every section wastes paper and
+     reads as noise. A heading is enough separation. */
+  .card,
+  .lesson-find,
+  .lesson-tools,
+  .lesson__toc {
+    background: transparent !important;
+    border: none !important;
+    border-radius: 0 !important;
+    padding: 0 !important;
+    box-shadow: none !important;
+  }
+
+  /* Keep a heading with the text it introduces, and never split a code block,
+     table, list item or blockquote across a page. A code block cut in half is
+     the single worst print outcome in this document. */
+  h1,
+  h2,
+  h3,
+  h4,
+  h5 {
+    break-after: avoid-page;
+    page-break-after: avoid;
+    color: #000000;
+  }
+
+  pre,
+  .lesson__code-wrap,
+  .lesson__code,
+  .lesson__table-wrap,
+  .lesson__table,
+  table,
+  blockquote,
+  .lesson__quote,
+  li {
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+
+  /* The TOC survives — it is how the reader finds their place on paper — but the
+     two-column screen layout becomes one column and the "done" marks are moot. */
+  .lesson__toc ol {
+    columns: 1 !important;
+  }
+
+  .lesson__toc-item button {
+    color: #000000 !important;
+    background: none !important;
+  }
+
+  /* Code and tables keep their own type size on screen; on paper they must not
+     inherit the reader's chosen on-screen reading scale. */
+  .lesson__body {
+    font-size: 11pt !important;
+  }
+
+  .lesson__body h3,
+  .lesson__body h4,
+  .lesson__body h5 {
+    font-size: 1em !important;
+  }
+
+  .lesson__code,
+  .lesson__table,
+  code,
+  pre {
+    font-size: 9pt !important;
+  }
+
+  /* A table that scrolls horizontally on screen has to fit the page or it is
+     truncated with no way to scroll. */
+  .lesson__table-wrap {
+    overflow: visible !important;
+  }
+
+  .lesson__table {
+    width: 100% !important;
+  }
+
+  /* Inline emphasis survives; interactive colour does not. */
+  a {
+    color: #000000 !important;
+    text-decoration: underline;
+  }
+
+  mark {
+    background: transparent !important;
+    color: #000000 !important;
+    font-weight: 700;
+  }
+
+  /* A single global rule cannot reach inside a sticky ancestor; be explicit. */
+  * {
+    box-shadow: none !important;
+    text-shadow: none !important;
+  }
+
+  /* Break between top-level sections rather than mid-paragraph where a new
+     heading starts a genuinely new page's worth of material. Applied only to
+     the lesson's own h3 so short cards do not each take a page. */
+  .lesson__body h3 {
+    break-before: auto;
+    page-break-before: auto;
+  }
+
+  @page {
+    margin: 18mm 16mm;
   }
 }

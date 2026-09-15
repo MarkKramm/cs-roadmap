@@ -15,6 +15,7 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import LessonBlock from "./LessonBlock.jsx";
+import LessonFinder from "./LessonFinder.jsx";
 import LessonToolbar from "./LessonToolbar.jsx";
 import { renderInline } from "../lib/renderInline.jsx";
 import { useLessonProgress } from "../hooks/useLessonProgress.js";
@@ -32,6 +33,7 @@ export default function Lesson({
 }) {
   const [activeId, setActiveId] = useState(toc.length ? toc[0].id : null);
   const [tickMode, setTickMode] = useState(false);
+  const [findOpen, setFindOpen] = useState(false);
   const bodyRef = useRef(null);
 
   const { done, toggle, doneCount, total } = useLessonProgress(phaseId, toc);
@@ -100,6 +102,22 @@ export default function Lesson({
     setActiveId(id);
   }
 
+  // A finder hit carries the section it belongs to, not a DOM id: the engine
+  // works on the block array and knows nothing about the rendered page. Jumping
+  // to that section heading is what the reader asked for — "show me the part of
+  // this lesson that talks about this" — and it is why the heading is the unit
+  // the engine attributes hits to in the first place. A hit before the first
+  // heading has no section to jump to, so the lesson body itself is the target.
+  function jumpToHit(hit) {
+    if (hit.sectionId) {
+      jump(hit.sectionId);
+      return;
+    }
+    if (bodyRef.current) {
+      bodyRef.current.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+  }
+
   if (!blocks || !blocks.length) {
     return (
       <section className="card">
@@ -123,6 +141,15 @@ export default function Lesson({
         onToggleTickMode={() => setTickMode((v) => !v)}
         size={size}
         onSizeChange={onSizeChange}
+        findOpen={findOpen}
+        onToggleFind={() => setFindOpen((v) => !v)}
+      />
+
+      <LessonFinder
+        blocks={blocks}
+        open={findOpen}
+        onClose={() => setFindOpen(false)}
+        onJump={jumpToHit}
       />
 
       {toc.length > 0 && (

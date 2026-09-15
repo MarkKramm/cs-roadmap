@@ -113,6 +113,23 @@ That last pair is a masterclass compressed into a table. "Is Outlook broken?" in
 
 **Read back what you heard.** "So to make sure I've got this right — it worked on Friday, and since the password change Outlook keeps asking for your old password. Is that right?" This catches misunderstandings early and makes the user feel listened to at the same time. It is one of the highest-return sentences in support.
 
+**A worked transcript.** Here is the same technique doing its job on a real ticket. The user’s entire opening message was: *“Email not working, please fix ASAP.”*
+
+| Turn | Who | What was said |
+|---|---|---|
+| 1 | You | “Got it — mail is down and you need it working. Before I dig in, three quick things.” |
+| 2 | You | “First: what exactly do you see when you open it? An error, a spinner, or does it open and then refuse your password?” |
+| 3 | User | “It says my password is wrong. But it isn’t.” |
+| 4 | You | “Second: when did it last work?” |
+| 5 | User | “Yesterday morning. It was fine before lunch.” |
+| 6 | You | “Third: is anyone else on your team seeing this?” |
+| 7 | User | “No, I don’t think so.” |
+| 8 | You | “So to check I’ve got this right — it worked yesterday morning, after lunch it started rejecting a password you’re sure is correct, and you’re the only one affected. Right?” |
+| 9 | User | “Yes, exactly.” |
+| 10 | You | “That combination usually means the saved password on your device has gone stale, not that your password is wrong. I’ll confirm in ten minutes and come back either way.” |
+
+Turn 2 is where the diagnosis comes from. “The password is wrong” and “it cannot connect to the server” point at completely different causes, and you only learn which one you have by asking for the wording rather than the summary. Turn 6 turns a possible outage into a single-user problem. And turn 8 is what lets you commit to an answer in turn 10: you are not guessing, because you have already checked your understanding.
+
 #### Empathy without blame
 
 Never blame the user. Not because they are never responsible — sometimes they are, and sometimes you will both know it — but because blame makes people defensive, and defensive people withhold information. Users start editing their account of what happened to avoid looking foolish, and you lose the detail that actually matters.
@@ -200,6 +217,12 @@ This phase's topic list names five behavioural themes. Write one real story for 
 
 **Prepare the stories as stories, not as scripts.** Memorised wording collapses under a follow-up question. A story you have told five times out loud, to a person, survives anything.
 
+**The misconception that stops people here.** *“I do not have professional experience, so I do not have STAR stories.”* This is the most common reason a beginner stalls on this phase, and it is wrong. STAR is a shape for describing a real event. A real event does not need a job title attached to it.
+
+The learning story is your study history. The difficult-user story is the relative whose laptop you spent a Saturday on. The mistake story is the time you deleted the wrong folder while setting up a virtual machine. None of that happened at work. All of it is true, specific, and structured.
+
+What you must not do is invent an employer, a colleague, or a manager. Interviewers ask follow-ups, and a fabricated story collapses on the first one. Tell the smaller true story instead. A candidate who says “this happened while I was teaching myself, and here is what I learned” is trusted. A candidate who implies a manager they never had is not.
+
 #### Explaining a no-degree background positively
 
 The topic list includes "explaining no-degree background positively", and this deserves its own treatment because it is the question you are most likely to dread.
@@ -258,6 +281,15 @@ Beginners write updates that answer the question they are interested in — "wha
 | "Does anyone know I am blocked?" | Whether it has been escalated, and who has it |
 
 A useful test: read your update and check whether it answers at least three of those four. An update that says "still investigating, will update soon" answers only the first, and only barely.
+
+**A small exercise: the four-question rewrite.** Fifteen minutes, no tools needed.
+
+1. Find a real status update you have written — a message to a group chat, a note to a classmate, anything where you owed someone a progress report. If you have none, write the worst possible one first: *“still working on it, will update soon.”*
+2. Score it against the four questions above. Which of them does it answer?
+3. Rewrite it so it answers all four, in under 120 words, with a specific next-update time.
+4. Read both versions aloud, one after the other.
+
+The gap between them is the whole lesson of this part. The rewrite is usually shorter than the first version, because structure replaces padding.
 
 ### Part 5 — Difficult conversations: the ones that are not really about technology
 

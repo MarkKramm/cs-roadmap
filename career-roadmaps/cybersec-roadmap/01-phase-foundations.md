@@ -98,6 +98,14 @@ The **CIA triad** — confidentiality, integrity, availability — is the oldest
 
 Read the integrity row again. Nobody stole anything in that example, and it is still a security failure. That is the part beginners miss.
 
+**The misconception worth naming here.** Beginners almost always equate security with confidentiality. Ask someone new what security protects, and you will hear about keeping data secret: encryption, passwords, firewalls. Confidentiality is the property they can picture.
+
+The correction is that a great deal of real security work is about the other two. Ransomware is overwhelmingly an availability attack. A defaced website or an altered invoice is an integrity attack.
+
+When you sit in a SOC queue, most of what you triage is not “someone read a file”. It is “something stopped working”, “something changed”, or “something is behaving in a way it should not”. If you enter the field believing security means secrecy, you will misread half your own alerts.
+
+A second version of the same mistake is subtler: assuming the three properties always point in the same direction. They do not. Every real security decision buys one at the cost of another, which is what the next section is about.
+
 #### Which of the three broke?
 
 The useful habit is to ask, of any incident: **which of the three broke?** Often more than one.
@@ -331,6 +339,16 @@ Read it against the routine, line by line.
 
 The correct action is to ignore the link, open `paypal.com` by typing it or using a bookmark, and check for notifications there. Nothing in this message needs a reply.
 
+**A ten-minute drill, worth doing now.** The routine only becomes automatic if you run it against real messages rather than examples.
+
+1. Open your inbox and pick the three most recent messages that ask you to do something — click, sign in, pay, or confirm.
+2. For each one, check the actual sender address rather than the display name.
+3. Hover every link and read the last label before the first single slash. Write it down.
+4. Ask of each message: which lever is it using — urgency, authority, fear, curiosity, or familiarity?
+5. Decide whether you would act on it without a second check, and write one sentence on why.
+
+The interesting output is step 4 applied to legitimate mail. Real marketing email uses the same levers as phishing, which is exactly why the levers work when a criminal uses them. Learning to see urgency and authority as techniques rather than as information is the skill, and it transfers to every message you will ever read.
+
 #### Malware: the taxonomy you should know
 
 **Malware** is any software written to cause harm. The categories overlap in practice, because real-world malicious software combines behaviours. The vocabulary is still worth holding.
@@ -521,6 +539,21 @@ The key word is *unauthorised*, not *malicious*. Running a port scan against a s
 | **Know your home network boundary** | Your router and your own devices are yours. Your ISP's infrastructure beyond the router is not |
 | **Keep notes of what you did and why** | Good practice for learning, and, if there is ever a question, your evidence of legitimate purpose |
 | **Handle accidental discoveries correctly** | If you find a real vulnerability in someone else's system by accident, do not exploit it, do not tell the internet, and do not ask for money. Stop, document, and look up that organisation's **responsible disclosure** or security contact |
+
+**A worked example of the accidental discovery.** Suppose you are testing a login form on your own practice app, you mistype an address, and you land on a small business’s site instead. You notice the URL takes an `id` parameter. You change the number, and someone else’s invoice appears — on a site you do not own.
+
+The wrong responses are the common ones. Keep clicking, because it is interesting. Post a screenshot, because it is remarkable. Message the business and ask for a reward. Each of those turns a mistake into an offence.
+
+The right response has four steps, and the order matters.
+
+| Step | What you do |
+|---|---|
+| **Stop** | Do not load another record. Do not save anything. Do not take a screenshot |
+| **Document from memory** | Note the URL, the approximate time, and what you saw, in your own notes |
+| **Find the contact** | Look for a security contact, a `security.txt` file, or a general enquiry address |
+| **Report privately** | One short, factual message: what the page is, how to reproduce it, and that you stopped |
+
+Then leave it alone. Do not follow up for credit. Do not test it once more to confirm, because you have already confirmed it.
 
 #### Why the ethics matter beyond the law
 

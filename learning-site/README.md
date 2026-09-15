@@ -20,6 +20,11 @@ npm run test:smoke   # render every page and phase, fail on a render crash
 npm run lint:content # text-integrity check over the Markdown
 ```
 
+`npm test` runs the whole guard chain: `test:highlight`, `test:ui`, `test:data`,
+`test:lesson-search`, `test:search` and `test:smoke`. The content audits
+(`lint:content`, `audit-content`, `audit-lesson-ast`, `audit-readability`) live in
+`../scripts/` and are run from the repository root.
+
 `npm run build:content` generates `src/data/generated/{it,cyber}.json` from the Markdown via [`scripts/build-content.mjs`](../scripts/build-content.mjs). It runs automatically before `dev` and `build`. The generated files are git-ignored — the Markdown is the single source of truth.
 
 ## Status

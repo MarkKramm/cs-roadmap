@@ -103,6 +103,10 @@ First, **the drop happens at the resume screen, not the interview.** If you get 
 
 Second, **a zero-offer first pass is a normal outcome, not a signal to change careers.** A 50-application pass that produces three interviews and no offer has taught you a great deal: which roles respond, which keywords matter, and what the interviews actually ask. That information is the real output of the first pass, and it is what makes the second pass dramatically better.
 
+**A common misconception, and the correction.** Beginners often read the funnel as a merit test. *“If I were good enough, I would get a response.”* That model is wrong, and it is what makes the silence unbearable. The resume screen is a **filter**, not a judge. It asks one narrow question: does this document match this posting closely enough to be worth a human’s time? It answers that in seconds, using keyword overlap and role family.
+
+A strong candidate applying to a slightly wrong role gets filtered out. A weaker candidate applying to an exactly matched role gets through. That is not fair, and it is not personal either. It is a mechanical property of the system, and mechanical properties can be worked with.
+
 #### What "entry-level" actually means in security
 
 The phrase does real damage to expectations, because entry-level in cybersecurity does not mean *no prior work experience*. It means **no prior security work experience** — and in practice almost every posting assumes you have already worked in IT.
@@ -434,6 +438,26 @@ After roughly 20–30 applications, the tracker data tells you which stage is fa
 - **Recruiter screens but no technical interviews.** The problem is your story. Rehearse the transition narrative and the "no degree" answer. The screener may be hearing uncertainty about why you are moving.
 - **Technical interviews but no offers.** The problem is depth or honesty in delivery. Increase out-loud practice, review your model answers, and make sure you are not bluffing. Ask for feedback when rejected — most will not give it, but some will, and it is gold.
 - **Interviews going well but no offer, repeatedly.** This is often a fit or competition issue rather than a skill issue. Widen the role families you apply to, including the IT-security bridge roles.
+
+**A worked example.** Here is a real-shaped first pass: 28 applications over six weeks, tracked properly.
+
+| What the tracker shows | Count | What it means |
+|---|---|---|
+| Applications submitted | 28 | Below the 50 target. That is the first finding — the volume is not there yet |
+| Recruiter screens | 4 | About one in seven. That is a normal rate for this profile |
+| Technical interviews | 1 | The drop from four screens to one technical is the signal to work on |
+| Offers | 0 | Expected on a first pass of this size |
+
+Read against the four diagnoses above, this tracker says something specific. The resume is working well enough to get screens, so do not rewrite it. The story told inside the screen is not landing, because three of four screens did not convert. The fix is not more applications. It is rehearsing the transition narrative out loud until it survives the first five minutes. That is a cheap, one-week piece of work, and the tracker is what pointed at it.
+
+**A small exercise: build the tracker before you need it.** Twenty minutes, done once.
+
+1. Open a blank spreadsheet and create the ten columns listed in Part 2.
+2. Add one row for a posting you would genuinely apply to this week, and fill every column, including the keywords you spot.
+3. Add two more rows for postings you would *not* apply to, and write the reason in Notes — wrong seniority, degree required, a tool you have never touched.
+4. Sort by status and read the sheet back.
+
+The third row is the point of the exercise. Knowing which postings to ignore is what keeps a 50-application target from becoming 50 wasted evenings, and writing the reason down turns a feeling into a rule you can check.
 
 #### Networking, referrals, and asking well
 
