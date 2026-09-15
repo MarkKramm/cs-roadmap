@@ -135,7 +135,12 @@ The review identified five gaps and deliberately did not fill them, to keep the 
 ## Later / optional
 
 - [ ] Print stylesheet for a lesson, so a phase can be taken offline on paper.
-- [ ] Keyboard shortcut to focus search, and query highlighting inside the snippet.
+- [x] **Query highlighting inside the snippet.** Matched terms are now marked, tiered the same way the query engine scores: terms as typed first, stems only if nothing matched. The tiering is load-bearing in both directions, which is why it is not a simple prefix match — see `src/lib/highlight.js`.
+- [x] **Copy button on every code block.** 464 blocks, most of them commands meant to be run; retyping one is how a beginner mistypes a flag and concludes the lesson is wrong. Asserted per block in the smoke test.
+- [ ] **Keyboard shortcut to focus search.** The search page is reachable from the nav, but there is no `/` or `Ctrl+K` to jump to it from a lesson, which is where a reader actually wants it. The only keys handled anywhere are Escape (closing the mobile drawer).
+- [ ] **A reading-position indicator for long lessons.** The longest phase is now 15,500 words with no sense of how far in the reader is. A thin progress bar against the reading column would cost almost nothing.
+- [ ] **A second breakpoint below 480px.** The site has exactly one media query, at 860px, so phones get the tablet layout. Touch targets and type size are the things to check rather than the overall structure.
+- [ ] **Font-size control for long reading sessions.** No way to adjust the reading size today.
 
 ## Explicitly out of scope
 
