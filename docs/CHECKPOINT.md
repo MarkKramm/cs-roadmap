@@ -2,14 +2,14 @@
 
 A snapshot of the repository's current state. Update this when a meaningful milestone is reached.
 
-## Current state — 2026-09-15
+## Current state — 2026-09-16
 
 | Item | Value |
 |---|---|
 | Branch | `main` |
-| Tracked files | **140** — 131 plus the nine files this pass adds: `scripts/shared-content.mjs`, `learning-site/src/lib/today.js`, `learning-site/src/lib/yourWork.js`, `learning-site/src/hooks/useTimeBudget.js`, `learning-site/src/pages/Shared.jsx`, `learning-site/src/pages/YourWork.jsx`, `learning-site/src/components/TimeBudgetSelector.jsx`, `learning-site/scripts/test-work.mjs`, `learning-site/scripts/test-today.mjs` |
-| Working tree | **Clean apart from one uncommitted refinement to `docs/CONTENT-SCHEMA.md`.** The three features and the doc updates for them landed in `3d637e7`; this file was then corrected to match |
-| Unpushed | None at the time of writing, subject to the one pending refinement above — run `git --no-pager log --oneline -n 1` for the exact hash, since this file cannot contain its own |
+| Tracked files | **140** — 131 plus the nine files this pass added: `scripts/shared-content.mjs`, `learning-site/src/lib/today.js`, `learning-site/src/lib/yourWork.js`, `learning-site/src/hooks/useTimeBudget.js`, `learning-site/src/pages/Shared.jsx`, `learning-site/src/pages/YourWork.jsx`, `learning-site/src/components/TimeBudgetSelector.jsx`, `learning-site/scripts/test-work.mjs`, `learning-site/scripts/test-today.mjs` |
+| Working tree | **Four files modified, uncommitted**: `.github/workflows/ci.yml` (six suite steps added to the site job — see the "Guards in CI" row), `CHANGELOG.md` and `docs/SESSION-LOG.md` (the same change written up in the same words), and this file. Everything else landed in `3d637e7`, with the `shared.json` contract correction in `CONTENT-SCHEMA.md` in `94fa18c` |
+| Unpushed | None — `main` and `origin/main` are level. Run `git --no-pager log --oneline -n 1` for the exact hash, since this file cannot contain its own |
 | Line endings | LF everywhere (Windows scripts excepted) |
 | Encoding | UTF-8, no BOM |
 | Remote | `origin` → https://github.com/MarkKramm/cs-roadmap |
@@ -17,7 +17,7 @@ A snapshot of the repository's current state. Update this when a meaningful mile
 | Deploy | **Live.** `.github/workflows/deploy-pages.yml` publishes `learning-site/dist` to <https://markkramm.github.io/cs-roadmap/>. Builds with `VITE_BASE=/cs-roadmap/` because a project site is served from a subdirectory, and verifies the emitted HTML so an unprefixed build fails rather than deploying a blank page |
 | License | CC BY 4.0 |
 | Build step | `learning-site/` — React + Vite. `npm run dev` / `npm run build` |
-| Curriculum size | **272,959 lesson words** across 23 phases, 464 fenced code blocks, 252 checklist task IDs |
+| Curriculum size | **272,959 lesson words** across 23 phases, 464 fenced code blocks, **252 phase task IDs** (IT 90, cyber 162), of which **183 are practice tasks**, every one banded and energy-tagged |
 | Hands-on density | **Every phase that can carry practice now does.** Measured as concrete instructions per 1,000 lesson words, IT Phase 4 rose from **0.11 → 2.8** and Phase 6 from 0.17, the two worst in the repository. Nine phases gained work totalling roughly +37,000 words, all additive, after this metric found that four IT and five cyber phases *taught* skills without ever having the reader perform them. The remaining low-density phases — soft skills, specialization choice, certifications, job application — are ones where prose is correct, because you cannot run a terminal command to practise an interview answer |
 | Checks | `lint-content` **140** files / 0 issues; `audit-content` 0 issues across 23 phases; `audit-lesson-ast` 23 lessons / 0 loss; `audit-readability` 0 of 23 outside target and **0 paragraphs over 90 words**; `test:highlight` 37; `test:ui` 42; `test:data` **86**; `test:notes` 28; **`test:work` 31**; **`test:today` 77**; `test:lesson-search` 77; `test:search` 41; `test:smoke` **181** renders / 0 failures; production build clean |
 | The reader's own writing | **A note per phase and an answer per practice task**, in a `localStorage` key (`cs-roadmap:notes:v1`) — D-019 — and now **readable back** through the new **Your work** view (D-020). It is deliberately unscored: no count, no percentage, nothing on the dashboard, and a smoke assertion forbids an `N of M` pattern from ever appearing in it. Practice tasks carry stable `<phase-id>-tNN` ids, so an answer cannot silently migrate to a different question |
@@ -27,7 +27,8 @@ A snapshot of the repository's current state. Update this when a meaningful mile
 | Time budget | A **tenth `localStorage` key**, `cs-roadmap:time-budget:v1` (D-021), owned by `hooks/useTimeBudget.js` and registered in `transfer.js` → `KEYS`, so the backup registry grew **9 → 10**. It defaults to `focused`, because that is where 82% of the tasks actually sit. `ongoing` is deliberately not offered as a budget — that is a property of a task, not an amount of time a person can have |
 | Bundle & build output | Initial chunk **429 KB raw / 126 KB gzipped**, unchanged by this pass, with 23 on-demand lesson chunks (**1,997 KB** total). `search.json` **542 KB**; the new `shared.json` adds **20 KB**. **No new dependency** was added for any of the three features |
 | Task IDs | 252 total (IT 90, cyber 162) |
-| CI | `.github/workflows/ci.yml` — two jobs on push to `main` and on PRs (D-008). Runs lint, content audit, lesson-parser audit, readability audit, build, smoke and search. **`cyber-restructure-check.mjs` is deliberately excluded**: it reads a before-snapshot from `process.env.TEMP`, which is not in the repository, so it can only ever fail on a fresh clone. It is a one-off migration tool for a restructure pass, not a standing guard. Last verified green: `2ec1871` |
+| CI | `.github/workflows/ci.yml` — two jobs on push to `main` and on PRs (D-008). Content job: lint, content audit, lesson-parser audit, readability audit. Site job: build, `test:smoke`, `test:search`, `test:highlight`. **`cyber-restructure-check.mjs` is deliberately excluded**: it reads a before-snapshot from `process.env.TEMP`, which is not in the repository, so it can only ever fail on a fresh clone. It is a one-off migration tool for a restructure pass, not a standing guard. CI run **#37 on `94fa18c` is green** (verified through the GitHub API, `completed / success`). **The six steps listed in the next row are uncommitted — they sit on top of that commit — so no CI run has ever executed them**; they are proven locally only, which is a different claim from "CI is green" |
+| Guards in CI | **The whole suite is wired into CI, and wired is not the same as observed.** The site job previously ran only smoke, search and highlight, so a regression in the band table, the fitting rule or the addressed rules would have passed CI and been caught only by a local run. `test:ui`, `test:data`, `test:notes`, `test:work`, `test:today` and `test:lesson-search` are now steps in `.github/workflows/ci.yml` — all six are plain node runs with no React and no DOM, so they add seconds and no install. Each was run standalone against the same tree before its step was added. **The workflow change is uncommitted, so no CI run has executed them yet**; until it is pushed, this row describes the file on disk rather than a green result |
 | Milestone | M3 complete — the site renders the lessons themselves, not just the structured sections |
 | Search | Full-text across all 23 lessons, both tracks (D-013). A build-time inverted index (term → segment id, **no prose**) emitted as `generated/search.json` — **1,128 segments / 11,374 terms / 542 KB, roughly 27% of the lesson bytes** — and **not referenced by `index.html`**, so a reader who never searches pays nothing. Results deep-link across tracks to the matching heading. Three silent-failure bugs were found by testing the index against the engine and are now guarded by `test:search` |
 | Content depth | **Both tracks complete and uniformly deep.** All 23 phases carry `## Lesson` sections, and **all 23 are inside every readability target**. Cyber runs 7,563–12,177 lesson words across 14 phases; IT runs 5,567–23,657 across 9 |
@@ -99,25 +100,25 @@ All of the following were re-verified against a **from-scratch rebuild** — `ge
 - [x] No literal `?` substitutes remain except three genuine question marks.
 - [x] All files valid UTF-8; no CR bytes; no BOM; no mojibake in any edited file (verified at byte level, since a PowerShell console misrenders correct UTF-8).
 - [x] `.gitattributes` and `.editorconfig` in place.
-- [x] Remote configured. **`main` and `origin/main` are both at `b980d11`; nothing is unpushed.**
-- [x] `lint-content.mjs` — 131 files, 0 issues.
+- [x] Remote configured. **The pass landed in `3d637e7`, and the `shared.json` contract correction in `94fa18c`; nothing is unpushed.**
+- [x] `lint-content.mjs` — **140 files, 0 issues**.
 - [x] `audit-content.mjs` — 0 issues across 23 phases.
 - [x] `audit-lesson-ast.mjs` — all 23 lessons parse with no content loss.
 - [x] `audit-readability.mjs` — 0 of 23 phases outside target (avg para ≤ 45, avg sentence ≤ 18, ≥ 8 tables).
-- [x] `test:data` — 83 checks; `test:notes` — 28 checks.
+- [x] `test:highlight` 37, `test:ui` 42, `test:data` **86**, `test:notes` 28, **`test:work` 31**, **`test:today` 77**, `test:lesson-search` 77, `test:search` 41 — all pass.
 - [x] `cyber-restructure-check.mjs` — no phase lost content; 132,563 lesson words.
-- [x] `build-content.mjs` — 228 phase task IDs (IT 66, cyber 162), 23 lesson files.
-- [x] `npm run test:smoke` — 174 renders across 23 phases and 191 tools, 0 failures.
+- [x] `build-content.mjs` — **183 practice tasks banded and 183 carrying energy, 0 still minted from position**; 252 total task IDs (IT 90, cyber 162), 23 lesson files.
+- [x] `npm run test:smoke` — **181 renders** across 23 phases and 191 tools, 0 failures.
 - [x] `npm run test:ui` — 42 checks across pace arithmetic, phase navigation, shortcut targeting and section-key namespacing.
-- [x] `npm run build` — clean; initial bundle 429 KB (126 KB gzipped) with 23 on-demand lesson chunks.
-- [x] 256 checklist IDs, all globally unique.
-- [x] CI and the Pages deploy are **green on `9629c89`**, verified through the GitHub API: `CI` and `Deploy to GitHub Pages` both report `completed / success`, and deployments exist for `e2fbae5`, `b980d11` and `9629c89`. The site is live at <https://markkramm.github.io/cs-roadmap/>.
+- [x] `npm run build` — clean; initial bundle 429 KB (126 KB gzipped) with 23 on-demand lesson chunks, **1,997 KB** of lesson JSON, `search.json` **542 KB** and the new `shared.json` **20 KB**. Size unchanged by this pass.
+- [x] 252 phase task IDs (IT 90, cyber 162), all globally unique — the build prints `total phase task IDs: 252` itself.
+- [x] CI is **green on `94fa18c`** — the newest commit — re-checked through the GitHub API: run **#37** on `main`, `push`, `completed / success`. An earlier run was verified green on `9629c89`, and deployments exist for `e2fbae5`, `b980d11` and `9629c89`. The site is live at <https://markkramm.github.io/cs-roadmap/>. **But a green run describes the workflow file that was committed at that hash, not the one on disk**: `94fa18c` predates the six suite steps, which are still uncommitted, so no CI run has ever executed them — see the CI row and item 1 under Resuming.
 
 ## Resuming
 
 Read this first.
 
-1. **Commit this pass first, then re-check CI.** The three features and these four doc updates are uncommitted, so CI has not run against them. CI and the Pages deploy were green on `9629c89` for the previous pass, and the site is live. See the table above.
+1. **Commit and push the CI change, then re-check CI.** `.github/workflows/ci.yml` is modified but uncommitted, and those six steps have never executed in CI. Until they do, "CI is green" describes a workflow file that is not the one on disk. CI is green on `94fa18c` (run #37), but that run used the committed workflow, which does not contain these six steps — so "CI is green" and "these six steps pass" are two different claims and only the first is currently evidenced. The site is live. See the CI row and the "Guards in CI" row above.
 2. **Rebuild before running the site.** `learning-site/src/data/generated/` is gitignored, so a fresh clone has no lesson JSON until `npm run build:content` (or `npm run dev` / `npm run build`, which both call it) has run.
 3. **Run the guards after touching the parser.** `node scripts/audit-lesson-ast.mjs` is the one that matters; see [`WORKFLOW.md`](WORKFLOW.md) → "Guards on the lesson renderer".
 4. **Beware inline `node -e` on Windows.** Backticks inside a PowerShell double-quoted string are mangled, which silently corrupts escape-sensitive regexes. Write a throwaway `.mjs` file instead — this cost two wrong measurements in one session.
@@ -157,7 +158,7 @@ From the repository root:
 
 ```powershell
 git --no-pager log --oneline -n 5
-git --no-pager status --short          # expect one modified docs/CONTENT-SCHEMA.md, then empty
+git --no-pager status --short          # expect ci.yml, CHANGELOG.md, CHECKPOINT.md and SESSION-LOG.md, then empty
 git --no-pager log origin/main..HEAD --oneline   # expect empty after pushing
 
 node scripts/lint-content.mjs            # content integrity

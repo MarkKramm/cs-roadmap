@@ -62,3 +62,21 @@ jobs:
       # broken search but never throws.
       - name: Search snippet highlighting
         run: npm run test:highlight
+      # The rest of the suite. Every one of these is a plain node run against a
+      # module with no React and no DOM, so they cost seconds and need no extra
+      # install. They were written because their failure modes are silent — a
+      # band table that offers a 90-minute task to someone with 30 minutes, an
+      # answer attached to the wrong task, a merge that drops a record — and a
+      # silent failure that only a local run can catch is a failure that ships.
+      - name: UI logic
+        run: npm run test:ui
+      - name: Data transfer
+        run: npm run test:data
+      - name: Notes
+        run: npm run test:notes
+      - name: Your work
+        run: npm run test:work
+      - name: Today
+        run: npm run test:today
+      - name: Lesson search
+        run: npm run test:lesson-search
