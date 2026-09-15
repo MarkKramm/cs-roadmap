@@ -60,21 +60,68 @@ Deepen networking and Linux skills enough to understand scans, logs, shells, ser
 
 ### Why this lesson exists
 
-There is a sentence you will hear repeatedly in this field, and it is worth taking literally: **you cannot secure what you do not understand.** Networking and Linux are the two subjects that sentence points at hardest. Almost every security tool you will ever use is, underneath, either sending packets, reading packets, or reading a log file that recorded packets. Nmap sends crafted packets and interprets the replies. Wireshark is a packet viewer. A firewall is a rule engine over packets. A SIEM is a search engine over logs. If you cannot read the underlying protocol, all of these tools become magic boxes that produce output you can copy but not explain.
+#### You cannot secure what you do not understand
 
-That gap — copying output versus explaining it — is exactly what separates candidates in interviews, and it is the phase's stated exit criterion: *you can look at a simple Nmap result or Wireshark capture and explain what service or protocol is involved.* That is a deliberately modest bar, and this lesson is written to get you over it with real understanding rather than memorised command flags.
+There is a sentence you will hear repeatedly in this field, and it is worth taking literally: **you cannot secure what you do not understand.**
 
-**Why these two subjects together.** They are paired for a practical reason: Linux is where the networking becomes visible. On Windows, network configuration is buried in GUI dialogs, and logging is abstracted away. On Linux, you type `ip a` and see your interfaces, you type `ss -tulpn` and see every listening service with the process that owns it, and you read `/var/log/auth.log` to watch authentication attempts scroll past in real time. Linux gives you the observability that makes the concepts concrete. It is also, not coincidentally, the operating system that runs most of the internet's servers, most security tooling, and most CTF environments — so fluency with it compounds across everything that follows.
+Networking and Linux are the two subjects that sentence points at hardest. Almost every security tool you will ever use is, underneath, one of three things. It sends packets, it reads packets, or it reads a log file that recorded packets.
 
-**Time to complete:** roughly 40–60 hours across the six weeks, and honestly, the longer side. This is the heaviest phase in the cyber track. The reading below is perhaps four hours of it; the rest is the nine practice tasks, the Bandit wargame, and the time you will spend being confused by subnetting before it suddenly clicks. Budget for that confusion — it is a normal part of learning this material, not a sign you are unsuited to it. Nearly everyone hits a wall at subnetting and again at permissions.
+| Tool | What it actually is |
+|---|---|
+| Nmap | Sends crafted packets and interprets the replies |
+| Wireshark | A packet viewer |
+| A firewall | A rule engine over packets |
+| A SIEM | A search engine over logs |
 
-**Two notes on scope.** First, this lesson covers the *why* and the working mental models; it does not attempt to be the complete reference for either subject. The resources section lists Linux Journey, Practical Networking, and the Nmap book — use them alongside this, because repetition across sources is how this material actually sticks. Second, a safety note that carries over from Phase 1: every command here is safe against **your own virtual machines only**. `nmap -sV` against a VM you created is learning. The same command against an address you do not own is unauthorised access. The phase's tools table says "Scan your own VM only" for this reason, and it is not boilerplate.
+If you cannot read the underlying protocol, all of these tools become magic boxes. They produce output you can copy but not explain.
+
+#### Copying output versus explaining it
+
+That gap — copying output versus explaining it — is exactly what separates candidates in interviews. It is also the phase's stated exit criterion: *you can look at a simple Nmap result or Wireshark capture and explain what service or protocol is involved.*
+
+That is a deliberately modest bar. This lesson is written to get you over it with real understanding rather than memorised command flags.
+
+#### Why these two subjects together
+
+They are paired for a practical reason: Linux is where the networking becomes visible.
+
+On Windows, network configuration is buried in GUI dialogs, and logging is abstracted away. On Linux, you type `ip a` and see your interfaces. You type `ss -tulpn` and see every listening service with the process that owns it. You read `/var/log/auth.log` to watch authentication attempts scroll past in real time.
+
+Linux gives you the observability that makes the concepts concrete. It is also, not coincidentally, the operating system that runs most of the internet's servers, most security tooling, and most CTF environments. Fluency with it compounds across everything that follows.
+
+#### How the time breaks down
+
+| What | Time | Note |
+|---|---|---|
+| Reading this lesson | ~4 hours | The thinking, not the practice |
+| Nine practice tasks | 25–40 hours | The bulk of the phase |
+| Bandit wargame | 8–15 hours | Runs across all six weeks |
+| Being confused by subnetting | Counts as progress | Nearly everyone hits this wall |
+| Total | 40–60 hours across 6 weeks | The heaviest phase in the cyber track |
+
+Budget honestly: this is the longer side, and it is the heaviest phase in the cyber track. Budget for the confusion too — subnetting and permissions are where nearly everyone hits a wall. That is a normal part of learning this material, not a sign you are unsuited to it.
+
+#### Two notes on scope
+
+First, this lesson covers the *why* and the working mental models. It does not attempt to be the complete reference for either subject. The resources section lists Linux Journey, Practical Networking, and the Nmap book — use them alongside this. Repetition across sources is how this material actually sticks.
+
+Second, a safety note that carries over from Phase 1: every command here is safe against **your own virtual machines only**.
+
+| Command | Against your own VM | Against an address you do not own |
+|---|---|---|
+| `nmap -sV` | Learning | Unauthorised access |
+| `tcpdump` on your own interface | Learning | Potentially unlawful interception |
+| `ssh user@your-vm` | Learning | Unauthorised access |
+
+The phase's tools table says “Scan your own VM only” for this reason, and it is not boilerplate.
 
 ### Part 1 — How networks are built: models, addresses, and layers
 
 #### The two models, and why you need either
 
-The **OSI model** has seven layers and the **TCP/IP model** has four (or five, depending on who is counting). Beginners often find this pointless until they see what the layers are *for*: they are a shared vocabulary for saying **where** a problem is.
+The **OSI model** has seven layers. The **TCP/IP model** has four, or five, depending on who is counting.
+
+Beginners often find this pointless until they see what the layers are *for*. They are a shared vocabulary for saying **where** a problem is.
 
 | Layer (OSI) | What it handles | Example | If it breaks |
 |---|---|---|---|
@@ -86,25 +133,56 @@ The **OSI model** has seven layers and the **TCP/IP model** has four (or five, d
 | 2 Data link | Local delivery | Ethernet, ARP, MAC | Cannot reach the gateway |
 | 1 Physical | The wire, the radio | Cables, Wi-Fi | Nothing at all |
 
-The practical value: when something fails, you ask *which layer?* "I cannot reach the server" is a layer 3 problem. "I can ping it but SSH is refused" is layer 4 — the host is reachable, the port is closed. "SSH connects but the certificate is wrong" is a layer 5–6 problem. "I cannot ping it but I can reach other things on my own network" is layer 2 — your local link works, routing does not.
+#### Asking “which layer?” when something fails
 
-For security work the mapping is even more useful. A firewall mostly filters layers 3 and 4. A web application firewall works at layer 7. ARP spoofing is a layer 2 attack. TLS interception is layer 6. When you read an incident report, the layer tells you which control failed.
+The practical value is diagnostic. When something fails, you ask *which layer?*
 
-The TCP/IP model collapses this into **Link → Internet → Transport → Application**. It is what the internet actually implements; OSI is the teaching model. Know both names, use whichever the conversation is using.
+| Symptom | Layer | What it means |
+|---|---|---|
+| “I cannot reach the server” | 3 | A routing or addressing problem |
+| “I can ping it but SSH is refused” | 4 | The host is reachable, the port is closed |
+| “SSH connects but the certificate is wrong” | 5–6 | Session or encryption problem |
+| “I cannot ping it but I can reach other things on my own network” | 2 | Your local link works, routing does not |
+
+For security work the mapping is even more useful.
+
+| Control or attack | Layer |
+|---|---|
+| A firewall | Mostly 3 and 4 |
+| A web application firewall | 7 |
+| ARP spoofing | 2 |
+| TLS interception | 6 |
+
+When you read an incident report, the layer tells you which control failed.
+
+The TCP/IP model collapses this into **Link → Internet → Transport → Application**. It is what the internet actually implements. OSI is the teaching model. Know both names, and use whichever the conversation is using.
 
 #### IP addresses, and the part everyone gets stuck on
 
-An **IPv4 address** is 32 bits, written as four decimal numbers (`192.168.1.10`). Every address has two logical parts: a **network** portion and a **host** portion. The **subnet mask** — or its shorthand, the **CIDR** prefix — says where the split falls.
+An **IPv4 address** is 32 bits, written as four decimal numbers (`192.168.1.10`). Every address has two logical parts: a **network** portion and a **host** portion.
 
-`192.168.1.10/24` means the first 24 bits (`192.168.1`) are the network and the last 8 bits are the host. So:
+The **subnet mask** — or its shorthand, the **CIDR** prefix — says where the split falls. `192.168.1.10/24` means the first 24 bits (`192.168.1`) are the network and the last 8 bits are the host.
 
-- Network address: `192.168.1.0` — identifies the network itself
-- Usable hosts: `192.168.1.1` through `192.168.1.254` — 254 of them
-- Broadcast address: `192.168.1.255` — sends to every host on the network at once
+| Address | Role |
+|---|---|
+| `192.168.1.0` | Network address — identifies the network itself |
+| `192.168.1.1` through `192.168.1.254` | Usable hosts — 254 of them |
+| `192.168.1.255` | Broadcast address — sends to every host on the network at once |
 
-The reason `/24` gives 254 usable rather than 256 is that the first and last addresses are reserved. That "minus two" rule holds for every subnet, and it is worth internalising now.
+The reason `/24` gives 254 usable rather than 256 is that the first and last addresses are reserved. That “minus two” rule holds for every subnet, and it is worth internalising now.
 
-**Doing the math for other prefixes.** The prefix tells you how many host bits remain: `32 − prefix`. `/25` leaves 7 bits, so `2^7 = 128` addresses, 126 usable. `/26` leaves 6 bits, 64 addresses, 62 usable. `/27` → 32 addresses, 30 usable. Each step up in prefix halves the block. The phase asks specifically for `/24`, `/25`, and `/26`, and that pattern — halve, subtract two — is all you need for those.
+#### Worked example: doing the math for other prefixes
+
+The prefix tells you how many host bits remain: `32 − prefix`.
+
+| Prefix | Host bits | Total addresses | Usable hosts | Calculation |
+|---|---|---|---|---|
+| `/24` | 8 | 256 | 254 | `2^8 = 256`, minus 2 |
+| `/25` | 7 | 128 | 126 | `2^7 = 128`, minus 2 |
+| `/26` | 6 | 64 | 62 | `2^6 = 64`, minus 2 |
+| `/27` | 5 | 32 | 30 | `2^5 = 32`, minus 2 |
+
+Each step up in prefix halves the block. The phase asks specifically for `/24`, `/25`, and `/26`, and that pattern — halve, subtract two — is all you need for those.
 
 A `/25` splits a `/24` into two halves:
 
@@ -113,29 +191,49 @@ A `/25` splits a `/24` into two halves:
 192.168.1.128/25  → hosts .129 – .254   (broadcast .255)
 ```
 
-Notice the `/25` boundary lands at `.128`, not at a round decimal number. That is because you are doing arithmetic in binary and reading it in decimal. This is the source of nearly all subnetting confusion: the numbers look arbitrary in decimal but are tidy in binary. If you write the last octet in binary, the pattern becomes obvious — `/25` is "the first bit of the last octet is the network part," so it splits at 128.
+Notice the `/25` boundary lands at `.128`, not at a round decimal number. That is because you are doing arithmetic in binary and reading it in decimal.
 
-**Private ranges.** Three blocks are reserved for internal use and are not routable on the public internet:
+This is the source of nearly all subnetting confusion. The numbers look arbitrary in decimal but are tidy in binary. If you write the last octet in binary, the pattern becomes obvious — `/25` is “the first bit of the last octet is the network part,” so it splits at 128.
 
-- `10.0.0.0/8` — large organisations
-- `172.16.0.0/12` — mid-size
-- `192.168.0.0/16` — home and small office
+#### Private ranges and what they tell you
+
+Three blocks are reserved for internal use and are not routable on the public internet.
+
+| Range | Typical use |
+|---|---|
+| `10.0.0.0/8` | Large organisations |
+| `172.16.0.0/12` | Mid-size |
+| `192.168.0.0/16` | Home and small office |
 
 Seeing `192.168.x.x` in a log tells you it is an internal address. This matters constantly in analysis: an internal address appearing as the source of an attack suggests a compromised insider machine rather than an external attacker.
 
-**IPv6** is 128 bits, written in hexadecimal (`2001:0db8::1`). You do not need to master it in this phase, but you should know three things. First, the `::` shorthand means "one or more groups of zeros" — the address above is `2001:0db8:0000:0000:0000:0000:0000:0001`. Second, **link-local** addresses (`fe80::/10`) exist automatically on every interface and are how devices on the same segment find each other; **global unicast** (`2001::/16` range) are internet-routable. Third, and this is the security-relevant point: IPv6 was designed with enough address space that **NAT is not necessary**, so every device can have a real address. That removes a layer of accidental protection that IPv4 networks enjoy, and it is why IPv6 misconfiguration is a recurring security finding.
+#### IPv6: the three things you actually need
+
+**IPv6** is 128 bits, written in hexadecimal (`2001:0db8::1`). You do not need to master it in this phase, but you should know three things.
+
+| Thing to know | Detail |
+|---|---|
+| The `::` shorthand | Means “one or more groups of zeros.” The address above is `2001:0db8:0000:0000:0000:0000:0000:0001` |
+| Link-local vs global unicast | **Link-local** (`fe80::/10`) exists automatically on every interface and is how devices on the same segment find each other. **Global unicast** (`2001::/16` range) are internet-routable |
+| The security-relevant point | IPv6 was designed with enough address space that **NAT is not necessary**, so every device can have a real address |
+
+That last point removes a layer of accidental protection that IPv4 networks enjoy. It is why IPv6 misconfiguration is a recurring security finding.
 
 #### ARP, MAC addresses, and the layer-2 neighbourhood
 
-Your machine sends data to another machine on the same local network by **MAC address** — a hardware identifier baked into the network card. To find the MAC for a given IP, it uses **ARP** (Address Resolution Protocol): it broadcasts "who has `192.168.1.1`?" and the owner replies with its MAC.
+Your machine sends data to another machine on the same local network by **MAC address** — a hardware identifier baked into the network card.
 
-ARP has no authentication. Anyone on the segment can answer, and anyone can announce false mappings. This is the basis of **ARP spoofing**, where an attacker tells the network "the gateway's IP is at *my* MAC address," causing traffic to flow through the attacker. It is one of the clearest examples in networking of a protocol designed for a trusting environment being deployed in an untrusting one — a theme you will see repeatedly in security.
+To find the MAC for a given IP, it uses **ARP** (Address Resolution Protocol). It broadcasts “who has `192.168.1.1`?” and the owner replies with its MAC.
+
+ARP has no authentication. Anyone on the segment can answer, and anyone can announce false mappings. This is the basis of **ARP spoofing**, where an attacker tells the network “the gateway's IP is at *my* MAC address,” causing traffic to flow through the attacker.
+
+It is one of the clearest examples in networking of a protocol designed for a trusting environment being deployed in an untrusting one — a theme you will see repeatedly in security.
 
 You can see your own ARP table with `ip neigh` on Linux or `arp -a` on Windows. Doing this once makes the concept concrete.
 
-#### DNS, DHCP, and NAT: the three services that make everything else work
+#### DNS record types you should know by heart
 
-**DNS** (Domain Name System) translates names to addresses, and its record types are worth knowing by heart because they appear constantly in investigations:
+**DNS** (Domain Name System) translates names to addresses. Its record types appear constantly in investigations.
 
 | Record | Meaning | Security relevance |
 |---|---|---|
@@ -146,13 +244,68 @@ You can see your own ARP table with `ip neigh` on Linux or `arp -a` on Windows. 
 | **TXT** | Arbitrary text | Holds SPF/DKIM/DMARC anti-spoofing records |
 | **NS** | Authoritative nameservers | Who controls the domain |
 
-The architecture matters too. A **recursive resolver** (your ISP's, or `8.8.8.8`, or `1.1.1.1`) does the legwork of asking around on your behalf. An **authoritative server** holds the real records for a domain and gives final answers. The distinction is useful in incident response because a hijacked or malicious resolver can lie to you while the authoritative record stays correct.
+#### Recursive resolvers versus authoritative servers
 
-You can inspect all of this from a terminal, and the phase's task 5 asks you to. `dig example.com MX` returns the mail records; `dig example.com TXT` shows the anti-spoofing policy. Reading a real TXT record for a domain you care about is a small revelation — it shows you that email authentication is public information.
+The architecture matters too.
 
-**DHCP** (Dynamic Host Configuration Protocol) hands out addresses automatically, through a four-step exchange known as **DORA**: Discover (client broadcasts "is anyone there?"), Offer (server proposes an address), Request (client asks for it), Acknowledge (server confirms). The security angle is that a rogue DHCP server can hand out a malicious gateway or DNS server, redirecting an entire network's traffic — which is why enterprise networks use **DHCP snooping**.
+| Role | What it does | Examples |
+|---|---|---|
+| **Recursive resolver** | Does the legwork of asking around on your behalf | Your ISP's resolver, `8.8.8.8`, `1.1.1.1` |
+| **Authoritative server** | Holds the real records for a domain and gives final answers | The domain owner's nameservers |
 
-**NAT** (Network Address Translation) lets many private devices share one public address. Your home router rewrites outgoing packets so they appear to come from its public IP, and tracks which internal machine each reply belongs to. Two consequences worth holding: NAT is why your internal `192.168.1.10` is invisible from outside, and NAT is *not* a security control even though it behaves like one by accident. It is an address-conservation mechanism that happens to hide internal structure.
+The distinction is useful in incident response. A hijacked or malicious resolver can lie to you while the authoritative record stays correct.
+
+You can inspect all of this from a terminal, and the phase's task 5 asks you to. `dig example.com MX` returns the mail records, and `dig example.com TXT` shows the anti-spoofing policy. Reading a real TXT record for a domain you care about is a small revelation — it shows you that email authentication is public information.
+
+#### Worked example: reading a real dig query
+
+You run:
+
+```bash
+dig example.com TXT +short
+```
+
+And you get back something like:
+
+```text
+"v=spf1 include:_spf.example.com -all"
+```
+
+Read it left to right.
+
+| Piece | What it means |
+|---|---|
+| `v=spf1` | This is an SPF record, version 1 — the list of servers allowed to send mail as this domain |
+| `include:_spf.example.com` | Mail sent through that host is authorised |
+| `-all` | Everything else is a **hard fail**. Any other server claiming to be this domain should be rejected |
+
+That last token is the security decision. A domain ending in `-all` is enforcing its policy strictly. A domain ending in `~all` is only marking it as suspicious, and a domain with no SPF record at all is trivially spoofable.
+
+You have just read an anti-spoofing policy straight from public DNS, using one command.
+
+#### DHCP and the DORA exchange
+
+**DHCP** (Dynamic Host Configuration Protocol) hands out addresses automatically, through a four-step exchange known as **DORA**.
+
+| Step | What happens |
+|---|---|
+| **D**iscover | Client broadcasts “is anyone there?” |
+| **O**ffer | Server proposes an address |
+| **R**equest | Client asks for it |
+| **A**cknowledge | Server confirms |
+
+The security angle is that a rogue DHCP server can hand out a malicious gateway or DNS server, redirecting an entire network's traffic. This is why enterprise networks use **DHCP snooping**.
+
+#### NAT: address conservation, not a security control
+
+**NAT** (Network Address Translation) lets many private devices share one public address. Your home router rewrites outgoing packets so they appear to come from its public IP, and tracks which internal machine each reply belongs to.
+
+Two consequences worth holding:
+
+| Consequence | Why it matters |
+|---|---|
+| Your internal `192.168.1.10` is invisible from outside | You cannot be reached directly from the internet |
+| NAT is *not* a security control | It is an address-conservation mechanism that happens to hide internal structure. It behaves like a control by accident |
 
 #### TCP, UDP, and ICMP
 
@@ -164,17 +317,46 @@ Server → Client:  SYN-ACK   ("Acknowledged, and here is mine")
 Client → Server:  ACK       ("Acknowledged — connection established")
 ```
 
-This handshake is the single most useful thing to understand for reading captures, and the phase's task 9 asks you to write it up. What it means in practice: a completed handshake proves the port is open and something is listening. A `SYN` that gets no reply means the port is filtered or the host is down. A `SYN` answered by `RST` (reset) means the host is alive but nothing is listening on that port — this is precisely how Nmap distinguishes open, closed, and filtered ports. Once you know the handshake, Nmap's output stops being arbitrary.
+This handshake is the single most useful thing to understand for reading captures, and the phase's task 9 asks you to write it up.
 
-Teardown uses `FIN` or `RST`, either side can initiate, and TCP tracks state throughout so it can retransmit lost data and deliver in order.
+#### Worked example: how the handshake explains Nmap's port states
 
-**UDP** is connectionless and unreliable: no handshake, no ordering, no retransmission. That sounds like a downgrade, and for some uses it is exactly right — DNS lookups, video streaming, and voice calls all prefer speed over guaranteed delivery, because a retransmitted video frame arrives too late to matter. The security relevance: UDP's lack of handshake makes it easier to spoof, and UDP services are often overlooked in hardening because they are harder to scan reliably.
+What the handshake means in practice:
 
-**ICMP** is the diagnostic protocol behind `ping` (echo request / echo reply) and the "destination unreachable" and "time exceeded" messages. It is how `traceroute` works, by sending packets with deliberately short lifetimes and listening for the resulting errors. Note that many networks block ICMP, so "ping fails" does not reliably mean "host is down" — a lesson that matters in both troubleshooting and reconnaissance.
+| What you observe | What it proves |
+|---|---|
+| A completed handshake | The port is open and something is listening |
+| A `SYN` that gets no reply | The port is filtered, or the host is down |
+| A `SYN` answered by `RST` (reset) | The host is alive but nothing is listening on that port |
 
-#### Common ports, and HTTP
+That third row is precisely how Nmap distinguishes open, closed, and filtered ports. Once you know the handshake, Nmap's output stops being arbitrary.
 
-You should recognise these without looking them up; they appear in scans, logs, and firewall rules constantly:
+Teardown uses `FIN` or `RST`, either side can initiate, and TCP tracks state throughout. That state tracking is what lets it retransmit lost data and deliver in order.
+
+#### Why UDP drops all of that on purpose
+
+**UDP** is connectionless and unreliable: no handshake, no ordering, no retransmission.
+
+That sounds like a downgrade, and for some uses it is exactly right. DNS lookups, video streaming, and voice calls all prefer speed over guaranteed delivery, because a retransmitted video frame arrives too late to matter.
+
+The security relevance runs two ways:
+
+| Property | Security consequence |
+|---|---|
+| No handshake | Easier to spoof, because there is no session to establish |
+| Harder to scan reliably | UDP services are often overlooked in hardening |
+
+#### ICMP and the trap of “ping fails”
+
+**ICMP** is the diagnostic protocol behind `ping` (echo request / echo reply) and the “destination unreachable” and “time exceeded” messages.
+
+It is how `traceroute` works, by sending packets with deliberately short lifetimes and listening for the resulting errors.
+
+Note that many networks block ICMP, so “ping fails” does not reliably mean “host is down.” That lesson matters in both troubleshooting and reconnaissance.
+
+#### Common ports to recognise on sight
+
+You should recognise these without looking them up. They appear in scans, logs, and firewall rules constantly.
 
 | Port | Protocol | Notes |
 |---:|---|---|
@@ -185,21 +367,79 @@ You should recognise these without looking them up; they appear in scans, logs, 
 | 139 / 445 | SMB | Windows file sharing; 445 is heavily attacked |
 | 3389 | RDP | Windows remote desktop; a favourite ransomware entry point |
 
-Two of these deserve emphasis. **Port 445 (SMB)** and **port 3389 (RDP)** exposed to the internet are among the most common causes of ransomware incidents in the world, because both are legitimate services that attackers can authenticate to. Seeing either open on an internet-facing host is a finding, not a curiosity — and this is exactly the kind of judgement the phase wants you to be able to make from an Nmap result.
+Two of these deserve emphasis. **Port 445 (SMB)** and **port 3389 (RDP)** exposed to the internet are among the most common causes of ransomware incidents in the world, because both are legitimate services that attackers can authenticate to.
 
-**HTTP** is the protocol you already know from web development, so the security framing is what matters here. **Methods** (`GET`, `POST`, `PUT`, `DELETE`, `HEAD`, `OPTIONS`) describe intent; a server that accepts `DELETE` from anyone has an authorisation problem. **Status codes** group by first digit: `2xx` success, `3xx` redirect, `4xx` client error, `5xx` server error. In security work, `401` versus `403` distinguishes "not authenticated" from "authenticated but not permitted" — a real difference when you are testing access control. **Headers** carry metadata that matters: `Set-Cookie` (and whether it has `HttpOnly` and `Secure` flags), `Content-Security-Policy`, `Server` (which leaks software versions, useful to an attacker), and `Authorization`. **Cookies** are how sessions persist — which is why stealing a session cookie can bypass login entirely.
+Seeing either open on an internet-facing host is a finding, not a curiosity. This is exactly the kind of judgement the phase wants you to be able to make from an Nmap result.
 
-You can read all of this with `curl` (phase task 7's companion), and `curl -I https://example.com` printing real response headers is worth more than any description.
+#### HTTP through a security lens
 
-**TLS** is what makes HTTPS trustworthy. At beginner level, the useful mental model is: the server presents a **certificate** proving its identity, signed by a **certificate authority** the client already trusts; the two sides then negotiate keys and encrypt everything after. Two failure modes to know — an expired certificate is a configuration problem, while a **valid but wrong** certificate (right domain, so the browser is happy, but not the host you think you are talking to) is a potential interception. That distinction is why certificate inspection is a real investigative step rather than a formality.
+**HTTP** is the protocol you already know from web development, so the security framing is what matters here.
 
-Finally, **VPNs and proxies** both relay your traffic, for different reasons. A **VPN** encrypts a tunnel from your device to a server, hiding traffic from your local network and presenting a different source IP. A **proxy** forwards requests at the application layer; a **reverse proxy** does it on the server side, in front of the real application. Knowing which is which matters when analysing logs, because the address you see may be the relay rather than the origin — a recurring theme in incident investigation.
+| Element | What it is | Security relevance |
+|---|---|---|
+| **Methods** | `GET`, `POST`, `PUT`, `DELETE`, `HEAD`, `OPTIONS` — they describe intent | A server that accepts `DELETE` from anyone has an authorisation problem |
+| **Status codes** | Grouped by first digit: `2xx` success, `3xx` redirect, `4xx` client error, `5xx` server error | `401` versus `403` distinguishes “not authenticated” from “authenticated but not permitted” — a real difference when testing access control |
+| **Headers** | Metadata about the request or response | `Set-Cookie` (and whether it has `HttpOnly` and `Secure` flags), `Content-Security-Policy`, `Server` (leaks software versions, useful to an attacker), `Authorization` |
+| **Cookies** | How sessions persist across requests | Stealing a session cookie can bypass login entirely |
+
+You can read all of this with `curl`, which is phase task 7's companion. `curl -I https://example.com` printing real response headers is worth more than any description.
+
+#### Worked example: reading response headers
+
+You run:
+
+```bash
+curl -I https://example.com
+```
+
+And you get back something like:
+
+```text
+HTTP/2 200
+content-type: text/html; charset=UTF-8
+server: ECS (dcb/7F84)
+strict-transport-security: max-age=31536000
+```
+
+| Line | What it tells a defender |
+|---|---|
+| `HTTP/2 200` | The request succeeded, and the server speaks HTTP/2 |
+| `content-type: text/html; charset=UTF-8` | The body is HTML in UTF-8 — no MIME confusion expected here |
+| `server: ECS (dcb/7F84)` | The software is identifiable. That is a version-disclosure decision the owner made, and attackers read it the same way |
+| `strict-transport-security: max-age=31536000` | HSTS is on. Browsers will refuse plain HTTP to this host for a year, which blocks downgrade attacks |
+
+Notice what is *absent*. There is no `set-cookie` here, so this response establishes no session. On a login response, a missing `HttpOnly` or `Secure` flag on that cookie would be the finding.
+
+#### TLS: what makes HTTPS trustworthy
+
+**TLS** is what makes HTTPS trustworthy. At beginner level, the useful mental model is this: the server presents a **certificate** proving its identity, signed by a **certificate authority** the client already trusts. The two sides then negotiate keys and encrypt everything after.
+
+Two failure modes to know:
+
+| Failure mode | What it means |
+|---|---|
+| An expired certificate | A configuration problem — the owner forgot to renew |
+| A **valid but wrong** certificate | Right domain, so the browser is happy, but not the host you think you are talking to. This is a potential interception |
+
+That distinction is why certificate inspection is a real investigative step rather than a formality.
+
+#### VPNs and proxies: which is which
+
+Finally, **VPNs and proxies** both relay your traffic, for different reasons.
+
+| Mechanism | What it does | Where it operates |
+|---|---|---|
+| **VPN** | Encrypts a tunnel from your device to a server, hiding traffic from your local network and presenting a different source IP | Network layer |
+| **Proxy** | Forwards requests on the client's behalf | Application layer |
+| **Reverse proxy** | Does it on the server side, in front of the real application | Application layer |
+
+Knowing which is which matters when analysing logs. The address you see may be the relay rather than the origin — a recurring theme in incident investigation.
 
 ### Part 2 — Linux: the filesystem and permissions
 
 #### The filesystem hierarchy, and why it is organised this way
 
-Linux has no drive letters. Everything hangs off a single root, `/`, and the directories have conventional purposes:
+Linux has no drive letters. Everything hangs off a single root, `/`, and the directories have conventional purposes.
 
 ```text
 /       the root; everything is beneath this
@@ -214,9 +454,22 @@ Linux has no drive letters. Everything hangs off a single root, `/`, and the dir
 /proc   a virtual filesystem exposing kernel and process state
 ```
 
-For security work, three of these are where you will spend most of your time. **`/etc`** holds configuration — `/etc/passwd` (user accounts), `/etc/shadow` (password hashes, readable only by root), `/etc/ssh/sshd_config` (SSH server configuration), `/etc/hosts`. **`/var/log`** holds the logs you will investigate. **`/tmp`** is world-writable, which makes it a favourite location for attackers to stage files, because anything can be written there.
+#### Where you will actually spend your time
 
-Two properties of this layout are security-relevant in themselves. The separation of `/etc` from `/var` means configuration and data change at different rates and can be backed up and protected differently. And the convention that system binaries live in known paths (`/bin`, `/sbin`) is what allows integrity tools to detect tampering — if `/bin/ls` has changed, that is detectable only because its location is predictable.
+For security work, three of these matter most.
+
+| Directory | What is in it | Why it matters |
+|---|---|---|
+| **`/etc`** | `/etc/passwd` (user accounts), `/etc/shadow` (password hashes, readable only by root), `/etc/ssh/sshd_config` (SSH server configuration), `/etc/hosts` | Configuration is where misconfiguration is found |
+| **`/var/log`** | The logs you will investigate | The evidence lives here |
+| **`/tmp`** | Temporary files | World-writable, which makes it a favourite location for attackers to stage files, because anything can be written there |
+
+#### Two structural properties that are security-relevant
+
+| Property | Security consequence |
+|---|---|
+| `/etc` is separated from `/var` | Configuration and data change at different rates, and can be backed up and protected differently |
+| System binaries live in known paths (`/bin`, `/sbin`) | This is what allows integrity tools to detect tampering. If `/bin/ls` has changed, that is detectable only because its location is predictable |
 
 #### Permissions: the part that takes practice
 
@@ -230,13 +483,28 @@ Every file has an owner, a group, and three sets of permissions. Reading `-rwxr-
 └─────────────────── type:    - file, d directory, l symlink
 ```
 
-- **r** (read) — for a file, read its contents; for a directory, list its contents
-- **w** (write) — for a file, modify it; for a directory, create or delete files *inside* it
-- **x** (execute) — for a file, run it; for a directory, **enter** it
+#### The same permission letter means two things
 
-That last row is the one that trips people up, and it has a real security consequence: a directory with `w` but not `x` lets someone create files but not see what is there; a directory with `x` but not `r` lets someone access a file *if they already know its name* but not list the directory. Confusing these leads to permissions that look restrictive and are not.
+This is the single most important table in this section.
 
-**Numeric (octal) permissions** are the same information in shorthand. Each permission is a bit: read = 4, write = 2, execute = 1. Add them within each triad:
+| Letter | On a file | On a directory |
+|---|---|---|
+| **r** (read) | Read its contents | List its contents |
+| **w** (write) | Modify it | Create or delete files *inside* it |
+| **x** (execute) | Run it | **Enter** it |
+
+That last row is the one that trips people up, and it has a real security consequence.
+
+| Directory permission set | What it actually allows |
+|---|---|
+| `w` but not `x` | Someone can create files but not see what is there |
+| `x` but not `r` | Someone can access a file *if they already know its name*, but cannot list the directory |
+
+Confusing these leads to permissions that look restrictive and are not.
+
+#### Numeric (octal) permissions
+
+**Numeric permissions** are the same information in shorthand. Each permission is a bit: read = 4, write = 2, execute = 1. Add them within each triad.
 
 | Symbolic | Numeric | Meaning |
 |---|---|---|
@@ -246,13 +514,29 @@ That last row is the one that trips people up, and it has a real security conseq
 | `r--` | 4 | 4 |
 | `---` | 0 | nothing |
 
-So `chmod 755 script.sh` gives the owner full rights and everyone else read-and-execute. `chmod 600 id_rsa` gives only the owner read-and-write — which is exactly what SSH requires for a private key, and the reason you will see "permissions are too open" errors when you get it wrong. `chmod 644 file.txt` is the ordinary setting for a non-executable file.
+#### Worked example: three chmod commands you will actually type
+
+| Command | What it sets | Why you would use it |
+|---|---|---|
+| `chmod 755 script.sh` | Owner full rights; everyone else read-and-execute | A script other people need to run |
+| `chmod 600 id_rsa` | Only the owner may read and write | Exactly what SSH requires for a private key — and the reason you will see “permissions are too open” errors when you get it wrong |
+| `chmod 644 file.txt` | Owner reads and writes; everyone else reads | The ordinary setting for a non-executable file |
 
 Ownership changes with `chown user:group file`. Only root can give a file away to another user, which is a deliberate restriction.
 
-**`sudo`** lets a permitted user run a command as root. It is the mechanism behind **least privilege** (Phase 1): instead of logging in as root, you work as a normal user and escalate only for the specific command that needs it. Every `sudo` invocation is logged, which is why it also serves the **accounting** part of AAA. Reading `/etc/sudoers` shows who has been granted what — and a common finding in security reviews is that far too many users are in the sudo group.
+#### sudo, least privilege, and the accounting trail
 
-**The setuid bit** is worth knowing because it is a classic privilege-escalation vector. A file with setuid set runs with the *owner's* permissions rather than the caller's. If root owns a setuid binary and the binary can be made to run arbitrary commands, any user can become root. This is why enumeration of setuid binaries is a standard step in Linux privilege escalation.
+**`sudo`** lets a permitted user run a command as root.
+
+It is the mechanism behind **least privilege** (Phase 1): instead of logging in as root, you work as a normal user and escalate only for the specific command that needs it.
+
+Every `sudo` invocation is logged, which is why it also serves the **accounting** part of AAA. Reading `/etc/sudoers` shows who has been granted what — and a common finding in security reviews is that far too many users are in the sudo group.
+
+#### The setuid bit: a classic privilege-escalation vector
+
+**The setuid bit** is worth knowing because it is a classic privilege-escalation vector. A file with setuid set runs with the *owner's* permissions rather than the caller's.
+
+If root owns a setuid binary and the binary can be made to run arbitrary commands, any user can become root. This is why enumeration of setuid binaries is a standard step in Linux privilege escalation.
 
 #### Users, groups, and where they are recorded
 
@@ -264,7 +548,17 @@ sudo cat /etc/shadow   # password hashes — root only, and a key target for att
 groups                 # the groups I belong to
 ```
 
-Reading `/etc/passwd` carefully is a genuinely useful skill: the **UID** field tells you whether an account is a normal user (typically 1000+), a system account (below 1000), or root (0). Any account *other than root* with UID 0 is a backdoor, full stop. The final field — the **login shell** — is how service accounts are locked down: `/usr/sbin/nologin` means the account exists but cannot log in interactively. An account that should have `nologin` but has `/bin/bash` is a finding.
+#### Worked example: reading /etc/passwd like an analyst
+
+Reading `/etc/passwd` carefully is a genuinely useful skill. Two fields carry the security meaning.
+
+| Field | What to look for | What it means |
+|---|---|---|
+| **UID** | Typically 1000+ | A normal user |
+| **UID** | Below 1000 | A system account |
+| **UID** | 0 | Root. Any account *other than root* with UID 0 is a backdoor, full stop |
+| **Login shell** | `/usr/sbin/nologin` | The account exists but cannot log in interactively — how service accounts are locked down |
+| **Login shell** | `/bin/bash` on a service account | A finding. That account should have had `nologin` |
 
 The phase's task 2 asks you to create two users and test permissions. Do that literally: create them, put them in a group, create a file, and then try to read it as the other user. Being *denied* by the system is the moment permissions stop being abstract.
 
@@ -272,9 +566,20 @@ The phase's task 2 asks you to create two users and test permissions. Do that li
 
 #### SSH: the tool you will use daily
 
-**SSH** gives you an encrypted shell on a remote machine. The server is `sshd` (the SSH *daemon* — a daemon is a background service), configured in `/etc/ssh/sshd_config`, and it listens on port 22 by default.
+**SSH** gives you an encrypted shell on a remote machine. The server is `sshd` — the SSH *daemon*, where a daemon is a background service. It is configured in `/etc/ssh/sshd_config`, and it listens on port 22 by default.
 
-**Key-based authentication** replaces passwords with a cryptographic keypair: a **private key** that never leaves your machine and a **public key** you place on the server in `~/.ssh/authorized_keys`. The server challenges you to prove you hold the private key; it never sees it. This is stronger than a password because there is nothing to guess, phish, or reuse — and it is why production servers usually disable password authentication entirely.
+#### Why key-based authentication beats passwords
+
+**Key-based authentication** replaces passwords with a cryptographic keypair.
+
+| Part | Where it lives | What it does |
+|---|---|---|
+| **Private key** | Never leaves your machine | Proves who you are |
+| **Public key** | Placed on the server in `~/.ssh/authorized_keys` | The server uses it to challenge you |
+
+The server challenges you to prove you hold the private key. It never sees it.
+
+This is stronger than a password because there is nothing to guess, phish, or reuse. It is why production servers usually disable password authentication entirely.
 
 ```bash
 ssh-keygen -t ed25519 -C "lab key"        # generate a keypair
@@ -283,7 +588,16 @@ ssh user@192.168.1.50                     # connect
 scp file.txt user@192.168.1.50:/tmp/      # copy a file over SSH
 ```
 
-Two configuration items are worth recognising in `sshd_config` because they are the difference between a hardened and a vulnerable server: `PermitRootLogin` (should be `no` — direct root login is unnecessary when `sudo` exists) and `PasswordAuthentication` (should be `no` once keys work). Phase task 3 asks you to enable SSH in your VM and connect from your host; when you do, read the config file and see these settings for yourself.
+#### The two sshd_config settings that matter most
+
+Two configuration items are worth recognising because they are the difference between a hardened and a vulnerable server.
+
+| Setting | Should be | Why |
+|---|---|---|
+| `PermitRootLogin` | `no` | Direct root login is unnecessary when `sudo` exists |
+| `PasswordAuthentication` | `no` once keys work | Removes the entire guessing and phishing surface |
+
+Phase task 3 asks you to enable SSH in your VM and connect from your host. When you do, read the config file and see these settings for yourself.
 
 #### systemctl: managing services
 
@@ -298,11 +612,28 @@ sudo systemctl restart sshd
 sudo systemctl enable sshd
 ```
 
-A service that is `active (running)` but `disabled` will not survive a reboot — a distinction that causes real incidents. And the security relevance of this command is direct: **you cannot defend a host whose services you cannot enumerate.** Asking "what is running, and should it be?" is the first question of host hardening, and `systemctl list-units --type=service` answers it.
+#### Worked example: the status/state trap
+
+A service that is `active (running)` but `disabled` will not survive a reboot. That distinction causes real incidents, and it is worth seeing once.
+
+```text
+$ systemctl status sshd
+● sshd.service - OpenSSH Daemon
+     Loaded: loaded (/usr/lib/systemd/system/sshd.service; disabled; preset: disabled)
+     Active: active (running) since Mon 2025-03-10 09:14:22 UTC; 3h 2min ago
+```
+
+| Line | What it tells you |
+|---|---|
+| `disabled` in the Loaded line | It will **not** start at boot |
+| `active (running)` in the Active line | It is running right now, because someone started it manually |
+| The combination | Everything looks fine until the next reboot, and then SSH is gone |
+
+The security relevance of this command is direct: **you cannot defend a host whose services you cannot enumerate.** Asking “what is running, and should it be?” is the first question of host hardening, and `systemctl list-units --type=service` answers it.
 
 #### Logs: where the evidence lives
 
-Logs are the raw material of detection and investigation, and Linux puts them in predictable places:
+Logs are the raw material of detection and investigation, and Linux puts them in predictable places.
 
 | Path | What it records |
 |---|---|
@@ -321,9 +652,17 @@ journalctl -p err               # errors and above
 journalctl -f                   # follow live, like tail -f
 ```
 
-A workflow worth adopting now: open one terminal running `journalctl -u sshd -f` on your VM, and try to SSH in from your host with the wrong username and then the wrong password. Watch the failures appear. Then use `grep` to pull the failed attempts out of `/var/log/auth.log`. That single exercise teaches log reading, SSH, and grep simultaneously — and it is the same pattern a SOC analyst uses all day, at larger scale.
+#### Exercise: watch a failed login happen
 
-Recognising what **failed SSH attempts look like** matters specifically, because brute-force attempts against internet-facing SSH are constant background noise:
+A workflow worth adopting now. Open one terminal running `journalctl -u sshd -f` on your VM. Try to SSH in from your host with the wrong username, and then with the wrong password.
+
+Watch the failures appear. Then use `grep` to pull the failed attempts out of `/var/log/auth.log`.
+
+That single exercise teaches log reading, SSH, and grep simultaneously — and it is the same pattern a SOC analyst uses all day, at larger scale.
+
+#### What failed SSH attempts look like
+
+Recognising this pattern matters specifically, because brute-force attempts against internet-facing SSH are constant background noise.
 
 ```text
 Failed password for invalid user admin from 203.0.113.45 port 51234 ssh2
@@ -331,13 +670,20 @@ Failed password for root from 203.0.113.45 port 51236 ssh2
 Invalid user test from 203.0.113.45 port 51240 ssh2
 ```
 
-The pattern — one source address, many usernames, rapid repetition — is a brute-force or spraying attempt. Seeing the same *source* trying many *usernames* is spraying; many passwords against one account is brute force. You learned both terms in Phase 1; this is what they look like in production.
+#### Worked example: spraying versus brute force in a real log
 
-#### The networking and text-processing toolkit
+You learned both terms in Phase 1. Here is what they look like in production.
 
-These commands are the core of the phase, and every one of them is worth running at least once:
+| Pattern in the log | What it is | Why |
+|---|---|---|
+| One source address, many **usernames**, rapid repetition | Password spraying | The attacker is trying a few common passwords across many accounts |
+| One source address, one username, many **passwords** | Brute force | Every attempt is against the same account |
 
-**Networking:**
+In the sample above, the same source `203.0.113.45` tries `admin`, `root`, and `test`. That is the spraying shape. A brute-force attempt would show the same username over and over.
+
+#### The networking toolkit
+
+These commands are the core of the phase, and every one of them is worth running at least once.
 
 ```bash
 ip a                    # interfaces and their IP addresses
@@ -351,9 +697,38 @@ ping -c 4 8.8.8.8       # four ICMP echoes
 traceroute example.com  # the path packets take
 ```
 
-`ss -tulpn` is broken down as: **t** CP, **u** DP, **l** istening, **p** rocesses, **n** umeric (do not resolve names). It is the Linux equivalent of a port scan against your own machine, and phase task 4 asks you to run it and identify every listening service. What you are looking for: anything listening on `0.0.0.0` (all interfaces, so reachable from the network) that you did not expect. A service bound to `127.0.0.1` is local-only and much safer. That single distinction — `0.0.0.0` versus `127.0.0.1` — is one of the most common security findings on Linux hosts.
+#### Decoding ss -tulpn, flag by flag
 
-**Text processing:**
+`ss -tulpn` is the Linux equivalent of a port scan against your own machine. Phase task 4 asks you to run it and identify every listening service.
+
+| Flag | Meaning |
+|---|---|
+| **t** | TCP |
+| **u** | UDP |
+| **l** | Listening sockets only |
+| **p** | Show the owning processes |
+| **n** | Numeric — do not resolve names |
+
+#### Worked example: reading ss output for a finding
+
+You run `sudo ss -tulpn` and see something like:
+
+```text
+Netid State  Local Address:Port   Process
+tcp   LISTEN 127.0.0.1:631        cupsd
+tcp   LISTEN 0.0.0.0:22           sshd
+tcp   LISTEN 0.0.0.0:3306         mysqld
+```
+
+| Line | Reading it |
+|---|---|
+| `127.0.0.1:631 cupsd` | Printing service. Bound to localhost only, so it is not reachable from the network. Low concern |
+| `0.0.0.0:22 sshd` | SSH is reachable from the network. Expected, but it should be key-only |
+| `0.0.0.0:3306 mysqld` | **The finding.** A database listening on all interfaces is reachable by anyone who can route to this host |
+
+That single distinction — `0.0.0.0` versus `127.0.0.1` — is one of the most common security findings on Linux hosts. A service bound to `127.0.0.1` is local-only and much safer.
+
+#### Text processing: the second half of the toolkit
 
 ```bash
 grep "Failed password" /var/log/auth.log      # find matching lines
@@ -366,13 +741,28 @@ command > file.txt                            # redirect output to a file
 command >> file.txt                           # append instead
 ```
 
-The pipe (`|`) is the concept to internalise: it takes one command's output and makes it the next command's input, letting you build small tools from small tools. This works because Unix programs follow a convention — read text in, write text out — and that convention is why a security analyst can answer "how many distinct IPs failed to log in today?" with one line:
+#### The pipe, and one real investigation query
+
+The pipe (`|`) is the concept to internalise. It takes one command's output and makes it the next command's input, letting you build small tools from small tools.
+
+This works because Unix programs follow a convention — read text in, write text out. That convention is why a security analyst can answer “how many distinct IPs failed to log in today?” with one line:
 
 ```bash
 grep "Failed password" /var/log/auth.log | awk '{print $11}' | sort | uniq -c | sort -rn | head
 ```
 
-Read that left to right: find failed passwords, extract the source IP column, sort, count unique, sort by count descending, show the top ten. That is a real investigation query, built from five small pieces, and it is the shape of most log analysis you will do. **`awk '{print $N}'` extracts the Nth whitespace-separated field** — that is the 90% of awk you need at this stage.
+Read that left to right.
+
+| Stage | What it does |
+|---|---|
+| `grep "Failed password" /var/log/auth.log` | Find the failed-password lines |
+| `awk '{print $11}'` | Extract the source IP column |
+| `sort` | Order them so identical addresses are adjacent |
+| `uniq -c` | Collapse duplicates and count each |
+| `sort -rn` | Sort by count, descending |
+| `head` | Show the top ten |
+
+That is a real investigation query, built from five small pieces, and it is the shape of most log analysis you will do. **`awk '{print $N}'` extracts the Nth whitespace-separated field** — that is the 90% of awk you need at this stage.
 
 ### Part 4 — Seeing it happen: packet capture and scanning
 
