@@ -367,7 +367,196 @@ Interviewers probe, because a memorised answer has no depth beneath it. Prepare 
 - "What did you learn?" — The weakest possible answer is a platitude. A specific behaviour change is the strongest.
 - "What was your actual role, versus the team's?" — The implicit "we" check. Be ready to draw the line precisely.
 
-### Part 7 — Key takeaways
+### Part 7 — Model answers you can compare against
+
+Parts 1 to 6 taught the moves. Part 8 gave you reps. This part gives you the thing that is missing when you study alone: **something to check your work against**.
+
+Soft skills are the hardest thing to self-teach, because there is no compiler to tell you that you got it wrong. Below is a weak attempt and a strong attempt for each of the situations this phase covers. Write yours first, then compare. Do not read the strong version first — the gap between your attempt and it is the lesson.
+
+#### Model 1 — The opening reply to a vague ticket
+
+Ticket: *"My computer is slow. Please fix."*
+
+**Weak:**
+
+> Hi, can you give me more details? What do you mean by slow?
+
+Three problems. It asks the user to do the diagnostic work, gives no acknowledgement, and offers no time commitment. The user now has to think about what "slow" means, which they cannot do.
+
+**Strong:**
+
+> Hi Maria — thanks for flagging this. Slow machines are usually fixable, so let's get it sorted.
+>
+> Three quick questions so I can start looking:
+> 1. Is it slow all the time, or only with certain programs?
+> 2. Roughly when did it start — today, or has it been getting worse over weeks?
+> 3. Is anyone else on your team seeing the same thing?
+>
+> I will pick this up as soon as I hear back, and I will update you either way by end of day.
+
+**Why it works:** acknowledges first, asks questions the user can actually answer, explains why each question matters, and commits to an update even if there is no progress. "I will update you either way" is the sentence that stops people chasing you.
+
+#### Model 2 — The status update with no ETA
+
+The hardest update to write, because "I do not know when" has to be delivered without losing confidence.
+
+**Weak:**
+
+> Still working on it. Will let you know.
+
+That is not an update. It answers none of the four questions a user has.
+
+**Strong:**
+
+> **Update on your printing issue — still open, no fix yet.**
+>
+> **What I know:** the printer is dropping off the network after about ten minutes, and it affects three people on your floor.
+> **What I am doing:** I have a replacement unit arriving tomorrow morning and will swap it before 10am.
+> **What you need to do:** nothing right now. If you need to print urgently today, the printer by reception is working.
+> **Escalated?** Not yet. If the swap does not fix it, I will escalate to the network team tomorrow.
+>
+> Next update: tomorrow by 11am, whether or not it is fixed.
+
+**Why it works:** it answers all four questions — is it known, when, what do I do, has it escalated — and gives a workaround. The workaround is what turns a frustrating update into a usable one.
+
+#### Model 3 — The "I don't know yet"
+
+**Weak:**
+
+> I am not sure, I will look into it.
+
+**Strong:**
+
+> I do not know yet, and I would rather tell you that than guess and be wrong.
+>
+> Here is what I do know: the error is coming from the mail server, not your laptop, which means it is probably affecting other people too.
+> Here is my plan: I am checking the server logs now, and I have asked the mail admin whether anything changed overnight.
+> I will come back to you within the hour with either an answer or a clearer picture.
+
+**Why it works:** naming what you *do* know demonstrates that your not-knowing is informed rather than helpless. The specific time commitment is what makes it credible.
+
+#### Model 4 — The "I broke something" note
+
+Send this **immediately**, in active voice, under 100 words.
+
+**Weak:**
+
+> It appears that some issues may have been experienced with printing this morning due to a change that was made. This is being looked into.
+
+Passive voice throughout. Nobody did anything, nothing is being owned, and the reader has to decode it.
+
+**Strong:**
+
+> I broke printing this morning and I am fixing it now.
+>
+> At 09:15 I applied a driver update to the print server. It was the wrong version for two of our printers, and they have been offline since.
+>
+> I rolled the change back at 09:40 and both are printing again. If yours is still failing, restart it once and tell me.
+>
+> I am sorry for the disruption. I will test driver updates on one printer before rolling them out, starting today.
+
+**Why it works:** active voice, the cause is named, the fix is already done, the times are exact, and it ends with a changed process — which is what turns a mistake into evidence of competence rather than a mark against you.
+
+#### Model 5 — The refusal that keeps the relationship
+
+Request: a user wants software installed that is not approved.
+
+**Weak:**
+
+> That is not my department, you will need to raise a request.
+
+The user now has to find out which department, and their problem has been moved rather than answered.
+
+**Strong:**
+
+> I can't install that one, and I want to be straight with you about why: it is not on our approved list, so I am not able to put it on a company machine.
+>
+> Here is what I can do instead. If there is a business reason you need it, I will help you put the request together and send it to the person who can approve it — that usually takes a couple of days.
+>
+> If you just need to do the task now, tell me what you are trying to achieve and I will find you an approved tool that does it.
+
+**Why it works:** fast, the reason is given once without over-explaining, the decision is separated from the person, and two real routes are offered. It never invents a policy it cannot back up.
+
+#### Model 6 — Same problem, two readers
+
+This is the exercise the whole phase is really about.
+
+**To a technical colleague:**
+
+> The machine is failing to complete the DHCP handshake on the corporate VLAN. It gets an APIPA address, so it is not reaching the scope. I have ruled out the cable and the switch port. Suspect the scope is exhausted or the reservation is stale — checking the lease table next.
+
+**To the user:**
+
+> Your laptop is not being given an address on the network, which is why nothing loads. I have checked the cable and the wall port, so it is not a physical problem. I am looking at the network side now and will update you within the hour.
+
+**The four differences to notice:**
+
+| | Technical colleague | User |
+|---|---|---|
+| Vocabulary | DHCP, VLAN, APIPA, scope | "not being given an address" |
+| Ruled out | Named specifically | Stated as a conclusion, with no jargon |
+| Uncertainty | Suspects, will check | "I am looking at it now" |
+| Next step | Checking the lease table | An update within the hour |
+
+The facts are identical. Only the packaging changed. **Being able to do this on demand, without losing accuracy, is the skill.**
+
+#### Model 7 — The no-degree answer, and the follow-up
+
+**Weak:**
+
+> I do not have a degree, but I have been teaching myself IT and I am a fast learner.
+
+"But" deletes everything before it, and "fast learner" is a claim with no evidence.
+
+**Strong:**
+
+> I do not have a degree. What I have is a year of self-directed study and a portfolio you can check.
+>
+> I built a Wazuh lab on my own hardware and wrote up three investigations from it, including one where my first detection rule generated 340 false positives in an hour and I had to work out why. That write-up is in the portfolio I sent you.
+>
+> What that shows is not that I know everything. It is that when I do not know something, I can find it and prove I found it.
+
+**The follow-up you will get:** *"But why should we take you over a graduate?"*
+
+**Weak answer:** "I work harder than most graduates."
+
+**Strong answer:**
+
+> A graduate has two years of theory I do not have, and I would not pretend otherwise. What I have that a fresh graduate often does not is a habit of documenting my work and showing my reasoning, because nobody was grading me — I had to be able to check myself.
+>
+> In this role, the first six months are learning your environment anyway. What matters is whether I can be trusted to investigate something and report it accurately. The portfolio is my evidence for that, and I would rather you judge me on it than on my answer right now.
+
+**Why it works:** it concedes the real gap instead of denying it, redirects to something true and checkable, and reframes what the role actually needs in the first six months. That reframe is honest — it is also the strongest thing you can say.
+
+#### How to use this section
+
+Do not read these and nod. That produces recognition, not skill.
+
+| Step | What to do |
+|---|---|
+| 1 | Cover the model answers. Read only the scenario |
+| 2 | Write your own version. Do not aim for perfect — aim for done |
+| 3 | Uncover the model and compare **sentence by sentence**, not overall |
+| 4 | Name the specific difference: was it the acknowledgement, a missing time commitment, a hedge, an invented policy |
+| 5 | Rewrite yours once, using what you found |
+| 6 | Say it out loud. Written answers and spoken answers are different skills |
+
+**Repeat at least three of these a week apart.** The first pass teaches you the structure. The second pass is where it starts to become automatic.
+
+#### The self-check that matters
+
+You cannot ask a teacher whether your answer was good, so use these four questions instead:
+
+| Question | If the answer is no |
+|---|---|
+| Did I acknowledge before I asked or explained? | You will get less information than you need |
+| Did I commit to a specific time for the next contact? | The user will chase you, and you will lose control of the ticket |
+| Did I separate what I know from what I am guessing? | You are about to be wrong in public |
+| If I refused or said no, did I offer a route that exists? | You have moved the problem, not answered it |
+
+Four questions, and they work on almost every piece of support writing you will produce.
+
+### Key takeaways
 
 - **Acknowledge before you diagnose.** The user needs to know they were heard before they can answer your questions.
 - **"I'll come back to you either way"** is the sentence that prevents users from chasing you.
@@ -388,7 +577,7 @@ Interviewers probe, because a memorised answer has no depth beneath it. Prepare 
 - **Your STAR stories must survive follow-ups.** If "what would you do differently?" collapses the story, you do not own it yet.
 - **The strongest story ending is a process change**, because it shows you improved the system rather than only the ticket.
 
-### Part 8 — Practice this next
+### Practice this next
 
 The tasks below turn this into reps. Draft your five STAR stories and tell each one out loud to a real person, timing it. Write the same explanation of a technical problem twice — once for a technical colleague, once for a non-technical user — and compare them. Then take a real ticket you have written and rewrite its closure note for a nervous user who is afraid they broke something, because that is the writing you will do most often in your first job.
 

@@ -726,7 +726,800 @@ Access tickets are where good helpdesk habits prevent real breaches. Three rules
 
 **Reasoning to take away:** A request to grant access should trigger a check of the *current* state before any change. In this ticket, doing what was asked would have changed nothing, closed the ticket, and left the user still blocked — while silently adding redundant permissions. The same discipline protects you when the request is malicious: if you always verify approver and current state, an attacker's request fails at the same gate an honest user's succeeds through.
 
-### Part 8 — Key takeaways
+### Part 10 — Run the checks yourself, on your own machine
+
+Parts 1 to 7 taught you what to do. This part makes you do it. Every command below is **read-only and safe on a laptop you own**, and each one is followed by what healthy output looks like.
+
+If you have the Ubuntu VM from Phase 2, the Linux half works there. If you do not, install one first — or read the Linux rows and come back to them. No command here needs a second machine, an account, or a peso.
+
+#### The rule for all of these
+
+Run one command, read the output, and write one sentence describing what you see. The sentence is the exercise.
+
+Running commands without interpreting them teaches you nothing, and it is the habit that separates a person who has watched a tutorial from a person who can work a ticket.
+
+#### The command table
+
+| # | Platform | Command | What it answers |
+|---|---|---|---|
+| 1 | Windows | `systeminfo` | OS build, RAM, uptime, install date |
+| 2 | Windows | `ipconfig /all` | IP, mask, gateway, DNS, DHCP, MAC |
+| 3 | Windows | `ping <gateway>` then `ping 8.8.8.8` then `ping google.com` | The DNS split test |
+| 4 | Windows | `nslookup google.com` and `nslookup google.com 8.8.8.8` | Is my own resolver working? |
+| 5 | Windows | `net use` | Mapped drives and their state |
+| 6 | Windows | `route print -4` | The default route, and any VPN route |
+| 7 | Windows | `whoami` then `whoami /groups` | My exact identity and group list |
+| 8 | Windows | `Get-Volume` | Free space per drive |
+| 9 | PowerShell | `Get-WinEvent -FilterHashtable @{LogName='System'; Level=1,2} -MaxEvents 10` | The ten most recent errors |
+| 10 | PowerShell | `Get-Service` filtered on Automatic and Stopped | A fault nobody has reported |
+| 11 | Linux | `df -h` | Filesystem usage in human units |
+| 12 | Linux | `lsblk` | Disks and partitions, as a tree |
+| 13 | Linux | `journalctl -p err -b --no-pager` | Errors since this boot |
+| 14 | Linux | `ss -tulpn` | What is listening, and on which port |
+| 15 | Linux | `ip a` and `ip route` | Addresses and the default gateway |
+
+Run each command now, before reading the sections that follow. Then compare your real output against the healthy examples below.
+
+#### Commands 1 to 4 — the network set
+
+```powershell
+systeminfo | Select-String "OS Name","OS Version","System Type","Total Physical Memory"
+ipconfig /all
+ping 192.168.1.1
+ping 8.8.8.8
+ping google.com
+nslookup google.com
+nslookup google.com 8.8.8.8
+```
+
+Healthy `ipconfig /all` output, trimmed to the lines that matter:
+
+```text
+Wireless LAN adapter Wi-Fi:
+
+   Physical Address. . . . . . . . . : A4-5E-60-1C-22-0B
+   DHCP Enabled. . . . . . . . . . . : Yes
+   IPv4 Address. . . . . . . . . . . : 192.168.1.22(Preferred)
+   Subnet Mask . . . . . . . . . . . : 255.255.255.0
+   Default Gateway . . . . . . . . . : 192.168.1.1
+   DHCP Server . . . . . . . . . . . : 192.168.1.1
+   DNS Servers . . . . . . . . . . . : 192.168.1.1
+```
+
+Five things are healthy here, and you should be able to name all five. A real IPv4 address that is not `169.254.x.x`. A subnet mask that contains the address. A default gateway inside the same subnet. A DHCP server that answered. And a DNS server that is not `127.0.0.1` unless something on your machine really is running a resolver.
+
+**What is not healthy:** `169.254.x.x` means DHCP failed. No gateway means nothing off your own subnet is reachable. A gateway outside your own subnet is unreachable by definition, and is arithmetic rather than a fault.
+
+Now the split test. Replace `192.168.1.1` with whatever your own `Default Gateway` line says:
+
+```text
+Reply from 192.168.1.1: bytes=32 time=2ms TTL=64        <- the LAN is healthy
+Reply from 8.8.8.8: bytes=32 time=24ms TTL=115          <- routing and internet work
+Reply from 142.250.4.101: bytes=32 time=25ms TTL=115    <- the name resolved
+```
+
+The third line is the one to read carefully. **If the reply shows an IP address rather than `google.com`, name resolution worked** — `ping` prints the name only when the forward lookup succeeded. That is the whole test, and it costs three seconds.
+
+If `8.8.8.8` answers and `google.com` fails, you have DNS failure and nothing else. Confirm it with a comparison of two servers:
+
+```text
+nslookup google.com              -> Server failed  (your configured resolver)
+nslookup google.com 8.8.8.8      -> 142.250.4.101  (a working resolver)
+```
+
+That pair is the single most useful comparison in entry-level support. Practise it until you can explain what each result means without notes.
+
+#### Commands 5 to 8 — identity, drives, and mapped shares
+
+```powershell
+net use
+route print -4
+whoami
+whoami /groups
+Get-Volume | Where-Object DriveLetter |
+  Select-Object DriveLetter, FileSystemLabel,
+  @{N='FreePct';E={[math]::Round(100*$_.SizeRemaining/$_.Size,1)}}
+```
+
+`net use` on a personal laptop usually prints `There are no entries in the list.` That is a **clean result, not a failure** — it means no drive letters are mapped to network shares, which is normal at home and unusual on a corporate machine.
+
+`route print -4` should show exactly one row beginning `0.0.0.0`. That row is your default gateway. **Two or more default routes is the fingerprint of a VPN client**, and it explains "my internet broke when I connected the VPN" better than any other single observation.
+
+`whoami /groups` is the command that would have saved the technician in Part 7's third ticket an hour. It lists every group your session token actually holds right now — which is not the same as the groups your account is a member of. A group added after you signed in does not appear until you sign out and back in.
+
+```text
+GROUP INFORMATION
+-----------------
+BUILTIN\Administrators    Alias    S-1-5-32-544  Enabled by default, Enabled group, Group owner
+BUILTIN\Users             Alias    S-1-5-32-545  Mandatory group, Enabled by default, Enabled group
+```
+
+Reading it: the `Mandatory group` flag means the group cannot be removed from your token, and an entry marked **`Group used for deny only`** means it is present but grants nothing. That distinction is the difference between "you are an administrator" and "you could become one".
+
+For `Get-Volume`, healthy is above about 15 % free. Below 10 % on the system drive, Windows slows down measurably: updates fail, the page file stops growing, and temp files cannot be written.
+
+#### Commands 9 and 10 — the log and the service
+
+```powershell
+Get-WinEvent -FilterHashtable @{LogName='System'; Level=1,2} -MaxEvents 10 |
+  Select-Object TimeCreated, LevelDisplayName, ProviderName, Id
+```
+
+```text
+TimeCreated          LevelDisplayName ProviderName             Id
+-----------          ---------------- ------------             --
+2/14/2025 9:41:02 AM Error            Service Control Manager  7000
+```
+
+**Every healthy machine has errors in its log.** Ten errors is not a fault; it is a Tuesday. The question is never "are there errors" but "is this one repeating, and is it recent".
+
+```powershell
+Get-Service | Where-Object { $_.StartType -eq 'Automatic' -and $_.Status -eq 'Stopped' } |
+  Select-Object Name, DisplayName, StartType
+```
+
+A **short or empty list is the healthy result.** Each entry is a service the machine was told to run automatically and is not running. Look up what each one does before touching anything, and ask whether it is history or a live fault.
+
+#### Commands 11 to 15 — the same questions on Linux
+
+| Windows command | Linux equivalent | The question |
+|---|---|---|
+| `Get-Volume` | `df -h` | How full is each filesystem? |
+| Disk Management | `lsblk` | What disks and partitions exist? |
+| Event Viewer | `journalctl -p err -b` | What has gone wrong since boot? |
+| `netstat -ano` | `ss -tulpn` | What is listening on which port? |
+| `ipconfig /all` | `ip a` plus `ip route` | What is my address and my gateway? |
+
+```bash
+df -h
+lsblk
+journalctl -p err -b --no-pager | tail -30
+ss -tulpn
+ip -brief address
+ip route
+```
+
+Reading `lsblk` as a tree:
+
+```text
+NAME   MAJ:MIN RM  SIZE RO TYPE MOUNTPOINTS
+sda      8:0    0   25G  0 disk
+└─sda3   8:3    0 24.5G  0 part /
+```
+
+Read it by indentation. `sda` is a physical disk; `sda3` is a partition on it; the `└─` prefix is the tree drawing, and `/` in the `MOUNTPOINTS` column is the filesystem you are actually using.
+
+Reading `ss -tulpn`:
+
+```text
+Netid State  Local Address:Port  Process
+udp   UNCONN 127.0.0.53%lo:53      users:(("systemd-resolve",pid=712,fd=13))
+tcp   LISTEN 0.0.0.0:22            users:(("sshd",pid=844,fd=3))
+```
+
+The columns are protocol, state, local address and port, then the process. `127.0.0.53%lo:53` is Ubuntu's local DNS stub listening only on loopback — normal. `0.0.0.0:22` is SSH listening on **every** interface, which is normal on a server and worth questioning on a laptop. This is exactly the check that proved the networking ticket in Phase 3: nothing listening on port 53 while the adapter was pointed at `127.0.0.1`.
+
+#### Answer key — write your sentence first, then read
+
+Cover this table, run the five commands above on your own machine, write one sentence for each, then uncover and compare.
+
+| Check | A good sentence | What a weak answer looks like |
+|---|---|---|
+| `ipconfig /all` | "Wi-Fi has 192.168.1.22/24 with gateway 192.168.1.1 and DNS 192.168.1.1 — a complete, consistent configuration." | "It shows my IP address." |
+| `ping 8.8.8.8` then `google.com` | "Both answered and the name resolved to 142.250.4.101, so connectivity and DNS are both healthy." | "The internet works." |
+| `whoami /groups` | "My token holds Users and Administrators; no deny-only entries, so I am a full local administrator." | "It lists my groups." |
+| `Get-Service` filter | "Empty list — no service set to Automatic is stopped, so there is no silent background fault on this machine." | "No services found." |
+| `journalctl -p err -b` | "Four errors since boot, all from the same unit repeating — that repetition is the signal, not the count." | "There are some errors." |
+
+The difference in every row is the same: the strong version states a **conclusion with its evidence**, and the weak version restates the output. That difference is the entire skill you are being hired for.
+
+#### Exercise 10A — Build your own healthy baseline
+
+Do this while your machine is working, not after it breaks. It takes about twenty minutes and it becomes a permanent reference.
+
+1. Run commands 1, 2, 5, 6, 7, 8, and 9 from the table, in that order.
+2. Paste each result into a file under a heading naming the command.
+3. Under each paste, write **two sentences**: what the output shows, and what would look different if it were broken.
+4. Save it as `portfolio/it/04-healthy-baseline.md`.
+
+**Model entry, so you know what "good" looks like:**
+
+> **`route print -4` — default route**
+> Exactly one `0.0.0.0` row, gateway `192.168.1.1`, interface `192.168.1.22`. This says all traffic that is not local leaves through the home router.
+> If it were broken I would expect either no `0.0.0.0` row at all (nothing leaves the subnet) or two of them (a VPN has taken over the default route, which is the classic "VPN connected and now nothing loads").
+
+The second sentence is the part that matters. Anyone can paste output; describing the failure you would recognise beside it is diagnostic skill, and it is what a hiring manager hears when you explain this file in an interview.
+
+### Part 11 — Six tickets, worked and answered
+
+Part 7 gave you three full tickets to read. This part gives you six shorter ones to **work**, each with a weak reply, a strong reply, and the reasoning that separates them.
+
+**How to use them.** Cover everything below the user's words. Write your triage questions, your first three checks, and your reply. Then uncover and compare. An exercise you cannot check yourself is not an exercise, so every ticket here has a model answer.
+
+#### The triage sequence you run on every ticket
+
+This is the ordered procedure from Part 2, written as something you actually execute rather than something you agree with. Run it in this order every time, even when the answer feels obvious.
+
+| Window | Action | Why it is in this position |
+|---|---|---|
+| 0–30 seconds | Verify identity, then read the ticket twice | Everything after this depends on knowing who you are helping |
+| 30–60 seconds | Ask for the exact error text and the last time it worked | One sentence usually eliminates half the possible causes |
+| Minute 1–2 | Ask who else and what else is affected | Scope splits the search before you spend effort |
+| Minute 2–4 | Compare against something that works | A working reference turns a guess into a measurement |
+| Minute 4–5 | Make one change, then retest | Two changes at once means you never learn which one fixed it |
+| Minute 5+ | Either set an update time, or escalate with what you have | Silence and hope are both failures |
+
+**Escalate immediately, without the first five minutes, when:** credentials may be compromised, data may be lost or exposed, the fault crosses a team boundary you cannot cross, or a fix would require a change you are not authorised to make.
+
+**Do not escalate merely because the ticket is hard.** Five minutes of evidence gathering turns a bad escalation into one the receiving engineer can act on.
+
+#### Ticket 4 — "My laptop takes ten minutes to become usable"
+
+> "Every morning I turn it on and it just sits there. Fans loud, spinning circle, and I can't do anything for ten minutes. It's fine after that. IT gave me this laptop in March."
+
+**Your questions.** Is the ten minutes every boot or only the first one of the day? Does it happen on battery as well as on mains? Has anything new been installed recently?
+
+**What you check, and where.**
+
+| Step | Command or path | What you are looking for |
+|---|---|---|
+| 1 | Task Manager, Startup tab | How many apps launch at sign-in |
+| 2 | Task Manager, Performance tab | Disk at 100 % with CPU low |
+| 3 | `Get-Service` filter from Part 10 | A service retrying and failing at boot |
+| 4 | `Get-WinEvent -FilterHashtable @{LogName='System'; Level=1,2}` | Repeated errors with boot-time timestamps |
+| 5 | `Get-Volume` | System drive below 10 % free |
+
+Disk at 100 % with CPU near 8 % is the signature of a slow or failing drive, not of a slow processor. A drive below 10 % free produces the same symptom through a different route.
+
+**Weak reply:**
+
+> Hi. Your laptop is slow because of too many startup apps. Please disable them in Task Manager. Let me know if it is better.
+
+Why it fails: it names a cause it did not verify, gives no steps a non-technical user can follow, sets no expectation, and asks for a vague judgement — "is it better" — rather than a measurement.
+
+**Strong reply:**
+
+> Hi Maria,
+>
+> Thanks for the detail — ten minutes every morning, then fine, is a recognisable pattern and I can work with it.
+>
+> Here is what I found: your laptop has 14 programs set to start automatically at sign-in, and your C: drive has 4 % free. Both of those slow the boot, and the low disk space also explains why it feels sluggish for a while afterwards.
+>
+> What I have done: removed three unused programs from the startup list and cleared 11 GB of temporary files.
+>
+> What I need you to do: restart the machine now, and time it with your phone — from pressing the power button to the desktop being usable. Reply with the number in minutes. If it is still over about three minutes, I will look at the drive's health next, because that is the other common cause and I would rather check it than replace the laptop on a guess.
+>
+> I will check back with you tomorrow morning either way.
+>
+> Thanks,
+> Alex
+
+**Why the strong one works.** It confirms the pattern rather than restating it. It names two findings with evidence. It gives one measurable instruction — "reply with the number in minutes" — instead of asking for a feeling. It pre-announces the next step if the fix fails, which stops the user worrying. And it commits to a follow-up time.
+
+The weak reply took thirty seconds and will generate a second ticket. The strong one took four minutes and will not.
+
+#### Ticket 5 — "I'm locked out and I have a meeting in ten minutes"
+
+> "I typed my password wrong a few times and now it says my account is locked. I have a client call in ten minutes. Please unlock it."
+
+**Your questions.** Is this the first time today, or has it happened more than once this week? Have you changed your password recently? Are you signed in anywhere else — a phone, a tablet, a second laptop?
+
+**Why the third question is the important one.** A single lockout is a typo. A **repeating** lockout has a cause: a device somewhere still using the old password. A phone with stale mail settings, a mapped drive, a scheduled task, a saved credential in a browser. If you unlock without asking, you will unlock again tomorrow.
+
+The lockout threshold also matters, and it is usually lower than people assume — commonly five failed attempts within thirty minutes. That is why "I only typed it wrong twice" and a locked account can both be true.
+
+**What you check.**
+
+```powershell
+# Is the account locked, and when did it last work?
+net user mdelacruz /domain
+
+# What is failing, and from where? (needs rights you may not have)
+Get-WinEvent -FilterHashtable @{LogName='Security'; Id=4740} -MaxEvents 5 |
+  Select-Object TimeCreated, Message
+```
+
+Event **4740** is "a user account was locked out", and it names the **caller computer** — the machine that is still sending the bad password. That single field is the whole diagnosis when it is available. If you cannot read the Security log, that is itself the escalation: the receiving engineer needs exactly this event.
+
+**Weak reply:**
+
+> Unlocked. Try again.
+
+Three words, no verification, no cause, and it guarantees the same ticket tomorrow. It also skips identity verification on the one ticket type attackers use most.
+
+**Strong reply:**
+
+> Hi Juan,
+>
+> I have unlocked your account — you should be able to sign in now.
+>
+> One thing I need to ask, because it will decide whether this happens again: has your password changed in the last few weeks, and do you have email set up on your phone or a tablet?
+>
+> The reason I ask is that this is the second lockout on your account this week. A device still holding your old password will keep retrying it in the background, and each retry counts as a failed attempt — so the lockout comes back even when you type everything correctly. If that is what is happening, unlocking is only a temporary fix.
+>
+> If you do have mail on a phone, the fastest test is to open the mail app and see whether it asks for your password. Reply here and I will walk you through it.
+>
+> Your meeting should be fine now — sign in and let me know if it does not work in the next five minutes and I will call you.
+>
+> Thanks,
+> Alex
+
+**Why the strong one works.** It solves the emergency first, in the first line, which is the right order for a user with ten minutes. It then asks a diagnostic question the user can actually answer. It explains *why* the question matters in plain language — background retries counting as failed attempts — which turns the user into a partner instead of a suspect. And it offers a fast path if the fix did not work.
+
+Note what it does **not** do: it does not reset the password. An unlock is reversible and low-risk; a password reset on an unverified caller is the attack described in Part 6. If identity cannot be verified, the answer is "not yet, and here is how we get there".
+
+#### Ticket 6 — "The printer works for him but not for me"
+
+> "The shared printer in the office works fine for everyone else but my laptop always says it is offline. I have reinstalled it twice."
+
+**Your questions.** Does the printer print a test page from its own panel? Do you see the printer in the list, or is it missing entirely? Did you ever print from this laptop successfully, or has it never worked? Is there another printer on your machine that does work?
+
+**Why "reinstalled twice" is a clue.** Reinstalling a driver is the most common wasted hour in support. If the others can print, the driver is almost never the fault — the fault is in the path between this machine and the device, and the path is address, name, queue, or permissions.
+
+**What you check, bottom to top.**
+
+| Layer | Check | Toolkit |
+|---|---|---|
+| Power and network | Is the printer awake and on the network? | The printer's own panel |
+| Reachability | Can you ping it from the failing laptop? | `ping <printer-ip>` |
+| Port | Is the print port answering? | `Test-NetConnection <printer-ip> -Port 9100` |
+| Queue | Is a job stuck on the local spooler? | Settings, Printers, see the queue |
+| Driver and port | Is the port pointing at the right address? | Printer properties, Ports tab |
+| Permissions | Can this user print to this queue? | Who else uses it successfully? |
+
+**Compare against a working machine — that is the whole method.** On a laptop that can print, open **Printer properties → Ports** and read the address. If it says `192.168.1.50` and the failing laptop's port says `192.168.1.51`, you have found it without touching a driver. A printer that changed address after a power cut produces exactly this ticket.
+
+**Weak reply:**
+
+> Please uninstall the printer and add it again, then restart.
+
+The user has already done this twice. Telling them to do it a third time tells them you did not read the ticket, and it is how a support desk loses a user's confidence.
+
+**Strong reply:**
+
+> Hi Sam,
+>
+> Thanks — and I noticed you have already reinstalled it twice, so I will not ask you to do that again. Reinstalling rarely helps when everyone else can print, because it means the printer itself is fine.
+>
+> I have looked at your laptop's printer settings and the port is pointing at 192.168.1.51. The printer is actually at 192.168.1.50, and the address changed when the printer was power-cycled last week. Your laptop is sending jobs to an address where nothing is listening, which is why it reports offline.
+>
+> I have changed your port to the correct address and sent a test page — could you check the printer tray and tell me whether it came out?
+>
+> This will happen again to anyone whose printer was set up by address. I am asking our network team to reserve a fixed address for that printer so it stops moving, and I have noted it on this ticket.
+>
+> Thanks,
+> Alex
+
+**Why the strong one works.** It acknowledges what the user already tried, which is worth more goodwill than the fix itself. It explains the cause in one sentence of plain language — "sending jobs to an address where nothing is listening". It gives one concrete check. And it goes one step beyond the ticket, to the change that stops the repeat.
+
+#### Ticket 7 — "The VPN keeps dropping"
+
+> "The VPN disconnects every twenty minutes or so. I reconnect and it works for a while, then drops again. I use it all day from home."
+
+**Your questions.** Is there a pattern — every twenty minutes, or only during large transfers? Does it drop on Wi-Fi and on a cable? Does anyone else on the team have the same problem? What are you doing when it drops?
+
+**A regular interval is a specification, not bad luck.** "Every twenty minutes" is the shape of an idle timeout, a re-keying interval, or a session limit, and each of those points somewhere specific. "Only on large transfers" points at an MTU problem instead. Ask the shape question before you touch anything.
+
+**What you check, in order.**
+
+1. Does the underlying internet connection drop at the same time? Watch a continuous `ping` to your gateway while working. If that drops too, the VPN was a symptom and your Wi-Fi is the fault.
+2. Are there two default routes? `route print -4` shows this — a VPN adds one, and two can fight.
+3. Is the DNS server still reachable during the drop? Split tunnelling changes which resolver is used.
+4. Does the drop correlate with a time or a size?
+
+```powershell
+# Continuous reachability while you reproduce the drop
+ping -t 192.168.1.1      # press Ctrl+C to stop — your gateway, must not drop
+ping -t 8.8.8.8          # is the internet itself the problem?
+route print -4           # one 0.0.0.0 row, or two?
+```
+
+If your gateway is stable and `8.8.8.8` drops, the fault is upstream of your laptop. If both are stable and only the VPN drops, the fault is the VPN client, its configuration, or the server side.
+
+**Weak reply:**
+
+> Have you tried restarting your router?
+
+If the router were at fault, the user's whole internet would drop, not one encrypted tunnel. Restarting your own equipment is the client-side equivalent of reinstalling the driver: plausible-looking work that changes nothing.
+
+**Strong reply:**
+
+> Hi Ana,
+>
+> A drop every twenty minutes is a very useful detail — that regular timing usually means a session or idle timeout rather than a network fault, so I would like to test that rather than guess.
+>
+> Two things, both quick:
+>
+> 1. Next time it drops, do not reconnect straight away. Look at whether your normal internet still works — open any website. Reply and tell me which happened: everything stopped, or only the VPN stopped.
+> 2. Separately, disconnect the VPN and leave it off for an hour. If your internet is stable for that hour, we have ruled out your home connection.
+>
+> With that, I can tell whether this is your line, your VPN client, or the VPN server. If it is the client or the server, that is not something you can fix from your laptop and I will pass it to the team that owns it — with your timings, which is exactly what they need.
+>
+> Thanks for the precise detail on the timing; it saves us both a lot of guessing.
+>
+> Alex
+
+**Why the strong one works.** It treats the timing as evidence and says so. It gives the user two small, unambiguous tests — one for the next drop, one that can run in the background. It pre-announces the escalation honestly, including why the user's timings are the valuable part. And it refuses to pretend the fix is on the user's side when it probably is not.
+
+#### Ticket 8 — "My S: drive disappeared"
+
+> "My S: drive is gone. It was there yesterday. I have a deadline tomorrow and everything is on it."
+
+**Your questions, in this order.** Does the file server open if you type its name? Does the error say *denied* or does it say *cannot find*? Did anyone else lose it, or just you? Did anything change yesterday — a password change, a Windows update, a different network?
+
+**Why those two errors are different tickets.** "Access is denied" means the share exists and you are not being let in — permissions, group membership, or a stale session token. "Windows cannot find" means the path itself is not resolving — network, DNS, or a renamed server. The message you were given tells you which hunt you are on, and the user's summary ("it's gone") tells you neither.
+
+**What you check.**
+
+```powershell
+net use
+whoami /groups
+Test-NetConnection fileserver01 -Port 445
+nslookup fileserver01
+```
+
+`net use` lists mapped drives and their state, including a `Disconnected` or `Unavailable` marker that tells you whether Windows still believes the mapping exists. `whoami /groups` answers the permissions question without needing the server, because a group added after sign-in will not be in your token — the exact cause in Part 7's third ticket.
+
+**Weak reply:**
+
+> I have remapped your drive. Try now.
+
+It may even work. But nothing was learned, nothing was recorded, and if the cause was a stale token the user will be back on Monday with the same ticket.
+
+**Strong reply:**
+
+> Hi Paolo,
+>
+> Good news first: nothing is lost. The S: drive is a shortcut to a folder on our file server, and the folder is intact — I can see your files in it from here. What broke is your laptop's connection to it, not the files.
+>
+> Here is what I found: your account is in the right group, so this is not a permissions problem. Your laptop's session was started before your group membership was updated this week, so it has been carrying an old copy of your permissions all day — that is why the drive vanished with no warning and no error message you could act on.
+>
+> What you need to do: save anything open, then choose **Start → your name → Sign out** — sign out, not restart, because a restart can keep the old session. Sign back in and open File Explorer. S: should be there with your files in it.
+>
+> If it is not back within five minutes of signing in, reply straight away and I will remap it manually. Either way, your deadline tomorrow is safe.
+>
+> Thanks,
+> Alex
+
+**Why the strong one works.** It leads with the reassurance the user actually needs, and it is specific about *why* nothing is lost. It states the diagnosis in plain language without using the words "token" or "group policy". It distinguishes **sign out** from **restart** and says why — a restart can preserve the session, which is the difference between the fix working and the user calling back. And it keeps a fallback open.
+
+#### Ticket 9 — "I got an email saying my password expires today"
+
+> "I got an email saying my password expires today and I need to click a link to keep the same password. Is that real?"
+
+**Your questions.** What is the sender's full email address, not the display name? Did you click anything? Have you entered your password anywhere as a result?
+
+The user did the right thing by asking. Your first job is to make sure they know that, because a user who feels stupid for asking does not ask next time — and next time they click.
+
+Whatever the answer, do not open the link, do not forward the live message, and do not delete it. Treat it as evidence. If the user already clicked and entered credentials, this stops being a helpdesk ticket and becomes the containment sequence in Part 7's second ticket.
+
+**Weak reply:**
+
+> That is a phishing email. Delete it and don't click links.
+
+Technically correct, practically useless. You have not established whether the user already clicked, you have destroyed the evidence, and you have answered a security report with a telling-off.
+
+**Strong reply:**
+
+> Hi Grace,
+>
+> Thank you for checking before clicking — that is exactly the right instinct and it is genuinely what keeps us safe.
+>
+> Yes, that message is not from us. We never email a link asking you to keep your existing password, and we would never ask you to confirm a password by email at all.
+>
+> Three things, and the first is the important one:
+>
+> 1. Please do not delete it yet — I need it as evidence. Leave it in your inbox.
+> 2. Did you click the link, or type your password anywhere after reading it? Either answer is fine and neither gets you in trouble — I only need to know so I can check your account properly.
+> 3. If you did click, tell me and I will take it from there immediately.
+>
+> I have reported it to our security team either way.
+>
+> Thanks,
+> Alex
+
+**Why the strong one works.** It thanks the user first, and means it. It names the specific tell in plain language — "we never email a link asking you to keep your existing password". It preserves the evidence instead of destroying it. It asks the containment question without any hint of blame, and it says so explicitly. And it tells the user what happens next.
+
+### Part 12 — Escalation writing practice
+
+Part 3 gave you the escalation template and one worked example. This part makes you write one, and shows you the two ways people get it wrong.
+
+#### What the receiving engineer actually needs
+
+An escalation is not a request for help. It is a **handover**, and the receiving engineer is deciding one thing: can I act on this without redoing the work?
+
+| What they need | Why | What beginners send instead |
+|---|---|---|
+| Scope: who and what is affected | Decides priority and how many people to wake up | "User cannot work" |
+| Timeline: when it started, when it changed | Points straight at a change window | Nothing |
+| Exact error text and codes | Searchable, and often names the cause | A paraphrase |
+| What you already tried, with results | Stops duplicate work — the most valuable section | Omitted |
+| What you ruled out | Narrows the search as much as what you found | Omitted |
+| The evidence, in copyable form | They will paste it into their own tools | A screenshot of a phone photo |
+| What you need from them, specifically | Turns a mystery into an assignment | "Please look into this" |
+| What you deliberately did not do | Prevents a hasty action that widens the outage | Omitted |
+
+#### The template
+
+```text
+Summary:        one line — the thing, the symptom, and the scope
+Since:          the time it started, and the last time it worked
+Impact:         who is affected, how badly, workaround if any, priority, SLA
+                position
+
+What I confirmed:
+- scope, established how (who did you ask, what did you compare)
+- the exact error text, verbatim, with codes
+- the evidence, as copyable output rather than a description
+
+What I tried, and what happened:
+- each attempt, with its result — including the ones that did nothing
+
+What I ruled out:
+- the causes you eliminated, and the evidence that eliminated them
+
+Hypothesis (not confirmed): best guess, clearly labelled as a guess
+
+What I need from you: the specific action, on the specific system
+
+Not doing, and why: the risky step you avoided
+```
+
+#### Worked example A — escalated too early, with too little
+
+```text
+Subject: Problem with shared drive
+
+Hi team,
+
+Can you please look at the shared drive, it is not working for
+one of our users. I have tried a few things but no luck. Let me
+know when it is fixed.
+
+Thanks
+```
+
+**What is wrong with it, line by line:**
+
+- **No scope.** One user or fourteen? Nobody can set a priority from this.
+- **No scope of *what*.** Which drive? Which server? Which path?
+- **No error.** "Not working" could be permissions, network, or a typo in a path.
+- **No timeline.** When did it start? Did it ever work?
+- **"I have tried a few things"** tells the engineer nothing and guarantees they will repeat all of them.
+- **No evidence.** Nothing to search, nothing to compare.
+- **No ask.** "Let me know when it is fixed" is not a handover, it is a delegation with no information.
+- **No priority or SLA position.** The receiving team cannot tell whether this is due now or next week.
+
+The cost is real: the engineer starts from zero, contacts the user, repeats the first-line investigation, and the outage lasts longer for exactly the person who was already blocked.
+
+#### Worked example B — the same ticket, escalated correctly
+
+```text
+Summary: S: (\\fileserver01\finance) inaccessible for one user since 08:40
+         today; other Finance users unaffected
+
+Since:   Last successful access 17:30 yesterday. Fails from 08:40 today.
+
+Impact:  One user (Paolo Reyes) cannot reach Finance month-end files.
+         Workaround: none confirmed yet — files are Finance-only.
+         Priority P3 by impact (single user, no workaround).
+         SLA: response due 12:40, currently within SLA.
+
+What I confirmed:
+- Scope: 4 other Finance users on the same floor access S: normally
+  as of 09:10. So this is one user, not the share.
+- Error text, verbatim: "Windows cannot access \\fileserver01\finance"
+  (0x80070035, "The network path was not found"). Not an access-denied
+  error — the path is not resolving, not being refused.
+- From the affected laptop:
+    Test-NetConnection fileserver01 -Port 445  -> TcpTestSucceeded: True
+    nslookup fileserver01                      -> 10.20.30.15
+    net use                                    -> S:  Unavailable
+- From a working nearby laptop: same lookup, same port result, S: Available.
+
+What I tried, and what happened:
+- `net use S: /delete` then remap to the same path -> remap succeeds,
+  but opening S: fails with the same 0x80070035.
+- Signed the user out and back in (fresh session token) -> no change.
+  I checked this specifically because a group change was made for this
+  user yesterday, but `whoami /groups` shows the group present both
+  before and after signing in, so a stale token is ruled out.
+
+What I ruled out:
+- Share outage: 4 other users working normally.
+- Server unreachable: TCP 445 answers from the affected laptop.
+- Name resolution: nslookup returns the expected address.
+- The user's own permissions: identical group membership to a working
+  colleague in Finance.
+- The user's credentials: no lockouts, no recent password change.
+
+Hypothesis (not confirmed): a per-user Windows credential for the
+fileserver has been stored incorrectly — the error is raised before
+authentication, but a cached credential can produce a path-level
+failure like this. I cannot see the Credential Manager entry contents
+from my access level.
+
+What I need from you: please check on fileserver01 whether this
+account has a duplicate or stale session, and confirm whether the
+share's access-based enumeration setting is per-user. If you need it,
+the user is available on extension 214 until 17:00.
+
+Not doing, and why: I have not restarted the Workstation service on
+the user's laptop or removed their cached credentials, because that
+would clear saved credentials for other shares they use daily and I
+cannot restore them. I have also not touched the share's permissions
+— no permissions change is indicated by the evidence.
+```
+
+**Why this one is acted on within minutes.** A reader knows exactly how big the problem is, how long it has been happening, what has been eliminated and how, and what single action is being asked of them. They can start work without opening a chat window.
+
+Notice the **"Not doing, and why"** section again. It is what stops a receiving engineer from taking a step — restarting a service, clearing credentials — that would fix nothing and cost the user something else.
+
+#### Exercise 12A — Write one, then grade it against the table
+
+Pick a fault **you have actually experienced** on your own machine, and write the escalation as if you could not fix it. Then score your draft: one point for each row of the table at the top of this part that your note satisfies.
+
+Nothing in this exercise involves anyone else's system. You are writing about your own laptop, and the escalation is a portfolio artefact rather than a real handover.
+
+| Score | What it means |
+|---|---|
+| 0–3 | The note is a request for help, not a handover. Rewrite it. |
+| 4–5 | Usable, but the engineer will still have questions. Add what you tried and what you ruled out. |
+| 6–7 | A professional handover. This is the standard to hold yourself to. |
+| 8 | You have included the hypothesis and the "not doing" line. This reads like a senior engineer's note. |
+
+**Common self-scoring mistake:** counting "I restarted it and it did not work" as *what I tried*. It only counts if you say what the restart was meant to prove and what its result ruled out.
+
+#### Ticket blackjack
+
+A short drill you can run in five minutes without an instructor or a second machine.
+
+Write down one realistic ticket number, then draw that many keyword cards from the six below. You must handle the ticket using exactly those constraints — the constraints force you to communicate instead of just fixing.
+
+| # | Keyword card |
+|---|---|
+| 1 | **Wait** — you must ask the user for something before you can proceed |
+| 2 | **Escalate** — the fault is outside your access |
+| 3 | **No repro** — you cannot make the fault happen |
+| 4 | **Angry** — the user is already frustrated |
+| 5 | **Workaround** — you must restore work before you find the cause |
+| 6 | **Document** — the ticket must be usable by someone else tomorrow |
+
+**Model answer for card 1 on Ticket 5** (a lockout, and you must wait): you unlock the account, then ask whether the user has mail on a phone, and set the ticket to **Waiting on User** with a note that the cause is unresolved until that answer arrives. The card did not change the fix; it changed the status, the note, and the reply.
+
+**Model answer for card 3 on Ticket 6** (a printer, and you cannot reproduce): you say so explicitly in the ticket, ask the user to capture a photo of the error and the exact time next time it happens, leave the ticket open in monitoring rather than closing it as fixed, and give them a workaround — print from the neighbouring machine.
+
+Working through the cards is worth more than reading another ten pages, because each card is a real constraint you will meet on a live queue.
+
+#### Exercise 12B — Repair the bad escalation
+
+Take worked example A above. Without reading example B, rewrite it as a complete escalation. You will have to invent the details — that is deliberate, because choosing *which* details matter is the skill.
+
+Then compare your version against example B and answer three questions in writing:
+
+1. Which details did you invent that example B did not need?
+2. Which details did example B have that you did not think to include?
+3. Which single addition to your version would have helped the receiving engineer most?
+
+Question 3 is the one worth keeping. **The gap between your answer and the model is your specific next thing to practise**, and it is different for everyone.
+
+### Part 13 — What would you do next? Drill and answer key
+
+Twelve situations. For each, decide **one** next action and write down why you chose it over the alternatives.
+
+**Do not read the answer key first.** Write all twelve answers, with a reason each, and only then compare. The reason matters more than the action — on a real queue there is often more than one defensible next step, and what is being assessed is whether you can justify yours.
+
+#### The twelve situations
+
+For each, your choices are: **resolve it now**, **gather one more piece of evidence**, **set Waiting on User**, or **escalate now**.
+
+1. A user reports the shared drive is empty. Their password was changed an hour ago.
+2. A user says "the internet is down". Your `ping` to their gateway succeeds.
+3. A user reports an MFA prompt they did not trigger, at 2am, on a Sunday.
+4. A user says their laptop is slow, and reports "it was fine yesterday".
+5. A printer shows offline for one user; the printer prints its own test page.
+6. A user reports a suspicious email. They have not opened it.
+7. A user's account has locked out four times this week.
+8. A user says a website is blocked. Their colleague on the same floor can reach it.
+9. A user cannot hear anything in a video call. The call connects normally.
+10. A user says their laptop will not turn on. They are on their way to a meeting.
+11. A user asks for access to a folder their manager says they should have.
+12. A user says the VPN dropped three times in an hour, always mid-transfer.
+
+#### Answer key
+
+| # | Next action | The reasoning you should have reached |
+|---|---|---|
+| 1 | Gather one more piece — ask whether the error is *denied* or *empty* | Denied means permissions; empty after a password change usually means a stale session token. The two answers lead to different fixes, so ask before changing anything |
+| 2 | Gather more — `ping 8.8.8.8`, then `ping google.com` | A working gateway rules out the LAN. The IP-versus-name pair splits connectivity from DNS in one step |
+| 3 | **Escalate now** | An unrequested MFA prompt means someone has the password and is trying the second factor. That is a suspected compromise, not a helpdesk fault |
+| 4 | Gather more — ask what changed, then measure CPU, memory, and disk | "Slow" is a symptom, not a measurement. Two readings beat one, and the change question is the cheapest test available |
+| 5 | Resolve it — check the port address against a machine that can print | One user plus a working self-test means the printer is healthy. The fault is in that machine's path, and the port address is the usual suspect |
+| 6 | Escalate per policy, or resolve with guidance — but never open it | Nothing is compromised yet, so there is no containment emergency. Preserve the message, follow the reporting process, and never click to check |
+| 7 | Escalate or investigate the source — do not simply unlock again | A repeating lockout has a cause. Event 4740 names the machine still sending the old password |
+| 8 | Gather more — compare the two machines' DNS and proxy settings | One user and one site is a device or profile problem. Comparing a working machine against a failing one is the fastest route to the difference |
+| 9 | Resolve it — check the default output device, then the app's own audio settings | Video works, so the network is fine. Audio device selection is the cause in most of these, and it takes thirty seconds |
+| 10 | Set an expectation, then gather — triage the power and the charger first | A meeting deadline does not change the diagnosis. Give a realistic update time, then work the hardware checks in order |
+| 11 | Gather more — check whether the access already exists before granting | Many of these are "granted but not taking effect". Verify the approver as well as the requester, per Part 7's third ticket |
+| 12 | Gather more — watch for two default routes, and ask whether the whole connection drops | Drops mid-transfer point at MTU or a network change rather than the VPN client. The route table and the user's own observation separate them |
+
+#### Scoring yourself honestly
+
+| Score | What it means |
+|---|---|
+| 10–12 correct | You are thinking in the right order and would not be a liability on a first-line queue |
+| 7–9 | Solid instincts, with a few places where you acted before you had the evidence |
+| 4–6 | Reread Part 2's eight steps, then retake this. Do not worry yet — this is the normal first score |
+| 0–3 | Read Part 11 again, working each ticket on paper, then retake. The vocabulary is there; the order is not yet |
+
+**The most common miss is 3**, and it is the one that matters most. Beginners file it as "an MFA annoyance" and reset the factor, which is precisely what the attacker wanted.
+
+**The second most common miss is 10.** Beginners jump to hardware diagnosis while the user is waiting, and end up with a frustrated user and no useful finding. Setting an expectation costs one sentence and buys the time you need.
+
+#### Exercise 13A — Write the two replies
+
+Choose any two situations from the twelve that you answered **escalate now**. For each, write the user-facing reply *and* the internal note, in that order.
+
+The lesson being tested is that the two are not the same text. The reply tells the user what is happening and what they should do; the internal note records what you actually suspect, which the user may never see.
+
+```text
+User-facing reply:
+Hi <name>,
+
+[acknowledge the report]
+[what you are doing about it, in plain language]
+[what you need from them, as numbered steps if any]
+[when they will hear from you next]
+
+Thanks,
+<your name>
+
+Internal note (not visible to the user):
+Scope established: ...
+Evidence: ...
+Suspected cause: ...
+Escalated to: ...
+Next action and owner: ...
+```
+
+**Model reply for situation 3** (an unexpected MFA prompt), because it is the hardest one to write without alarming the user:
+
+> Hi Ravi,
+>
+> Thank you for telling me — reporting an MFA prompt you did not trigger is exactly the right thing to do, and it is genuinely helpful.
+>
+> What it means: someone has your password and tried to use it, but they could not get past the second factor. Your account is not open to them, and nothing has been changed.
+>
+> What I am doing: I have passed this to our security team as a priority, and we will reset your password and your MFA registration together this morning. Please do not change your password yourself yet — we want to do it in a way that also signs out anyone already connected.
+>
+> What I need from you now: if you get another prompt, tap **Deny**, and reply here with the time it happened.
+>
+> I will call you within thirty minutes to walk through the reset.
+>
+> Thanks,
+> Alex
+
+**Why this reply works.** It thanks before it alarms. It explains the actual risk accurately without either hiding it or overstating it. It tells the user what *not* to do, and why, which prevents them from undoing your containment. And it commits to a specific time.
+
+The internal note for the same ticket is a different document entirely — it says what you suspect, what you have ruled out, and who owns it now. Write that one as if the security team will read it before they speak to anyone.
+
+#### Practice scenarios that need only one laptop
+
+Every exercise in this part works with a single machine. Two of them are worth doing deliberately, because they reproduce a failure you will otherwise only read about.
+
+| Scenario | What you do | What you should observe |
+|---|---|---|
+| Break your own DNS | Set your adapter's DNS to `127.0.0.1`, then `ipconfig /flushdns` | `ping 8.8.8.8` still works, `ping google.com` fails. Put it back to automatic afterwards |
+| Break your own Wi-Fi | Disable the adapter, then try each Part 10 command | Every network check fails at the first step — link down means nothing else can pass |
+| Fill a folder path | Create a folder with a very long name and map it, then rename the folder | The mapping reports unavailable. This is Ticket 8 with the serial numbers filed off |
+| Fill the system drive | Do not do this to test it — instead read `Get-Volume` and predict what would break below 5 % free | A prediction you can check beats a disk you have to repair |
+| One laptop plus one phone | Use the phone's hotspot for the laptop, then disable the hotspot | The laptop's whole network fails at once. Comparing that to a single-command failure teaches the scope idea physically |
+
+**Do these on your own machine only, and put every setting back afterwards.** Changing an adapter's DNS on a work laptop, or on a machine you do not own, is not an exercise — it is an incident. The rule is simple: you may only test systems you own or have written authorisation for, and at this stage that means your own laptop and your own VM.
+
+The value of breaking things on purpose is that you see the failure signature while you are calm. A technician who has deliberately broken DNS once recognises it in four seconds on a real ticket, and spends the next four minutes fixing it instead of reading documentation.
+
+### Key takeaways
 
 - A ticket is a **record**, not a receipt. Write so the next person never has to re-investigate.
 - **Incidents are broken things; service requests are wanted things.** Classify at intake.
@@ -743,9 +1536,15 @@ Access tickets are where good helpdesk habits prevent real breaches. Three rules
 - **Check the current state before changing anything.** Many "I need access" tickets are "access exists but has not taken effect", and granting again fixes nothing.
 - **Thank people who report their own mistakes.** A culture where users report phishing quickly is the strongest control an organisation has.
 
-### Part 9 — Practice this next
+### Part 14 — Practice this next
 
 The exercises below are the phase. Build the tracker, write the ten tickets, produce the knowledge base articles, practise remote support with a family member, write the user-friendly replies, and write the escalation notes. Keep every artefact — they become portfolio evidence and, later, interview stories.
+
+Parts 10 to 13 are the doing half of this lesson, and they are meant to be worked in order. Part 10 has you run the checks on your own machine and build a healthy baseline. Part 11 walks six tickets end to end, each with a weak reply and a strong one. Part 12 is escalation writing. Part 13 is a drill with an answer key so you can mark your own work.
+
+**Time to complete:** 12–18 hours if you do all four parts properly, which is more than the reading takes and is the point. Write your answers down before you look at any model answer, because a model answer read first teaches you nothing except that the text exists.
+
+Every exercise from here on has an answer, a model response, or a scoring table. Nothing in this lesson asks you to guess whether you got it right.
 
 One last piece of advice before you start. When you write those ten sample tickets, write them about real problems you have actually seen — a laptop that would not connect, a printer that vanished from the network, an account locked out twice in a week. Invented tickets read like invented tickets, and a hiring manager can tell.
 
@@ -777,7 +1576,11 @@ Real ones carry the detail that only comes from having been there: the exact err
 3. Write 2 knowledge base articles: one on troubleshooting a no-internet connection (physical checks, IP configuration, DNS), and one on clearing browser cache and cookies in Chrome, Firefox, and Edge.
 4. Practise remote support. Use **RustDesk** or **Chrome Remote Desktop** to connect to a family member's device or a second VM, and fix a simple issue such as display settings or a cache problem.
 5. Write 5 user-friendly replies to common helpdesk issues — email not syncing, VPN not connecting, printer offline, forgotten password, and a slow laptop. Each reply must be clear, polite, and contain actionable steps.
-6. Write 3 escalation notes, each including a detailed description, the troubleshooting already performed, supporting evidence such as error messages or logs, and the reason for escalation.
+6. Write 3 escalation notes, each including a detailed description, the troubleshooting already performed, supporting evidence such as error messages or logs, and the reason for escalation. Score each draft against the eight rows of the Part 12 handover table, and rewrite any that scores below six.
+7. Run every command in the Part 10 command table on your own machine, and write down what each result tells you. Add the output to `portfolio/it/04-healthy-baseline.md` with one sentence describing what would look different if it were broken.
+8. Work Part 11's six tickets on paper before reading the model replies. Write your triage questions, your reply to the user, and the internal note for each. Then compare your reply against the strong example and write two sentences on what you would change.
+9. Retake the Part 13 drill a week later, without rereading the answer key first. Anything you get wrong twice is the thing to practise, and the two most commonly missed situations are the ones worth checking first.
+10. Write one knowledge base article from a fault you fixed on your own machine while running the Part 10 checks. Use a command's unexpected output as the subject — it is a real finding, it is yours, and it is more convincing in a portfolio than a generic article.
 
 ## Deliverable / proof of work
 
@@ -787,6 +1590,8 @@ Create `portfolio/it/04-helpdesk-skills.md` with:
 - 2 knowledge base articles
 - 3 escalation examples
 - 5 user communication templates
+- A healthy baseline note for your own machine, with what broken would look like beside each reading
+- Your written answers to the twelve Part 13 drill situations, with your reasons, kept even where you scored them wrong
 
 ## Checklist
 
@@ -797,6 +1602,11 @@ Create `portfolio/it/04-helpdesk-skills.md` with:
 - [ ] I practiced or simulated remote support. <!-- id: it-04-c05 energy: normal -->
 - [ ] I can troubleshoot 8 common helpdesk issues. <!-- id: it-04-c06 energy: normal -->
 - [ ] I can write a calm response to an angry user. <!-- id: it-04-c07 energy: normal -->
+- [ ] I can run the Part 10 checks on my own machine and say what healthy output looks like. <!-- id: it-04-c09 energy: normal -->
+- [ ] I built my own healthy baseline and wrote what broken would look like beside it. <!-- id: it-04-c10 energy: normal -->
+- [ ] I worked all six tickets in Part 11 on paper before reading the model replies. <!-- id: it-04-c11 energy: normal -->
+- [ ] I scored myself against the Part 13 drill and reworked every answer I got wrong. <!-- id: it-04-c12 energy: normal -->
+- [ ] I wrote an escalation note that satisfies at least six rows of the Part 12 table. <!-- id: it-04-c13 energy: normal -->
 - [ ] I started applying for entry-level IT roles after this phase. <!-- id: it-04-c08 energy: normal -->
 
 ## You're ready to move on when...
