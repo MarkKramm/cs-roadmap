@@ -95,7 +95,7 @@ Use this flat checklist to track the full cybersecurity roadmap.
 
 - [ ] I can explain the shared responsibility model and where my responsibility starts.
 - [ ] I built a least-privilege IAM role and can justify every permission in it.
-- [ ] I enabled MFA and a conditional access policy in a free cloud tenant.
+- [ ] I enabled MFA in a free cloud tenant, and I can explain what a conditional access policy does and where the free tier stops.
 - [ ] I found and fixed a public storage bucket in my own tenant.
 - [ ] I read cloud audit logs (CloudTrail or Activity Log) and identified a suspicious action.
 - [ ] I can explain the metadata service and why SSRF against it matters.
