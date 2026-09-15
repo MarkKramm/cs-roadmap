@@ -9,7 +9,7 @@ A snapshot of the repository's current state. Update this when a meaningful mile
 | Branch | `main` |
 | Tracked files | 106 |
 | Working tree | Clean — nothing uncommitted, nothing untracked |
-| Unpushed | None. `main` and `origin/main` are both at `f4ba4d1` |
+| Unpushed | None. `main` and `origin/main` are both at `2ec1871` |
 | Line endings | LF everywhere (Windows scripts excepted) |
 | Encoding | UTF-8, no BOM |
 | Remote | `origin` → https://github.com/MarkKramm/cs-roadmap |
@@ -19,7 +19,7 @@ A snapshot of the repository's current state. Update this when a meaningful mile
 | Build step | `learning-site/` — React + Vite. `npm run dev` / `npm run build` |
 | Checks | `lint-content` 106 files / 0 issues; `audit-content` 0 issues across 23 phases; `audit-lesson-ast` 23 lessons / 0 loss; `audit-readability` 0 of 23 outside target and **0 paragraphs over 90 words**; `test:smoke` 85 renders / 0 failures; `test:search` 41 checks / pass; production build clean |
 | Task IDs | 228 total (IT 66, cyber 162) |
-| CI | `.github/workflows/ci.yml` — two jobs on push to `main` and on PRs (D-008) |
+| CI | `.github/workflows/ci.yml` — two jobs on push to `main` and on PRs (D-008). Runs lint, content audit, lesson-parser audit, readability audit, build, smoke and search. **`cyber-restructure-check.mjs` is deliberately excluded**: it reads a before-snapshot from `process.env.TEMP`, which is not in the repository, so it can only ever fail on a fresh clone. It is a one-off migration tool for a restructure pass, not a standing guard. Last verified green: `2ec1871` |
 | Milestone | M3 complete — the site renders the lessons themselves, not just the structured sections |
 | Search | Full-text across all 23 lessons, both tracks (D-013). A build-time inverted index (term → segment id, **no prose**) emitted as `generated/search.json` — 471 KB raw, 180 KB as a delivered chunk, and **not referenced by `index.html`**, so a reader who never searches pays nothing and the main bundle stays at 105 KB gzipped. Results deep-link across tracks to the matching heading. Three silent-failure bugs were found by testing the index against the engine and are now guarded by `test:search` |
 | Content depth | **Both tracks complete and uniformly deep.** All 23 phases carry `## Lesson` sections, and **all 23 are inside every readability target**. Cyber runs 7,563–12,177 lesson words across 14 phases; IT runs 5,567–23,657 across 9 |
@@ -137,4 +137,6 @@ npm run test:smoke                       # render every phase with real data
 npm run test:search                      # index and query engine agree
 ```
 
-Expected results: lint `106 files, 0 issues`; content audit `0 issues`; lesson AST `all 23 lessons, no content loss`; readability `0 of 23` outside target and `0 paragraphs over 90 words`; preservation `OK`; smoke `85 renders across 23 phases and 191 tools, 0 failures`; search `41 checks, pass`.
+Note: `cyber-restructure-check.mjs` exits 2 on a fresh clone because its baseline lives in `TEMP`. That is expected and it is why CI does not run it.
+
+Expected results: lint `106 files, 0 issues`; content audit `0 issues`; lesson AST `all 23 lessons, no content loss`; readability `0 of 23` outside target and `0 paragraphs over 90 words`; smoke `85 renders across 23 phases and 191 tools, 0 failures`; search `41 checks, pass`.

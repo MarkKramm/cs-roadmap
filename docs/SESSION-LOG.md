@@ -2,6 +2,40 @@
 
 A chronological record of working sessions. Newest first.
 
+## 2026-09-15 (latest) — Search, five module follow-ups, and a red build that was worth having
+
+**Goal:** Two items chosen from the roadmap queue — write the five module-review follow-ups, and add full-text search across lessons.
+
+**Search: the obvious implementation was measured and thrown away.** The first version stored each segment's text. Measured, that came to **1,438 KB raw / 473 KB gzipped**, because it duplicated every lesson file — and an average lesson gzips to 16 KB, so the index cost roughly *thirty lessons' worth* of download for a feature used occasionally. That is the wrong trade for the audience this curriculum targets. The second attempt, windowing long segments with overlap to improve snippets, was also measured and made it **worse** (1,438 → 1,501 KB), because the overlap duplicated text. What shipped is an inverted index — term to segment id, **no prose** — at 180 KB as its own lazily-fetched chunk, with `index.html` not referencing it at all. The main bundle is unchanged at 105 KB gzipped.
+
+Both rejected designs were killed by *measuring* rather than by reasoning about them, and the second one looked obviously sensible.
+
+**Three bugs that returned the wrong answer without erroring.** None of these would have been caught by reading either the index builder or the query engine — they only appear when the two are run against each other:
+
+| Bug | What a reader would have seen |
+|---|---|
+| Terms in >20% of segments were **deleted** to save space | `"user account locked"` returned **nothing**, because a query is an AND and `user` was gone |
+| Trailing punctuation glued into terms | `"...was timestomped."` indexed `timestomped.` separately from `timestomped` |
+| An exact match **suppressed** broader ones | Typing `timestomping` found modules 10 and 12 but not 11 — the *more* precisely you typed, the *fewer* results you got |
+
+The third one has a mirror image that the fix had to respect: merging exact and prefix matches flatly broke `STAR`, which exactly matches the interview method but also prefixes `start`, `startup` and `starved` across 227 segments — the merged set drowned the lesson that actually teaches STAR. The fix is tiered scoring, not a merge.
+
+Each was found because the test asserted on **known-correct hits**, not on the absence of exceptions. That distinction matters for anything in this repository that can be wrong without crashing — the same reason `audit-lesson-ast.mjs` compares content rather than checking for thrown errors.
+
+**1,438 KB → 180 KB, and the honest cost of each option before writing the UI** is the useful habit here. The first design would have shipped and looked fine on a fast connection.
+
+**The five follow-ups were written rather than filed**, 366 lines added and nothing deleted: a worked "wrong first guess" and a five-rung setup ladder in module 09, a reversed wrong-automation case in module 12, a worked risk-scoring disagreement in module 13, and a residual-incompetence statement in all six modules naming what the reader still cannot do.
+
+**I broke CI, and the failure was more useful than the success.** The "Content integrity" job went red. The cause was not the content: `cyber-restructure-check.mjs` reads its baseline from `process.env.TEMP` — a machine-local file that is **not in the repository**. It had been passing locally only because I generated that baseline earlier in the session, and it can never pass on a fresh clone. Adding it to CI guaranteed a permanent red build. It is a one-off migration tool for a restructure pass, not a standing guard, and the pass finished long ago; the permanent guarantee is `audit-lesson-ast.mjs`, which CI does run.
+
+The right response was not to reason about it. I **cloned the repository fresh** and ran every CI step in the clone — which is the environment CI actually uses, and exactly what I had failed to consider when adding the step. All four content audits and all three site steps exit 0 there.
+
+**Two PowerShell traps, both already documented, both hit anyway.** A heredoc (`git commit -F - <<'MSG'`) does not exist in PowerShell and failed loudly. Then a scratch commit-message file got swept into the commit by `git add -A` and had to be removed in a follow-up — the fix is to name paths explicitly rather than stage everything.
+
+**Final state:** lint 106 files / 0 issues; content audit 0 issues; lesson AST 23 lessons / 0 loss; readability 0 of 23 outside target and **0 paragraphs over 90 words**; build clean; smoke 85 renders / 0 failures; search 41 checks / pass; CI and Deploy both green on `2ec1871`.
+
+**Lesson taken:** a check that cannot fail on a fresh clone is not a check. Every guard added to CI should be run once in a clone before it is trusted — and when a build goes red, the environment mismatch is worth more attention than the failing assertion.
+
 ## 2026-09-15 (later) — Four roadmap items: a density gate, a module review, an assessment, and a correction
 
 **Goal:** Work the four-item queue from the previous checkpoint — harden the readability audit and split the dense paragraphs, review the six new cyber modules, assess whether the IT track's later phases need the Phase 1 treatment, and deploy the site.
