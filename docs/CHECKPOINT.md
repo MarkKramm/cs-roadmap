@@ -9,7 +9,7 @@ A snapshot of the repository's current state. Update this when a meaningful mile
 | Branch | `main` |
 | Tracked files | 102 |
 | Working tree | Clean — nothing uncommitted, nothing untracked |
-| Unpushed | **8 commits ahead of `origin/main`.** The work exists only on this machine |
+| Unpushed | None. `main` and `origin/main` are both at `b980d11` |
 | Line endings | LF everywhere (Windows scripts excepted) |
 | Encoding | UTF-8, no BOM |
 | Remote | `origin` → https://github.com/MarkKramm/cs-roadmap |
@@ -72,7 +72,7 @@ All of the following were re-verified against a **from-scratch rebuild** — `ge
 - [x] No literal `?` substitutes remain except three genuine question marks.
 - [x] All files valid UTF-8; no CR bytes; no BOM; no mojibake in any edited file (verified at byte level, since a PowerShell console misrenders correct UTF-8).
 - [x] `.gitattributes` and `.editorconfig` in place.
-- [x] Remote configured. **`main` is 8 commits ahead of `origin/main` — not yet pushed.** See "Resuming" below.
+- [x] Remote configured. **`main` and `origin/main` are both at `b980d11`; nothing is unpushed.**
 - [x] `lint-content.mjs` — 102 files, 0 issues.
 - [x] `audit-content.mjs` — 0 issues across 23 phases.
 - [x] `audit-lesson-ast.mjs` — all 23 lessons parse with no content loss.
@@ -82,19 +82,20 @@ All of the following were re-verified against a **from-scratch rebuild** — `ge
 - [x] `npm run test:smoke` — 84 renders across 23 phases and 191 tools, 0 failures.
 - [x] `npm run build` — clean; initial bundle 355 KB with 23 on-demand lesson chunks.
 - [x] 256 checklist IDs, all globally unique.
-- [x] CI runs the content linter, the production build, and the render smoke test on every push and pull request — previously verified green on GitHub (Node 24, `ubuntu-latest`). **The last 8 commits have not been pushed, so CI has not run against them.**
+- [x] CI runs the content linter, the production build, and the render smoke test on every push and pull request — previously verified green on GitHub (Node 24, `ubuntu-latest`). **The 9 commits pushed on 2026-09-15 have not been confirmed green** — `gh` is not installed locally, so check the Actions tab rather than assuming. Every check CI runs was run locally and passed, so a red build would most likely be environmental.
 
 ## Resuming
 
 Read this first.
 
-1. **Push the 8 unpushed commits.** `git push origin main`. Everything is committed and the working tree is clean, but the work exists only locally. Note that CI has not validated these commits.
+1. **Check CI on the latest push.** The work is pushed and the working tree is clean, but the run for `b980d11` had not been confirmed when this was written. If it is red, treat it as environmental first — the same checks pass locally.
 2. **Rebuild before running the site.** `learning-site/src/data/generated/` is gitignored, so a fresh clone has no lesson JSON until `npm run build:content` (or `npm run dev` / `npm run build`, which both call it) has run.
 3. **Run the guards after touching the parser.** `node scripts/audit-lesson-ast.mjs` is the one that matters; see [`WORKFLOW.md`](WORKFLOW.md) → "Guards on the lesson renderer".
+4. **Beware inline `node -e` on Windows.** Backticks inside a PowerShell double-quoted string are mangled, which silently corrupts escape-sensitive regexes. Write a throwaway `.mjs` file instead — this cost two wrong measurements in one session.
 
 ## Open items
 
-- [ ] **Push `main`** — 8 commits, including the lesson renderer and six new modules, exist only on this machine.
+- [ ] **Confirm the CI run for `b980d11` is green.** Not verifiable locally (`gh` is not installed).
 - [ ] **Deploy the site.** `.github/workflows/deploy-pages.yml` is written and its base-path guard was tested, but the repository is private: GitHub Pages from a private repo generally needs a paid plan, while Netlify, Vercel, and Cloudflare Pages all deploy private repos on free tiers. `netlify.toml` is already configured as that fallback.
 - [ ] **Audit modules 09–14 against the depth standard.** They meet the section contract and every readability target, but have not had the evidence-reading and worked-ticket review that the IT and cyber core phases received.
 - [ ] **Assess the IT track's thin phases.** IT word counts range from 6,219 (Phase 7) to 24,723 (Phase 1). Phase 1 is deep because it was the pilot; whether the later phases deserve the same treatment is a judgement call, not an assumption.

@@ -95,7 +95,7 @@ The roadmap for the **repository itself** (for the study curriculum, see [`../ca
 
 ## Next
 
-- [ ] **Push `main`.** 8 commits — the lesson renderer, the six new modules, and the sidebar fix — are committed locally but not yet on `origin`. CI has therefore not run against them.
+- [ ] **Confirm CI is green on `b980d11`.** The work is pushed, but the run had not been confirmed. `gh` is not installed locally, so check the Actions tab. Every check CI runs passed locally.
 - [ ] **Split the dense paragraphs.** Every phase passes the readability audit, because it gates on a per-phase average. Measured per paragraph, **33 IT paragraphs exceed 90 words** (9 over 110, worst 193 in Phase 1) and the six new cyber modules add 12 more (worst 162). Worth doing alongside a change to the audit so it cannot regress.
 - [ ] **Audit the six new modules against the depth standard.** Modules 09–14 meet the section contract and every readability target, but have not had the evidence-reading and worked-ticket review that IT Phases 1–9 and cyber Phases 1–8 received. An audit first, a writing pass second.
 - [ ] **Assess the IT track's thin phases.** IT word counts range from 6,219 (Phase 7) to 24,723 (Phase 1). Phase 1 is deep because it was the pilot; whether the later phases deserve the same treatment, or the range is appropriate, needs a judgement rather than an assumption.
