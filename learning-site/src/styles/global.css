@@ -977,6 +977,61 @@ a:hover {
   white-space: pre;
 }
 
+/* --- Copy control on code blocks ---
+   The button sits above the block rather than floating over it, so it never
+   covers the first line of a command and stays clear when the code scrolls
+   horizontally. It is always rendered rather than revealed on hover, because a
+   touch user has no hover to reveal it with. */
+
+.lesson__code-wrap {
+  position: relative;
+  margin: 0 0 var(--space-4);
+}
+
+.lesson__code-wrap .lesson__code {
+  margin: 0;
+}
+
+.lesson__copy {
+  display: block;
+  margin-left: auto;
+  margin-bottom: var(--space-1);
+  padding: var(--space-1) var(--space-3);
+  background: var(--bg-elevated);
+  color: var(--text-muted);
+  border: 1px solid var(--border);
+  border-radius: var(--space-1);
+  font-size: var(--text-xs);
+  font-family: inherit;
+  line-height: 1.8;
+  cursor: pointer;
+  transition: color var(--transition-fast), border-color var(--transition-fast);
+}
+
+.lesson__copy:hover {
+  color: var(--text);
+  border-color: var(--accent);
+}
+
+.lesson__copy[data-state="copied"] {
+  color: var(--success);
+  border-color: var(--success);
+}
+
+.lesson__copy[data-state="failed"] {
+  color: var(--warning);
+  border-color: var(--warning);
+}
+
+/* On a phone there is no hover to reveal the control, so it is made
+   comfortably tappable instead. */
+@media (max-width: 860px) {
+  .lesson__copy {
+    padding: var(--space-2) var(--space-4);
+    font-size: var(--text-sm);
+  }
+}
+
 /* --- Blockquote: used for the certification and interview verdicts --- */
 
 .lesson__quote {
@@ -1169,6 +1224,17 @@ p em {
   font-size: var(--text-sm);
   line-height: 1.5;
   overflow-wrap: anywhere;
+}
+
+/* The matched term inside a snippet. The browser default is black on yellow,
+   which is unreadable against the dark surface and looks like a bug, so the
+   colour is set explicitly and the text keeps its inherited size. */
+.search__snippet mark {
+  background: var(--accent);
+  color: var(--bg);
+  border-radius: 2px;
+  padding: 0 2px;
+  font-weight: 600;
 }
 
 .search__hint {

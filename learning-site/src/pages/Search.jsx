@@ -10,6 +10,7 @@
 import { useEffect, useState } from "react";
 import { tracks } from "../data/roadmaps.js";
 import { useSearch } from "../hooks/useSearch.js";
+import { highlight } from "../lib/highlight.js";
 import { useLesson } from "../hooks/useLesson.js";
 
 const FENCE = "```";
@@ -92,6 +93,18 @@ function snippetFor(blocks, headingText, query) {
   return out;
 }
 
+/**
+ * Wrap the matched terms in the snippet.
+ *
+ * The matching rules live in lib/highlight.js so they can be tested without
+ * rendering React — a wrong pattern here marks the wrong word, which is only
+ * visible to a reader.
+ */
+function Highlighted({ text, query }) {
+  let n = 0;
+  return <>{highlight(text, query, (s) => <mark key={"m" + n++}>{s}</mark>)}</>;
+}
+
 /** One result row. Loads its own lesson to build the snippet. */
 function Result({ hit, query, onOpen }) {
   // Find the phase record so useLesson can resolve lessonPath.
@@ -113,7 +126,11 @@ function Result({ hit, query, onOpen }) {
           {hit.k === "cyber" ? "Cyber" : "IT"} · {hit.pt}
         </span>
         <span className="search__heading">{hit.h}</span>
-        {text && <span className="search__snippet">{text}</span>}
+        {text && (
+          <span className="search__snippet">
+            <Highlighted text={text} query={query} />
+          </span>
+        )}
       </button>
     </li>
   );

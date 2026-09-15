@@ -5,7 +5,72 @@
 // Inline emphasis (bold, code, italic) goes through renderInline, which already
 // exists for the structured sections.
 
+import { useCallback, useEffect, useRef, useState } from "react";
 import { renderInline } from "../lib/renderInline.jsx";
+
+/**
+ * Copy control for a fenced code block.
+ *
+ * The curriculum ships 464 code blocks, most of them commands a reader is meant
+ * to run. Retyping them by hand is where a flag gets mistyped and a beginner
+ * concludes the lesson is wrong, so copy is a correctness aid, not a
+ * convenience.
+ *
+ * navigator.clipboard needs a secure context. localhost and the deployed HTTPS
+ * site both qualify, but a reader who opens the built site over plain HTTP on
+ * another machine does not, so the fallback keeps the button working there
+ * rather than failing silently.
+ */
+function CopyButton({ text }) {
+  const [state, setState] = useState("idle");
+  const timer = useRef(null);
+
+  useEffect(() => () => clearTimeout(timer.current), []);
+
+  const copy = useCallback(async () => {
+    const flash = (next) => {
+      setState(next);
+      clearTimeout(timer.current);
+      timer.current = setTimeout(() => setState("idle"), 1600);
+    };
+
+    try {
+      if (navigator.clipboard?.writeText) {
+        await navigator.clipboard.writeText(text);
+      } else {
+        // Deprecated, but it is the only route when the page is not a secure
+        // context, and it is still implemented everywhere that matters.
+        const ta = document.createElement("textarea");
+        ta.value = text;
+        ta.setAttribute("readonly", "");
+        ta.style.position = "fixed";
+        ta.style.opacity = "0";
+        document.body.appendChild(ta);
+        ta.select();
+        document.execCommand("copy");
+        document.body.removeChild(ta);
+      }
+      flash("copied");
+    } catch {
+      // Denied permission or no clipboard at all. Say so instead of pretending.
+      flash("failed");
+    }
+  }, [text]);
+
+  const label = state === "copied" ? "Copied" : state === "failed" ? "Press Ctrl+C" : "Copy";
+
+  return (
+    <button
+      type="button"
+      className="lesson__copy"
+      data-state={state}
+      onClick={copy}
+      aria-label={state === "copied" ? "Code copied to clipboard" : "Copy code to clipboard"}
+    >
+      {label}
+    </button>
+  );
+}
 
 function List({ list, keyPrefix }) {
   const Tag = list.ordered ? "ol" : "ul";
@@ -73,9 +138,12 @@ export default function LessonBlock({ block, index }) {
 
     case "code":
       return (
-        <pre className="lesson__code" data-lang={block.lang || undefined}>
-          <code>{block.text}</code>
-        </pre>
+        <div className="lesson__code-wrap">
+          <CopyButton text={block.text} />
+          <pre className="lesson__code" data-lang={block.lang || undefined}>
+            <code>{block.text}</code>
+          </pre>
+        </div>
       );
 
     case "quote":

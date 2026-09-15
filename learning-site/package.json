@@ -9,6 +9,8 @@
     "lint:content": "node ../scripts/lint-content.mjs",
     "test:search": "npm run build:content && node scripts/test-search.mjs",
     "test:smoke": "npm run build:content && node scripts/smoke-render.mjs",
+    "test:highlight": "node scripts/test-highlight.mjs",
+    "test": "npm run test:highlight && npm run test:search && npm run test:smoke",
     "dev": "npm run build:content && vite",
     "build": "npm run build:content && vite build",
     "preview": "vite preview"

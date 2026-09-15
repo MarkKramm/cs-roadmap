@@ -264,6 +264,30 @@ try {
         "expected " + codeBlocks + " code blocks, rendered " + renderedCode
       );
 
+      // Every code block needs a copy control. The curriculum ships hundreds of
+      // runnable commands and retyping one is how a beginner mistypes a flag and
+      // concludes the lesson is wrong, so a missing button is a real defect and
+      // not a cosmetic one. Asserted against the code count so a block that
+      // renders without its button is caught rather than counted as fine.
+      if (codeBlocks > 0) {
+        const copyButtons = (html.match(/class="lesson__copy"/g) || []).length;
+        assert(
+          label + ": copy button per code block",
+          copyButtons === codeBlocks,
+          "expected " + codeBlocks + " copy buttons, found " + copyButtons
+        );
+
+        // The wrap must exist too: the button is positioned against it, and
+        // without the wrapper the button and the code block are siblings with
+        // no shared box.
+        const wraps = (html.match(/class="lesson__code-wrap"/g) || []).length;
+        assert(
+          label + ": code wrapper per code block",
+          wraps === codeBlocks,
+          "expected " + codeBlocks + " code wrappers, found " + wraps
+        );
+      }
+
       // Every heading needs a unique id, or the table of contents links to the
       // wrong place (or to nothing).
       const ids = [...html.matchAll(/id="([^"]+)"/g)].map((m) => m[1]);

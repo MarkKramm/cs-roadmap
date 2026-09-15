@@ -56,3 +56,9 @@ jobs:
         run: npm run test:smoke
       - name: Search index and query engine
         run: npm run test:search
+      # Query highlighting runs on the real module with no React needed, so it
+      # is a plain node run rather than part of the render suite. A wrong span
+      # here shows a correct result with the wrong word marked, which reads as a
+      # broken search but never throws.
+      - name: Search snippet highlighting
+        run: npm run test:highlight
