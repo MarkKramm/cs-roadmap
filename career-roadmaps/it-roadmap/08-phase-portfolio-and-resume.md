@@ -292,23 +292,248 @@ The weekly habit matters because **every interview generates new material.** A q
 
 The reverse is also true. A portfolio that was built once and never touched looks exactly like what it is: an assignment finished and abandoned. Reviewers notice dates.
 
-### Key takeaways
+### Part 5 — A complete resume, annotated
 
-- **The resume gets about thirty seconds.** Design for a scan, not for a read.
-- **Specificity creates credibility.** Name the tool, the action, and the verifiable outcome.
-- **Evidence beats claims.** A working portfolio link outweighs any adjective on the resume.
-- **The projects section replaces work experience** for entry-level candidates, and it carries the application.
-- **No exaggeration, ever.** Every resume line is a future interview question, and links are clickable.
-- **README first.** A reviewer who reads only your portfolio front page should already understand you.
-- **One page, single column, standard headings** — for human readers and parsers alike.
-- **Mirror the job ad's keywords honestly; never fabricate them.**
-- **LinkedIn is a search index.** Headline and About are the fields that get you found.
-- **"Remote-ready Philippines"** belongs where a recruiter filter can see it.
-- **Test with a stranger.** If they cannot say what role you want, the portfolio is not done.
+Part 1 explained what the hiring manager scans for. This part shows a resume that survives that scan, line by line, with the reasoning attached — because the reasoning is the transferable part.
 
-### Practice this next
+This is a real structure for an entry-level remote support applicant with no professional IT experience. Read it as a worked example, not a template to copy verbatim; your artefacts are your own.
 
-The tasks below are assembly work, and you can start with the smallest one. Create the folder structure, then write the README before you add anything else — it is the file that does the most work per minute spent. Pull in the artefacts from earlier phases, write the eight project bullets using the context/tools/action/evidence/result pattern, and turn three of them into STAR summaries for the deliverable. Then write the resume, and finish with the review task in the list: have one person, or an AI tool, read it for clarity *and for anything that overstates what you did*. That last instruction is not a formality. An outside reader will catch the one bullet that says more than you can defend, and finding it now is far better than finding it in an interview.
+```text
+JUAN DELA CRUZ
+Manila, Philippines (UTC+8) · Available 09:00–18:00 UTC+8, flexible for US/EU overlap
+juan.delacruz@email.com · linkedin.com/in/juandelacruz · github.com/juandelacruz
+```
+
+**What each line is doing.** The location and timezone are the first filter for remote work — a US employer needs to know the overlap before they read anything else. Stating availability pre-empts the question that would otherwise be their first email. All three links are on one line so the thirty-second scan finds them immediately rather than at the bottom of page two.
+
+```text
+SUMMARY
+Entry-level IT support technician. Self-taught through a structured curriculum covering
+Windows administration, networking, and ticketing, with a portfolio of documented
+hands-on work. Seeking a remote helpdesk or IT support role.
+```
+
+**What this is doing.** Three sentences, three jobs: name the role being applied for, state the basis of the claim, and say what is wanted. It contains no adjectives about personality — "hardworking", "passionate", "detail-oriented" are the words every other applicant used and none of them are verifiable. This summary is entirely checkable.
+
+```text
+TECHNICAL SKILLS
+Operating systems : Windows 10/11 (user and group management, NTFS permissions, services,
+                    Event Viewer), Ubuntu Server (users, systemd, permissions, log review)
+Networking        : TCP/IP, subnetting, DNS, DHCP, NAT, ping/tracert/nslookup,
+                    Wireshark capture and analysis
+Identity & access : Local accounts and groups, Active Directory concepts, least privilege,
+                    MFA, access review
+Tools             : osTicket, Snipe-IT, Bitwarden, VirtualBox, PowerShell, Git/GitHub
+```
+
+**What this is doing.** Every line maps to vocabulary that appears in real job ads, which is what the keyword scan is checking. Note the parenthetical detail — it converts a list of nouns into evidence of what was actually done with each. "Windows" is a claim; "NTFS permissions, services, Event Viewer" is a demonstration. And nothing here is claimed that a follow-up question could not be answered honestly.
+
+```text
+PROJECTS
+
+Practice helpdesk ticket portfolio
+· Resolved 15 documented practice tickets covering password resets, VPN failures,
+  printer faults, and account lockouts, each written in the reported/observed/action/
+  verified format with the diagnostic reasoning recorded.
+· Built five reusable ticket templates and a monitoring runbook for a disk-space alert,
+  including known false positives.
+· github.com/juandelacruz/ticket-portfolio
+
+Routed home lab network
+· Built a two-subnet network in VirtualBox with pfSense routing between them; verified
+  connectivity and fault isolation using ping, tracert, and Wireshark packet captures.
+· Produced a subnetting worksheet covering /26 and /25 networks with worked host ranges,
+  and a network diagram of the finished topology.
+· github.com/juandelacruz/networking-labs
+
+Windows administration and permissions lab
+· Created users and groups, then demonstrated inherited versus explicit NTFS permissions
+  and the effect of share permissions combining with NTFS on effective access.
+· Wrote a PowerShell script reporting OS version, disk space, and running services,
+  used to populate a 10-device practice asset inventory.
+· github.com/juandelacruz/windows-labs
+```
+
+**What this is doing, and why it is the centre of the resume.** This section is what replaces "experience" for a candidate who has none, and it works because each project has the same five elements Part 1 described: context, tools, action, evidence, result. Every bullet names a specific technology and a specific action, and every project ends with a link a sceptical reader can click.
+
+The third bullet of each project is the most important line. It is what converts "I studied this" into "here is the thing I made".
+
+```text
+EDUCATION AND TRAINING
+
+Self-directed IT curriculum                                    2026 – present
+· Completed a structured 9-phase programme covering computer fundamentals, operating
+  systems, networking, helpdesk practice, system administration, and security basics.
+· Built and documented a hands-on artefact at every phase; portfolio at the link above.
+
+[Any formal education, most recent first — degree, diploma, or senior high school,
+with dates. Do not omit it; do not apologise for it.]
+```
+
+**What this is doing.** It states the self-taught route as a fact with a structure and a date, not as a confession. The phrase "built and documented a hands-on artefact at every phase" is the sentence that reframes self-teaching as disciplined delivery. Formal education goes below it in plain form — no hedging, no "only", no apology.
+
+```text
+LANGUAGES
+English (professional working proficiency) · Filipino (native)
+```
+
+**Why it is here.** For remote overseas roles this line answers a question the employer is legally restricted from asking directly in some jurisdictions and reluctant to ask anywhere. Volunteering it, with a proficiency level rather than a bare claim, removes an unspoken doubt.
+
+#### What is deliberately absent
+
+- **No photo, age, or marital status.** These are common on Philippine resumes and are a liability for remote international applications, where they invite bias and look dated.
+- **No objective statement.** It was replaced by the summary, which says the same thing in half the space and without the word "seeking a challenging position".
+- **No references.** "Available on request" wastes a line; every employer assumes you can provide them.
+- **No hobbies** unless one is genuinely relevant — a home lab is relevant, and belongs in Projects rather than as a hobby.
+- **No skill bars or percentages.** "Windows — 80%" is unverifiable and means nothing to any reader.
+
+### Part 6 — Getting past the software, without lying to it
+
+Part 1 said applicants worry about ATS (applicant tracking systems) — the software that reads, scores, and sometimes filters resumes before a human sees them. Here is the accurate version of that concern, because the internet exaggerates it in both directions.
+
+**What ATS software actually does.** It parses your resume into fields — name, contact details, employer, dates, skills — so a recruiter can search and sort. It may rank candidates by keyword match. In a small company it may do nothing at all. Knocking out a qualified candidate automatically is a real phenomenon but a rarer one than the internet suggests, and it mostly affects badly formatted files rather than honest content.
+
+**The three things that genuinely cause parse failures**, all of which are formatting rather than wording:
+
+| Cause | What breaks | Fix |
+|---|---|---|
+| **Tables and text boxes** | Parsers read columns in the wrong order, scrambling your history | Single-column layout for the resume itself |
+| **Headers and footers** | Contact details in a Word header are frequently dropped entirely | Put contact details in the body text, at the top |
+| **Images and icons** | Skill icons and logos parse as nothing; the meaning is lost | Write the skill as text |
+
+**The honest way to handle keywords.** Read ten job ads for the role you want and write down the words that keep appearing: *Windows*, *Active Directory*, *ticketing system*, *remote support*, *TCP/IP*, *customer service*. Then check whether your resume contains the ones that are **truthfully** yours.
+
+That last word is doing the work. If you have genuinely done it — studied NTFS permissions, built a lab network, worked practice tickets — then the keyword is honest and should appear. If you have not, adding the keyword converts a weak resume into a dishonest one, and the interview will find out. **You are matching vocabulary to real experience, not inventing experience to match vocabulary.**
+
+A practical test for every keyword you add: *if the interviewer says "tell me about your experience with this", can I answer specifically for ninety seconds?* If not, the word does not belong on the page yet.
+
+#### One resume per role family, not per application
+
+Customising every application is exhausting and, past a point, pointless. The workable compromise:
+
+- **Keep one master resume** containing everything true.
+- **Maintain two or three variants** by role family — helpdesk/support, networking-focused, sysadmin-focused. Change the summary, reorder the skills, and promote the most relevant project to the top.
+- **Tailor the summary only** for a specific application, because that is the one paragraph a human always reads, and it costs two minutes.
+
+That gets you most of the benefit of customisation for a fraction of the effort, and it keeps you applying when the alternative is burning out on resume editing.
+
+### Part 7 — LinkedIn, and why it is not optional for remote work
+
+For local walk-in hiring, LinkedIn is optional. **For remote overseas roles it is close to mandatory**, because it is where a recruiter checks that you exist, that your story is consistent with your resume, and often that you are reachable before they ever email you.
+
+#### The four sections that matter
+
+| Section | What to write | Common mistake |
+|---|---|---|
+| **Headline** | The role and the skills: "IT Support Technician · Windows, Networking, Ticketing" | "Aspiring IT professional" — aspiration is not a search term |
+| **About** | Three short paragraphs: what you do, what you have built, what you want | A wall of text, or a list of soft-skill adjectives |
+| **Experience** | Your projects, entered as entries with dates — this is what makes the profile look active | Leaving it empty because you have no employer |
+| **Skills** | The same truthful keywords as your resume | Adding 50 skills to look broad; it reads as unfocused |
+
+That third row is the one people get wrong. You do not need an employer to populate the Experience section — you list your projects with date ranges, in the same way the resume does. A profile with real entries reads as someone working; an empty one reads as someone who made an account.
+
+#### The About section, written out
+
+```text
+I am an entry-level IT support technician, self-taught through a structured
+curriculum covering Windows administration, networking, and helpdesk practice.
+
+I learn by building. My portfolio includes 15 documented practice tickets, a
+routed two-subnet lab network, and a PowerShell inventory script — each written
+up with the diagnostic reasoning, not just the outcome. I am most useful at the
+part of a ticket where the user has described the symptom and someone needs to
+work out what is actually happening.
+
+I am looking for a remote helpdesk or IT support role. I am based in the
+Philippines (UTC+8) and available to overlap with US and EU hours.
+
+Portfolio: github.com/juandelacruz
+```
+
+**What this is doing.** First paragraph: who and what basis. Second: evidence with a specific strength named, which is more memorable than a list of skills. Third: what is wanted and the practical constraint. It is under 150 words, it names real artefacts, and every sentence would survive being questioned.
+
+#### Networking without feeling like a fraud
+
+The instinct for a newcomer is to avoid connecting with anyone until there is something worth showing. That is backwards. **Connect while you are still learning**, with a short honest note:
+
+> "Hello — I am studying toward entry-level IT support and working through hands-on labs in Windows and networking. I have been following your work in [specific area]. I would be glad to connect and learn from what you post."
+
+Two rules: say something specific about why *that* person, and never ask for a job in the connection request. A connection request is not an application; asking for work in it converts a possible ally into someone who ignores you. Build thirty to fifty genuine connections during study, and the profile stops looking new at exactly the moment you start applying.
+
+### Part 8 — Defending every line in the interview
+
+This is the section that determines whether the resume helps or hurts. Everything on the page is a question waiting to be asked, and the difference between a strong and weak candidate is not the resume — it is what happens in the two minutes after the interviewer points at a bullet.
+
+#### The two-minute drill
+
+For every line on your resume, be able to answer these without hesitating:
+
+1. **What specifically did you do?** Not the topic — the action.
+2. **What tools did you use, exactly?**
+3. **What went wrong, and how did you get past it?** The failed attempts are what prove you did the work.
+4. **How did you know it was finished?** The evidence question. "The user said thanks" is a weak answer; "connectivity was confirmed by ping and the capture showed the full handshake" is a strong one.
+5. **What would you do differently now?**
+
+If any line on your resume cannot survive those five, either do the work behind it or remove the line. Those are the only two honest options, and removing is always available.
+
+#### Worked example: defending a bullet
+
+Take this bullet from Part 5:
+
+> Built a two-subnet network in VirtualBox with pfSense routing between them; verified connectivity and fault isolation using ping, tracert, and Wireshark packet captures.
+
+**"Walk me through building it."** Two VirtualBox internal networks, an Ubuntu Server VM on each, and a pfSense VM with one interface on each network acting as the router and DHCP server. The point was to force traffic between subnets through the router rather than letting everything sit on one flat network.
+
+**"What went wrong?"** The two guests could not reach each other at first. I had assigned the interfaces to the same internal network by mistake, so they were on one segment and had no router between them — which also meant the routing I was trying to test was not being exercised at all. Finding that taught me to check the topology before the config.
+
+**"How did you verify?"** A `ping` from the first subnet to the router's second interface, then to the host on the second subnet, then `tracert` to confirm the path actually went through pfSense rather than resolving locally. Then a Wireshark capture to see the traffic crossing the interface. The `tracert` mattered most, because a successful ping alone would not have proven the router was doing the work.
+
+**"What would you do differently?"** I would draw the topology before building it. I fixed the interface mix-up by inspecting the config, but a diagram would have made the mistake visible before I wasted time on it — and it is what I do first now.
+
+That is a two-minute answer to a single resume line, and it contains a real failure, a specific verification method, and a changed habit. **That is the standard.** Not perfect knowledge — demonstrable work.
+
+#### The question behind the question
+
+When an interviewer probes a resume bullet, they are usually not testing the technology. They are testing three things:
+
+- **Did you actually do this?** A candidate who did the work has texture — specific problems, specific fixes. A candidate who read about it is smooth and vague.
+- **Can you explain it to someone who does not know?** This is the job. If you cannot explain your own lab network clearly, you cannot explain a user's problem clearly.
+- **Do you know the edges of your own knowledge?** The strongest answer to "do you know X?" is often "I know this part well and I have not touched that part yet." Overclaiming is what destroys interviews; accurate self-assessment is what builds credibility.
+
+### Part 9 — Key takeaways
+
+- **The hiring manager is scanning for signals, not reading.** Design the top third of page one for a thirty-second skim.
+- **Comprehension beats impressiveness.** A stranger must understand what you did, not be dazzled by it.
+- **A lab project reads as experience** when it carries context, tools, action, evidence, and result.
+- **Every bullet names a tool, a specific action, and a verifiable outcome.** If you cannot name a tool, you have not done enough to write the bullet.
+- **Everything on your resume is an interview question.** Keep every claim strictly true so the question is one you can answer.
+- **Honesty is a strategy, not only a virtue.** Verification is trivially easy when your portfolio has links.
+- **Precision beats both apology and inflation.** "I completed this curriculum and built these artefacts" is the framing.
+- **Put contact details and links in the body text, not a header**, and keep the layout single-column — those are the formatting failures that break parsing.
+- **Match keywords to experience you actually have.** The test is whether you can talk about it for ninety seconds.
+- **Two or three resume variants by role family** beats rewriting for every application, and it keeps you applying.
+- **For remote work, LinkedIn is close to mandatory.** List your projects under Experience so the profile reads as active.
+- **A headline is a search term, not an aspiration.** "Aspiring IT professional" is invisible.
+- **Never ask for a job in a connection request.** Build the network while you are still learning.
+- **Prepare a two-minute defence for every resume line.** The texture of a real answer — specific problems, specific fixes — is what proves you did the work.
+- **"I know this part well and I have not touched that part" is a strong answer.** Accurate self-assessment builds credibility; overclaiming destroys it.
+
+### Part 10 — Practice this next
+
+The tasks below produce three artefacts and one demonstration. The artefacts are a static site with your write-ups and diagrams, a README that ties the work together, and the workbook PDF. The demonstration is a recorded walkthrough, and it is the one that changes how people read everything else.
+
+Then work this list, which turns the artefacts into something a stranger can actually evaluate:
+
+1. **Write the two-minute defence for every bullet on your resume.** Do it in writing first, then say each one aloud and time it. Any bullet you cannot defend in two minutes is either not finished work or not a resume line yet.
+2. **Run the thirty-second test on yourself.** Show the top third of your resume to someone who does not work in IT, give them thirty seconds, then ask: what job is this person applying for, and what have they built? If either answer is wrong, that zone needs rewriting.
+3. **Build the master resume plus two variants** — support-focused and networking-focused. Change only the summary, the skills order, and which project is first. Then compare them side by side and confirm each is truthful.
+4. **Parse-test your resume.** Paste the plain text into a `.txt` file, or open the PDF and try to select the text in reading order. If your contact details are missing or the columns scramble, fix the layout before anything else.
+5. **Collect ten real job ads** for the role you want and list the words that repeat. Check each against your resume, and add only the ones where you can answer "tell me about this" for ninety seconds.
+6. **Write your LinkedIn headline and About section** using the Part 7 structure, then read them against the rule that every sentence must be checkable. Delete any adjective you cannot prove.
+7. **Enter three projects under LinkedIn Experience with date ranges**, even though they have no employer. This is what makes the profile read as active rather than new.
+8. **Send five connection requests** with a specific, honest note and no request for work. Then keep doing it weekly — the network is what makes the profile useful on the day you start applying.
+9. **Record yourself answering the five drill questions** for your strongest project, then watch it back. You are checking for two things: whether the explanation is clear to a non-specialist, and whether you say "we" when you mean "I".
+10. **Write the honest-limits sentence for your three weakest areas.** For each, one sentence that states what you do know and what you have not touched yet — then say it aloud until it sounds like confidence rather than apology, because that is what it is.
 
 ## Tools for This Phase
 
