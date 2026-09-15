@@ -95,7 +95,7 @@ The roadmap for the **repository itself** (for the study curriculum, see [`../ca
 
 ## Next
 
-- [ ] **Split the 28 remaining dense paragraphs in the IT track.** The readability audit now gates on per-paragraph density: Phase 1 has 11 paragraphs over 90 words, Phase 3 has 6, Phase 5 has 5, Phase 4 has 4, Phase 6 has 2. The cyber track is clean. Keep every word — this is about where the breaks go, not about cutting content.
+- [ ] **Write the five module-review follow-ups.** Scoped and specific — see "Follow-ups from the module review" below. These are the closest thing to known, identified gaps in the curriculum right now.
 - [x] **Audit the six new modules against the depth standard.** Reviewed all six against the standard set by cyber Phases 2 and 7. Verdict: **structurally sound, teaching quality high, no restructuring needed.** All passed clean on every structural check — no stranded content after the closing sections, no duplicate or gapped Part numbers, no misparented `####`, no glued headings, all ten required sections present, six-column Tools tables with a valid Free alternative on every paid row, well-formed resource bullets and checklist lines, and every internal cross-reference resolving.
   - **Five real technical errors found and fixed** — the class automated checks cannot catch:
     - **Detection Engineering:** an auditd rule comment claimed "privileged user" above `-F auid>=1000`, but `auid` is the *login* uid and root is 0, so the rule did the opposite of what the text said. The correction also documents that `auid` survives `sudo`, so the rule does not isolate privileged execution on its own. Verified against the `auditctl(8)` man page, which defines `auid` as "the original ID the user logged in with".
@@ -127,7 +127,6 @@ Small, specific, and scoped — each closes a gap the review identified but deli
 
 - [ ] Full-text search across lessons, if the curriculum outgrows the sidebar and per-phase navigation.
 - [ ] Print stylesheet for a lesson, so a phase can be taken offline on paper.
-- [ ] Tighten the paragraph-density gate from 150 to 110 words once the current backlog is cleared.
 
 ## Explicitly out of scope
 
