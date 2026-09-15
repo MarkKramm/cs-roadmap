@@ -1002,7 +1002,7 @@ Then look at what is listening and decide what should not be:
 
 | Finding | Question to ask |
 |---|---|
-| A port listening on `0.0.0.0` | Does this need to be reachable from other machines, or only `127.0.0.1`? |
+| A port listening on `0.0.0.0` | Does this need to be reachable from other machines, or only from `127.0.0.1` |
 | A service you do not recognise | What installed it, and do you still use it? |
 | A port open that you never configured | Investigate before assuming it is fine |
 

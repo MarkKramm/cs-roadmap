@@ -518,7 +518,740 @@ When an interviewer probes a resume bullet, they are usually not testing the tec
 - **Prepare a two-minute defence for every resume line.** The texture of a real answer — specific problems, specific fixes — is what proves you did the work.
 - **"I know this part well and I have not touched that part" is a strong answer.** Accurate self-assessment builds credibility; overclaiming destroys it.
 
-### Part 10 — Practice this next
+### Part 10 — Build the portfolio README, step by step
+
+Parts 2 and 4 told you what the README should contain. This part builds one, in order, with the exact commands. Budget two hours. Assume you have never used Git.
+
+#### Step 1 — Check that Git exists
+
+Open a terminal. On Windows, install Git from https://git-scm.com/ if the first command fails.
+
+```bash
+git --version
+git config --global user.name "Juan Dela Cruz"
+git config --global user.email "juan.delacruz@email.com"
+```
+
+Use the same email as your GitHub account. The second and third commands run once per computer and never need repeating.
+
+#### Step 2 — Create the repository on GitHub first
+
+Creating it on the website is easier than fighting the command line on day one.
+
+| Where | What to click | What to type |
+|---|---|---|
+| github.com | Green **New** button | — |
+| Repository name | — | `entry-level-it-portfolio` |
+| Description | — | `Entry-level IT support portfolio: labs, write-ups, scripts` |
+| Visibility | — | **Public** — a private repo is invisible to reviewers |
+| Initialize | — | Tick **Add a README file** |
+| Licence | — | Leave as None |
+
+Then click **Create repository**. You now have a URL shaped like `https://github.com/yourname/entry-level-it-portfolio`.
+
+#### Step 3 — Clone it to your laptop
+
+"Clone" means download a working copy that Git tracks.
+
+```bash
+cd ~/Documents
+git clone https://github.com/yourname/entry-level-it-portfolio.git
+cd entry-level-it-portfolio
+```
+
+If Git asks for a password, it wants a **personal access token**, not your GitHub password. Create one under Settings → Developer settings → Personal access tokens, scope `repo` only.
+
+#### Step 4 — Create the folder skeleton
+
+Git does not track empty folders, so put a placeholder file in each one.
+
+```bash
+mkdir troubleshooting-writeups networking windows-linux ticketing-samples scripts resume
+touch troubleshooting-writeups/.gitkeep networking/.gitkeep windows-linux/.gitkeep
+touch ticketing-samples/.gitkeep scripts/.gitkeep resume/.gitkeep
+```
+
+On Windows PowerShell, `touch` is not a command. Use `New-Item -ItemType File` followed by the path instead, once per file.
+
+#### Step 5 — Write the README for real
+
+Open `README.md` in a plain text editor — Notepad, VS Code, anything — and paste this. Replace every bracketed part.
+
+```markdown
+# IT Support Portfolio — [Your Full Name]
+
+Entry-level IT support technician (remote). Based in [City], Philippines (UTC+8).
+Target role: remote helpdesk / IT support.
+
+**Resume (PDF):** [resume/resume.pdf](resume/resume.pdf)
+**Contact:** [email] · [linkedin.com/in/you] · [github.com/you]
+
+## What's here
+
+| Folder | Contents |
+|---|---|
+| [troubleshooting-writeups/](troubleshooting-writeups/) | Worked examples: symptom → diagnosis → fix, with what I ruled out |
+| [networking/](networking/) | Lab network diagram, subnetting notes, Wireshark walkthroughs |
+| [windows-linux/](windows-linux/) | User/group and permission labs, services, PowerShell and Bash |
+| [ticketing-samples/](ticketing-samples/) | 5 ticket templates, sample resolved tickets, monitoring runbook |
+| [scripts/](scripts/) | PowerShell inventory script |
+| [resume/](resume/) | One-page resume (PDF) |
+
+## How I work
+
+I learn by building and documenting. Every artefact below records what I
+attempted, what broke, how I diagnosed it, and how I verified the fix —
+including the dead ends, because those are where the learning is.
+
+## Background
+
+Self-taught via a structured IT curriculum, [Month Year] – present. No degree.
+Studied deliberately with hands-on labs and written evidence at each stage.
+
+## Currently learning
+
+[One line: what you are studying this month.]
+```
+
+#### What each README section is doing
+
+| Section | Its job | Failure mode it prevents |
+|---|---|---|
+| Title and first two lines | Answers "who is this and what do they want" before any scrolling | Reviewer cannot tell the target role |
+| Resume and contact links | One click to the PDF from the very top | Reviewer gives up hunting for it |
+| What's here table | Proves the repo has substance without opening folders | Reviewer assumes it is empty |
+| How I work | States your method — the thing that transfers to the job | Reviewer sees only files, not a person |
+| Background | Frames self-teaching as disciplined delivery, not a gap | Reviewer assumes no structure |
+| Currently learning | Proves the repo is alive, not an abandoned assignment | Stale dates read as disinterest |
+
+#### Step 6 — Commit and push
+
+```bash
+git add .
+git commit -m "Add portfolio README and folder structure"
+git push origin main
+```
+
+If your branch is called `master` rather than `main`, the push command is `git push origin master`. Check which one you have with `git branch`.
+
+**What you should see.** Refresh the GitHub page. The README now renders as formatted HTML: your name as a heading, the table drawn as a grid, the links clickable and blue. Open the repository URL in a private browser window. If you can read it while logged out, a recruiter can too.
+
+#### Step 7 — The five-second test on your own README
+
+Open the page, look away, then look back for five seconds and close it. Write down what you remember without scrolling.
+
+| What you should have caught | What it means if you did not |
+|---|---|
+| The role you are targeting | The title or first line is buried or vague |
+| That you are in the Philippines and remote-ready | The location is missing or below the fold |
+| That there is real content in folders | The "What's here" table is missing or too wordy |
+| How to reach you | The contact line is not at the top |
+
+Fix the misses by moving text up or deleting words — never by adding more.
+
+#### Commands you will use for the rest of this phase
+
+| Command | What it does | When to use it |
+|---|---|---|
+| `git status` | Lists changed and untracked files | Before every commit, always |
+| `git add .` | Stages everything changed | After you finish a piece of work |
+| `git add path/to/file` | Stages just one file | When you want two separate commits |
+| `git commit -m "message"` | Saves a labelled snapshot | After staging |
+| `git push` | Uploads commits to GitHub | After committing, before you stop |
+| `git log --oneline` | Shows your commit history | When checking the history looks tidy |
+| `git pull` | Downloads changes made on GitHub | When you edit a file in the web editor |
+
+**The rule of committing:** one commit per finished thought. "Add DHCP lab write-up with packet capture notes" is a commit. Twenty commits called "update" is a history that tells a reviewer nothing.
+
+**Only ever test systems you own or have written permission to test.** Everything in this portfolio is your own virtual machines on your own laptop. That constraint is not a formality — it is the professional habit, and it belongs in the write-ups themselves.
+
+### Part 11 — The worked lab write-up
+
+This is the single most valuable artefact you can produce, because for a candidate with no job history it is the closest thing to a work sample. A write-up is not a tutorial you copied. It is a record of *you* doing a thing and reasoning about it.
+
+#### The scenario
+
+A free, safe, offline exercise: install Ubuntu Server in VirtualBox and prove you can administer the basics. It costs nothing, needs no account, and can be done on a modest laptop with 4 GB free and virtualisation enabled.
+
+| Constraint | Detail |
+|---|---|
+| Cost | $0 — VirtualBox and Ubuntu are both free |
+| Hardware | ~2 GB RAM and 15 GB disk allocated to the VM |
+| Risk | None — nothing touches your real machine |
+| Time | 2–3 hours including the write-up |
+| Safety | You own the VM, so you may test it freely |
+
+#### The strong version
+
+Save this as `windows-linux/ubuntu-server-first-install.md`. Read it as a model of *shape*, then write your own with your own failures.
+
+```markdown
+# Ubuntu Server 24.04 in VirtualBox — first install and admin basics
+
+**Date:** 2026-03-14 · **Time spent:** 3 hours · **Status:** Complete
+
+## What I set out to do
+
+Install Ubuntu Server 24.04 in a VirtualBox VM and prove I can do four
+things from the command line without a GUI: create a user, put them in a
+group, restart a service, and read a log to explain a failure.
+
+## Environment
+
+| Item | Value |
+|---|---|
+| Host | Windows 11, 8 GB RAM |
+| Virtualisation | Enabled in BIOS (see "What went wrong") |
+| VirtualBox | 7.0.14 |
+| Guest | Ubuntu Server 24.04 LTS, 2 GB RAM, 20 GB disk |
+| Network | NAT, no port forwarding needed |
+
+## What I did
+
+1. Created the VM, attached the ISO, booted.
+2. Accepted defaults, chose the LVM-guided disk layout.
+3. Named the machine `lab-ubuntu-01`, created user `labadmin`.
+4. Enabled OpenSSH server during install (faster than adding it later).
+5. Booted and logged in at the console.
+
+## Screenshots
+
+- `01-install-summary.png` — the install confirmation screen showing
+  `lab-ubuntu-01` and user `labadmin`.
+- `02-login-motd.png` — first login, showing the IP and hostname banner.
+- `03-group-add.png` — `id labuser` output showing the new group membership.
+- `04-ssh-failure.png` — the `Connection refused` error before enabling
+  the service.
+- `05-ssh-success.png` — successful login after the fix.
+
+(Each screenshot is cropped to the terminal window only. No host desktop
+visible — the host contains nothing a reviewer needs and everything a
+reviewer should not see.)
+
+## What went wrong
+
+**The VM would not start at all.** VirtualBox reported
+`VT-x is not available (VERR_VMX_NO_VMX)`. My first guess was a corrupted
+install, so I reinstalled VirtualBox — a wasted 40 minutes, and the error
+was identical.
+
+**The actual cause:** hardware virtualisation was disabled in BIOS. I
+rebooted into BIOS (F2 on this laptop), enabled Intel VT-x, saved and
+exited. The VM booted immediately.
+
+**What I would check first next time:** the error text, literally. `VT-x
+is not available` names the missing feature. I read past it because I did
+not know what VT-x was, then guessed instead of looking it up.
+
+**Second failure:** SSH was refused even though I selected OpenSSH during
+install. `systemctl status ssh` showed the unit as `inactive (dead)`.
+Cause: I had skipped that step in the installer. Fix:
+`sudo systemctl enable --now ssh`, then `systemctl status ssh` to confirm
+`active (running)`. Verified by connecting from the host.
+
+## How I verified it worked
+
+| Claim | How I proved it |
+|---|---|
+| User and group created | `id labuser` showed `uid=1001(labuser) gid=1002(helpdesk)` |
+| Service controllable | `systemctl status ssh` showed `active (running)` |
+| Log reading works | `journalctl -u ssh -n 20` showed the accepted-connection line |
+| SSH reachable | `ssh labadmin@127.0.0.1 -p 2222` connected from the host |
+
+## What I learned
+
+- `VT-x is not available` means BIOS virtualisation, not a broken install.
+  Reading the error literally would have saved 40 minutes.
+- `systemctl status <unit>` is the first command to run for any service
+  problem — it distinguishes "not running" from "running but refusing".
+- Enabling a service with `enable --now` is two operations: start it and
+  make it start at boot. I had been assuming they were the same thing.
+- Cropping screenshots before committing them is a habit worth having.
+
+## What I would do differently
+
+Draw the plan on paper first, including which BIOS settings matter, and
+read every error message once before touching anything.
+
+## Files in this folder
+
+- `01`–`05` screenshots
+- `lab-notes.txt` — the raw command log I kept while working
+```
+
+#### Why that write-up works
+
+| Element | What it proves to a reviewer |
+|---|---|
+| Environment table | You can state a configuration precisely, which is what ticketing requires |
+| Numbered actions | You can reconstruct a process in order |
+| Five named screenshots | The work happened; a claim alone would not |
+| A real failure with a cost | You diagnose, and you admit guesses — the trait that makes someone trainable |
+| Verification table | You distinguish "I did a thing" from "I confirmed it worked" |
+| Lessons with specifics | You extract transferable rules, not just outcomes |
+| "What I would do differently" | You reflect, which is what separates juniors who improve |
+
+The failure section is the part most beginners delete, and it is the part that does the most work. A write-up with no failures reads as copied. A write-up with one honest dead end reads as experience.
+
+#### The weak version of the same task
+
+Here is the same three hours, written up badly. This is what most beginners produce first.
+
+```markdown
+# Ubuntu
+
+I installed Ubuntu in VirtualBox today. It was pretty easy. I used
+VirtualBox and followed a YouTube tutorial.
+
+I learned a lot about Linux and it was interesting. Linux is important
+for IT so I am glad I learned it.
+
+I had some problems but I fixed them.
+
+Overall a good experience. I will continue learning Linux.
+```
+
+#### Weak versus strong, line by line
+
+| Weak | What is missing | Strong equivalent |
+|---|---|---|
+| "I installed Ubuntu in VirtualBox today." | Which version, how much RAM, which network mode | The environment table |
+| "I used VirtualBox and followed a YouTube tutorial." | Which tutorial taught you what, and what you did yourself | The numbered action list |
+| "I had some problems but I fixed them." | The single most valuable paragraph in the whole artefact | The VT-x story, with the 40 wasted minutes |
+| "I learned a lot about Linux." | Any specific, checkable claim | The four bullet lessons |
+| No screenshots | Evidence | Five named, cropped screenshots |
+| No verification | Proof the outcome was real | The verification table |
+
+**The rule that follows:** a write-up is judged by the density of specifics, not by the fluency of the prose. The strong version is not better written. It is better *evidenced*.
+
+#### Write-up checklist before you commit
+
+| Check | Why |
+|---|---|
+| Date and time spent recorded | Shows sustained effort and lets a reviewer see recency |
+| Environment table present | Separates a repeatable lab from a lucky accident |
+| Every screenshot cropped to the relevant window | A messy desktop is a distraction and can leak personal data |
+| At least one failure described with its cost | Proves you actually did the work |
+| Every claim has a verification line | Turns activity into evidence |
+| Secrets and personal data absent | Passwords, tokens, and real names never belong in a public repo |
+
+### Part 12 — Resume templates you can type over
+
+Part 5 showed a finished resume with the reasoning attached. This part gives you the same structure with blanks, so you can produce your own in one sitting.
+
+#### Rules for using these templates
+
+- Replace every `[bracketed]` field. A resume with a leftover `[Your Name]` is an instant rejection.
+- Delete any section you cannot fill honestly. An absent section costs nothing; a fabricated one costs the interview.
+- Keep it to one page. If it spills, cut the weakest bullet, not the font size.
+- Build it in Google Docs with a single column, then export to PDF.
+
+#### Template 1 — Header and summary
+
+```text
+[FULL NAME]
+[City], Philippines (UTC+8) · Available [hours] UTC+8, flexible for US/EU overlap
+[email] · linkedin.com/in/[handle] · github.com/[handle]
+
+SUMMARY
+Entry-level IT support technician. Self-taught through a structured curriculum covering
+Windows administration, networking, and ticketing, with a portfolio of documented
+hands-on work. Seeking a [target role] role.
+```
+
+| Line | Guidance |
+|---|---|
+| Name | Plain, largest text, no photo anywhere on the page |
+| Location | Always include `UTC+8` — many remote employers filter on timezone |
+| Availability | State real hours; do not promise 24/7 you cannot sustain |
+| Links | All three on one line, near the top, always working |
+| Summary | Two or three sentences, no adjectives about your personality |
+
+#### Template 2 — Skills block
+
+```text
+TECHNICAL SKILLS
+Operating systems : [Windows 10/11: users, groups, NTFS permissions, services, Event Viewer]
+                    [Ubuntu Server: users, systemd, permissions, /var/log review]
+Networking        : [TCP/IP, subnetting, DNS, DHCP, NAT, ping/tracert/nslookup, Wireshark]
+Identity & access : [Local accounts and groups, least privilege, MFA, access review]
+Tools             : [osTicket, Snipe-IT, Bitwarden, VirtualBox, PowerShell, Git/GitHub]
+```
+
+| Column | Guidance |
+|---|---|
+| Category names | Use the standard ones — parsers and humans both expect them |
+| Left of the colon | Keep aligned so the block scans as a grid of text, not a paragraph |
+| Inside brackets | Replace with what you actually did, or delete the whole line |
+| Never | Skill bars, percentages, star ratings, or logos |
+
+#### Template 3 — One project entry
+
+```text
+PROJECTS
+
+[Project name — plain English, no clever titles]
+· [Context and action: what you built and with which tools, one sentence.]
+· [Second action or artefact: a document, script, or diagram you produced.]
+· [Evidence line: the repository or folder link.]
+```
+
+| Bullet | Guidance |
+|---|---|
+| Name | Say what it is: "Routed home lab network", not "Networking Journey" |
+| Bullet 1 | Verb first: Built, Configured, Diagnosed, Wrote, Verified |
+| Bullet 2 | Prove you produced something reusable, not just clicked around |
+| Bullet 3 | A link a sceptical reader can click. Delete the project if you have no link |
+
+#### Template 4 — Experience when you have no IT job
+
+```text
+EXPERIENCE AND RELEVANT ACTIVITIES
+
+[Job title or role] — [Employer or "Family business" or "Freelance"]     [dates]
+· [What you did that involved people, problems, or process.]
+· [A number if you have one: how many customers, tickets, or hours.]
+· [Anything you documented, organised, or improved.]
+
+Self-directed IT study                                                  [dates]
+· [What you studied, and the artefacts you produced.]
+```
+
+| Line | Guidance |
+|---|---|
+| Section title | "Experience and Relevant Activities" is honest and lets you include non-IT work |
+| Retail or service work | Genuinely relevant — support is half communication. Say so in the bullet |
+| Numbers | "handled 30+ customers daily" is stronger than "handled customers" |
+| Self-directed study | An entry, with dates, so the section is never empty |
+
+#### Template 5 — Education, certifications, and languages
+
+```text
+EDUCATION AND TRAINING
+
+Self-directed IT curriculum                                     [start] – present
+· Completed a structured 9-phase programme covering computer fundamentals, operating
+  systems, networking, helpdesk practice, system administration, and security basics.
+· Built and documented a hands-on artefact at every phase; portfolio at the link above.
+
+[Most recent formal education — degree, diploma, or senior high school]  [dates]
+
+CERTIFICATIONS
+· [Only certificates you have actually earned, with the issuer and date. Delete the
+  section entirely if there are none yet.]
+
+LANGUAGES
+English ([proficiency]) · Filipino (native)
+```
+
+| Line | Guidance |
+|---|---|
+| Self-study entry | Give it a structure and a date range so it reads as a programme, not a hobby |
+| Formal education | Include it plainly. No "only", no apology, no hedging |
+| Certifications | Delete the heading if empty. A heading with nothing under it looks worse than absence |
+| Languages | Give a level, not a bare claim — it answers a question employers avoid asking |
+
+#### Common template errors
+
+| Error | Why it costs you |
+|---|---|
+| Leftover `[brackets]` | Reads as careless before a single word is evaluated |
+| Two columns | Parsers scramble the reading order |
+| Contact details in a Word header | Frequently dropped by parsers, so you become unreachable |
+| Photo, age, marital status | Invites bias in international remote hiring and looks dated |
+| "References available on request" | Wastes a line; every employer assumes it |
+| Font size below 10pt to fit one page | Cut content instead — legibility is not negotiable |
+| Exporting as an image PDF | Text will not parse and the reviewer cannot copy your email |
+
+### Part 13 — The line-by-line resume workshop
+
+Below are five lines beginners actually write. Each is improved in front of you, with the reason given. The pattern in all five is identical: **add the tool, add the action, add the evidence, remove the adjective.**
+
+#### Line 1 — "Good with computers."
+
+| Version | Text |
+|---|---|
+| Before | Good with computers. |
+| After | Diagnosed and resolved 15 practice helpdesk tickets covering password resets, VPN failures, printer faults, and account lockouts, documented in a public ticket repository. |
+| Why | "Good with" is an opinion with no scale. The rewrite names a countable body of work, the categories inside it, and a place to verify it. |
+
+The rewrite is not a boast. It is the same fact, stated in the unit a hiring manager measures in: tickets.
+
+#### Line 2 — "Familiar with Windows."
+
+| Version | Text |
+|---|---|
+| Before | Familiar with Windows. |
+| After | Created local users and groups in Windows 11 and demonstrated how inherited and explicit NTFS permissions combine with share permissions to determine effective access. |
+| Why | "Familiar" is unfalsifiable. Naming permissions proves you touched the part of Windows that a helpdesk actually argues with. |
+
+Note what was **not** added: "experienced", "expert", "advanced". The verb carries the claim and the noun carries the proof.
+
+#### Line 3 — "Fast learner and hardworking."
+
+| Version | Text |
+|---|---|
+| Before | Fast learner and hardworking. |
+| After | *(cut — see below)* |
+| Why | Every applicant writes this. It is unverifiable, it occupies the most valuable space on the page, and it says nothing about IT. |
+
+**This line should be deleted, not improved.** The evidence for "fast learner" is the portfolio: a curriculum completed, artefacts produced, tools picked up without a course. Show it in Projects and let the reader conclude it. Asserting a trait you could demonstrate instead is the weakest move available to you.
+
+#### Line 4 — "Did a home lab."
+
+| Version | Text |
+|---|---|
+| Before | Did a home lab. |
+| After | Built a two-subnet network in VirtualBox with pfSense routing between them; verified connectivity and fault isolation using ping, tracert, and Wireshark packet captures. |
+| Why | "A home lab" could mean anything. Naming the hypervisor, the router, the separation, and the verification tools turns a vague noun into a describable activity. |
+
+That single bullet generates at least four interview questions, and you can answer all four because you did the work. A vague bullet generates none — and a resume that generates no questions is a resume that generated no interest.
+
+#### Line 5 — "Helped customers."
+
+| Version | Text |
+|---|---|
+| Before | Helped customers. |
+| After | Handled 30+ customer queries per shift in a retail environment, including resolving complaints about incorrect orders and escalating billing disputes to a supervisor with a written summary of the issue. |
+| Why | It adds volume, the nature of the problems, and — critically — evidence of escalation with written documentation. Escalation hygiene is what a service desk is graded on. |
+
+This is the line most beginners undervalue. Non-IT customer work is genuinely relevant to a support role, and describing it accurately is not a stretch. It is a match.
+
+#### The pattern, extracted
+
+| Move | Example |
+|---|---|
+| Name the tool or system | VirtualBox, Windows 11, osTicket, pfSense |
+| Name the action | Built, configured, diagnosed, created, verified |
+| Add a scale or number | 15 tickets, two subnets, 30+ customers, 10 devices |
+| Add the verification | ping and tracert, Event Viewer, packet capture |
+| Add the artefact | repository, diagram, runbook, worksheet |
+| Delete the adjective | "hardworking", "passionate", "good with" |
+
+Apply those six moves to every line and the resume becomes checkable, which is the only property that matters.
+
+### Part 14 — The defence drill, worked
+
+Part 8 described the five-question drill and defended one bullet from Part 5. This part runs the drill three more times, and one of the three produces the answer nobody wants: **cut the line.**
+
+#### The drill, in five questions
+
+| # | Question | What it is really testing |
+|---|---|---|
+| 1 | What specifically did you do? | Whether you can name an action rather than a topic |
+| 2 | What tools did you use, exactly? | Whether the work was real |
+| 3 | What went wrong, and how did you get past it? | Whether you struggled, which is what learning looks like |
+| 4 | How did you know it was finished? | Whether you verified or merely stopped |
+| 5 | What would you do differently now? | Whether you reflected |
+
+#### Drill 1 — the PowerShell inventory script
+
+The line under test:
+
+> Wrote a PowerShell inventory script reporting OS version, disk space, and running services; used to document a 10-device practice asset inventory.
+
+| Q | Answer |
+|---|---|
+| 1 | I wrote a script that queries a Windows machine and outputs OS version, free disk space on each volume, and running services, then reformatted the output into a table I could paste into an asset register. |
+| 2 | PowerShell 7, `Get-CimInstance` for OS and disk, `Get-Service` filtered to `Running`, `Export-Csv` for the output. |
+| 3 | Disk space came back in bytes, which is unreadable. I converted with `[math]::Round($_.FreeSpace/1GB,2)` and it took me a while to accept that I needed the `1GB` division rather than a format string. |
+| 4 | It produced correct rows for all 10 devices in my practice inventory, and I spot-checked two against the machine's own Settings screen. |
+| 5 | I would add a comment-based help block and a parameter for a remote computer name instead of hardcoding `localhost`. |
+
+**Verdict:** keep. It survives all five, and the byte-to-gigabyte detail is exactly the texture that distinguishes real work from a copied bullet.
+
+#### Drill 2 — the ticket templates
+
+The line under test:
+
+> Built five reusable ticket templates and a monitoring runbook for a disk-space alert, including known false positives.
+
+| Q | Answer |
+|---|---|
+| 1 | I wrote five ticket templates — password reset, VPN failure, printer fault, account lockout, slow machine — and a runbook for what to do when a disk-space alert fires. |
+| 2 | Plain Markdown in a Git repository, structured as reported/observed/action/verified. No ticketing software involved; I used osTicket separately to practise the workflow. |
+| 3 | The first runbook draft said "check disk space" and was useless, because that is the thing the alert already told you. I rewrote it around what to do *after* you know: which volumes, what to check first, and when it is a false positive from a log rotation. |
+| 4 | I ran the runbook against a VM with an artificially filled disk and it correctly led me to the cause. |
+| 5 | I would version the runbook and record the date of each revision, since runbooks go stale. |
+
+**Verdict:** keep, but note the honest limitation. This is worth saying aloud in the interview: *"The templates are Markdown rather than real ticket exports — I did not have access to a production ticketing system."* Volunteering the limit is stronger than being caught by it.
+
+#### Drill 3 — the Active Directory line that should be cut
+
+The line under test, as a beginner might write it:
+
+> Experienced with Active Directory and Windows Server administration.
+
+| Q | Answer |
+|---|---|
+| 1 | I studied how Active Directory organises users, groups, and organisational units, and I read about Group Policy. I practised the equivalent concepts — local users, local groups, permissions — on a standalone Windows 11 machine. |
+| 2 | Windows 11 local users and groups. I have not installed or administered a domain controller. |
+| 3 | Nothing went wrong, because I did not do it. I followed a tutorial's screenshots rather than running my own domain. |
+| 4 | I could not answer this honestly. There was no artefact and nothing to verify. |
+| 5 | Install Windows Server in a VM and promote an actual domain controller, then recreate the user and group management I practised locally. |
+
+**Verdict: cut the line.** Questions 3 and 4 collapse, which is the signal. The honest version is not a weaker version of the same sentence — it is a different sentence:
+
+| Cut this | Replace with this |
+|---|---|
+| Experienced with Active Directory and Windows Server administration. | Studied Active Directory concepts and practised user and group management, permissions, and least privilege on a standalone Windows 11 machine; next step is a Windows Server domain controller lab. |
+
+The replacement is longer, entirely true, and much stronger. It names what you did, names what you have not done, and shows you know the difference. Interviewers hire the second version and distrust the first.
+
+#### How to run the drill on your own resume
+
+| Step | Instruction |
+|---|---|
+| 1 | Write all five questions at the top of a blank document. |
+| 2 | Read your resume aloud, one bullet at a time. |
+| 3 | Answer all five in writing for each bullet. Do not edit as you go. |
+| 4 | Mark any bullet where Q3 or Q4 has no real answer. Those are the cuts. |
+| 5 | Rewrite each cut bullet either to describe the work you actually did, or delete it. |
+| 6 | Say the surviving answers aloud and time them. Aim for under two minutes each. |
+| 7 | Repeat monthly — the answers get sharper as the work behind them grows. |
+
+**The uncomfortable rule:** if a bullet cannot survive the drill, the work is missing, not the wording. Wording is the last thing to fix, never the first.
+
+### Part 15 — GitHub profile basics
+
+A GitHub profile is a second landing page, and most beginners leave it at defaults. Fifteen minutes of settings work changes what a recruiter sees.
+
+#### The first five seconds
+
+When a recruiter opens `github.com/yourname`, they see, in order:
+
+| Order | What they see | What it tells them |
+|---|---|---|
+| 1 | Your avatar | A default identicon reads as an inactive account |
+| 2 | Your name and bio | Blank means anonymous |
+| 3 | Pinned repositories | Your three to six best pieces of work, or nothing |
+| 4 | Contribution activity | Whether you are currently active or stopped months ago |
+| 5 | Repo names and descriptions | Whether the work is legible without clicking |
+
+#### Settings to set
+
+| Setting | Where | What to do | Why |
+|---|---|---|---|
+| Avatar | Settings → Public profile | A clear, plain photograph of your face | Default identicons look like abandoned accounts |
+| Name | Same page | Your real full name | Matching your resume makes you findable and consistent |
+| Bio | Same page | The same headline as LinkedIn, trimmed | It is a one-line search surface |
+| Location | Same page | `Philippines (UTC+8)` | Remote employers filter on it |
+| Website | Same page | Your portfolio repo URL | One click from profile to evidence |
+| Pinned repos | Profile → Customize your pins | Pin three to six, best work first | Reviewers will not scroll past the first screen |
+| Public email | Settings → Emails | Tick "Keep my email addresses private" then add a contact email to the bio | Prevents scraping while staying reachable |
+
+#### What to leave empty
+
+| Leave empty | Reason |
+|---|---|
+| README profile repository | Optional and mostly decorative; a strong one helps, an empty scaffold looks worse than none |
+| Organisation memberships unrelated to IT | Irrelevant at best |
+| Sponsors, achievements, and badges | They signal a contributor, not a jobseeker |
+| Followers and following counts | Never chase these; they are not evaluated |
+| Repositories for coursework you never finished | A repo with one commit and no README is negative evidence |
+
+#### Why pinning matters more than anything else here
+
+The default profile shows repositories by last-updated date. That means a half-finished experiment from last week outranks the write-up you spent six hours on.
+
+| Unpinned profile | Pinned profile |
+|---|---|
+| Whatever you touched most recently | The three to six artefacts you choose |
+| An abandoned test repo can appear first | Order is deliberate, best first |
+| Reviewer must click to learn anything | Each pin shows a name, description, and language |
+| Shows activity | Shows judgement |
+
+Pin in this order: the ticket portfolio, the networking lab, the Windows lab, the best troubleshooting write-up, then the scripts. Add a one-line description to each repository — the description is the only text visible on the pin.
+
+#### Repository hygiene a reviewer notices
+
+| Habit | Why it matters |
+|---|---|
+| Every repo has a README | A repo without one is a folder, not a project |
+| Commit messages describe the change | History is read as evidence of working method |
+| No credentials, tokens, or real client data | A leaked key in a public repo is a serious professional failure |
+| Placeholder values in examples | Proves you know the difference between an example and a secret |
+| Real names and screenshots cropped | Protects other people's data as well as your own |
+| Descriptions filled in on every repo | The pin card is mostly description |
+
+**You may only test systems you own or have written authorisation for.** If you ever write up a security-adjacent exercise, that sentence belongs in the write-up itself, and the target must be a machine you own — typically a VM on your own laptop.
+
+### Part 16 — The 30-day portfolio plan
+
+Everything above, scheduled. Roughly 45–60 minutes a day, on a modest laptop, at $0. Tick the boxes as you go.
+
+#### Week 1 — Build the container
+
+| Day | Task | Artefact by end of day |
+|---|---|---|
+| 1 | Install Git, set your name and email, create the GitHub account if needed | Working `git --version` |
+| 2 | Create the repository on GitHub and clone it locally | Local clone |
+| 3 | Create the six folders with `.gitkeep` files | Folder skeleton pushed |
+| 4 | Write and paste the README from Part 10, replacing every bracket | Rendered README on GitHub |
+| 5 | Pin repositories, set avatar, bio, and location from Part 15 | Profile page that reads as active |
+| 6 | Move five existing artefacts from earlier phases into the folders | Five files committed |
+| 7 | Open the repo in a private window and run the five-second test | A list of fixes, applied |
+
+#### Week 2 — Produce the flagship write-up
+
+| Day | Task | Artefact by end of day |
+|---|---|---|
+| 8 | Plan the Ubuntu Server VM; draw the environment table first | `lab-notes.txt` started |
+| 9 | Install the VM, capture screenshots as you go | Screenshots 01–03 |
+| 10 | Break something deliberately, then fix it, and record the cost | The failure paragraph |
+| 11 | Write the verification table for every claim | Draft write-up |
+| 12 | Write the "what I learned" and "what I would do differently" sections | Complete draft |
+| 13 | Crop screenshots, redact anything personal, commit | Published write-up |
+| 14 | Read Part 11's weak version and check yours against the strong one | Corrected write-up |
+
+#### Week 3 — Produce the resume
+
+| Day | Task | Artefact by end of day |
+|---|---|---|
+| 15 | Draft the header and summary from Template 1 | First page started |
+| 16 | Fill the skills block from Template 2, deleting what is not true | Truthful skills block |
+| 17 | Write three project entries from Template 3 | Projects section |
+| 18 | Write the experience section from Template 4, including non-IT work | Experience section |
+| 19 | Fill in education from Template 5; delete the certifications heading if empty | Complete one-page draft |
+| 20 | Run the Part 13 workshop moves over every bullet | Rewritten bullets |
+| 21 | Export to PDF, parse-test it, and check the links work | `resume/resume.pdf` |
+
+#### Week 4 — Harden and defend
+
+| Day | Task | Artefact by end of day |
+|---|---|---|
+| 22 | Run the Part 14 drill on every bullet in writing | A list of kept and cut lines |
+| 23 | Rewrite or delete every cut line | Final resume |
+| 24 | Write the LinkedIn headline and About section from Part 7 | Updated profile |
+| 25 | Enter three projects under LinkedIn Experience with date ranges | Profile reads as active |
+| 26 | Send five connection requests with specific, honest notes | Five sent |
+| 27 | Show the portfolio to someone outside IT and ask the three stranger questions | Their answers, written down |
+| 28 | Fix whatever the stranger test exposed | Revised README |
+| 29 | Record yourself defending your strongest project; watch it back | One recording, watched |
+| 30 | Write the honest-limits sentence for your three weakest areas and say them aloud | Three sentences you can deliver calmly |
+
+#### The weekly habit after day 30
+
+| Frequency | Action |
+|---|---|
+| Weekly | Add one write-up, even a short one, from anything you troubleshoot |
+| Weekly | Log in to LinkedIn so the profile does not go stale |
+| Monthly | Re-run the defence drill on any new bullet |
+| Monthly | Re-read the README as if you were a stranger and delete one sentence that adds nothing |
+| On every rejection | Write down the question you could not answer, and study that topic |
+
+#### What "done" looks like on day 30
+
+| Item | Evidence it exists |
+|---|---|
+| A public portfolio repository | A URL that works in a private browser window |
+| A README a stranger understands | Three correct answers to the stranger test |
+| At least one full lab write-up | A page with screenshots, a failure, and a verification table |
+| A one-page PDF resume | Parses cleanly, links resolve, no leftover brackets |
+| A LinkedIn profile that reads as active | Projects under Experience, with date ranges |
+| A defended resume | Every bullet survives five questions, in writing |
+
+### Part 17 — Practice this next
 
 The tasks below produce three artefacts and one demonstration. The artefacts are a static site with your write-ups and diagrams, a README that ties the work together, and the workbook PDF. The demonstration is a recorded walkthrough, and it is the one that changes how people read everything else.
 
@@ -579,6 +1312,18 @@ Then work this list, which turns the artefacts into something a stranger can act
 - [ ] I updated LinkedIn headline/About. <!-- id: it-08-c05 energy: normal -->
 - [ ] I removed exaggerated claims. <!-- id: it-08-c06 energy: normal -->
 - [ ] I can explain every resume bullet honestly. <!-- id: it-08-c07 energy: low -->
+- [ ] I created the portfolio repo and pushed the folder skeleton. <!-- id: it-08-c08 energy: normal -->
+- [ ] I wrote a README with a working resume link and contact line. <!-- id: it-08-c09 energy: normal -->
+- [ ] I ran the five-second test on my own README and acted on it. <!-- id: it-08-c10 energy: low -->
+- [ ] I wrote one full lab write-up with a failure and a verification table. <!-- id: it-08-c11 energy: high -->
+- [ ] I cropped and redacted every screenshot before committing it. <!-- id: it-08-c12 energy: low -->
+- [ ] I filled in the resume templates with my own true facts. <!-- id: it-08-c13 energy: normal -->
+- [ ] I rewrote every bullet using the six workshop moves. <!-- id: it-08-c14 energy: normal -->
+- [ ] I ran the five-question drill on every bullet, in writing. <!-- id: it-08-c15 energy: high -->
+- [ ] I cut or rewrote every bullet that failed question 3 or 4. <!-- id: it-08-c16 energy: normal -->
+- [ ] I set my GitHub avatar, bio, location, and pinned repos. <!-- id: it-08-c17 energy: low -->
+- [ ] I checked my public repo in a private browser window. <!-- id: it-08-c18 energy: low -->
+- [ ] I completed all four weeks of the 30-day portfolio plan. <!-- id: it-08-c19 energy: high -->
 
 ## You're ready to move on when...
 
