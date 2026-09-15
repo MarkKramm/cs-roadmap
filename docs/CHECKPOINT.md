@@ -8,7 +8,8 @@ A snapshot of the repository's current state. Update this when a meaningful mile
 |---|---|
 | Branch | `main` |
 | Tracked files | 102 |
-| Working tree | Clean |
+| Working tree | Clean — nothing uncommitted, nothing untracked |
+| Unpushed | **8 commits ahead of `origin/main`.** The work exists only on this machine |
 | Line endings | LF everywhere (Windows scripts excepted) |
 | Encoding | UTF-8, no BOM |
 | Remote | `origin` → https://github.com/MarkKramm/cs-roadmap |
@@ -20,7 +21,7 @@ A snapshot of the repository's current state. Update this when a meaningful mile
 | CI | `.github/workflows/ci.yml` — two jobs on push to `main` and on PRs (D-008); verified green |
 | Deploy | `.github/workflows/deploy-pages.yml` — publishes `learning-site/dist` to GitHub Pages (D-009). Builds with `VITE_BASE=/cs-roadmap/` because a project site is served from a subdirectory, and verifies the emitted HTML so an unprefixed build fails rather than deploying a blank page. Netlify (`netlify.toml`) is configured as a fallback and builds from the repository root, since `build:content` reads `career-roadmaps/` one level above the site |
 | Milestone | M3 complete — the site renders the lessons themselves, not just the structured sections |
-| Content depth | **Both tracks complete and uniformly deep.** All 23 phases carry `## Lesson` sections. Cyber runs 7,563–12,177 lesson words with all 14 phases inside every readability target; IT runs 5,567–23,657. Every cyber phase sits in the 9,000–9,500 band except Phase 8 (7,563, the job-hunt phase) and the apex modules 13–14 (~12,100, deliberately the deepest) |
+| Content depth | **Both tracks complete and uniformly deep.** All 23 phases carry `## Lesson` sections, and **all 23 are inside every readability target**. Cyber runs 7,563–12,177 lesson words across 14 phases; IT runs 5,567–23,657 across 9 |
 | Cyber depth track | Six new modules added as Phases 9–14, because the core path lists cloud, detection, IR, scripting, GRC and web security as target roles but taught none of them: cloud and identity, detection engineering, incident response and DFIR, scripting and automation, GRC and compliance, and web application security. All $0, all with explicit legal-boundary sections |
 | Cyber rebalance | Phases 4, 5 and 6 were the thinnest lessons in the track (4,788 / 5,200 / 5,828) and are now level with the rest (9,045 / 9,329 / 9,311). Phase 4 gained a full lab build, a twelve-row troubleshooting table, evidence capture and malware isolation; Phase 5 a weighted decision matrix and the first 90 days of each path; Phase 6 a fourth project, an annotated weak-versus-strong report, and interview follow-ups |
 | Lesson rendering | The site parses each lesson into a block AST at build time (`scripts/lesson-ast.mjs`) and renders it with a table of contents and scroll-spy (D-011). Lessons ship as per-phase files loaded on demand, which took the initial bundle from 1.96 MB back to 355 KB (D-012). Two guards protect the path, since a parser bug deletes content rather than crashing: `audit-lesson-ast.mjs` and the lesson assertions in `test:smoke` |
@@ -65,39 +66,59 @@ edit. For the exact current state, run `git --no-pager log --oneline -n 1`.
 
 ## Health checks
 
+All of the following were re-verified against a **from-scratch rebuild** — `generated/` and `dist/` deleted, then `npm run build` — so they describe what a fresh session reproduces, not a stale working tree.
+
 - [x] All content files recovered byte-for-byte from Git objects.
 - [x] No literal `?` substitutes remain except three genuine question marks.
-- [x] All files valid UTF-8; no CR bytes.
+- [x] All files valid UTF-8; no CR bytes; no BOM; no mojibake in any edited file (verified at byte level, since a PowerShell console misrenders correct UTF-8).
 - [x] `.gitattributes` and `.editorconfig` in place.
-- [x] Remote configured and `main` pushed.
-- [x] `lint-content.mjs` passes — 81 files, 0 issues. (`LICENSE` is scanned; it is extensionless, so it is matched by name. The workflow file is scanned too. 81 is the whole repository: every walked file currently has a checkable extension, and it equals `git ls-files`.)
-- [x] `build-content.mjs` passes — 129 phase task IDs, up from 116 before the stranded-task repair.
-- [x] Structural integrity verified — 75 element IDs in `it.json` before and after the Phase 1–4 repairs, zero missing, zero extra, zero count changes.
-- [x] Structural integrity re-verified for Phases 5–9 — `it.json` diffed against a baseline captured before any edit: identical, 1,585 lines, **zero diffs**. Per-phase task counts unchanged at 7 / 6 / 6 / 7 / 7, checklist counts unchanged at 8 / 7 / 6 / 7 / 8. This proves the document did not move; it cannot prove the document was *correct*, because the baseline was taken from a working tree that already contained the Phase 4 tools regression.
-- [x] Structural integrity checked against `HEAD` — JSON built from a `git worktree` at `HEAD` and diffed field-by-field against the working tree: 3 intended differences (the `wmic` → `Get-PhysicalDisk` fix, and the tasks recovered on Phases 3 and 4), 0 unintended. **This is the check that found the two missing tools** — tool rows carry no IDs, so ID-based comparisons miss them. IT tools 56, both tracks 112.
-- [x] `HEAD` builds — verified in a scratch worktree at `HEAD`: 2 files written, 129 task IDs, and the output is byte-identical to the working tree's apart from `generatedAt` (1,602 lines each). A fresh clone plus `npm run build:content` reproduces the tree.
-- [x] `ToolCard` renders tool data; the M1 crash on opening a phase is fixed.
-- [x] `test:smoke` now covers every page as well as every phase — 31 renders.
-- [x] Tools library lists all 116 tools with search and cost/track filters.
-- [x] Portfolio and application trackers persist under their own `localStorage` keys.
-- [x] CI runs the content linter, the production build, and the render smoke test on every push and pull request — verified green on GitHub (2 runs, both jobs passing on `ubuntu-latest`, Node 24).
-- [x] **Cyber Phases 6–8 lessons verified as pipeline-invisible** — both `it.json` and `cyber.json` built from the working tree are byte-identical (excluding `generatedAt`) to a baseline built in a `git worktree` at `HEAD`. Phase task/checklist/tool counts unchanged at 6/7/6 for Phase 7 and 7/8/6 for Phase 8.
-- [x] **Build parser is fence-aware** — `sections()` and `subsections()` now track fenced code blocks, so a report template inside a ```text fence is no longer read as phase structure. Verified output-preserving against the `HEAD` baseline and verified by negative test: a fenced `## Checklist` injection failed the old parser (exit 1, no output) and is ignored by the new one.
-- [x] `npm run test:smoke` — 31 renders across 17 phases and 116 tools, 0 failures. `npm run build` — clean, 47 modules.
+- [x] Remote configured. **`main` is 8 commits ahead of `origin/main` — not yet pushed.** See "Resuming" below.
+- [x] `lint-content.mjs` — 102 files, 0 issues.
+- [x] `audit-content.mjs` — 0 issues across 23 phases.
+- [x] `audit-lesson-ast.mjs` — all 23 lessons parse with no content loss.
+- [x] `audit-readability.mjs` — 0 of 23 phases outside target (avg para ≤ 45, avg sentence ≤ 18, ≥ 8 tables).
+- [x] `cyber-restructure-check.mjs` — no phase lost content; 132,563 lesson words.
+- [x] `build-content.mjs` — 228 phase task IDs (IT 66, cyber 162), 23 lesson files.
+- [x] `npm run test:smoke` — 84 renders across 23 phases and 191 tools, 0 failures.
+- [x] `npm run build` — clean; initial bundle 355 KB with 23 on-demand lesson chunks.
+- [x] 256 checklist IDs, all globally unique.
+- [x] CI runs the content linter, the production build, and the render smoke test on every push and pull request — previously verified green on GitHub (Node 24, `ubuntu-latest`). **The last 8 commits have not been pushed, so CI has not run against them.**
+
+## Resuming
+
+Read this first.
+
+1. **Push the 8 unpushed commits.** `git push origin main`. Everything is committed and the working tree is clean, but the work exists only locally. Note that CI has not validated these commits.
+2. **Rebuild before running the site.** `learning-site/src/data/generated/` is gitignored, so a fresh clone has no lesson JSON until `npm run build:content` (or `npm run dev` / `npm run build`, which both call it) has run.
+3. **Run the guards after touching the parser.** `node scripts/audit-lesson-ast.mjs` is the one that matters; see [`WORKFLOW.md`](WORKFLOW.md) → "Guards on the lesson renderer".
 
 ## Open items
 
-- [ ] Deploy the site — blocked on the private-repo visibility decision. GitHub Pages from a private repo generally needs a paid plan, but Netlify, Vercel, and Cloudflare Pages all deploy private repos on free tiers, so this is less blocked than it first appeared.
-- [ ] Apply the Phase 1 depth standard to other IT phases — S.M.A.R.T./BSOD evidence reading and ticket-lifecycle material exist only in Phase 1 so far.
+- [ ] **Push `main`** — 8 commits, including the lesson renderer and six new modules, exist only on this machine.
+- [ ] **Deploy the site.** `.github/workflows/deploy-pages.yml` is written and its base-path guard was tested, but the repository is private: GitHub Pages from a private repo generally needs a paid plan, while Netlify, Vercel, and Cloudflare Pages all deploy private repos on free tiers. `netlify.toml` is already configured as that fallback.
+- [ ] **Audit modules 09–14 against the depth standard.** They meet the section contract and every readability target, but have not had the evidence-reading and worked-ticket review that the IT and cyber core phases received.
+- [ ] **Assess the IT track's thin phases.** IT word counts range from 6,219 (Phase 7) to 24,723 (Phase 1). Phase 1 is deep because it was the pilot; whether the later phases deserve the same treatment is a judgement call, not an assumption.
+- [ ] **Dense paragraphs still exist in the IT track, and in modules 10–14.** The readability audit gates on a per-phase **average**, so individual long paragraphs do not fail it. Measured per paragraph: the IT track has **33 paragraphs over 90 words**, of which **9 exceed 110** — Phase 1 alone has 16, with the worst at 193 words, followed by Phase 3 (6, worst 136) and Phase 5 (5, worst 120). The six new cyber modules add 12 more, worst 162 words in module 13. The cyber core phases 01–08 are cleanest.
+- [ ] **Consider gating the audit on per-paragraph density, not just the average.** `audit-readability.mjs` already computes `longest para` but does not fail on it, which is why ~45 dense paragraphs across the repo pass today while every phase reports a healthy average. A ceiling, or a count of paragraphs over 110 words, would make this visible without displacing the average.
 
 ## How to verify quickly
 
+From the repository root:
+
 ```powershell
 git --no-pager log --oneline -n 5
-git --no-pager status --short
-git --no-pager ls-files
-node scripts/lint-content.mjs          # content integrity
+git --no-pager status --short          # expect empty
+git --no-pager log origin/main..HEAD --oneline   # expect empty after pushing
+
+node scripts/lint-content.mjs            # content integrity
+node scripts/audit-content.mjs           # phase structure across all 23 phases
+node scripts/audit-lesson-ast.mjs        # parser loses no lesson content
+node scripts/audit-readability.mjs       # prose density targets
+node scripts/cyber-restructure-check.mjs # no cyber phase shrank
+
 cd learning-site
-npm run build                          # production build
-npm run test:smoke                     # render every phase with real data
+npm run build                            # production build
+npm run test:smoke                       # render every phase with real data
 ```
+
+Expected results: lint `102 files, 0 issues`; content audit `0 issues`; lesson AST `all 23 lessons, no content loss`; readability `0 of 23` outside target; preservation `OK`; smoke `84 renders across 23 phases and 191 tools, 0 failures`.
