@@ -95,16 +95,39 @@ The roadmap for the **repository itself** (for the study curriculum, see [`../ca
 
 ## Next
 
-- [ ] **Confirm CI is green on `b980d11`.** The work is pushed, but the run had not been confirmed. `gh` is not installed locally, so check the Actions tab. Every check CI runs passed locally.
-- [ ] **Split the dense paragraphs.** Every phase passes the readability audit, because it gates on a per-phase average. Measured per paragraph, **33 IT paragraphs exceed 90 words** (9 over 110, worst 193 in Phase 1) and the six new cyber modules add 12 more (worst 162). Worth doing alongside a change to the audit so it cannot regress.
-- [ ] **Audit the six new modules against the depth standard.** Modules 09–14 meet the section contract and every readability target, but have not had the evidence-reading and worked-ticket review that IT Phases 1–9 and cyber Phases 1–8 received. An audit first, a writing pass second.
-- [ ] **Assess the IT track's thin phases.** IT word counts range from 6,219 (Phase 7) to 24,723 (Phase 1). Phase 1 is deep because it was the pilot; whether the later phases deserve the same treatment, or the range is appropriate, needs a judgement rather than an assumption.
+- [ ] **Split the 28 remaining dense paragraphs in the IT track.** The readability audit now gates on per-paragraph density: Phase 1 has 11 paragraphs over 90 words, Phase 3 has 6, Phase 5 has 5, Phase 4 has 4, Phase 6 has 2. The cyber track is clean. Keep every word — this is about where the breaks go, not about cutting content.
+- [x] **Audit the six new modules against the depth standard.** Reviewed all six against the standard set by cyber Phases 2 and 7. Verdict: **structurally sound, teaching quality high, no restructuring needed.** All passed clean on every structural check — no stranded content after the closing sections, no duplicate or gapped Part numbers, no misparented `####`, no glued headings, all ten required sections present, six-column Tools tables with a valid Free alternative on every paid row, well-formed resource bullets and checklist lines, and every internal cross-reference resolving.
+  - **Five real technical errors found and fixed** — the class automated checks cannot catch:
+    - **Detection Engineering:** an auditd rule comment claimed "privileged user" above `-F auid>=1000`, but `auid` is the *login* uid and root is 0, so the rule did the opposite of what the text said. The correction also documents that `auid` survives `sudo`, so the rule does not isolate privileged execution on its own. Verified against the `auditctl(8)` man page, which defines `auid` as "the original ID the user logged in with".
+    - **Cloud and Identity:** a wildcard-audit loop hardcoded `--version-id v1`, which is arbitrary for customer-managed policies — the script silently skipped most of them and would have reported a clean account. It now reads `DefaultVersionId`, and the `grep` was widened to catch unspaced and service-level wildcards.
+    - **Scripting and Automation:** `Get-ScheduledTask` *does* expose `.Date`, but it is a **string**, so comparing it to a `DateTime` coerces and compares lexically — a filter for "last 30 days" returned 14 tasks from 2010 without erroring. Replaced with `Get-ScheduledTaskInfo`; the comment now teaches the real trap rather than the wrong one.
+    - **Detection Engineering:** `sigmac` is retired; corrected to `sigma-cli` (pySigma). Verified against the `sigma-cli` repository.
+    - **Detection Engineering:** a Sysmon config filename implied a canonical name when it is only a convention.
+  - **Reported but not fixed** (depth-pass scope, recorded as follow-ups below): Phase 09 is missing a worked "wrong first guess" example and a free-tier setup diagnostic ladder; Phase 12 is missing a reversed-wrong-automation case; Phase 13 is missing a worked risk-scoring disagreement.
+  - **No safety or $0-budget violations.** All six state the authorisation boundary explicitly, and every paid item is correctly quarantined in `## Free vs Paid`.
+- [x] **Assess the IT track's later phases for the Phase 1 depth treatment. Finding: no pass is needed.** The question was framed around word counts (Phase 7 at 6,219 against Phase 1 at 24,723), but word count turned out not to be the right measure, and the phases are not thin. Measured properly:
+  - **Phases 6–9 total 6,457–6,992 words each** across **8–10 substantial Parts**, with every Part running 400–1,100 words. Phase 7, the shortest, has 8 Parts and a 898-word practice section. These are complete lessons, not stubs.
+  - **The depth treatment is already present in most of the track.** Phases 2, 3, 4, 5 and 8 all carry a guided walkthrough or a worked case, which is the Phase 1 signature. Phase 7 teaches by weak-versus-strong comparison rather than by narrated case, which is a different method reaching the same standard; Phase 9 does the same through a full application-material walkthrough.
+  - **The genuine outliers are the two shortest and least technical phases** — 6 (Tools and Ticketing) and 7 (Soft Skills). Both have table-driven, structured content suited to their subject. Extending them toward 9,000 words would mean padding, not teaching, and `ROADMAP.md` already states that 3,000 words is a floor rather than a ladder to climb.
+  - **Phase 1 at 24,723 words is the outlier in the other direction** and is not a template the rest should match. It absorbed the pilot pass and carries 66 subheadings against 25–59 elsewhere.
+  - **The measured defect in the IT track is paragraph density, not depth** — see the separate open item. That is where the editorial effort belongs.
+  - Method note: the first two attempts at this assessment used keyword matching to detect "worked examples" and produced two wrong answers before reading the files settled it. Phase 5's *Guided walkthrough* and *Two worked tickets* were missed because a table column was misread, and Phase 7's weak-versus-strong pairs were missed because they are not labelled as worked cases. **For a question like this, read the phase.**
+
+## Follow-ups from the module review
+
+Small, specific, and scoped — each closes a gap the review identified but deliberately did not fill.
+
+- [ ] **Module 09: add a worked "wrong first guess".** The incident reconstruction in Part 4 presents a tidy, already-correct sequence. Cyber Phase 02 shows a misread (spraying read as brute force) and then corrects it, which is what teaches the reader to doubt their own first reading. Add that shape to the CloudTrail example.
+- [ ] **Module 09: add a free-tier setup diagnostic ladder.** The file warns about the cost trap but gives no ordered checks for a beginner whose tenant or account fails to provision. Account created → budget alarm confirmed → IAM user denied-everything verified → CloudTrail shows your own API call.
+- [ ] **Module 12: add a reversed-wrong-automation case.** The "what not to automate" tables are strong but every example is stated as settled. A case where a script silently closes a real alert, and the reasoning that removes it, would land harder.
+- [ ] **Module 13: add a worked risk-scoring disagreement.** The file says "everything rated medium" is the failure and describes recording a disagreement without averaging it away, but never shows the table.
+- [ ] **All six modules: add an end-of-phase residual-incompetence statement.** Each states what is out of scope; none states what the reader still cannot do. "You can now read a CloudTrail event, but you cannot yet design an IAM permission boundary under change control."
 
 ## Later / optional
 
 - [ ] Full-text search across lessons, if the curriculum outgrows the sidebar and per-phase navigation.
 - [ ] Print stylesheet for a lesson, so a phase can be taken offline on paper.
-- [ ] Gate the readability audit on per-paragraph density, not only the average — `longest para` is already computed and simply not enforced.
+- [ ] Tighten the paragraph-density gate from 150 to 110 words once the current backlog is cleared.
 
 ## Explicitly out of scope
 

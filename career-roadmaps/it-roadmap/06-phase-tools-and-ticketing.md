@@ -395,7 +395,9 @@ You will be asked about these in interviews, and the terms matter more than the 
 | **SLA compliance** | Share of tickets met within their promised time | Always read alongside severity, or teams meet it by ignoring small tickets |
 | **Customer satisfaction (CSAT)** | Post-ticket rating | Low response rates make it noisy; treat single low scores as a signal to read the ticket, not a verdict |
 
-The pattern in the right-hand column is the real lesson: **almost every support metric can be improved by making the work look better rather than by doing it better.** Closing tickets without confirming the fix raises FCR and lowers MTTR, while reopen rate quietly rises. This is why mature teams report these together rather than one at a time. When you are asked in an interview how you would measure your own performance, saying "I would look at reopen rate as well, because it is the check on the other numbers" signals that you understand the system rather than just the tool.
+The pattern in the right-hand column is the real lesson: **almost every support metric can be improved by making the work look better rather than by doing it better.** Closing tickets without confirming the fix raises FCR and lowers MTTR, while reopen rate quietly rises.
+
+This is why mature teams report these together rather than one at a time. When you are asked in an interview how you would measure your own performance, saying "I would look at reopen rate as well, because it is the check on the other numbers" signals that you understand the system rather than just the tool.
 
 ### Part 6 — The ticket that should have been a problem
 
@@ -448,7 +450,9 @@ MinPasswordAge    MaxPasswordAge    LockoutThreshold
 
 Thirty days is the maximum password age. `MinPasswordAge` is one day.
 
-**Now the cause is visible.** Somewhere in this organisation there is a scheduled task, a script, or a service account using a *stored* credential for these users — most likely the VPN client profile or a mapped drive with saved credentials. When the password expires and is changed, the stored credential still holds the old one. It retries, fails, and in environments with a lockout policy it can lock the account. Meanwhile the user's password is fine, so the ticket gets closed as "reset password, user working" — and then it recurs.
+**Now the cause is visible.** Somewhere in this organisation there is a scheduled task, a script, or a service account using a *stored* credential for these users — most likely the VPN client profile or a mapped drive with saved credentials. When the password expires and is changed, the stored credential still holds the old one. It retries, fails, and in environments with a lockout policy it can lock the account.
+
+Meanwhile the user's password is fine, so the ticket gets closed as "reset password, user working" — and then it recurs.
 
 That is why A. Reyes appears three times. Each reset fixed the symptom. None of them found the stored credential.
 

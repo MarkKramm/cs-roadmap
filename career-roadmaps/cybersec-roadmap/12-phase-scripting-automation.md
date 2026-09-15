@@ -806,9 +806,36 @@ Get-CimInstance Win32_Service |
   Format-Table -AutoSize
 
 # 6. Scheduled tasks created recently — a persistence favourite.
+#
+# THE TRAP HERE IS SUBTLE AND WORTH UNDERSTANDING.
+# Get-ScheduledTask does expose a Date property, so the obvious filter looks
+# like it works:
+#
+#     Get-ScheduledTask | Where-Object { $_.Date -gt (Get-Date).AddDays(-30) }
+#
+# It returns results, which is what makes it dangerous. But .Date is a STRING,
+# not a DateTime, so comparing it to a DateTime makes PowerShell coerce the
+# right-hand side to a string and compare the two LEXICALLY. This machine
+# returned 14 tasks registered in 2010 for a filter asking for the last 30 days,
+# because "2010-..." sorts after "2026-..." character by character.
+#
+# It never errors. It just answers a different question than the one you asked.
+#
+# So: filter on TaskPath to drop Microsoft's own tasks, and get real timing
+# from Get-ScheduledTaskInfo, whose LastRunTime IS a proper DateTime.
 Get-ScheduledTask |
-  Where-Object { $_.Date -gt (Get-Date).AddDays(-30) } |
-  Select-Object TaskName, TaskPath, State, Date |
+  Where-Object { $_.TaskPath -notlike '\Microsoft\*' } |
+  ForEach-Object {
+    $info = $_ | Get-ScheduledTaskInfo
+    [PSCustomObject]@{
+      TaskName = $_.TaskName
+      TaskPath = $_.TaskPath
+      State    = $_.State
+      Author   = $_.Author
+      LastRun  = $info.LastRunTime
+    }
+  } |
+  Sort-Object LastRun -Descending |
   Format-Table -AutoSize
 
 # 7. Local administrators.

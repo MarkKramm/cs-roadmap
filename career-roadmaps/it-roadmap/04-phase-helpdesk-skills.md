@@ -71,7 +71,9 @@ Here is the thing nobody tells beginners: **helpdesk is not a technical job with
 
 That is a learnable skill set, and it is the single highest-return thing you can build at this stage of your career. Almost every IT career starts here — helpdesk, service desk, desktop support. It is the doorway to sysadmin, networking, and security, and the habits you form in it will follow you.
 
-**How to use this lesson.** Read it once end to end to get the shape of the work. Then come back to it while you do the practice tasks below, because the lesson and the tasks are designed as a pair: the reading tells you what good looks like, and the tasks make you produce it. Do not try to memorise the scenarios in Part 4 — you will meet them in the wild soon enough. What matters is the method in Part 2 and the communication habits in Part 3, because those transfer to every ticket you will ever touch, in every role, at every level.
+**How to use this lesson.** Read it once end to end to get the shape of the work. Then come back to it while you do the practice tasks below, because the lesson and the tasks are designed as a pair: the reading tells you what good looks like, and the tasks make you produce it.
+
+Do not try to memorise the scenarios in Part 4 — you will meet them in the wild soon enough. What matters is the method in Part 2 and the communication habits in Part 3, because those transfer to every ticket you will ever touch, in every role, at every level.
 
 **Time to complete:** 10–15 hours across the phase. Roughly half of that is writing: tickets, knowledge base articles, replies, and escalation notes. That is deliberate. Writing is the job.
 
@@ -88,7 +90,9 @@ A ticket is a durable, time-stamped record of a request and everything done abou
 
 This is why "I fixed it, I just didn't log it" is a failure, not a humblebrag. From the organisation's perspective, you fixed one issue and destroyed the evidence that would have prevented the next ten.
 
-Think about the third bullet for a moment, because it is the one beginners underestimate. If the same printer fails every Monday for six weeks, six separate tickets each look like a minor printer problem. Six tickets in the same pattern is a maintenance contract that has lapsed, or a device that needs replacing. That pattern is only visible if the tickets were written consistently enough to be grouped together. Your records are how your organisation notices its own recurring problems, and how you personally build the case for changing something rather than endlessly patching it.
+Think about the third bullet for a moment, because it is the one beginners underestimate. If the same printer fails every Monday for six weeks, six separate tickets each look like a minor printer problem.
+
+Six tickets in the same pattern is a maintenance contract that has lapsed, or a device that needs replacing. That pattern is only visible if the tickets were written consistently enough to be grouped together. Your records are how your organisation notices its own recurring problems, and how you personally build the case for changing something rather than endlessly patching it.
 
 There is also a self-interested reason to write good tickets: **they are your evidence.** When review time comes, the technician who can point to a year of clear, well-documented work has a much easier conversation than the one whose output is invisible. Nobody remembers the ticket you fixed quietly on a Tuesday. Everybody can read the ticket you wrote well.
 
@@ -278,7 +282,9 @@ Three habits carry most of the weight:
 
 **Plain language.** Users do not know what DNS is, and they should not have to. "The address book your computer uses has a stale entry — I've refreshed it" beats "I flushed your DNS cache". Explain jargon only when the user is genuinely curious.
 
-There is a fourth habit that is easy to miss: **believe the user.** When someone says the printer worked yesterday and nothing changed, they usually mean it. When they say the problem only happens in one meeting room, that is a clue worth chasing. Users are unreliable narrators of *cause* — they will confidently tell you what broke it and be wrong — but they are excellent reporters of *symptom*. Trust the symptom, investigate the cause yourself, and never let a user feel dismissed. "Are you sure?" is a sentence that costs you their cooperation.
+There is a fourth habit that is easy to miss: **believe the user.** When someone says the printer worked yesterday and nothing changed, they usually mean it. When they say the problem only happens in one meeting room, that is a clue worth chasing. Users are unreliable narrators of *cause* — they will confidently tell you what broke it and be wrong — but they are excellent reporters of *symptom*.
+
+Trust the symptom, investigate the cause yourself, and never let a user feel dismissed. "Are you sure?" is a sentence that costs you their cooperation.
 
 #### The first sixty seconds
 
@@ -741,7 +747,9 @@ Access tickets are where good helpdesk habits prevent real breaches. Three rules
 
 The exercises below are the phase. Build the tracker, write the ten tickets, produce the knowledge base articles, practise remote support with a family member, write the user-friendly replies, and write the escalation notes. Keep every artefact — they become portfolio evidence and, later, interview stories.
 
-One last piece of advice before you start. When you write those ten sample tickets, write them about real problems you have actually seen — a laptop that would not connect, a printer that vanished from the network, an account locked out twice in a week. Invented tickets read like invented tickets, and a hiring manager can tell. Real ones carry the detail that only comes from having been there: the exact error, the thing you tried that did not work, the moment the cause became obvious. That authenticity is what will make your portfolio convincing, and it is what will make these skills stick.
+One last piece of advice before you start. When you write those ten sample tickets, write them about real problems you have actually seen — a laptop that would not connect, a printer that vanished from the network, an account locked out twice in a week. Invented tickets read like invented tickets, and a hiring manager can tell.
+
+Real ones carry the detail that only comes from having been there: the exact error, the thing you tried that did not work, the moment the cause became obvious. That authenticity is what will make your portfolio convincing, and it is what will make these skills stick.
 
 ## Tools for This Phase
 

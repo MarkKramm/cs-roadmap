@@ -380,7 +380,9 @@ Start with a picture. Imagine a single office network with 500 devices on it and
 
 Three things go wrong, and they are the reason subnetting was invented.
 
-**One — broadcast traffic consumes everyone’s bandwidth.** A **broadcast** is a frame addressed to “everyone on this network”. Some protocols need them: DHCP, ARP (the protocol that asks “who owns this IP address?”), and various discovery services. In a flat network of 500 devices, every ARP request and every discovery announcement is delivered to all 500 machines. Each one must interrupt what it is doing, unwrap the frame, and decide whether it cares. Almost none of them do. Scale that to thousands of devices and a measurable slice of your network exists purely to carry noise.
+**One — broadcast traffic consumes everyone’s bandwidth.** A **broadcast** is a frame addressed to “everyone on this network”. Some protocols need them: DHCP, ARP (the protocol that asks “who owns this IP address?”), and various discovery services.
+
+In a flat network of 500 devices, every ARP request and every discovery announcement is delivered to all 500 machines. Each one must interrupt what it is doing, unwrap the frame, and decide whether it cares. Almost none of them do. Scale that to thousands of devices and a measurable slice of your network exists purely to carry noise.
 
 A **broadcast domain** is the set of devices that receive each other’s broadcasts. Subnetting is the act of deciding where one broadcast domain ends and the next begins. One subnet equals one broadcast domain, almost always.
 
@@ -555,7 +557,9 @@ If a device’s address and mask define a subnet that does not contain its own g
 
 **Consequence 3 — a mask typo produces “some things work and some don’t”.**
 
-This is the giveaway signature, and it is genuinely common. If a machine has `/24` when the rest of its network uses `/26`, it believes a larger range of addresses is local. It can reach the gateway and anything in the neighbouring blocks directly, so *some* things work. It fails for the addresses it thinks are remote but the router does not route back, or when its own replies go astray. The result is a machine that half-works — and half-working machines send technicians down the wrong path for an hour if they never look at the mask.
+This is the giveaway signature, and it is genuinely common. If a machine has `/24` when the rest of its network uses `/26`, it believes a larger range of addresses is local. It can reach the gateway and anything in the neighbouring blocks directly, so *some* things work.
+
+It fails for the addresses it thinks are remote but the router does not route back, or when its own replies go astray. The result is a machine that half-works — and half-working machines send technicians down the wrong path for an hour if they never look at the mask.
 
 *Ticket-shaped symptom:* “My laptop can reach the file server but not the shared printer, and both are in the same room.” The file server is inside the machine’s believed subnet; the printer is not. You check `ipconfig /all` and compare the subnet mask against what every other working machine on that network reports. That comparison is the whole diagnosis.
 
@@ -855,7 +859,9 @@ Two things beginners get wrong here.
 
 **First, latency is not the same as a problem.** A 200 ms ping to a server in the United States is physics, not a fault. What matters is whether the number is *stable* and whether packets are being *lost*.
 
-**Second, and more importantly: “ping works but the app does not” is a different problem class.** Ping uses **ICMP**, a completely different protocol from TCP. A host can cheerfully answer ICMP while a specific TCP port is blocked by a firewall, or while the service behind that port is simply not running. So a successful ping proves the *host* is reachable and nothing more. If ping succeeds and the application fails, you have not proved the network is fine — you have proved you should move on to the port rung and stop testing reachability.
+**Second, and more importantly: “ping works but the app does not” is a different problem class.** Ping uses **ICMP**, a completely different protocol from TCP. A host can cheerfully answer ICMP while a specific TCP port is blocked by a firewall, or while the service behind that port is simply not running. So a successful ping proves the *host* is reachable and nothing more.
+
+If ping succeeds and the application fails, you have not proved the network is fine — you have proved you should move on to the port rung and stop testing reachability.
 
 Also worth knowing: **many hosts block ICMP deliberately.** `ping` failing is not proof a machine is down. `Test-NetConnection` on a known port is the stronger test.
 
@@ -1398,7 +1404,9 @@ The single `0.0.0.0 0.0.0.0` default route now points at `192.168.1.1`, with no 
 
 **What you do not do.** You do not “fix” this by disabling DNS entirely, you do not install a third-party DNS changer, and you do not reboot the router a third time. The router was never involved.
 
-**Where a fix belongs to a later phase.** Removing the leftover VPN client’s virtual adapter cleanly, and understanding why VPN clients install a local DNS proxy in the first place, is **Phase 4 (VPN) work** — that phase covers VPN types, split tunnelling, and what a VPN client actually changes on your machine. At Phase 3, the correct action is the one taken above: identify that the configured resolver is unreachable, restore working resolution, and note the cause for the next technician. If the user needs the VPN client reinstalled, that is Phase 4 or a ticket to whoever owns the VPN.
+**Where a fix belongs to a later phase.** Removing the leftover VPN client’s virtual adapter cleanly, and understanding why VPN clients install a local DNS proxy in the first place, is **Phase 4 (VPN) work** — that phase covers VPN types, split tunnelling, and what a VPN client actually changes on your machine.
+
+At Phase 3, the correct action is the one taken above: identify that the configured resolver is unreachable, restore working resolution, and note the cause for the next technician. If the user needs the VPN client reinstalled, that is Phase 4 or a ticket to whoever owns the VPN.
 
 **Final ticket note.**
 
@@ -1410,7 +1418,9 @@ The single `0.0.0.0 0.0.0.0` default route now points at `192.168.1.1`, with no 
 > **Cause:** The adapter was statically configured to use `127.0.0.1` as its DNS server, with no resolver running on that address. Traced to a leftover configuration from a discontinued VPN client. Connectivity was never at fault.
 > **For the next agent / out of scope:** The VPN client that created this configuration is still installed. If the user resumes using it, or if the DNS setting reverts, this is **Phase 4 (VPN)** work — do not keep resetting the adapter. Escalate to the VPN owner with these notes. Does not require ISP involvement; the router and line were healthy throughout.
 
-**Reasoning to take away:** “The internet is down” is a *symptom description*, not a diagnosis, and in this ticket the internet was never down. The decisive evidence cost nothing: `ping 8.8.8.8` succeeded while `ping google.com` failed, and that single comparison split “connectivity” from “name resolution” in under five seconds. Then comparing your own resolver against `8.8.8.8` proved the fault was local rather than global. **Read the DNS Servers line in `ipconfig /all` every single time** — `127.0.0.1` is never an accident, and it is the fingerprint of a VPN or security tool that changed the machine and did not change it back.
+**Reasoning to take away:** “The internet is down” is a *symptom description*, not a diagnosis, and in this ticket the internet was never down. The decisive evidence cost nothing: `ping 8.8.8.8` succeeded while `ping google.com` failed, and that single comparison split “connectivity” from “name resolution” in under five seconds. Then comparing your own resolver against `8.8.8.8` proved the fault was local rather than global.
+
+**Read the DNS Servers line in `ipconfig /all` every single time** — `127.0.0.1` is never an accident, and it is the fingerprint of a VPN or security tool that changed the machine and did not change it back.
 
 #### Ticket 2 — “The printer works for me but not for her”
 
@@ -1589,7 +1599,11 @@ What you do is **escalate with evidence**. This is a VLAN assignment on a manage
 > **Request / out of scope for Phase 3:** Please review the switch port assignment for the back-office desk occupied by Maria and move it to the VLAN used by the adjacent desks (`192.168.10.0/26`), or add an inter-subnet rule permitting `192.168.10.64/26` to reach `192.168.10.192/26` on TCP 445. VLAN and firewall changes are outside first-line scope; no changes have been made pending that review.
 > **Workaround in place:** User can print from the adjacent shared PC until the port is moved.
 
-**Reasoning to take away:** “We’re on the same network” is a claim, not a fact, and the subnet mask is what settles it. Three addresses that all begin `192.168.10.` turned out to live in three different subnets, and doing the `/26` arithmetic — block size 64, boundaries at 0, 64, 128, 192 — answered the ticket before any fix was attempted. Then the ladder confirmed it: the user could reach her gateway (rungs 1–3 pass) but not port 445 on the printer (rung 5 fails), which placed the fault precisely between two subnets rather than on either machine. Finally, the discipline that makes this professional: **when the fix requires switch or firewall access you do not have, you stop, document the evidence, and escalate.** Reinstalling the print driver would have looked like work and changed nothing.
+**Reasoning to take away:** “We’re on the same network” is a claim, not a fact, and the subnet mask is what settles it. Three addresses that all begin `192.168.10.` turned out to live in three different subnets, and doing the `/26` arithmetic — block size 64, boundaries at 0, 64, 128, 192 — answered the ticket before any fix was attempted.
+
+Then the ladder confirmed it: the user could reach her gateway (rungs 1–3 pass) but not port 445 on the printer (rung 5 fails), which placed the fault precisely between two subnets rather than on either machine.
+
+Finally, the discipline that makes this professional: **when the fix requires switch or firewall access you do not have, you stop, document the evidence, and escalate.** Reinstalling the print driver would have looked like work and changed nothing.
 
 #### What both tickets have in common
 

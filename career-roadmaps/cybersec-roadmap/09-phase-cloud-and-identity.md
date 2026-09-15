@@ -237,17 +237,29 @@ You can answer the first two mechanically, without reading a policy by eye.
 aws iam list-attached-user-policies --user-name svc-reporting
 
 # The actual document behind a managed policy, so you can read the actions.
+# The version id must be the policy's *default* version, which is v1 for AWS
+# managed policies but is arbitrary for customer-managed ones. Read it first:
+aws iam get-policy --policy-arn arn:aws:iam::aws:policy/AmazonS3FullAccess \
+  --query 'Policy.DefaultVersionId' --output text
 aws iam get-policy-version \
   --policy-arn arn:aws:iam::aws:policy/AmazonS3FullAccess \
   --version-id v1 --query 'PolicyVersion.Document'
 
-# Find every policy in the account that grants a wildcard action.
+# Find every customer-managed policy that grants a wildcard action.
+# Hardcoding --version-id v1 here would silently skip every policy whose
+# default version is not v1, which is most of them. Ask for the real one.
 aws iam list-policies --scope Local --query 'Policies[].Arn' --output text | \
   while read -r p; do
-    aws iam get-policy-version --policy-arn "$p" --version-id v1 2>/dev/null \
-      --query 'PolicyVersion.Document' | grep -q '"Action": "\*"' && echo "WILDCARD: $p"
+    v=$(aws iam get-policy --policy-arn "$p" \
+          --query 'Policy.DefaultVersionId' --output text 2>/dev/null)
+    aws iam get-policy-version --policy-arn "$p" --version-id "$v" 2>/dev/null \
+      --query 'PolicyVersion.Document' \
+      | grep -qE '"Action"[[:space:]]*:[[:space:]]*"(\*|[a-z0-9-]+:\*)"' \
+      && echo "WILDCARD: $p"
   done
 ```
+
+Two details in that third command are worth naming, because both are the kind of thing that makes an audit script quietly wrong. The version id has to be fetched rather than assumed, and the `grep` pattern is written loosely enough to catch the several shapes a wildcard action takes — `"Action": "*"`, `"Action":"*"` with no space, and service-level wildcards such as `"Action": "s3:*"` — because the CLI's JSON is not formatted the way you would write it by hand.
 
 That third command is the shape of a real audit task. It is not elegant, it is exactly the kind of thing a junior analyst is asked to produce in their first month, and it produces a list that goes straight into a report.
 

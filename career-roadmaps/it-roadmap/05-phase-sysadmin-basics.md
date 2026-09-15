@@ -69,7 +69,9 @@ You are not becoming a system administrator in four weeks. This phase is deliber
 
 **Time to complete:** roughly 15–20 hours across the phase. The reading is a small part of it. Most of the value is in the practice tasks at the bottom — creating real users and groups, breaking and fixing folder permissions, and writing a PowerShell script that actually runs.
 
-**A note on what you cannot do from home.** You cannot stand up a real enterprise Active Directory domain on a laptop without significant effort, and you do not need to. The enterprise tools here are learned by reading authoritative documentation and mapping it onto the concepts you *can* practise locally with local accounts and NTFS permissions. That is a legitimate way to learn, and it is how you will talk about it in interviews: not "I ran a domain controller", but "I understand what a domain controller does and I practised the equivalent concepts with local accounts and NTFS". Honesty about the boundary is a strength.
+**A note on what you cannot do from home.** You cannot stand up a real enterprise Active Directory domain on a laptop without significant effort, and you do not need to.
+
+The enterprise tools here are learned by reading authoritative documentation and mapping it onto the concepts you *can* practise locally with local accounts and NTFS permissions. That is a legitimate way to learn, and it is how you will talk about it in interviews: not "I ran a domain controller", but "I understand what a domain controller does and I practised the equivalent concepts with local accounts and NTFS". Honesty about the boundary is a strength.
 
 ### Part 1 — Identity and access: the heart of the job
 
@@ -322,7 +324,9 @@ NT AUTHORITY\Authenticated Users       Well-known group S-1-5-11                
 
 Two things to learn from this, and they are the whole point of the command.
 
-**The SID is the truth; the name is a convenience.** A **security identifier (SID)** is the permanent, unique identifier of an account or group. Windows stores SIDs in permissions, not names. The friendly name you see is looked up from the local account database or the domain when the command runs. That lookup can fail — if a domain is unreachable, or a group was deleted, you will see a raw SID with no name beside it, or a name ending in a long number. When you see a bare SID in a permission listing, that is evidence: something was granted access to an identity that no longer resolves. Do not delete it blindly; find out what it was first.
+**The SID is the truth; the name is a convenience.** A **security identifier (SID)** is the permanent, unique identifier of an account or group. Windows stores SIDs in permissions, not names. The friendly name you see is looked up from the local account database or the domain when the command runs.
+
+That lookup can fail — if a domain is unreachable, or a group was deleted, you will see a raw SID with no name beside it, or a name ending in a long number. When you see a bare SID in a permission listing, that is evidence: something was granted access to an identity that no longer resolves. Do not delete it blindly; find out what it was first.
 
 **The `Attributes` column answers a question you will need later.** Look for entries marked **`Deny`**. A group listed with a `Deny` attribute is a *deny-only* group — membership in it removes rights rather than adding them. In a domain you may see groups with a `Use for Deny Only` attribute, which means the group’s administrative rights are deliberately stripped from this session. Seeing that on a technician’s own account is normal and good; it is the system enforcing least privilege on you.
 
@@ -571,7 +575,9 @@ Finance *         FINANCE\Finance-Managers   Allow             Change
 Finance *         Everyone                   Allow             Read
 ```
 
-Now you can reason concretely. Suppose `FINANCE\maria.santos` needs to save files. On NTFS she has `Modify` through `Finance-Managers`, so the NTFS side is fine. But the share grants `Finance-Managers` only `Change` — which on a share means read, write, and delete, so she is fine there too. Now suppose a *new* user is added to `Finance-ReadOnly` and complains they cannot save: NTFS gives `ReadAndExecute`, the share gives `Read`. Both sides say read-only, consistently, and the answer is “this is working as designed — tell me what you actually need.” That is a very different outcome from a misconfiguration, and you can only tell them apart if you checked both sides.
+Now you can reason concretely. Suppose `FINANCE\maria.santos` needs to save files. On NTFS she has `Modify` through `Finance-Managers`, so the NTFS side is fine. But the share grants `Finance-Managers` only `Change` — which on a share means read, write, and delete, so she is fine there too.
+
+Now suppose a *new* user is added to `Finance-ReadOnly` and complains they cannot save: NTFS gives `ReadAndExecute`, the share gives `Read`. Both sides say read-only, consistently, and the answer is “this is working as designed — tell me what you actually need.” That is a very different outcome from a misconfiguration, and you can only tell them apart if you checked both sides.
 
 **Rule three: check whether the user is local or remote.** `icacls` on a local path tells you nothing about the share. `Get-SmbShareAccess` tells you nothing about NTFS. A ticket that says “it works when I am at my desk but not from home” is pointing at the share layer or the VPN identity, not at NTFS.
 
@@ -655,7 +661,9 @@ Beginners — and, uncomfortably often, small businesses — use these words int
 
 **A sync** keeps two locations identical. This is the important one, because it is the mistake almost every beginner makes and it feels like safety.
 
-**A synced folder is not a backup.** Here is why, in one concrete example. You keep your project folder in a cloud sync client. Ransomware encrypts every file in it at 2am. By 2:05am the sync client has faithfully uploaded the encrypted versions to the cloud, and — depending on configuration — downloaded the encryption over every other synced device. You now have four copies of your encrypted data, all consistent, all useless. Sync did its job perfectly. Its job was to make everything the same, and the mistake became identical everywhere, quickly.
+**A synced folder is not a backup.** Here is why, in one concrete example.
+
+You keep your project folder in a cloud sync client. Ransomware encrypts every file in it at 2am. By 2:05am the sync client has faithfully uploaded the encrypted versions to the cloud, and — depending on configuration — downloaded the encryption over every other synced device. You now have four copies of your encrypted data, all consistent, all useless. Sync did its job perfectly. Its job was to make everything the same, and the mistake became identical everywhere, quickly.
 
 The same logic applies to an accidental delete: delete a file, and the sync deletes it on every device. Or a bad edit: overwrite a report with nonsense, and the nonsense is now the canonical version everywhere.
 
@@ -1136,7 +1144,9 @@ This is the one to internalise, because it is the mistake that separates a techn
 
 You fix something. It works. You close the ticket. You wrote nothing.
 
-Now consider what you have actually done. You have **changed the state of a system** in a way that exists only in your memory. Tomorrow, someone asks why the finance folder has an unusual permission. Nobody knows. Next month, the problem recurs and the next technician starts from zero — and may well “fix” it in a way that undoes your change. In a year, you leave, and the knowledge leaves with you. Every organisation has a few of these: permissions nobody understands, scheduled tasks nobody remembers creating, service accounts with passwords in a document nobody can find. They are all the residue of fixes that were never written down.
+Now consider what you have actually done. You have **changed the state of a system** in a way that exists only in your memory. Tomorrow, someone asks why the finance folder has an unusual permission. Nobody knows. Next month, the problem recurs and the next technician starts from zero — and may well “fix” it in a way that undoes your change. In a year, you leave, and the knowledge leaves with you.
+
+Every organisation has a few of these: permissions nobody understands, scheduled tasks nobody remembers creating, service accounts with passwords in a document nobody can find. They are all the residue of fixes that were never written down.
 
 A note costs two minutes and converts a private fix into shared knowledge. At minimum, record:
 

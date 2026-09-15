@@ -62,6 +62,17 @@ for (const track of tracks) {
 
     // Longest paragraph: the wall-of-text risk.
     const longest = pWords.length ? Math.max(...pWords) : 0;
+
+    // Per-paragraph density.
+    //
+    // The average alone cannot see a single 190-word wall: one such paragraph
+    // among twenty short ones barely moves the mean, so a phase reports a
+    // healthy average while still being miserable to read at that spot. These
+    // counts make the individual offenders visible and gateable.
+    //
+    // 90 is the practical ceiling for this curriculum, 150 the hard one. The
+    // worst paragraph found so far is 193 words, in IT Phase 1.
+    const over90 = pWords.filter((n) => n > 90).length;
     const over150 = pWords.filter((n) => n > 150).length;
 
     const h3 = heads.filter((h) => h.level === 3 && h.line > start.line && h.line < end.line).length;
@@ -78,6 +89,7 @@ for (const track of tracks) {
       paras: paras.length,
       avgPara: avg(pWords),
       maxPara: longest,
+      over90,
       over150,
       avgSent: avg(sWords),
       h3, h4,
@@ -149,4 +161,37 @@ for (const p of problems) {
   if (p.avgSent > 18) why.push(`sentence ${p.avgSent}`);
   if (p.tables < 8) why.push(`tables ${p.tables}`);
   console.log(`  ${pad(p.file.slice(0, 40), 42)} ${why.join(', ')}`);
+}
+
+// ---------- per-paragraph density ----------
+// Reported separately from the average-based gate above, because it catches a
+// different defect: the average passes while a single paragraph is unreadable.
+console.log('\n=== paragraph density ===');
+const dense = rows.filter((r) => r.over90 > 0).sort((a, b) => b.over90 - a.over90);
+const totalOver90 = rows.reduce((n, r) => n + r.over90, 0);
+const totalOver150 = rows.reduce((n, r) => n + r.over150, 0);
+console.log(`Paragraphs over 90 words: ${totalOver90} across ${dense.length} phases.`);
+console.log(`Paragraphs over 150 words: ${totalOver150}.`);
+if (dense.length) {
+  console.log('  ' + pad('phase', 42) + padL('>90', 5) + padL('>150', 6) + padL('max', 5));
+  for (const r of dense) {
+    console.log('  ' + pad(r.file.slice(0, 40), 42) + padL(r.over90, 5) + padL(r.over150, 6) + padL(r.maxPara, 5));
+  }
+}
+
+// Gate: 150 words is the hard ceiling. It is deliberately above the 90-word
+// editorial target, so the build fails on genuine walls of text without
+// blocking on every paragraph that merely wants splitting.
+const tooLong = rows.filter((r) => r.over150 > 0);
+if (tooLong.length) {
+  console.log(`\nFAIL — ${tooLong.length} phase(s) contain a paragraph over 150 words:`);
+  for (const r of tooLong) {
+    console.log(`  ${pad(r.file.slice(0, 40), 42)} ${r.over150} paragraph(s), longest ${r.maxPara} words`);
+  }
+  console.log('Split the paragraph. Keep every word — this is about where the breaks go, not about cutting content.');
+  process.exit(1);
+}
+console.log('\nNo paragraph exceeds the 150-word ceiling.');
+if (totalOver90) {
+  console.log(`(${totalOver90} over the 90-word editorial target — worth splitting, not a failure.)`);
 }

@@ -324,13 +324,17 @@ Three of these deserve a sentence each because they are frequently misunderstood
 ```powershell
 # Install Sysmon with a community configuration, from an elevated prompt.
 # Read the configuration file before you run this.
-sysmon64.exe -accepteula -i sysmonconfig-export.xml
+# The -i argument takes whatever file you downloaded and reviewed, so rename
+# nothing and use the path you actually have:
+sysmon64.exe -accepteula -i .\sysmonconfig.xml
 
-# Confirm it is running and check which events it is producing.
+# Then confirm the schema version was accepted, which Sysmon reports in the log.
 Get-Service Sysmon64
 Get-WinEvent -LogName "Microsoft-Windows-Sysmon/Operational" -MaxEvents 20 |
   Select-Object TimeCreated, Id, Message | Format-List
 ```
+
+One practical note on the filename: the well-known community configurations publish their file under names such as `sysmonconfig.xml` and `sysmonconfig-export.xml`, and the name is only ever a convention — nothing reads it. What matters is that the file you pass to `-i` is the one you actually read, and that a schema-version error is reported loudly rather than silently ignored, because Sysmon installing with an empty or rejected configuration looks exactly like Sysmon being installed correctly.
 
 #### Linux: auditd, auth.log, and syslog
 
@@ -357,7 +361,12 @@ The auditd rules worth writing first, because they cover the persistence and pri
 -w /etc/cron.d/ -p wa -k cron_persistence
 -w /etc/crontab -p wa -k cron_persistence
 
-# Record every command executed by a privileged user.
+# Record every command executed by a real, logged-in user.
+# auid is the "audit user id" — the account that logged in, which survives su
+# and sudo. auid>=1000 selects ordinary interactive accounts; auid!=-1 excludes
+# processes with no login session, such as daemons started at boot.
+# Note that this does NOT isolate privileged command execution on its own:
+# a command run through sudo still carries the original caller's auid.
 -a always,exit -F arch=b64 -S execve -F auid>=1000 -F auid!=-1 -k command_exec
 
 # Watch SSH key material, which is quietly a persistence mechanism.
@@ -1063,7 +1072,7 @@ Then open `portfolio/cyber/10-detection-engineering.md` and assemble the deliver
 |---|---|---|---|---|---|
 | Sysmon | Windows endpoint telemetry | Free | https://learn.microsoft.com/en-us/sysinternals/downloads/sysmon | Install with a community config and capture Event ID 1 | Windows Security audit policy with command-line auditing |
 | Wazuh | Free SIEM/XDR with rule engine | Free/open-source | https://wazuh.com/ | Load three custom rules and generate matching events | Elastic Security free tier |
-| Sigma | Vendor-neutral detection rule format | Free/open-source | https://sigmahq.io/ | Write one rule and validate it with sigmac or pySigma | Direct platform-native rules |
+| Sigma | Vendor-neutral detection rule format | Free/open-source | https://sigmahq.io/ | Write one rule and convert it with `sigma-cli` (pySigma's successor to the retired `sigmac`) | Direct platform-native rules |
 | SigmaHQ rules | Public rule repository | Free/open-source | https://github.com/SigmaHQ/sigma | Convert a community rule and compare it with yours | Elastic detection-rules repository |
 | Atomic Red Team | Safe adversary simulation tests | Free/open-source | https://github.com/redcanaryco/atomic-red-team | Run one atomic test in an isolated VM and confirm your rule fires | Manual command execution following ATT&CK procedure examples |
 | MITRE ATT&CK | Adversary technique catalogue | Free | https://attack.mitre.org/ | Map three rules to sub-technique IDs | Sigma rule tags, which already carry ATT&CK mappings |
