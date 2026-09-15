@@ -2,13 +2,21 @@
 
 A lightweight decision log (ADR-style). Newest first.
 
+## D-009 — Publishing the site to GitHub Pages, and the base path that makes it work
+
+- **Date:** 2026-09-15
+- **Status:** Accepted
+- **Context:** D-008 permitted CI but ruled deployment out of scope and noted that "publishing the site would need a decision of its own." This is that decision. The site is a static Vite build, so it can be hosted anywhere; the constraint that shapes the rest is that GitHub Pages serves a *project* site from a subdirectory of a shared domain — `https://markkramm.github.io/cs-roadmap/` — rather than from a domain root.
+- **Decision:** Publish the site to GitHub Pages from a dedicated `.github/workflows/deploy-pages.yml` workflow. Because the site is served from a subdirectory, `learning-site/vite.config.js` reads `process.env.VITE_BASE` and falls back to `/`, and the Pages build sets `VITE_BASE=/cs-roadmap/`.
+- **Consequences:** Rule 3 in `AGENTS.md` gains a third bounded carve-out: `.github/workflows/` may now contain a deploy step, but only to GitHub Pages, and only for the built site. The content stays dependency-free — the deploy publishes generated output and adds nothing that reading `career-roadmaps/` depends on. Vite emits absolute asset URLs, so without the prefix the published page loads blank and every `/assets/...` request 404s; the workflow therefore *verifies* the emitted HTML and fails the build if the prefix is missing, rather than trusting the environment variable. Hard-coding the prefix was rejected because it would break `npm run dev`, `vite preview`, and the Netlify build, all of which serve from a root. Netlify is left working and unchanged as a fallback host.
+
 ## D-008 — CI is permitted, deploy is not
 
 - **Date:** 2026-09-11
-- **Status:** Accepted
+- **Status:** **Superseded by D-009** for the deploy question only; the CI carve-out still stands as written.
 - **Context:** The roadmap's remaining Next item is CI — run `lint:content`, `build`, and `test:smoke` on every push. A GitHub Actions workflow lives at `.github/workflows/`, which is outside the `learning-site/` + `scripts/` scope that D-005 permits under rule 3 of `AGENTS.md`. The rule blocks the workflow file even though CI adds no runtime dependency to the content.
 - **Decision:** Permit `.github/workflows/` **solely for continuous integration** — linting, building, and smoke-testing the repository on push and on pull request. No deploy step, no publishing, no secrets, no credentials. Deployment stays out of scope.
-- **Consequences:** Rule 3 in `AGENTS.md` gains a second explicit, bounded carve-out. The dependency-free guarantee survives intact, because CI *checks* the content rather than becoming a dependency of reading it — `career-roadmaps/` and `docs/` are still readable with just `git` and a text editor. A future contributor knows CI is allowed and deployment is not; publishing the site would need a decision of its own.
+- **Consequences:** Rule 3 in `AGENTS.md` gains a second explicit, bounded carve-out. The dependency-free guarantee survives intact, because CI *checks* the content rather than becoming a dependency of reading it — `career-roadmaps/` and `docs/` are still readable with just `git` and a text editor. A future contributor knows CI is allowed and deployment is not; publishing the site would need a decision of its own. **That decision is D-009.**
 
 ## D-007 — View navigation is local state, not a router
 

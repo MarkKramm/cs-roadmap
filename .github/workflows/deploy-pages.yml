@@ -1,0 +1,91 @@
+name: Deploy to GitHub Pages
+
+# Runs after the content and site checks in ci.yml would pass, and can also be
+# triggered by hand from the Actions tab.
+#
+# WHY A SEPARATE WORKFLOW FROM ci.yml:
+# ci.yml verifies the repository (D-008): it lints, builds, and smoke-tests, but
+# never writes anywhere. This workflow publishes. Keeping the two apart means a
+# broken build cannot deploy, and the deploy has no part in making CI "pass".
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+# Required by actions/deploy-pages: it needs to mint an OIDC token and write to
+# the Pages environment. These are the minimum permissions the action documents.
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# Never let two deploys race. A queued run supersedes an in-flight one, and an
+# in-progress publish is allowed to finish rather than being cancelled halfway.
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    name: Build site
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: learning-site/package-lock.json
+
+      - name: Install dependencies
+        working-directory: learning-site
+        run: npm ci
+
+      # The site is published to a subdirectory of github.io (the repository
+      # name), so Vite's asset URLs must be prefixed to match. Without this the
+      # built HTML requests /assets/... from the domain root and every asset
+      # 404s. See learning-site/vite.config.js.
+      - name: Build
+        working-directory: learning-site
+        env:
+          VITE_BASE: /cs-roadmap/
+        run: npm run build
+
+      # Guards the failure above from ever reaching production: if the emitted
+      # HTML does not carry the /cs-roadmap/ prefix, the deploy stops here.
+      - name: Verify asset paths are prefixed for Pages
+        working-directory: learning-site
+        run: |
+          if grep -qE 'src="/assets/|href="/assets/' dist/index.html; then
+            echo "::error::dist/index.html references /assets/ from the domain root."
+            echo "GitHub Pages serves this site from /cs-roadmap/, so those URLs would 404."
+            exit 1
+          fi
+          if ! grep -q '/cs-roadmap/assets/' dist/index.html; then
+            echo "::error::dist/index.html does not contain /cs-roadmap/assets/."
+            exit 1
+          fi
+          echo "Asset paths are correctly prefixed."
+          grep -oE '(src|href)="[^"]+"' dist/index.html
+
+      - name: Configure Pages
+        uses: actions/configure-pages@v5
+
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: learning-site/dist
+
+  deploy:
+    name: Deploy
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
