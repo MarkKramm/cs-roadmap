@@ -1062,7 +1062,7 @@ Note what it does **not** do: it does not reset the password. An unlock is rever
 |---|---|---|
 | Power and network | Is the printer awake and on the network? | The printer's own panel |
 | Reachability | Can you ping it from the failing laptop? | `ping <printer-ip>` |
-| Port | Is the print port answering? | `Test-NetConnection <printer-ip> -Port 9100` |
+| Port | Is the print port answering? | `Test-NetConnection <printer-ip> -Port 9100` — 9100 is the raw-printing port nearly every network printer listens on |
 | Queue | Is a job stuck on the local spooler? | Settings, Printers, see the queue |
 | Driver and port | Is the port pointing at the right address? | Printer properties, Ports tab |
 | Permissions | Can this user print to this queue? | Who else uses it successfully? |
@@ -1098,13 +1098,13 @@ The user has already done this twice. Telling them to do it a third time tells t
 
 **Your questions.** Is there a pattern — every twenty minutes, or only during large transfers? Does it drop on Wi-Fi and on a cable? Does anyone else on the team have the same problem? What are you doing when it drops?
 
-**A regular interval is a specification, not bad luck.** "Every twenty minutes" is the shape of an idle timeout, a re-keying interval, or a session limit, and each of those points somewhere specific. "Only on large transfers" points at an MTU problem instead. Ask the shape question before you touch anything.
+**A regular interval is a specification, not bad luck.** "Every twenty minutes" is the shape of an idle timeout, a **re-keying interval** (how often the tunnel renegotiates its encryption keys), or a session limit — each points somewhere specific. "Only on large transfers" points at an **MTU** problem instead: MTU is the largest packet a path will carry, and when the VPN lowers it, big packets stall while small ones still get through. Ask the shape question before you touch anything.
 
 **What you check, in order.**
 
 1. Does the underlying internet connection drop at the same time? Watch a continuous `ping` to your gateway while working. If that drops too, the VPN was a symptom and your Wi-Fi is the fault.
 2. Are there two default routes? `route print -4` shows this — a VPN adds one, and two can fight.
-3. Is the DNS server still reachable during the drop? Split tunnelling changes which resolver is used.
+3. Is the DNS server still reachable during the drop? **Split tunnelling** — sending only some traffic through the VPN and the rest straight out — changes which DNS resolver is used, so a name that resolved before the drop may not after it.
 4. Does the drop correlate with a time or a size?
 
 ```powershell
@@ -1174,7 +1174,7 @@ It may even work. But nothing was learned, nothing was recorded, and if the caus
 >
 > Here is what I found: your account is in the right group, so this is not a permissions problem. Your laptop's session was started before your group membership was updated this week, so it has been carrying an old copy of your permissions all day — that is why the drive vanished with no warning and no error message you could act on.
 >
-> What you need to do: save anything open, then choose **Start → your name → Sign out** — sign out, not restart, because a restart can keep the old session. Sign back in and open File Explorer. S: should be there with your files in it.
+> What you need to do: save anything open, then choose **Start → your name → Sign out** — sign out rather than restart, because a restart reuses the existing logon token and the permissions may come back just as stale. (Some other fixes do need a restart; the difference is whether the fix depends on rebuilding your logon.) Sign back in and open File Explorer. S: should be there with your files in it.
 >
 > If it is not back within five minutes of signing in, reply straight away and I will remap it manually. Either way, your deadline tomorrow is safe.
 >
@@ -1341,7 +1341,7 @@ from my access level.
 
 What I need from you: please check on fileserver01 whether this
 account has a duplicate or stale session, and confirm whether the
-share's access-based enumeration setting is per-user. If you need it,
+share's access-based enumeration setting — the one that hides files a user has no permission to open — is per-user. If you need it,
 the user is available on extension 214 until 17:00.
 
 Not doing, and why: I have not restarted the Workstation service on
@@ -1374,7 +1374,7 @@ Nothing in this exercise involves anyone else's system. You are writing about yo
 
 A short drill you can run in five minutes without an instructor or a second machine.
 
-Write down one realistic ticket number, then draw that many keyword cards from the six below. You must handle the ticket using exactly those constraints — the constraints force you to communicate instead of just fixing.
+Pick a number from 1 to 6 — that number is your draw for this drill — then pull that many keyword cards from the six below, and work one ticket from Part 11 under exactly those constraints. They force you to communicate instead of just fixing.
 
 | # | Keyword card |
 |---|---|
@@ -1509,7 +1509,7 @@ Every exercise in this part works with a single machine. Two of them are worth d
 
 | Scenario | What you do | What you should observe |
 |---|---|---|
-| Break your own DNS | Set your adapter's DNS to `127.0.0.1`, then `ipconfig /flushdns` | `ping 8.8.8.8` still works, `ping google.com` fails. Put it back to automatic afterwards |
+| Break your own DNS | In an **Administrator** PowerShell on a machine you own, set your adapter's DNS to `127.0.0.1`, then `ipconfig /flushdns` | `ping 8.8.8.8` still works, `ping google.com` fails. Put it back to automatic afterwards |
 | Break your own Wi-Fi | Disable the adapter, then try each Part 10 command | Every network check fails at the first step — link down means nothing else can pass |
 | Fill a folder path | Create a folder with a very long name and map it, then rename the folder | The mapping reports unavailable. This is Ticket 8 with the serial numbers filed off |
 | Fill the system drive | Do not do this to test it — instead read `Get-Volume` and predict what would break below 5 % free | A prediction you can check beats a disk you have to repair |

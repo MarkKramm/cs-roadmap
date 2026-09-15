@@ -189,7 +189,7 @@ You do not need to subnet IPv6 for entry-level work. You do need to know three t
 3. **Request** — the client asks for that specific address.
 4. **Acknowledge** — the server confirms the lease.
 
-If the exchange fails at any point, the client ends up with a `169.254` address. The usual causes are a DHCP server that is down, a network that is not reaching it (VLAN or switch misconfiguration), or the client's DHCP being disabled.
+If the exchange fails at any point, the client ends up with a `169.254` address. The usual causes are a DHCP server that is down, a network that is not reaching it (a **VLAN** — a virtual network carved out of one physical switch, covered in Part 9 — or a switch misconfiguration), or the client's DHCP being disabled.
 
 To see your own lease details:
 
@@ -290,7 +290,7 @@ You can see the handshake on your own machine. In Wireshark, filter on `tcp` and
 
 #### TLS and HTTPS in one paragraph
 
-**TLS (Transport Layer Security)** wraps a connection in encryption and proves the server's identity with a **certificate**. **HTTPS** is simply HTTP carried inside TLS, on port 443. The practical support consequence: certificate errors are a common, specific, and diagnosable class of ticket. "Your connection is not private" almost always means an expired certificate, a wrong system clock, a captive portal, or an inspecting proxy — not a virus.
+**TLS (Transport Layer Security)** wraps a connection in encryption and proves the server's identity with a **certificate**. **HTTPS** is simply HTTP carried inside TLS, on port 443. The practical support consequence: certificate errors are a common, specific, and diagnosable class of ticket. "Your connection is not private" almost always means an expired certificate, a wrong system clock, a **captive portal** (the login page a hotel or café Wi-Fi shows before it lets you online), or an **inspecting proxy** (a corporate appliance that decrypts and re-signs traffic so it can scan it) — not a virus.
 
 ### Part 5 — Troubleshooting, in a fixed order
 
@@ -396,7 +396,7 @@ So: **subnets exist to limit broadcast noise, to separate groups of devices, and
 
 A **subnet mask** is a 32-bit number, written the same way as an IP address, whose whole job is to say: *this many bits at the front identify the network; the rest identify the host.*
 
-The mask is always a run of `1`s followed by a run of `0`s, with no gaps. Here are a few written out:
+The mask is always a run of `1`s followed by a run of `0`s, with no gaps. Those are **binary** digits — base two, where each position is worth double the one to its right, so the only digits are `0` and `1`. Here are a few written out:
 
 ```text
 255.255.255.0     = 11111111.11111111.11111111.00000000   = 24 ones = /24
@@ -838,7 +838,7 @@ Network Destination        Netmask          Gateway       Interface  Metric
 
 The row that matters most is the first one: destination `0.0.0.0`, netmask `0.0.0.0`, gateway `192.168.1.1`. That is the **default route** — the rule that says “anything I do not otherwise recognise goes to the router”. It is the table form of the default gateway.
 
-Find the `0.0.0.0 0.0.0.0` row and read its Gateway column. That value *is* your default gateway, and seeing it here confirms the machine agrees with what `ipconfig /all` told you. A machine with a VPN client installed often has several of these rows, which is a common cause of “the internet broke when I connected the VPN” — the VPN added a competing default route. That diagnosis is Phase 4 (VPN) territory, but *seeing* the second default route here is the evidence you would hand over.
+Find the `0.0.0.0 0.0.0.0` row and read its Gateway column. That value *is* your default gateway, and seeing it here confirms the machine agrees with what `ipconfig /all` told you. A machine with a VPN client installed often has several of these rows, which is a common cause of “the internet broke when I connected the VPN” — the VPN added a competing default route. Phase 4 works that as a ticket; *seeing* the second default route here is the evidence you would hand over.
 
 #### Latency, packet loss, and what they actually mean
 
@@ -954,7 +954,7 @@ Notice that **“full bars” is evidence about exactly one rung, and it is the 
 | “It is very slow” | Any | Check latency and packet loss first, then link rate and channel |
 | “It worked yesterday and nothing changed” | 2 | Ask again about change; check DHCP lease and static config |
 | “IT sent me a new laptop and the printer is gone” | 2 | Different subnet, or the printer is on a stale address |
-| “The VPN connected and now nothing works” | 3 | `route print -4` for a competing default route. Phase 4 territory |
+| “The VPN connected and now nothing works” | 3 | `route print -4` for a competing default route — the evidence Phase 4's VPN ticket starts from |
 
 #### Where the boundary of Phase 3 knowledge is
 
@@ -1175,7 +1175,7 @@ Two practical notes. If the capture looks overwhelming, remember Wireshark is sh
 
 This is the check that makes the failure signatures stick, because you will experience them instead of reading about them.
 
-**Before you start:** make sure nothing important is running — no call, no upload, no exam.
+**Before you start:** make sure nothing important is running — no call, no upload, no exam. Open PowerShell **as Administrator** (right-click it in the Start menu → *Run as administrator*). The commands below change adapter and DNS settings, and in a normal window they fail with `Access is denied`.
 
 1. **Confirm everything works.** Run the ladder once while healthy: `ipconfig /all`, `ping` the gateway, `ping 8.8.8.8`, `nslookup google.com`. Write down each result. This is your baseline, and it matters because you cannot recognise a failure signature you have never seen a success beside.
 2. **Break it.** Disconnect from Wi-Fi in Windows settings, or disable the adapter:
@@ -1404,9 +1404,9 @@ The single `0.0.0.0 0.0.0.0` default route now points at `192.168.1.1`, with no 
 
 **What you do not do.** You do not “fix” this by disabling DNS entirely, you do not install a third-party DNS changer, and you do not reboot the router a third time. The router was never involved.
 
-**Where a fix belongs to a later phase.** Removing the leftover VPN client’s virtual adapter cleanly, and understanding why VPN clients install a local DNS proxy in the first place, is **Phase 4 (VPN) work** — that phase covers VPN types, split tunnelling, and what a VPN client actually changes on your machine.
+**Where the fix belongs.** Removing the leftover VPN client’s virtual adapter cleanly, and understanding why VPN clients install a local DNS proxy in the first place, goes beyond this phase. Phase 4 works a VPN drop ticket from the same `route print -4` evidence you gathered here, but it is not a prerequisite for anything above — the correct move at your level is to escalate to whoever owns the VPN client.
 
-At Phase 3, the correct action is the one taken above: identify that the configured resolver is unreachable, restore working resolution, and note the cause for the next technician. If the user needs the VPN client reinstalled, that is Phase 4 or a ticket to whoever owns the VPN.
+At Phase 3, the correct action is the one taken above: identify that the configured resolver is unreachable, restore working resolution, and note the cause for the next technician. If the user needs the VPN client reinstalled, that is a ticket to whoever owns the VPN.
 
 **Final ticket note.**
 
@@ -1416,7 +1416,7 @@ At Phase 3, the correct action is the one taken above: identify that the configu
 > **Action (one change at a time):** 1) Reset the Wi-Fi adapter’s DNS servers to automatic (`Set-DnsClientServerAddress -ResetServerAddresses`) and flushed the DNS cache. 2) Confirmed the adapter now receives `192.168.1.1` and `8.8.8.8` via DHCP.
 > **Verified:** `nslookup google.com` resolved correctly. Asked the user to load the specific site that failed and confirm it opened — they confirmed it loaded normally.
 > **Cause:** The adapter was statically configured to use `127.0.0.1` as its DNS server, with no resolver running on that address. Traced to a leftover configuration from a discontinued VPN client. Connectivity was never at fault.
-> **For the next agent / out of scope:** The VPN client that created this configuration is still installed. If the user resumes using it, or if the DNS setting reverts, this is **Phase 4 (VPN)** work — do not keep resetting the adapter. Escalate to the VPN owner with these notes. Does not require ISP involvement; the router and line were healthy throughout.
+> **For the next agent / out of scope:** The VPN client that created this configuration is still installed. If the user resumes using it, or if the DNS setting reverts, do not keep resetting the adapter — escalate to whoever owns the VPN client, with these notes. Does not require ISP involvement; the router and line were healthy throughout.
 
 **Reasoning to take away:** “The internet is down” is a *symptom description*, not a diagnosis, and in this ticket the internet was never down. The decisive evidence cost nothing: `ping 8.8.8.8` succeeded while `ping google.com` failed, and that single comparison split “connectivity” from “name resolution” in under five seconds. Then comparing your own resolver against `8.8.8.8` proved the fault was local rather than global.
 
@@ -1656,7 +1656,7 @@ The exercises in *Hands-on practice tasks* below are not optional extras — the
 
 Then work the new material in the same way, in this order:
 
-1. **Do the Part 6 arithmetic by hand, on paper, three times.** Take `192.168.20.0/27`, `10.0.0.0/28`, and `172.16.8.64/26`. For each, write out the network address, first and last usable host, broadcast address, and usable host count — using the shortcut method, then check one of them in binary. Do not use a subnet calculator until you have done all three yourself; the calculator is for checking, not for thinking.
+1. **Do the Part 6 arithmetic by hand, on paper, three times.** Take `192.168.20.0/27`, `10.0.0.0/28`, and `172.16.8.64/26`. For each, write out the network address, first and last usable host, broadcast address, and usable host count — using the shortcut method, then check one of them in binary, the way Part 6 Step 2 lays it out. Do not use a subnet calculator until you have done all three yourself; the calculator is for checking, not for thinking.
 2. **Redraw the four-subnet table from Part 6 from memory.** A `/24` split into four `/26`s, with every network, host, and broadcast address. If you get one wrong, work out which block boundary you missed.
 3. **Answer the two mask questions in words.** Ask yourself: *“Is `192.168.10.10/26` in the same subnet as `192.168.10.200/26`, and how do you know?”* Then: *“Why can a device not use a gateway outside its own subnet?”* If you can answer both without hesitating, you have the part of subnetting that actually earns money.
 4. **Run the Part 8 walkthrough end to end** on your own network and record every result. Checks 1–7, in order. The comparison table from Check 7 is the single most useful artifact in this phase — it is your own, measured, and you will still be using it in a year.
