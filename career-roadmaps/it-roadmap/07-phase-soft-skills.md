@@ -223,25 +223,9 @@ Two things make practice work rather than feel like a waste of time:
 
 Then expect follow-ups, because interviews are follow-ups. "What would you do differently?" "Why did you choose that approach?" "What did you learn?" If your story collapses when probed, it is not yet a story you own.
 
-### Key takeaways
+### Part 4 — The same explanation, written for two different readers
 
-- **Acknowledge before you diagnose.** The user needs to know they were heard before they can answer your questions.
-- **"I'll come back to you either way"** is the sentence that prevents users from chasing you.
-- **Ask about symptoms, not causes.** A user's theory of the problem is usually unreliable.
-- **Three questions to memorise:** exact error wording, when it last worked and what changed, does it affect others.
-- **Never blame the user.** Blame makes people defensive, and defensive people withhold information.
-- **"I don't know yet, here's my plan, here's when I'll update you"** builds more trust than a confident guess.
-- **Lead async messages with the ask**, and separate fact from interpretation.
-- **Update every open ticket on a schedule**, even when the update is "no news yet".
-- **STAR: Situation, Task, Action, Result** — and say "I", not "we".
-- **No degree is a self-direction story, not an apology.** Support it with artefacts, not explanations.
-- **Evidence beats explanation.** The portfolio argues for you.
-
-### Practice this next
-
-The tasks below turn this into reps. Draft your five STAR stories and tell each one out loud to a real person, timing it. Write the same explanation of a technical problem twice — once for a technical colleague, once for a non-technical user — and compare them. Then take a real ticket you have written and rewrite its closure note for a nervous user who is afraid they broke something, because that is the writing you will do most often in your first job.
-
-#### The same explanation, written for two different readers
+Part 1 gave you the principles. This part shows the translation being done, because the gap between what you tell a colleague and what you tell a user is the whole skill.
 
 The core translation skill is writing the same information twice: once for a technical colleague, once for the user. Compare these two accounts of an identical fix.
 
@@ -262,7 +246,20 @@ Same facts, same diagnosis, same fix. What changed:
 
 Practising this translation, deliberately, is the exercise. Take any ticket you have written and rewrite it for a user who is worried, busy, and not technical. Then compare the two versions. The gap between them is exactly the skill.
 
-#### Difficult conversations: the ones that are not really about technology
+#### The four things a user actually needs from a status update
+
+Beginners write updates that answer the question they are interested in — "what have I tried?" — rather than the questions the user actually has. Users have four, in roughly this order:
+
+| The user's question | What your update must contain |
+|---|---|
+| "Does anyone know this is broken?" | Confirmation it is logged and being worked |
+| "Will it be fixed before I need it?" | A realistic time, or an honest "I do not know yet, by 3pm" |
+| "Should I do something in the meantime?" | A workaround, or an explicit "there is nothing you need to do" |
+| "Does anyone know I am blocked?" | Whether it has been escalated, and who has it |
+
+A useful test: read your update and check whether it answers at least three of those four. An update that says "still investigating, will update soon" answers only the first, and only barely.
+
+### Part 5 — Difficult conversations: the ones that are not really about technology
 
 Sooner or later you will tell someone something they do not want to hear: their device is not repairable, their data cannot be recovered, their request has been refused, or the fix will take three days and they needed it yesterday.
 
@@ -274,6 +271,137 @@ Four principles make these survivable:
 4. **Do not take anger personally.** A user shouting about a broken laptop is often stressed about the work they cannot do, not about you. Staying calm and factual is the entire response, and it de-escalates faster than matching their tone ever would.
 
 The habit worth building: **state the problem, state the impact, state what happens next, and end with the user's concrete options.** A user who knows their options is no longer helpless, and a user who is not helpless is very rarely angry.
+
+#### The angry user: a sequence, not a talent
+
+De-escalation is the skill beginners fear most and experienced technicians consider routine, because it follows a sequence rather than requiring a gift.
+
+**First, let them finish.** Interrupting an angry person to correct a detail escalates the situation and costs you nothing to avoid. Let the whole complaint land, even the parts that are wrong, even the parts that are about someone else.
+
+**Second, name the impact, not the fault.** "You have been waiting two days, and that has cost you time with a client. That is not acceptable." Notice this contains no "but". The word "but" deletes everything before it, so "I understand, but..." tells the user their frustration did not count.
+
+**Third, say what you are doing now.** Not what went wrong historically, and not who should have done better. "I am taking this ticket personally, I am going to look at the account now, and I will call you within the hour." Concrete, present tense, with a deadline.
+
+**Fourth, keep the promise or re-negotiate before it expires.** A broken promise converts a calming situation back into an angry one, and worse than before. If you cannot make the hour, call at fifty minutes and say so.
+
+**Fifth, do not accept abuse.** De-escalation has a floor. You can stay calm, acknowledge frustration, and still say: "I want to help you, and I will. I need you to stop shouting so I can." If it continues, escalate to a manager — that is a legitimate response, not a failure. Nobody is required to absorb personal abuse, and organisations that expect staff to do so have a retention problem.
+
+**What not to say**, with the reason:
+
+| Do not say | Why it inflames |
+|---|---|
+| "Calm down." | It implies their reaction is unreasonable, which is a new insult on top of the original problem |
+| "That is not my department." | True, sometimes — but it abandons them. Say who owns it and hand them over |
+| "You should have logged a ticket." | Blames the user for the organisation's process |
+| "I already explained that." | True and useless. Explain it again, differently |
+| "There is nothing I can do." | Usually false. There is almost always a next step, even if it is escalation |
+
+#### When you are the one who got it wrong
+
+You will eventually break something. A change you made takes a service down, or you close a ticket that was not fixed, or you delete something you should not have. How you handle that moment is a stronger signal than almost any success.
+
+**Say it immediately, plainly, and to the right person.** "I applied a change to the print server at 14:10 and printing has been down since. I am reverting it now." Notice the structure: what I did, when, what the effect is, what I am doing about it. No hedging, no passive voice, no "mistakes were made". The passive voice is where accountability goes to hide, and everyone can hear it.
+
+**Speed matters more than the size of the mistake.** A small fault reported in two minutes is a small problem. The same fault discovered by someone else two hours later is an incident, because now nobody trusts the reporting.
+
+**Do not apologise instead of acting.** An apology is necessary and it is not a substitute for the rollback. Fix first, apologise in the same breath, then write it up.
+
+**Write the post-incident note** even if nobody asks, in the same shape as a ticket: what happened, when, what the impact was, what you did, and what would prevent it. This is the single artefact that converts a mistake into evidence of professionalism, because it is what a senior engineer does and it is what most beginners avoid.
+
+#### The refusal that keeps the relationship
+
+Sometimes the answer is genuinely no: the software is not approved, the access is not appropriate, the deadline is not achievable. Refusals are where support relationships are lost, and the shape of a good one is consistent:
+
+1. **Answer quickly.** A slow "no" is worse than a fast one, because the user has been planning around a "maybe".
+2. **Give the reason, once.** "That licence is not approved for this team" is sufficient. Repeating or over-justifying sounds defensive.
+3. **Separate the decision from the person.** "I am not able to approve it" rather than "you cannot have it". You are describing your authority, not their worth.
+4. **Offer the route that does exist.** "It can be approved by your manager through the change process — I can start that for you." A refusal with a path attached is a redirection, not a wall.
+5. **Never invent a policy.** If you do not know the rule, say you will find out. Inventing one to make a refusal easier is the fastest way to lose credibility permanently, because it will be checked.
+
+### Part 6 — Two interview answers, taken apart
+
+Parts 1 to 5 taught the skills. This part shows them being assessed, because the interview is where this phase pays out.
+
+#### "Tell me about a time you dealt with a difficult user"
+
+This is the most common behavioural question in support hiring, and it is asked because the interviewer wants to know whether you will escalate or de-escalate when it costs you something.
+
+**A weak answer:**
+
+> "I have not really had a difficult user. I am a calm person and I get along with everyone."
+
+Three problems. It claims no experience at the moment experience was requested. "I am a calm person" is a self-assessment, and interviewers discount those. And it gives them nothing to follow up on, so the conversation dies.
+
+**A strong answer** (in STAR shape, ninety seconds):
+
+> **Situation:** "A colleague was locked out of her account for the second time in a week and she was frustrated, which was fair — her deadline was that afternoon and I was the second person she had spoken to."
+> **Task:** "I needed to get her working, and I needed her to trust that this attempt would stick rather than being another quick reset."
+> **Action:** "I let her finish explaining before I said anything. I told her the pattern was the important part and that a second lockout in a week meant her password was not the problem. I asked whether she had any saved logins — she had a saved VPN profile. I reset the password, then walked her through updating the saved VPN credential, and I did it on a call rather than sending instructions, because that was the step the previous fix had missed."
+> **Result:** "She was working inside twenty minutes and has not been locked out since. I wrote the stored-credential check into our password-reset procedure so the next person catches it on the first ticket rather than the second."
+
+What makes it strong: the user's frustration is acknowledged as legitimate rather than painted as unreasonable; the action is specific and uses "I"; the diagnosis explains *why* the previous fix failed; and the result includes a process change. The last sentence is what separates this from a good story into a hiring signal — it shows the candidate improved the system, not just the ticket.
+
+#### "You have no degree and no professional IT experience. Why should we hire you?"
+
+This is the question you are most likely to dread, and it has a reliable structure.
+
+**Do not:** apologise, use the word "but" after "I know I don't have a degree", overclaim ("I basically have the same knowledge as a graduate"), or get defensive about the question itself. The interviewer is not attacking you; they are testing how you handle it.
+
+**Do:** answer the real question, which is *can you do this job and will you be reliable*.
+
+> "That is a fair question. What I have is a deliberate, structured route into this work rather than a degree. I have worked through networking, Windows administration, ticketing systems and security fundamentals, and at every stage I built something rather than only reading — a subnetting worksheet, a PowerShell inventory script, five ticket templates, an asset inventory, and written troubleshooting reports with the evidence in them.
+>
+> The part that translates directly to this role is that I documented my work as I went, because I knew the portfolio would have to argue for me. So I can show you not just that I studied, but how I diagnose something and how I write it up. I have also been the person my family and friends call when their computer breaks, which has taught me a lot about explaining things to someone who is already frustrated.
+>
+> What I do not have is experience in a real environment at volume, and I am not going to pretend otherwise. What I would ask is the chance to show that I learn fast and that I do not need to be told something twice."
+
+Why this works: it answers honestly, it points at artefacts, it converts the gap into a specific and bounded admission rather than a general insecurity, and it ends with a request rather than a plea. The final sentence about learning fast is a claim the portfolio has already supported.
+
+#### The follow-up questions, and why your stories must survive them
+
+Interviewers probe, because a memorised answer has no depth beneath it. Prepare for these on every story:
+
+- "What would you do differently?" — Have a real answer. "Nothing" reads as no reflection.
+- "Why did you choose that approach?" — If you cannot explain the reasoning, the story sounds borrowed.
+- "How did you know it was fixed?" — This is a verification question. Answer with the evidence, not "the user said thanks".
+- "What did you learn?" — The weakest possible answer is a platitude. A specific behaviour change is the strongest.
+- "What was your actual role, versus the team's?" — The implicit "we" check. Be ready to draw the line precisely.
+
+### Part 7 — Key takeaways
+
+- **Acknowledge before you diagnose.** The user needs to know they were heard before they can answer your questions.
+- **"I'll come back to you either way"** is the sentence that prevents users from chasing you.
+- **Ask about symptoms, not causes.** A user's theory of the problem is usually unreliable.
+- **Three questions to memorise:** exact error wording, when it last worked and what changed, does it affect others.
+- **Never blame the user.** Blame makes people defensive, and defensive people withhold information.
+- **"I don't know yet, here's my plan, here's when I'll update you"** builds more trust than a confident guess.
+- **Lead async messages with the ask**, and separate fact from interpretation.
+- **Update every open ticket on a schedule**, even when the update is "no news yet".
+- **STAR: Situation, Task, Action, Result** — and say "I", not "we".
+- **No degree is a self-direction story, not an apology.** Support it with artefacts, not explanations.
+- **Evidence beats explanation.** The portfolio argues for you.
+- **Every status update answers four user questions:** is it known, when will it be fixed, do I need to do anything, and has it been escalated.
+- **De-escalation is a sequence, not a talent:** let them finish, name the impact, say what you are doing now, keep the promise, and do not accept abuse.
+- **"But" deletes everything before it.** "I understand, but..." tells the user their frustration did not count.
+- **When you break something, say it immediately and in active voice.** The passive voice is where accountability hides, and speed matters more than the size of the mistake.
+- **A good refusal answers fast, gives the reason once, separates the decision from the person, and offers the route that does exist.** Never invent a policy.
+- **Your STAR stories must survive follow-ups.** If "what would you do differently?" collapses the story, you do not own it yet.
+- **The strongest story ending is a process change**, because it shows you improved the system rather than only the ticket.
+
+### Part 8 — Practice this next
+
+The tasks below turn this into reps. Draft your five STAR stories and tell each one out loud to a real person, timing it. Write the same explanation of a technical problem twice — once for a technical colleague, once for a non-technical user — and compare them. Then take a real ticket you have written and rewrite its closure note for a nervous user who is afraid they broke something, because that is the writing you will do most often in your first job.
+
+Then push further:
+
+1. **Rewrite three real messages from Part 5's "do not say" table.** Take "calm down", "that is not my department", and "there is nothing I can do", and write what you would actually say instead, in a specific scenario you invent. The replacement must still refuse or redirect where that is the honest outcome.
+2. **Script the sequence for an angry user, then say it aloud.** Write your five de-escalation moves into your own words and record yourself delivering them. Then listen back and find the place where you would naturally have interrupted — that is the reflex you are training out.
+3. **Write your own "I broke something" note.** Invent a realistic mistake — you applied a change that took printing down — and write the immediate message you would send, under 100 words. Then write the post-incident note. The first must contain no hedging and no passive voice.
+4. **Prepare the no-degree answer and have someone attack it.** Deliver it, then have the person ask "but why should we take you over a graduate?" and answer that follow-up without repeating yourself. The follow-up is the real question.
+5. **Take each of your five STAR stories and write three follow-up questions** a hostile-but-fair interviewer would ask. Then answer them out loud. Any story that does not survive this is not finished.
+6. **Record a ninety-second story and time it precisely.** Most people's "short" story runs three minutes. Cut it to ninety seconds without losing the result, then deliver the shorter version — that is the discipline the timing table in Part 3 is asking for.
+7. **Write one status update using the four user questions** from Part 4, for a ticket that is genuinely stuck and has no ETA. This is the hardest version, because "I do not know when" has to be delivered without losing the user's confidence.
+8. **Take a refusal you have actually received or given** and reshape it into the five-part structure from Part 5 — fast, reason once, decision not person, route that exists, no invented policy.
 
 ## Tools for This Phase
 
