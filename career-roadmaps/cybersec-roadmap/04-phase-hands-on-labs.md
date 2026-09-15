@@ -53,30 +53,112 @@ If your computer is weak:
 
 ### Why this lesson exists
 
-Everything up to this point has been preparation. Phases 1 through 3 gave you vocabulary, plumbing, and the map of the six domains. This phase is where you build something a hiring manager can look at.
+Everything up to this point has been preparation. Phases 1 through 3 gave you
+vocabulary, plumbing, and the map of the six domains. This phase is where you
+build something a hiring manager can look at.
 
-The exit criterion is unusually concrete, and it is worth reading twice: *you can show a hiring manager logs flowing into a SIEM, explain what triggered an alert, and write a short incident report.* Notice that it does not say "you have completed labs." It says you can **show**, **explain**, and **write**. That is a portfolio standard, not a study standard. This is the phase where the curriculum stops being about what you know and starts being about what you can demonstrate.
+The exit criterion is unusually concrete, and it is worth reading twice:
 
-**Why this phase is 8–12 weeks when others are 4–6.** The honest reason is stated in the phase itself: *labs can break.* And they will. Wazuh's installer will fail on a machine with too little RAM. The agent will not connect because of a firewall rule you did not know existed. A VM will refuse to boot after an update. None of this means you are doing it wrong — **troubleshooting the lab is part of the lab.** The buffer is deliberate, and learning to work through a broken environment methodically is itself a job skill, because production systems break too.
+> You can show a hiring manager logs flowing into a SIEM, explain what triggered
+> an alert, and write a short incident report.
 
-**A strategic point about what you are building.** There are two kinds of cyber learner, and the difference is visible from across a room. The first collects flags and course completions. The second produces artifacts: a lab diagram, a set of detection rules with reasoning, an incident report about something they actually observed. The phase's deliverable is entirely the second kind, and the goal is stated plainly in the skills list: **produce reports instead of just collecting flags.** A TryHackMe completion badge tells an employer you followed instructions. A detection rule you wrote, with a screenshot of it firing on an event you generated, tells them you can do the job.
+Notice that it does not say "you have completed labs." It says you can **show**,
+**explain**, and **write**.
 
-**On hardware, and why the phase offers two paths.** The `## Lab setup options` section above gives a minimum path and a better local path, and this is not a polite formality — it is a recognition that the learner this roadmap is written for may not have a powerful machine. Wazuh with a Windows VM and a Linux VM realistically wants 8–16 GB of RAM. If you have 8 GB, you can run the SIEM and one agent if you are careful. If you have 4 GB, you cannot, and **the curriculum explicitly permits you to document that limitation instead of pretending otherwise.** That is not a lesser outcome. "I planned a Wazuh deployment in detail and documented why my hardware could not host it, then built the equivalent understanding in browser-based labs" is a truthful, defensible position — and truthfulness about limits is something interviewers respect far more than a vague claim to have done everything.
+| Standard | What it asks for |
+|---|---|
+| A study standard | "I have completed labs" |
+| **A portfolio standard** | "I can show it, explain it, and write it up" |
 
-**Time to complete:** 60–100 hours across the phase, spread unevenly. The lab build is front-loaded and can consume a whole weekend if something goes wrong. The labs are steady. The writing is where most learners under-invest and where most of the portfolio value actually is.
+This is the phase where the curriculum stops being about what you know and
+starts being about what you can demonstrate.
+
+#### Why this phase is 8–12 weeks when others are 4–6
+
+The honest reason is stated in the phase itself: *labs can break.* And they will.
+
+| What breaks | Why |
+|---|---|
+| Wazuh's installer | Fails on a machine with too little RAM |
+| The agent connection | Blocked by a firewall rule you did not know existed |
+| A VM | Refuses to boot after an update |
+
+None of this means you are doing it wrong. **Troubleshooting the lab is part of
+the lab.**
+
+The buffer is deliberate. Learning to work through a broken environment
+methodically is itself a job skill, because production systems break too.
+
+#### The strategic point about what you are building
+
+There are two kinds of cyber learner, and the difference is visible from across
+a room.
+
+| The collector | The builder |
+|---|---|
+| Gathers flags and course completions | Produces artifacts |
+| A TryHackMe badge | A lab diagram, detection rules with reasoning, an incident report about something they actually observed |
+| Tells an employer you followed instructions | Tells them you can do the job |
+
+The phase's deliverable is entirely the second kind. The goal is stated plainly
+in the skills list: **produce reports instead of just collecting flags.**
+
+#### On hardware, and why the phase offers two paths
+
+The `## Lab setup options` section gives a minimum path and a better local path.
+This is not a polite formality — it is a recognition that the learner this
+roadmap is written for may not have a powerful machine.
+
+| Your RAM | What is realistic |
+|---|---|
+| 16 GB | The full local lab comfortably |
+| 8 GB | The SIEM and one agent, if you are careful |
+| 4 GB | Not the local lab — use browser-based labs instead |
+
+Wazuh with a Windows VM and a Linux VM realistically wants 8–16 GB.
+
+**If you have 4 GB, the curriculum explicitly permits you to document that
+limitation instead of pretending otherwise.** That is not a lesser outcome.
+
+> I planned a Wazuh deployment in detail and documented why my hardware could
+> not host it, then built the equivalent understanding in browser-based labs.
+
+That is a truthful, defensible position — and truthfulness about limits is
+something interviewers respect far more than a vague claim to have done
+everything.
+
+**Time to complete:** 60–100 hours across the phase, spread unevenly.
+
+| Work | Shape of the effort |
+|---|---|
+| The lab build | Front-loaded; can consume a whole weekend if something goes wrong |
+| The labs themselves | Steady |
+| The writing | Where most learners under-invest, and where most of the portfolio value actually is |
 
 ### Part 1 — Design the lab before you build it
 
 #### Why the diagram comes first
 
-Phase task 1 is to build a **lab diagram before installing anything**, and this ordering is the single most important piece of advice in the phase. Building first and documenting later produces a mess you cannot describe. Designing first forces you to answer questions that will otherwise ambush you mid-install:
+Phase task 1 is to build a **lab diagram before installing anything**. This
+ordering is the single most important piece of advice in the phase.
 
-- How many machines, and what is each one *for*?
-- How do they reach each other, and how do they reach the internet?
-- Where does the traffic get observed?
-- What are the addresses, and do they stay stable across reboots?
+Building first and documenting later produces a mess you cannot describe.
+Designing first forces you to answer questions that will otherwise ambush you
+mid-install:
 
-A lab diagram is a network diagram with purpose labels. It does not need to be pretty — a hand drawing photographed, or a diagram in any free tool, is fine. What it needs is: **each host, its role, its IP, its network, and the direction of the log flow.** Here is a realistic minimal lab that matches the phase's "better local path":
+| Question | Why it matters later |
+|---|---|
+| How many machines, and what is each one *for*? | Determines your RAM budget |
+| How do they reach each other, and the internet? | Determines your adapter setup |
+| Where does the traffic get observed? | Determines where the agent goes |
+| What are the addresses, and do they survive reboots? | Determines whether your rules keep working |
+
+A lab diagram is a network diagram with purpose labels. It does not need to be
+pretty — a hand drawing photographed, or a diagram in any free tool, is fine.
+
+What it needs is: **each host, its role, its IP, its network, and the direction
+of the log flow.** Here is a realistic minimal lab that matches the phase's
+"better local path":
 
 ```text
                     ┌─────────────────────────────┐
@@ -101,23 +183,61 @@ A lab diagram is a network diagram with purpose labels. It does not need to be p
                        agent log forwarding (1514/tcp)
 ```
 
-Three design decisions in that diagram are worth understanding, because each one is a real trade-off you will meet in professional environments.
+Three design decisions in that diagram are worth understanding, because each one
+is a real trade-off you will meet in professional environments.
 
-**Why a host-only network.** Phase 2 introduced VirtualBox networking modes. Host-only gives you a private network that your host and the VMs share, with **no route to your real network**. For a lab containing deliberately vulnerable machines, that isolation is the point: nothing you run can reach anything real. You will still need NAT or a second adapter on the VMs that must download updates. A common and effective pattern is **two adapters per VM** — host-only for lab traffic, NAT for internet access.
+| Decision | Why it is right |
+|---|---|
+| **A host-only network** | Host-only gives your host and the VMs a private network with **no route to your real network**. For a lab containing deliberately vulnerable machines, that isolation is the point: nothing you run can reach anything real |
+| **The SIEM as its own VM** | Wazuh's server is resource-hungry, and it is the machine whose logs you care about least. Keeping it separate means you can snapshot and rebuild it independently — and it mirrors how SIEMs are deployed in reality: a central collector, separate from the endpoints it monitors |
+| **A direction to the log flow** | The arrow points *from* victims *to* the SIEM. This sounds trivial and it is not |
 
-**Why the SIEM is its own VM.** Wazuh's server is resource-hungry and it is the machine whose logs you care about least. Keeping it separate means you can snapshot and rebuild it independently, and it mirrors how SIEMs are deployed in reality: a central collector, separate from the endpoints it monitors.
+**On the network:** you will still need NAT or a second adapter on the VMs that
+must download updates. A common and effective pattern is **two adapters per
+VM** — host-only for lab traffic, NAT for internet access.
 
-**Why the log flow has a direction.** The arrow points *from* victims *to* the SIEM. This sounds trivial and it is not: it determines which firewall rules you need, which way the agent connects, and where you look when it does not work. Most log-forwarding failures are a direction problem — the agent cannot reach the manager because you opened the port the wrong way, or a firewall on the victim is blocking outbound traffic.
+**On the log flow direction:** it determines which firewall rules you need, which
+way the agent connects, and where you look when it does not work.
+
+Most log-forwarding failures are a direction problem — the agent cannot reach the
+manager because you opened the port the wrong way, or a firewall on the victim
+is blocking outbound traffic.
 
 #### Static addressing, and why DHCP will waste your weekend
 
-Give the lab VMs **static IP addresses**, or configure DHCP reservations. This is a small decision with a large payoff: your detection rules, your documentation, and your screenshots will all reference IP addresses, and if those change on every reboot your notes become wrong and your rules stop matching.
+Give the lab VMs **static IP addresses**, or configure DHCP reservations.
 
-It is also a small lesson in professional practice. In real environments, servers have stable addresses precisely so that monitoring and rules can depend on them. A lab where everything moves is a lab where nothing is reproducible.
+This is a small decision with a large payoff. Your detection rules, your
+documentation, and your screenshots will all reference IP addresses. If those
+change on every reboot, your notes become wrong and your rules stop matching.
+
+| | Static addresses | DHCP without reservations |
+|---|---|---|
+| Your notes | Stay accurate | Go stale on reboot |
+| Your detection rules | Keep matching | Silently stop matching |
+| Reproducibility | A reader can rebuild your lab | Nothing is reproducible |
+
+It is also a small lesson in professional practice. In real environments,
+servers have stable addresses precisely so that monitoring and rules can depend
+on them.
 
 #### Recording baseline state
 
-Before you install anything, note what "clean" looks like: the OS version, the services running, the listening ports. This is the **baseline** concept from Phase 3's endpoint material, and building it explicitly is what makes it possible to detect change later. A practical method: run `ss -tulpn` on the Linux VM and `netstat -ano` on Windows, save the output to a file in your notes, and keep it. When you later generate a test event, you will be able to say precisely what changed.
+Before you install anything, note what "clean" looks like: the OS version, the
+services running, the listening ports.
+
+This is the **baseline** concept from Phase 3's endpoint material. Building it
+explicitly is what makes it possible to detect change later.
+
+A practical method:
+
+| Platform | Command |
+|---|---|
+| Linux VM | `ss -tulpn` |
+| Windows VM | `netstat -ano` |
+
+Save the output to a file in your notes, and keep it. When you later generate a
+test event, you will be able to say precisely what changed.
 
 ### Part 2 — Building the lab: VMs, and installing a SIEM
 
@@ -125,38 +245,89 @@ Before you install anything, note what "clean" looks like: the OS version, the s
 
 The installation order that causes the least pain:
 
-1. **Install VirtualBox** on the host.
-2. **Create the host-only network** first, in VirtualBox's network settings, before creating any VM. Doing this afterwards means editing every VM's configuration.
-3. **Install Ubuntu Server** (no desktop) as the SIEM host. Server, not Desktop — the desktop consumes RAM the SIEM needs, and you will administer it over SSH, which practices Phase 2's skills.
-4. **Snapshot immediately after install**, before configuring anything. This is the single highest-value habit in the phase: a snapshot is a checkpoint you can return to when (not if) a configuration experiment breaks the machine.
-5. **Install the victim VMs**, snapshot them too, and install Sysmon on the Windows one.
+| Order | Step | Why this order |
+|---|---|---|
+| 1 | Install VirtualBox on the host | Nothing else works without it |
+| 2 | Create the host-only network first, in VirtualBox's network settings | Doing this afterwards means editing every VM's configuration |
+| 3 | Install Ubuntu Server (no desktop) as the SIEM host | The desktop consumes RAM the SIEM needs, and you will administer it over SSH, which practises Phase 2's skills |
+| 4 | Snapshot immediately after install, before configuring anything | The single highest-value habit in the phase |
+| 5 | Install the victim VMs, snapshot them too, and install Sysmon on the Windows one | Same reasoning |
 
-The snapshot point deserves emphasis. Virtual machines are used for security work specifically because they are **reversible** — that is what makes it safe to run malicious code or break a configuration. A learner who snapshots before each experiment can be fearless; one who does not will hesitate, and hesitation is what stalls progress. Take the snapshot.
+**Why step 4 matters most.** Virtual machines are used for security work
+specifically because they are **reversible** — that is what makes it safe to run
+malicious code or break a configuration.
 
-For Windows, Microsoft publishes free **evaluation** virtual machines and ISOs for testing, which is what the phase's "Windows evaluation VM if available" refers to. If you cannot obtain one, the Linux victim alone is sufficient to complete the phase — Wazuh monitors Linux just as well, and you can complete the whole log-forwarding and detection-rule exercise with a single Ubuntu agent. **Do not let a missing Windows VM stop you.** The deliverable asks for logs from "one Windows or Linux VM."
+A learner who snapshots before each experiment can be fearless. One who does not
+will hesitate, and hesitation is what stalls progress. Take the snapshot.
+
+**On obtaining Windows.** Microsoft publishes free **evaluation** virtual
+machines and ISOs for testing, which is what the phase's "Windows evaluation VM
+if available" refers to.
+
+| Situation | What to do |
+|---|---|
+| You have a Windows evaluation VM | Use it |
+| You do not | The Linux victim alone is sufficient |
+
+Wazuh monitors Linux just as well, and you can complete the whole
+log-forwarding and detection-rule exercise with a single Ubuntu agent.
+
+**Do not let a missing Windows VM stop you.** The deliverable asks for logs from
+"one Windows or Linux VM."
 
 #### What Wazuh is, and what it is not
 
-**Wazuh** is a free, open-source **SIEM** — Security Information and Event Management — combined with **XDR** (Extended Detection and Response) capabilities. Recall the division of labour from Phase 3: Sysmon *records* endpoint activity, AV *blocks known bad*, EDR *detects behaviour*. Wazuh's role is different again:
+**Wazuh** is a free, open-source **SIEM** — Security Information and Event
+Management — combined with **XDR** (Extended Detection and Response)
+capabilities.
 
-- **Collect** — it receives logs from many sources: Linux agents, Windows agents, Sysmon events, firewalls, web servers.
-- **Normalise** — it parses wildly different log formats into a common structure, so a Windows event and an SSH failure become comparable records.
-- **Analyse** — it applies **decoders** (which extract fields from raw log lines) and **rules** (which match patterns in those fields and assign severity).
-- **Alert** — when a rule matches, it generates an alert, visible in the dashboard and available for response.
-- **Retain** — it stores everything, which is what makes after-the-fact investigation possible.
+Recall the division of labour from Phase 3: Sysmon *records* endpoint activity,
+AV *blocks known bad*, EDR *detects behaviour*. Wazuh's role is different again.
 
-Two components to keep straight, because the vocabulary appears throughout the Wazuh documentation:
+| Wazuh's job | What it means |
+|---|---|
+| **Collect** | Receives logs from many sources: Linux agents, Windows agents, Sysmon events, firewalls, web servers |
+| **Normalise** | Parses wildly different log formats into a common structure, so a Windows event and an SSH failure become comparable records |
+| **Analyse** | Applies **decoders** (extract fields from raw log lines) and **rules** (match patterns and assign severity) |
+| **Alert** | When a rule matches, generates an alert visible in the dashboard |
+| **Retain** | Stores everything, which is what makes after-the-fact investigation possible |
 
-- The **Wazuh manager** is the server: it receives events, applies decoders and rules, and generates alerts.
-- The **Wazuh agent** is a small program installed on each monitored machine. It watches log files and the event log, and forwards relevant entries to the manager on port 1514.
+**Two components to keep straight**, because the vocabulary appears throughout
+the Wazuh documentation:
 
-That manager/agent split is why the lab diagram has a direction. The agent *initiates* the connection outward to the manager — which means the firewall rule you need is for the victim to reach the manager's port 1514, not the reverse. Getting this backwards is one of the most common setup failures.
+| Component | What it is |
+|---|---|
+| **The Wazuh manager** | The server. Receives events, applies decoders and rules, generates alerts |
+| **The Wazuh agent** | A small program on each monitored machine. Watches log files and the event log, forwards entries to the manager on port 1514 |
 
-**A note on resource planning.** Wazuh's official **quickstart** (linked in the resources) is the correct path, and it offers an all-in-one installation that puts the manager, indexer, and dashboard on one machine. Be aware that the indexer is the memory-hungry component — it is a search engine — and that the documented minimum requirements are real rather than conservative. If your machine cannot meet them, the honest options are: run only the manager without the indexer (you lose the dashboard but keep the alerting), use Docker with tight memory limits, plan the install and document the limitation, or defer to browser-based labs. Any of these is a legitimate outcome.
+That manager/agent split is why the lab diagram has a direction. The agent
+*initiates* the connection outward to the manager.
+
+Which means the firewall rule you need is for the victim to reach the manager's
+port 1514 — not the reverse. Getting this backwards is one of the most common
+setup failures.
+
+**A note on resource planning.** Wazuh's official **quickstart** (linked in the
+resources) is the correct path. It offers an all-in-one installation that puts
+the manager, indexer, and dashboard on one machine.
+
+Be aware that the indexer is the memory-hungry component — it is a search engine
+— and that the documented minimum requirements are real rather than
+conservative. If your machine cannot meet them, the honest options are:
+
+| Option | What you lose |
+|---|---|
+| Run only the manager without the indexer | The dashboard, but you keep the alerting |
+| Use Docker with tight memory limits | Some setup simplicity |
+| Plan the install and document the limitation | Nothing — this is a valid outcome |
+| Defer to browser-based labs | The local build, but not the understanding |
+
+Any of these is a legitimate outcome.
 
 #### Source, decoder, rule: how detection actually works
 
-This is the conceptual core of the phase, and understanding it is what turns "I installed a SIEM" into "I can write detection."
+This is the conceptual core of the phase. Understanding it is what turns
+"I installed a SIEM" into "I can write detection."
 
 The pipeline, in order:
 
@@ -164,13 +335,18 @@ The pipeline, in order:
 Log source → event arrives → decoder extracts fields → rule matches → alert
 ```
 
-A **decoder** turns a raw log line into structured fields. Consider a real SSH failure:
+A **decoder** turns a raw log line into structured fields. Consider a real SSH
+failure:
 
 ```text
 Failed password for invalid user admin from 203.0.113.45 port 51234 ssh2
 ```
 
-A decoder extracts `user=admin`, `srcip=203.0.113.45`, `srcport=51234`. Without this step, the line is just text and you cannot write conditions against it. Wazuh ships with hundreds of decoders for common log formats — which is why it can understand Windows events and `sshd` logs out of the box.
+A decoder extracts `user=admin`, `srcip=203.0.113.45`, `srcport=51234`.
+
+Without this step, the line is just text and you cannot write conditions against
+it. Wazuh ships with hundreds of decoders for common log formats — which is why
+it can understand Windows events and `sshd` logs out of the box.
 
 A **rule** then tests those fields and decides whether the event matters. The structure, in Wazuh's XML format:
 
@@ -217,47 +393,113 @@ The rule-writing discipline, in five questions you should be able to answer for 
 
 #### Triggering events safely, and reading the result
 
-Phase task 5 asks you to generate safe test events, and "safe" is doing real work in that sentence. On your own isolated lab VMs, you can deliberately fail logins and create users. Every one of those actions is a crime on a system you do not own. Phase 2's boundary still applies, and this phase is where the temptation to test a rule against something real is highest — resist it completely.
+Phase task 5 asks you to generate safe test events, and "safe" is doing real work
+in that sentence.
 
-The method, which is the same loop a detection engineer uses professionally:
+On your own isolated lab VMs, you can deliberately fail logins and create users.
+Every one of those actions is a crime on a system you do not own. Phase 2's
+boundary still applies, and this phase is where the temptation to test a rule
+against something real is highest — resist it completely.
 
-1. **Generate one event** on the victim VM (for example, `su - fakeuser` with a wrong password).
-2. **Find it in the raw log** on the victim (`/var/log/auth.log`, or Event Viewer on Windows). Proving the event exists *at the source* before looking in the SIEM is what lets you isolate a forwarding failure from a detection failure.
-3. **Find it in Wazuh**, first as a raw event and then as a decoded event with fields extracted.
-4. **Check whether a rule fired.** If yes, note which. If no, ask whether no rule exists for it — which is often the honest answer and the reason you are writing your own.
-5. **Write or modify a rule** so that it does, then repeat from step 1 to confirm.
+The method is the same loop a detection engineer uses professionally.
 
-That loop — generate, observe at the source, observe in the pipeline, adjust — is the whole of detection engineering, and doing it three times by hand teaches more than reading any amount of documentation about it.
+| Step | Action | Why this step exists |
+|---|---|---|
+| 1 | **Generate one event** on the victim VM — for example, `su - fakeuser` with a wrong password | You need a known event to trace |
+| 2 | **Find it in the raw log** on the victim (`/var/log/auth.log`, or Event Viewer) | Proving it exists *at the source* is what lets you isolate a forwarding failure from a detection failure |
+| 3 | **Find it in Wazuh**, first as a raw event, then as a decoded event with fields extracted | Confirms the pipeline works |
+| 4 | **Check whether a rule fired.** If no, ask whether no rule exists for it | Often the honest answer — and the reason you are writing your own |
+| 5 | **Write or modify a rule** so that it does, then repeat from step 1 | Closes the loop |
 
-**A note on screenshots.** The deliverable asks for them, and they are your portfolio evidence. Take them at the moment the thing works, and annotate them in your notes so that a reader who was not there understands what they are looking at. A screenshot with a caption explaining *what the alert means* is worth ten unannotated ones. Remember that a screenshot proves a state, not an understanding — the explanation in your write-up is what carries the value.
+That loop — generate, observe at the source, observe in the pipeline, adjust — is
+the whole of detection engineering. Doing it three times by hand teaches more
+than reading any amount of documentation about it.
+
+**A note on screenshots.** The deliverable asks for them, and they are your
+portfolio evidence. Take them at the moment the thing works, and annotate them
+in your notes so a reader who was not there understands what they are looking at.
+
+| Screenshot quality | Value |
+|---|---|
+| Annotated, with a caption explaining what the alert means | Worth ten unannotated ones |
+| Unannotated | Proves nothing to a reader who was not present |
+
+Remember that a screenshot proves a state, not an understanding. The explanation
+in your write-up is what carries the value.
 
 #### Writing the incident report
 
-The final artifact, and the one that most directly matches the exit criterion, is one incident report from a lab. Phase 3 covered report structure; here it must come from something you actually observed in your lab, which makes it real in a way a mock is not.
+The final artifact, and the one that most directly matches the exit criterion.
+Phase 3 covered report structure; here it must come from something you actually
+observed in your lab, which makes it real in a way a mock is not.
 
 A structure that works, adapted to a lab incident:
 
-- **Summary** — one paragraph, plain language. "A brute-force attempt against SSH on the Ubuntu victim was detected by a custom Wazuh rule at 14:32 UTC. No access was gained."
-- **Detection** — which rule fired, at what level, and **what triggered it**. This is where you explain the `frequency` threshold and the `same_source_ip` clause in your own words.
-- **Evidence** — the log lines and the alert, quoted, with timestamps in UTC.
-- **Timeline** — a short table, as in Phase 3.
-- **Impact** — in a lab, honestly: none. Saying so is correct and professional. Do not inflate a lab event into a breach narrative; an interviewer will see through it instantly.
-- **Root cause** — the control gap. For a brute-force detection on a lab host, the honest answer is that a control was *absent* (no key-only SSH, no fail2ban) and the detection you built is what surfaced the behaviour.
-- **Recommendations** — specific and prioritised. "Disable password authentication in favour of keys" is a recommendation; "improve SSH security" is not.
+| Section | What goes in it |
+|---|---|
+| **Summary** | One paragraph, plain language: "A brute-force attempt against SSH on the Ubuntu victim was detected by a custom Wazuh rule at 14:32 UTC. No access was gained." |
+| **Detection** | Which rule fired, at what level, and **what triggered it**. Explain the `frequency` threshold and the `same_source_ip` clause in your own words |
+| **Evidence** | The log lines and the alert, quoted, with timestamps in UTC |
+| **Timeline** | A short table, as in Phase 3 |
+| **Impact** | In a lab, honestly: none. Saying so is correct and professional |
+| **Root cause** | The control gap. For brute force, the honest answer is usually that a control was *absent* — no key-only SSH, no fail2ban — and your detection is what surfaced the behaviour |
+| **Recommendations** | Specific and prioritised. "Disable password authentication in favour of keys" is a recommendation; "improve SSH security" is not |
 
-Two things make a lab report read as professional rather than academic. First, **UTC timestamps everywhere**, stated explicitly. Second, **an honest impact statement.** A report that says "this was a controlled test, no impact, and here is what the detection would have caught in production" demonstrates exactly the judgement an employer wants, and it is far more credible than manufactured drama.
+Two things make a lab report read as professional rather than academic.
+
+First, **UTC timestamps everywhere**, stated explicitly. Second, **an honest
+impact statement**.
+
+A report that says "this was a controlled test, no impact, and here is what the
+detection would have caught in production" demonstrates exactly the judgement an
+employer wants. It is far more credible than manufactured drama.
+
+Do not inflate a lab event into a breach narrative; an interviewer will see
+through it instantly.
 
 #### Blue-team labs and web labs: different skills, both required
 
-The phase asks for **10 PortSwigger Apprentice labs** and **2 free blue-team labs** (from CyberDefenders, Blue Team Labs Online, or LetsDefend). These two families teach genuinely different things and the combination is deliberate.
+The phase asks for **10 PortSwigger Apprentice labs** and **2 free blue-team
+labs** (from CyberDefenders, Blue Team Labs Online, or LetsDefend).
 
-**PortSwigger labs** are web security — Phase 3's Part 4, made concrete. They are browser-based, need no lab hardware, and each has a defined objective. The phase's earlier task list asked for five; this one asks for ten, because by now you have the fundamentals and can work faster. The pattern for write-ups is the one from Phase 3: what the vulnerability was, how you found it, the payload, and the fix. Since this is your strongest area, use it to build confidence and volume in your portfolio.
+These two families teach genuinely different things, and the combination is
+deliberate.
 
-**Blue-team labs** are the other side: you are given evidence — disk images, memory captures, logs, PCAPs — and asked to determine what happened. CyberDefenders and Blue Team Labs Online both offer free beginner challenges with exactly this shape. This is much closer to the daily work of a SOC analyst than any offensive lab, and it exercises skills you have built across three phases: reading logs, correlating timestamps, interpreting network traffic, and writing conclusions.
+| | PortSwigger labs | Blue-team labs |
+|---|---|---|
+| **Subject** | Web security — Phase 3's Part 4, made concrete | The defensive side |
+| **Format** | Browser-based, no lab hardware, each with a defined objective | You are given evidence — disk images, memory captures, logs, PCAPs — and asked what happened |
+| **Your task** | Find and exploit the vulnerability | Determine what occurred and prove it |
+| **Closeness to the job** | Useful, especially for pentest | Much closer to daily SOC analyst work |
+| **Skills exercised** | Web attack techniques | Reading logs, correlating timestamps, interpreting traffic, writing conclusions |
 
-The reports for these two are the most directly employable artifacts you will produce in this phase. A blue-team write-up that says "I identified the initial access vector, the persistence mechanism, and the exfiltration destination, and here is the evidence for each" is a close simulation of what an L1 analyst produces. Do these two properly rather than rushing them, and if the phase forces a choice about where to spend time, spend it here.
+The count went from five to ten because by now you have the fundamentals and can
+work faster.
 
-**On TryHackMe.** The phase's Free vs Paid section notes this is the first phase where **one month of TryHackMe Premium may be worth it** — but only after the prerequisites in `WHEN-TO-BUY-THM-PREMIUM.md`. Read that file before spending anything. The free rooms (Pre Security, Cyber Security 101) cover the guided-lab ground adequately, and every other tool in this phase is free. Premium buys convenience and more targets, not a capability you cannot otherwise build.
+**The write-up pattern** is the one from Phase 3: what the vulnerability was, how
+you found it, the payload, and the fix. Since web security is your strongest
+area, use it to build confidence and volume in your portfolio.
+
+**Blue-team write-ups are the most directly employable artifacts you will produce
+in this phase.** A write-up that says "I identified the initial access vector,
+the persistence mechanism, and the exfiltration destination, and here is the
+evidence for each" is a close simulation of what an L1 analyst produces.
+
+Do these two properly rather than rushing them. If the phase forces a choice
+about where to spend time, spend it here.
+
+**On TryHackMe.** The Free vs Paid section notes this is the first phase where
+**one month of TryHackMe Premium may be worth it** — but only after the
+prerequisites in `WHEN-TO-BUY-THM-PREMIUM.md`. Read that file before spending
+anything.
+
+| | Free rooms | Premium |
+|---|---|---|
+| Coverage | Pre Security, Cyber Security 101 — the guided-lab ground adequately | Convenience and more targets |
+| Cost | $0 | Paid |
+
+Every other tool in this phase is free. Premium buys convenience, not a
+capability you cannot otherwise build.
 
 ### Key takeaways
 
