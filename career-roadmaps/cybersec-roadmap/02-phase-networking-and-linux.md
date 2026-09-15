@@ -768,7 +768,14 @@ That is a real investigation query, built from five small pieces, and it is the 
 
 #### Wireshark and tcpdump
 
-**Wireshark** is a graphical packet analyser; **tcpdump** is its command-line counterpart. Both read the same `.pcap` files, and both see what is actually on the wire rather than what a program claims to be doing.
+**Wireshark** is a graphical packet analyser. **tcpdump** is its command-line counterpart.
+
+Both read the same `.pcap` files, and both see what is actually on the wire rather than what a program claims to be doing.
+
+| Tool | Interface | Best for |
+|---|---|---|
+| Wireshark | Graphical | Exploring, filtering interactively, following streams |
+| tcpdump | Command line | Capturing on a server, scripting, low overhead |
 
 ```bash
 sudo tcpdump -i eth0 -w capture.pcap        # capture to a file
@@ -777,7 +784,9 @@ sudo tcpdump -i eth0 -n 'tcp port 80'       # only HTTP, no name resolution
 sudo tcpdump -r capture.pcap -nn            # read a saved capture
 ```
 
-The single most valuable Wireshark skill is **display filters**, because a capture contains far more than you want to look at:
+#### Display filters: the most valuable Wireshark skill
+
+A capture contains far more than you want to look at, so filtering is the skill that matters.
 
 ```text
 dns                          show only DNS
@@ -788,11 +797,27 @@ tcp.flags.syn == 1           connection attempts
 tcp.flags.reset == 1         resets — refused connections
 ```
 
-Phase task 6 asks you to capture DNS and HTTP traffic. Do it deliberately: start the capture, run `dig example.com` and `curl -I https://example.com` in another terminal, stop the capture, and then find those packets. You will see the DNS query and its response as plain text — **DNS is unencrypted**, which is why anyone on the path can see every domain you look up, and why DNS-over-HTTPS exists. You will also see the TCP handshake for the HTTP connection, showing the three packets you read about in Part 1 actually happening.
+#### Worked example: capturing DNS and HTTP on purpose
 
-For HTTP specifically, note the difference between `http` and `https` traffic in a capture: plain HTTP is fully readable, including URLs, headers, and any credentials sent; HTTPS shows the handshake and then encrypted bytes. This is the single clearest demonstration of why TLS matters, and it takes about two minutes to see for yourself.
+Phase task 6 asks you to capture DNS and HTTP traffic. Do it deliberately.
 
-**Following a TCP stream** (right-click a packet → Follow → TCP Stream) reconstructs a whole conversation. It is the fastest way to understand that "a connection" is really a sequence of packets, and it is a technique you will use constantly in analysis.
+| Step | What you do |
+|---|---|
+| 1 | Start the capture in Wireshark or tcpdump |
+| 2 | In another terminal, run `dig example.com` and `curl -I https://example.com` |
+| 3 | Stop the capture |
+| 4 | Find those packets in the capture |
+
+What you will see, and why it matters:
+
+| What you find | What it proves |
+|---|---|
+| The DNS query and its response, as plain text | **DNS is unencrypted.** Anyone on the path can see every domain you look up — which is why DNS-over-HTTPS exists |
+| The TCP handshake for the HTTP connection | The three packets you read about in Part 1, actually happening |
+| Plain HTTP: URLs, headers, and any credentials sent | Fully readable on the wire |
+| HTTPS: the handshake, then encrypted bytes | This is the single clearest demonstration of why TLS matters, and it takes about two minutes to see for yourself |
+
+**Following a TCP stream** (right-click a packet → Follow → TCP Stream) reconstructs a whole conversation. It is the fastest way to understand that “a connection” is really a sequence of packets, and it is a technique you will use constantly in analysis.
 
 #### Nmap: reading a scan instead of just running one
 
@@ -806,14 +831,20 @@ nmap -sn 192.168.1.0/24           # ping sweep: which hosts are up?
 nmap -O 192.168.1.50              # guess the operating system
 ```
 
-Now the interpretation, which is the actual skill. Port states:
+#### The four port states, and what each proves
 
-- **open** — something is listening and accepted the connection. A completed TCP handshake, or a UDP reply.
-- **closed** — the host is reachable but nothing is listening. Nmap got a `RST` back. This is *information*: it proves the host is up.
-- **filtered** — no reply at all. Something — usually a firewall — silently dropped the packet. You cannot tell whether the port is open behind the filter.
-- **open|filtered** — Nmap cannot distinguish. Common with UDP, where the absence of a reply is ambiguous.
+Now the interpretation, which is the actual skill.
 
-A worked example, of the kind you should be able to narrate after this phase:
+| State | What Nmap saw | What it means |
+|---|---|---|
+| **open** | A completed TCP handshake, or a UDP reply | Something is listening and accepted the connection |
+| **closed** | A `RST` came back | The host is reachable but nothing is listening. This is *information*: it proves the host is up |
+| **filtered** | No reply at all | Something — usually a firewall — silently dropped the packet. You cannot tell whether the port is open behind the filter |
+| **open\|filtered** | Ambiguous | Nmap cannot distinguish. Common with UDP, where the absence of a reply is ambiguous |
+
+#### Worked example: narrating an Nmap result
+
+Here is a scan result of the kind you should be able to narrate after this phase.
 
 ```text
 PORT     STATE  SERVICE  VERSION
@@ -822,15 +853,35 @@ PORT     STATE  SERVICE  VERSION
 3306/tcp open   mysql    MySQL 8.0.32
 ```
 
-What a defender should say about this: SSH is open, which is expected but should be key-only and not exposed publicly. HTTP is open with no HTTPS — traffic is unencrypted. **MySQL is listening on a network interface**, which is the real finding: a database should almost never be reachable from the network, only from the application that uses it. And `-sV` disclosed exact version numbers, which map directly to known CVEs — which is why version disclosure is itself a hardening item.
+What a defender should say about this:
 
-That paragraph is the level to aim for. It uses the port states, the service identification, and the security meaning together, and it comes from understanding rather than from a tool's summary line.
+| Line | The reading |
+|---|---|
+| `22/tcp open ssh` | SSH is open, which is expected but should be key-only and not exposed publicly |
+| `80/tcp open http` | HTTP is open with no HTTPS on 443 — traffic is unencrypted |
+| `3306/tcp open mysql` | **The real finding.** A database should almost never be reachable from the network, only from the application that uses it |
 
-**Two safety points.** First, `-sV` and `-O` are noticeably more intrusive than a plain scan, and `-O` is unreliable. Second, and more importantly: scanning generates real, attributable traffic. Phase task 7 says "against your own VM IP only," and that restriction is absolute. Use `ip a` inside the VM to find its address, and confirm you are scanning a machine you created.
+And one more point that comes from the `VERSION` column: `-sV` disclosed exact version numbers, which map directly to known CVEs. That is why version disclosure is itself a hardening item.
+
+That table is the level to aim for. It uses the port states, the service identification, and the security meaning together. It comes from understanding rather than from a tool's summary line.
+
+#### Two safety points
+
+First, `-sV` and `-O` are noticeably more intrusive than a plain scan, and `-O` is unreliable.
+
+Second, and more importantly: scanning generates real, attributable traffic. Phase task 7 says “against your own VM IP only,” and that restriction is absolute. Use `ip a` inside the VM to find its address, and confirm you are scanning a machine you created.
 
 #### Putting the two together
 
-The natural workflow, and the one to practise: scan with Nmap to find what is listening, then capture with Wireshark while you connect to a discovered service, then read the log that service wrote. Three views of the same event — the scanner's inference, the wire's truth, and the service's record. Understanding that these are three perspectives on one reality is a large part of what this phase is teaching.
+The natural workflow, and the one to practise, has three steps.
+
+| Step | Tool | What you get |
+|---|---|---|
+| 1 | Nmap | Find what is listening |
+| 2 | Wireshark, while you connect to a discovered service | What actually crossed the wire |
+| 3 | The service's own log | The service's record of the event |
+
+Three views of the same event — the scanner's inference, the wire's truth, and the service's record. Understanding that these are three perspectives on one reality is a large part of what this phase is teaching.
 
 ### Part 5 — Lab setup and the learning path
 
@@ -838,23 +889,70 @@ The natural workflow, and the one to practise: scan with Nmap to find what is li
 
 A **virtual machine (VM)** is a complete computer running as software inside your real one, managed by a **hypervisor**. VirtualBox is the free hypervisor this phase assumes. The phase's task 1 is to install Ubuntu or Kali in VirtualBox, and both are free.
 
-The reason VMs are non-negotiable here is not convenience; it is **safety and reversibility**. A VM can be snapshotted before you experiment and rolled back afterwards, so mistakes cost nothing. This is what makes it legitimate to learn about attacks: you are working on an isolated machine that is yours, with no risk of touching anything real. It is also why Kali — a Linux distribution preloaded with security tools — belongs in a VM rather than on your daily machine.
+#### Why VMs are non-negotiable
 
-**Networking modes matter and are easy to get wrong.** VirtualBox offers several, and two are relevant: **NAT** (the VM can reach out, but your host cannot easily reach in — fine for browsing, awkward for SSH or scanning) and **Bridged** (the VM appears as another device on your real network with its own address — easy to connect to, but it is now visible to your actual network). For this phase's scanning and SSH tasks, **Host-only** or **Bridged** is usually what you want, because you need your host and the VM to reach each other. Check the VM's address with `ip a` inside it, and verify connectivity with `ping` before concluding anything is broken.
+The reason is not convenience. It is **safety and reversibility**.
 
-A note on resources, since the roadmap targets a modest machine: Ubuntu Server (no desktop) uses far less RAM than Ubuntu Desktop, and it is what you should use for the SSH and log tasks. Kali's desktop is heavier still. If you have 8 GB of RAM, running one VM at a time with 2–4 GB allocated is realistic; running two simultaneously will be painful.
+| Property | What it buys you |
+|---|---|
+| A VM can be snapshotted before you experiment | Mistakes cost nothing |
+| Roll back afterwards | You can try destructive things without consequence |
+| It is an isolated machine that is yours | You can learn about attacks with no risk of touching anything real |
+| Kali is preloaded with security tools | This is why it belongs in a VM rather than on your daily machine |
+
+#### Networking modes matter and are easy to get wrong
+
+VirtualBox offers several modes. Two are relevant here.
+
+| Mode | How it behaves | Trade-off |
+|---|---|---|
+| **NAT** | The VM can reach out, but your host cannot easily reach in | Fine for browsing, awkward for SSH or scanning |
+| **Bridged** | The VM appears as another device on your real network with its own address | Easy to connect to, but it is now visible to your actual network |
+| **Host-only** | Host and VM can reach each other on a private segment | Good for lab work; no route to the internet from the VM |
+
+For this phase's scanning and SSH tasks, **Host-only** or **Bridged** is usually what you want, because you need your host and the VM to reach each other. Check the VM's address with `ip a` inside it, and verify connectivity with `ping` before concluding anything is broken.
+
+#### A note on resources
+
+The roadmap targets a modest machine, so this matters.
+
+| Choice | Resource cost | When to use it |
+|---|---|---|
+| Ubuntu Server (no desktop) | Far less RAM than Ubuntu Desktop | The SSH and log tasks — this is what you should use |
+| Ubuntu Desktop | Moderate | Only if you want a GUI |
+| Kali desktop | Heavier still | When you need the preloaded tools |
+
+If you have 8 GB of RAM, running one VM at a time with 2–4 GB allocated is realistic. Running two simultaneously will be painful.
 
 #### OverTheWire Bandit: the best free Linux practice there is
 
-**OverTheWire Bandit** (phase task 8, levels 0–10) is a free wargame that teaches Linux by making you use it. Each level is an SSH login to a server where the password for the next level is hidden somewhere, and finding it requires exactly the skills this phase covers: reading files, permissions, `grep`, pipes, and later `find` and encoding.
+**OverTheWire Bandit** (phase task 8, levels 0–10) is a free wargame that teaches Linux by making you use it.
 
-It is worth doing properly rather than looking up answers, and worth understanding *why* it works as a teaching tool: it gives you immediate, unambiguous feedback. Either you found the password or you did not, and no amount of theory substitutes for that. It also builds the habit of reading `man` pages and exploring a system you do not fully know — which is the actual job.
+Each level is an SSH login to a server where the password for the next level is hidden somewhere. Finding it requires exactly the skills this phase covers: reading files, permissions, `grep`, pipes, and later `find` and encoding.
 
-Two practical points. First, the deliverable explicitly says to record Bandit notes **without publishing passwords**. That is a professional habit, not a formality: publishing working credentials to a shared system is exactly the behaviour that would end an employment relationship. Second, expect to be stuck. Being stuck on a Bandit level for an hour and then solving it teaches more than ten levels solved by searching for hints.
+#### Why Bandit works as a teaching tool
+
+It is worth doing properly rather than looking up answers. It is also worth understanding *why* it works.
+
+| Property | Why it teaches |
+|---|---|
+| Immediate, unambiguous feedback | Either you found the password or you did not. No amount of theory substitutes for that |
+| It forces exploration of an unfamiliar system | This builds the habit of reading `man` pages — which is the actual job |
+| It gets you stuck | Being stuck on a level for an hour and then solving it teaches more than ten levels solved by searching for hints |
+
+#### Two practical points
+
+First, the deliverable explicitly says to record Bandit notes **without publishing passwords**. That is a professional habit, not a formality: publishing working credentials to a shared system is exactly the behaviour that would end an employment relationship.
+
+Second, expect to be stuck. That is the design, not a failure.
 
 #### Where this phase fits
 
-Looking back, this phase exists to make Phase 3's material intelligible. Security fundamentals are largely about *how things fail*, and things fail in the layers and services described here. Looking forward, Phase 4's labs will hand you tools that only make sense once you can read a port list, a packet capture, and an auth log — which is precisely what the exit criteria measure. If Phase 4 feels overwhelming when you reach it, the usual cause is a rushed Phase 2.
+Looking back, this phase exists to make Phase 3's material intelligible. Security fundamentals are largely about *how things fail*, and things fail in the layers and services described here.
+
+Looking forward, Phase 4's labs will hand you tools that only make sense once you can read a port list, a packet capture, and an auth log — which is precisely what the exit criteria measure.
+
+If Phase 4 feels overwhelming when you reach it, the usual cause is a rushed Phase 2.
 
 ### Key takeaways
 

