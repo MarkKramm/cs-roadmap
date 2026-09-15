@@ -51,16 +51,32 @@ The roadmap for the **repository itself** (for the study curriculum, see [`../ca
 
 - [x] **Cyber track lesson pass complete** — all eight cyber phases carry `## Lesson` sections of 4,510–8,929 words (4,969 / 6,848 / 8,162 / 4,510 / 4,919 / 5,672 / 8,929 / 7,358). Combined with the IT track's nine, every phase in the repository now carries full lesson prose.
 
+- [x] **Phase 1 structural repair and depth pass** — `it-roadmap/01-phase-computer-fundamentals.md` had four defects that rendered it visibly broken, all predating the build-parser fence fix:
+  - **A missing blank line** glued `### Part 2 — RAM` to the preceding paragraph, so the Part 2 heading did not render at all.
+  - **Part 2's `#### What you would do` was empty**, and its five numbered actions sat orphaned inside Part 3 under a second `#### What you would do` — so RAM's remedy advice appeared under Storage.
+  - **Part 4's `#### What you would do` sat after Check 4** in the walkthrough rather than inside Part 4.
+  - **`## Common Pitfalls` and `## Tools for This Phase` bisected the lesson**, so Parts 7–9 rendered *after* the pitfalls list and the tools heading, with the tools table landing far below its own heading.
+
+  Repaired by moving each block to its correct home. **Verified output-preserving:** `it.json` is byte-identical to a pre-edit baseline apart from `generatedAt`, and phase 1's counts are unchanged at 5 tasks / 7 checklists. Also folded the legacy `### Hands-On Tasks` block (the other open item) into `## Hands-on practice tasks` as check-referenced steps, preserving its detail rather than deleting it.
+
+  Depth added in the same pass, taking the lesson from ~4,400 to ~23,400 words across 13 parts:
+  - **Part 6 — reading the evidence hardware leaves behind**: S.M.A.R.T. attribute table with the "direction, not absolute numbers" rule, why memory faults are intermittent and a passing test proves nothing, a BSOD stop-code reference, where bug check and power-loss history is stored, and driver signing.
+  - **Part 10 — getting in locally, then going remote**: the two stages framed as sequential rather than competing. Local employer types (BPO, shared-services/capability centres, MSPs, in-house) with the point that night-shift experience is an *asset* for later remote work; what local employers screen for; then the overseas market — role types open to PH-based applicants, EOR versus independent contractor, payment mechanics, timezone conversion tables treating UTC+8 as an advantage, and the remote reliability bar.
+  - **Part 11 — working with real users**: the eight-stage ticket lifecycle and why skipping verification causes reopens, priority versus severity as independent axes, escalation and what a handoff note must contain, SLAs from zero, handling frustrated users with a weak-versus-better phrasing table, remote support consent and credential hygiene, and a weak-versus-strong ticket-note comparison.
+  - **Part 12 — a worked ticket set**: five complete tickets (slow PC, dead second monitor, "won't turn on", full disk blocking updates, dropping Wi-Fi), each with the questions asked, real command output, one-change-at-a-time actions, verification, a final note, and the reasoning to take away — with later-phase boundaries stated explicitly rather than faked.
+
+  Also: self-check extended from 8 to 21 questions, skills 6 → 11, tools 6 → 10, resources 4 → 11, and goal/estimated-time updated to state that the phase's exit criteria remain hardware-only so a beginner cannot be gated by the career material.
+
 - [x] **Build-parser hardening — fences are now respected.** `scripts/build-content.mjs` matched `^## ` and `^### ` without tracking fenced code blocks, so a report template inside a ```text fence was read as real phase structure. Phase 6's lesson exposed this: an *unindented* template containing `## Summary`, `## Findings`, and `## Checklist` produced eleven phantom sections and a "checklist line without an id comment" failure. The `sections()` and `subsections()` scanners now track fence state, a heading inside a fence is never a section, and `docs/CONTENT-GUIDE.md` documents the rule plus the unterminated-fence failure mode it introduces. **Verified output-preserving:** both `it.json` and `cyber.json` remain byte-identical to a `HEAD` baseline worktree. **Verified by negative test:** with a fenced `## Checklist` injection, the old parser failed the build (exit 1, no output) while the new parser built cleanly and ignored it. The Phase 6 template was then restored to unindented form, since the workaround is no longer needed and the template now copies cleanly.
 
 ## Next
 
 - [ ] **Deploy the site** — blocked on the private-repo visibility decision. GitHub Pages from a private repo generally needs a paid plan, but Netlify, Vercel, and Cloudflare Pages all deploy private repos on free tiers, so this is less blocked than it first appeared.
-- [ ] **Phase 1's legacy `### Hands-On Tasks` block** (IT) — verbose `#### Task 1–5` walkthroughs duplicating the five one-line tasks. Contributes nothing to the generated JSON. Fold it into the task section rather than deleting it, per `CHECKPOINT.md`.
 
 ## Later / optional
 
 - [ ] Cyber track site UI for surfacing lessons, if the lessons need to be reachable in the app rather than only in Markdown.
+- [ ] Apply the Phase 1 depth standard to other IT phases — S.M.A.R.T./BSOD evidence reading and ticket-lifecycle material currently exist only in Phase 1.
 
 ## Explicitly out of scope
 
