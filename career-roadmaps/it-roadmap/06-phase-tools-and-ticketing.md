@@ -462,7 +462,686 @@ That is why A. Reyes appears three times. Each reset fixed the symptom. None of 
 
 **The habit to take away:** when you notice you have fixed the same thing for the same person, or the same team, more than twice, stop closing and start linking. That is the moment an incident becomes a problem, and noticing it is what separates a ticket-taker from a support engineer.
 
-### Part 7 — Key takeaways
+### Part 7 — Build your own ticketing system, for free
+
+Everything so far has been description. This part is construction. By the end you will have a working ticket queue, a dashboard that computes itself, and a screenshot worth putting in your portfolio.
+
+The tools are Google Sheets or LibreOffice Calc. Both are free. Nothing here needs an account, a licence, or a card. If you would rather run real software, the free self-hosted option is **osTicket** on a local virtual machine. Build the sheet version regardless, because a flat sheet is what most small businesses actually run on.
+
+#### The workbook, and why it has four tabs
+
+| Tab | What it holds | Why it exists |
+|---|---|---|
+| `Tickets` | One row per ticket — the live queue | The work itself |
+| `Lists` | The allowed values for category, priority, status | So dropdowns are consistent |
+| `Users` | Name, username, email, department, site | So you can group tickets by team |
+| `Dashboard` | Formulas only, no typing | So the numbers update themselves |
+
+The `Lists` tab is the one beginners skip, and it is the one that matters. When status values are typed by hand you get `Closed`, `closed`, `CLOSED`, and `Clsed`. Every count you write afterwards is then wrong.
+
+Here is `Lists`, exactly:
+
+```text
+Category            Status        Priority   Impact        Urgency
+Hardware            New           P1         Enterprise    Critical
+Software            Assigned      P2         Department    High
+Network             In Progress   P3         Individual    Medium
+Account             Pending       P4         Single Site   Low
+Email               Resolved
+Access              Closed
+Other               Cancelled
+```
+
+`Cancelled` is not decoration. A ticket that was never real work — a duplicate, a user who solved it themselves — must leave the queue somehow. Without a cancelled state, agents close those as `Resolved`, and your resolution metrics quietly become fiction.
+
+#### The column layout
+
+Set up `Tickets` with these eleven columns, in this order:
+
+| Column | Header | Example value | Why it exists |
+|---|---|---|---|
+| A | `Ticket ID` | `INC-1001` | The name everyone uses in conversation |
+| B | `Date Opened` | `2026-03-02 09:14` | The clock starts here |
+| C | `Date Resolved` | `2026-03-02 10:02` | Resolution time is computed from this |
+| D | `Requester` | `A. Reyes` | Who reported it; links to `Users` |
+| E | `Category` | `Email` | Reporting and routing |
+| F | `Summary` | `Outlook stuck after password change` | The searchable subject line |
+| G | `Impact` | `Individual` | How many people are affected |
+| H | `Urgency` | `High` | How fast it needs attention |
+| I | `Priority` | `P2` | Derived from G and H together |
+| J | `Status` | `Resolved` | Where it sits in the lifecycle |
+| K | `Resolution` | `Cleared stale cached credential` | What actually fixed it |
+
+The first-response-time column belongs in the corporate system, and it is worth adding here as column L (`First Response`) if you want to practise the metric in Part 13. Leave it blank on tickets nobody has replied to yet — do not type a zero.
+
+#### Why each field exists, in one line
+
+If you cannot say why a column exists, delete it. Every field costs an agent time on every ticket, forever.
+
+- **Ticket ID** — so two people discussing "the email one" know they mean the same thing.
+- **Date Opened** — the start of every time-based metric you will ever report.
+- **Date Resolved** — the end of the clock, and only set when the *user* confirms.
+- **Requester** — so recurring problems can be spotted per person, as Part 6 showed.
+- **Category** — so "what breaks most often" is an answerable question.
+- **Summary** — so search returns the right ticket six months later.
+- **Impact** — how wide the damage is; a factual question.
+- **Urgency** — how fast it needs attention; also factual.
+- **Priority** — the decision, derived rather than argued about.
+- **Status** — where the ticket is right now, and who is holding it up.
+- **Resolution** — the audit trail, and the raw material for your KB article.
+
+#### Making the dropdowns work
+
+Select the `Category` column in `Tickets`, then **Data → Data validation → Add rule → Dropdown**. Set the range to `Lists!$A$2:$A$8`. Repeat for the other columns using their own ranges.
+
+Do this for `Status` too, and use exactly these seven values: `New`, `Assigned`, `In Progress`, `Pending`, `Resolved`, `Closed`, `Cancelled`. A status nobody chose deliberately is a status nobody maintains.
+
+#### Writing your own ID
+
+Type `INC-1001` in `A2`. Then in `A3` put this formula and drag it down:
+
+```text
+="INC-" & (1000 + ROW() - 1)
+```
+
+`ROW()` returns the row number, so row 3 produces `INC-1002`. The formula is self-maintaining: insert a row and every ID below renumbers itself.
+
+#### Deriving priority from impact and urgency
+
+Priority should never be typed. Put this in `I2` and drag it down:
+
+```text
+=IF(OR($G2="","",$H2=""),"", INDEX(Lists!$C$2:$C$5,
+ MATCH($G2&"|"&$H2, {"Enterprise|Critical";"Enterprise|High";
+ "Department|High";"Individual|Medium";"Individual|Low";"Single Site|Low"}, 0)))
+```
+
+That is fiddly to read, so here is the lookup table it encodes. Use this directly if the formula fights you — a `VLOOKUP` against a helper column works too.
+
+| Impact \ Urgency | Critical | High | Medium | Low |
+|---|---|---|---|---|
+| **Enterprise** | P1 | P1 | P2 | P3 |
+| **Department** | P1 | P2 | P3 | P4 |
+| **Individual** | P2 | P3 | P4 | P4 |
+| **Single Site** | P3 | P4 | P4 | P4 |
+
+Read the top-left and bottom-right of that grid. An enterprise-wide outage is P1 whatever the stated urgency. One person's low-urgency request is P4 however loudly it is described. The grid is the argument-settler: when a user insists something is urgent, you are not disagreeing with them, you are reading a table.
+
+#### The dashboard, which is where the value is
+
+Put these five formulas on `Dashboard`. Adjust the row count to match your data.
+
+| Cell | Formula | What it reports |
+|---|---|---|
+| `A2` | `=COUNTA(Tickets!A2:A200)` | Total tickets logged |
+| `A3` | `=COUNTIF(Tickets!J:J,"Resolved")+COUNTIF(Tickets!J:J,"Closed")` | Resolved or closed |
+| `A4` | `=COUNTIF(Tickets!J:J,"New")` | Unassigned backlog |
+| `A5` | `=AVERAGEIFS(Tickets!C:C,Tickets!J:J,"<>")-AVERAGEIFS(Tickets!B:B,Tickets!J:J,"<>")` | Mean time to resolve |
+| `A6` | `=IFERROR(A3/A2,"n/a")` | Resolution rate |
+
+The `A5` formula is ugly because Sheets stores a date-time as a single decimal number, and subtracting two of them gives a fraction of a day. Fix the display by formatting `A5` as **Duration**, then dividing by 24 in the cell if you want hours.
+
+That `IFERROR` in `A6` is not decoration. With no tickets logged, `A3/A2` is a division by zero and the cell shows `#DIV/0!`. A dashboard that screams red on day one is a dashboard people stop opening.
+
+#### Build it, then use it
+
+Do not build this and admire it. Log your next ten real home IT problems in it. Your own laptop counts, your family's phone counts, the printer counts.
+
+- **Build the four-tab workbook**, with `Lists` populated before any ticket is typed.
+- **Add dropdowns driven from `Lists`**, so a status can never be typed by hand.
+- **Write the ID formula** and drag it down at least twenty rows.
+- **Derive `Priority` from `Impact` and `Urgency`** with the grid, rather than typing it.
+- **Log five real tickets of your own** — your own home problems count.
+
+### Part 8 — Writing tickets from scratch
+
+Part 2 showed one incident written two ways. This part makes you do it five times, which is the only way the habit forms.
+
+The rule underneath all five exercises is the same. **A user gives you a symptom; a ticket needs a shape.** Your job is to convert one into the other without inventing facts you were not given.
+
+#### The six fields you must always fill
+
+| Field | The question it answers | Bad answer | Good answer |
+|---|---|---|---|
+| **Summary** | What is it, in one searchable line? | "Email problem" | "Outlook cannot connect after password change — A. Reyes" |
+| **Impact** | How many people, how badly? | "Urgent" | "Individual — one user, unable to send externally" |
+| **Urgency** | How fast must this move? | "ASAP" | "High — client presentation at 14:00 today" |
+| **Category** | What kind of work is this? | "Computer" | "Email" |
+| **Affected service** | Which system is failing? | "The internet" | "Microsoft 365 Exchange Online (mail send path)" |
+| **Steps to reproduce** | What exactly produces the fault? | "It doesn't work" | "1. Open Outlook. 2. Send to any external address. 3. Message sits in Outbox." |
+
+Notice that only two of the six are judgement calls. Impact and urgency are reports of fact; the rest are precision. Most beginner tickets are weak because four fields are vague, not because the judgement was wrong.
+
+#### Report 1 — "it's not working"
+
+**The user says:** *"Hi, it's not working again. Can you look? It was fine yesterday."*
+
+**Weak ticket:**
+
+```text
+Summary : not working
+Category: Other    Priority: P3    Status: New
+```
+
+**Strong ticket:**
+
+```text
+Summary : Shared drive S: unavailable on the Manila floor — 6 users
+Impact  : Department — six users on the Manila floor cannot reach S:.
+          Local work continues; shared documents are blocked.
+Urgency : High — month-end reporting is due today.
+Category: Network (file share access)
+Service : SMB file share \\FS01\shared
+Repro   : 1. Open File Explorer. 2. Navigate to \\FS01\shared.
+          3. Error: "Windows cannot access \\FS01\shared" (0x80070035).
+          Other departments on the same floor are unaffected.
+```
+
+**Why:** the weak version is unactionable because "it" has no referent and "again" was thrown away. That word is the whole clue. It means a previous ticket exists, and the previous fix probably did not hold — the Part 6 pattern. The strong version names the host, the path, the error code, and who is *not* affected, which is what narrows the search.
+
+#### Report 2 — "my email is broken"
+
+**The user says:** *"My email is broken. I can't send anything."*
+
+**Weak:** `Summary: email broken. Detail: user cannot send.` — no direction, no scope, no error.
+
+**Strong:**
+
+```text
+Summary : Cannot send external mail from Outlook — receives fine (J. Cruz)
+Impact  : Individual — one user. Internal mail works; external blocked.
+Urgency : Medium — responses to two clients delayed today.
+Category: Email
+Service : Microsoft 365 Exchange Online (outbound queue)
+Repro   : 1. Open Outlook desktop. 2. Compose to an external address.
+          3. Send. 4. Message stays in Outbox; no error dialog appears.
+Tested  : Webmail sends externally without issue from the same account.
+```
+
+**Why:** "broken" covers at least four different faults. This version separates sending from receiving, and desktop from web. The webmail test is the single most valuable line, because it splits the problem in half: account-side or client-side. It also proves the issue is not the mail service itself.
+
+#### Report 3 — "the internet is slow"
+
+**The user says:** *"The internet is so slow today, I can barely do anything."*
+
+**Weak ticket:**
+
+```text
+Summary : Internet slow
+Category: Network    Priority: P2
+```
+
+**Strong ticket:**
+
+```text
+Summary : Intermittent slow browsing, 09:00–11:00, one workstation — M. Santos
+Impact  : Individual — one user, but work is effectively stopped.
+Urgency : Medium — no deadline today, but productivity is affected.
+Category: Network
+Service : Office LAN and internet gateway
+Repro   : 1. Browse to any site at 09:30. 2. Pages take 8–12 seconds.
+          3. Same pages load in under 2 seconds from a phone on mobile data.
+Scope   : Speed test from this PC: 4 Mbps down, 1 Mbps up.
+          Speed test from a neighbouring desk: 88 Mbps down.
+```
+
+**Why:** "slow" is a comparison with no reference point. The strong version adds a time window, a comparison device, and two speed-test numbers from two different desks. Those two numbers turn an opinion into a measurement: this is one workstation, not the office connection. Never open a network ticket without a number in it.
+
+#### Report 4 — "I think I got a virus"
+
+**The user says:** *"There's a pop-up saying my computer is infected, I think I got a virus. I clicked something."*
+
+**Weak:** `Summary: possible virus. Action: ran a scan, nothing found. Closed.`
+
+**Strong:**
+
+```text
+Summary : Suspected malware — browser pop-up scareware, user clicked (R. Lim)
+Impact  : Individual so far. Potential scope unknown — one shared drive
+          and one webmail session are reachable from this device.
+Urgency : Critical — a possible credential compromise is time-sensitive.
+Category: Security (potential incident)
+Service : Endpoint RLLAPTOP-04; account rlim@company.local
+Repro   : 1. User browsed a coupon site at ~08:40.
+          2. Full-screen pop-up claimed the PC was infected.
+          3. User clicked "Scan now" and closed the window.
+          4. No malware detected by the installed antivirus scan.
+Timeline: 08:40 click, 08:55 reported, 09:02 ticket raised.
+```
+
+**Why:** this is the one report where the weak and strong versions are dangerously far apart. The weak ticket closed a possible credential compromise in twenty minutes with a scan. The strong one records the timeline, because when a compromise happened, "when" decides which logs to pull and which sessions to invalidate. Notice it does not claim there is a virus either — it reports what happened and marks scope as unknown, which is honest.
+
+**This one needs a security phase, not this one.** Record it fully, isolate the endpoint if you have authority, then escalate. Part 4's escalation structure applies exactly here.
+
+#### Report 5 — "the printer won't print"
+
+**The user says:** *"The printer won't print. I've tried everything."*
+
+**Weak:** `Summary: printer issue. Resolution: reinstalled driver. Closed.`
+
+**Strong:**
+
+```text
+Summary : Finance printer offline for 3 users since 08:00 — no output
+Impact  : Department — three users, invoicing blocked before a 12:00 run.
+Urgency : High — invoicing deadline at noon.
+Category: Hardware (peripheral)
+Service : HP LaserJet M428, queue FINANCE-PRINTER-01, print server PRT01
+Repro   : 1. Print a one-page test from any of the three PCs.
+          2. Job appears in the queue, status "Error — Printing".
+          3. Nothing is produced; the printer panel shows "Ready".
+Ruled out: Printer is powered, networked, and shows Ready on its own panel.
+          Queue is not paused. A test page prints from the printer's own menu,
+          so the hardware is functional.
+```
+
+**Why:** "tried everything" is not information, so the strong ticket supplies the tests instead. Look at which branch each test eliminates: the panel eliminates power, the queue state eliminates a paused spooler, and the printer's own self-test proves the hardware works. That third test is the one beginners never run, and it is the one that halves the problem.
+
+#### Your turn
+
+Rewrite each of these five reports yourself before reading the model answers. Then compare field by field.
+
+1. *"The shared drive is gone. Everyone's freaking out."*
+2. *"My laptop takes 20 minutes to start up in the morning."*
+3. *"I can't log in to the VPN from home. It just spins."*
+4. *"Outlook keeps asking for my password over and over."*
+5. *"The website is down. Nobody can see it."*
+
+- **Rewrite all five reports** into full ticket structure before checking the models.
+- **Write a steps-to-reproduce list** for at least three of them.
+- **Explain why each weak version was unactionable**, not merely that it was.
+
+### Part 9 — Ticket lifecycle drill
+
+Read the queue, decide the order, then check the answer key. Do not read ahead.
+
+Every ticket is at `2026-03-04 09:00`. You are the only person on the desk. Work top to bottom only if you can defend it.
+
+| # | Summary | Impact | Urgency | Priority | Status | Age |
+|---|---|---|---|---|---|---|
+| 1 | CEO's laptop will not power on | Enterprise | Critical | P1 | New | 5 min |
+| 2 | Printer jam, third floor | Individual | Low | P4 | New | 3 days |
+| 3 | Suspicious email, clicked link | Individual | Unknown | P2 | New | 20 min |
+| 4 | Payroll system login failure | Enterprise | High | P1 | In Progress | 4 hours |
+| 5 | New starter needs laptop | Individual | Medium | P4 | Pending | 6 days |
+| 6 | Wi-Fi drops every 10 minutes | Department | High | P2 | Assigned | 2 hours |
+| 7 | Monitor flickering at one desk | Individual | Low | P4 | Assigned | 5 days |
+| 8 | Mailbox over quota, cannot send | Individual | Medium | P3 | New | 1 day |
+| 9 | VPN down for all remote staff | Enterprise | Critical | P1 | In Progress | 40 min |
+| 10 | Password reset for a leaver | Individual | Low | P4 | New | 9 days |
+
+#### The order, and the reasoning
+
+**1. #9 — VPN down for all remote staff.** It is already P1, already In Progress, and it blocks every remote worker. An outage affecting all remote staff outranks one VIP, because the VIP has alternatives and the remote staff do not.
+
+**2. #1 — CEO's laptop will not power on.** P1, brand new, and the impact is a single person. High-urgency single-user tickets usually lose to service outages. This one is the exception in practice, not in theory: a CEO blocked at 09:00 generates pressure that reaches you regardless. Handle it honestly rather than pretending it is not urgent.
+
+**3. #4 — Payroll system login failure.** P1, four hours old, and money is involved. Payroll is time-boxed: a bug on payday costs real trust. Four hours without progress on a P1 is the worst number on this board.
+
+**4. #3 — Suspicious email, clicked link.** P2 with *unknown* impact. Unknown is not low. A credential compromise gets worse with every minute it is left alone, and the evidence is perishable. Where the queue allows, this goes before the cheerful P2 below it.
+
+**5. #6 — Wi-Fi drops every 10 minutes.** P2, a whole department, two hours old. Real work is being lost in small increments, which nobody escalates because it is intermittent.
+
+**6. #8 — Mailbox over quota, cannot send.** P3, one day old. Annoying, not blocking. A single command fixes it, so it takes ten minutes once the P1s are stable.
+
+**7. #5 — New starter needs laptop.** P4, six days old. Someone new is working with no equipment, which is embarrassing for the company and cheap to fix. It has aged into visibility.
+
+**8. #7 — Monitor flickering.** P4, five days. A workaround almost certainly exists, and it is a hardware swap.
+
+**9. #2 — Printer jam.** P4, three days. A jam is physical, a person can walk over, and the workaround is the printer two floors down.
+
+**10. #10 — Password reset for a leaver.** P4, nine days. This is a **security** item wearing a housekeeping costume. The oldest ticket on the board is not the most urgent; it is the one most likely to be a forgotten account.
+
+#### The three traps in that queue
+
+| Trap | The ticket | Why beginners fall in |
+|---|---|---|
+| Oldest-first is not a policy | #10 at 9 days | Age is a sorting tool, not a priority. A leaver account is a risk, not a queue position |
+| "Unknown" gets read as "low" | #3 | Missing information is a reason to investigate, never a reason to deprioritise |
+| The loudest person wins | #1 | VIP pressure is real. Say so and schedule around it instead of hiding it in a re-sort |
+
+#### Now do it again, differently
+
+Take the same ten tickets and reorder them for a team of **three** technicians instead of one. Then write one sentence per ticket explaining what changed.
+
+- **Order all ten tickets** before reading the answer key.
+- **Write a reason for each** of your top five positions.
+- **Re-order for a three-person team** and explain what changed.
+- **Spot the leaver ticket as a security item** without reading the trap table first.
+
+### Part 10 — Remote support tooling, hands-on
+
+Remote support is where a support technician's power is greatest, so the rules around it are strictest. Free tools cover every scenario you need to practise.
+
+The four tools below are the free set worth knowing. Each is free for personal or small-scale use, and none requires a paid account to complete the exercises in this part.
+
+| Tool | Purpose | Cost | URL | Task | Free alternative |
+|---|---|---|---|---|---|
+| RustDesk | Remote desktop control, self-hostable | Free (open source) | https://rustdesk.com/ | Screen-share between two of your own machines | AnyDesk free tier |
+| AnyDesk | Remote desktop control | Freemium | https://anydesk.com/ | Install two copies you own and connect | RustDesk |
+| Quick Assist | Built-in Windows screen sharing | Free (included) | https://learn.microsoft.com/windows/client-management/quick-assist | Assist a family member's PC | RustDesk |
+| Google Meet | Screen sharing with audio, for teaching | Freemium | https://meet.google.com/ | Share your screen and narrate a fix | Jitsi Meet |
+| mRemoteNG | One window for many saved RDP/SSH sessions | Free (open source) | https://mremoteng.org/ | Save three connections to your own lab | Windows RDP client |
+| PuTTY | SSH and serial terminal | Free (open source) | https://www.putty.org/ | SSH into your own Linux VM | Windows OpenSSH client |
+
+**Authorisation rule, and this is not a formality.** You may connect only to devices you own, or devices whose owner has given you explicit, recorded permission. Connecting to a machine you do not own or have not been asked to help with is unauthorised access, whatever your intention was. In this track, that means your own VMs, your own laptop, and a family member's PC *after they ask you to*.
+
+#### What each tool can and cannot see
+
+This is the part beginners underestimate. When you share a screen, you are not sharing a window. You are sharing whatever the operating system and the tool decide to include.
+
+| Tool | Sees | Does **not** see | Security note |
+|---|---|---|---|
+| Quick Assist | Full desktop, with the user's explicit session code | Nothing if the user closes the window — sharing is user-initiated each time | The session code is a credential; never let it be posted publicly |
+| RustDesk | Full desktop; file transfer and clipboard if enabled | Encrypted content that is not on screen | Self-hosting keeps session metadata on your own relay |
+| AnyDesk | Full desktop, unattended access if configured | Screen content while the machine is locked | Unattended access is a permanent door — treat the password as an admin credential |
+| Google Meet | The screen or window you select, plus audio | Other windows, if you share a single window rather than the desktop | "Share a tab" leaks browser notifications; "share a window" is safer |
+| mRemoteNG | Everything you connect to — it holds saved credentials | Nothing; it is a client, not a guard | Its config file contains credentials. Encrypt it, and never commit it to Git |
+
+Read the AnyDesk row twice. Unattended access is convenient and is also how a support tool becomes a backdoor. If you configure it during practice, remove it afterwards.
+
+#### What to check before you screen-share
+
+Run this list every single time. It takes fifteen seconds and it prevents the incidents people remember you for.
+
+| Check | How | Why |
+|---|---|---|
+| Consent is explicit | Ask, and wait for a clear yes | "I'll connect now" is not consent; "yes, go ahead" is |
+| The right machine | Confirm the hostname before connecting | Connecting to the wrong device is its own incident |
+| Nothing sensitive on screen | Ask them to close banking, payroll, and personal tabs | You will see everything they can see |
+| Notifications silenced | Windows: **Focus assist**; macOS: **Do Not Disturb** | A message preview on screen is a data leak you caused |
+| Recording policy known | Ask your organisation, or decide as the owner | Recording without agreement is a breach of trust |
+| The user stays present | They watch; you narrate | Silent remote control trains people to distrust IT |
+
+That fourth row is the one that catches beginners. A desktop notification that pops up mid-session — a personal message, a one-time code, a password reset email — is now on a screen someone else controls, and you did not intend it.
+
+#### What never goes on a shared screen
+
+- **Password fields, and password managers mid-unlock.** Have the user type it themselves, or you type it without them watching.
+- **MFA codes and recovery codes.** If you can see it, it is no longer a second factor.
+- **Payroll, HR, medical, or legal documents.** Unrelated to the fix; close them first.
+- **Other users' tickets or customer data.** If your ticketing system is open, minimise it.
+- **Your own credentials, tokens, or browser profile.** Use a dedicated admin session.
+- **Personal email and chat.** Share a single window instead of the whole desktop when you can.
+
+#### Practise it properly, tonight
+
+This exercise uses two machines you own. If you only have one laptop, use a virtual machine as the second — Part 5 of the operating systems phase set one up.
+
+```powershell
+# Before any session, record the basics in your ticket.
+hostname
+Get-CimInstance Win32_OperatingSystem | Select-Object Caption, Version
+Get-LocalUser | Select-Object Name, Enabled, LastLogon
+```
+
+```text
+Session log (paste into the ticket)
+-----------------------------------
+Tool            : Quick Assist
+Host            : DESKTOP-8QK2M1
+User present    : Yes, throughout
+Consent given   : Yes, 09:14, verbal on call
+Sensitive items : User closed webmail and banking tabs before connecting
+Start / End     : 09:15 / 09:32
+Actions         : Cleared stale credential for outlook.office.com;
+                  restarted Outlook; user confirmed send/receive works.
+Recording       : None (not permitted on personal devices)
+```
+
+That block is the evidence. When a session is later questioned, this is what shows you did it properly. Practise writing it every time, even for a five-minute fix on your own VM.
+
+- **Connect only to a device you own**, with explicit consent recorded in the ticket.
+- **Run the pre-share checklist** and silence notifications first.
+- **Write a session log** with start, end, consent, and actions taken.
+- **Explain what unattended access is**, and why leaving it enabled is a risk.
+
+### Part 11 — Metric practice
+
+Part 5 introduced the metrics. This part makes you compute them, because reading a number and producing one are different skills.
+
+Here is one week of data from a fictional service desk. Everything you need is in the table.
+
+| Ticket | Opened | First response | Resolved | Reopened | Status |
+|---|---|---|---|---|---|
+| INC-101 | Mon 09:00 | Mon 09:20 | Mon 09:45 | No | Closed |
+| INC-102 | Mon 11:00 | Mon 11:10 | Mon 16:30 | Yes | Closed |
+| INC-103 | Mon 14:00 | Mon 14:05 | — | No | In Progress |
+| INC-104 | Tue 08:30 | Tue 09:30 | Tue 10:00 | No | Closed |
+| INC-105 | Tue 10:00 | Tue 10:05 | Tue 10:15 | No | Closed |
+| INC-106 | Wed 09:00 | Wed 09:15 | Wed 09:15 | No | Closed |
+| INC-107 | Wed 13:00 | Wed 13:40 | Thu 11:00 | No | Closed |
+| INC-108 | Thu 09:00 | Thu 09:10 | Thu 09:25 | Yes | Closed |
+| INC-109 | Thu 15:00 | Thu 16:20 | Fri 09:30 | No | Closed |
+| INC-110 | Fri 10:00 | — | — | No | New |
+
+Grab a pen. Compute the five numbers below before reading further.
+
+1. Mean first-response time, over the tickets that have a first response.
+2. Mean time to resolve, over the closed tickets only.
+3. Reopen rate, over the closed tickets only.
+4. First contact resolution: assume it means first response and resolution within 15 minutes.
+5. The number of tickets breaching a 4-hour first-response target.
+
+#### The answers, with the arithmetic
+
+**First-response gaps, in minutes:** 20, 10, 5, 60, 5, 15, 40, 10, 80. That is nine tickets with a response; INC-103 has no resolution yet but does have a response, and INC-110 has none at all.
+
+Total = 20 + 10 + 5 + 60 + 5 + 15 + 40 + 10 + 80 = **245 minutes**. Mean = 245 ÷ 9 = **27.2 minutes**. Answer: **about 27 minutes**.
+
+**Resolution times, in minutes:** INC-101 = 45, INC-102 = 330, INC-104 = 90, INC-105 = 15, INC-106 = 15, INC-107 = 1,320, INC-108 = 25, INC-109 = 1,110. Eight closed tickets; INC-103 and INC-110 are excluded.
+
+Total = 45 + 330 + 90 + 15 + 15 + 1,320 + 25 + 1,110 = **2,950 minutes**. Mean = 2,950 ÷ 8 = **368.75 minutes**, which is about **6.1 hours**. Answer: **roughly 6 hours**.
+
+**Reopen rate:** two reopens (INC-102, INC-108) out of eight closed = 2 ÷ 8 = **25%**.
+
+**First contact resolution:** the definition here is *first response and resolution within 15 minutes of each other*. Measure the gap between the response and the resolution, not from the open time. INC-105 is 5 → 15, a 10-minute gap. INC-106 is 15 → 15, a zero-minute gap. INC-108 is 10 → 25, a 15-minute gap, which meets "within 15" exactly. INC-101 is 20 → 45, a 25-minute gap, so it fails. That gives **INC-105, INC-106, and INC-108** = 3 ÷ 8 = **38%**.
+
+Watch the boundary case. INC-108 was open for 25 minutes, so a careless reading of "resolved within 15 minutes" rejects it. The definition says the *response-to-resolution* gap, and 15 minutes passes. State your definition in the report, because the same week of data yields 25% or 38% depending on which rule you chose.
+
+**Breaches of the 4-hour first-response target:** INC-104 at 60 minutes is fine. INC-110 has no response at all and was opened Friday — it has breached by the end of the week. So **1 breach** (and it is the worst kind: a ticket nobody has touched).
+
+#### What those numbers actually say
+
+| Number | Value | What it tells you |
+|---|---|---|
+| Mean first response | ~27 min | Healthy. The mean is dragged up by two slow responses, not by a general problem |
+| MTTR | ~6.1 hours | Misleading on its own — two tickets (INC-107, INC-109) carry most of it |
+| Reopen rate | 25% | Bad. One in four closures did not hold |
+| FCR | 38% | Middling, and definition-dependent — state the rule you used or the number means nothing |
+| 4-hour breaches | 1 | INC-110 was never touched. That is a process failure, not a speed failure |
+
+The four findings that matter, in order of severity:
+
+1. **INC-110 had no first response at all.** Every other problem on this list is a tuning issue. This is a ticket that fell through a gap. The fix is a daily sweep of `Status = New`, which the dashboard formula in Part 7 gives you for free.
+2. **The reopen rate is the real story.** INC-102 was resolved in 5.5 hours and came back. INC-108 was resolved in 25 minutes and came back. Neither was confirmed with the user. This is exactly the pattern Part 5 warned about: fast closes raise FCR while reopen rate rises underneath.
+3. **MTTR is being carried by two tickets.** INC-107 (22 hours) and INC-109 (18.5 hours) together add 2,430 of the 2,950 minutes. Both span an overnight period, which a professional report would either exclude or explain. A single MTTR figure without that note is a number that misleads its own reader.
+4. **The mean first-response figure hides a 80-minute outlier.** INC-109 took 80 minutes to get a response while the median is 15. Report medians alongside means, or one slow ticket makes a good week look average.
+
+#### Your own numbers, next
+
+Log your next ten tickets in the Part 7 sheet, with a `First Response` column. Then compute the same five numbers. Your sample will be tiny and that is fine; the arithmetic is the skill, and the honesty is the habit.
+
+- **Compute all five metrics by hand** before checking the answers.
+- **Recompute one of them with your own data** and compare the two.
+- **Explain why MTTR alone is misleading**, using the two tickets that carry it.
+- **Identify the untouched ticket** as the most serious finding on the board.
+
+### Part 12 — "What did I miss?" drill
+
+Read the closed ticket below and list everything wrong with it. Then check the answer key. There are at least eleven defects, and some are structural rather than cosmetic.
+
+#### The ticket as it was closed
+
+```text
+Ticket   : INC-2088
+Summary  : email
+Opened   : 2026-02-17 14:02
+Requester: j.anonymous
+Status   : Closed
+Priority : P3
+
+Description:
+  user says email doesnt work
+
+Notes:
+  - looked at it
+  - reinstalled outlook
+  - seems fine now
+  - closing
+
+Resolution: fixed
+Closure   : (blank)
+Resolved  : 2026-02-17 14:40
+```
+
+#### Write your list first
+
+Give yourself three minutes. Write down every problem you can see, in your own words, before scrolling to the key.
+
+#### The answer key
+
+| # | Defect | Why it matters |
+|---|---|---|
+| 1 | Summary is `email` | Not searchable, not specific, and gives no symptom or name |
+| 2 | Requester is `j.anonymous` | No real identity, so you cannot follow up or spot a pattern |
+| 3 | Description copies the user verbatim | "doesnt work" is the symptom, not the diagnosis. No observed facts added |
+| 4 | No impact recorded | Nothing says whether this was one user or the whole company |
+| 5 | No urgency recorded | Priority `P3` was therefore guessed, not derived |
+| 6 | No affected service | The reader cannot tell whether the fault was the mail server or one client |
+| 7 | No steps to reproduce | The next person cannot confirm the fault ever existed |
+| 8 | No failed diagnostic steps | The most valuable content in a ticket is missing entirely |
+| 9 | "reinstalled outlook" is unverified | An extreme action with no reason recorded and no licence or profile check |
+| 10 | "seems fine now" is not a confirmation | The *user* must confirm the fix, not the agent. This is the classic early close |
+| 11 | Resolution says `fixed` | Repeats nothing. It cannot be searched, learned from, or audited |
+| 12 | Closure note is blank | The user is told nothing, so they will reopen or call again |
+| 13 | No root cause recorded | "Reinstalled and it worked" means the cause is still unknown and will return |
+| 14 | No KB link or prevention note | The next identical ticket starts from zero, as Part 2 warned |
+| 15 | Resolved 38 minutes after opening | Fast, and meaningless — the metric is being improved by closing early |
+
+Fifteen. If you found eleven, you have the practical defects; the last four are the process ones that separate a ticket-taker from a technician.
+
+#### The rewritten ticket
+
+```text
+Ticket   : INC-2088
+Summary  : Outlook cannot open — crash on launch after Feb update (J. Donnelly)
+Impact   : Individual — one user. Webmail unaffected; no other users reporting.
+Urgency  : Medium — user can work in webmail as a temporary workaround.
+Category : Email (client)
+Service  : Microsoft 365 Outlook desktop, Windows 11, version 2401 build 17231
+Repro    : 1. Launch Outlook from Start. 2. Splash screen appears.
+           3. Application closes with no error. 4. Event Viewer shows
+           Application Error, faulting module olmapi32.dll, event ID 1000.
+
+Steps tried:
+  - Verified webmail login — SUCCESS. Account healthy, fault is client-side.
+  - Launched Outlook in safe mode (outlook.exe /safe) — still crashes. So the
+    fault is not an add-in.
+  - Checked Event Viewer — faulting module olmapi32.dll, timestamped 14:09.
+  - Compared build number with a working PC — update KB5034441 installed
+    here on 2026-02-16, not on the working machine. [Cause identified.]
+  - Repaired the Office installation (Settings > Apps > Microsoft 365 >
+    Modify > Quick Repair) — no change.
+  - Rolled back KB5034441 — Outlook launched normally.
+
+Resolution: Rolled back Windows update KB5034441, which was installed the day
+            before the fault began and was present only on the affected PC.
+            Confirmed with the user by phone at 15:26.
+
+Closure  : Hi Jane — Outlook was crashing because of a Windows update from
+           Tuesday that Outlook did not get along with. We removed it, and
+           Outlook is working again. Please keep using it normally and let us
+           know if it reappears. We will reinstall the update once Microsoft
+           ships a fix.
+
+Prevention: KB article "Outlook crash on launch after KB5034441" written.
+            Patch team notified so the update is not redeployed to this group.
+
+Verified : User confirmed by phone, 15:26. Ticket parked for 48 hours before
+           final closure rather than closed immediately.
+```
+
+Compare the two closures side by side. The weak one saved thirty minutes. The strong one saved the next technician an hour, told the user what happened, and stopped the same update from breaking the whole group.
+
+- **List the defects before reading the answer key**, aiming for at least eleven.
+- **Rewrite the ticket** with a real summary, impact, and steps tried.
+- **Write a closure note in plain language** for the user, not the database.
+- **Name three defects that are process problems**, not typing problems.
+
+### Part 13 — Guided build: your first week as a solo desk
+
+This is the consolidation exercise. You are the only support person for a fictional twenty-person company. Nothing here needs software you do not already have.
+
+#### The setup
+
+| Item | Value |
+|---|---|
+| Company | Mabini Trading, 20 staff, one office, hybrid Fridays |
+| Systems | Microsoft 365, one file server `FS01`, one printer, 20 laptops |
+| Your tools | The Part 7 sheet, Quick Assist, Bitwarden or KeePassXC |
+| Your authority | You own the workbook and the lab. You do not have production access |
+| Time budget | Four hours, split over two sittings |
+
+#### The week's incoming work
+
+Log every one of these as a ticket in your sheet. Fill every column. Then triage all fifteen using the Part 7 priority grid.
+
+1. *"Laptop won't turn on, it's dead."* — Sales, Monday 08:40.
+2. *"Can't access the shared drive from home."* — Sales, Monday 09:10.
+3. *"Printer is out of toner again."* — Finance, Monday 10:00.
+4. *"Outlook asks for my password every hour."* — Ops, Monday 13:20.
+5. *"New starter begins Monday, needs a laptop and email."* — HR, Tuesday 09:00.
+6. *"Suspicious email from 'the CEO' asking for gift cards."* — Finance, Tuesday 09:30.
+7. *"Wi-Fi is slow in the meeting room."* — Ops, Tuesday 11:00.
+8. *"I'm locked out, too many wrong passwords."* — Sales, Tuesday 14:15.
+9. *"Excel file corrupted, can you restore yesterday's version."* — Finance, Wednesday 08:50.
+10. *"VPN client says 'authentication failed' but my password is right."* — Ops, Wednesday 10:30.
+11. *"Monitor has a line down the middle."* — HR, Wednesday 15:00.
+12. *"Can you install the design software we discussed?"* — Sales, Thursday 09:00.
+13. *"Email to a client bounced back."* — Sales, Thursday 11:20.
+14. *"Teams call audio is crackly."* — Ops, Thursday 14:00.
+15. *"I'm leaving Friday, what happens to my accounts?"* — Finance, Friday 09:00.
+
+#### The triage model answer
+
+| # | Priority | Category | Reasoning |
+|---|---|---|---|
+| 1 | P1 | Hardware | A user cannot work at all. Swap the device the same morning |
+| 2 | P2 | Network | One user, but shared documents are blocked. Check VPN first, then share permissions |
+| 3 | P4 | Hardware | Consumable, not a fault. Log it, order it, close it |
+| 4 | P2 | Email | Recurring password prompts point at a stale credential — the Part 6 pattern |
+| 5 | P3 | Service request | Scheduled work with a known date. Needs a change request, not urgency |
+| 6 | P1 | Security | Possible phishing and possible fraud. This outranks everything except an outage |
+| 7 | P3 | Network | Intermittent and location-specific. Measure before acting |
+| 8 | P2 | Account | User cannot work. Lockout may be caused by item 4's stale credential |
+| 9 | P2 | Software | Data loss risk. Check the volume shadow copy before anything else |
+| 10 | P2 | Network | Same root cause as item 4 — a stored credential after a password change |
+| 11 | P4 | Hardware | Cosmetic or a failing panel. Book a swap |
+| 12 | P3 | Service request | Needs approval, a licence check, and a rollback plan. This is a change |
+| 13 | P3 | Email | One message, one recipient. Send logs first, then decide |
+| 14 | P3 | Network | Intermittent audio is usually the network or the headset. Test the cheap thing first |
+| 15 | P2 | Account | Offboarding is a security task with a deadline. Raise the checklist today |
+
+#### The three things this week is really testing
+
+**Items 4, 8, and 10 are one problem.** Recurring password prompts, a lockout, and VPN authentication failure after a password change are the same stored-credential fault from three angles. Spotting that is the single highest-value observation available this week, and it is exactly what Part 6 described. Link them to one problem record.
+
+**Item 6 is not a P3 because it was unsuccessful.** A gift-card phishing attempt that reached a finance mailbox means someone is targeting you, and the sender may have mailed other staff. Containment is the priority, not the fact that nobody clicked.
+
+**Items 5, 12, and 15 are not incidents.** They are service requests and changes. Logging them as incidents inflates your incident count and hides the real queue. This distinction is the first thing Part 1 taught, and it is the most common beginner error in triage.
+
+#### What to produce
+
+Write this up as `portfolio/it/06-tools-and-ticketing.md`. Include the fifteen logged tickets, the triage table, the linked problem record for items 4, 8, and 10, and one change request for item 12.
+
+- **Log all fifteen requests** with every column filled in your sheet.
+- **Assign a priority to each** and be able to justify every one.
+- **Link items 4, 8, and 10** into a single problem record.
+- **Write the change request for item 12**, with approval and rollback steps.
+- **Write the offboarding checklist** for item 15.
+
+### Part 14 — Key takeaways
 
 - **Tools encode process.** A ticketing system is a model of how work flows, not a complaint database.
 - **Incident = symptom; problem = cause.** Repeating incidents are a signal to investigate, not to keep closing.
@@ -480,7 +1159,7 @@ That is why A. Reyes appears three times. Each reset fixed the symptom. None of 
 - **Almost every support metric can be gamed** by making work look better rather than doing it better. Read reopen rate alongside FCR and MTTR, because it is the honesty check.
 - When you have fixed **the same thing for the same person twice**, stop closing and start linking tickets. That is the moment an incident becomes a problem.
 
-### Part 8 — Practice this next
+### Part 15 — Practice this next
 
 The tasks below produce five artefacts, and each one is interview evidence. Build the workflow diagram with the escalation and reopen arrows included. Populate the inventory with ten fictional devices. Write the five templates *and use one on a real problem you have* — that is the only way to find out whether your diagnostic questions are the right ones. Then write your one runbook, and finish with the change request template for "install software for user", because it forces you to think about approval, licence, and rollback.
 
@@ -523,6 +1202,13 @@ Then extend that work:
 4. Create 5 ticket templates: password reset, VPN issue, printer issue, no internet, suspicious email.
 5. Create a change request template for “install software for user.”
 6. Create a monitoring alert response runbook for “website down” or “router unreachable.”
+7. Build the four-tab ticket queue from Part 7 and log five real tickets in it.
+8. Rewrite the five vague reports in Part 8 into structured tickets, then compare with the models.
+9. Work the ten-ticket lifecycle drill in Part 9 and justify your ordering in writing.
+10. Run one remote session on a device you own and write the session log.
+11. Compute the five metrics in Part 11 by hand, then recompute with your own ticket data.
+12. Complete the “what did I miss?” drill in Part 12 and produce the rewritten ticket.
+13. Triage the fifteen requests in Part 13 and link the three related tickets into one problem record.
 
 ## Deliverable / proof of work
 
@@ -533,6 +1219,10 @@ Create `portfolio/it/06-tools-and-ticketing.md` with:
 - 5 ticket templates
 - 1 change request template
 - 1 monitoring alert runbook
+- Ticket queue workbook with a working dashboard
+- Five structured tickets rewritten from the Part 8 reports
+- The Part 12 rewritten ticket with its defect list
+- The Part 13 fifteen-ticket triage table and linked problem record
 
 ## Checklist
 
@@ -543,6 +1233,13 @@ Create `portfolio/it/06-tools-and-ticketing.md` with:
 - [ ] I created a change request template. <!-- id: it-06-c05 energy: normal -->
 - [ ] I created a monitoring alert runbook. <!-- id: it-06-c06 energy: normal -->
 - [ ] I understand safe remote support behavior. <!-- id: it-06-c07 energy: low -->
+- [ ] I built a working ticket queue with derived priority and a live dashboard. <!-- id: it-06-c08 energy: high -->
+- [ ] I rewrote five vague user reports into structured tickets. <!-- id: it-06-c09 energy: normal -->
+- [ ] I completed the ten-ticket lifecycle drill and justified my ordering. <!-- id: it-06-c10 energy: normal -->
+- [ ] I ran a remote session on a device I own, with consent and a session log. <!-- id: it-06-c11 energy: normal -->
+- [ ] I computed first-response time, MTTR, reopen rate, and FCR by hand. <!-- id: it-06-c12 energy: normal -->
+- [ ] I completed the "what did I miss?" drill and rewrote the closed ticket. <!-- id: it-06-c13 energy: normal -->
+- [ ] I triaged the fifteen-request solo-desk week into a portfolio write-up. <!-- id: it-06-c14 energy: high -->
 
 ## You're ready to move on when...
 
