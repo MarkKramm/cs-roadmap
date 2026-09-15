@@ -50,7 +50,7 @@ Learn just enough Python and PowerShell to automate the repetitive parts of secu
 - Defanging indicators so they are safe to paste into reports
 - Input validation and the risks of `eval`, shell string interpolation, and unsafe deserialisation
 - Logging and audit trails for automated actions
-- Idempotency: what happens when your script runs twice
+- Idempotency — running the same script twice has the same effect as running it once — and what breaks when it does not
 - When not to automate: the judgement call
 
 ## Lesson: Automate the Boring Parts, Never the Judgement
@@ -643,7 +643,7 @@ import os
 import time
 from pathlib import Path
 
-from lookup import lookup_file_hash          # from the previous example
+from lookup import lookup_file_hash          # save the previous example as lookup.py
 
 
 def classify(result: dict) -> tuple[str, int]:
@@ -1157,8 +1157,10 @@ What changed is what the script did with its answer.
 
 ```python
 # triage_hint.py — annotate and route, never close
+evaluated = 0
 matched = 0
 for alert in open_alerts():
+    evaluated += 1
     if matches_known_approved_pattern(alert):   # same test as before
         annotate(alert, note=f"known-approved pattern {PATTERN_VERSION}; "
                              "aged file in approved path; verify before closing")
@@ -1234,8 +1236,16 @@ verdict per hash. Read-only: it makes no changes to any system.
     python -m venv .venv
     source .venv/bin/activate        # Windows: .venv\Scripts\activate
     pip install -r requirements.txt
+
+    # Copy the example environment file. Linux/macOS: cp .env.example .env
+    # Windows PowerShell: Copy-Item .env.example .env
     cp .env.example .env             # then put your key in .env
+
+    # Load the key into the environment. Linux/macOS:
     export VT_API_KEY=$(grep VT_API_KEY .env | cut -d= -f2)
+
+    # Windows PowerShell — same effect:
+    #   $env:VT_API_KEY = (Select-String -Path .env -Pattern '^VT_API_KEY=').Line.Split('=')[1]
 
 ## Usage
 

@@ -61,7 +61,7 @@ Learn to run an incident from the first alert to the closing report, preserving 
 
 An incident feels like an event. It is not. It is a sequence of decisions, and the quality of those decisions depends almost entirely on work done before anything happened.
 
-This is the phase where the skills from every phase before it converge. You read logs from Phase 4 and Phase 10, you think about identity from Phase 9, you write reports from Phase 6, and you reason about risk from Phase 13. What is new is that you are doing all of it under time pressure, against an adversary who is still active, with evidence that is being destroyed by the minute.
+This is the phase where the skills from every phase before it converge. You read logs from Phase 4 and Phase 10, you think about identity from Phase 9, and you write reports from Phase 6. Risk reasoning from Phase 13 arrives later and is reinforced here, not assumed. What is new is that you are doing all of it under time pressure, against an adversary who is still active, with evidence that is being destroyed by the minute.
 
 **The two mistakes that define this field** are worth naming at the start, because everything else follows from avoiding them.
 
@@ -143,7 +143,7 @@ A plan does not need to be a hundred pages. It needs to answer six questions.
 | **Who do we call?** | A contact list with phone numbers, not just email, and an out-of-band channel |
 | **What counts as an incident?** | Severity definitions with examples, so a junior can classify without asking |
 | **What do we do first?** | The first-hour checklist for the three most likely scenarios |
-| **What must we keep?** | Evidence handling rules, and the legal hold trigger |
+| **What must we keep?** | Evidence handling rules, and the legal hold trigger — a legal hold is a preservation obligation that suspends normal deletion, so once it is in force nothing related to the matter may be destroyed however routine the cleanup looks |
 | **How do we get back up?** | Restoration priorities and the order systems come back |
 
 The fourth row is the one that saves time at three in the morning. A first-hour checklist for ransomware, for a compromised account, and for a data-exposure event covers a large share of real incidents.
@@ -1081,7 +1081,7 @@ Now you look. Note that every line pairs a **fact** with its **source**.
 
 Two things the timeline *does* establish, and they matter:
 
-1. The malicious process started **2 minutes 58 seconds** after the document was received. That gap is consistent with automated execution, not a user manually exploring.
+1. The malicious process started **2 minutes 58 seconds** after `cmd.exe` wrote the payload to disk (01:11:04 → 01:14:02), and **6 minutes 29 seconds** after the document arrived (01:07:33). Both gaps are consistent with automated execution, not a user manually exploring.
 2. Access to the client records share happened **5 minutes after** execution began. The attacker knew where to look, or the malware was configured to.
 
 #### Stage 5 — The root cause, stated properly

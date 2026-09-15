@@ -25,6 +25,14 @@ jobs:
         run: node scripts/audit-lesson-ast.mjs
       - name: Audit readability
         run: node scripts/audit-readability.mjs
+      # A comprehension audit found defects no existing guard could see: text
+      # sending the reader to a "Part 5" that is really Part 4, or to a "Part 8"
+      # that does not exist at all. Those are arithmetic on the text, so a script
+      # holds the line where a prose scan could not. The one judgement class it
+      # computes (a forward phase cited as prior knowledge) is printed but does
+      # not gate — see the comment in the script.
+      - name: Audit cross-references
+        run: node scripts/audit-refs.mjs
       # cyber-restructure-check.mjs is deliberately NOT run here. It compares the
       # cyber phases against a "before" snapshot captured at the start of the
       # 2026 restructure pass, and reads it from process.env.TEMP — a

@@ -245,6 +245,8 @@ You do not need to memorise hundreds of event IDs. You need perhaps fifteen, and
 | **5140** | A network share object was accessed | Share access | Lateral movement and data collection |
 | **7045** | A service was installed in the system | New service, in the **System** log | A classic persistence mechanism |
 
+Four terms in that table carry the meaning and are explained nowhere earlier in the track. **Kerberos** is the domain authentication protocol. A **TGT (ticket-granting ticket)** is the credential proving who you are for the rest of the session. **Kerberoasting** is asking for service tickets so their encrypted portion can be cracked offline, which is why a burst of 4769 events matters. **NTLM relay** is forwarding another machine's authentication attempt to a service that trusts it. Without those, the rows above read as noise.
+
 Two details in that table are worth more than the table itself.
 
 **Event 4688 does not contain a command line by default.** Command-line auditing has to be enabled, by policy locally or by Group Policy in a domain. This is a very common reason a detection does not fire on a system where someone assumed it would.
@@ -349,7 +351,7 @@ Linux telemetry is different in shape and equally valuable.
 | `/etc/passwd` and `/etc/shadow` access | Account changes | Via auditd file watches |
 | Cron | Scheduled job definitions and execution | `/var/log/cron` or journald |
 
-The auditd rules worth writing first, because they cover the persistence and privilege-escalation behaviours that matter:
+The auditd rules worth writing first, because they cover the persistence and privilege-escalation behaviours that matter. Put them in `/etc/audit/rules.d/10-lab.rules`, load them with `augenrules --load`, and confirm they are live with `auditctl -l` — a rule that is written but never loaded detects nothing, which is the same lesson as the disabled event log:
 
 ```bash
 # Watch account files for any change.
@@ -621,7 +623,7 @@ DeviceProcessEvents
     <if_sid>61603</if_sid>
     <field name="win.eventdata.image">powershell\.exe$</field>
     <field name="win.eventdata.commandLine">-enc|encodedcommand</field>
-    <field name="win.eventdata.parentImage">SCCMExec\.exe$|msiexec\.exe$</field>
+    <field name="win.eventdata.parentImage" negate="yes">SCCMExec\.exe$|msiexec\.exe$</field>
     <description>Encoded PowerShell execution outside known management tools</description>
     <mitre>
       <id>T1059.001</id>
@@ -630,7 +632,7 @@ DeviceProcessEvents
 </group>
 ```
 
-The three are structurally identical: select the image, select the flags, exclude the known-benign parents. That is the point of learning the logic rather than the syntax.
+The three are structurally identical: select the image, select the flags, exclude the known-benign parents. The Wazuh version needs `negate="yes"` on that last field, because Wazuh treats a plain `<field>` as a positive match — without it the rule fires when the parent *is* the management tool, the exact inverse of the Sigma and SPL versions. That is the point of learning the logic rather than the syntax.
 
 | Platform | Strengths | Trade-off |
 |---|---|---|
