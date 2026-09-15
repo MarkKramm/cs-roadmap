@@ -4,6 +4,7 @@ import EnergyModeSelector, {
   acceptsTask,
 } from "../components/EnergyModeSelector.jsx";
 import { countDone } from "../hooks/useProgress.js";
+import { renderInline } from "../lib/renderInline.jsx";
 import { tracks, allTasks } from "../data/roadmaps.js";
 
 // The dashboard answers one question: "What should I do today?"
@@ -42,7 +43,9 @@ export default function Dashboard({
               {track.label}
               {nextPhase ? " · " + nextPhase.title : ""}
             </div>
-            <p className="focus__task">{nextTask.text}</p>
+            <p className="focus__task">
+              {renderInline(nextTask.text, "focus-task")}
+            </p>
             <div className="focus__meta">
               {nextTask.energy && (
                 <span className={"badge badge--" + nextTask.energy}>

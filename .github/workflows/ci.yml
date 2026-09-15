@@ -19,6 +19,8 @@ jobs:
           node-version: 24
       - name: Lint content
         run: node scripts/lint-content.mjs
+      - name: Audit phase structure
+        run: node scripts/audit-content.mjs
 
   site:
     name: Learning site

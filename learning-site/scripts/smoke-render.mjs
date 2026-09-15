@@ -71,6 +71,8 @@ const noop = () => {};
 // Declared out here so the summary line can report totals after the try block.
 let allPhases = [];
 let allTools = [];
+// Also needed by the inline-markup sweep below, which runs after the try block.
+let PhaseDetailForSweep = null;
 
 const server = await createServer({
   root: ROOT,
@@ -98,6 +100,7 @@ try {
   const App = await load("/src/App.jsx");
   const Dashboard = await load("/src/pages/Dashboard.jsx");
   const PhaseDetail = await load("/src/pages/PhaseDetail.jsx");
+  PhaseDetailForSweep = PhaseDetail;
   const ProgressBar = await load("/src/components/ProgressBar.jsx");
   const PhaseCard = await load("/src/components/PhaseCard.jsx");
   const ChecklistItem = await load("/src/components/ChecklistItem.jsx");
@@ -346,6 +349,67 @@ try {
   }
 } finally {
   await server.close();
+}
+
+// ---------------------------------------------------------------------------
+// Regression check: no literal inline Markdown in rendered output.
+//
+// The generated JSON carries **bold**, `code` and *italic* from the curriculum
+// Markdown. The site has no Markdown renderer, so before src/lib/renderInline.jsx
+// existed these were displayed with the asterisks and backticks visible to the
+// reader. This asserts that every content string containing that syntax is
+// rendered through the formatter.
+//
+// Scoped to the fields the site renders as text. A visible "**" or "`" in any
+// of them means a render site was missed.
+{
+  const MARKUP = /(\*\*[^*\n]+\*\*|`[^`\n]+`|\*[^*\n]+\*)/;
+
+  function collectStrings(node, out) {
+    if (typeof node === "string") {
+      if (MARKUP.test(node)) out.push(node);
+      return;
+    }
+    if (Array.isArray(node)) return node.forEach((v) => collectStrings(v, out));
+    if (node && typeof node === "object") {
+      Object.values(node).forEach((v) => collectStrings(v, out));
+    }
+  }
+
+  const marked = [];
+  for (const phase of allPhases) collectStrings(phase, marked);
+
+  // Rendered phase pages, so the assertion is about output rather than intent.
+  if (allPhases.length > 0 && PhaseDetailForSweep) {
+    let withMarkup = 0;
+    for (const phase of allPhases) {
+      const html = render("PhaseDetail: " + phase.id, createElement(PhaseDetailForSweep, {
+        phase,
+        done: {},
+        onToggle: noop,
+        onBack: noop,
+      }));
+      if (html && /\*\*|`/.test(html)) {
+        withMarkup++;
+        const sample = html.match(/.{0,60}(\*\*|`).{0,60}/);
+        assert(
+          "PhaseDetail: " + phase.id,
+          false,
+          "literal Markdown markers in rendered text: " +
+            (sample ? sample[0].replace(/\s+/g, " ").trim() : "")
+        );
+      }
+    }
+    if (withMarkup === 0) {
+      renders++; // count the sweep itself as one passing render
+    }
+  }
+
+  console.log(
+    "  inline-markup sweep: " +
+      marked.length +
+      " content string(s) contain formatting, none rendered literally."
+  );
 }
 
 if (failures.length > 0) {

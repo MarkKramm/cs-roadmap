@@ -55,7 +55,7 @@ a:hover {
   text-decoration: underline;
 }
 
-/* Focus is always visible — accessibility requirement in DESIGN-SYSTEM.md. */
+/* Focus is always visible â—— accessibility requirement in DESIGN-SYSTEM.md. */
 :focus-visible {
   outline: 2px solid var(--accent);
   outline-offset: 2px;
@@ -152,7 +152,7 @@ a:hover {
 }
 
 .sidebar__link.is-complete::after {
-  content: " ✓";
+  content: " â——";
   color: var(--success);
 }
 
@@ -458,7 +458,7 @@ a:hover {
   font-size: var(--text-sm);
 }
 
-/* A button that reads as inline text — used for "clear filters". */
+/* A button that reads as inline text â—— used for "clear filters". */
 .link-btn {
   background: none;
   border: none;
@@ -575,8 +575,8 @@ a:hover {
   flex: 1 1 200px;
 }
 
-/* A follow-up that has come due. Warning, never danger — a missed reminder
-   is not an error state. See docs/DESIGN-SYSTEM.md → Anti-patterns. */
+/* A follow-up that has come due. Warning, never danger â—— a missed reminder
+   is not an error state. See docs/DESIGN-SYSTEM.md â—— Anti-patterns. */
 .chip--due {
   color: var(--warning);
   border-color: var(--warning);
@@ -629,7 +629,7 @@ a:hover {
 }
 
 /* Overdue follow-up date, marked with a weight change as well as colour so it
-   is not conveyed by colour alone. See DESIGN-SYSTEM.md → Accessibility. */
+   is not conveyed by colour alone. See DESIGN-SYSTEM.md â—— Accessibility. */
 .app-due {
   color: var(--warning);
   font-weight: 600;
@@ -692,4 +692,31 @@ a:hover {
     border-right: none;
     border-bottom: 1px solid var(--border);
   }
+}
+/* ---------------------------------------------------------------------------
+   Inline content formatting
+   ---------------------------------------------------------------------------
+   Content strings in the generated JSON carry a small amount of inline
+   Markdown — **bold**, `code`, *italic* — because that is how the curriculum
+   Markdown emphasises practice tasks and deliverables. These rules style what
+   src/lib/renderInline.jsx produces, so the emphasis reads as emphasis
+   instead of showing the literal asterisks and backticks.
+   --------------------------------------------------------------------------- */
+
+code {
+  font-family: var(--font-mono, ui-monospace, SFMono-Regular, Consolas, monospace);
+  font-size: 0.9em;
+  background: var(--bg-subtle);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 1px 5px;
+  color: var(--text);
+  overflow-wrap: anywhere;
+}
+
+/* Emphasis inside a list item should not shout; it is a qualifier, not a
+   heading. Muted weight keeps the primary clause dominant. */
+li em,
+p em {
+  color: var(--text-muted);
 }
