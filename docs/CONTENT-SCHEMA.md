@@ -59,6 +59,18 @@ Each `- [ ]` line under `## Checklist` gets a trailing HTML comment with a stabl
 - The `energy:` hint is optional. When present, the site's low-energy mode only offers `energy: low` tasks.
 - HTML comments are invisible in every Markdown renderer, so the raw file stays clean.
 
+### Practice task IDs
+
+Each line under `## Hands-on practice tasks` gets an id at build time, `<phase-id>-t<NN>`:
+
+```json
+{ "id": "it-03-t01", "text": "Run `ipconfig /all` and record …" }
+```
+
+These are **minted from position, not authored in the Markdown**, which is the one place this schema differs from checklist ids. The reason is that a reader's *answer* to a practice task is stored against the task's id (see `DECISIONS.md` → D-019), so an answer keyed by array position would silently reappear under a different question the moment a task was inserted above it.
+
+The limitation that follows is real and is recorded rather than hidden: **appending** a task is safe, **reordering** one is not — the ids shift with the position, so an existing answer would follow the position rather than the question. Migrating to an authored `<!-- id: … -->` comment on each task line, as the checklist already does, removes the caveat. It has not been needed because these lists have only ever been appended to.
+
 ### Sections to extract
 
 The build script reads these `##` headings. Missing mandatory headings are a build error.

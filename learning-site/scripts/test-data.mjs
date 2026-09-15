@@ -75,6 +75,12 @@ const POPULATED = {
   }),
   "cs-roadmap:energy-mode:v1": JSON.stringify("normal"),
   "cs-roadmap:reading-size:v1": JSON.stringify("m"),
+  "cs-roadmap:notes:v1": JSON.stringify({
+    "it-01-computer-fundamentals": {
+      note: "What confused me was the difference between RAM and storage.",
+      answers: { "it-01-computer-fundamentals-t01": "CPU, RAM, disk, OS build." },
+    },
+  }),
 };
 
 // ---- export ---------------------------------------------------------------
@@ -87,7 +93,7 @@ const POPULATED = {
   eq(out.payload.format, FORMAT, "export: carries the format marker");
   eq(out.payload.version, VERSION, "export: carries the version");
   eq(out.payload.exportedAt, "2026-03-01T12:00:00.000Z", "export: stamps the time it was given");
-  eq(Object.keys(out.payload.data).length, 8, "export: captured all eight keys");
+  eq(Object.keys(out.payload.data).length, 9, "export: captured all nine keys");
   ok(out.payload.data["cs-roadmap:progress:v1"]["it-01-c01"] === true, "export: progress survived");
 }
 
@@ -127,7 +133,7 @@ const POPULATED = {
   const out = exportAll(s, "2026-03-01T12:00:00.000Z");
   ok(out.ok, "export: survives a storage read that throws");
   eq(Object.keys(out.payload.data).length, 0, "export: nothing captured when nothing is readable");
-  eq(out.skipped.length, 8, "export: every unreadable key is reported");
+  eq(out.skipped.length, 9, "export: every unreadable key is reported");
 }
 
 // ---- inspect: the rejection cases -----------------------------------------
@@ -232,11 +238,14 @@ const POPULATED = {
       "cs-roadmap:reading:v1": { lastTrackId: "it", lastPhaseId: "it-01", lastSection: { "it-01": { id: "x", text: "X" } } },
       "cs-roadmap:energy-mode:v1": "high",
       "cs-roadmap:reading-size:v1": "l",
+      "cs-roadmap:notes:v1": {
+        "it-01-x": { note: "a note", answers: { "it-01-x-t01": "an answer" } },
+      },
     },
   };
   const v = inspect(good);
   ok(v.ok, "inspect: accepts a fully valid payload", v.error);
-  eq(Object.keys(v.data).length, 8, "inspect: accepts all eight keys");
+  eq(Object.keys(v.data).length, 9, "inspect: accepts all nine keys");
 }
 
 // ---- round trip -----------------------------------------------------------
@@ -250,10 +259,20 @@ const POPULATED = {
   const to = fakeStorage();
   const res = importAll(to, parsed, "replace");
   ok(res.ok, "round trip: import succeeds", res.error);
-  eq(res.written.length, 8, "round trip: all eight keys were written");
+  eq(res.written.length, 9, "round trip: all nine keys were written");
 
   // Every key must be byte-identical after a JSON serialise/parse cycle.
   for (const { key } of KEYS) {
+    // A key registered in KEYS but missing from the fixture is a gap in THIS
+    // TEST, not a bug in the module. It was previously an unguarded
+    // JSON.parse(undefined), which threw a stack trace naming neither the key
+    // nor the reason and took the whole suite down with it — so the suite
+    // reported nothing at all when the ninth key was added. Report it as a
+    // failed check instead.
+    if (!(key in POPULATED)) {
+      ok(false, "round trip: " + key + " has no seed value in the fixture");
+      continue;
+    }
     eq(JSON.parse(to._raw(key)), JSON.parse(POPULATED[key]), "round trip: " + key + " survived unchanged");
   }
 }
@@ -416,7 +435,7 @@ const POPULATED = {
   // Every key the site actually uses must be in KEYS, or a backup would quietly
   // omit it. This is asserted against a literal list so adding a ninth storage
   // key without registering it fails here.
-  eq(KEYS.length, 8, "registry: knows exactly the eight keys the site writes");
+  eq(KEYS.length, 9, "registry: knows exactly the nine keys the site writes");
   eq(KEYS.map((k) => k.key).sort(), Object.keys(POPULATED).sort(), "registry: matches the keys in use");
 }
 

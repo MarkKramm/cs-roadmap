@@ -2580,6 +2580,131 @@ p em {
   padding: 0 1px;
 }
 
+/* --- Notes and task answers ---
+   The reader's own writing. Nothing here is scored, counted, or surfaced
+   anywhere else in the site — see docs/DECISIONS.md → D-019. The styles are
+   deliberately quiet: a note box that shouts reads as a demand. */
+
+.notes__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-4);
+  flex-wrap: wrap;
+}
+
+.notes__head h2 {
+  margin-bottom: 0;
+}
+
+.notes__hint {
+  margin: var(--space-3) 0 0;
+}
+
+.notes__label {
+  display: block;
+  margin: var(--space-4) 0 var(--space-2);
+  font-size: var(--text-sm);
+  color: var(--text-muted);
+}
+
+.notes__area,
+.task__area {
+  width: 100%;
+  min-height: 8rem;
+  resize: vertical;
+  font: inherit;
+  font-size: var(--text-base);
+  line-height: 1.6;
+  color: var(--text);
+  background: var(--bg-subtle);
+  border: 1px solid var(--border);
+  border-radius: var(--space-1);
+  padding: var(--space-3) var(--space-4);
+}
+
+.notes__area:focus-visible,
+.task__area:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.notes__foot,
+.task__foot {
+  margin: var(--space-2) 0 0;
+  font-size: var(--text-sm);
+}
+
+.notes__actions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  flex-wrap: wrap;
+  margin-top: var(--space-4);
+  padding-top: var(--space-4);
+  border-top: 1px solid var(--border);
+}
+
+/* --- Practice tasks with an answer box --- */
+
+.task-list {
+  margin: 0;
+  padding-left: var(--space-5);
+}
+
+.task + .task {
+  margin-top: var(--space-4);
+}
+
+.task__head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-3);
+  flex-wrap: wrap;
+}
+
+.task__text {
+  flex: 1 1 22rem;
+  min-width: 0;
+}
+
+/* A chip small enough to sit beside a list item without competing with it. */
+.chip--tiny {
+  font-size: var(--text-xs);
+  padding: 2px var(--space-2);
+}
+
+.task__toggle {
+  white-space: nowrap;
+}
+
+/* The dot is the whole progress signal: it says writing exists here, and says
+   nothing about how much, how good, or how many are left. */
+.task__dot {
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  margin-left: var(--space-2);
+  border-radius: 50%;
+  background: var(--accent);
+  vertical-align: middle;
+}
+
+.task__area {
+  margin-top: var(--space-2);
+}
+
+@media (max-width: 560px) {
+  .task__head {
+    flex-direction: column;
+  }
+
+  .task__toggle {
+    align-self: flex-start;
+  }
+}
+
 /* --- Print ---
    A phase is meant to be printable. The curriculum is 34–112 weeks and the
    whole point of this stylesheet is that a reader can take one phase offline on
@@ -2763,6 +2888,27 @@ p em {
   .lesson__body h3 {
     break-before: auto;
     page-break-before: auto;
+  }
+
+  /* The reader's own writing does not print, and that is deliberate. This
+     stylesheet exists so a phase can be taken to a train or a lab bench and
+     annotated with a pen — and a printed page full of the reader's earlier
+     answers is a page with no room to write on. The note panel and the answer
+     boxes are hidden; the tasks themselves still print, with blank space after
+     each one. */
+  .notes,
+  .task__area,
+  .task__foot,
+  .task__toggle {
+    display: none !important;
+  }
+
+  .task-list {
+    padding-left: var(--space-4);
+  }
+
+  .task + .task {
+    margin-top: var(--space-5);
   }
 
   @page {

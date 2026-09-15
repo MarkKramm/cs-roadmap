@@ -72,6 +72,11 @@ export const KEYS = [
     kind: "one of s | m | l | xl",
     check: (v) => ["s", "m", "l", "xl"].includes(v),
   },
+  {
+    key: "cs-roadmap:notes:v1",
+    kind: "map of phaseId -> { note, answers }",
+    check: isNotesMap,
+  },
 ];
 
 const VALID_DATE = /^\d{4}-\d{2}-\d{2}$/;
@@ -124,6 +129,32 @@ function isReadingState(v) {
     if (!isPlainObject(entry)) return false;
     if (typeof entry.id !== "string" || entry.id === "") return false;
     if (typeof entry.text !== "string") return false;
+  }
+  return true;
+}
+
+/**
+ * `{ phaseId: { note: string, answers: { taskId: string } } }`.
+ *
+ * Strict on purpose, and strict in the same direction as every other validator
+ * here: the reader's writing is the one thing in this store that cannot be
+ * regenerated from the curriculum, so a value that does not match the shape is
+ * refused rather than coerced. An absent `answers` object is tolerated because a
+ * phase with only a note legitimately has none; an `answers` value that is not an
+ * object is not, because that is a different shape pretending to be this one.
+ */
+function isNotesMap(v) {
+  if (!isPlainObject(v)) return false;
+  for (const [phaseId, entry] of Object.entries(v)) {
+    if (typeof phaseId !== "string" || phaseId === "") return false;
+    if (!isPlainObject(entry)) return false;
+    if (typeof entry.note !== "string") return false;
+    if (entry.answers === undefined) continue;
+    if (!isPlainObject(entry.answers)) return false;
+    for (const [taskId, answer] of Object.entries(entry.answers)) {
+      if (typeof taskId !== "string" || taskId === "") return false;
+      if (typeof answer !== "string") return false;
+    }
   }
   return true;
 }
@@ -290,6 +321,7 @@ export function labelFor(key) {
     reading: "Reading position",
     "energy-mode": "Energy mode",
     "reading-size": "Reading size",
+    notes: "Your notes and answers",
   };
   return labels[short] || short;
 }
@@ -335,6 +367,37 @@ export function mergeValue(key, current, incoming) {
   if (isDateMap(current) && isDateMap(incoming)) {
     // One start date per track. Existing wins per track.
     return { ...incoming, ...current };
+  }
+
+  // Notes are writing, and writing unions the same way accomplishments do —
+  // but at one level deeper, because each phase holds a note AND a map of task
+  // answers, and those need different rules:
+  //
+  //   * The NOTE is prose. There is no way to merge two paragraphs a machine can
+  //     honestly choose between, so the existing one wins and the incoming text
+  //     is left alone. Importing must never silently replace something the
+  //     reader wrote on this machine with an older draft from another one.
+  //   * The ANSWERS are a map of task id -> text. A phase present on both sides
+  //     unions per task, and an existing answer wins on a collision, for the
+  //     same reason.
+  //
+  // A phase that exists only in the incoming file is taken whole — that is the
+  // whole point of moving your work to a new laptop.
+  if (isNotesMap(current) && isNotesMap(incoming)) {
+    const merged = { ...incoming };
+    for (const [phaseId, entry] of Object.entries(current)) {
+      const incomingEntry = merged[phaseId];
+      if (!incomingEntry) {
+        merged[phaseId] = entry;
+        continue;
+      }
+      const note = entry.note && entry.note.trim() !== "" ? entry.note : incomingEntry.note;
+      merged[phaseId] = {
+        note,
+        answers: { ...(incomingEntry.answers || {}), ...(entry.answers || {}) },
+      };
+    }
+    return merged;
   }
 
   // Preferences and reading position belong to this machine.

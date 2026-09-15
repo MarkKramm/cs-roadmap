@@ -6,7 +6,7 @@ Build tooling is permitted **only** in this directory — see [`docs/DECISIONS.m
 
 ## Stack
 
-React + Vite, plain CSS, no component library, no state-management library. No router — view state is a single string in `App.jsx` (see D-007). Progress and the two trackers persist in `localStorage`. No backend, no auth, no database. See D-006.
+React + Vite, plain CSS, no component library, no state-management library. No router — view state is a single string in `App.jsx` (see D-007). Progress, the two trackers, and the reader's own notes persist in `localStorage` — **nine keys in total**, all covered by Back up & restore (see D-016, D-019). No backend, no auth, no database. See D-006.
 
 ## Commands
 
@@ -17,13 +17,14 @@ npm run dev          # local dev server
 npm run build        # production build into dist/
 npm run preview      # serve the built output
 npm run test:smoke   # render every page and phase, fail on a render crash
-npm run lint:content # text-integrity check over the Markdown
+npm run test:notes   # the notes store, its validator and its merge rule
+npm run lint:content # text-integrity check over the Markdown (needs ../scripts)
 ```
 
 `npm test` runs the whole guard chain: `test:highlight`, `test:ui`, `test:data`,
-`test:lesson-search`, `test:search` and `test:smoke`. The content audits
-(`lint:content`, `audit-content`, `audit-lesson-ast`, `audit-readability`) live in
-`../scripts/` and are run from the repository root.
+`test:notes`, `test:lesson-search`, `test:search` and `test:smoke`. The content
+audits (`lint:content`, `audit-content`, `audit-lesson-ast`, `audit-readability`)
+live in `../scripts/` and are run from the repository root.
 
 `npm run build:content` generates `src/data/generated/{it,cyber}.json` from the Markdown via [`scripts/build-content.mjs`](../scripts/build-content.mjs). It runs automatically before `dev` and `build`. The generated files are git-ignored — the Markdown is the single source of truth.
 
@@ -53,14 +54,17 @@ learning-site/
     │   ├── useProgress.js            task progress in localStorage
     │   ├── useEnergyMode.js          energy preference in localStorage
     │   ├── usePortfolio.js           portfolio entries in localStorage
-    │   └── useApplications.js        job applications in localStorage
+    │   ├── useApplications.js        job applications in localStorage
+    │   └── useNotes.js               the reader's own notes and answers
     ├── components/
     │   ├── ProgressBar.jsx
     │   ├── PhaseCard.jsx
     │   ├── ChecklistItem.jsx
     │   ├── ToolCard.jsx
     │   ├── EmptyState.jsx
-    │   └── EnergyModeSelector.jsx
+    │   ├── EnergyModeSelector.jsx
+    │   ├── NotesPanel.jsx            the reader's workspace for a phase
+    │   └── TaskList.jsx              practice tasks, with an answer box
     ├── pages/
     │   ├── Dashboard.jsx
     │   ├── PhaseDetail.jsx

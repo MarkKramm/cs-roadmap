@@ -3,9 +3,12 @@ import ChecklistItem from "../components/ChecklistItem.jsx";
 import ToolCard from "../components/ToolCard.jsx";
 import Lesson from "../components/Lesson.jsx";
 import PhaseNav from "../components/PhaseNav.jsx";
+import NotesPanel from "../components/NotesPanel.jsx";
+import TaskList from "../components/TaskList.jsx";
 import { ReadingBar, ResumePrompt, useReadingProgress } from "../components/ReadingPosition.jsx";
 import { countDone } from "../hooks/useProgress.js";
 import { useLesson } from "../hooks/useLesson.js";
+import { useNotes } from "../hooks/useNotes.js";
 import { renderInline } from "../lib/renderInline.jsx";
 
 // Full detail for one phase, rendered from the generated JSON.
@@ -36,6 +39,12 @@ export default function PhaseDetail({
   scale,
 }) {
   const doneCount = countDone(done, phase.checklist);
+
+  // The reader's own writing for this phase. Its own store, its own key, and
+  // deliberately not folded into progress: ticking a box and writing an answer
+  // are different acts and neither should be able to imply the other.
+  const { notes, setNote, setAnswer, clearPhase } = useNotes();
+  const phaseNotes = notes[phase.id] || { note: "", answers: {} };
 
   // The lesson is the substance of the phase; everything else is scaffolding
   // around it. It sits directly after the goal so the reader reaches the
@@ -200,11 +209,12 @@ export default function PhaseDetail({
 
       <section className="card">
         <h2>Hands-on practice tasks</h2>
-        <ol>
-          {phase.tasks.map((t, i) => (
-            <li key={i}>{renderInline(t, `task-${i}`)}</li>
-          ))}
-        </ol>
+        <TaskList
+          tasks={phase.tasks}
+          phaseId={phase.id}
+          answers={phaseNotes.answers}
+          onAnswer={setAnswer}
+        />
       </section>
 
       <section className="card">
@@ -230,6 +240,14 @@ export default function PhaseDetail({
         <h2>You're ready to move on when...</h2>
         <p>{renderInline(phase.exitCriteria, "exit-criteria")}</p>
       </section>
+
+      <NotesPanel
+        phaseId={phase.id}
+        note={phaseNotes.note}
+        hasAnswers={Object.keys(phaseNotes.answers).length > 0}
+        onChange={setNote}
+        onClear={clearPhase}
+      />
 
       <PhaseNav
         variant="full"

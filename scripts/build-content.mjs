@@ -146,6 +146,31 @@ const bullets = (lines) =>
 const numbered = (lines) =>
   lines.filter((l) => /^\d+\.\s+/.test(l)).map((l) => l.replace(/^\d+\.\s+/, "").trim());
 
+// Practice tasks, each with a stable id.
+//
+// WHY TASKS NEED IDS TOO
+// Checklist items carry an authored `<!-- id: … -->`, so progress survives a
+// reworded task. Practice tasks had no id at all, and the reader's *answer* to a
+// task is about to be stored — keying it by array index would silently move one
+// reader's answer onto a different question the moment a task is inserted above
+// it. Silent mis-attribution is the failure this repository has already been
+// bitten by twice (D-013), so tasks get ids on the same principle as the
+// checklist.
+//
+// HONEST LIMITATION: these ids are minted from position at build time, not
+// authored in the Markdown. Inserting a task in the MIDDLE of a list therefore
+// renumbers the ones after it, and answers keyed to the old numbers would follow
+// the position rather than the question. Appending is safe; reordering is not.
+// Migrating to authored `<!-- id: -->` comments on task lines would remove this
+// caveat and is a one-line change here when wanted — the curriculum's task lists
+// have only ever grown, which is why it has not been needed yet.
+function numberedWithIds(lines, phaseId) {
+  return numbered(lines).map((text, i) => ({
+    id: phaseId + "-t" + String(i + 1).padStart(2, "0"),
+    text,
+  }));
+}
+
 const textOf = (lines) => lines.join("\n").trim();
 
 function firstPara(lines) {
@@ -267,7 +292,7 @@ function buildPhase(file) {
       }
       return { name: m[1].trim(), url: m[2] };
     }),
-    tasks: numbered(sec["Hands-on practice tasks"] || []),
+    tasks: numberedWithIds(sec["Hands-on practice tasks"] || [], fm.id),
     deliverableItems: bullets(sec["Deliverable / proof of work"] || []),
     checklist: parseChecklist(sec["Checklist"] || [], rel),
     lessonTitle,

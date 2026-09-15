@@ -137,6 +137,8 @@ try {
     "/src/components/ReadingPosition.jsx"
   );
   const LessonToolbar = await load("/src/components/LessonToolbar.jsx");
+  const NotesPanel = await load("/src/components/NotesPanel.jsx");
+  const TaskList = await load("/src/components/TaskList.jsx");
 
   allPhases = tracks.flatMap((t) => t.phases);
   allTools = allPhases.flatMap((p) => p.tools);
@@ -762,6 +764,144 @@ try {
       "ProgressRing: zero draws an empty arc",
       zeroArc === 0,
       "a 0% ring drew a non-zero arc"
+    );
+  }
+
+  // --- NotesPanel ---
+  // The reader's own writing. What matters here is that the panel renders with
+  // no note at all (the common case: most phases are opened before anything is
+  // written), that a note is not visible until the panel is opened, and — the
+  // one that would actually hurt — that the rendered output contains no count or
+  // completion language, which would turn a workspace into a scoreboard.
+  if (NotesPanel) {
+    const empty = render(
+      "NotesPanel (empty)",
+      createElement(NotesPanel, {
+        phaseId: "it-01-computer-fundamentals",
+        note: "",
+        hasAnswers: false,
+        onChange: noop,
+        onClear: noop,
+      })
+    );
+    if (empty) {
+      assert(
+        "NotesPanel: empty state renders a prompt",
+        empty.includes("Add a note"),
+        "no control to open the panel"
+      );
+      assert(
+        "NotesPanel: closed panel has no textarea",
+        !empty.includes("<textarea"),
+        "the textarea renders before the panel is opened"
+      );
+      assert(
+        "NotesPanel: never reports a count",
+        !/\b\d+\s*(of|\/)\s*\d+\b/.test(empty),
+        "the notes panel rendered something that reads as a score"
+      );
+    }
+
+    const written = render(
+      "NotesPanel (written)",
+      createElement(NotesPanel, {
+        phaseId: "it-01-computer-fundamentals",
+        note: "RAM is volatile, storage is not.",
+        hasAnswers: true,
+        onChange: noop,
+        onClear: noop,
+      })
+    );
+    if (written) {
+      assert(
+        "NotesPanel: a written note changes the control label",
+        written.includes("Your notes"),
+        "an existing note is not acknowledged"
+      );
+    }
+  }
+
+  // --- TaskList ---
+  // Two shapes must render: the pipeline's `{ id, text }` and the older plain
+  // string, because a stale generated file would otherwise blank the section.
+  if (TaskList) {
+    const withIds = render(
+      "TaskList (ids)",
+      createElement(TaskList, {
+        tasks: [
+          { id: "it-01-x-t01", text: "Identify your machine." },
+          { id: "it-01-x-t02", text: "Watch the machine work." },
+        ],
+        phaseId: "it-01-x",
+        answers: {},
+        onAnswer: noop,
+      })
+    );
+    if (withIds) {
+      assert(
+        "TaskList: renders every task",
+        withIds.includes("Identify your machine") && withIds.includes("Watch the machine work"),
+        "a task was dropped"
+      );
+      assert(
+        "TaskList: one answer control per task",
+        (withIds.match(/task__toggle/g) || []).length === 2,
+        "expected two answer controls"
+      );
+      assert(
+        "TaskList: answers start closed",
+        !withIds.includes("<textarea"),
+        "an answer box rendered before it was asked for"
+      );
+    }
+
+    // An existing answer marks the task, and the marker is a dot — not a count.
+    const answered = render(
+      "TaskList (answered)",
+      createElement(TaskList, {
+        tasks: [{ id: "it-01-x-t01", text: "Identify your machine." }],
+        phaseId: "it-01-x",
+        answers: { "it-01-x-t01": "CPU, RAM, disk." },
+        onAnswer: noop,
+      })
+    );
+    if (answered) {
+      assert(
+        "TaskList: an answered task is marked",
+        answered.includes("task--answered"),
+        "an existing answer is not signalled"
+      );
+      assert(
+        "TaskList: the marker is not a count",
+        !/\b\d+\s*(of|\/)\s*\d+\b/.test(answered),
+        "the task list rendered something that reads as a score"
+      );
+    }
+
+    // The pre-id shape must not crash the section.
+    const legacy = render(
+      "TaskList (legacy strings)",
+      createElement(TaskList, {
+        tasks: ["A task with no id."],
+        phaseId: "it-01-x",
+        answers: {},
+        onAnswer: noop,
+      })
+    );
+    assert(
+      "TaskList: tolerates the pre-id string shape",
+      legacy !== null && legacy.includes("A task with no id"),
+      "a task with no id blanked the list"
+    );
+
+    const none = render(
+      "TaskList (empty)",
+      createElement(TaskList, { tasks: [], phaseId: "it-01-x", answers: {}, onAnswer: noop })
+    );
+    assert(
+      "TaskList: handles an empty list",
+      none !== null && none.includes("no practice tasks"),
+      "an empty task list rendered nothing"
     );
   }
 

@@ -13,7 +13,8 @@
     "test:ui": "node scripts/test-ui.mjs",
     "test:data": "node scripts/test-data.mjs",
     "test:lesson-search": "node scripts/test-lesson-search.mjs",
-    "test": "npm run test:highlight && npm run test:ui && npm run test:data && npm run test:lesson-search && npm run test:search && npm run test:smoke",
+    "test:notes": "node scripts/test-notes.mjs",
+    "test": "npm run test:highlight && npm run test:ui && npm run test:data && npm run test:notes && npm run test:lesson-search && npm run test:search && npm run test:smoke",
     "dev": "npm run build:content && vite",
     "build": "npm run build:content && vite build",
     "preview": "vite preview"
