@@ -1036,3 +1036,163 @@ li em,
 p em {
   color: var(--text-muted);
 }
+
+/* ── Search ─────────────────────────────────────────────────────────────────
+   The box is wide and the results are a vertical list of clickable rows. Each
+   row shows where the hit lives, the heading it sits under, and a snippet
+   windowed around the match. */
+
+.search__header {
+  margin-bottom: var(--space-5);
+}
+
+.search__header h1 {
+  margin: 0 0 var(--space-1);
+}
+
+.search__header p {
+  margin: 0;
+}
+
+.search__box {
+  position: relative;
+  margin-bottom: var(--space-5);
+}
+
+.search__input {
+  width: 100%;
+  padding: var(--space-3) var(--space-7) var(--space-3) var(--space-4);
+  font-size: var(--text-lg);
+  font-family: inherit;
+  color: var(--text);
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: var(--space-2);
+  transition: border-color var(--transition-fast);
+}
+
+.search__input:focus {
+  outline: none;
+  border-color: var(--accent);
+}
+
+.search__input::placeholder {
+  color: var(--text-muted);
+}
+
+/* The browser's own clear button duplicates ours and only appears in some
+   engines, so suppress it and keep one consistent control. */
+.search__input::-webkit-search-cancel-button {
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+.search__clear {
+  position: absolute;
+  top: 50%;
+  right: var(--space-3);
+  transform: translateY(-50%);
+  padding: var(--space-1) var(--space-2);
+  font-size: var(--text-sm);
+  color: var(--text-muted);
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: var(--space-1);
+  cursor: pointer;
+}
+
+.search__clear:hover {
+  color: var(--text);
+  border-color: var(--border);
+}
+
+.search__note,
+.search__count {
+  margin: 0 0 var(--space-4);
+  color: var(--text-muted);
+  font-size: var(--text-sm);
+}
+
+.search__list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.search__link {
+  display: block;
+  width: 100%;
+  text-align: left;
+  padding: var(--space-4);
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: var(--space-2);
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+  transition: border-color var(--transition-fast);
+}
+
+.search__link:hover {
+  border-color: var(--accent);
+}
+
+.search__link:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.search__where {
+  display: block;
+  font-size: var(--text-xs);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--text-muted);
+  margin-bottom: var(--space-1);
+}
+
+.search__heading {
+  display: block;
+  font-weight: 600;
+  margin-bottom: var(--space-1);
+  overflow-wrap: anywhere;
+}
+
+/* The snippet is the evidence that the hit is real, so it gets room to show a
+   full clause rather than collapsing to a single truncated line. */
+.search__snippet {
+  display: block;
+  color: var(--text-muted);
+  font-size: var(--text-sm);
+  line-height: 1.5;
+  overflow-wrap: anywhere;
+}
+
+.search__hint {
+  padding: var(--space-5);
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: var(--space-2);
+}
+
+.search__hint h2 {
+  margin: 0 0 var(--space-3);
+  font-size: var(--text-lg);
+}
+
+.search__hint ul {
+  margin: 0 0 var(--space-4);
+  padding-left: var(--space-5);
+}
+
+.search__hint li {
+  margin-bottom: var(--space-2);
+}
+
+.search__hint p {
+  margin: 0;
+  font-size: var(--text-sm);
+}

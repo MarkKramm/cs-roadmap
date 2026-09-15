@@ -1,0 +1,67 @@
+feat(site): full-text search, five module follow-ups, and CI that runs the audits
+
+TWO ITEMS, both from the roadmap queue.
+
+1. FIVE MODULE FOLLOW-UPS WRITTEN (366 lines added, 0 deleted)
+
+The module review identified five gaps and deliberately did not fill them, so the
+audit stayed an audit. All five are now written:
+- Module 09: a worked "wrong first guess" — the analyst reads a second source
+  address as a separate actor, with four stated reasons that reading was
+  reasonable, then overturns it on a byte-identical userAgent and a timing gap
+  showing the bucket was opened EXPECTING to harvest rather than found.
+- Module 09: a five-rung setup ladder for a beginner whose free-tier account will
+  not provision, gated so the budget alarm cannot be skipped.
+- Module 12: a reversed wrong-automation case — a script that correctly detects
+  its pattern and silently closes a genuine alert. The reframe is the lesson: it
+  asked "does this look like the pattern?" instead of "if I am wrong, will
+  anyone find out?"
+- Module 13: a worked risk-scoring disagreement, 20 Critical against 12 High,
+  with a register entry recording the outcome as a DECISION rather than
+  agreement.
+- All six: a residual-incompetence statement naming what the reader still cannot
+  do — the counterpart to the existing "out of scope" sections, which said what
+  was excluded but never what remains beyond them.
+
+2. FULL-TEXT SEARCH (D-013)
+
+The obvious implementation was measured and rejected. Storing segment text came
+to 473 KB gzipped because it duplicated every lesson file; an average lesson
+gzips to 16 KB, so that index cost roughly thirty lessons of download for an
+occasional feature. Windowing segments for better snippets was measured too and
+made it WORSE (1438 -> 1501 KB), because overlap duplicates text.
+
+What ships is an inverted index — term to segment id, no prose — built at build
+time and fetched once, lazily, on the reader's first search. 180 KB as its own
+chunk. index.html does not reference it, so the main bundle is unchanged at
+105 KB gzipped and a reader who never searches pays nothing.
+
+THREE SILENT-FAILURE BUGS, found by testing the index against the query engine
+rather than by reading either one. All three returned nothing or the wrong thing
+without erroring, which is the failure mode this repository keeps finding:
+- Terms in >20% of segments were DELETED to save space. A query is an AND, so
+  one deleted term killed the whole query: "user account locked" found NOTHING
+  because "user" was gone. They are now kept and flagged — matched, but not
+  allowed to narrow — and the UI reports which words it ignored.
+- Trailing punctuation was glued into terms, so "...was timestomped." indexed
+  "timestomped." separately from "timestomped".
+- An exact match SUPPRESSED broader ones: searching "timestomping" matched only
+  that term and never reached the stem finding module 11's "timestomped", so
+  typing MORE precisely returned FEWER results. Exact and prefix matches are now
+  tiered. Merging them flatly was wrong the other way: STAR exactly matches the
+  interview method but also prefixes start/startup/starved, drowning the lesson
+  that teaches STAR.
+
+test:search guards all three plus ID range, ordering, empty and nonsense
+queries. A search bug does not crash the page — it returns the wrong answer — so
+the guard asserts on known-correct hits, not on the absence of exceptions.
+
+CI NOW RUNS THE AUDITS IT WAS SKIPPING
+
+ci.yml ran lint and audit-content but not the lesson-parser, readability or
+preservation audits, and had nothing for search. All five content scripts and
+both site tests now run, each verified to exit 0 before being added.
+
+Guards: lint 106/0; content audit 0 issues; lesson AST 23/0 loss; readability 0
+of 23 outside target and 0 paragraphs over 90 words; preservation OK; build
+clean; smoke 85 renders / 0 failures; search 41 checks / pass.

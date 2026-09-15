@@ -949,6 +949,26 @@ The fourth row is uncommon and it is the one where stopping is unambiguously cor
 
 The three differences are: **commands and times**, **the boundary between evidence and inference**, and **verification**. Those three habits are what separate a forensic note from a guess.
 
+#### What you still cannot do after this phase
+
+You have practised this on images you built, at your own pace, with no one waiting.
+
+You can now work an incident end to end on a lab image — triage, contain, preserve, analyse, and report. You can also explain order of volatility and chain of custody precisely.
+
+You **cannot** yet do it under a clock. Containment decisions there have a cost, and the business asks for an update before you have finished looking.
+
+You have also never handled evidence that would go to a court or a regulator. There, a documentation habit is not a study skill. It is a professional obligation.
+
+| You can | You cannot yet |
+|---|---|
+| Image a disk, hash it, and document custody | Produce evidence that would survive a legal challenge to your method |
+| Triage a severity from a prepared scenario | Triage a live alert where half the information is missing and someone is waiting |
+| Analyse memory and disk from a lab capture | Decide when to pull the plug on a production system with a revenue impact |
+| Write a report with root cause and detection gaps | Brief an executive who wants an answer you do not have yet |
+| Run a tabletop exercise with peers | Run a real eradication and prove the attacker is gone |
+
+**Say it plainly:** “I can run the full process on a lab image, and I have written it up properly. I have not done it live. I have also not handled evidence with a legal standard attached.” Both halves of that sentence are useful to an interviewer. The second one tells them you know what you do not know.
+
 ### Key takeaways
 
 - **An incident is a process, not an event.** The quality of the response depends almost entirely on preparation done before anything happened.

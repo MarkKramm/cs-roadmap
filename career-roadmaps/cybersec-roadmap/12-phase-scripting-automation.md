@@ -1097,6 +1097,92 @@ The third row is a small design change with a large effect. **A tool that prints
 
 **The last row is the one to hold onto.** The value of doing a task by hand first is not nostalgia. It is that manual work teaches you the edge cases, and edge cases are where automation breaks.
 
+#### Worked example: the auto-closer that worked perfectly
+
+The tables above state conclusions. Judgement is not built by reading conclusions, so here is the same lesson as it actually happens — with the wrong answer first, and the reasoning that replaced it.
+
+**The task.** A junior analyst on a small team handles roughly 300 alerts a day. About 260 of them are the same thing: an endpoint agent reporting a file that has been on the machine for months, already approved, and flagged only because a signature updated. Closing those by hand takes an hour.
+
+**The first attempt.** The analyst writes a script to close them automatically.
+
+```python
+# auto_close.py — close alerts that look like the known-good pattern
+APPROVED_PATHS = ["/opt/tools/", "C:\\Program Files\\Corp\\"]
+
+for alert in open_alerts():
+    if alert["rule"] != "SUSPICIOUS_FILE_HASH":
+        continue
+    if not any(alert["path"].startswith(p) for p in APPROVED_PATHS):
+        continue
+    if days_since(alert["file_mtime"]) < 30:
+        continue
+    close(alert, reason="known approved software, aged file")
+```
+
+The logic reads well. It only touches one rule, only inside approved directories, and only for files older than thirty days. The analyst tests it against last week's alerts, and it closes 264 of them. The other 36 are reviewed by hand.
+
+**What it got wrong.** Three weeks later, a real intrusion is found during an unrelated review. The entry point was a signed binary dropped into `C:\Program Files\Corp\`, with its timestamps set back by the attacker so the file appeared months old. The matching alert had been closed at 04:12 by `auto_close.py`, with the reason “known approved software, aged file.”
+
+| The script assumed | Reality |
+|---|---|
+| An approved path means approved software | A path is writable by anyone with the right permissions, including an installer the attacker controlled |
+| An old timestamp means an old file | Timestamps are trivially forged. Phase 11 calls this timestomping |
+| A consistent pattern means a consistent meaning | Three conditions that are *usually* benign are not three conditions that are *always* benign |
+| Closing the alert records the decision | The closure was indistinguishable from 263 others, so nobody ever saw it |
+
+**The deepest error was not in the code.** It was in the question the analyst asked. The script answers “does this alert look like the pattern?” when the question a security control must answer is **“if I am wrong about this one, will anyone find out?”**
+
+That is the third question from the four above, and it was skipped. The answer for auto-close is always no.
+
+| Failure property | Why auto-close fails it |
+|---|---|
+| Silent wrongness | A wrongly closed alert produces no error, no log entry anyone reads, and no output |
+| Compounding | Each closure deletes the evidence that would have shown the pattern was wrong |
+| Delayed discovery | The mistake surfaces months later, from a different investigation entirely |
+| Unattributable | By the time it is found, the ticket says “known approved software” and nothing else |
+
+The uncomfortable part is that the script made the team *less* safe while making it measurably faster. That is the trade nobody prices in when writing the first line of code.
+
+**The correction.** The analyst did not delete the script. The pattern detection was genuinely useful, and the hour it saved was real.
+
+What changed is what the script did with its answer.
+
+| Before | After | Why |
+|---|---|---|
+| `close(alert, reason=...)` | `annotate(alert, note="matches known-approved pattern v1; aged file; approved path")` | The judgement is recorded without being made |
+| The alert left the queue | The alert is routed to a digest, reviewed daily | A human still sees it, but in a batch rather than one at a time |
+| No counter | Every run prints “evaluated N, matched M, routed M” | A run that matches nothing is visible as unusual rather than invisible |
+| The pattern was a decision rule | The pattern is a **triage hint attached to the alert** | The analyst who opens it starts from the hint, not from zero |
+| One rule, forever | The pattern is versioned, with a review date | A signature update changes the meaning of “known-good” |
+
+```python
+# triage_hint.py — annotate and route, never close
+matched = 0
+for alert in open_alerts():
+    if matches_known_approved_pattern(alert):   # same test as before
+        annotate(alert, note=f"known-approved pattern {PATTERN_VERSION}; "
+                             "aged file in approved path; verify before closing")
+        route_to_digest(alert)
+        matched += 1
+
+print(f"evaluated={evaluated} matched={matched} routed={matched} closed=0")
+```
+
+**The corrected judgement, stated generally:** the script may narrow what a human must read. It may not decide that the human need not read it. Those two sentences look close together and they are the whole distance between a tool and a liability.
+
+| The line the corrected script holds | Expressed as code |
+|---|---|
+| Enrich, do not decide | It adds a note; it does not set a status |
+| Preserve the human step | Everything matching is still routed somewhere a person looks |
+| Fail loudly | The run always prints its counts, including zero |
+| Be reversible | Removing the script restores the previous state exactly, because nothing was closed |
+
+**What the analyst wrote in the “what I chose not to automate” note** — and this is the artefact the phase asks for:
+
+> I automate the *detection* of a known-benign pattern and I attach that finding to the alert. I do not automate the *closure*, because a wrongly closed alert is invisible by construction, and invisibility is the property that makes a failure permanent. The script saves the same typing either way; the difference is whether a human still gets to be wrong out loud.
+
+**Where this sits against the table above:** auto-closing alerts matching a pattern is row four of the “do not automate” judgment. The script was not badly written. It was correctly written against the wrong question — which is the failure mode this whole part exists to prevent.
+
 #### Worked example: automating the right part
 
 A junior analyst is told to check every new alert's file hash against a threat-intelligence service, and to write up anything malicious. Done manually, that is twenty minutes per alert.
@@ -1262,6 +1348,21 @@ This phase produces something specific and legible, and it is the single most de
 | A written "what I chose not to automate" note | You have judgement, which is the rarest of these |
 
 That last row is unusual, and it is the one that makes an interviewer stop. A candidate who can explain why they did *not* automate alert closure has demonstrated that they understand what automation is for.
+
+#### What you still cannot do after this phase
+
+Be precise, because “I can automate security tasks” is a claim people will test.
+
+You can now write a script that collects, parses, and enriches security data, and you can explain why a particular action should stay manual. You **cannot** yet write production-quality code that other people maintain — there are no unit tests beyond a malformed-input case, no packaging, and no dependency management. You have also never automated anything against a live production system, where a mistake is not a line in your own log file.
+
+| You can | You cannot yet |
+|---|---|
+| Write a script that parses logs and produces a report | Write a library with tests, versioned releases, and a dependency lockfile |
+| Handle hostile input without crashing | Reason about concurrency, retries, and rate limits under real load |
+| Justify what you chose not to automate | Operate an automation pipeline with alerting, ownership, and a rollback path |
+| Read and adapt someone else's script | Review code for security defects the way a developer would |
+
+**In an interview, say:** “I write small Python and PowerShell tools for analysis and triage, and I keep the destructive steps manual. I have not shipped anything to production.” That is accurate, and it is more credible than a claim the follow-up question will dismantle.
 
 ### Key takeaways
 

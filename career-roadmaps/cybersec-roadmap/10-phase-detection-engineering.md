@@ -1031,6 +1031,22 @@ Phase 6 taught that a portfolio needs evidence, not claims. This phase produces 
 
 That set is unusual in an entry-level portfolio, and it is directly relevant to SOC work. Most junior candidates present a list of tools. A candidate who presents a detection library with documented false positives and an honest coverage map is describing work they have actually done.
 
+#### What you still cannot do after this phase
+
+Your rules were written against telemetry you generated yourself, and that gap is real.
+
+You can now turn an attacker behaviour into a Sigma rule, test it in both directions, and document its false positives. You **cannot** yet tune a rule against real production volume — you have never seen what a rule looks like when it fires four hundred times on a Monday because a backup job changed. You have also never worked a detection backlog with a queue, a service-level target, and an analyst asking you to make it stop.
+
+| You can | You cannot yet |
+|---|---|
+| Write a Sigma rule for a named technique | Tune the same rule against a week of real production traffic |
+| Map coverage honestly and name your gaps | Measure detection coverage against a threat model the business agreed |
+| Document a false positive with a risk acceptance | Negotiate that acceptance with the team who has to live with the alert |
+| Build a tested detection library alone | Operate a shared rule repository with review, ownership, and deprecation |
+| Write an analyst action for a rule | Know whether that action is realistic at three in the morning on a busy shift |
+
+**In an interview, say:** “I have a small detection library in Sigma with test records and named coverage gaps, all built on a home lab. I have not tuned against production volume or worked a live queue.” Naming the production-volume gap shows you know what the job actually involves.
+
 ### Key takeaways
 
 - **A detection is a product an analyst receives at three in the morning.** The only question that matters is: if this fires, what will they do differently?

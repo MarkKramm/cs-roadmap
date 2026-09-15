@@ -149,11 +149,42 @@ The build script emits a small index per track plus one file per lesson:
 learning-site/src/data/generated/it.json
 learning-site/src/data/generated/cyber.json
 learning-site/src/data/generated/lessons/<phase-id>.json
+learning-site/src/data/generated/search.json
 ```
 
 ### Why the lessons are separate files
 
-The lesson bodies total roughly 1.6 MB of JSON. Inlining them into the track indexes made the site's single JS bundle 1.9 MB, which delayed first paint for content the reader had not asked for. Each lesson is therefore its own file, imported dynamically by `src/hooks/useLesson.js` when a phase is opened, and cached per phase id in memory.
+The lesson bodies total roughly 1.7 MB of JSON. Inlining them into the track indexes made the site's single JS bundle 1.9 MB, which delayed first paint for content the reader had not asked for. Each lesson is therefore its own file, imported dynamically by `src/hooks/useLesson.js` when a phase is opened, and cached per phase id in memory.
+
+### `search.json` — the full-text index
+
+Search needs to find a phrase across all 23 lessons without loading all of them. This file holds an inverted index — term to segment id — and **no prose**, so it does not duplicate the lesson files. See [`DECISIONS.md`](DECISIONS.md) → D-013 for the measurements behind that choice; storing segment text came to 473 KB gzipped against 180 KB for this.
+
+```json
+{
+  "v": 2,
+  "segments": [
+    { "h": "Part 4 — Reading cloud logs", "a": "part-4-reading-cloud-logs",
+      "p": "cyber-09-cloud-and-identity", "pt": "Phase 9 — Cloud and Identity Security",
+      "k": "cyber" }
+  ],
+  "terms": "auditd:a,b,c\nazure:1d,2f",
+  "common": "the\nand\nuser"
+}
+```
+
+| Field | Meaning |
+| --- | --- |
+| `v` | Index format version. The site reads this and a mismatch is a bug, not a fallback case. |
+| `segments[].h` | The heading this segment sits under. Taken from the lesson's `###`/`####` headings. |
+| `segments[].a` | The heading's anchor id, used to scroll to the hit. Empty for the lesson-level opening segment. |
+| `segments[].p` | Phase id. Resolves to a lesson file at `lessons/<p>.json`. |
+| `segments[].pt` | Phase title, for the result row. |
+| `segments[].k` | Track id — `it` or `cyber`. |
+| `terms` | One line per term, `term:delta,delta,…`, where the deltas are ascending segment indices encoded in base36. |
+| `common` | Terms appearing in more than 20% of segments. Kept so the engine can match and report them, but excluded from the query's AND — see D-013. |
+
+Segment indices are positions in `segments`, so **the two arrays must stay in sync**; both are emitted from one pass. Segments are cut at `###`/`####` headings rather than per block or per lesson: per block gives a result list too long to read, per lesson gives 23 hits too broad to use.
 
 An index file contains:
 

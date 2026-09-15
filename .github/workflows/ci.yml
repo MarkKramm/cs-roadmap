@@ -21,6 +21,12 @@ jobs:
         run: node scripts/lint-content.mjs
       - name: Audit phase structure
         run: node scripts/audit-content.mjs
+      - name: Audit lesson parser (no content loss)
+        run: node scripts/audit-lesson-ast.mjs
+      - name: Audit readability
+        run: node scripts/audit-readability.mjs
+      - name: Verify no cyber phase shrank
+        run: node scripts/cyber-restructure-check.mjs
 
   site:
     name: Learning site
@@ -41,3 +47,5 @@ jobs:
         run: npm run build
       - name: Smoke test
         run: npm run test:smoke
+      - name: Search index and query engine
+        run: npm run test:search

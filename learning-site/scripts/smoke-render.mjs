@@ -112,6 +112,7 @@ try {
   const ToolsLibrary = await load("/src/pages/ToolsLibrary.jsx");
   const Portfolio = await load("/src/pages/Portfolio.jsx");
   const Applications = await load("/src/pages/Applications.jsx");
+  const Search = await load("/src/pages/Search.jsx");
 
   allPhases = tracks.flatMap((t) => t.phases);
   allTools = allPhases.flatMap((p) => p.tools);
@@ -423,6 +424,30 @@ try {
         "Applications: add affordance",
         html.includes("Add an application"),
         "no way to add the first application"
+      );
+    }
+  }
+
+  if (Search) {
+    // The idle state, which is what a reader sees on arrival: no index fetched
+    // yet, so the hint block must render without any data.
+    const html = render("Search", createElement(Search, { onOpenResult: noop }));
+    if (html) {
+      assert("Search: heading", html.includes("Search"), "page heading not rendered");
+      assert(
+        "Search: input",
+        html.includes('type="search"') || html.includes("aria-label=\"Search lessons\""),
+        "no search input rendered"
+      );
+      assert(
+        "Search: hints when idle",
+        html.includes("What you can search for"),
+        "idle-state guidance not rendered"
+      );
+      assert(
+        "Search: does not render results before a query",
+        !html.includes("search__result"),
+        "rendered result rows with no query"
       );
     }
   }

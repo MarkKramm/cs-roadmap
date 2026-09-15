@@ -1200,6 +1200,22 @@ If you find a vulnerability by accident, there is a correct sequence.
 
 **The exam-rules row is worth understanding.** A practical certification exam grants you permission to attack a specific environment for a specific period. That permission does not extend to any other system, and attacking anything else during an exam is both a crime and grounds for disqualification.
 
+#### What you still cannot do after this phase
+
+Every lab you attacked was built to be attacked, and none of them pushed back.
+
+You can now test an application methodically, find access control and injection flaws, and write a finding a developer can act on. You **cannot** yet review source code for the same flaws — you have tested running applications, not read a codebase looking for the bug before it ships. You have also never tested an application with a Web Application Firewall, a rate limiter, and an authentication flow designed by someone who anticipated you.
+
+| You can | You cannot yet |
+|---|---|
+| Find IDOR and injection in a running application | Read a codebase and locate the same flaws before deployment |
+| Write a finding with a reproduction a developer can follow | Fix the flaw in the framework the application actually uses |
+| Use Burp and ZAP to test a request flow | Test an API-heavy single-page application with token-based auth |
+| Explain same-origin policy and CSP precisely | Design a CSP for a real application without breaking its front end |
+| Work the OWASP Top 10 as a checklist | Prioritise findings against a real threat model and a real deadline |
+
+**In an interview, say:** “I have worked the PortSwigger labs and I can find and report access control and injection bugs in a running app. My background is development, so I read code well — but I have not done a code review for security, and I have not tested anything with real defences in front of it.” Your development background is the differentiator; naming the untested parts is what keeps the claim honest.
+
 ### Key takeaways
 
 - **Your web development background is the asset, not a gap.** You already know how a request becomes a response; the new skill is making code fail deliberately.

@@ -579,6 +579,52 @@ What this sequence tells you, and what it does not.
 
 **The remedy order matters.** Deleting the created access key first, before touching the original credential, is what stops the attacker re-entering. Analysts who rotate the original key first and forget the new one find the attacker back inside an hour later.
 
+#### Wrong first guess: two addresses, one actor
+
+That table reads as though the analyst knew the answer from the first row. Nobody does. Here is the same sequence as it actually arrives — one event at a time, with the first reading written down and then overturned.
+
+**First reading.** At 04:52 the analyst sees 214 `GetObject` calls against the customer-exports bucket from `198.51.100.7`. That address has never appeared in this account before. It is a different address, in a different range, doing a different thing: the earlier activity was management API calls from `203.0.113.44`, and this is bulk data retrieval.
+
+The plausible conclusion is **a second actor**. It is plausible for good reasons, and those reasons are worth stating plainly.
+
+| Why the first reading was reasonable | The evidence for it |
+|---|---|
+| The address is different | `203.0.113.44` did all the reconnaissance and configuration; `198.51.100.7` did all the downloading |
+| The behaviour is different | One identity changed permissions and made keys; the other only read objects |
+| The timing is different | The management calls cluster in a seven-minute burst; the downloads run for eleven minutes afterwards |
+| A second party arriving after exposure is common | Once a bucket is public, unrelated scanners find it within hours, and they look exactly like this |
+
+So the analyst writes the tentative conclusion: **the original actor exposed the bucket, and an unrelated party found and harvested it.** That is a defensible reading, and it changes the response.
+
+**What overturned it.** Two details, both from fields already on the page.
+
+| Detail | What it shows |
+|---|---|
+| The `userAgent` string is byte-identical | Both addresses present the same client string, down to the version. Independent scanners rarely match an attacker's tooling exactly |
+| The gap is suspiciously tidy | Downloads begin 4 minutes 21 seconds after `PutBucketAcl`, with no scanning delay. An unrelated finder needs time to discover the bucket — the discovery step is missing entirely |
+
+The second detail is the stronger one. A bucket opened at 04:48 and harvested at 04:52 has not been *found*; it has been *expected*. An attacker who already knows the bucket name does not need to scan for it.
+
+**Revised conclusion.** One actor used a second egress path — a different host, a VPN exit, or a container in another account — for the high-volume, high-attribution part of the operation. The first address is the control path; the second is the data path.
+
+| Reading | Verdict | Why |
+|---|---|---|
+| Two unrelated actors | Plausible, then rejected | Identical `userAgent` and a four-minute gap with no discovery step |
+| One actor, two egress paths | Consistent with all the evidence | Explains both the identical tooling and the missing discovery delay |
+| Still unresolved | What cannot be settled from CloudTrail alone | Which of the two addresses was the human, and whether a third path exists |
+
+**The honest ending matters as much as the revision.** CloudTrail cannot tell you whether the two addresses are the same person, the same malware, or two operators working from one playbook. What it can tell you is that treating them as unrelated is the weaker hypothesis, so your containment must cover both.
+
+| What the revision changes | Because |
+|---|---|
+| The scope of credential revocation | Two paths mean at least two credential sets to hunt, not one |
+| The containment priority | Blocking `203.0.113.44` alone would leave the download path untouched |
+| The report's language | “One actor” is a finding; “two actors” is speculation the evidence does not support |
+
+**The habit this teaches:** write your first reading down before you check it, because a conclusion you never recorded is a conclusion you cannot audit. The revision above is not a mistake. It is the work.
+
+**A caution about both readings.** The `userAgent` string is attacker-controlled. A careful adversary can copy any client string they like, so identical tooling is evidence, not proof. Treat it as one strong signal among several, and say so when you write it up.
+
 ### Part 5 — The five failures that cause most cloud incidents
 
 #### Failure 1 — The public storage bucket
@@ -750,6 +796,72 @@ This is the one place in this phase where you can lose real money, so it needs a
 **Set a budget alarm before you create anything.** In AWS this is under Billing, and it takes about two minutes. A budget of one US dollar with an email alert is enough to catch the mistake that would otherwise cost you a month's income.
 
 The phase is completable on free tiers and on the Microsoft Entra free tenant. It is not completable if you leave an instance running for three weeks while you do other work.
+
+#### The setup ladder: five rungs, in order
+
+The warning above tells you what can go wrong with cost. It does not tell you what to do when your account will not provision at all, and that is the more common beginner problem.
+
+Work these five rungs **in order**, and do not climb past a rung that is failing. Each one is cheap and takes minutes. Fixing a rung you already passed is far easier than diagnosing a compound failure later.
+
+**Rung 1 — The account or tenant exists and you can sign in.**
+
+*Healthy:* you sign in at the provider's own console with the credentials you just created, from a browser that is not signed in to any other account. The landing page shows your account identifier.
+
+| Common failure | What it looks like | What to check |
+|---|---|---|
+| You are signed in to the wrong account | The console loads, but the tenant or account name is not yours | Sign out fully, or use a private window. A personal Microsoft account and a work tenant look similar in the URL bar |
+| The card verification did not complete | AWS holds the account in a pending state and some services are refused | Check the email for a verification step you skipped; AWS free tier needs a card even when nothing is charged |
+| The tenant was created under the wrong domain | Your intended name is taken, so the provider appended a suffix | Read the full `.onmicrosoft.com` or account alias, and record it |
+| Email delivery silently failed | You never received the confirmation, so the account is unverified | Check spam, and try a different address rather than re-registering repeatedly |
+
+**Rung 2 — A budget alarm or spending limit is active, and you have seen it fire.**
+
+*Healthy:* the budget exists, it names a small amount, it has an email recipient, and you have deliberately confirmed the alert reaches you. In AWS that is a Budget under Billing with an alert threshold. In Azure it is a Cost Management budget on the subscription.
+
+| Common failure | What it looks like | What to check |
+|---|---|---|
+| The budget exists but has no notification | The alarm never fires because nobody is told | Open the budget and read the alert recipients, do not assume the default |
+| The threshold is set to zero dollars | Free-tier usage trips it constantly, so you learn to ignore it | One or two US dollars catches a mistake without crying wolf |
+| The alert goes to an address you do not read | The mail arrives somewhere you never look | Use your primary address, and send yourself a test notification |
+| You created resources before the budget | The order was wrong, so an early mistake is unmonitored | Set the budget now, and delete anything already running |
+
+**Do not climb to rung 3 until rung 2 is done.** The warning earlier in this part exists because this is the rung beginners skip, and it is the only rung where skipping costs money.
+
+**Rung 3 — One identity that is denied everything by default, and you can prove it is denied.**
+
+*Healthy:* you have an IAM user or a role with **no** policy attached, and an explicit attempt to use it fails with a denial. That failure is the success condition.
+
+| Common failure | What it looks like | What to check |
+|---|---|---|
+| The identity inherits permissions | The denial never happens, because a group or an account-level policy grants access | Check group membership and any attached managed policies. A new user with no groups should be denied everything |
+| You tested with the root or global admin | Everything succeeds, so the test proves nothing | Test with the new identity's own credentials, in its own session |
+| The denial came from a typo, not a policy | You get an error, but it is an authentication failure rather than an authorisation one | Read the error code. `AccessDenied` is the one you want; a credential error is a different problem |
+| The identity has a wildcard policy "for now" | It works, and it will still be there in six months | Remove it now. A temporary permission is a permanent permission |
+
+Capture the denial output. In this phase that output is evidence, and Part 7 asks you to re-run checks and paste results.
+
+**Rung 4 — CloudTrail or Activity Log records your own API call.**
+
+*Healthy:* you make one deliberate, harmless call — read your own identity, or list the trail itself — then find that exact event in the log, with the right time, identity, and source address. You have now watched logging work rather than assuming it.
+
+| Common failure | What it looks like | What to check |
+|---|---|---|
+| The trail exists but is not logging | The configuration page looks right and no events arrive | Check the trail status, and the specific region you are calling from |
+| You are looking in a different region | The call happened in one region and you are reading another | CloudTrail is per-region for most services; switch the console region or query the event history |
+| You waited too little | Recent events take a few minutes to appear | Wait, then refresh. This is not a failure yet |
+| The event is there and you cannot read it | The JSON is present but the fields are unfamiliar | Go back to the six fields in Part 4 and find each one in your own event |
+
+**Rung 5 — Only now build anything.**
+
+Everything after this rung is the phase's actual lab work: the bucket, the policies, the detections, the finding. You climb to it with a working account, a spending guard, a proven denial, and proven logging.
+
+| Why the order matters | What breaks without it |
+|---|---|
+| Cost safety first | A runaway resource with no alarm is the one way this phase costs real money |
+| Denial before permission | You cannot recognise over-permission until you have seen correct denial |
+| Logging before detection | A detection you cannot verify is a rule you are guessing at |
+
+**When the ladder itself will not start:** if rung 1 fails repeatedly, stop and use a provider sandbox instead. Microsoft Learn sandboxes and AWS workshops give you a live environment for a fixed session at no cost, and Part 8 lists them. A beginner who spends a week fighting account provisioning has learned nothing about cloud security. **You may only work in accounts you own or have written authorisation for**, and a sandbox you were granted access to counts as authorised.
 
 ### Part 7 — Writing a cloud finding
 
@@ -923,6 +1035,21 @@ Cloud labs are easiest to build with sample data, and beginners sometimes use re
 | Licensed software or keys | Licence breach independent of security |
 
 Use generated data. If you need something that looks realistic, generate names from a list, or use a public sample dataset. There is no shortage.
+
+#### What you still cannot do after this phase
+
+Be precise about this, because overclaiming is the fastest way to lose an interview.
+
+You can now read a CloudTrail event and tell whether it is routine or worth chasing, and you can write a finding about a misconfigured resource with evidence and a remediation. You **cannot** yet design an IAM permission boundary across an organisation and put it under change control, and you have not run a cloud incident — you have reconstructed one from an example, which is not the same thing.
+
+| You can | You cannot yet |
+|---|---|
+| Read one identity's activity and explain it | Design a multi-account permission model with boundaries and guardrails |
+| Write a scoped policy for one task | Migrate a running workload onto a least-privilege role without breaking it |
+| Recognise the five common misconfigurations | Run an organisation-wide posture programme with exceptions and tracking |
+| Reconstruct a sequence from logs you generated | Respond to a live cloud incident with a real business clock running |
+
+**Say it that way in an interview.** “I have read CloudTrail and written findings against my own lab; I have not operated a cloud environment under change control” is a stronger answer than a vague claim of cloud experience.
 
 ### Key takeaways
 

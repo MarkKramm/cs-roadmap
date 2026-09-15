@@ -11,7 +11,7 @@ import { renderInline } from "../lib/renderInline.jsx";
 
 const REPO = "https://github.com/MarkKramm/cs-roadmap/blob/main/";
 
-export default function PhaseDetail({ phase, done, onToggle, onBack }) {
+export default function PhaseDetail({ phase, done, onToggle, onBack, anchorRef }) {
   const doneCount = countDone(done, phase.checklist);
 
   // The lesson is the substance of the phase; everything else is scaffolding
@@ -64,6 +64,7 @@ export default function PhaseDetail({ phase, done, onToggle, onBack }) {
           title={lesson.title || phase.lessonTitle || "Lesson"}
           blocks={lesson.blocks || []}
           toc={lesson.toc || []}
+          anchorRef={anchorRef}
         />
       )}
 

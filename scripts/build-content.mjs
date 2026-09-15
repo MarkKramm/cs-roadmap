@@ -7,6 +7,7 @@ import { readFileSync, writeFileSync, readdirSync, statSync, mkdirSync } from "n
 import { join, relative, dirname, basename } from "node:path";
 import { fileURLToPath } from "node:url";
 import { parseLesson } from "./lesson-ast.mjs";
+import { buildSearchIndex } from "./search-index.mjs";
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
 const CONTENT = join(ROOT, "career-roadmaps");
@@ -311,6 +312,8 @@ mkdirSync(join(OUT, "lessons"), { recursive: true });
 const stamp = new Date().toISOString();
 let totalIds = 0;
 let totalLessonBytes = 0;
+// Collected across both tracks, then emitted as one search index after the loop.
+const searchInput = [];
 
 for (const track of Object.keys(byTrack)) {
   const phases = byTrack[track].sort((a, b) => a.order - b.order);
@@ -332,6 +335,14 @@ for (const track of Object.keys(byTrack)) {
     totalLessonBytes += Buffer.byteLength(text, "utf8");
     writeFileSync(join(OUT, rel), text + "\n", "utf8");
 
+    searchInput.push({
+      id: p.id,
+      track,
+      phaseTitle: p.title,
+      title: p.lessonTitle,
+      blocks,
+    });
+
     // The phase record keeps the path and a couple of cheap facts the dashboard
     // can use without loading the lesson.
     p.lessonPath = rel;
@@ -351,8 +362,22 @@ for (const track of Object.keys(byTrack)) {
   console.log(track + ".json — phases=" + phases.length + " taskIds=" + ids);
 }
 
+// One search index for the whole curriculum, emitted after both tracks so a
+// query can cross from IT into cyber. It holds term -> segment-id postings and
+// no prose; the site fetches it once, on the reader's first search, and renders
+// snippets from the lesson file it already has. See scripts/search-index.mjs
+// for the measurements behind that decision.
+const search = buildSearchIndex(searchInput);
+const searchText = JSON.stringify(search) + "\n";
+writeFileSync(join(OUT, "search.json"), searchText, "utf8");
+const searchBytes = Buffer.byteLength(searchText, "utf8");
+const termCount = search.terms ? search.terms.split("\n").length : 0;
+
 console.log("");
 console.log("wrote " + Object.keys(byTrack).length + " index files to " + relative(ROOT, OUT).replace(/\\/g, "/"));
 console.log("wrote " + (byTrack.it.length + byTrack.cyber.length) + " lesson files (" +
   Math.round(totalLessonBytes / 1024) + " KB) to " + relative(ROOT, join(OUT, "lessons")).replace(/\\/g, "/"));
+console.log("wrote search.json — " + search.segments.length + " segments, " +
+  termCount + " terms (" + Math.round(searchBytes / 1024) + " KB, " +
+  Math.round((searchBytes / totalLessonBytes) * 100) + "% of lesson bytes)");
 console.log("total phase task IDs: " + totalIds);

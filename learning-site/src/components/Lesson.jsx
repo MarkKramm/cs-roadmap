@@ -8,9 +8,25 @@ import { useEffect, useRef, useState } from "react";
 import LessonBlock from "./LessonBlock.jsx";
 import { renderInline } from "../lib/renderInline.jsx";
 
-export default function Lesson({ title, blocks, toc }) {
+export default function Lesson({ title, blocks, toc, anchorRef }) {
   const [activeId, setActiveId] = useState(toc.length ? toc[0].id : null);
   const bodyRef = useRef(null);
+
+  // A search result opens a phase with a specific heading in mind. Scroll there
+  // once the blocks have rendered, then clear the ref so a later navigation does
+  // not jump again. Uses an instant scroll because the reader is arriving, not
+  // moving within a page they are already reading.
+  useEffect(() => {
+    if (!anchorRef || !anchorRef.current) return;
+    const id = anchorRef.current;
+    anchorRef.current = "";
+    if (!id) return;
+    const el = document.getElementById(id);
+    if (el) {
+      el.scrollIntoView({ block: "start" });
+      setActiveId(id);
+    }
+  }, [anchorRef, blocks]);
 
   // Track which heading is currently on screen. Observing the headings rather
   // than scroll offsets keeps this correct when images or tables change height.

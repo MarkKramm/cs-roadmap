@@ -11,11 +11,13 @@ import PhaseDetail from "./pages/PhaseDetail.jsx";
 import ToolsLibrary from "./pages/ToolsLibrary.jsx";
 import Portfolio from "./pages/Portfolio.jsx";
 import Applications from "./pages/Applications.jsx";
+import Search from "./pages/Search.jsx";
 
 // Every destination the sidebar can reach. Adding a page means adding an entry
 // here and a branch in the content switch below.
 const VIEWS = [
   { id: "dashboard", label: "Dashboard" },
+  { id: "search", label: "Search" },
   { id: "tools", label: "Tools" },
   { id: "portfolio", label: "Portfolio" },
   { id: "applications", label: "Applications" },
@@ -32,6 +34,8 @@ export default function App() {
   const { mode, change: changeMode } = useEnergyMode();
   const mainRef = useRef(null);
   const activePhaseRef = useRef(null);
+  // Set when a search result is opened, read once by the lesson renderer.
+  const pendingAnchor = useRef("");
 
   const track = findTrack(trackId);
   const activePhase = openPhaseId
@@ -40,7 +44,11 @@ export default function App() {
 
   // Opening a phase keeps whatever scroll position the dashboard was at, which
   // lands the reader in the middle of a lesson. Reset on every view change.
+  // A search result carries an anchor and scrolls there instead, so skip the
+  // reset in that case — otherwise the two effects fight and the reader lands
+  // at the top of the lesson rather than at the matched heading.
   useEffect(() => {
+    if (pendingAnchor.current) return;
     window.scrollTo(0, 0);
   }, [view, openPhaseId, trackId]);
 
@@ -89,6 +97,17 @@ export default function App() {
     setOpenPhaseId(null);
     setView(target);
     setNavOpen(false);
+  }
+
+  // A search result can live in the other track, so this switches track as well
+  // as opening the phase. The heading anchor is handed to PhaseDetail, which
+  // scrolls to it once the lesson has rendered.
+  function openSearchResult(hit) {
+    setTrackId(hit.k);
+    setOpenPhaseId(hit.p);
+    setView("phase");
+    setNavOpen(false);
+    pendingAnchor.current = hit.a || "";
   }
 
   return (
@@ -214,7 +233,10 @@ export default function App() {
             done={done}
             onToggle={toggle}
             onBack={goBack}
+            anchorRef={pendingAnchor}
           />
+        ) : view === "search" ? (
+          <Search onOpenResult={openSearchResult} />
         ) : view === "tools" ? (
           <ToolsLibrary onOpenPhase={openPhase} />
         ) : view === "portfolio" ? (

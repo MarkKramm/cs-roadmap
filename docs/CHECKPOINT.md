@@ -7,21 +7,23 @@ A snapshot of the repository's current state. Update this when a meaningful mile
 | Item | Value |
 |---|---|
 | Branch | `main` |
-| Tracked files | 102 |
+| Tracked files | 106 |
 | Working tree | Clean — nothing uncommitted, nothing untracked |
-| Unpushed | None. `main` and `origin/main` are both at `b980d11` |
+| Unpushed | None. `main` and `origin/main` are both at `f4ba4d1` |
 | Line endings | LF everywhere (Windows scripts excepted) |
 | Encoding | UTF-8, no BOM |
 | Remote | `origin` → https://github.com/MarkKramm/cs-roadmap |
 | Visibility | **Public** — `"private": false` via the GitHub API. It was made public for Pages (D-009); the history was audited for secrets before that. This corrects an earlier entry in this file that still said private |
-| Deploy | **Live.** `.github/workflows/deploy-pages.yml` publishes `learning-site/dist` to <https://markkramm.github.io/cs-roadmap/>. Latest deployment `9629c89`, status `success`. Builds with `VITE_BASE=/cs-roadmap/` because a project site is served from a subdirectory, and verifies the emitted HTML so an unprefixed build fails rather than deploying a blank page |
+| Deploy | **Live.** `.github/workflows/deploy-pages.yml` publishes `learning-site/dist` to <https://markkramm.github.io/cs-roadmap/>. Builds with `VITE_BASE=/cs-roadmap/` because a project site is served from a subdirectory, and verifies the emitted HTML so an unprefixed build fails rather than deploying a blank page |
 | License | CC BY 4.0 |
 | Build step | `learning-site/` — React + Vite. `npm run dev` / `npm run build` |
-| Checks | `lint-content` 102 files / 0 issues; `audit-content` 0 issues across 23 phases; `audit-lesson-ast` 23 lessons / 0 loss; `audit-readability` 0 of 23 outside target; `test:smoke` 84 renders / 0 failures; production build clean |
+| Checks | `lint-content` 106 files / 0 issues; `audit-content` 0 issues across 23 phases; `audit-lesson-ast` 23 lessons / 0 loss; `audit-readability` 0 of 23 outside target and **0 paragraphs over 90 words**; `test:smoke` 85 renders / 0 failures; `test:search` 41 checks / pass; production build clean |
 | Task IDs | 228 total (IT 66, cyber 162) |
-| CI | `.github/workflows/ci.yml` — two jobs on push to `main` and on PRs (D-008). Last verified green: `9629c89` |
+| CI | `.github/workflows/ci.yml` — two jobs on push to `main` and on PRs (D-008) |
 | Milestone | M3 complete — the site renders the lessons themselves, not just the structured sections |
+| Search | Full-text across all 23 lessons, both tracks (D-013). A build-time inverted index (term → segment id, **no prose**) emitted as `generated/search.json` — 471 KB raw, 180 KB as a delivered chunk, and **not referenced by `index.html`**, so a reader who never searches pays nothing and the main bundle stays at 105 KB gzipped. Results deep-link across tracks to the matching heading. Three silent-failure bugs were found by testing the index against the engine and are now guarded by `test:search` |
 | Content depth | **Both tracks complete and uniformly deep.** All 23 phases carry `## Lesson` sections, and **all 23 are inside every readability target**. Cyber runs 7,563–12,177 lesson words across 14 phases; IT runs 5,567–23,657 across 9 |
+| Paragraph density | **Zero paragraphs over 90 words anywhere in the repository.** The readability audit now counts per-paragraph density and fails the build on anything over 150 words; the previous per-phase *average* could not see a single 190-word wall among twenty short paragraphs, which is how 33 of them accumulated in the IT track. All 33 were split at natural seams with every word preserved — proved by `git diff --word-diff`, where inserting a blank line is invisible and four of the five files therefore report 0/0 tokens |
 | Cyber depth track | Six new modules added as Phases 9–14, because the core path lists cloud, detection, IR, scripting, GRC and web security as target roles but taught none of them: cloud and identity, detection engineering, incident response and DFIR, scripting and automation, GRC and compliance, and web application security. All $0, all with explicit legal-boundary sections |
 | Cyber rebalance | Phases 4, 5 and 6 were the thinnest lessons in the track (4,788 / 5,200 / 5,828) and are now level with the rest (9,045 / 9,329 / 9,311). Phase 4 gained a full lab build, a twelve-row troubleshooting table, evidence capture and malware isolation; Phase 5 a weighted decision matrix and the first 90 days of each path; Phase 6 a fourth project, an annotated weak-versus-strong report, and interview follow-ups |
 | Lesson rendering | The site parses each lesson into a block AST at build time (`scripts/lesson-ast.mjs`) and renders it with a table of contents and scroll-spy (D-011). Lessons ship as per-phase files loaded on demand, which took the initial bundle from 1.96 MB back to 355 KB (D-012). Two guards protect the path, since a parser bug deletes content rather than crashing: `audit-lesson-ast.mjs` and the lesson assertions in `test:smoke` |
@@ -102,14 +104,17 @@ Read this first.
 
 ### Closed in this pass
 
+- [x] **Split every dense paragraph, and gated the audit so they stay split.** 33 paragraphs over 90 words → **0**. The old gate measured a per-phase *average*, which a single wall of text does not move.
 - [x] **Audited modules 09–14.** Structurally sound, no restructuring needed, but **five real technical errors** found and fixed that no automated check could catch: a reversed auditd privilege claim, a silently-wrong AWS version-id assumption, a `Get-ScheduledTask` `.Date` string-comparison trap, a retired `sigmac` reference, and a misleading Sysmon filename. Full detail in [`ROADMAP.md`](ROADMAP.md).
 - [x] **Assessed the IT track's later phases. Finding: no depth pass is needed.** Phases 6–9 are 6,457–6,992 words across 8–10 substantial Parts — complete lessons, not stubs — and the depth signature (guided walkthrough or worked case) is already present in Phases 2–5 and 8. Phase 1's 24,723 words is the outlier in the other direction and is not a template. The real IT-track defect is **paragraph density, not depth**.
+- [x] **Wrote the five module-review follow-ups.** A worked "wrong first guess" and a five-rung setup diagnostic ladder in module 09, a reversed wrong-automation case in module 12, a worked risk-scoring disagreement in module 13, and a residual-incompetence statement in all six modules — each naming a real limitation rather than a humble generality. 366 lines added, nothing deleted.
+- [x] **Added full-text search.** See the Search row above and D-013.
 - [x] **Confirmed the site is deployed.** It was already live — see the Deploy row above. No new hosting was needed.
 
-### Dense paragraphs, current state
+### Paragraph density, current state
 
-- **28 paragraphs over 90 words, all in the IT track**: Phase 1 (11), Phase 3 (6), Phase 5 (5), Phase 4 (4), Phase 6 (2). **The cyber track is clean — 0 over 90.** Split them without cutting a word; the gate exists so this cannot regrow.
-- The 193-word paragraph in Phase 1 has been split, which is what turned the hard gate from failing to passing.
+- **Zero paragraphs over 90 words, in either track.** The gate fails the build on anything over 150 and the audit reports any over 90, so this cannot regrow silently.
+- Raising the 90-word reporting threshold into a hard gate is the next tightening step, now that the backlog it was waiting on is cleared.
 
 ## How to verify quickly
 
@@ -129,6 +134,7 @@ node scripts/cyber-restructure-check.mjs # no cyber phase shrank
 cd learning-site
 npm run build                            # production build
 npm run test:smoke                       # render every phase with real data
+npm run test:search                      # index and query engine agree
 ```
 
-Expected results: lint `102 files, 0 issues`; content audit `0 issues`; lesson AST `all 23 lessons, no content loss`; readability `0 of 23` outside target; preservation `OK`; smoke `84 renders across 23 phases and 191 tools, 0 failures`.
+Expected results: lint `106 files, 0 issues`; content audit `0 issues`; lesson AST `all 23 lessons, no content loss`; readability `0 of 23` outside target and `0 paragraphs over 90 words`; preservation `OK`; smoke `85 renders across 23 phases and 191 tools, 0 failures`; search `41 checks, pass`.

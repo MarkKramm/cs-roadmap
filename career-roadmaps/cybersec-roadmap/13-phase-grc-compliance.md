@@ -362,6 +362,76 @@ Read those five and notice what makes the register useful.
 
 That observation — noticing that a register entry has a problem — is exactly the kind of thing an interviewer asks about.
 
+#### Worked example: two analysts, one risk, two honest scores
+
+The module says to record a disagreement rather than average it away. That instruction is easy to agree with and hard to *see*, so here is the actual table.
+
+The risk is the same one from R-01 above, scored by two people in the Thursday workshop. Both are competent. Both use the published scale from earlier in this part. They land four points apart.
+
+| Field | Analyst A scores | Analyst B scores |
+|---|---|---|
+| **Likelihood** | Almost certain (5) | Possible (3) |
+| **Impact** | Major (4) | Major (4) |
+| **Score** | **20 — Critical** | **12 — High** |
+| **Stated reasoning** | “Staff already access the portal from personal devices today. This is not a hypothetical — the risky behaviour is the current operating state, and MFA on the portal is the only thing standing between a compromised device and customer records” | “MFA is enforced on every account that can reach the portal. A compromised device still needs a valid second factor, and no comparable organisation has reported a breach through this path. Possible is defined as ‘could happen given a single control failure,’ and that is exactly the position” |
+
+**Both readings are defensible, and neither is a mistake.** That is the point of the example.
+
+The disagreement is not about the facts. Both analysts agree on the controls, the data, and the threat. It is about **which control failure the likelihood definition is counting**, and the published scale does not settle it.
+
+| What they actually disagree about | Analyst A's position | Analyst B's position |
+|---|---|---|
+| Which single control failure counts | Device compromise alone is enough — MFA is on the *account*, not the device | MFA must also fail, so one control failure is insufficient |
+| Whether current behaviour is “happening now” | The risky access pattern is already the operating state | The *risk event* has not occurred, only the exposure |
+| What “comparable organisations” means | Sector breach reports understate this path because it is rarely attributed | No reported case in the sector is the evidence the definition asks for |
+
+**Averaging would produce 16 — Critical**, which is the wrong number twice over.
+
+| Why the average destroys the information | Concretely |
+|---|---|
+| It invents a score nobody holds | Neither analyst believes 16. The register would record a number that is no one's judgement |
+| It hides the disagreement | The reader sees a tidy Critical and never learns that the scale is ambiguous here |
+| It removes the decision | The gap between the two readings is the finding. Averaging answers the question instead of escalating it |
+| It launders the unresolved point | The definition of “possible” versus “almost certain” stays ambiguous for the next risk, and the next |
+
+The honest entry records both scores, the reasoning, and the resolution — **the accountable owner decides, and the deciding reason is written down.**
+
+| Register field | Recorded value |
+|---|---|
+| **Risk ID** | R-01 |
+| **Risk statement** | Because staff access the client portal from personal devices without device management, there is a risk that a compromised personal device accesses customer records, resulting in a reportable data breach |
+| **Existing controls** | MFA enforced on the portal; no device management; no conditional access (free tenant limitation) |
+| **Scored by** | Analyst A — 20 Critical (L5 × I4); Analyst B — 12 High (L3 × I4) |
+| **Likelihood rationale (A)** | Risky access is the current operating state, so the precondition is present, not hypothetical |
+| **Likelihood rationale (B)** | MFA must also fail before the event occurs, which is a second control, so “possible” rather than “almost certain” |
+| **Unresolved question** | Whether the likelihood scale counts one control failure or the full chain |
+| **Resolution** | Owner scored at the **higher** value for treatment prioritisation, because the cost of treating a High that turns out to be Medium is lower than the cost of under-treating a Critical. Recorded as a decision, not as agreement |
+| **Residual score used** | 16 Critical, with the range 12–20 stated in the register |
+| **Scale defect raised** | A wording note against the likelihood definitions, to be resolved at the next review so the next risk does not repeat the argument |
+| **Treatment** | Mitigate — conditional access requiring a managed device, or an equivalent compensating control |
+| **Owner** | IT Manager |
+| **Target date** | Q2 |
+| **Review date** | Quarterly, and immediately if the scale wording changes |
+
+Read the last three rows of that block together, because they are what makes it a register entry rather than a transcript.
+
+| Field | What it does for the reader |
+|---|---|
+| Residual score **with the range** | A decision-maker sees both the number to plan against and the uncertainty behind it |
+| **Scale defect raised** | The disagreement produces a fix to the instrument, not just a note in a file |
+| The resolution stated as **a decision, not agreement** | Nobody is claiming the two analysts converged. They did not |
+
+**The general rule this illustrates:** when a disagreement is about the *instrument* rather than the *evidence*, record the disagreement and fix the instrument. When it is about the evidence, record the disagreement and go and get more of it. Averaging is never the answer, because it converts a question into a number.
+
+| Disagreement is about | What to do | What not to do |
+|---|---|---|
+| The scale's wording | Score both, record both, raise the wording defect | Reword the scale mid-workshop to force agreement |
+| The evidence | Record both, and name the evidence that would settle it | Split the difference and move on |
+| The controls in place | Record both, and test the control | Assume the control works because it is documented |
+| Genuine uncertainty about impact | Record the range, and involve the accountable owner | Pick the middle value for tidiness |
+
+**One more thing worth noticing.** In this example, impact was the agreed dimension and likelihood was the contested one. That is the usual pattern. Impact is about consequences, which people can picture. Likelihood is about a definition of probability, which people interpret differently until the scale is written precisely enough to settle it.
+
 ### Part 3 — The frameworks, described honestly
 
 #### What a framework is, and is not
@@ -1044,6 +1114,22 @@ The solution is to build the artefacts for a **scenario you invent**, at a reali
 | "Have you written a policy?" | Show the invented-company policy, and explain the exception process and why it exists |
 
 **The sixth answer is the one that gets people hired in GRC.** It demonstrates that you understand the integrity requirement of the role, and that you have thought about what you would do when it is tested.
+
+#### What you still cannot do after this phase
+
+The artefacts in this phase are real, and the boundaries of them are worth stating before an interviewer finds them.
+
+You can now write a scorable risk statement, build a register with an honest spread, and map a control to a framework. You **cannot** yet run a risk assessment with the business — you have scored risks you invented, not facilitated a workshop where the disagreement has a budget attached. You have also never been through an external audit, so you know what evidence an auditor asks for but not what it feels like when the evidence is not there.
+
+| You can | You cannot yet |
+|---|---|
+| Write a risk statement a manager can decide on | Facilitate a scoring workshop and defend a number to a sceptical owner |
+| Map one control to two frameworks | Build an ISO 27001 Statement of Applicability with justified exclusions |
+| Draft a policy with an exception process | Get a policy through a real approval chain and survive its first exception |
+| List the evidence an auditor would request | Operate a control through an audit cycle and answer a finding in person |
+| Know the Data Privacy Act exists and route the decision | Assess a real breach notification against the specific legal test |
+
+**Say it this way:** “I have built a full GRC artefact set for an invented company — register, control matrix, policy, vendor assessment — and I can talk through every judgement in it. The part I have not done is the part with other people in the room.” The artefacts then do the rest of the work, because they are checkable.
 
 ### Key takeaways
 

@@ -95,7 +95,8 @@ The roadmap for the **repository itself** (for the study curriculum, see [`../ca
 
 ## Next
 
-- [ ] **Write the five module-review follow-ups.** Scoped and specific — see "Follow-ups from the module review" below. These are the closest thing to known, identified gaps in the curriculum right now.
+- [ ] **Consider tightening the paragraph-density gate from 150 to 90 words.** Every phase now reports zero paragraphs over 90, so the backlog this was waiting on is cleared and the reporting threshold can become a hard gate.
+- [ ] **Review the six modules again for beginner comprehension**, now that the first review's findings have been written. The follow-ups below are closed; the remaining question is different and harder — *where would a beginner abandon this?* rather than *what is structurally wrong?* No automated check can answer it, and every guard in this repository tests internal consistency rather than whether the material is followable.
 - [x] **Audit the six new modules against the depth standard.** Reviewed all six against the standard set by cyber Phases 2 and 7. Verdict: **structurally sound, teaching quality high, no restructuring needed.** All passed clean on every structural check — no stranded content after the closing sections, no duplicate or gapped Part numbers, no misparented `####`, no glued headings, all ten required sections present, six-column Tools tables with a valid Free alternative on every paid row, well-formed resource bullets and checklist lines, and every internal cross-reference resolving.
   - **Five real technical errors found and fixed** — the class automated checks cannot catch:
     - **Detection Engineering:** an auditd rule comment claimed "privileged user" above `-F auid>=1000`, but `auid` is the *login* uid and root is 0, so the rule did the opposite of what the text said. The correction also documents that `auid` survives `sudo`, so the rule does not isolate privileged execution on its own. Verified against the `auditctl(8)` man page, which defines `auid` as "the original ID the user logged in with".
@@ -113,20 +114,20 @@ The roadmap for the **repository itself** (for the study curriculum, see [`../ca
   - **The measured defect in the IT track is paragraph density, not depth** — see the separate open item. That is where the editorial effort belongs.
   - Method note: the first two attempts at this assessment used keyword matching to detect "worked examples" and produced two wrong answers before reading the files settled it. Phase 5's *Guided walkthrough* and *Two worked tickets* were missed because a table column was misread, and Phase 7's weak-versus-strong pairs were missed because they are not labelled as worked cases. **For a question like this, read the phase.**
 
-## Follow-ups from the module review
+## Follow-ups from the module review — all written
 
-Small, specific, and scoped — each closes a gap the review identified but deliberately did not fill.
+The review identified five gaps and deliberately did not fill them, to keep the audit an audit. All five are now written: 366 lines added across the six modules, nothing deleted.
 
-- [ ] **Module 09: add a worked "wrong first guess".** The incident reconstruction in Part 4 presents a tidy, already-correct sequence. Cyber Phase 02 shows a misread (spraying read as brute force) and then corrects it, which is what teaches the reader to doubt their own first reading. Add that shape to the CloudTrail example.
-- [ ] **Module 09: add a free-tier setup diagnostic ladder.** The file warns about the cost trap but gives no ordered checks for a beginner whose tenant or account fails to provision. Account created → budget alarm confirmed → IAM user denied-everything verified → CloudTrail shows your own API call.
-- [ ] **Module 12: add a reversed-wrong-automation case.** The "what not to automate" tables are strong but every example is stated as settled. A case where a script silently closes a real alert, and the reasoning that removes it, would land harder.
-- [ ] **Module 13: add a worked risk-scoring disagreement.** The file says "everything rated medium" is the failure and describes recording a disagreement without averaging it away, but never shows the table.
-- [ ] **All six modules: add an end-of-phase residual-incompetence statement.** Each states what is out of scope; none states what the reader still cannot do. "You can now read a CloudTrail event, but you cannot yet design an IAM permission boundary under change control."
+- [x] **Module 09: a worked "wrong first guess".** The analyst reads 214 `GetObject` calls from a second address as a *separate actor*, with four stated reasons that reading was reasonable, then overturns it on two details — a byte-identical `userAgent`, and a 4m21s gap with no discovery delay, meaning the bucket was opened *expecting* to harvest rather than found. Includes what CloudTrail still cannot settle, and a caution that `userAgent` is attacker-controlled.
+- [x] **Module 09: a free-tier setup diagnostic ladder.** Five rungs in dependency order — account sign-in, budget alarm, deny-by-default identity with the denial captured as evidence, logging that shows your own API call, and only then building anything — each with a healthy state and its common failure. Explicitly gated so the reader cannot skip the budget alarm.
+- [x] **Module 12: a reversed wrong-automation case.** Shows the actual auto-close script, the genuine alert it silently closed (a timestomped binary in an approved path, reusing Phase 11), a "what it assumed versus reality" table, and the correction to annotate-and-route. The reframe is the point: the script answered *"does this look like the pattern?"* instead of *"if I am wrong, will anyone find out?"*
+- [x] **Module 13: a worked risk-scoring disagreement.** Reuses the module's own R-01 and its published 1–5 scale: one analyst scores 20 Critical, another 12 High. Shows why averaging to 16 destroys the information, then a full defensible register entry that records the resolution **as a decision rather than agreement**, states residual risk as a range, and turns a scale argument into an instrument fix.
+- [x] **All six modules: an end-of-phase residual-incompetence statement.** Each names a real limitation — you can read a CloudTrail event but cannot yet design an IAM permission boundary under change control; you can write Sigma rules but have never tuned against production volume — plus a sentence the reader can actually say in an interview, including what they *have* done.
 
 ## Later / optional
 
-- [ ] Full-text search across lessons, if the curriculum outgrows the sidebar and per-phase navigation.
 - [ ] Print stylesheet for a lesson, so a phase can be taken offline on paper.
+- [ ] Keyboard shortcut to focus search, and query highlighting inside the snippet.
 
 ## Explicitly out of scope
 
