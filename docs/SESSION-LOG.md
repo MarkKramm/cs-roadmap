@@ -2,6 +2,40 @@
 
 A chronological record of working sessions. Newest first.
 
+## 2026-09-15 (later) — Four roadmap items: a density gate, a module review, an assessment, and a correction
+
+**Goal:** Work the four-item queue from the previous checkpoint — harden the readability audit and split the dense paragraphs, review the six new cyber modules, assess whether the IT track's later phases need the Phase 1 treatment, and deploy the site.
+
+**The user caught a real error before I did.** Asked what to do next, I proposed deploying the site to a free host because the repository was private. The user pushed back: *"isn't our web already hosted on github?"* It was. The GitHub API showed `"private": false`, `"has_pages": true`, and successful `Deploy to GitHub Pages` runs for every recent commit. The site had been live at <https://markkramm.github.io/cs-roadmap/> the whole time, and `docs/CHECKPOINT.md` still claimed the repo was private and unreachable. I had repeated a stale doc instead of checking. **One API call would have settled it.**
+
+**The audit gate found 33 paragraphs that the average had hidden.** `audit-readability.mjs` gated on a per-phase *average*, so a single 193-word wall passed unnoticed among twenty short paragraphs — and it already computed `longest para` without failing on it. Added per-paragraph counts gating at 150 words. The first run found 33 paragraphs over 90 words across five IT files, plus one hard failure.
+
+All 33 are now split, at natural seams, with **every word preserved**. The verification is the interesting part: inserting a blank line is invisible to `git diff --word-diff`, so four of the five files reported `0 removed / 0 added` tokens — which is the *proof* of word-neutrality, not a failure to measure. Phase 1 reported 214/214 from the paragraphs I split by hand.
+
+One reconciliation worth recording: my commit message said Phase 1 had 16 dense paragraphs and a subagent counted 11. Both were right — **16** at the commit before any work, **11** after I hand-split four of them. Checked against git history rather than argued.
+
+**Five real technical errors in modules 09–14, found only by reading.** Structural checks were clean on all six. What a reviewer caught that no automated check can:
+
+| File | Error | Why it mattered |
+|---|---|---|
+| 10 | auditd comment said "privileged user" above `-F auid>=1000` | `auid` is the *login* uid and root is 0, so the rule does the opposite. Verified against `auditctl(8)`. |
+| 09 | wildcard audit hardcoded `--version-id v1` | Arbitrary for customer-managed policies — silently skipped most and reported a clean account. |
+| 12 | `Get-ScheduledTask` filtered on `.Date` | `.Date` **exists** but is a *string*, so comparing it to a `DateTime` compares lexically. A "last 30 days" filter returned 14 tasks from **2010**, without erroring. |
+| 10 | `sigmac` in the tools table | Retired; the tool is `sigma-cli`. Verified against its repository. |
+| 10 | Sysmon config filename implied canonical | It is only a convention. |
+
+The third one is worth dwelling on: the subagent's *fix* was correct but its *explanation* was wrong — it wrote "Get-ScheduledTask has no creation-date property". Running the command showed the property exists as a string. I corrected the comment to teach the real trap, which is more instructive than the imagined one.
+
+**Two measurement failures of my own, same root cause.** I reported "12 dense paragraphs in cyber modules 10–14" and later a phantom 594-word paragraph. Both were wrong, and both came from the same class of mistake — an inline `node -e` string whose backticks PowerShell mangled, corrupting an escape-sensitive regex so bullet-list lines counted as paragraph prose. A separate instance: `git show HEAD:file > out.md` writes **UTF-16LE** in Windows PowerShell 5.1, which produced a false "3,131 words lost". Every one of these was caught by cross-checking against a second measurement, not by the tool erroring. **Escape-sensitive regexes do not belong in an inline shell string, and a number that contradicts another number is a signal to stop and reconcile.**
+
+**The IT depth assessment changed the plan.** The question assumed the later phases were thin. Reading them showed otherwise: Phases 6–9 are **6,457–6,992 words across 8–10 substantial Parts**, and the depth signature (guided walkthrough or worked case) is already present in Phases 2–5 and 8. Phase 1's 24,723 words is the outlier in the *other* direction and not a template. **No depth pass is warranted.** My first two attempts to measure this by keyword matching gave two wrong answers — one from misreading my own table's column alignment, one because Phase 7 teaches by weak-versus-strong comparison rather than a labelled worked case. Reading the files settled it in minutes.
+
+**Two subagent claims I verified rather than accepted.** The review flagged its own uncertainty about `sigmac` and the `Get-ScheduledTask` property, both unverifiable at the time because web search returned HTTP 401. I confirmed `sigma-cli` from its repository and the `.Date` behaviour by running the command — and the second one **contradicted** the subagent's stated reasoning, so I corrected the file rather than filing the report as-is.
+
+**Final state:** lint 102 files / 0 issues; content audit 0 issues; lesson AST 23 lessons / 0 loss; readability 0 of 23 outside target and **0 paragraphs over 90 words**; preservation OK; smoke 84 renders / 0 failures; CI and Deploy green.
+
+**Lesson taken:** every wrong number this session came from a *measurement* bug, never a content bug. The content was fine; my instruments were not. When a tool reports something surprising, suspect the instrument first, and always confirm with a second method.
+
 ## 2026-09-15 — The site learns to render lessons, the nav stops running away, and the cyber track grows six modules
 
 **Goal:** Three things the user asked for in one pass — show the lessons in the site UI (the content "feels lacking"), add modules where the curriculum had holes, and fix the sidebar, which scrolled away so navigating a long page meant scrolling back to the top.
