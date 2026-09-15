@@ -6,6 +6,7 @@
 import { readFileSync, writeFileSync, readdirSync, statSync, mkdirSync } from "node:fs";
 import { join, relative, dirname, basename } from "node:path";
 import { fileURLToPath } from "node:url";
+import { parseLesson } from "./lesson-ast.mjs";
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
 const CONTENT = join(ROOT, "career-roadmaps");
@@ -23,6 +24,12 @@ const MANDATORY = [
   "You're ready to move on when...",
   "Free vs Paid",
 ];
+
+// The lesson region is where the teaching actually happens: measured across
+// both tracks it is 84–95% of every phase file. `sections()` below only splits
+// on `##`, so the whole `Lesson` section is captured as one blob and parsed
+// separately into blocks by lesson-ast.mjs. See docs/CONTENT-SCHEMA.md.
+const LESSON = "Lesson";
 
 const OPTIONAL = [
   "Specific topics to learn",
@@ -212,6 +219,20 @@ function buildPhase(file) {
 
   const fvp = subsections(sec["Free vs Paid"] || []);
 
+  // The lesson heading is `## Lesson: <Title>`, so find the section key that
+  // starts with "Lesson" rather than assuming an exact title.
+  const lessonKey = Object.keys(sec).find((h) => h.startsWith(LESSON));
+  const lessonTitle = lessonKey ? lessonKey.replace(/^Lesson:\s*/, "") : null;
+  const lesson = lessonKey
+    ? parseLesson(sec[lessonKey].join("\n"))
+    : { blocks: [], toc: [], unknown: [] };
+
+  // An unhandled construct would render as plain text on the site, so fail the
+  // build rather than shipping a page that silently drops meaning.
+  for (const line of lesson.unknown) {
+    fail(rel, "lesson contains an unsupported construct: " + line);
+  }
+
   return {
     id: fm.id,
     track: fm.track,
@@ -248,6 +269,9 @@ function buildPhase(file) {
     tasks: numbered(sec["Hands-on practice tasks"] || []),
     deliverableItems: bullets(sec["Deliverable / proof of work"] || []),
     checklist: parseChecklist(sec["Checklist"] || [], rel),
+    lessonTitle,
+    lessonBlocks: lesson.blocks,
+    lessonToc: lesson.toc,
     exitCriteria: firstPara(sec["You're ready to move on when..."] || []),
     freeVsPaid: {
       freeEnough: textOf(fvp["What's free and enough"] || []),
@@ -283,11 +307,38 @@ if (errors.length) {
 }
 
 mkdirSync(OUT, { recursive: true });
+mkdirSync(join(OUT, "lessons"), { recursive: true });
 const stamp = new Date().toISOString();
 let totalIds = 0;
+let totalLessonBytes = 0;
 
 for (const track of Object.keys(byTrack)) {
   const phases = byTrack[track].sort((a, b) => a.order - b.order);
+
+  // Lesson bodies are the bulk of the content — roughly 2 MB of JSON across both
+  // tracks, against ~50 KB of everything else. Inlining them made the single JS
+  // bundle 1.9 MB and delayed first paint for a page that needs at most one
+  // lesson. They are emitted as one file per phase and imported dynamically by
+  // the site, so a reader downloads only the lesson they open.
+  for (const p of phases) {
+    const blocks = p.lessonBlocks || [];
+    const toc = p.lessonToc || [];
+    delete p.lessonBlocks;
+    delete p.lessonToc;
+
+    const rel = "lessons/" + p.id + ".json";
+    const payload = { id: p.id, title: p.lessonTitle, blocks, toc };
+    const text = JSON.stringify(payload);
+    totalLessonBytes += Buffer.byteLength(text, "utf8");
+    writeFileSync(join(OUT, rel), text + "\n", "utf8");
+
+    // The phase record keeps the path and a couple of cheap facts the dashboard
+    // can use without loading the lesson.
+    p.lessonPath = rel;
+    p.lessonBlockCount = blocks.length;
+    p.lessonHeadingCount = toc.length;
+  }
+
   const payload = {
     track,
     generatedAt: stamp,
@@ -301,5 +352,7 @@ for (const track of Object.keys(byTrack)) {
 }
 
 console.log("");
-console.log("wrote " + Object.keys(byTrack).length + " files to " + relative(ROOT, OUT).replace(/\\/g, "/"));
+console.log("wrote " + Object.keys(byTrack).length + " index files to " + relative(ROOT, OUT).replace(/\\/g, "/"));
+console.log("wrote " + (byTrack.it.length + byTrack.cyber.length) + " lesson files (" +
+  Math.round(totalLessonBytes / 1024) + " KB) to " + relative(ROOT, join(OUT, "lessons")).replace(/\\/g, "/"));
 console.log("total phase task IDs: " + totalIds);

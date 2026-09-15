@@ -296,6 +296,158 @@ Write the Summary and Limitations sections **last**, after everything else
 exists. They are the two sections that require knowing the whole result.
 Writing them first guarantees they are wrong.
 
+#### Worked example: a weak finding versus a strong one
+
+Rules about writing are easy to agree with and hard to apply. Here is the same finding written twice. The first version is what most beginners produce. The second is the same work, documented properly.
+
+**The weak version.**
+
+```text
+## Findings
+
+I analyzed the traffic in Wireshark and found some suspicious activity.
+There were DNS queries to a strange domain and a lot of HTTP traffic.
+I also saw an encoded PowerShell command which is very dangerous and
+indicates a compromise. The system should be patched and users should
+be trained. Overall this shows the importance of security monitoring.
+```
+
+**The strong version.**
+
+```text
+## Finding 2 — Encoded PowerShell execution from a macro-enabled document
+
+Severity: High. Confidence: High for execution; Medium for intent.
+
+**What was observed**
+At 08:14:31 UTC, WINWORD.EXE (PID 4488) spawned powershell.exe (PID 5120)
+on LAB-WIN10 with the argument -EncodedCommand SQBFAFgAKA... The parent
+process had opened a .docm file received from an external sender thirteen
+seconds earlier.
+
+**Evidence**
+- Sysmon Event ID 1, host LAB-WIN10, 08:14:31 UTC — process creation with
+  full command line (evidence/06-sysmon-eid1-encoded-powershell-0814utc.png)
+- Original document retained as evidence/sample-0814-invoice.docm
+- Decoded command: `IEX (New-Object Net.WebClient).DownloadString(...)`
+
+**Why this matters**
+A document reader spawning a command shell is not normal behaviour on any
+system. The decoded command retrieves and executes a remote payload in
+memory, which means the activity would not necessarily leave a file on disk
+for a signature-based tool to find.
+
+**Business impact**
+An attacker with this execution path would run code with the privileges of
+the logged-in user. On this host that account has read access to the shared
+finance directory, so a single opened attachment could expose financial
+records without any further exploitation.
+
+**What I checked next**
+- Outbound connection to 203.0.113.44:443 at 08:14:36 UTC (Sysmon Event ID 3)
+- Whether the payload persisted: no Run key, no scheduled task, no new service
+- Whether the host had been patched against the related Office vector
+
+**Limitations**
+I could not determine whether the remote payload executed successfully,
+because the host had no network capture running and the connection was
+encrypted. I also could not verify the document's original sender, as the
+message headers were outside the scope of this lab.
+```
+
+Now put the two side by side and the differences become teachable.
+
+| Dimension | Weak | Strong | What changed |
+|---|---|---|---|
+| **Specificity** | "a strange domain", "some suspicious activity" | Named process, PID, exact time, full command line | Every claim is now checkable |
+| **Severity** | Implied by "very dangerous" | Stated as High, with confidence separated from severity | A reviewer can disagree with a stated rating; they cannot disagree with an adjective |
+| **Evidence** | None cited | Two artifacts referenced by path, with a caption | The claim traces to something in the repository |
+| **Root cause** | "the system should be patched" | Explained the parent-child anomaly and why it is abnormal | Names the behaviour, not just the outcome |
+| **Impact** | "indicates a compromise" | Explained which account, which data, what an attacker gains | A manager can act on the second |
+| **Next steps** | Absent | Three specific checks, each with a result | Shows method, not just a conclusion |
+| **Limitations** | Absent entirely | Two honest gaps, each explaining why | Reads as an analyst rather than a student |
+
+**The single sentence that explains the difference.** In the weak version you are asked to *believe* the author. In the strong version you are invited to *check* them.
+
+That is the whole distinction, and it is why an annotated finding beats a fluent paragraph every time. A reviewer who can verify your work does not have to trust you on faith — and that is what makes them comfortable hiring you.
+
+**Three habits that produce the strong version automatically:**
+
+1. **Write the evidence reference before the claim.** If you cannot point to an artifact, you cannot make the assertion.
+2. **Separate severity from confidence.** "High severity, medium confidence" is a professional statement. "Critical" alone is an opinion.
+3. **Write the limitation even when it feels like a weakness.** Every real investigation has one, and naming it is what proves you understand the boundary of what you did.
+
+#### Repository presentation: the sixty-second scan
+
+A hiring manager opening your repository is doing something specific and fast. Understanding what they scan for lets you design for it.
+
+Here is what happens in roughly the first minute, in order.
+
+| Seconds | What they look at | What they decide |
+|---:|---|---|
+| 0–5 | The repository name and description | Is this a security portfolio, or a personal scratch folder? |
+| 5–15 | The top-level README, first screen only | What is this person's target role, and is there a project list? |
+| 15–30 | Whether the projects are named and linked | Can I get to the evidence in one click? |
+| 30–45 | One project README's title and Summary | Does this person write clearly about their own work? |
+| 45–60 | Whether there is a Limitations section, and evidence files | Can I trust what they say? |
+
+Six of those decisions are made from the README alone. That is why the top-level README is the file worth rewriting repeatedly.
+
+**What a strong top-level README contains, in order.**
+
+```markdown
+# Cyber Security Portfolio — <Your Name>
+
+Aspiring <target role> with two years of remote IT support experience.
+This repository documents three self-built lab projects with full evidence.
+
+## Projects
+
+| Project | What it demonstrates | Report |
+|---|---|---|
+| Wazuh SIEM lab | Detection engineering and alert investigation | [Read](wazuh-siem-lab/README.md) |
+| Network traffic analysis | Behaviour analysis from packet captures | [Read](network-traffic-analysis/README.md) |
+| Incident report | Timeline reconstruction and response | [Read](incident-report/README.md) |
+
+## Tools used
+Wazuh · Sysmon · Wireshark · VirtualBox · MITRE ATT&CK
+
+## About the evidence
+Everything here was built in an isolated home lab on host-only networking.
+Where work is synthetic, the report says so. Each project lists what I could
+not determine.
+
+## Contact
+<email> · <LinkedIn or site>
+```
+
+Four short sections and a table. Not a life story, and not empty either.
+
+| What a reviewer notices in the first minute | What loses them in the first minute |
+|---|---|
+| A stated target role in the first two lines | No indication of what role you want |
+| A table of projects with one-line descriptions | A wall of prose about your motivation |
+| Links that open the reports directly | Folders the reader has to explore |
+| An explicit statement about lab conditions | An ambiguous claim that invites suspicion |
+| Evidence files visible in each project folder | Only screenshots, with no raw artifacts |
+| A Limitations section in each report | Reports that claim complete success |
+
+#### What hiring managers look for, stated plainly
+
+The sixty-second scan is about getting past the filter. This is about what the technical reviewer concludes once they read properly.
+
+| What they are actually assessing | How they judge it from your repository |
+|---|---|
+| **Can this person investigate methodically?** | Is there a visible order to the work — trigger, evidence, checks, conclusion? |
+| **Do they know what they do not know?** | Is there a Limitations section, and is it specific? |
+| **Can they communicate to a non-technical reader?** | Does the Impact section stand alone without jargon? |
+| **Will they overstate to look good?** | Do the claims match the evidence, including where the evidence is thin? |
+| **Do they finish things?** | Three finished projects, not six half-built folders |
+| **Will they need less training than the average junior?** | Does the report resemble the format their team already uses? |
+| **Are they safe to give production access to?** | Do they state boundaries, and did they stay inside them? |
+
+Notice that **none of these is "do they know a lot"**. Knowledge is assumed to be learnable. What is being assessed is judgement, method, honesty, and follow-through — and all four are visible in how you wrote the report, not in what tools you listed.
+
 ### Part 2 — Building the three projects
 
 #### Project 1 — The Wazuh SIEM lab
@@ -474,11 +626,93 @@ different things.**
 
 Beginners merge them. Reviewers notice.
 
-#### Choosing and scoping your specialization projects
+#### Project 4 — Threat intelligence briefing *(a fourth project option)*
 
-The phase asks for one or two additional projects from your path's list. Choose
-based on your Phase 5 primary, and choose the one where you can produce
-**evidence** — not the one that sounds most impressive.
+The phase's required list is three projects plus one or two specialization projects. This is a **fourth full project** you can substitute for a specialization project, or add as a fifth if you want to demonstrate a skill none of the other three cover.
+
+It is a **threat intelligence briefing**: take a real, currently-reported threat and explain what it means for a specific organisation. It is the one project in this phase that produces a document a non-technical executive would actually read.
+
+**Why it exists as an option.** The three required projects are all retrospective — you investigate something that already happened. A threat intelligence briefing is **prospective**, and it exercises a different set of muscles: reading primary sources critically, assessing relevance, and writing for someone who will make a spending decision from your paragraph.
+
+It also fits every path. For SOC it demonstrates that you can turn intelligence into detection priorities. For GRC it demonstrates risk assessment from external input. For IT Security it demonstrates vulnerability prioritisation against a live threat. For pentest it demonstrates that you understand why a finding matters beyond its CVSS score.
+
+**The scope, written down before you start.**
+
+| Element | What it contains |
+|---|---|
+| **A threat** | One specific, currently-documented campaign, vulnerability, or actor. Not "ransomware" — a named campaign with a CVE or a vendor report |
+| **A named organisation** | A fictional but concrete profile: sector, size, likely technology stack, likely data held. Public-sector healthcare, a regional logistics firm, an online retailer |
+| **Relevance assessment** | Which of their assets are exposed, and why you believe so. This is the analytical core |
+| **Indicators** | Concrete technical indicators from the source — file hashes, domains, event IDs, TTPs mapped to MITRE ATT&CK |
+| **Detection opportunities** | What a defender in that organisation could actually log and alert on |
+| **Recommendations** | Prioritised, with reasons, and honest about cost |
+| **Confidence statement** | What you know, what you inferred, and what you could not verify |
+
+**Where the source material comes from, for $0.** Use primary or near-primary sources rather than news summaries of them.
+
+| Source | What it gives you |
+|---|---|
+| **MITRE ATT&CK** | Technique descriptions and real-world procedure examples, grouped by actor |
+| **CISA advisories** | Joint advisories with concrete IOCs, and the KEV catalog for what is actively exploited |
+| **Vendor threat reports** | Companies publish free annual and campaign reports. Read the technical sections, not the marketing |
+| **The CVE record and NVD entry** | Affected versions, CVSS vector, and often the vendor's own advisory |
+| **CISA KEV** | Whether the threat is confirmed as exploited in the wild — the single most important relevance signal |
+
+**A worked structure.** Notice how much of it is *analysis* rather than summary. A briefing that recites the vendor report is worth nothing; a briefing that says what it means for one named organisation is the whole exercise.
+
+```text
+# Threat Briefing — <Campaign or CVE> and <Organisation>
+
+## Bottom line
+Two sentences. What the threat is, and whether this organisation should act.
+Written for someone who reads only this.
+
+## Why this organisation
+Sector, size, stack, and the specific reason this threat is relevant
+(or the honest reason it is not).
+
+## The threat, in plain language
+What it does, how it spreads, what an attacker gains. No jargon.
+
+## Technical detail
+Affected versions, the exploitation path, and the ATT&CK techniques.
+This is the section a technical reader checks.
+
+## Relevance assessment
+| Their asset | Exposed? | Why |
+|---|---|---|
+| Internet-facing VPN appliance | Yes | Version X is affected and it is on the perimeter |
+| Internal file server | No | Not the affected product |
+
+## Detection opportunities
+What to log, what to alert on, and what a false positive looks like.
+
+## Recommendations, prioritised
+1. Patch the appliance — highest impact, lowest effort.
+2. Enable the specific log source so the detection is possible at all.
+3. Only then invest in the longer-term control.
+
+## Confidence and limitations
+What the source confirms, what I inferred, and what I could not verify.
+```
+
+**The two sections that make it credible, and that beginners skip.**
+
+*The relevance assessment* is where the analytical work lives. It is easy to write "this ransomware is dangerous". It is a skill to write "this ransomware exploits an appliance this organisation runs on its perimeter, at a version confirmed vulnerable, and they hold the patient data the actors target — so this is a top priority this week."
+
+*The confidence statement* is what separates intelligence from opinion. Say what the source actually states, what you inferred from it, and what you could not establish. An honest "I could not confirm whether they run the affected version, so I have listed it as an assumption to verify" is a professional sentence.
+
+| Signal of a weak briefing | Signal of a strong one |
+|---|---|
+| Summarises a news article | Works from the advisory, the CVE record, and KEV |
+| Recommends "patch and train users" | Recommends three specific actions in priority order with reasons |
+| Says the threat is "critical" | Says whether it applies *here*, and rates confidence |
+| No named organisation | One concrete profile, assessed asset by asset |
+| Lists IOCs with no context | Explains what each indicator would look like in a log |
+
+**What it proves in an interview.** This project answers the question every interviewer asks in some form: *can you tell me what matters, and explain why, to someone who is not technical?* That is a scarce skill, and it is the same skill the Impact section of every other report depends on.
+
+#### Choosing and scoping your specialization projects
 
 | Path | Strongest choice | Why, and the key detail |
 |---|---|---|
@@ -606,6 +840,94 @@ visible in the report.
 The interview is checking whether *you* did the work. The way to prove that is to
 be able to talk about the moments where it was difficult.
 
+#### Anticipating the follow-up questions
+
+The five questions above are the opening. A real interview continues, and the follow-ups are where most candidates unravel — not because they did not do the work, but because they did not anticipate being asked about it.
+
+Each of your projects invites a specific set of follow-ups. Prepare them per project.
+
+**For Project 1, the Wazuh SIEM lab:**
+
+| Follow-up you will be asked | What a good answer contains |
+|---|---|
+| "Why did you choose that threshold?" | The reasoning behind your `frequency` value, and what happens at a lower or higher one |
+| "What was your false-positive rate?" | An honest number or an honest "I did not measure it systematically, but here is what I saw" |
+| "How would you deploy this at scale?" | The manager/agent split, and that one manager would not carry thousands of agents |
+| "What would you alert on that you did not?" | One specific gap, showing you still think about it |
+
+**For Project 2, the traffic analysis:**
+
+| Follow-up you will be asked | What a good answer contains |
+|---|---|
+| "Was that traffic encrypted? How did you tell?" | Whether you saw a TLS ClientHello, and what you could and could not conclude from metadata |
+| "How would an attacker defeat this analysis?" | Encryption, jitter, domain fronting, or using a legitimate service |
+| "Could this pattern have been benign?" | The alternative explanation you considered, and why you rejected it |
+| "Why these filters and not others?" | What each filter was hunting for, not a memorised list |
+
+**For Project 3, the incident report:**
+
+| Follow-up you will be asked | What a good answer contains |
+|---|---|
+| "How confident are you in the timeline?" | Which rows rest on strong evidence and which rely on inference |
+| "What would you have done differently?" | A real decision you would change, with the reason |
+| "Was this a true positive?" | Your verdict and the reasoning, stated without hedging |
+| "What was the root cause?" | A control gap, not "the user clicked a link" |
+
+**For Project 4, the threat briefing:**
+
+| Follow-up you will be asked | What a good answer contains |
+|---|---|
+| "How did you decide this was relevant?" | The asset-by-asset reasoning, and what you assumed |
+| "What is your confidence?" | What the source confirmed versus what you inferred |
+| "What would change your assessment?" | A specific fact that would move it up or down |
+
+**Three general principles for handling any follow-up.**
+
+| Principle | Why it works |
+|---|---|
+| **Answer the question that was asked, then stop** | Rambling past the answer is what makes a reviewer suspect you are padding |
+| **Say "I do not know" when you do not** | A specific "I did not test that, and here is how I would" is stronger than a guess |
+| **Never inflate under pressure** | The follow-up exists to test exactly this. One exposed exaggeration costs you the whole portfolio's credibility |
+
+**A preparation method that works.** Write each follow-up question on a card, then answer out loud with no notes. Where you hesitate is where you do not yet understand your own project — and that gap is worth fixing before the interview rather than during it.
+
+#### Writing about work you cannot publish
+
+Not everything you do will be publishable. If you work in IT support at a company with any security function, you may have done real work — a control you implemented, an incident you helped handle — that you cannot put on GitHub.
+
+This is common, and it has an honest answer. Three approaches, in order of preference.
+
+| Approach | How it works | When to use it |
+|---|---|---|
+| **Describe the shape, not the details** | "I implemented MFA enrolment for a 200-user organisation, including the exception process for users without smartphones" — the method and the scale, with no names, systems, or data | Almost always. This is the default |
+| **Build a sanitised equivalent** | Rebuild the same control or investigation in your own lab, with synthetic data, and present that | When the method is the interesting part and the environment is not identifiable |
+| **Keep it for the interview only** | Do not publish it. Describe it verbally, at the level of abstraction your NDA or employer policy allows | When any written version would identify the organisation or expose a control gap |
+
+**The rule that keeps you safe: never publish anything you did not build yourself in your own environment.** Your employer's internal addressing, hostnames, tool configurations, ticket contents, and control gaps are theirs. Publishing them is not a portfolio decision — it is a potential disciplinary or contractual matter, and in some cases a legal one.
+
+**What you may say about employer work, without risk:**
+
+| Safe to say | Not safe to say |
+|---|---|
+| The type of control you implemented | Which product, at which version, with which configuration |
+| The approximate scale, rounded | Exact user counts, hostnames, or IP ranges |
+| The process you followed | The organisation's actual process documentation |
+| That you handled a phishing report | The contents of the reported message |
+
+**How to write the sanitised equivalent honestly.** A rebuilt lab project must say what it is. This paragraph belongs in the Environment section:
+
+> The control described here is one I implemented in a professional
+> environment. This repository contains a rebuilt version in my own lab, with
+> synthetic data, because the original environment is confidential. The
+> method and the exception process are the same; the organisation, systems,
+> and data are not.
+
+That sentence does two things at once. It tells the reviewer you have *real* professional experience — which is more valuable than a lab — and it demonstrates that you understand confidentiality as a professional obligation.
+
+**Why this is an advantage rather than a limitation.** A candidate who says "I cannot share the details, but here is the method, and here is a lab version I built to demonstrate it" has just shown an interviewer three things: they have real experience, they understand discretion, and they can rebuild something from scratch. Candidates who accidentally leak their employer's internals have shown only one thing.
+
+**The one thing never to do.** Do not sanitise by deleting a couple of hostnames and calling it done. Sanitisation means the artifact is genuinely non-identifying, and if you cannot make it so, do not publish it. A partial sanitisation is worse than none, because it creates the appearance of care without the substance.
+
 ### Key takeaways
 
 - **Doing the work and proving the work are different skills**, and this phase exists to close the gap. Your screen history is invisible to an employer; only the artifacts count.
@@ -669,6 +991,7 @@ Then open `portfolio/cyber/06-portfolio-projects.md`, link the three repository 
 5. Choose 1–2 specialization projects.
 6. Add screenshots, commands used, lessons learned, and limitations.
 7. Rewrite reports so a non-technical manager can understand the impact.
+8. Write out the follow-up questions each project invites and answer them out loud without notes.
 
 ## Deliverable / proof of work
 
@@ -689,6 +1012,7 @@ A portfolio with at least 3 completed reports:
 - [ ] I included screenshots/evidence. <!-- id: cyber-06-c06 energy: normal -->
 - [ ] I included remediation advice. <!-- id: cyber-06-c07 energy: normal -->
 - [ ] I can explain every project in interviews. <!-- id: cyber-06-c08 energy: low -->
+- [ ] I can answer the likely follow-up questions for each project without notes. <!-- id: cyber-06-c09-followup-questions energy: normal -->
 
 ## You're ready to move on when...
 

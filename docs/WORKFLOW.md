@@ -102,9 +102,28 @@ cd ..; git worktree remove '.head-check' --force
 
 Both jobs use Node 24, matching the local toolchain. The workflow is check-only: it does not deploy, publish, or touch secrets — see [`DECISIONS.md`](DECISIONS.md) → D-008. To reproduce it locally, run the commands under "How to verify quickly" in [`CHECKPOINT.md`](CHECKPOINT.md).
 
+## Guards on the lesson renderer
+
+The site renders the lesson prose itself (D-011), so the parser in `scripts/lesson-ast.mjs` sits between the Markdown and the page. A parser bug does not crash the build — it makes content quietly disappear from the site. Two guards exist because of that:
+
+```bash
+node scripts/audit-lesson-ast.mjs   # parser vs source: no content loss, no unhandled construct
+node scripts/audit-readability.mjs  # prose density targets
+cd learning-site && npm run test:smoke   # the lesson renders for every phase
+```
+
+**Run `audit-lesson-ast.mjs` after any change to `lesson-ast.mjs`.** It compares each lesson's parsed blocks against its source with markup stripped, and reports a non-zero delta, an unrecognised construct, or a lesson with no headings. It currently reports zero loss on all 18 lessons.
+
+`build-content.mjs` also fails the build when the parser reports an unhandled construct, so a new Markdown form cannot ship unrendered — the failure is loud and names the line.
+
+The smoke test renders the lesson for every phase and asserts that the table and code-block counts match the AST, that heading IDs are unique, that every table-of-contents entry resolves, and that no literal `**` or backtick reaches rendered prose. It excludes `<pre>` and `<code>` from that last check, because a `markdown` fence legitimately displays `**bold**` as an example.
+
 ## Checklist before committing
 
 - [ ] `node scripts/lint-content.mjs` reports no issues.
+- [ ] `node scripts/audit-lesson-ast.mjs` reports no content loss (for any change touching the parser or a lesson).
+- [ ] `node scripts/audit-readability.mjs` reports no phase outside the target.
+- [ ] `cd learning-site && npm run test:smoke` passes (for any change touching the site).
 - [ ] File is LF (no CR bytes) unless it is a Windows-native script.
 - [ ] File is UTF-8 without BOM.
 - [ ] Typographic characters are real, not `?` substitutes.

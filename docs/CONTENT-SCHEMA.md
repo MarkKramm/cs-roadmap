@@ -113,22 +113,54 @@ Each row becomes:
 
 Column order is fixed by [`CONTENT-GUIDE.md`](CONTENT-GUIDE.md).
 
+## The lesson region
+
+Everything between `## Lesson: <Title>` and the next `## ` heading is the lesson — the part that actually teaches. Measured across both tracks it is **84–95% of every phase file**, so it is the largest thing the schema carries and the reason the site is worth opening.
+
+The build parses it with [`scripts/lesson-ast.mjs`](../scripts/lesson-ast.mjs) into a block AST. The parser supports exactly the Markdown subset the curriculum uses, which was measured rather than assumed: `###`/`####`/`#####` headings, paragraphs, bullet and ordered lists (including one level of nesting), tables, fenced code blocks, and blockquotes. Inline `**bold**`, `*italic*`, and `` `code` `` are carried through as raw text and formatted by the site's `renderInline.jsx`.
+
+Block shapes:
+
+```json
+[
+  { "type": "heading", "level": 3, "text": "Part 1 — …", "id": "part-1" },
+  { "type": "para",    "text": "…" },
+  { "type": "code",    "lang": "powershell", "text": "…" },
+  { "type": "quote",   "paras": ["…"] },
+  { "type": "table",   "head": ["Tool", "Purpose"], "rows": [["Wazuh", "SIEM"]] },
+  { "type": "list",    "ordered": false,
+    "items": [{ "text": "…", "children": [] }] }
+]
+```
+
+Two rules the parser keeps:
+
+- **Nothing is dropped.** A line that matches no block becomes a paragraph, and any construct the parser does not recognise is recorded in `unknown`, which **fails the build**. Content that cannot be rendered must be a loud error, not a silently missing paragraph.
+- **Heading IDs are unique.** Duplicates get a numeric suffix so a table of contents never links two entries to the same anchor.
+
+`node scripts/audit-lesson-ast.mjs` verifies both across every phase by comparing the AST's characters against the source with markup stripped. It currently reports zero loss on all 18 lessons. **Run it after any change to the parser.**
+
 ## Output: generated JSON
 
-The build script emits two files:
+The build script emits a small index per track plus one file per lesson:
 
 ```text
 learning-site/src/data/generated/it.json
 learning-site/src/data/generated/cyber.json
+learning-site/src/data/generated/lessons/<phase-id>.json
 ```
 
-Each contains:
+### Why the lessons are separate files
+
+The lesson bodies total roughly 1.6 MB of JSON. Inlining them into the track indexes made the site's single JS bundle 1.9 MB, which delayed first paint for content the reader had not asked for. Each lesson is therefore its own file, imported dynamically by `src/hooks/useLesson.js` when a phase is opened, and cached per phase id in memory.
+
+An index file contains:
 
 ```json
 {
   "track": "it",
   "generatedAt": "2026-09-11T00:00:00Z",
-  "sourceHash": "<hash of all source files>",
+  "phaseCount": 9,
   "phases": [
     {
       "id": "it-03-networking-basics",
@@ -144,6 +176,10 @@ Each contains:
       "tasks": ["...", "..."],
       "deliverableItems": ["...", "..."],
       "checklist": [{ "id": "it-03-c01", "text": "...", "energy": "low" }],
+      "lessonTitle": "Networking Without the Jargon",
+      "lessonPath": "lessons/it-03-networking-basics.json",
+      "lessonBlockCount": 478,
+      "lessonHeadingCount": 59,
       "exitCriteria": "...",
       "freeVsPaid": {
         "freeEnough": "...",
@@ -156,7 +192,7 @@ Each contains:
 }
 ```
 
-The UI never reads the Markdown directly. It reads this JSON.
+A lesson file contains `{ id, title, blocks, toc }`. The UI never reads the Markdown directly. It reads this JSON.
 
 ## Validation rules
 

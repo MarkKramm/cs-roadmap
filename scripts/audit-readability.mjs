@@ -13,7 +13,11 @@ const rows = [];
 for (const track of tracks) {
   const dir = path.join('career-roadmaps', track);
   for (const f of fs.readdirSync(dir).sort()) {
-    if (!/^0[1-9]-.*\.md$/.test(f)) continue;
+    // Phases only: two-digit numbers from 01 (01 … 14), excluding 00-overview,
+  // which is a strategy document and has no lesson region. The earlier
+    // `^0[1-9]-` matched only 01–09, so phases 10 and above were silently left
+    // out of the audit — a phase could fall outside the targets unreported.
+    if (!/^(?!00-)\d{2}-.*\.md$/.test(f)) continue;
     const lines = fs.readFileSync(path.join(dir, f), 'utf8').split('\n');
 
     // Isolate the lesson region.
@@ -68,6 +72,7 @@ for (const track of tracks) {
     const avg = (a) => (a.length ? Math.round(a.reduce((x, y) => x + y, 0) / a.length) : 0);
 
     rows.push({
+      track,
       file: f.replace(/\.md$/, ''),
       words: totalWords,
       paras: paras.length,
@@ -110,12 +115,14 @@ console.log('  Longest average sentence:');
 // ---------- track-level comparison ----------
 // The per-phase table is hard to read as a trend; this is the summary that
 // actually drives a decision about which track needs editorial work.
-const trackOf = (file) => (file.includes('cybersec') || /^0[1-8]-(phase-)?(foundations|networking-and-linux|security|hands-on|specialization|portfolio-projects|certifications|job-application)/.test(file) ? 'CYBER' : 'IT');
+//
+// The track comes from the path the row was read from, not from a hardcoded
+// list of phase names. The earlier version listed the original eight cyber
+// phases by name, so the six modules added as 09–14 were counted as IT and the
+// cyber average described only part of the track.
 const groups = { IT: [], CYBER: [] };
 for (const r of rows) {
-  const isCyber = ['01-phase-foundations', '02-phase-networking-and-linux', '03-phase-security-fundamentals',
-    '04-phase-hands-on-labs', '05-phase-specialization-choice', '06-phase-portfolio-projects',
-    '07-phase-certifications', '08-phase-job-application'].includes(r.file);
+  const isCyber = r.track === 'cybersec-roadmap';
   groups[isCyber ? 'CYBER' : 'IT'].push(r);
 }
 

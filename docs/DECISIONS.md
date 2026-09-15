@@ -2,6 +2,30 @@
 
 A lightweight decision log (ADR-style). Newest first.
 
+## D-012 — Lesson bodies are emitted per phase and loaded on demand
+
+- **Date:** 2026-09-15
+- **Status:** Accepted
+- **Context:** D-011 added the lesson body to the generated JSON. Measured afterwards, the lesson region is 84–95% of every phase file, and its JSON totals roughly 1.6 MB across both tracks. Because `src/data/roadmaps.js` imported the track files statically, Vite inlined all of it: the JS bundle went from 265 KB to 1.96 MB, so a reader who opened the dashboard downloaded the entire curriculum before seeing anything.
+- **Decision:** Keep the track index files small (goal, skills, checklist, tools — about 200 KB total) and emit each lesson as its own file at `generated/lessons/<phase-id>.json`. The site loads one with a dynamic `import()` in `src/hooks/useLesson.js`, keyed by `phase.lessonPath` carried on the phase record, and caches per phase id in memory. The phase record also carries `lessonBlockCount` and `lessonHeadingCount` so the dashboard can describe a lesson without fetching it.
+- **Consequences:** The initial bundle returns to ~340 KB and each lesson becomes a 30–170 KB chunk fetched when its phase is opened. This is the first split point in the app; a reader who never opens a phase never downloads a lesson. The cost is a loading state and an error state in `PhaseDetail`, and the requirement that `build-content.mjs` runs before the site is served — already true, since `dev` and `build` both call it. Vite needs a literal `import.meta.glob` pattern to discover the files, so the path is templated rather than computed.
+
+## D-011 — The site renders the lesson body, not just the structured sections
+
+- **Date:** 2026-09-15
+- **Status:** Accepted
+- **Context:** `build-content.mjs` originally extracted goal, skills, topics, tools, tasks, checklist, and exit criteria — and dropped the `## Lesson:` region entirely. Measured per phase that region is 84–95% of the file, so the site was showing roughly a tenth of the curriculum: a checklist *about* a lesson rather than the lesson. The prose, the worked examples, and the tables were reachable only through a link to GitHub.
+- **Decision:** Parse the lesson region into a block AST at build time with `scripts/lesson-ast.mjs`, and render it in the site with `components/Lesson.jsx` and `components/LessonBlock.jsx`, behind a table of contents built from the lesson's `###`/`####` headings. The Markdown stays the single source of truth; the AST is a build artifact like the rest of the JSON. No Markdown dependency is added — the parser supports the subset the curriculum actually uses, which was measured across all 18 phases before being written.
+- **Consequences:** The site is now a reader for the curriculum rather than an index of it. Two guards protect the new path, because a parser bug does not crash anything — it just makes content vanish: `audit-lesson-ast.mjs` compares every lesson's AST against its source with markup stripped and fails on any loss or unrecognised construct, and `build-content.mjs` fails the build when the parser reports an unhandled construct. `smoke-render.mjs` renders the lesson for every phase and asserts that tables, code blocks, and headings all appear and that no literal `**` or backtick reaches rendered prose. Inline formatting needed one addition: the curriculum writes bold containing code (``**`/etc`**``), so `renderInline.jsx` now recurses into bold and italic runs instead of a single-pass alternation.
+
+## D-010 — The sidebar is viewport-pinned, and becomes a drawer on small screens
+
+- **Date:** 2026-09-15
+- **Status:** Accepted
+- **Context:** `.app-shell` is a flex row and `.sidebar` had no height or position constraint, so the sidebar stretched to the full document height and scrolled away with the page. On a long phase the reader had to scroll back to the top to navigate. Below 720px the sidebar also stacked above the content, which pushed the page down and left the nav no closer.
+- **Decision:** Give the sidebar `position: sticky; top: 0; height: 100vh; overflow-y: auto` so it stays pinned and scrolls independently. Below 860px, replace the stacked layout with an off-canvas drawer: fixed, translated off-screen, opened by a hamburger button in a sticky topbar, and closed by the backdrop, the close button, or Escape. Background scroll locks while it is open and the open phase is scrolled into view in the list.
+- **Consequences:** The nav is reachable from any scroll position. The drawer adds one piece of state to `App.jsx` and needs Escape handling and scroll locking to avoid trapping the page behind an overlay — both are in place. View changes now reset scroll to the top, which also fixes opening a phase at the previous page's scroll offset.
+
 ## D-009 — Publishing the site to GitHub Pages, and the base path that makes it work
 
 - **Date:** 2026-09-15

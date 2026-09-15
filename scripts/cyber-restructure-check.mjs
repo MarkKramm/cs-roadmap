@@ -23,7 +23,9 @@ const words = (s) => s.split(/\s+/).filter(Boolean).length;
 const current = {};
 
 for (const f of fs.readdirSync(dir).sort()) {
-  if (!/^0[1-9]-.*\.md$/.test(f)) continue;
+  // Two-digit phase numbers from 01 (01 … 14), excluding 00-overview.
+  // Matching only 01–09 would leave phases 10+ out of the check entirely.
+  if (!/^(?!00-)\d{2}-.*\.md$/.test(f)) continue;
   const text = fs.readFileSync(path.join(dir, f), 'utf8');
   const lines = text.split('\n');
 

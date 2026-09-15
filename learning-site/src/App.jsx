@@ -2,7 +2,7 @@
 // router, see docs/DECISIONS.md → D-007. Content is rendered from the JSON
 // emitted by scripts/build-content.mjs; see docs/CONTENT-SCHEMA.md.
 
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { tracks, findTrack } from "./data/roadmaps.js";
 import { useProgress, countDone } from "./hooks/useProgress.js";
 import { useEnergyMode } from "./hooks/useEnergyMode.js";
@@ -27,23 +27,57 @@ export default function App() {
   const [view, setView] = useState("dashboard");
   const [trackId, setTrackId] = useState("it");
   const [openPhaseId, setOpenPhaseId] = useState(null);
+  const [navOpen, setNavOpen] = useState(false);
   const { done, toggle, reset } = useProgress();
   const { mode, change: changeMode } = useEnergyMode();
+  const mainRef = useRef(null);
+  const activePhaseRef = useRef(null);
 
   const track = findTrack(trackId);
   const activePhase = openPhaseId
     ? track.phases.find((p) => p.id === openPhaseId) || null
     : null;
 
+  // Opening a phase keeps whatever scroll position the dashboard was at, which
+  // lands the reader in the middle of a lesson. Reset on every view change.
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [view, openPhaseId, trackId]);
+
+  // A drawer that traps the page behind it is worse than no drawer. Close on
+  // Escape, and lock background scrolling while it is open.
+  useEffect(() => {
+    if (!navOpen) return;
+    const onKey = (e) => {
+      if (e.key === "Escape") setNavOpen(false);
+    };
+    window.addEventListener("keydown", onKey);
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      window.removeEventListener("keydown", onKey);
+      document.body.style.overflow = prev;
+    };
+  }, [navOpen]);
+
+  // Keep the open phase visible in a long sidebar list.
+  useEffect(() => {
+    if (activePhaseRef.current) {
+      activePhaseRef.current.scrollIntoView({ block: "nearest" });
+    }
+  }, [openPhaseId]);
+
   function switchTrack(id) {
     setTrackId(id);
     setOpenPhaseId(null);
     setView("dashboard");
+    setNavOpen(false);
   }
 
   function openPhase(id) {
     setOpenPhaseId(id);
     setView("phase");
+    setNavOpen(false);
   }
 
   function goBack() {
@@ -51,9 +85,36 @@ export default function App() {
     setView("dashboard");
   }
 
+  function goTo(target) {
+    setOpenPhaseId(null);
+    setView(target);
+    setNavOpen(false);
+  }
+
   return (
     <div className="app-shell">
-      <nav className="sidebar">
+      {navOpen && (
+        <button
+          type="button"
+          className="sidebar-backdrop"
+          aria-label="Close navigation"
+          onClick={() => setNavOpen(false)}
+        />
+      )}
+
+      <nav
+        className={"sidebar" + (navOpen ? " is-open" : "")}
+        aria-label="Main navigation"
+      >
+        <button
+          type="button"
+          className="sidebar__close"
+          aria-label="Close navigation"
+          onClick={() => setNavOpen(false)}
+        >
+          ×
+        </button>
+
         <div className="sidebar__title">CS Roadmap</div>
 
         <div className="sidebar__section">Views</div>
@@ -65,10 +126,7 @@ export default function App() {
               className={
                 "sidebar__link" + (v.id === view ? " is-active" : "")
               }
-              onClick={() => {
-                setOpenPhaseId(null);
-                setView(v.id);
-              }}
+              onClick={() => goTo(v.id)}
             >
               {v.label}
             </button>
@@ -102,6 +160,7 @@ export default function App() {
               <button
                 key={p.id}
                 type="button"
+                ref={p.id === openPhaseId ? activePhaseRef : null}
                 className={
                   "sidebar__link" +
                   (complete ? " is-complete" : "") +
@@ -135,7 +194,20 @@ export default function App() {
         </div>
       </nav>
 
-      <main className="content">
+      <main className="content" ref={mainRef}>
+        <div className="content__topbar">
+          <button
+            type="button"
+            className="nav-toggle"
+            aria-label="Open navigation"
+            aria-expanded={navOpen}
+            onClick={() => setNavOpen(true)}
+          >
+            ☰ Menu
+          </button>
+          <span className="muted">{track.label}</span>
+        </div>
+
         {view === "phase" && activePhase ? (
           <PhaseDetail
             phase={activePhase}

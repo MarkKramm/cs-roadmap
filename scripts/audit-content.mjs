@@ -13,8 +13,11 @@ for (const track of ['it-roadmap', 'cybersec-roadmap']) {
   const dir = path.join(ROOT, track);
   for (const f of fs.readdirSync(dir).sort()) {
     // 00-overview is a strategy document, not a phase file, so the phase
-    // structure requirements do not apply to it.
-    if (/^0[1-9]-.*\.md$/.test(f)) files.push({ track, file: path.join(dir, f) });
+    // structure requirements do not apply to it. Phases use two-digit numbers
+    // starting at 01 (01 … 14); matching only 01–09 would skip every later
+    // phase, while matching 00 would wrongly demand phase sections of the
+    // overview.
+    if (/^(?!00-)\d{2}-.*\.md$/.test(f)) files.push({ track, file: path.join(dir, f) });
   }
 }
 

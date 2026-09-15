@@ -135,6 +135,8 @@ everything.
 | The labs themselves | Steady |
 | The writing | Where most learners under-invest, and where most of the portfolio value actually is |
 
+That middle column is worth reading twice. The lab build is the *prerequisite*, not the deliverable — and it is the part most likely to absorb the whole phase if you let it.
+
 ### Part 1 — Design the lab before you build it
 
 #### Why the diagram comes first
@@ -241,6 +243,111 @@ test event, you will be able to say precisely what changed.
 
 ### Part 2 — Building the lab: VMs, and installing a SIEM
 
+#### Choosing a hypervisor, and the honest answer
+
+A **hypervisor** is the software that runs virtual machines. It pretends to be a complete computer so that a guest operating system can run inside it, believing it is on real hardware.
+
+The phase's tools table names VirtualBox, with VMware Player as the free alternative. Both are genuinely free, and both will complete this phase.
+
+| | VirtualBox | VMware Workstation Player |
+|---|---|---|
+| **Cost** | Free, open-source core | Free for personal use |
+| **Licence** | GPL — no personal-use caveat | Free *only* for non-commercial personal use |
+| **Guest additions** | A separate download per guest OS family | Bundled, and generally smoother |
+| **Snapshots** | Unlimited, with a snapshot manager | The free Player build restricts them |
+| **Which to pick** | **Default recommendation** | A fine substitute if VirtualBox fights your machine |
+
+**Use VirtualBox for this phase.** Its free tier has no licence ambiguity, its snapshot support is unlimited, and virtually every free tutorial uses its menu names verbatim.
+
+#### Host preparation: four checks before you install
+
+Most hypervisor pain is avoidable in about fifteen minutes.
+
+| Check | How to check it | Why it matters |
+|---|---|---|
+| **Virtualisation is enabled in BIOS/UEFI** | Task Manager → Performance → CPU → "Virtualisation" | Without it, 64-bit guests refuse to start or run unusably slowly |
+| **Hyper-V and related Windows features are off** | `OptionalFeatures.exe` | Hyper-V claims the CPU's virtualisation extensions exclusively, and VirtualBox then fails with `VERR_VMX_NO_VMX` |
+| **Enough free disk space** | `Get-PSDrive C` in PowerShell | Guests grow, and a full host disk corrupts running VMs |
+| **Windows Defender exclusions** | Add your VM folder and VirtualBox's program folder | Scanning a 20 GB virtual disk file will make your machine crawl |
+
+Windows ships with Hyper-V, Virtualisation-Based Security, Windows Sandbox, the Virtual Machine Platform, and the Windows Hypervisor Platform — any of them holding the virtualisation extensions stops VirtualBox dead.
+
+The classic symptom is VirtualBox reporting `VT-x is not available (VERR_VMX_NO_VMX)` on a machine whose Task Manager says virtualisation is enabled. The CPU supports it, and something else has claimed it. **Reboot after disabling any of these.**
+
+#### Resource allocation on a modest laptop
+
+This is where beginners over-commit and then blame the tools. The rule that matters: **never allocate more than half your physical RAM to the sum of your running VMs.**
+
+| Host RAM | Realistic allocation | What you can run at once | Honest verdict |
+|---:|---|---|---|
+| 4 GB | 1 GB to one Linux VM | One lightweight VM, occasionally | Not the local Wazuh lab. Use browser labs |
+| 8 GB | 2 GB to Ubuntu Server | The SIEM VM alone, or victims alone | Workable if you install the manager without the indexer |
+| 16 GB | 4 GB + 2 GB + 2 GB | All three VMs together | The comfortable path |
+| 32 GB and above | 4 GB + 4 GB + 4 GB | Room for a fourth VM | More than the phase requires |
+
+**Why half, and not "as much as possible".** The host operating system is also running. A host that is swapping makes every guest feel slow, and a starved guest will silently kill processes — which is usually why the Wazuh installer fails halfway for no visible reason.
+
+**On CPU.** Allocate **one or two virtual CPUs per VM**, not all of them. More cores than a guest can use adds overhead rather than speed.
+
+**On disk.** Budget **20 GB for Ubuntu Server, 40 GB for a Windows guest, and 50 GB for a Wazuh server with the indexer**. Use the **dynamically allocated** disk type, and keep at least **30 GB genuinely free** on the host.
+
+| Disk mistake | What happens |
+|---|---|
+| A fixed-size disk you cannot shrink | Your host fills up and you cannot reclaim space without rebuilding |
+| Running the VM from an external USB drive | Painfully slow, and unplugging it corrupts the guest |
+| Storing snapshots indefinitely | Snapshots are deltas, not free points in time, and they grow |
+
+#### VM networking modes, and when each one is right
+
+This is the most confusing part of the lab build. Each mode answers a different question about who the VM can talk to.
+
+| Mode | What the VM can reach | Use it when |
+|---|---|---|
+| **NAT** | The internet, through the host. Other VMs cannot see it by default | The VM needs updates but should not be discoverable |
+| **Bridged** | Everything on your real local network, as a full peer | You need a LAN peer. **Never for vulnerable or malware labs** |
+| **Host-only** | The host, and other VMs on the same host-only network | The lab's own traffic: agents to SIEM, attacker to victim |
+| **Internal network** | Other VMs on the same named network — not even the host | You want the host out of the loop entirely |
+| **Not attached** | Nothing | You want the network severed while the machine runs |
+
+The pattern to internalise is the pairing: **NAT for the road out, host-only for the lab road in.** Two adapters on one VM is normal and correct.
+
+| VM | Adapter 1 | Adapter 2 | Reasoning |
+|---|---|---|---|
+| Wazuh server | Host-only (static `192.168.56.10`) | NAT | Receives agent traffic privately, and reaches the internet only to install and update |
+| Ubuntu victim | Host-only (static `192.168.56.20`) | NAT | Forwards logs to the manager, and can patch itself |
+| Windows victim | Host-only (static `192.168.56.30`) | NAT | Same |
+
+**Use static addresses, or DHCP reservations.** Your detection rules, your notes, and your screenshots all reference IP addresses; if those change on reboot, your notes become wrong and your rules silently stop matching. In production, servers have stable addresses for exactly this reason.
+
+#### Snapshots and rollback discipline
+
+Virtual machines are used for security work because they are **reversible**. That reversibility is a habit you either build or you do not.
+
+A **snapshot** records the state of a VM's disk at a moment in time. Reverting rolls the VM back to exactly that state, discarding everything since.
+
+| Snapshot discipline | Why it matters |
+|---|---|
+| Snapshot **immediately after install, before configuring anything** | Gives you a known-good base you can return to in seconds |
+| Snapshot **before each experiment** | Makes every experiment reversible, which is what lets you try things |
+| Name snapshots meaningfully: `clean-install`, `pre-agent`, `pre-rule-test` | `Snapshot 1` tells you nothing three weeks later |
+| Delete snapshots you have finished with | Each one consumes disk and slows the VM down |
+
+A snapshot does not copy the disk. It stores the difference from that point forward, so a VM running for weeks on one snapshot can accumulate a delta as large as the original disk.
+
+**The habit that pays for itself:** before you generate a test event, break a configuration, or install something questionable, take a snapshot. Then you can be genuinely fearless.
+
+#### Safe teardown, and why it is part of the skill
+
+At the end of the phase you will have several large virtual disks and possibly a Wazuh install you no longer need.
+
+| Step | What to do | Why in this order |
+|---|---|---|
+| 1 | **Export anything you want to keep first** | Screenshots already live in your portfolio repo; the VM disk does not need to survive |
+| 2 | **Power the VMs off properly** — `sudo shutdown -h now`, not the window's X button | A hard power-off can corrupt the guest filesystem and the snapshot chain |
+| 3 | **Delete snapshots before deleting the VM** | Deleting a VM with snapshots attached leaves orphaned disk files |
+| 4 | **Remove the VM and choose "Delete all files"** | Otherwise multi-gigabyte `.vdi` files sit in your user profile forever |
+| 5 | **Keep the hypervisor and the lab** | Phase 6 builds on exactly this environment, and rebuilding it costs a weekend you have already spent |
+
 #### Getting the VMs running without losing a weekend
 
 The installation order that causes the least pain:
@@ -323,6 +430,29 @@ conservative. If your machine cannot meet them, the honest options are:
 | Defer to browser-based labs | The local build, but not the understanding |
 
 Any of these is a legitimate outcome.
+
+#### A troubleshooting table for the failures you will actually hit
+
+Every item below is a failure this phase's learners genuinely meet. Read it now, and read it again when something breaks.
+
+| Symptom | Most likely cause | How to confirm | Fix |
+|---|---|---|---|
+| **The VM has no internet** | No NAT adapter, or no default route | `ip route` shows no `default via` line | Add a NAT adapter in the VM's network settings, or restore DHCP on the NAT interface |
+| **NAT and bridged confusion** | The VM is bridged and picked up an address from your real router | The guest's IP is in your home range (for example `192.168.1.x`) while your lab is `192.168.56.x` | Switch that adapter to NAT. **If the VM is deliberately vulnerable, this is urgent, not cosmetic** |
+| **The host disk is full** | Snapshot deltas, or dynamically allocated disks that grew | `Get-PSDrive C` on the host; check the VM folder's size | Delete finished snapshots, delete unused VMs, move the VM folder to a larger drive |
+| **Guest additions will not install or the display is wrong** | The guest additions ISO is not mounted, or the guest lacks build tools | VirtualBox → Devices → Insert Guest Additions CD image; then inside the guest, check for a mounted volume | Mount the ISO, run the installer from inside the guest, and on Ubuntu install `build-essential` and the matching `linux-headers` package first |
+| **Windows guest is unusably slow** | No guest additions, no virtualisation extensions, or antivirus scanning the disk | Task Manager on the host shows sustained disk at 100% | Install guest additions, enable VT-x/AMD-V, and add the VM folder to antivirus exclusions |
+| **Nested virtualisation — a VM inside a VM will not start** | The hypervisor is not exposing virtualisation extensions to the guest | VirtualBox → Settings → System → Processor → "Enable Nested VT-x/AMD-V" is greyed out or unticked | Tick nested virtualisation if your CPU and host permit it. On many laptops it is unavailable — use a browser lab rather than fighting it |
+| **A SIEM agent never checks in** | Firewall, wrong manager address, or the service is not running | On the victim: `sudo systemctl status wazuh-agent` and `sudo tail -f /var/ossec/logs/ossec.log` | Confirm the agent's `MANAGER_IP` points at the host-only address, that outbound TCP 1514 and UDP 1514 are open, and then restart the agent |
+| **The agent checks in but no events arrive** | The log file is not in the agent's configuration, or nothing is being written to it | On the victim, generate an event and confirm it appears in `/var/log/auth.log` | Add the log location to `ossec.conf` on the agent, then restart the agent |
+| **Clock skew breaks your timeline** | The VM suspended, or timezone drift between guest and host | Compare `date -u` inside the guest with the host's UTC time | Enable guest time synchronisation and an NTP client in each guest. Log correlations fail silently otherwise |
+| **The SSH connection to the lab drops** | The host-only network changed, or DHCP reassigned the address | `ip -brief addr` inside the guest | Fix the address statically, as Part 1 describes |
+| **`apt` or Windows Update fails inside the guest** | No route out, or a corporate VPN on the host | `curl -I https://archive.ubuntu.com` inside the guest | Detach the VPN, or verify the NAT adapter is present and enabled |
+| **Snapshots will not restore** | The snapshot chain is broken, or the disk is full | VirtualBox shows the snapshot as "corrupt" or the restore fails immediately | Free disk space first. If the chain is genuinely broken, revert to the clean-install snapshot and rebuild — this is exactly why you made one |
+
+**How to use that table well.** Identify the symptom as precisely as you can before you act. "The lab is broken" is not a symptom; "the agent service is running and its log says `Unable to connect to manager`" is, and it points at a single fix.
+
+**Clock skew deserves a warning of its own**, because it produces *confidently wrong* output rather than an error. If your Ubuntu victim reports 14:32 local while the Wazuh manager timestamps the same event at 06:32 UTC, your timeline is nonsense and nothing anywhere tells you so. Enable time synchronisation in every guest, and take every timestamp in **UTC** from the start.
 
 #### Source, decoder, rule: how detection actually works
 
@@ -427,6 +557,169 @@ in your notes so a reader who was not there understands what they are looking at
 Remember that a screenshot proves a state, not an understanding. The explanation
 in your write-up is what carries the value.
 
+#### Evidence capture: what a screenshot proves, and what it does not
+
+The word "evidence" is used loosely by beginners, and tightening it up changes how your work reads.
+
+**A screenshot proves that a particular screen displayed particular content at some point.** That is all. It does not prove who produced it, from which machine, using which command, at what time, or whether the screen was a lab you built.
+
+| A screenshot does prove | A screenshot does not prove |
+|---|---|
+| The interface showed those values | Which host produced them |
+| The state existed when you captured it | What command created that state |
+| The tool was running | That the result is reproducible |
+
+So the job of your evidence is to close those gaps with context. Three rules do most of the work.
+
+**Rule 1: include the command, not just the output.** A terminal screenshot showing only a result is unverifiable. Include the prompt and the command that produced it.
+
+```bash
+analyst@lab-ubuntu:~$ sudo grep "Failed password" /var/log/auth.log | tail -3
+Jan 14 14:32:07 lab-ubuntu sshd[3187]: Failed password for invalid user admin from 192.168.56.30 port 51234 ssh2
+Jan 14 14:32:09 lab-ubuntu sshd[3189]: Failed password for invalid user admin from 192.168.56.30 port 51236 ssh2
+Jan 14 14:32:11 lab-ubuntu sshd[3191]: Failed password for invalid user admin from 192.168.56.30 port 51239 ssh2
+```
+
+That block says what ran, on which host, as which user, and what came back. It is evidence rather than a picture.
+
+**Rule 2: include the timestamp and the timezone.** An alert screenshot with no visible time is nearly worthless, because the first question a reviewer asks is *when*.
+
+**Rule 3: keep the identifiers, crop the noise.** Crop the browser chrome and the unrelated tabs. Keep the hostname, the rule identifier, the severity, and the time.
+
+#### Capturing a clean log excerpt
+
+Screenshots of logs are usually worse than the text of the logs, because text can be searched, diffed, and pasted into a ticket.
+
+The excerpt you want is **short, contiguous, and self-describing**.
+
+| Quality | Example | Why |
+|---|---|---|
+| **Weak** | A screenshot of a scrolling terminal | Not searchable, unreadable at GitHub's image width, impossible to quote |
+| **Acceptable** | Ten lines pasted into a fenced block | Searchable and quotable, but context is guesswork |
+| **Strong** | A three-line excerpt with the command above it, the host named, and timestamps in UTC | A reviewer can reproduce the command and compare |
+
+Two commands make this easy, and the second is worth learning now:
+
+```bash
+# The command visible in the transcript, with the last few matches
+grep "Failed password" /var/log/auth.log | tail -3
+
+# A window around a known time, rather than the whole file
+journalctl -u sshd --since "14:30" --until "14:35" --no-pager
+```
+
+"Here is a four-minute window around the alert" is far more useful than "here are 4,000 lines", and it is the same instinct a real analyst uses.
+
+**Sanitise log excerpts before publishing.** Log lines contain usernames, internal addresses, and sometimes tokens. Replace them consistently and say you did — `user_a`, `192.168.56.x`.
+
+#### Naming conventions for evidence files
+
+Filenames are part of the evidence, because a reviewer navigating your repository sees them before they see anything else.
+
+| Weak | Strong | Why the strong one wins |
+|---|---|---|
+| `Screenshot 2024-11-03 141022.png` | `04-wazuh-alert-100001-ssh-bruteforce-1432utc.png` | States the project, the alert, the rule, and the time |
+| `image1.png` | `04-authlog-bruteforce-excerpt.txt` | Says what the artifact is and which project it belongs to |
+| `final_v2_FINAL.png` | `04-loglab-network-diagram.png` | Stable, and versioning belongs in git, not the filename |
+| `evidence/` with 40 loose files | `04-loglab/evidence/` with 8 named files | Grouped by project, and each name carries meaning |
+
+The pattern to adopt: **`<project>-<what it shows>-<when>.ext`**, with the timestamp in UTC and compressed, like `1432utc`. Keep filenames lowercase with hyphens.
+
+**Append every image with a caption.** A caption is one line, and it says what the reviewer should conclude:
+
+```markdown
+![Wazuh rule 100001 firing at level 10 at 14:32 UTC on lab-ubuntu, showing source 192.168.56.30](evidence/04-wazuh-alert-100001-1432utc.png)
+```
+
+#### Worked example: documenting one alert properly
+
+Here is one alert from the lab, written up as it should appear in your deliverable. Notice how much of the value is in the framing rather than the screenshot.
+
+```text
+## Finding 1 — Repeated SSH authentication failures for non-existent users
+
+Verdict: true positive (behaviour confirmed); no successful access.
+Severity: level 10 (high), custom rule 100001.
+
+What happened
+ Between 14:32:07 and 14:32:11 UTC on 14 January, the Ubuntu victim
+ (lab-ubuntu, 192.168.56.20) received six SSH authentication failures for
+ non-existent usernames, all from a single source, 192.168.56.30.
+
+What triggered the alert
+ Custom rule 100001 matches the built-in rule 5710 ("attempt to login using
+ a non-existent user") and requires six matching events within 120 seconds
+ sharing one source IP. Six events from one address in four seconds satisfied
+ all three conditions.
+
+Evidence
+ - Raw excerpt from /var/log/auth.log, three of the six lines, captured with
+   `grep "Failed password" /var/log/auth.log | tail -3`
+ - Wazuh alert for rule 100001, level 10, timestamped 14:32:11 UTC
+ - The rule definition at /var/ossec/etc/rules/local_rules.xml
+
+What I checked next
+ - Whether any authentication succeeded from 192.168.56.30 in the same window:
+   no 4624 or "Accepted password" events.
+ - The source address: 192.168.56.30 is the Windows victim VM in this lab, so
+   the source is expected for the test and is not an external host.
+ - Whether the usernames exist on the host: they do not.
+
+Conclusion
+ The behaviour is a username-spraying pattern against SSH. In this lab it was
+ generated deliberately. The detection works as intended.
+
+Limitations
+ - The six failures are the whole sample; I could not test how the rule behaves
+   against a slow spray spread over an hour, which would evade the 120-second
+   window entirely.
+```
+
+| What makes that write-up strong | Why |
+|---|---|
+| A stated verdict with reasoning | A reviewer sees you making the true/false-positive call, which is the job |
+| The trigger explained in plain language | Proves you understand your own rule rather than pasting it |
+| Evidence listed as artifacts, not adjectives | Every claim traces to something in the repository |
+| A clearly labelled Limitations section | Shows you know where your test stops, which is what makes the rest credible |
+| No inflation | It says "generated deliberately", and that honesty buys the rest of the report its trust |
+
+#### Isolated malware handling, and the boundary you never cross
+
+The phase's tasks do not require you to run real malware. You can build a defensible, useful lab without ever executing a live sample.
+
+But you should understand what "isolated" genuinely means, because the word is used loosely and the failure mode is serious.
+
+**Isolation is a property of the network path, not of the VM.** A VM is isolated when nothing it can reach is real. That is a stronger condition than "it is a VM", because a VM with a bridged adapter is a full participant on your home network.
+
+| Configuration | Is it isolated? | Why |
+|---|---|---|
+| Host-only adapter only | **Yes** — for lab-to-lab traffic | No route to your real network or the internet |
+| Host-only plus NAT | **Partially** — the guest can reach the internet | Outbound access is a path back out. Fine for patching, not for a live sample |
+| Bridged | **No. Never.** | The VM has a real address on your real network and can reach your router, your NAS, and every device on it |
+| Internal network, host excluded | **Yes** — stricter than host-only | Even the host cannot reach the guest |
+
+**Why you never use a bridged adapter for a malware lab.** A bridged VM is a peer on your local network. Malware that scans the local subnet — and much of it does, because that is how it spreads — will scan your household or office devices. You would have released live malware onto a network you do not own and cannot contain.
+
+| Risk | What actually happens |
+|---|---|
+| Lateral spread from the bridged VM | Other devices on your LAN become targets, and reverting a snapshot cannot undo it |
+| A phone-home beacon from your real IP | Your household or employer's public address appears in someone else's threat intelligence |
+| Employer network involvement | If you lab on a work device or network, this becomes a disciplinary matter |
+| Legal exposure | Unauthorised access to systems you do not own is an offence in most jurisdictions, including the Philippines' Cybercrime Prevention Act |
+
+**What to do instead, if you want to study malware behaviour.** Take the free, safe routes, which teach the same concepts without the risk:
+
+| Safe route | What you learn |
+|---|---|
+| **Static analysis only** — never execute the sample | File type, strings, imports, embedded URLs, packer indicators |
+| **Public sandbox reports** — read the vendor's own dynamic analysis output | Behaviour, persistence, network indicators, without running anything |
+| **Platform lab environments** — CyberDefenders, BTLO, LetsDefend | Malware *artifacts* (disk images, memory captures, pcaps) rather than live code |
+| **Your own harmless binaries** — a small program that beacons on an interval | The detection engineering, which is what the phase actually asks for |
+
+**The ethical and legal boundary, stated plainly.** You may attack systems you own and have built yourself, on hardware you control, with no route to anything else. You may not attack anything else — not an employer's system, not a friend's server, not a public service, not "just to test whether a rule works". Every one of those is unauthorised access, and the intent does not change the offence.
+
+A useful rule of thumb for the whole track: **if you cannot describe the environment in one sentence that ends with "and it cannot reach anything else", it is not a lab.**
+
 #### Writing the incident report
 
 The final artifact, and the one that most directly matches the exit criterion.
@@ -501,6 +794,55 @@ anything.
 Every other tool in this phase is free. Premium buys convenience, not a
 capability you cannot otherwise build.
 
+#### The lab notebook, and why it saves you twice
+
+A **lab notebook** is one file you keep open while you work, where you write down what you did, what broke, and what you concluded — as you go, not afterwards.
+
+It saves you twice. Once immediately, because you stop re-solving the same error three weeks later. And once at the end, because the incident report writes itself out of notes you already took.
+
+```markdown
+# Lab notebook — Phase 4
+
+## Lab inventory
+| Host | Role | IP | OS | Snapshot base |
+|---|---|---|---|---|
+| lab-wazuh | SIEM manager | 192.168.56.10 | Ubuntu Server 24.04 | clean-install |
+| lab-ubuntu | Victim | 192.168.56.20 | Ubuntu Server 24.04 | clean-install |
+| lab-win10 | Victim | 192.168.56.30 | Windows 10 Eval | clean-install |
+
+## Entry template
+
+### YYYY-MM-DD HH:MM UTC — <short title>
+**Goal:** what I set out to do, in one sentence.
+**Did:** the commands I ran, in order, pasted verbatim.
+**Observed:** what actually happened, including the exact error text.
+**Next:** what I will try next, or the decision I made.
+
+## Entries
+
+### 2026-01-14 15:40 UTC — Agent installed but not checking in
+**Goal:** Get lab-ubuntu forwarding to lab-wazuh.
+**Did:** Installed the agent, set MANAGER_IP to 192.168.56.10, restarted.
+**Observed:** `ossec.log` shows `Unable to connect to manager`. `ss -tulpn`
+on the manager shows nothing listening on 1514.
+**Next:** Check whether the manager service is running at all — probably I
+installed the agent before the manager finished initialising.
+
+## Recurring problems
+| Problem | Cause | Fix that worked |
+|---|---|---|
+| (add a row each time you solve something twice) | | |
+```
+
+| Why that template works | Reason |
+|---|---|
+| The entry prompts are short and fixed | No entry takes more than two minutes |
+| Commands are pasted verbatim | The notebook becomes a source of quotations for your report |
+| Every entry records the failure text exactly | Paraphrased errors cannot be searched for later |
+| It ends with a "recurring problems" table | This is the section you will read most, and it becomes interview answers |
+
+**Use plain Markdown in your portfolio repository.** Do not use a proprietary notes app for lab work — the notebook is evidence, and evidence should be readable with `git` and a text editor, in ten years, without an account.
+
 ### Key takeaways
 
 - **The exit criterion is a demonstration, not a completion.** Show logs flowing, explain an alert, write a report. Badges are not the deliverable.
@@ -569,6 +911,7 @@ Then assemble `portfolio/cyber/04-hands-on-labs.md` against the deliverable chec
 7. Complete 10 PortSwigger Apprentice labs.
 8. Complete 2 free blue-team labs from CyberDefenders/BTLO/LetsDefend.
 9. Write one incident report from a lab.
+10. Start a lab notebook and record at least 5 entries: the goal, the commands, the exact error text, and what you did next.
 
 ## Deliverable / proof of work
 
@@ -593,6 +936,7 @@ Create `portfolio/cyber/04-hands-on-labs.md` with:
 - [ ] I completed 10 PortSwigger labs. <!-- id: cyber-04-c07 energy: normal -->
 - [ ] I completed 2 blue-team labs. <!-- id: cyber-04-c08 energy: normal -->
 - [ ] I wrote one incident report. <!-- id: cyber-04-c09 energy: normal -->
+- [ ] I kept a lab notebook with dated entries, exact error text, and what I tried. <!-- id: cyber-04-c10-lab-notebook energy: low -->
 
 ## You're ready to move on when...
 

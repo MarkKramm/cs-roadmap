@@ -358,7 +358,225 @@ slower, and it is far more likely to succeed than a direct application.
 | **Main barrier** | Shift work | Experience expectation | Fewer, less standardised roles | Trust and track record |
 | **Natural next step** | Tier 2, detection engineering, DFIR | Compliance manager, risk lead | Security engineer, cloud security | Senior pentester, red team |
 
-### Part 2 — How to actually decide
+### Part 2 — What the first 90 days actually look like
+
+The comparison table describes the roles. It does not describe the *days*, and the days are what you are actually choosing between.
+
+This part exists because "SOC analyst" and "risk analyst" are job titles, and a job title tells you almost nothing about how you will spend a Tuesday. What follows is the honest texture of each path in the first three months — the point at which you know enough to be useful and not enough to be comfortable.
+
+#### The first 90 days in a SOC (Path A)
+
+Expect **training on the tools, then a queue**.
+
+| Weeks | What you are doing |
+|---|---|
+| 1–2 | Reading playbooks and watching someone else triage. You are shadowing, and you will feel useless. That is normal, not a signal about your ability |
+| 3–4 | Taking your first alerts, but every one gets reviewed before you close it. You are learning the house standard for what "benign" looks like |
+| 5–8 | Working the queue independently. You are graded on whether your dispositions agree with your reviewer's |
+| 9–13 | Given a shift and a queue of your own. Escalations are still reviewed, but you are trusted to decide what to escalate |
+
+**What a specific day contains.** You log in and pick up the queue — fifteen to forty alerts, mostly the same three or four patterns you have seen fifty times: a scheduled scan, an administrator running a script, a user who mistyped their password. You close those with a one-line justification.
+
+Two or three will be genuinely unclear, and those are where your time goes. You open the SIEM, pivot to endpoint telemetry, check whether the account was supposed to be doing that, look at what happened next, and make a call. If it looks real, you escalate to tier 2 with a written summary.
+
+**The skill you are actually building is disposition speed.** A senior tier 1 analyst recognises a shape and closes it correctly in ninety seconds, because they have seen the benign version a hundred times. That recognition is not intelligence. It is exposure.
+
+| What you will be measured on | What it is not measured on |
+|---|---|
+| Whether your dispositions match your reviewer's | How clever your analysis was |
+| How quickly you clear the queue | How many tools you know |
+| Whether your escalations are worth tier 2's time | How many alerts you closed |
+| Whether your notes are usable by the next person | Whether your report reads well |
+
+**The thing that surprises people.** Most of the work is *not* investigation. It is documentation, and judgement about what *not* to investigate. A tier 1 analyst who escalates everything is worse than one who escalates nothing, because they spend the team's most expensive resource — senior attention — on noise.
+
+#### The first 90 days in GRC (Path B)
+
+Expect **documents, meetings, and a lot of reading**.
+
+| Weeks | What you are doing |
+|---|---|
+| 1–2 | Reading the existing policy set, and understanding what the organisation already claims it does |
+| 3–4 | Being given a small piece of a control matrix or risk register to maintain |
+| 5–8 | Sitting in meetings where a business owner explains a process, and translating that into a control description |
+| 9–13 | Owning a workstream — a vendor questionnaire, an access-review cycle, or evidence collection for an audit |
+
+**What a specific day contains.** A morning meeting where a system owner describes how they handle customer data. Later you map what they said against a framework and find two places where it does not match the policy.
+
+Then a vendor returns a security questionnaire, and you read it critically rather than ticking boxes. Does their encryption answer actually say at rest *and* in transit, or does it say "we take security seriously"? In the afternoon you chase audit evidence: a screenshot proving access reviews happened, a configuration export showing MFA is enforced.
+
+**The skill you are actually building is translation.** You translate between three languages: what the business does, what the framework requires, and what the auditor will accept as proof. All three demand precision.
+
+| What you will be measured on | What it is not measured on |
+|---|---|
+| Whether your evidence stands up to an auditor | How many frameworks you can name |
+| Whether your writing is unambiguous | How deeply you understand the technology |
+| Whether business owners trust you | Whether you can configure the control yourself |
+| Whether you finish by the deadline | Whether your analysis was elegant |
+
+**The thing that surprises people.** The hardest part is not the framework. It is getting a busy person in another department to give you something. GRC is a **persuasion job** with a documentation output. If that sounds unpleasant, take it seriously as a signal against this path.
+
+#### The first 90 days in IT Security (Path C)
+
+Expect **tickets with a security flavour, and growing ownership of controls**.
+
+| Weeks | What you are doing |
+|---|---|
+| 1–2 | Learning the environment: what systems exist, who owns them, what the current baseline is |
+| 3–4 | Taking identity work — MFA enrolments, access requests, permission fixes |
+| 5–8 | Endpoint hardening: applying a baseline, finding exceptions, and arguing with the exceptions |
+| 9–13 | Vulnerability and patch tracking, plus explaining a security requirement to a non-technical colleague |
+
+**What a specific day contains.** A ticket asking for access to a shared drive. It looks routine, and part of your job is confirming that it is — does this person's role actually need it, or is this the third unrelated permission they have requested this month?
+
+Then an MFA enrolment that will not work, because the user's phone is on a corporate plan with SMS disabled. Then a scanner report showing forty findings on a server nobody has patched since it was built, and the interesting question of which five actually matter.
+
+**The skill you are actually building is control ownership.** You are not detecting, and you are not writing policy. You are making specific systems match a standard, and then proving that they do.
+
+| What you will be measured on | What it is not measured on |
+|---|---|
+| Whether the control is actually applied | Whether you proposed the control |
+| Whether exceptions are documented with an owner | Whether you eliminated every exception |
+| Whether you can explain the requirement to a colleague | Whether you can explain it to a security architect |
+| Whether the audit trail exists | Whether the work felt important |
+
+**The thing that surprises people.** How much of the job is **negotiation**. The technical work is often straightforward; getting a team to accept a hardened baseline that breaks their workflow is not. Your IT support background is unusually good preparation for exactly this, which is why the phase names this path as your most accessible one.
+
+#### The first 90 days in a junior pentest role (Path D)
+
+Expect **supervised testing, heavy note-taking, and writing**.
+
+| Weeks | What you are doing |
+|---|---|
+| 1–2 | Reading past reports to learn the house format and the house standard for evidence |
+| 3–4 | Reconnaissance and low-risk testing on an engagement, with findings reviewed line by line |
+| 5–8 | Taking a small scope — one application or one host range — and writing your own findings section |
+| 9–13 | Writing report sections that reach a client, with a senior tester correcting your impact statements |
+
+**What a specific day contains.** Most of a morning on reconnaissance: enumerating hosts, reading responses, noting what looks interesting. A few hours of testing against the promising targets, most of which yields nothing. Then you find something, spend an hour confirming it is exploitable rather than a false alarm, and capture evidence carefully.
+
+Then you write it up, and this is the part beginners underestimate. The write-up must be reproducible by a developer who was not there, with the exact request, the exact response, and a remediation that does not merely say "sanitise input".
+
+**The skill you are actually building is judgement about severity and safety.** Anyone can run a scanner. The professional skill is knowing whether a finding matters, how far it is safe to go, and how to phrase it so someone acts on it.
+
+| What you will be measured on | What it is not measured on |
+|---|---|
+| Whether your findings are reproducible | How many findings you produced |
+| Whether your severity ratings are defensible | How novel your technique was |
+| Whether you stopped at the agreed boundary | How far you could have gone |
+| Whether your remediation advice is actionable | Whether you wrote the exploit yourself |
+
+#### The 90-day comparison, side by side
+
+| | SOC | GRC | IT Security | Pentest |
+|---|---|---|---|---|
+| **What you produce daily** | Dispositions and escalations | Documents and evidence | Configured controls and ticket notes | Findings and report sections |
+| **Core skill being built** | Pattern recognition | Translation | Control ownership | Severity judgement |
+| **How you know you are doing well** | Your dispositions match your reviewer's | Your evidence survives an audit | The control holds and exceptions are documented | Your findings are reproducible and well rated |
+| **Biggest surprise** | How much is documentation, not investigation | How much is persuasion, not analysis | How much is negotiation, not configuration | How much is writing, not hacking |
+| **Feedback speed** | Immediate — every alert | Slow — an audit is months away | Medium — a control either holds or breaks | Slow — a client reads the report weeks later |
+| **Best preparation you already have** | Phase 4's blue-team labs | Phase 3's control-mapping table | Your IT support experience | Your web development background |
+
+Read the "biggest surprise" row carefully. In all four paths the surprise has the same shape: the job is substantially less technical and substantially more communicative than the title suggests.
+
+### Part 3 — How to actually decide
+
+#### The weighted decision matrix
+
+The four-axis scoring in task 2 is the exercise the phase asks for. This is how to make it produce a decision rather than four numbers.
+
+**Step 1: write the criteria down before scoring anything.** Decide which criteria matter to you *now*, in your circumstances, and give each one a weight.
+
+| Criterion | What it measures | Weight |
+|---|---|---|
+| **Entry accessibility** | Can someone with your background realistically be hired into this in 6–12 months? | ×3 |
+| **Local job volume** | How many postings in your market could you apply for? | ×3 |
+| **Interest and daily-work fit** | Do you want the *day* described above, not the title? | ×2 |
+| **Portfolio feasibility** | Can you build three convincing projects for it, on your hardware, for $0? | ×2 |
+| **Learning-curve fit** | Can you make visible progress weekly without burning out? | ×2 |
+| **Ceiling and transferability** | Where does it lead in three to five years, and do the skills move? | ×1 |
+| **Shift and lifestyle** | Does the schedule fit your life? | ×1 |
+
+**Step 2: score each path 1–5 on every criterion, and multiply by the weight.** The weights above are a starting point, not a prescription — but if you change them, write down why.
+
+**Step 3: fill this in.** Here is the matrix as a worked artefact you can copy into your deliverable.
+
+| Criterion | Weight | A — SOC | B — GRC | C — IT Security | D — Pentest |
+|---|---:|---:|---:|---:|---:|
+| Entry accessibility | ×3 | 4 | 2 | 5 | 2 |
+| Local job volume | ×3 | 5 | 4 | 4 | 2 |
+| Interest and daily-work fit | ×2 | 4 | 2 | 4 | 5 |
+| Portfolio feasibility | ×2 | 4 | 5 | 4 | 4 |
+| Learning-curve fit | ×2 | 4 | 3 | 5 | 3 |
+| Ceiling and transferability | ×1 | 5 | 4 | 4 | 5 |
+| Shift and lifestyle | ×1 | 2 | 5 | 4 | 3 |
+| **Weighted total** | | **82** | **63** | **88** | **61** |
+
+Those totals are one learner's numbers, not a verdict. Fill in your own, and expect them to differ — the value is in doing the arithmetic, because it forces you to notice which criterion is actually driving your answer.
+
+**Step 4: look at the shape, not just the total.** Two diagnostics matter more than the winner.
+
+| Diagnostic | What it tells you |
+|---|---|
+| **Which criterion contributes most to the top score?** | If it is job volume, your decision is a market decision. If it is interest, it is a preference decision — and those fail differently |
+| **Is any path within 5 points of the top?** | A near-tie means the backup is genuinely viable rather than a consolation |
+
+**Step 5: sanity-check against the veto criteria.** Some things are not weighted — they disqualify. Shift work you cannot do, a path with no local postings, or a portfolio you could not build are vetoes, not low scores.
+
+#### Worked example: choosing between SOC and GRC for one realistic profile
+
+Here is the reasoning out loud for a specific learner, because the value of a worked example is watching someone weigh evidence rather than repeat a recommendation.
+
+**The profile.**
+
+| Fact | Detail |
+|---|---|
+| Current job | Remote IT support for a BPO, two years |
+| Education | No degree; some college, unfinished |
+| Background | Self-taught web development, a few small sites |
+| Hardware | A 2019 laptop, 8 GB RAM |
+| Budget | $0, and no capacity to spend in the next six months |
+| Constraint | Dislikes shift work intensely, and has a health condition that makes night shifts hard |
+
+**Her stated leaning: GRC.** She likes writing, she is organised, and GRC needs no lab hardware — which suits an 8 GB laptop.
+
+**First, does her interest signal survive scrutiny?** She completed the mini-tasks. The GRC one — a ten-risk register for a small remote company — she found absorbing and finished early. The SOC one, investigating an alert, she also finished but describes as "fine". That is weaker evidence for SOC than her GRC reaction is for GRC.
+
+**Second, what does the market say?** She reads twenty postings, and the pattern is stark.
+
+| Path | Postings found | Of those, junior or 0–2 years | With a degree requirement |
+|---|---:|---:|---:|
+| SOC / Blue Team | 9 | 5 | 3 |
+| GRC / Compliance | 6 | 1 | 4 |
+| IT Security | 3 | 2 | 1 |
+| Pentest | 2 | 0 | 2 |
+
+GRC has demand — the postings exist — but almost none of it is junior. The one junior-sounding GRC posting asks for "1–2 years in audit or compliance". She has neither.
+
+**Third, what about the shift-work constraint?** This is where the decision gets real. SOC has the most junior openings, and a large share are 24/7 shift roles. She has a genuine constraint, and a constraint is not a preference.
+
+**Her reasoning, out loud:**
+
+> GRC is what I want, and the postings say I cannot have it yet. The one junior GRC role wants audit or compliance experience I do not have. SOC has five junior openings, but most are shift work, which I cannot do.
+>
+> IT Security has only three postings, but two are junior and none demands a degree — and it is the closest thing to what I already do. My support experience is the qualification rather than a gap.
+>
+> So IT Security is the realistic entry, and it is adjacent to GRC in a way that matters. The GRC work I enjoyed — building a risk register, mapping controls — happens inside IT security teams too, because access reviews, vulnerability tracking, and audit evidence all live there.
+>
+> My plan: target IT Security Analyst as the primary and build the portfolio for it — a vulnerability management report with real prioritisation, an MFA rollout plan, and a hardening checklist. Keep GRC as the backup, and write one GRC artifact inside that same portfolio: a risk register covering the findings from my vulnerability report.
+>
+> In twelve months, if the search stalls, that artifact is my pivot. In three years GRC is the destination — and I will arrive with the organisational context the junior postings were asking for.
+
+**What that reasoning demonstrates.** Four things worth naming, because they are the method.
+
+| Move | Why it is good reasoning |
+|---|---|
+| She treated her own preference as *evidence to be tested*, not as the answer | Liking the mini-task is real data, but it is one data point |
+| She counted postings rather than trusting reputation | The GRC market is real but not junior-accessible, and only counting revealed that |
+| She treated shift work as a **veto**, not a low score | A constraint is not something to be averaged away |
+| She chose an adjacent backup and planned the pivot explicitly | The backup becomes a route rather than a consolation |
+
+**The general lesson.** Her interest and her accessibility pointed at different paths, and both facts were true. The resolution was not to pick one and discard the other — it was to **enter where the door is open and walk toward where she wants to be**, with the pivot written into the plan.
 
 #### The four-axis scoring, and how to use it honestly
 
@@ -516,7 +734,7 @@ honest. A 90-day plan written today is a hypothesis about a market you have
 sampled, not a fact. Deciding in advance what would falsify it is what makes it
 a plan rather than a hope.
 
-### Part 3 — Making the choice stick
+### Part 4 — Making the choice stick
 
 #### The switching trap
 
@@ -581,6 +799,87 @@ reasons to change course matters as much as knowing the trap.
 
 Revisit at the review point, or when one of those three happens — not because a
 different tool looked interesting on a Tuesday.
+
+### Part 5 — Changing your mind without losing progress
+
+#### Which skills transfer, and which do not
+
+The fear behind "what if I choose wrong" is really a fear of wasted work. That fear is mostly unfounded, and it is worth being precise about why.
+
+Every artifact you produce in this track teaches a skill that at least one other path uses. Some transfer completely; a few are genuinely path-specific.
+
+| Skill or artifact | SOC | GRC | IT Security | Pentest |
+|---|---|---|---|---|
+| **Log reading and reasoning from evidence** | ●●● | ●● | ●● | ●● |
+| **Written reports with findings and remediation** | ●●● | ●●● | ●● | ●●● |
+| **Control and framework literacy** | ●● | ●●● | ●● | ● |
+| **Vulnerability prioritisation** | ●● | ●● | ●●● | ●●● |
+| **Identity and access work** | ●● | ●● | ●●● | ●● |
+| **Traffic and packet analysis** | ●●● | ○ | ● | ●● |
+| **Web exploitation technique** | ● | ○ | ● | ●●● |
+| **Risk register and policy writing** | ● | ●●● | ●● | ● |
+| **Detection rule engineering** | ●●● | ○ | ● | ● |
+
+Read the rows rather than the columns, because the rows are the reassurance. **Writing a defensible report, reading evidence, and prioritising findings are shared by all four paths.** Those are also the three things employers find hardest to teach, which is why they are the most valuable artifacts in your portfolio.
+
+#### The 70/30 rule for a pivot
+
+When you change paths, roughly **70 percent of your portfolio survives and 30 percent needs rebuilding**.
+
+| What survives | What needs rebuilding |
+|---|---|
+| Your method — how you scope, investigate, and document | The domain-specific artifacts |
+| Your evidence discipline — captions, artifacts, limitations | The framing of your summary for a different reader |
+| Your best report, re-framed | The projects that only make sense for the old path |
+
+A pivot from SOC to GRC is mostly a **re-framing** exercise. Your Wazuh lab report becomes a control-effectiveness case study: the detection rule is a detective control, its tuning is a control gap you identified and closed, and the findings map to CIS Controls. Same artifact, different lens.
+
+A pivot from SOC to pentest is a **rebuild**, because almost nothing in a blue-team portfolio demonstrates offensive skill.
+
+| Pivot | Cost | What you keep |
+|---|---|---|
+| SOC → GRC | Low | Nearly everything, re-framed |
+| SOC → IT Security | Low | Nearly everything |
+| IT Security → GRC | Low | Everything |
+| IT Security → SOC | Medium | The reports; add a detection artefact |
+| SOC → Pentest | High | Method, writing, and evidence discipline only |
+| GRC → Pentest | High | Writing only |
+
+**The asymmetry has a direction.** Paths that produce *documents about systems* transfer into each other cheaply. Paths requiring a distinct technical demonstration — pentest most of all — are expensive to enter late.
+
+#### How to change course without restarting
+
+If you decide at your review point that the path is wrong, the recovery is procedural rather than emotional. Four steps.
+
+| Step | Action |
+|---|---|
+| **1. Distinguish the three reasons** | The market is not there, the work is not what you thought, or circumstances changed. Each has a different response |
+| **2. Re-read your own job-post notes** | You already did the research. Your notes are more reliable than your current mood |
+| **3. Identify the smallest viable pivot** | The adjacent path, not the furthest one |
+| **4. Rebuild only the 30 percent** | Keep the reports, rewrite the framing, add the one artifact the new path requires |
+
+**The reason this works is that you were never starting from zero.** A learner who spent six focused months on SOC and pivots to IT security has six months of evidence, a working lab, a written method, and a portfolio that needs one artifact added. That is a correction, not a restart.
+
+**What would be a genuine waste** is the switching trap: six months of *starting* four paths and finishing none.
+
+#### Honest market observations for the Philippines
+
+This curriculum is written for a beginner in the Philippines, and vague encouragement is not useful. What follows is directional, and you should verify it against your own twenty postings.
+
+| Observation | What it means for your choice |
+|---|---|
+| **BPO and shared-services are the largest local cyber employer** | Global firms run security operations from Manila, Cebu, and other hubs. This makes **Path A (SOC)** more available locally than a global search suggests |
+| **Those SOC roles often run 24/7 to cover other timezones** | The shift-work barrier is *more* pronounced here than in a domestic-only market, not less |
+| **Banking, fintech, insurance, and healthcare carry real compliance demand** | BSP and data-privacy obligations create genuine work. This supports **Path B (GRC)** locally — but usually at mid-level, not entry |
+| **Many junior openings are hybrid in Metro Manila, Cebu, or Clark** | If you are outside those areas, local entry may require relocation. Factor that in honestly |
+| **Remote work for overseas employers is common but competitive** | A real medium-term goal, and a harder entry point than local work |
+| **Degrees are listed more often than they are enforced** | Many postings say "Bachelor's degree in IT or related field" and then interview on skill. Look for "or equivalent experience", and apply anyway when the rest fits |
+| **Certifications carry real weight locally** | More than in some Western markets. Phase 7 covers this, and it is a reason not to skip it |
+| **Entry-level security salaries are modest** | This is a field you enter for the trajectory, not the first salary |
+
+**The honest summary for this market:** Path A is where the local volume is, Path B is where the local compliance money is, Path C is your shortest walk from where you already are, and Path D is a destination rather than a door.
+
+**One caution about market advice, including this table.** It is a snapshot of a moving market. Your twenty postings are fresher and more local than anything above. When this table and your notes disagree, **trust your notes, and record why.**
 
 #### Connecting forward
 
@@ -662,6 +961,7 @@ Then open `portfolio/cyber/05-specialization-choice.md` and check it against the
 3. Search PH/remote job boards for each role and list common requirements.
 4. Choose one primary path and one backup path.
 5. Write a 90-day specialization plan.
+6. Fill in the weighted decision matrix with your own criteria and weights, and write one sentence explaining which criterion drove your answer.
 
 ## Deliverable / proof of work
 
@@ -683,6 +983,7 @@ Create `portfolio/cyber/05-specialization-choice.md` with:
 - [ ] I chose one primary path. <!-- id: cyber-05-c06 energy: normal -->
 - [ ] I chose one backup path. <!-- id: cyber-05-c07 energy: normal -->
 - [ ] I wrote a 90-day specialization plan. <!-- id: cyber-05-c08 energy: normal -->
+- [ ] I filled in a weighted decision matrix and named the criterion that drove my choice. <!-- id: cyber-05-c09-weighted-matrix energy: normal -->
 
 ## You're ready to move on when...
 

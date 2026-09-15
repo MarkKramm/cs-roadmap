@@ -8,7 +8,9 @@ const dir = 'career-roadmaps/cybersec-roadmap';
 const out = {};
 
 for (const f of fs.readdirSync(dir).sort()) {
-  if (!/^0[1-9]-.*\.md$/.test(f)) continue;
+  // Phases only: two-digit numbers from 01, excluding 00-overview (a strategy
+  // document with no lesson region).
+  if (!/^(?!00-)\d{2}-.*\.md$/.test(f)) continue;
   const text = fs.readFileSync(path.join(dir, f), 'utf8');
   const lines = text.split('\n');
 

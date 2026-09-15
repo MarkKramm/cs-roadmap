@@ -21,6 +21,7 @@
 import { createServer } from "vite";
 import { createElement } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
+import { readFileSync, existsSync } from "node:fs";
 import { join, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -105,6 +106,7 @@ try {
   const PhaseCard = await load("/src/components/PhaseCard.jsx");
   const ChecklistItem = await load("/src/components/ChecklistItem.jsx");
   const ToolCard = await load("/src/components/ToolCard.jsx");
+  const Lesson = await load("/src/components/Lesson.jsx");
   const EnergyModeSelector = await load("/src/components/EnergyModeSelector.jsx");
   const EmptyState = await load("/src/components/EmptyState.jsx");
   const ToolsLibrary = await load("/src/pages/ToolsLibrary.jsx");
@@ -180,6 +182,105 @@ try {
           "phase title not rendered"
         );
       }
+    }
+  }
+
+  // --- Lesson renderer, every phase ---
+  // The lesson is ~90% of each phase file and is the reason the site exists.
+  // Server rendering never runs useEffect or IntersectionObserver, so what this
+  // proves is the block switch itself: that every block type the parser emits
+  // has a renderer, that tables and code survive, and that inline Markdown is
+  // not left as literal asterisks. The parser is checked for content loss
+  // separately by scripts/audit-lesson-ast.mjs.
+  if (Lesson) {
+    for (const phase of allPhases) {
+      const lessonPath = join(
+        ROOT,
+        "src",
+        "data",
+        "generated",
+        "lessons",
+        phase.id + ".json"
+      );
+      if (!existsSync(lessonPath)) {
+        failures.push("Lesson " + phase.id + " — no lesson file at " + lessonPath);
+        continue;
+      }
+      const lesson = JSON.parse(readFileSync(lessonPath, "utf8"));
+
+      const html = render(
+        "Lesson " + phase.id,
+        createElement(Lesson, {
+          title: lesson.title,
+          blocks: lesson.blocks,
+          toc: lesson.toc,
+        })
+      );
+      if (!html) continue;
+
+      const label = "Lesson " + phase.id;
+
+      assert(label + ": has blocks", (lesson.blocks || []).length > 0, "lesson has no blocks");
+
+      assert(
+        label + ": no unsupported block",
+        !html.includes("Unsupported block type"),
+        "a block type reached the renderer with no case for it"
+      );
+
+      // Literal Markdown markers in rendered prose mean inline formatting was
+      // not applied. Code blocks are excluded: their whole purpose is to show
+      // text verbatim, and a `markdown` fence legitimately displays **bold** as
+      // an example. Only the surrounding prose is checked.
+      const prose = html
+        .replace(/<pre[\s\S]*?<\/pre>/g, "")
+        .replace(/<code[\s\S]*?<\/code>/g, "");
+      assert(
+        label + ": inline bold rendered",
+        !prose.includes("**"),
+        "literal ** reached rendered prose — renderInline did not run"
+      );
+      assert(
+        label + ": inline code rendered",
+        !/`[^`]+`/.test(prose),
+        "literal backticks reached rendered prose — renderInline did not run"
+      );
+
+      // Tables: compare counts against the AST so a dropped table is caught.
+      const tableBlocks = (lesson.blocks || []).filter((b) => b.type === "table").length;
+      const renderedTables = (html.match(/<table/g) || []).length;
+      assert(
+        label + ": tables rendered",
+        renderedTables === tableBlocks,
+        "expected " + tableBlocks + " tables, rendered " + renderedTables
+      );
+
+      const codeBlocks = (lesson.blocks || []).filter((b) => b.type === "code").length;
+      const renderedCode = (html.match(/<pre/g) || []).length;
+      assert(
+        label + ": code blocks rendered",
+        renderedCode === codeBlocks,
+        "expected " + codeBlocks + " code blocks, rendered " + renderedCode
+      );
+
+      // Every heading needs a unique id, or the table of contents links to the
+      // wrong place (or to nothing).
+      const ids = [...html.matchAll(/id="([^"]+)"/g)].map((m) => m[1]);
+      const dupes = ids.filter((id, i) => ids.indexOf(id) !== i);
+      assert(
+        label + ": heading ids unique",
+        dupes.length === 0,
+        "duplicate id(s): " + [...new Set(dupes)].slice(0, 3).join(", ")
+      );
+
+      // Each TOC entry must point at an id that exists in the body.
+      const tocTargets = (lesson.toc || []).map((t) => t.id);
+      const missingTargets = tocTargets.filter((t) => !ids.includes(t));
+      assert(
+        label + ": toc targets exist",
+        missingTargets.length === 0,
+        "toc points at missing id(s): " + missingTargets.slice(0, 3).join(", ")
+      );
     }
   }
 

@@ -1,7 +1,9 @@
 import ProgressBar from "../components/ProgressBar.jsx";
 import ChecklistItem from "../components/ChecklistItem.jsx";
 import ToolCard from "../components/ToolCard.jsx";
+import Lesson from "../components/Lesson.jsx";
 import { countDone } from "../hooks/useProgress.js";
+import { useLesson } from "../hooks/useLesson.js";
 import { renderInline } from "../lib/renderInline.jsx";
 
 // Full detail for one phase, rendered from the generated JSON.
@@ -12,6 +14,12 @@ const REPO = "https://github.com/MarkKramm/cs-roadmap/blob/main/";
 export default function PhaseDetail({ phase, done, onToggle, onBack }) {
   const doneCount = countDone(done, phase.checklist);
 
+  // The lesson is the substance of the phase; everything else is scaffolding
+  // around it. It sits directly after the goal so the reader reaches the
+  // teaching before the checklist.
+  const { status: lessonStatus, lesson, message } = useLesson(phase);
+  const headingCount = phase.lessonHeadingCount || 0;
+
   return (
     <div className="phase-detail">
       <button type="button" className="btn btn--ghost" onClick={onBack}>
@@ -20,9 +28,10 @@ export default function PhaseDetail({ phase, done, onToggle, onBack }) {
 
       <h1>{phase.title}</h1>
       <p className="muted">
-        {phase.duration} · {phase.checklist.length} checklist items ·{" "}
+        {phase.duration} · {phase.checklist.length} checklist items
+        {headingCount > 0 && " · " + headingCount + " lesson sections"} ·{" "}
         <a href={REPO + phase.sourcePath} target="_blank" rel="noreferrer">
-          read the full guide
+          read the source
         </a>
       </p>
 
@@ -32,6 +41,31 @@ export default function PhaseDetail({ phase, done, onToggle, onBack }) {
         <h2>Goal</h2>
         <p>{phase.goal}</p>
       </section>
+
+      {lessonStatus === "loading" && (
+        <section className="card">
+          <h2>Lesson</h2>
+          <p className="muted">Loading the lesson…</p>
+        </section>
+      )}
+
+      {lessonStatus === "error" && (
+        <section className="card">
+          <h2>Lesson</h2>
+          <p className="muted">
+            The lesson could not be loaded ({message}). The source file is
+            still readable in the repository.
+          </p>
+        </section>
+      )}
+
+      {lessonStatus === "ready" && (
+        <Lesson
+          title={lesson.title || phase.lessonTitle || "Lesson"}
+          blocks={lesson.blocks || []}
+          toc={lesson.toc || []}
+        />
+      )}
 
       <section className="card">
         <h2>Skills you'll gain</h2>
