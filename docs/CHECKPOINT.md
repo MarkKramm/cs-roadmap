@@ -8,8 +8,8 @@ A snapshot of the repository's current state. Update this when a meaningful mile
 |---|---|
 | Branch | `main` |
 | Tracked files | **140** — 131 plus the nine files this pass adds: `scripts/shared-content.mjs`, `learning-site/src/lib/today.js`, `learning-site/src/lib/yourWork.js`, `learning-site/src/hooks/useTimeBudget.js`, `learning-site/src/pages/Shared.jsx`, `learning-site/src/pages/YourWork.jsx`, `learning-site/src/components/TimeBudgetSelector.jsx`, `learning-site/scripts/test-work.mjs`, `learning-site/scripts/test-today.mjs` |
-| Working tree | **This pass is uncommitted.** The three features and these four doc updates are the pending change; everything before it is committed |
-| Unpushed | None beyond that pending commit. `main` and `origin/main` were level before this pass — run `git --no-pager log --oneline -n 1` for the exact hash, since this file cannot contain its own |
+| Working tree | **Clean apart from one uncommitted refinement to `docs/CONTENT-SCHEMA.md`.** The three features and the doc updates for them landed in `3d637e7`; this file was then corrected to match |
+| Unpushed | None at the time of writing, subject to the one pending refinement above — run `git --no-pager log --oneline -n 1` for the exact hash, since this file cannot contain its own |
 | Line endings | LF everywhere (Windows scripts excepted) |
 | Encoding | UTF-8, no BOM |
 | Remote | `origin` → https://github.com/MarkKramm/cs-roadmap |
@@ -157,7 +157,7 @@ From the repository root:
 
 ```powershell
 git --no-pager log --oneline -n 5
-git --no-pager status --short          # expect the pending pass, then empty after committing
+git --no-pager status --short          # expect one modified docs/CONTENT-SCHEMA.md, then empty
 git --no-pager log origin/main..HEAD --oneline   # expect empty after pushing
 
 node scripts/lint-content.mjs            # content integrity

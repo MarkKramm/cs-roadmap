@@ -173,7 +173,7 @@ Two rules the parser keeps:
 - **Nothing is dropped.** A line that matches no block becomes a paragraph, and any construct the parser does not recognise is recorded in `unknown`, which **fails the build**. Content that cannot be rendered must be a loud error, not a silently missing paragraph.
 - **Heading IDs are unique.** Duplicates get a numeric suffix so a table of contents never links two entries to the same anchor.
 
-`node scripts/audit-lesson-ast.mjs` verifies both across every phase by comparing the AST's characters against the source with markup stripped. It currently reports zero loss on all 18 lessons. **Run it after any change to the parser.**
+`node scripts/audit-lesson-ast.mjs` verifies both across every phase by comparing the AST's characters against the source with markup stripped. It currently reports zero loss on all 23 lessons. **Run it after any change to the parser.**
 
 ## Output: generated JSON
 
@@ -184,7 +184,36 @@ learning-site/src/data/generated/it.json
 learning-site/src/data/generated/cyber.json
 learning-site/src/data/generated/lessons/<phase-id>.json
 learning-site/src/data/generated/search.json
+learning-site/src/data/generated/shared.json
 ```
+
+### `shared.json` — the standalone shared documents
+
+`career-roadmaps/shared/` holds three documents that are part of the curriculum but are **not phase files**, so `build-content.mjs`'s `*-phase-*.md` walk never reaches them. [`scripts/shared-content.mjs`](../scripts/shared-content.mjs) reads them separately and emits one file:
+
+`{ "generatedAt": "…", "docs": [ … ] }`, where each entry carries `id`, `kind`, `title`, `blurb` and `sourcePath`, and then one of two bodies depending on `kind`:
+
+```json
+{
+  "generatedAt": "2026-09-15T00:00:00.000Z",
+  "docs": [
+    { "id": "anti-burnout-rules", "kind": "doc",
+      "title": "Anti-Burnout Rules", "blurb": "…", "sourcePath": "career-roadmaps/shared/anti-burnout-rules.md",
+      "blocks": [ … ], "toc": [ … ], "blockCount": 21 },
+
+    { "id": "resource-list", "kind": "resources",
+      "title": "Free Resource List", "blurb": "…", "sourcePath": "career-roadmaps/shared/resource-list.md",
+      "groups": [ { "heading": "CompTIA A+",
+                    "resources": [ { "name": "Professor Messer CompTIA A+", "url": "https://…" } ] } ],
+      "resourceCount": 42 }
+  ]
+}
+```
+
+- **`kind: "doc"`** — the anti-burnout rules and the weekly tracker. Prose, tables and lists, parsed into the lesson AST's own block shape, so `LessonBlock` renders them unchanged.
+- **`kind: "resources"`** — the resource list. A catalogue rather than prose: `Name — https://url` lines are extracted into `{ name, url }` pairs under their category heading, so the site can render real anchors. `renderInline` handles bold, code and italic only and deliberately does not autolink, so as prose this document would be 42 unclickable URLs.
+- **The block shape is the lesson AST's**, because the same parser builds it. The parser takes a `headingBase` parameter: lessons are authored inside a `## Lesson:` wrapper so their headings start at level 3, while a standalone document is authored `# Title` / `## Section` and starts at level 1. One parser, two corpora.
+- **The build fails rather than skipping quietly.** A wrong resource separator, a bullet before any category heading, or an unparsed block stops the build — the same contract `build-content.mjs` enforces for phase resources, and for the same reason: an unlinked resource far from its cause is a mystery, while a named error at build time is a five-second fix.
 
 ### Why the lessons are separate files
 
@@ -239,7 +268,7 @@ An index file contains:
       "topics": [{ "heading": "IP addressing", "items": ["...", "..."] }],
       "tools": [{ "name": "Wazuh", "purpose": "...", "cost": "...", "url": "...", "task": "...", "freeAlternative": "..." }],
       "resources": [{ "name": "Practical Networking", "url": "https://..." }],
-      "tasks": ["...", "..."],
+      "tasks": [{ "id": "it-03-t01", "text": "...", "band": "quick", "energy": "low" }],
       "deliverableItems": ["...", "..."],
       "checklist": [{ "id": "it-03-c01", "text": "...", "energy": "low" }],
       "lessonTitle": "Networking Without the Jargon",
@@ -282,4 +311,4 @@ Failures are reported with file path and line number.
 
 ## Migration path
 
-Adding front-matter and task IDs touches all 17 phase files. The migration is one scripted pass, committed as a single change, then reviewed. Until that pass runs, this document is a design artifact.
+Completed. Front-matter, checklist IDs and practice-task IDs are on all 23 phase files, and every practice task additionally carries a duration band and an energy value. There is no pending migration; the contract above describes the files as they are.

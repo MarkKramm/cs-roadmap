@@ -14,8 +14,8 @@
 //   * `anti-burnout-rules.md` and `weekly-tracker-template.md` are prose with
 //     tables and lists. parseLesson handles them once told their heading depth
 //     (they are standalone files, so they start at `#`, not `###`).
-//   * `resource-list.md` is a structured catalogue — 45 entries of
-//     `Name — https://url` under eight category headings. Rendered as prose it
+//   * `resource-list.md` is a structured catalogue — 42 entries of
+//     `Name — https://url` under six category headings. Rendered as prose it
 //     would be a wall of unclickable text; `renderInline` handles bold, code and
 //     italic only, and deliberately does not autolink. So its categories and
 //     entries are extracted into data and rendered as links.
