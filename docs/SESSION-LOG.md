@@ -2,6 +2,26 @@
 
 A chronological record of working sessions. Newest first.
 
+## 2026-09-16 (later) — A guard that could not fail, and the documentation that said it was fine
+
+**Goal:** hand the pass over cleanly. What it actually turned up was a guard whose skip path was indistinguishable from its pass path, and four documents still describing the repository as it was several passes ago.
+
+**The defect: a green tick that could mean nothing.** `learning-site/scripts/browser-check.mjs` shipped with an unconditional `process.exit(0)` when no browser was found, justified in its own header comment by "GitHub's ubuntu runner has none at any path this script looks in" — a claim that was **false**. `ubuntu-latest` has Chrome at `/usr/bin/google-chrome`, and CI run #43 already listed `Browser check (real engine)` as a passing step. So the file was both wrong about the runner and, worse, structured so that `completed / success` could not distinguish `50 checks, 0 failed` from `BROWSER CHECK SKIPPED`. This repository had already been bitten by that exact shape three times — the `^0[1-9]-` pattern that hid phases 10+, the storage-key guard that compared the test to itself, and the key-count assertion that threw instead of failing. **A check whose skip path looks like its pass path is not a check.**
+
+**Two failure modes now exist, and both are guarded.** `BROWSER_CHECK_STRICT=1` (set in the workflow, and only there) turns a missing browser into exit 1 with `BROWSER CHECK FAILED`. `MIN_CHECKS = 40` catches the other silent pass — a run that connected to an error page and executed almost no assertions, where assertions that never ran would otherwise look like assertions that held. All four combinations were exercised locally: strict with no browser exits 1, non-strict with no browser exits 0 with an explicit `SKIPPED`, and with Edge present both modes exit 0 at 50 checks.
+
+**The first attempt at testing that was itself broken, and it is worth recording.** It replaced `PATH` with `C:\Windows\System32` to hide the browser — which also hid `node`, so nothing ran at all and both cases reported nothing. The fix was to add a `BROWSER_PATH` override so the skip path is testable on a machine that *does* have a browser. A test that cannot run is not evidence, which is the same lesson as the guard it was testing.
+
+**End-to-end proof, not local proof.** CI run **#45 on `57af97e`** is the first run of the strict-mode version, and the step **passed** — which means a browser was found, because strict mode fails the step otherwise. Before that commit, "it runs in CI" rested on run #43, a run of the version whose skip path exited 0. Recorded in D-023, CHECKPOINT, ROADMAP and CHANGELOG, each now citing both runs and saying which one carries the weight.
+
+**Four documents still described CI as it was several passes ago.** `WORKFLOW.md` claimed two jobs running only lint and build+smoke, said "all 18 lessons" when there are 23, and did not mention `audit-refs` or `test:browser` at all. `ARCHITECTURE.md` and `ROADMAP.md` repeated the two-jobs-three-checks line. `README.md` line 58 said "Deploying the site is the remaining item" while the site has been live for weeks, and its Status paragraph stopped at M2. All four are corrected; the historical entries in this file and D-011 that say "18 phases" are **left alone deliberately**, because a log that describes the state when it was written is doing its job.
+
+**Two documentation corrections were also made to the pass's own record.** The `audit-refs.mjs` false start count in `COMPREHENSION-AUDIT.md` was reconciled against the actual runs, and the CHECKPOINT tracked-file count was corrected from 143 to **144** — `audit-terms.mjs` was also new, and the count had been written before reconciling against `git ls-files`.
+
+**Final state.** `HEAD == origin/main == b93e3f7`, tree clean. Guards: lint **144 files / 0 issues**, content 0, AST 23 / 0 loss, readability 0 of 23 outside target, refs **0 findings across 25 files**, site suite **37 / 42 / 86 / 28 / 31 / 77 / 77 / 41** and **181 renders / 0 failures**, browser **50 checks / 0 failed**. CI run **#46 on `b93e3f7` — `completed/success`, all 11 content steps and all 18 site steps.**
+
+**Carried forward, and it is not nothing.** The audit's *verdicts* are one reader's judgement — only its findings were re-verified against source. `FORWARD_AS_PRIOR` and the acronym scan print without gating, so each needs a human to look. The browser check is one engine at two widths, so it is not a cross-browser matrix and does not cover the 561–860px band. And **nobody has timed a single curriculum task** — every band and energy value is an authored estimate.
+
 ## 2026-09-16 — An audit for the defect the guards cannot see, and the first real browser render
 
 **Goal:** Three parts. Audit all 23 phases for beginner-comprehension defects and report only falsifiable findings; fix the real ones and add a mechanical guard for whatever class the audit **proves** detectable; then actually render the six never-verified views in a real browser.
