@@ -1002,21 +1002,21 @@ Create `portfolio/cyber/09-cloud-and-identity.md` with:
 
 ## Checklist
 
-- [ ] I can explain the shared responsibility model for IaaS, PaaS, and SaaS. <!-- id: c9-cloud-shared-responsibility energy: low -->
-- [ ] I created a free Entra ID tenant and added test users. <!-- id: c9-entra-tenant-setup energy: normal -->
-- [ ] I enabled MFA and read the resulting sign-in log entries. <!-- id: c9-entra-mfa-signin energy: normal -->
-- [ ] I can explain conditional access as an if-then statement with signals and controls. <!-- id: c9-conditional-access-concept energy: low -->
-- [ ] I wrote three IAM policies and analysed what each actually allows. <!-- id: c9-iam-policy-writing energy: normal -->
-- [ ] I can identify over-permissive permissions in a policy and justify each removal. <!-- id: c9-least-privilege-audit energy: normal -->
-- [ ] I explained why managed identities are safer than long-lived access keys. <!-- id: c9-managed-identity-reasoning energy: low -->
-- [ ] I completed a public storage bucket lab including detection and remediation. <!-- id: c9-public-bucket-lab energy: normal -->
-- [ ] I read CloudTrail or Activity Log and reconstructed a sequence as a timeline. <!-- id: c9-cloudtrail-timeline energy: normal -->
-- [ ] I wrote three cloud detection rules naming the events they watch. <!-- id: c9-cloud-detections energy: normal -->
-- [ ] I can explain the metadata endpoint and why SSRF there is credential theft. <!-- id: c9-metadata-ssrf-explanation energy: low -->
-- [ ] I produced an IAM access review with keep, reduce, or remove decisions. <!-- id: c9-iam-access-review energy: normal -->
-- [ ] I wrote a cloud finding with evidence, impact, remediation, and verification. <!-- id: c9-cloud-finding-writeup energy: high -->
-- [ ] I set a cloud budget alarm before creating any resource. <!-- id: c9-cloud-cost-guardrail energy: low -->
-- [ ] I stated in writing what cloud systems I will and will not test. <!-- id: c9-cloud-legal-boundaries energy: low -->
+- [ ] I can explain the shared responsibility model for IaaS, PaaS, and SaaS. <!-- id: cyber-09-cloud-shared-responsibility energy: low -->
+- [ ] I created a free Entra ID tenant and added test users. <!-- id: cyber-09-entra-tenant-setup energy: normal -->
+- [ ] I enabled MFA and read the resulting sign-in log entries. <!-- id: cyber-09-entra-mfa-signin energy: normal -->
+- [ ] I can explain conditional access as an if-then statement with signals and controls. <!-- id: cyber-09-conditional-access-concept energy: low -->
+- [ ] I wrote three IAM policies and analysed what each actually allows. <!-- id: cyber-09-iam-policy-writing energy: normal -->
+- [ ] I can identify over-permissive permissions in a policy and justify each removal. <!-- id: cyber-09-least-privilege-audit energy: normal -->
+- [ ] I explained why managed identities are safer than long-lived access keys. <!-- id: cyber-09-managed-identity-reasoning energy: low -->
+- [ ] I completed a public storage bucket lab including detection and remediation. <!-- id: cyber-09-public-bucket-lab energy: normal -->
+- [ ] I read CloudTrail or Activity Log and reconstructed a sequence as a timeline. <!-- id: cyber-09-cloudtrail-timeline energy: normal -->
+- [ ] I wrote three cloud detection rules naming the events they watch. <!-- id: cyber-09-cloud-detections energy: normal -->
+- [ ] I can explain the metadata endpoint and why SSRF there is credential theft. <!-- id: cyber-09-metadata-ssrf-explanation energy: low -->
+- [ ] I produced an IAM access review with keep, reduce, or remove decisions. <!-- id: cyber-09-iam-access-review energy: normal -->
+- [ ] I wrote a cloud finding with evidence, impact, remediation, and verification. <!-- id: cyber-09-cloud-finding-writeup energy: high -->
+- [ ] I set a cloud budget alarm before creating any resource. <!-- id: cyber-09-cloud-cost-guardrail energy: low -->
+- [ ] I stated in writing what cloud systems I will and will not test. <!-- id: cyber-09-cloud-legal-boundaries energy: low -->
 
 ## You're ready to move on when...
 

@@ -26,7 +26,7 @@ The curriculum itself is content-only. `career-roadmaps/` and `docs/` are plain 
 └── career-roadmaps/       # The actual study content
     ├── README.md          # Strategy document (start here)
     ├── it-roadmap/        # 00-overview + 9 phases + checklists
-    ├── cybersec-roadmap/  # 00-overview + 8 phases + checklists
+    ├── cybersec-roadmap/  # 00-overview + 14 phases + checklists
     └── shared/            # Anti-burnout rules, resources, weekly tracker
 ```
 

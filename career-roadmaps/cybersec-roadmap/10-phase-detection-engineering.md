@@ -1117,21 +1117,21 @@ Create `portfolio/cyber/10-detection-engineering.md` with:
 
 ## Checklist
 
-- [ ] I can name which log source records a given attacker behaviour. <!-- id: c10-behaviour-log-mapping energy: low -->
-- [ ] I installed Sysmon with a configuration I read and modified myself. <!-- id: c10-sysmon-configured energy: normal -->
-- [ ] I can interpret the Windows logon types and explain why 4624 differs by type. <!-- id: c10-logon-type-reading energy: low -->
-- [ ] I can read 4625 sub-codes and distinguish enumeration from password guessing. <!-- id: c10-4625-subcodes energy: low -->
-- [ ] I wrote three Sigma rules with references, ATT&CK tags, and a false-positives field. <!-- id: c10-sigma-rules-written energy: normal -->
-- [ ] I converted a Sigma rule into at least one platform-specific query. <!-- id: c10-sigma-conversion energy: normal -->
-- [ ] I wrote at least one sequence or correlation rule, not only single-event matches. <!-- id: c10-sequence-rule energy: normal -->
-- [ ] I ran a true positive test and confirmed the rule fires on the behaviour. <!-- id: c10-true-positive-test energy: normal -->
-- [ ] I ran a false positive test, found a benign lookalike, and fixed the rule. <!-- id: c10-false-positive-test energy: normal -->
-- [ ] I documented one false positive with a risk accepted and a review date. <!-- id: c10-false-positive-record energy: normal -->
-- [ ] I mapped my rules to ATT&CK sub-techniques and named the gaps. <!-- id: c10-attack-coverage-map energy: normal -->
-- [ ] I wrote an analyst action for every rule in my library. <!-- id: c10-analyst-action energy: low -->
-- [ ] I calculated the alert volume my library would produce and stated what I would retire. <!-- id: c10-alert-fatigue-math energy: normal -->
-- [ ] I can explain why tuning by filter creates a bypass and how I document it. <!-- id: c10-filter-risk-explanation energy: low -->
-- [ ] I explained how a broken rule is indistinguishable from a quiet one and how I re-test. <!-- id: c10-silent-failure-awareness energy: low -->
+- [ ] I can name which log source records a given attacker behaviour. <!-- id: cyber-10-behaviour-log-mapping energy: low -->
+- [ ] I installed Sysmon with a configuration I read and modified myself. <!-- id: cyber-10-sysmon-configured energy: normal -->
+- [ ] I can interpret the Windows logon types and explain why 4624 differs by type. <!-- id: cyber-10-logon-type-reading energy: low -->
+- [ ] I can read 4625 sub-codes and distinguish enumeration from password guessing. <!-- id: cyber-10-4625-subcodes energy: low -->
+- [ ] I wrote three Sigma rules with references, ATT&CK tags, and a false-positives field. <!-- id: cyber-10-sigma-rules-written energy: normal -->
+- [ ] I converted a Sigma rule into at least one platform-specific query. <!-- id: cyber-10-sigma-conversion energy: normal -->
+- [ ] I wrote at least one sequence or correlation rule, not only single-event matches. <!-- id: cyber-10-sequence-rule energy: normal -->
+- [ ] I ran a true positive test and confirmed the rule fires on the behaviour. <!-- id: cyber-10-true-positive-test energy: normal -->
+- [ ] I ran a false positive test, found a benign lookalike, and fixed the rule. <!-- id: cyber-10-false-positive-test energy: normal -->
+- [ ] I documented one false positive with a risk accepted and a review date. <!-- id: cyber-10-false-positive-record energy: normal -->
+- [ ] I mapped my rules to ATT&CK sub-techniques and named the gaps. <!-- id: cyber-10-attack-coverage-map energy: normal -->
+- [ ] I wrote an analyst action for every rule in my library. <!-- id: cyber-10-analyst-action energy: low -->
+- [ ] I calculated the alert volume my library would produce and stated what I would retire. <!-- id: cyber-10-alert-fatigue-math energy: normal -->
+- [ ] I can explain why tuning by filter creates a bypass and how I document it. <!-- id: cyber-10-filter-risk-explanation energy: low -->
+- [ ] I explained how a broken rule is indistinguishable from a quiet one and how I re-test. <!-- id: cyber-10-silent-failure-awareness energy: low -->
 
 ## You're ready to move on when...
 

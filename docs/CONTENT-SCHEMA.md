@@ -53,8 +53,9 @@ Each `- [ ]` line under `## Checklist` gets a trailing HTML comment with a stabl
 - [ ] I understand IPv6 basics and AAAA DNS records. <!-- id: it-03-c03 energy: normal -->
 ```
 
-- **ID format:** `<track>-<phase>-c<NN>`, zero-padded, sequential within the phase.
+- **ID format:** `<track>-<phase>-c<NN>`, zero-padded, sequential within the phase. Track is `it` or `cyber`, phase is the two-digit number from the filename. `it-03-c01`, `cyber-09-c01`.
 - **IDs never change.** Adding a task appends a new ID. Removing a task retires its ID but does not renumber.
+- IDs must be **globally unique**, not merely unique within a phase — the build fails on a duplicate. The site treats an ID as the identity of a task, so a collision across two phases would make progress on one appear against the other.
 - The `energy:` hint is optional. When present, the site's low-energy mode only offers `energy: low` tasks.
 - HTML comments are invisible in every Markdown renderer, so the raw file stays clean.
 

@@ -1300,23 +1300,23 @@ Create `portfolio/cyber/14-web-app-security.md` with:
 
 ## Checklist
 
-- [ ] I can read a full HTTP request and explain the security meaning of each header. <!-- id: c14-http-request-reading energy: low -->
-- [ ] I can evaluate a response's security headers and say what each missing one allows. <!-- id: c14-security-headers energy: normal -->
-- [ ] I can explain the same-origin policy and demonstrate it. <!-- id: c14-same-origin-demo energy: normal -->
-- [ ] I can identify which OWASP Top 10 category a flaw belongs to and justify it. <!-- id: c14-owasp-classification energy: normal -->
-- [ ] I found and demonstrated an IDOR using two accounts. <!-- id: c14-idor-demonstration energy: normal -->
-- [ ] I demonstrated SQL injection manually and explained why parameterisation fixes it. <!-- id: c14-sqli-demonstration energy: normal -->
-- [ ] I explained why identifiers need an allowlist rather than a parameter. <!-- id: c14-identifier-allowlist energy: low -->
-- [ ] I demonstrated reflected, stored, and DOM-based XSS and explained the difference. <!-- id: c14-xss-three-flavours energy: normal -->
-- [ ] I demonstrated a CSRF and identified which defence was missing. <!-- id: c14-csrf-demonstration energy: normal -->
-- [ ] I demonstrated SSRF reaching the cloud metadata address in a local lab. <!-- id: c14-ssrf-demonstration energy: normal -->
-- [ ] I tested session handling including identifier regeneration on login and server-side logout. <!-- id: c14-session-testing energy: normal -->
-- [ ] I chained two or more small flaws into one higher-severity finding. <!-- id: c14-finding-chaining energy: high -->
-- [ ] I used Burp Repeater and changed one thing at a time while recording results. <!-- id: c14-burp-repeater-workflow energy: normal -->
-- [ ] I wrote a finding with a full reproduction, raw requests, and a specific remediation. <!-- id: c14-web-finding-written energy: high -->
-- [ ] I can defend a CVSS vector and explain why it is a triage input rather than a priority. <!-- id: c14-cvss-reasoning energy: low -->
-- [ ] I reviewed a configuration and proposed a defence-in-depth measure per finding. <!-- id: c14-config-review energy: normal -->
-- [ ] I wrote down exactly what I may test and the sequence I would follow on an accidental discovery. <!-- id: c14-web-legal-boundaries energy: low -->
+- [ ] I can read a full HTTP request and explain the security meaning of each header. <!-- id: cyber-14-http-request-reading energy: low -->
+- [ ] I can evaluate a response's security headers and say what each missing one allows. <!-- id: cyber-14-security-headers energy: normal -->
+- [ ] I can explain the same-origin policy and demonstrate it. <!-- id: cyber-14-same-origin-demo energy: normal -->
+- [ ] I can identify which OWASP Top 10 category a flaw belongs to and justify it. <!-- id: cyber-14-owasp-classification energy: normal -->
+- [ ] I found and demonstrated an IDOR using two accounts. <!-- id: cyber-14-idor-demonstration energy: normal -->
+- [ ] I demonstrated SQL injection manually and explained why parameterisation fixes it. <!-- id: cyber-14-sqli-demonstration energy: normal -->
+- [ ] I explained why identifiers need an allowlist rather than a parameter. <!-- id: cyber-14-identifier-allowlist energy: low -->
+- [ ] I demonstrated reflected, stored, and DOM-based XSS and explained the difference. <!-- id: cyber-14-xss-three-flavours energy: normal -->
+- [ ] I demonstrated a CSRF and identified which defence was missing. <!-- id: cyber-14-csrf-demonstration energy: normal -->
+- [ ] I demonstrated SSRF reaching the cloud metadata address in a local lab. <!-- id: cyber-14-ssrf-demonstration energy: normal -->
+- [ ] I tested session handling including identifier regeneration on login and server-side logout. <!-- id: cyber-14-session-testing energy: normal -->
+- [ ] I chained two or more small flaws into one higher-severity finding. <!-- id: cyber-14-finding-chaining energy: high -->
+- [ ] I used Burp Repeater and changed one thing at a time while recording results. <!-- id: cyber-14-burp-repeater-workflow energy: normal -->
+- [ ] I wrote a finding with a full reproduction, raw requests, and a specific remediation. <!-- id: cyber-14-web-finding-written energy: high -->
+- [ ] I can defend a CVSS vector and explain why it is a triage input rather than a priority. <!-- id: cyber-14-cvss-reasoning energy: low -->
+- [ ] I reviewed a configuration and proposed a defence-in-depth measure per finding. <!-- id: cyber-14-config-review energy: normal -->
+- [ ] I wrote down exactly what I may test and the sequence I would follow on an accidental discovery. <!-- id: cyber-14-web-legal-boundaries energy: low -->
 
 ## You're ready to move on when...
 

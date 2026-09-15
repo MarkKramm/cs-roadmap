@@ -27,6 +27,10 @@ Cybersecurity is not just hacking. Entry-level cyber hiring usually rewards:
 
 ## Timeline
 
+Phases 1–8 are the core path to employability. Phases 9–14 are a **depth track**: optional, taken after Phase 8 or alongside your job search, depending on which roles you are targeting. They exist because the core path teaches you to be hireable, not to be specialised — cloud, detection engineering, incident response, scripting, GRC, and web application security are all listed as target roles in Phase 8 but were previously taught nowhere.
+
+### Core path (Phases 1–8)
+
 | Phase | Topic | Realistic Time |
 |---|---|---:|
 | 1 | Foundations | 4 weeks |
@@ -38,7 +42,20 @@ Cybersecurity is not just hacking. Entry-level cyber hiring usually rewards:
 | 7 | Certifications | optional 4–12 weeks |
 | 8 | Job application | 8–16 weeks alongside study |
 
-Total: **6–18 months**. If working full-time, expect the longer side.
+### Depth track (Phases 9–14)
+
+Take the two or three that match your Phase 5 specialisation, not all six.
+
+| Phase | Topic | Realistic Time | Take it if |
+|---|---|---:|---|
+| 9 | Cloud and identity security | 4 weeks | You are targeting cloud, IAM, or any role touching Microsoft 365 or Azure |
+| 10 | Detection engineering | 4 weeks | You are targeting SOC, and want to do more than read other people's rules |
+| 11 | Incident response and DFIR | 4 weeks | You are targeting SOC, DFIR, or incident response |
+| 12 | Scripting and automation | 3–4 weeks | Any path — it multiplies everything else |
+| 13 | GRC, compliance and risk | 4 weeks | You are targeting GRC, compliance, or audit |
+| 14 | Web application security | 4–6 weeks | You are targeting pentest, or coming from a web development background |
+
+Core path total: **6–18 months**. If working full-time, expect the longer side. Each depth-track module adds roughly a month.
 
 ## Suggested Weekly Schedule While Working IT
 

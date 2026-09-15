@@ -2,6 +2,42 @@
 
 A chronological record of working sessions. Newest first.
 
+## 2026-09-15 — The site learns to render lessons, the nav stops running away, and the cyber track grows six modules
+
+**Goal:** Three things the user asked for in one pass — show the lessons in the site UI (the content "feels lacking"), add modules where the curriculum had holes, and fix the sidebar, which scrolled away so navigating a long page meant scrolling back to the top.
+
+**The measurement that reframed the whole task.** Before writing anything I measured how much of each phase file the site was actually showing. The `## Lesson:` region is **84–95% of every phase file**. The build script extracted goal, skills, topics, tools, tasks, checklist and exit criteria, and dropped the rest — so the site rendered roughly **a tenth of the curriculum**, and the teaching content was reachable only via a GitHub link. That turned "show the lessons" from a nice-to-have into the main event.
+
+**Lesson rendering (D-011, D-012).** Wrote `scripts/lesson-ast.mjs`, a zero-dependency parser for the Markdown subset the curriculum uses — measured first, not assumed: h3/h4, paragraphs, one level of nesting, tables, fences, blockquotes, inline bold/italic/code; **no** h5, images, footnotes or raw HTML anywhere. `Lesson.jsx` renders it with a TOC and scroll-spy.
+
+The payload problem was real, and the first attempt hit it: inlining lessons into the track indexes took the JS bundle from 265 KB to **1.96 MB**. Emitting per-phase `lessons/*.json` loaded via `import.meta.glob` brought the initial bundle to **355 KB**.
+
+Because a parser bug deletes content instead of crashing, two guards were built: `audit-lesson-ast.mjs` (AST vs source, per block) and lesson assertions in the smoke test.
+
+**A guard that was silently worthless.** `audit-lesson-ast.mjs` reported a clean pass — on 18 of 23 lessons. It matched phase files with `^0[0-9]-`, which stops at 09. Checking the other scripts showed **four more with the same bug**, including the preservation check. All five now use `^(?!00-)\d{2}-`. First run after the fix surfaced 30 real issues that had been invisible. The readability script separately hardcoded the original eight cyber phase names, so the six new modules were being averaged into the IT track; it now derives the track from the path.
+
+**Five parser bugs, each found by a different signal.**
+
+| Bug | How it surfaced |
+|---|---|
+| Flat siblings nested 17 deep under the first item | Character-level audit (cyber-07 −123 chars, it-03 −311) |
+| `\|` escaped pipe split a table cell | Literal `**` on the page (Nmap `open\|filtered`) |
+| Pipe inside a code span split a cell | Stray backtick on the page (LDAP payload) |
+| ``**`/etc`**`` — bold containing code | Literal `**` and backticks |
+| Wrapped paragraph/blockquote line counting | Audit false alarms — **my measurement was wrong, not the parser** |
+
+That last row matters: the audit's first version reported losses in all 18 phases. It was over-counting table delimiter rows and under-counting wrapped blockquotes. A later variant compared one concatenated string, letting digits from adjacent blocks fuse (`7.9 / 0.6` followed by `0.6 GB free on a 7.9 GB`). Fixed by comparing **per block**. The header comment says it plainly: *a guard that always fails gets ignored, which is worse than having none.*
+
+**Also the smoke test was wrong, not the renderer.** It scanned all rendered HTML for literal `**` — but a `markdown` fence legitimately shows `**bold**` as an example. Excluding `<pre>`/`<code>` cleared it.
+
+**Nav fix (D-010).** The sidebar was a flex item with no height constraint, so it stretched to full document height and scrolled away. Now viewport-pinned; below 860px it becomes a drawer with Escape, backdrop-click and scroll locking.
+
+**Content.** Phases 4/5/6 rebalanced to the track standard (4,788/5,200/5,828 → **9,045/9,329/9,311** lesson words), and six new modules added as 09–14 for the gaps the core path names but never taught: cloud and identity, detection engineering, incident response and DFIR, scripting and automation, GRC and compliance, web application security. Each 8,837–12,181 lesson words, $0, with an explicit legal-boundary section.
+
+**Final state:** lint 102 files / 0 issues; content audit 0 issues across 23 phases; lesson AST 23 lessons / 0 loss; readability **0 of 23 outside target**; smoke 84 renders / 0 failures; production build clean; every changed file UTF-8, no BOM, LF-only.
+
+**Lesson taken:** the guards mattered more than the feature. Three of the five parser bugs produced no error — just missing or mangled content — and the audit bug meant the guard itself was asleep. When a check reports success, verify it is looking at what you think it is.
+
 ## 2026-09-13 — Cyber Phases 6–8 lessons: the cyber track is complete, and a parser fix
 
 **Goal:** Finish the cyber-track lesson pass — Phases 6, 7, and 8 — following the established pattern (a `## Lesson` section placed after the last structural section and immediately before `## Tools for This Phase`).

@@ -1145,23 +1145,23 @@ Create `portfolio/cyber/13-grc-compliance.md` with:
 
 ## Checklist
 
-- [ ] I can explain governance, risk, and compliance as three separate functions. <!-- id: c13-grc-three-functions energy: low -->
-- [ ] I built an asset inventory with a classification scheme and applied it. <!-- id: c13-asset-inventory energy: normal -->
-- [ ] I can write a risk as a cause, an event, and an impact rather than as a topic. <!-- id: c13-risk-statement-writing energy: normal -->
-- [ ] I published a likelihood and impact scale before scoring any risk. <!-- id: c13-risk-scoring-scale energy: normal -->
-- [ ] I distinguished inherent, residual, and target risk in my register. <!-- id: c13-residual-vs-inherent energy: normal -->
-- [ ] I documented a risk acceptance with an owner, a justification, and a review date. <!-- id: c13-risk-acceptance-record energy: normal -->
-- [ ] I can name the six NIST CSF 2.0 functions and what each covers. <!-- id: c13-nist-csf-functions energy: low -->
-- [ ] I mapped ten controls to framework subcategories with identifiers. <!-- id: c13-control-matrix energy: normal -->
-- [ ] My control matrix includes Partial, Fail, and Not-tested rows. <!-- id: c13-honest-test-results energy: normal -->
-- [ ] I can explain why ISO 27001 Annex A is a menu rather than a checklist. <!-- id: c13-iso-annex-a-reasoning energy: low -->
-- [ ] I wrote a policy with a compliance and exceptions section and a review date. <!-- id: c13-policy-written energy: normal -->
-- [ ] I tested my policy against the five properties and rewrote what failed. <!-- id: c13-policy-usability-test energy: normal -->
-- [ ] I completed a vendor assessment ending in "approve with conditions". <!-- id: c13-vendor-assessment energy: normal -->
-- [ ] I can describe the evidence an auditor would accept for five controls. <!-- id: c13-evidence-requirements energy: normal -->
-- [ ] I wrote an audit finding response with a cause, not just a condition. <!-- id: c13-finding-response energy: normal -->
-- [ ] I can state what I would do if asked to mark an untested control as passed. <!-- id: c13-grc-integrity-stance energy: low -->
-- [ ] I know a privacy notification obligation exists and who decides whether it applies. <!-- id: c13-privacy-escalation-path energy: low -->
+- [ ] I can explain governance, risk, and compliance as three separate functions. <!-- id: cyber-13-grc-three-functions energy: low -->
+- [ ] I built an asset inventory with a classification scheme and applied it. <!-- id: cyber-13-asset-inventory energy: normal -->
+- [ ] I can write a risk as a cause, an event, and an impact rather than as a topic. <!-- id: cyber-13-risk-statement-writing energy: normal -->
+- [ ] I published a likelihood and impact scale before scoring any risk. <!-- id: cyber-13-risk-scoring-scale energy: normal -->
+- [ ] I distinguished inherent, residual, and target risk in my register. <!-- id: cyber-13-residual-vs-inherent energy: normal -->
+- [ ] I documented a risk acceptance with an owner, a justification, and a review date. <!-- id: cyber-13-risk-acceptance-record energy: normal -->
+- [ ] I can name the six NIST CSF 2.0 functions and what each covers. <!-- id: cyber-13-nist-csf-functions energy: low -->
+- [ ] I mapped ten controls to framework subcategories with identifiers. <!-- id: cyber-13-control-matrix energy: normal -->
+- [ ] My control matrix includes Partial, Fail, and Not-tested rows. <!-- id: cyber-13-honest-test-results energy: normal -->
+- [ ] I can explain why ISO 27001 Annex A is a menu rather than a checklist. <!-- id: cyber-13-iso-annex-a-reasoning energy: low -->
+- [ ] I wrote a policy with a compliance and exceptions section and a review date. <!-- id: cyber-13-policy-written energy: normal -->
+- [ ] I tested my policy against the five properties and rewrote what failed. <!-- id: cyber-13-policy-usability-test energy: normal -->
+- [ ] I completed a vendor assessment ending in "approve with conditions". <!-- id: cyber-13-vendor-assessment energy: normal -->
+- [ ] I can describe the evidence an auditor would accept for five controls. <!-- id: cyber-13-evidence-requirements energy: normal -->
+- [ ] I wrote an audit finding response with a cause, not just a condition. <!-- id: cyber-13-finding-response energy: normal -->
+- [ ] I can state what I would do if asked to mark an untested control as passed. <!-- id: cyber-13-grc-integrity-stance energy: low -->
+- [ ] I know a privacy notification obligation exists and who decides whether it applies. <!-- id: cyber-13-privacy-escalation-path energy: low -->
 
 ## You're ready to move on when...
 

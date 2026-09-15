@@ -1047,22 +1047,22 @@ Create `portfolio/cyber/11-incident-response.md` with:
 
 ## Checklist
 
-- [ ] I can name the six NIST incident response stages and what each produces. <!-- id: c11-nist-lifecycle energy: low -->
-- [ ] I wrote a first-hour checklist for my three most likely scenarios. <!-- id: c11-first-hour-checklist energy: normal -->
-- [ ] I can triage an alert in fifteen minutes and set a defensible severity. <!-- id: c11-triage-drill energy: normal -->
-- [ ] I recorded the retention window of every log source I depend on. <!-- id: c11-log-retention-audit energy: normal -->
-- [ ] I can state the order of volatility and capture evidence in that order. <!-- id: c11-order-of-volatility energy: low -->
-- [ ] I captured a memory image, hashed it, and analysed it with Volatility. <!-- id: c11-memory-acquisition energy: normal -->
-- [ ] I imaged a disk, verified the hash, and analysed a copy rather than the original. <!-- id: c11-disk-imaging energy: normal -->
-- [ ] I built a timeline from at least three independent evidence sources. <!-- id: c11-timeline-build energy: normal -->
-- [ ] I found a timestomped file by comparing `$SI` and `$FN` timestamps. <!-- id: c11-timestomp-detection energy: normal -->
-- [ ] I completed a chain of custody record including the Purpose column. <!-- id: c11-chain-of-custody energy: normal -->
-- [ ] I chose a containment strategy and documented the option I rejected. <!-- id: c11-containment-decision energy: normal -->
-- [ ] I can explain why powering off a host is the most destructive containment choice. <!-- id: c11-poweroff-reasoning energy: low -->
-- [ ] I distinguished mechanism, root cause, and contributing factor in my report. <!-- id: c11-root-cause-analysis energy: normal -->
-- [ ] I wrote a incident report with a detection-gaps and a limitations section. <!-- id: c11-incident-report-written energy: high -->
-- [ ] I ran or wrote a tabletop exercise and recorded the gaps it exposed. <!-- id: c11-tabletop-exercise energy: normal -->
-- [ ] I wrote down what I may examine, who authorises it, and who I route legal questions to. <!-- id: c11-forensic-legal-boundaries energy: low -->
+- [ ] I can name the six NIST incident response stages and what each produces. <!-- id: cyber-11-nist-lifecycle energy: low -->
+- [ ] I wrote a first-hour checklist for my three most likely scenarios. <!-- id: cyber-11-first-hour-checklist energy: normal -->
+- [ ] I can triage an alert in fifteen minutes and set a defensible severity. <!-- id: cyber-11-triage-drill energy: normal -->
+- [ ] I recorded the retention window of every log source I depend on. <!-- id: cyber-11-log-retention-audit energy: normal -->
+- [ ] I can state the order of volatility and capture evidence in that order. <!-- id: cyber-11-order-of-volatility energy: low -->
+- [ ] I captured a memory image, hashed it, and analysed it with Volatility. <!-- id: cyber-11-memory-acquisition energy: normal -->
+- [ ] I imaged a disk, verified the hash, and analysed a copy rather than the original. <!-- id: cyber-11-disk-imaging energy: normal -->
+- [ ] I built a timeline from at least three independent evidence sources. <!-- id: cyber-11-timeline-build energy: normal -->
+- [ ] I found a timestomped file by comparing `$SI` and `$FN` timestamps. <!-- id: cyber-11-timestomp-detection energy: normal -->
+- [ ] I completed a chain of custody record including the Purpose column. <!-- id: cyber-11-chain-of-custody energy: normal -->
+- [ ] I chose a containment strategy and documented the option I rejected. <!-- id: cyber-11-containment-decision energy: normal -->
+- [ ] I can explain why powering off a host is the most destructive containment choice. <!-- id: cyber-11-poweroff-reasoning energy: low -->
+- [ ] I distinguished mechanism, root cause, and contributing factor in my report. <!-- id: cyber-11-root-cause-analysis energy: normal -->
+- [ ] I wrote a incident report with a detection-gaps and a limitations section. <!-- id: cyber-11-incident-report-written energy: high -->
+- [ ] I ran or wrote a tabletop exercise and recorded the gaps it exposed. <!-- id: cyber-11-tabletop-exercise energy: normal -->
+- [ ] I wrote down what I may examine, who authorises it, and who I route legal questions to. <!-- id: cyber-11-forensic-legal-boundaries energy: low -->
 
 ## You're ready to move on when...
 

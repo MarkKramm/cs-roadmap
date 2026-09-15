@@ -2,27 +2,38 @@
 
 A snapshot of the repository's current state. Update this when a meaningful milestone is reached.
 
-## Current state — 2026-09-13
+## Current state — 2026-09-15
 
 | Item | Value |
 |---|---|
 | Branch | `main` |
-| Tracked files | 81 |
-| Working tree | Cyber Phases 6–8 lessons, the build-parser fence fix, and the doc updates are uncommitted |
+| Tracked files | 102 |
+| Working tree | Clean |
 | Line endings | LF everywhere (Windows scripts excepted) |
 | Encoding | UTF-8, no BOM |
 | Remote | `origin` → https://github.com/MarkKramm/cs-roadmap |
 | Visibility | Private — not publicly reachable |
 | License | CC BY 4.0 |
 | Build step | `learning-site/` — React + Vite. `npm run dev` / `npm run build` |
-| Checks | `node scripts/lint-content.mjs` passes (81 files, 0 issues); `npm run build` passes; `it.json` total phase task IDs: 129 |
+| Checks | `lint-content` 102 files / 0 issues; `audit-content` 0 issues across 23 phases; `audit-lesson-ast` 23 lessons / 0 loss; `audit-readability` 0 of 23 outside target; `test:smoke` 84 renders / 0 failures; production build clean |
+| Task IDs | 228 total (IT 66, cyber 162) |
 | CI | `.github/workflows/ci.yml` — two jobs on push to `main` and on PRs (D-008); verified green |
 | Deploy | `.github/workflows/deploy-pages.yml` — publishes `learning-site/dist` to GitHub Pages (D-009). Builds with `VITE_BASE=/cs-roadmap/` because a project site is served from a subdirectory, and verifies the emitted HTML so an unprefixed build fails rather than deploying a blank page. Netlify (`netlify.toml`) is configured as a fallback and builds from the repository root, since `build:content` reads `career-roadmaps/` one level above the site |
-| Milestone | M2 complete — tools library, portfolio tracker, application tracker |
-| Content depth | **Both tracks complete, and the whole IT track now deepened.** All 9 IT phases carry `## Lesson` sections, every one brought to the evidence-reading standard. All 8 cyber phases carry lessons (4,969 / 6,848 / 8,162 / 4,510 / 4,919 / 5,672 / **8,929** / 7,358), which have not yet been assessed against that standard |
-| Phase 1 | Structurally repaired and deepened. Four rendering defects fixed, the legacy task block folded in, and the lesson taken from ~4,400 to ~23,800 words across 13 parts (evidence reading, the local→remote career route, working with real users, and five worked tickets). `it.json` verified byte-identical to baseline apart from `generatedAt`; 5 tasks / 7 checklists preserved. Tools 6 → 10, resources 4 → 11, skills 6 → 11 |
-| Phases 2–4 | Deepened to the Phase 1 standard. Phase 2, 4,337 → 9,709 words. Phase 3, 3,370 → 16,680. Phase 4, 6,137 → 9,482. All Markdown-only and verified pipeline-neutral — phase counts unchanged from a pre-edit baseline, task IDs still 129 |
-| Phases 5–9 | Deepened to the same standard, taking the IT lesson prose from roughly 32,800 to roughly 97,300 words. Phase 5, 3,039 → 13,642. Phase 6, 3,844 → 5,739. Phase 7, 3,343 → 5,759. Phase 8, 3,875 → 6,255. Phase 9, 3,757 → 6,224. A structural defect was fixed along the way: Phases 6, 7 and 8 each had lesson content stranded after the closing sections. Verified per phase with `scripts/verify-counts.mjs` against a saved baseline — every task, checklist, tool and resource count unchanged, task IDs still 129 |
+| Milestone | M3 complete — the site renders the lessons themselves, not just the structured sections |
+| Content depth | **Both tracks complete and uniformly deep.** All 23 phases carry `## Lesson` sections. Cyber runs 7,563–12,177 lesson words with all 14 phases inside every readability target; IT runs 5,567–23,657. Every cyber phase sits in the 9,000–9,500 band except Phase 8 (7,563, the job-hunt phase) and the apex modules 13–14 (~12,100, deliberately the deepest) |
+| Cyber depth track | Six new modules added as Phases 9–14, because the core path lists cloud, detection, IR, scripting, GRC and web security as target roles but taught none of them: cloud and identity, detection engineering, incident response and DFIR, scripting and automation, GRC and compliance, and web application security. All $0, all with explicit legal-boundary sections |
+| Cyber rebalance | Phases 4, 5 and 6 were the thinnest lessons in the track (4,788 / 5,200 / 5,828) and are now level with the rest (9,045 / 9,329 / 9,311). Phase 4 gained a full lab build, a twelve-row troubleshooting table, evidence capture and malware isolation; Phase 5 a weighted decision matrix and the first 90 days of each path; Phase 6 a fourth project, an annotated weak-versus-strong report, and interview follow-ups |
+| Lesson rendering | The site parses each lesson into a block AST at build time (`scripts/lesson-ast.mjs`) and renders it with a table of contents and scroll-spy (D-011). Lessons ship as per-phase files loaded on demand, which took the initial bundle from 1.96 MB back to 355 KB (D-012). Two guards protect the path, since a parser bug deletes content rather than crashing: `audit-lesson-ast.mjs` and the lesson assertions in `test:smoke` |
+| Site UI | Sidebar is viewport-pinned and scrolls independently; below 860px it becomes an off-canvas drawer with Escape, backdrop-click and scroll locking (D-010). View changes reset scroll to the top. Lesson body has a reading measure, horizontally scrolling tables, and focus-visible states |
+| Phase 1 (IT) | Structurally repaired and deepened. Four rendering defects fixed, the legacy task block folded in, and the lesson taken from ~4,400 to ~23,800 words across 13 parts (evidence reading, the local→remote career route, working with real users, and five worked tickets) |
+| Phases 2–4 (IT) | Deepened to the Phase 1 standard. Phase 2, 4,337 → 9,709 words. Phase 3, 3,370 → 16,680. Phase 4, 6,137 → 9,482 |
+| Phases 5–9 (IT) | Deepened to the same standard, taking the IT lesson prose from roughly 32,800 to roughly 97,300 words. A structural defect was fixed along the way: Phases 6, 7 and 8 each had lesson content stranded after the closing sections |
+
+### Guards fixed in this pass
+
+Five audit scripts matched phase files with `^0[1-9]-`, which covers 01–09 only. Every guard was therefore blind to phases 10 and above — and `audit-lesson-ast.mjs`, written fresh, inherited the same bug and was checking 18 of 23 lessons. All five now match `^(?!00-)\d{2}-`, which includes 10+ while still excluding `00-overview`. The readability script's track summary also hardcoded the original eight cyber phase names, so the six new modules were averaged into the IT track; it now derives the track from the path.
+
+This is worth recording because the failure mode was silence: the guards printed a clean result while covering four fifths of the content.
 
 This file deliberately carries no commit hash or commit count: a checkpoint
 cannot contain its own hash, so those numbers drift by one commit on every
@@ -43,12 +54,12 @@ edit. For the exact current state, run `git --no-pager log --oneline -n 1`.
 ├── LICENSE
 ├── docs/
 ├── scripts/                 (content tooling)
-├── learning-site/           (React + Vite; 5 pages, 6 components, 4 hooks;
+├── learning-site/           (React + Vite; 5 pages, 8 components, 5 hooks;
 │                             generated/ and dist/ ignored)
 └── career-roadmaps/
     ├── README.md
-    ├── it-roadmap/          (13 files)
-    ├── cybersec-roadmap/    (14 files)
+    ├── it-roadmap/          (12 files)
+    ├── cybersec-roadmap/    (19 files)
     └── shared/              (3 files)
 ```
 

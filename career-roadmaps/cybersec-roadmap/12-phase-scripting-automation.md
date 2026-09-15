@@ -1331,22 +1331,22 @@ Create `portfolio/cyber/12-scripting-automation.md` with:
 
 ## Checklist
 
-- [ ] I can read a log file line by line without loading it all into memory. <!-- id: c12-python-file-reading energy: low -->
-- [ ] My scripts use `.get()` or a helper rather than chained dictionary access. <!-- id: c12-safe-dict-access energy: low -->
-- [ ] I parse log data with regular expressions where appropriate and use libraries where better. <!-- id: c12-regex-and-libraries energy: normal -->
-- [ ] I validate an IP address with a library rather than a pattern. <!-- id: c12-input-validation energy: normal -->
-- [ ] I wrote an HTTP request with a timeout, explicit status handling, and retry with backoff. <!-- id: c12-api-client-energy energy: normal -->
-- [ ] I read my API key from the environment and never from source code. <!-- id: c12-secrets-out-of-code energy: normal -->
-- [ ] I added a `.gitignore` entry and an `.env.example`, and ran a secret scan. <!-- id: c12-secret-scan energy: normal -->
-- [ ] I can use `Get-WinEvent -FilterHashtable` and find a property index by inspection. <!-- id: c12-powershell-eventing energy: normal -->
-- [ ] I can join a network connection to its owning process with `Get-NetTCPConnection`. <!-- id: c12-powershell-triage energy: normal -->
-- [ ] My PowerShell triage script is read-only and handles one collection failing. <!-- id: c12-triage-script-built energy: normal -->
-- [ ] I wrote tests for a known-good input, a malformed input, and an empty input. <!-- id: c12-input-tests energy: normal -->
-- [ ] I never build a shell command from a string with untrusted input. <!-- id: c12-command-injection-avoidance energy: normal -->
-- [ ] I defang indicators in written output and never defang a hash. <!-- id: c12-defanging-habit energy: low -->
-- [ ] My tool logs a start and an end, and exits non-zero on failure. <!-- id: c12-automation-logging energy: low -->
-- [ ] I wrote a README with a "What it does not do" section someone else could follow. <!-- id: c12-readme-written energy: normal -->
-- [ ] I wrote down three things I deliberately chose not to automate, and why. <!-- id: c12-when-not-to-automate energy: normal -->
+- [ ] I can read a log file line by line without loading it all into memory. <!-- id: cyber-12-python-file-reading energy: low -->
+- [ ] My scripts use `.get()` or a helper rather than chained dictionary access. <!-- id: cyber-12-safe-dict-access energy: low -->
+- [ ] I parse log data with regular expressions where appropriate and use libraries where better. <!-- id: cyber-12-regex-and-libraries energy: normal -->
+- [ ] I validate an IP address with a library rather than a pattern. <!-- id: cyber-12-input-validation energy: normal -->
+- [ ] I wrote an HTTP request with a timeout, explicit status handling, and retry with backoff. <!-- id: cyber-12-api-client-energy energy: normal -->
+- [ ] I read my API key from the environment and never from source code. <!-- id: cyber-12-secrets-out-of-code energy: normal -->
+- [ ] I added a `.gitignore` entry and an `.env.example`, and ran a secret scan. <!-- id: cyber-12-secret-scan energy: normal -->
+- [ ] I can use `Get-WinEvent -FilterHashtable` and find a property index by inspection. <!-- id: cyber-12-powershell-eventing energy: normal -->
+- [ ] I can join a network connection to its owning process with `Get-NetTCPConnection`. <!-- id: cyber-12-powershell-triage energy: normal -->
+- [ ] My PowerShell triage script is read-only and handles one collection failing. <!-- id: cyber-12-triage-script-built energy: normal -->
+- [ ] I wrote tests for a known-good input, a malformed input, and an empty input. <!-- id: cyber-12-input-tests energy: normal -->
+- [ ] I never build a shell command from a string with untrusted input. <!-- id: cyber-12-command-injection-avoidance energy: normal -->
+- [ ] I defang indicators in written output and never defang a hash. <!-- id: cyber-12-defanging-habit energy: low -->
+- [ ] My tool logs a start and an end, and exits non-zero on failure. <!-- id: cyber-12-automation-logging energy: low -->
+- [ ] I wrote a README with a "What it does not do" section someone else could follow. <!-- id: cyber-12-readme-written energy: normal -->
+- [ ] I wrote down three things I deliberately chose not to automate, and why. <!-- id: cyber-12-when-not-to-automate energy: normal -->
 
 ## You're ready to move on when...
 
