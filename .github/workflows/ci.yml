@@ -99,6 +99,7 @@ jobs:
       - name: Browser check (real engine)
         env:
           BROWSER_NO_SANDBOX: '1'
+          BROWSER_CHECK_STRICT: '1'
         run: |
           npx vite preview --port 4173 --strictPort > /tmp/preview.log 2>&1 &
           PREVIEW_PID=$!

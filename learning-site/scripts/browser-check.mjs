@@ -10,13 +10,18 @@
 // print media. Both defects this project previously found in that class were
 // found by reading the CSS by hand, which does not scale and does not repeat.
 //
-// WHY IT IS NOT IN CI
-// It needs a browser binary. GitHub's ubuntu runner has none at any path this
-// script looks in, and a guard that cannot run is a guard someone eventually
-// deletes. It exits 0 with an explicit "skipped" line when no browser is found,
-// so running it in CI is honest rather than red. This is a local verification
-// tool, and the honest description of the gap it closes is: the views have been
-// rendered in Edge, by a human running this, on one machine.
+// IT RUNS IN CI
+// This comment previously said the opposite, on the belief that GitHub's ubuntu
+// runner had no browser at any path this script looks in. That belief was wrong:
+// `/usr/bin/google-chrome` is present, and the CI step passes. A guard that only
+// runs when someone remembers is not a guard, and this file was one for a day.
+//
+// A skip is honest locally but must never be invisible in CI, where a green tick
+// is the only thing anyone reads. BROWSER_CHECK_STRICT=1 (set in the workflow)
+// turns a missing browser into a failure, and MIN_CHECKS does the same for a run
+// that connected to an error page and asserted almost nothing. Both failure
+// modes exit 0 otherwise, and this project has been bitten by exactly that three
+// times — a check that printed nothing and was read as green.
 //
 // WHY THERE IS NO DEPENDENCY
 // Node 24 ships a global WebSocket, and the DevTools Protocol is a JSON protocol
@@ -49,6 +54,18 @@ const BROWSERS = [
 ];
 
 function findBrowser() {
+  // An explicit override first, so the skip path can be exercised on a machine
+  // that does have a browser. Without it the only way to test strict mode was to
+  // break PATH, which also hides `node` and tests nothing.
+  const override = process.env.BROWSER_PATH;
+  if (override) {
+    try {
+      if (fs.existsSync(override)) return override;
+    } catch {
+      /* fall through to the known paths */
+    }
+    return null;
+  }
   for (const p of BROWSERS) {
     try {
       if (fs.existsSync(p)) return p;
@@ -183,9 +200,24 @@ window.__type = function (el, text) {
 };
 `;
 
+// A skip that exits 0 is indistinguishable from a pass to anything reading only
+// the exit code, and CI reports both as `completed / success`. This project has
+// already been bitten three times by a guard that printed nothing and was read
+// as green, so on CI the run must be real: BROWSER_CHECK_STRICT=1 turns a
+// missing browser into a failure, and MIN_CHECKS catches the other silent
+// failure — a run that connects, executes a handful of assertions and exits 0
+// because the page it measured was an error page.
+const STRICT = process.env.BROWSER_CHECK_STRICT === '1';
+const MIN_CHECKS = 40;
+
 async function main() {
   const browser = findBrowser();
   if (!browser) {
+    if (STRICT) {
+      process.stdout.write('BROWSER CHECK FAILED — no browser found at any known path.\n');
+      process.stdout.write('BROWSER_CHECK_STRICT=1 requires a real engine; this is not a skip.\n');
+      process.exit(1);
+    }
     process.stdout.write('BROWSER CHECK SKIPPED — no browser found at any known path.\n');
     process.stdout.write('Set BASE_URL to a running preview and install Edge/Chrome to run it.\n');
     process.exit(0);
@@ -644,9 +676,19 @@ async function main() {
     const tag = r.informational ? '     ' : r.ok ? '  OK ' : ' FAIL';
     process.stdout.write(tag + ' ' + r.name + (r.detail ? '  — ' + r.detail : '') + '\n');
   }
-  process.stdout.write(
-    '\n' + results.filter((r) => !r.informational).length + ' checks, ' + failed.length + ' failed\n',
-  );
+  const ran = results.filter((r) => !r.informational).length;
+  process.stdout.write('\n' + ran + ' checks, ' + failed.length + ' failed\n');
+
+  // A run that asserted almost nothing is not a pass. If the preview server
+  // answered with an error page, or a selector vanished, the assertions that
+  // never executed would otherwise look like assertions that held.
+  if (ran < MIN_CHECKS) {
+    process.stdout.write(
+      '\nBROWSER CHECK FAILED — only ' + ran + ' checks ran, expected at least ' + MIN_CHECKS + '.\n',
+    );
+    process.exit(1);
+  }
+
   process.exit(failed.length === 0 ? 0 : 1);
 }
 

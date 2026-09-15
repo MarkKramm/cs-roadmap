@@ -97,10 +97,17 @@ cd ..; git worktree remove '.head-check' --force
 
 | Job | What it runs | Working directory |
 |---|---|---|
-| Content integrity | `node scripts/lint-content.mjs` | repository root |
-| Learning site | `npm ci` → `npm run build` → `npm run test:smoke` | `learning-site/` |
+| Content integrity | `lint-content` → `audit-content` → `audit-lesson-ast` → `audit-readability` → `audit-refs` | repository root |
+| Learning site | `npm ci` → `build` → `test:smoke` → `test:search` → `test:highlight` → `test:ui` → `test:data` → `test:notes` → `test:work` → `test:today` → `test:lesson-search` → `test:browser` | `learning-site/` |
 
 Both jobs use Node 24, matching the local toolchain. The workflow is check-only: it does not deploy, publish, or touch secrets — see [`DECISIONS.md`](DECISIONS.md) → D-008. To reproduce it locally, run the commands under "How to verify quickly" in [`CHECKPOINT.md`](CHECKPOINT.md).
+
+`cyber-restructure-check.mjs` is deliberately **not** a CI step: it reads a before-snapshot from `process.env.TEMP`, which is not in the repository, so it can only ever fail on a fresh clone. It is a one-off migration tool, not a standing guard.
+
+The `Browser check (real engine)` step is the one that needs a process manager. It starts `vite preview`, polls it with `curl` rather than sleeping a fixed interval, runs `npm run test:browser`, and kills the server on both the success and failure paths — a background process started in an earlier step is not reliably still listening in a later one. It sets two variables that matter:
+
+- `BROWSER_NO_SANDBOX=1` — a container does not grant the kernel capability Chrome's sandbox requires. Locally the sandbox stays on.
+- `BROWSER_CHECK_STRICT=1` — makes a missing browser a **failure** rather than a skip. Without it the script exits 0 with `BROWSER CHECK SKIPPED`, which is indistinguishable from `50 checks, 0 failed` to anything reading only the exit code. The script also fails if fewer than 40 checks ran, catching a run that connected to an error page and asserted almost nothing.
 
 ## Guards on the lesson renderer
 
@@ -112,7 +119,22 @@ node scripts/audit-readability.mjs  # prose density targets
 cd learning-site && npm run test:smoke   # the lesson renders for every phase
 ```
 
-**Run `audit-lesson-ast.mjs` after any change to `lesson-ast.mjs`.** It compares each lesson's parsed blocks against its source with markup stripped, and reports a non-zero delta, an unrecognised construct, or a lesson with no headings. It currently reports zero loss on all 18 lessons.
+**Run `audit-lesson-ast.mjs` after any change to `lesson-ast.mjs`.** It compares each lesson's parsed blocks against its source with markup stripped, and reports a non-zero delta, an unrecognised construct, or a lesson with no headings. It currently reports zero loss on all 23 lessons.
+
+## Guards on the curriculum text
+
+Two more guards run over the phase Markdown itself, and they catch different things:
+
+```bash
+node scripts/audit-refs.mjs    # every "Part N" and "Phase N" reference resolves
+node scripts/audit-terms.mjs   # acronym MEASUREMENT — always exits 0, never a gate
+```
+
+**`audit-refs.mjs` gates.** It exits 1 when a `Part N` names a heading the file does not have, or a `Phase N` names a number the track does not contain — both are claims about the text agreeing with itself, which is the test for whether a class belongs in CI. It found IT 06 sending the reader to "Part 5's structure" for a note in Part 4, and IT 07 referring to a nonexistent "Part 8". It also prints `FORWARD_AS_PRIOR`, a phase citing a later phase as prior knowledge, but does **not** gate on it: the guard was wrong about that once already, matching "risk reasoning **from** Phase 13 arrives later" — a sentence that explicitly disclaims prior knowledge — as a claim of it. Read that output; nothing fails the build on it.
+
+**`audit-terms.mjs` never gates, and that is the finding, not a shortcut.** It was written to catch a term reaching the reader before anything says what the letters mean. Five measurement passes moved the domain count 365 → 232 → 232 → 227 → 72 and the residue was still `AMD`, `USD`, `UTC`, `PID`, `NTFS`, `CMD`, `ISP`, `SSID` — two brands, a currency code, and `PID` flagged on the line that reads "**PID** is the process ID". The class is real but not regex-detectable: "a term a beginner must decode" versus "a proper noun that happens to be capitalised" is a judgement about the reader, not a property of the string. It is retained as a prompt for a periodic human read. See [`COMPREHENSION-AUDIT.md`](COMPREHENSION-AUDIT.md).
+
+**The rule, stated once so it can be applied to the next idea.** A class belongs in CI when it is a claim about the text agreeing with itself — does this name exist, does this number exist. It belongs in a periodic human read when it is a claim about the reader's state — is this term decodable, is this sentence claiming prior knowledge.
 
 `build-content.mjs` also fails the build when the parser reports an unhandled construct, so a new Markdown form cannot ship unrendered — the failure is loud and names the line.
 
@@ -123,7 +145,9 @@ The smoke test renders the lesson for every phase and asserts that the table and
 - [ ] `node scripts/lint-content.mjs` reports no issues.
 - [ ] `node scripts/audit-lesson-ast.mjs` reports no content loss (for any change touching the parser or a lesson).
 - [ ] `node scripts/audit-readability.mjs` reports no phase outside the target.
+- [ ] `node scripts/audit-refs.mjs` reports no broken cross-reference (for any change to a phase file).
 - [ ] `cd learning-site && npm run test:smoke` passes (for any change touching the site).
+- [ ] `cd learning-site && npm run test:browser` passes with a preview server running (for any change touching a view, a stylesheet or a control).
 - [ ] File is LF (no CR bytes) unless it is a Windows-native script.
 - [ ] File is UTF-8 without BOM.
 - [ ] Typographic characters are real, not `?` substitutes.
