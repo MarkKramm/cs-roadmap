@@ -1,0 +1,41 @@
+# Netlify configuration for the learning site.
+#
+# WHY base = "." AND NOT "learning-site":
+# The site's build runs `npm run build:content` first, which reads the Markdown
+# under `career-roadmaps/` one level ABOVE the site. If Netlify's base directory
+# were set to `learning-site`, that content would be outside the build sandbox
+# and the pipeline would fail with a missing-content error. Netlify therefore
+# builds from the repository root and publishes the site's `dist/`.
+#
+# Netlify installs dependencies from the base directory, so the install step
+# explicitly targets the site's own package files.
+
+[build]
+  base = "."
+  command = "cd learning-site && npm ci && npm run build"
+  publish = "learning-site/dist"
+
+# Node 24 matches the version CI uses (.github/workflows/ci.yml), so a build
+# that passes locally and in CI behaves identically here.
+[build.environment]
+  NODE_VERSION = "24"
+
+# Single-page app: all navigation is client-side state (see D-007), and the site
+# has exactly one HTML entry point. Any unknown path falls through to index.html
+# rather than 404ing, which keeps a deep link or a refresh working.
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
+
+# Hashed asset filenames are content-addressed, so they can be cached forever;
+# the HTML entry point must not be, or a deploy would never be picked up.
+[[headers]]
+  for = "/assets/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
+[[headers]]
+  for = "/index.html"
+  [headers.values]
+    Cache-Control = "public, max-age=0, must-revalidate"
