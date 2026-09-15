@@ -118,7 +118,43 @@ function Table({ head, rows, keyPrefix }) {
   );
 }
 
-export default function LessonBlock({ block, index }) {
+/**
+ * The done control that rides on a section heading.
+ *
+ * A heading is the unit a reader thinks in — "I have finished the storage
+ * section" — and the phase checklist below the lesson cannot express that. The
+ * control is a real button rather than a nested checkbox inside the heading, so
+ * the heading text stays selectable and the h3/h4 outline is not violated by
+ * interactive content.
+ *
+ * In reading mode a completed section shows a quiet tick; the button itself is
+ * revealed on hover or keyboard focus so it does not add 66 visible controls to
+ * a page whose purpose is reading.
+ */
+function SectionDone({ id, text, done, onToggle }) {
+  return (
+    <button
+      type="button"
+      className={"lesson__done" + (done ? " is-done" : "")}
+      aria-pressed={done}
+      aria-label={
+        (done ? "Mark not done: " : "Mark done: ") + String(text || "").replace(/[*`]/g, "")
+      }
+      title={done ? "Mark this section as not done" : "Mark this section as done"}
+      onClick={() => onToggle(id)}
+    >
+      <span aria-hidden="true">{done ? "✓" : "○"}</span>
+    </button>
+  );
+}
+
+export default function LessonBlock({
+  block,
+  index,
+  sectionDone = false,
+  onToggleSection,
+  tickMode = false,
+}) {
   const key = "b" + index;
 
   switch (block.type) {
@@ -126,8 +162,28 @@ export default function LessonBlock({ block, index }) {
       // The lesson's own h3/h4 sit inside a phase page that already has an h1
       // and h2, so the levels are shifted down to keep the outline valid.
       const Tag = block.level === 3 ? "h3" : block.level === 4 ? "h4" : "h5";
+      // Only h3/h4 appear in the TOC and therefore carry a done state; h5 is a
+      // paragraph-level label with no section identity of its own.
+      const togglable =
+        (block.level === 3 || block.level === 4) && typeof onToggleSection === "function";
+
       return (
-        <Tag id={block.id} className="lesson__heading">
+        <Tag
+          id={block.id}
+          className={
+            "lesson__heading" +
+            (togglable && sectionDone ? " is-done" : "") +
+            (togglable && tickMode ? " is-ticking" : "")
+          }
+        >
+          {togglable && (
+            <SectionDone
+              id={block.id}
+              text={block.text}
+              done={sectionDone}
+              onToggle={onToggleSection}
+            />
+          )}
           {renderInline(block.text, key)}
         </Tag>
       );

@@ -1,0 +1,49 @@
+// The start date for a track's plan. One preference, one key.
+//
+// Kept separate from progress and from energy mode for the same reason those are
+// separate from each other: resetting progress must not forget when you started,
+// and changing the start date must not touch a single completed task.
+
+import { useState, useEffect, useCallback } from "react";
+
+const KEY = "cs-roadmap:schedule:v1";
+const VALID_DATE = /^\d{4}-\d{2}-\d{2}$/;
+
+function load() {
+  try {
+    const raw = window.localStorage.getItem(KEY);
+    const parsed = raw ? JSON.parse(raw) : null;
+    if (!parsed || typeof parsed !== "object") return {};
+    const out = {};
+    for (const [trackId, date] of Object.entries(parsed)) {
+      if (typeof date === "string" && VALID_DATE.test(date)) out[trackId] = date;
+    }
+    return out;
+  } catch {
+    return {};
+  }
+}
+
+export function useSchedule() {
+  const [starts, setStarts] = useState(load);
+
+  useEffect(() => {
+    try {
+      window.localStorage.setItem(KEY, JSON.stringify(starts));
+    } catch {
+      // Storage unavailable or full. The date works for the session only.
+    }
+  }, [starts]);
+
+  const setStart = useCallback((trackId, date) => {
+    setStarts((prev) => {
+      const next = { ...prev };
+      if (!date) delete next[trackId];
+      else if (VALID_DATE.test(date)) next[trackId] = date;
+      else return prev;
+      return next;
+    });
+  }, []);
+
+  return { starts, setStart };
+}

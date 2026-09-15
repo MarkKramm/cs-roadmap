@@ -3,14 +3,38 @@
 // A lesson runs 5,000–24,000 words, so the TOC is not decoration — without it
 // the page is unnavigable. The active section is tracked with IntersectionObserver
 // so the reader always knows where they are, and clicking an entry scrolls to it.
+//
+// Two pieces of state are tracked per section and they are NOT the same thing:
+//
+// * **active** — where the reader is looking, recomputed from scroll position.
+// * **done**   — what the reader has ticked off, persisted per phase.
+//
+// Keeping them apart is what lets the TOC show both at once: the current section
+// is highlighted, and completed sections are marked, without either pretending
+// to be the other.
 
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import LessonBlock from "./LessonBlock.jsx";
+import LessonToolbar from "./LessonToolbar.jsx";
 import { renderInline } from "../lib/renderInline.jsx";
+import { useLessonProgress } from "../hooks/useLessonProgress.js";
 
-export default function Lesson({ title, blocks, toc, anchorRef }) {
+export default function Lesson({
+  title,
+  blocks,
+  toc,
+  anchorRef,
+  phaseId,
+  onActiveSection,
+  size,
+  onSizeChange,
+  scale = 1,
+}) {
   const [activeId, setActiveId] = useState(toc.length ? toc[0].id : null);
+  const [tickMode, setTickMode] = useState(false);
   const bodyRef = useRef(null);
+
+  const { done, toggle, doneCount, total } = useLessonProgress(phaseId, toc);
 
   // A search result opens a phase with a specific heading in mind. Scroll there
   // once the blocks have rendered, then clear the ref so a later navigation does
@@ -52,6 +76,22 @@ export default function Lesson({ title, blocks, toc, anchorRef }) {
     return () => observer.disconnect();
   }, [toc, blocks]);
 
+  // Report the current section upward so the phase can remember it for the
+  // resume prompt. Separate effect from the observer above because it writes to
+  // persistent storage, and the observer fires on every scroll.
+  const textFor = useCallback(
+    (id) => {
+      const entry = toc.find((t) => t.id === id);
+      return entry ? entry.text : "";
+    },
+    [toc]
+  );
+
+  useEffect(() => {
+    if (!onActiveSection || !activeId) return;
+    onActiveSection(activeId, textFor(activeId));
+  }, [activeId, onActiveSection, textFor]);
+
   function jump(id) {
     const el = document.getElementById(id);
     if (!el) return;
@@ -76,6 +116,15 @@ export default function Lesson({ title, blocks, toc, anchorRef }) {
     <section className="lesson" aria-labelledby="lesson-heading">
       <h2 id="lesson-heading">{title || "Lesson"}</h2>
 
+      <LessonToolbar
+        doneCount={doneCount}
+        total={total}
+        tickMode={tickMode}
+        onToggleTickMode={() => setTickMode((v) => !v)}
+        size={size}
+        onSizeChange={onSizeChange}
+      />
+
       {toc.length > 0 && (
         <nav className="lesson__toc" aria-label="Lesson contents">
           <div className="lesson__toc-title">On this page</div>
@@ -86,11 +135,18 @@ export default function Lesson({ title, blocks, toc, anchorRef }) {
                 className={
                   "lesson__toc-item" +
                   (t.level === 4 ? " is-sub" : "") +
-                  (t.id === activeId ? " is-active" : "")
+                  (t.id === activeId ? " is-active" : "") +
+                  (done(t.id) ? " is-done" : "")
                 }
               >
                 <button type="button" onClick={() => jump(t.id)}>
+                  <span className="lesson__toc-mark" aria-hidden="true">
+                    {done(t.id) ? "✓" : ""}
+                  </span>
                   {renderInline(t.text, "toc-" + t.id)}
+                  <span className="sr-only">
+                    {done(t.id) ? " — marked done" : ""}
+                  </span>
                 </button>
               </li>
             ))}
@@ -98,9 +154,24 @@ export default function Lesson({ title, blocks, toc, anchorRef }) {
         </nav>
       )}
 
-      <div className="lesson__body" ref={bodyRef}>
+      <div
+        className={"lesson__body" + (tickMode ? " is-ticking" : "")}
+        ref={bodyRef}
+        style={scale !== 1 ? { "--lesson-scale": String(scale) } : undefined}
+      >
         {blocks.map((b, i) => (
-          <LessonBlock key={i} block={b} index={i} />
+          <LessonBlock
+            key={i}
+            block={b}
+            index={i}
+            sectionDone={
+              b.type === "heading" && (b.level === 3 || b.level === 4)
+                ? done(b.id)
+                : false
+            }
+            onToggleSection={toggle}
+            tickMode={tickMode}
+          />
         ))}
       </div>
     </section>

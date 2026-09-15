@@ -136,7 +136,7 @@ function Result({ hit, query, onOpen }) {
   );
 }
 
-export default function Search({ onOpenResult }) {
+export default function Search({ onOpenResult, inputId }) {
   const [input, setInput] = useState("");
   const { status, message, results, ignored, missing, run } = useSearch();
 
@@ -154,11 +154,13 @@ export default function Search({ onOpenResult }) {
         <h1>Search</h1>
         <p className="muted">
           Every lesson in both tracks. Type a term, a command, or an error string.
+          Press <kbd className="kbd">/</kbd> from anywhere to get back here.
         </p>
       </header>
 
       <div className="search__box">
         <input
+          id={inputId}
           type="search"
           className="search__input"
           value={input}

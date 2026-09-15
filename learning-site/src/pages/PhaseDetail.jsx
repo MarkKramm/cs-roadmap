@@ -2,16 +2,39 @@ import ProgressBar from "../components/ProgressBar.jsx";
 import ChecklistItem from "../components/ChecklistItem.jsx";
 import ToolCard from "../components/ToolCard.jsx";
 import Lesson from "../components/Lesson.jsx";
+import PhaseNav from "../components/PhaseNav.jsx";
+import { ReadingBar, ResumePrompt, useReadingProgress } from "../components/ReadingPosition.jsx";
 import { countDone } from "../hooks/useProgress.js";
 import { useLesson } from "../hooks/useLesson.js";
 import { renderInline } from "../lib/renderInline.jsx";
 
 // Full detail for one phase, rendered from the generated JSON.
 // The raw Markdown stays the source of truth; the link at the top opens it.
+//
+// Layout order is deliberate and unchanged from D-011: goal → lesson → skills →
+// topics → checklist → tools → tasks → deliverable → free vs paid → exit
+// criteria. What is new is the navigation at both ends and the reading-position
+// machinery, which exist because a 9–14 phase track had no "next" anywhere.
 
 const REPO = "https://github.com/MarkKramm/cs-roadmap/blob/main/";
 
-export default function PhaseDetail({ phase, done, onToggle, onBack, anchorRef }) {
+export default function PhaseDetail({
+  phase,
+  done,
+  onToggle,
+  onBack,
+  anchorRef,
+  prev,
+  next,
+  index,
+  phaseCount,
+  onOpenPhase,
+  onVisitSection,
+  lastSection,
+  size,
+  onSizeChange,
+  scale,
+}) {
   const doneCount = countDone(done, phase.checklist);
 
   // The lesson is the substance of the phase; everything else is scaffolding
@@ -20,11 +43,41 @@ export default function PhaseDetail({ phase, done, onToggle, onBack, anchorRef }
   const { status: lessonStatus, lesson, message } = useLesson(phase);
   const headingCount = phase.lessonHeadingCount || 0;
 
+  // Depth through the lesson region only — not the page, which is mostly
+  // scaffolding below the lesson and would make the bar flatter than the truth.
+  // Gated on the lesson being rendered, because there is no region to measure
+  // until then and the hook would query for an element that does not exist yet.
+  const fraction = useReadingProgress(lessonStatus === "ready");
+
+  const toc = lesson ? lesson.toc || [] : [];
+  const firstSectionId = toc.length ? toc[0].id : null;
+
+  function handleActiveSection(id, text) {
+    if (onVisitSection) onVisitSection(phase.id, id, text);
+  }
+
+  function jumpToSection(id) {
+    const el = document.getElementById(id);
+    if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
+  }
+
   return (
     <div className="phase-detail">
-      <button type="button" className="btn btn--ghost" onClick={onBack}>
-        ← Back
-      </button>
+      <ReadingBar fraction={fraction} />
+
+      <div className="phase-detail__topbar">
+        <button type="button" className="btn btn--ghost" onClick={onBack}>
+          ← Back to dashboard
+        </button>
+        <PhaseNav
+          variant="compact"
+          prev={prev}
+          next={next}
+          index={index}
+          count={phaseCount}
+          onOpenPhase={onOpenPhase}
+        />
+      </div>
 
       <h1>{phase.title}</h1>
       <p className="muted">
@@ -41,6 +94,14 @@ export default function PhaseDetail({ phase, done, onToggle, onBack, anchorRef }
         <h2>Goal</h2>
         <p>{phase.goal}</p>
       </section>
+
+      {lessonStatus === "ready" && lastSection && (
+        <ResumePrompt
+          section={lastSection}
+          firstSectionId={firstSectionId}
+          onJump={jumpToSection}
+        />
+      )}
 
       {lessonStatus === "loading" && (
         <section className="card">
@@ -63,8 +124,13 @@ export default function PhaseDetail({ phase, done, onToggle, onBack, anchorRef }
         <Lesson
           title={lesson.title || phase.lessonTitle || "Lesson"}
           blocks={lesson.blocks || []}
-          toc={lesson.toc || []}
+          toc={toc}
           anchorRef={anchorRef}
+          phaseId={phase.id}
+          onActiveSection={handleActiveSection}
+          size={size}
+          onSizeChange={onSizeChange}
+          scale={scale}
         />
       )}
 
@@ -88,8 +154,12 @@ export default function PhaseDetail({ phase, done, onToggle, onBack, anchorRef }
         </section>
       ))}
 
-      <section className="card">
+      <section className="card" id="phase-checklist">
         <h2>Checklist</h2>
+        <p className="muted phase-detail__hint">
+          This is the phase's completion test. The sections you ticked inside the
+          lesson are counted separately, above.
+        </p>
         {phase.checklist.map((item) => (
           <ChecklistItem
             key={item.id}
@@ -108,6 +178,25 @@ export default function PhaseDetail({ phase, done, onToggle, onBack, anchorRef }
           ))}
         </div>
       </section>
+
+      {phase.resources && phase.resources.length > 0 && (
+        <section className="card">
+          <h2>Free and cheap resources</h2>
+          <ul>
+            {phase.resources.map((r, i) => (
+              <li key={i}>
+                {r.url ? (
+                  <a href={r.url} target="_blank" rel="noreferrer">
+                    {renderInline(r.name, `resource-${i}`)}
+                  </a>
+                ) : (
+                  renderInline(r.name, `resource-${i}`)
+                )}
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
 
       <section className="card">
         <h2>Hands-on practice tasks</h2>
@@ -141,6 +230,15 @@ export default function PhaseDetail({ phase, done, onToggle, onBack, anchorRef }
         <h2>You're ready to move on when...</h2>
         <p>{renderInline(phase.exitCriteria, "exit-criteria")}</p>
       </section>
+
+      <PhaseNav
+        variant="full"
+        prev={prev}
+        next={next}
+        index={index}
+        count={phaseCount}
+        onOpenPhase={onOpenPhase}
+      />
     </div>
   );
 }

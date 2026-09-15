@@ -57,6 +57,22 @@ function render(label, element) {
   }
 }
 
+// Some components are CORRECTLY empty in a given state: ResumePrompt is silent
+// when the remembered section is the one the page already opens at, and
+// ShortcutHelp renders nothing while closed. Passing those through render()
+// would report a passing design as a defect, so they get their own entry point
+// that distinguishes "rendered nothing, as intended" from "threw".
+function renderMaybeEmpty(label, element) {
+  try {
+    const html = renderToStaticMarkup(element);
+    renders++;
+    return decode(html || "");
+  } catch (e) {
+    failures.push(label + " — " + e.message);
+    return null;
+  }
+}
+
 function assert(label, ok, detail) {
   if (!ok) failures.push(label + " — " + detail);
 }
@@ -113,6 +129,13 @@ try {
   const Portfolio = await load("/src/pages/Portfolio.jsx");
   const Applications = await load("/src/pages/Applications.jsx");
   const Search = await load("/src/pages/Search.jsx");
+  const Schedule = await load("/src/pages/Schedule.jsx");
+  const PhaseNav = await load("/src/components/PhaseNav.jsx");
+  const ShortcutHelp = await load("/src/components/ShortcutHelp.jsx");
+  const { ReadingBar, ResumePrompt } = await server.ssrLoadModule(
+    "/src/components/ReadingPosition.jsx"
+  );
+  const LessonToolbar = await load("/src/components/LessonToolbar.jsx");
 
   allPhases = tracks.flatMap((t) => t.phases);
   allTools = allPhases.flatMap((p) => p.tools);
@@ -330,6 +353,323 @@ try {
           "missing the dashboard's primary question"
         );
       }
+    }
+  }
+
+  // --- Phase navigation, every phase ---
+  // The pager is the feature whose absence was most obvious in use: a phase
+  // ended after its exit criteria with no way forward. What this asserts is that
+  // every phase in a track has at least ONE live neighbour and that the boundary
+  // phases are honest about being boundaries — a pager that renders two dead
+  // buttons on the last phase of a track looks broken rather than finished.
+  if (PhaseNav) {
+    for (const track of tracks) {
+      const phases = track.phases;
+      for (let i = 0; i < phases.length; i++) {
+        const prev = i > 0 ? phases[i - 1] : null;
+        const next = i < phases.length - 1 ? phases[i + 1] : null;
+        const label = "PhaseNav " + phases[i].id;
+
+        const html = render(
+          label,
+          createElement(PhaseNav, {
+            prev,
+            next,
+            index: i,
+            count: phases.length,
+            onOpenPhase: noop,
+          })
+        );
+        if (!html) continue;
+
+        assert(
+          label + ": names the next phase",
+          !next || html.includes(next.title.replace(/^Phase \d+\s*—\s*/, "")),
+          "next phase name not rendered"
+        );
+        assert(
+          label + ": names the previous phase",
+          !prev || html.includes(prev.title.replace(/^Phase \d+\s*—\s*/, "")),
+          "previous phase name not rendered"
+        );
+        assert(
+          label + ": first phase says so",
+          prev || html.includes("first phase"),
+          "no indication that this is the first phase"
+        );
+        assert(
+          label + ": last phase says so",
+          next || html.includes("last phase"),
+          "no indication that this is the last phase"
+        );
+
+        // The position line lives on the compact variant, which is the one that
+        // sits beside the Back button at the top of a phase.
+        const compact = render(
+          label + " (compact)",
+          createElement(PhaseNav, {
+            prev,
+            next,
+            index: i,
+            count: phases.length,
+            onOpenPhase: noop,
+            variant: "compact",
+          })
+        );
+        if (compact) {
+          assert(
+            label + " compact: position line",
+            compact.includes("Phase " + (i + 1) + " of " + phases.length),
+            "position not rendered in the compact pager"
+          );
+        }
+      }
+    }
+  }
+
+  // --- Lesson section toggles ---
+  // Every h3/h4 in a lesson must get a done control, and h5 must NOT — those are
+  // paragraph-level labels with no section identity, so a control on one would
+  // produce a heading the TOC cannot show or count. Asserted per lesson against
+  // the TOC, which is the list the phase's section progress is measured from.
+  if (Lesson) {
+    for (const phase of allPhases) {
+      const lessonPath = join(
+        ROOT,
+        "src",
+        "data",
+        "generated",
+        "lessons",
+        phase.id + ".json"
+      );
+      if (!existsSync(lessonPath)) continue;
+      const lesson = JSON.parse(readFileSync(lessonPath, "utf8"));
+
+      const html = render(
+        "Lesson toggles " + phase.id,
+        createElement(Lesson, {
+          title: lesson.title,
+          blocks: lesson.blocks,
+          toc: lesson.toc,
+          phaseId: phase.id,
+        })
+      );
+      if (!html) continue;
+
+      const label = "Lesson toggles " + phase.id;
+      const tocIds = new Set((lesson.toc || []).map((t) => t.id));
+      const headingBlocks = (lesson.blocks || []).filter(
+        (b) => b.type === "heading"
+      );
+      const expected = headingBlocks.filter(
+        (b) => (b.level === 3 || b.level === 4) && tocIds.has(b.id)
+      ).length;
+      const rendered = (html.match(/class="lesson__done"/g) || []).length;
+
+      assert(
+        label + ": one done control per section heading",
+        rendered === expected,
+        "expected " + expected + " section controls, rendered " + rendered
+      );
+
+      // The toolbar must report the same denominator the controls are counted
+      // against, or the progress line and the checkboxes disagree.
+      assert(
+        label + ": toolbar total matches sections",
+        html.includes("0/" + expected + " sections"),
+        "toolbar does not report " + expected + " sections"
+      );
+    }
+  }
+
+  // --- Section progress counts persisted state ---
+  // useLessonProgress resolves its "done" state through a namespaced key. A key
+  // collision between two phases would make progress in one appear in the other,
+  // which is invisible in the UI — the checkbox just renders already-ticked.
+  if (LessonToolbar) {
+    const html = render(
+      "LessonToolbar",
+      createElement(LessonToolbar, {
+        doneCount: 7,
+        total: 20,
+        tickMode: false,
+        onToggleTickMode: noop,
+        size: "m",
+        onSizeChange: noop,
+      })
+    );
+    if (html) {
+      assert(
+        "LessonToolbar: count",
+        html.includes("7/20 sections"),
+        "section count not rendered"
+      );
+      assert(
+        "LessonToolbar: progressbar role",
+        html.includes('role="progressbar"'),
+        "missing progressbar role"
+      );
+      assert(
+        "LessonToolbar: four size options",
+        (html.match(/chip--s/g) || []).length === 4,
+        "expected 4 reading-size options"
+      );
+      assert(
+        "LessonToolbar: tick toggle is a pressed state",
+        html.includes('aria-pressed="false"'),
+        "the tick-off toggle does not report its state"
+      );
+    }
+  }
+
+  // --- Reading position ---
+  if (ReadingBar) {
+    const html = render("ReadingBar", createElement(ReadingBar, { fraction: 0.42 }));
+    if (html) {
+      assert(
+        "ReadingBar: width follows the fraction",
+        html.includes("width:42%"),
+        "bar width does not track the reading fraction"
+      );
+      assert(
+        "ReadingBar: hidden from assistive tech",
+        html.includes('aria-hidden="true"'),
+        "a decorative position bar should not be announced"
+      );
+    }
+  }
+
+  if (ResumePrompt) {
+    const html = render(
+      "ResumePrompt",
+      createElement(ResumePrompt, {
+        section: { id: "part-7", text: "Part 7 — Storage" },
+        firstSectionId: "why",
+        onJump: noop,
+      })
+    );
+    if (html) {
+      assert(
+        "ResumePrompt: names the section",
+        html.includes("Part 7 — Storage"),
+        "the remembered section is not named"
+      );
+    }
+
+    // The first section is where the page already opens, so the prompt would be
+    // pure noise there. Rendered as empty, not as a prompt that jumps nowhere.
+    const silent = renderMaybeEmpty(
+      "ResumePrompt (first section)",
+      createElement(ResumePrompt, {
+        section: { id: "why", text: "Why this lesson exists" },
+        firstSectionId: "why",
+        onJump: noop,
+      })
+    );
+    assert(
+      "ResumePrompt: silent at the first section",
+      silent !== null && !silent.includes("You were reading"),
+      "prompt rendered for the section the page already opens at"
+    );
+  }
+
+  // --- Schedule ---
+  // A page with a date comparison in it is exactly where a wrong render is
+  // invisible: the numbers still look like numbers.
+  if (Schedule) {
+    for (const track of tracks) {
+      const html = render(
+        "Schedule " + track.id,
+        createElement(Schedule, {
+          trackId: track.id,
+          done: {},
+          onOpenPhase: noop,
+          onOpenTrack: noop,
+        })
+      );
+      if (!html) continue;
+      const label = "Schedule " + track.id;
+
+      assert(label + ": heading", html.includes("Schedule"), "heading not rendered");
+      assert(
+        label + ": planned weeks",
+        html.includes("weeks planned"),
+        "planned length not rendered"
+      );
+      assert(
+        label + ": phase count",
+        html.includes(track.phases.length + "</span>") ||
+          html.includes(">" + track.phases.length + "<"),
+        "phase count not rendered"
+      );
+      assert(
+        label + ": offers a start date",
+        html.includes('type="date"'),
+        "no way to set the track's start date"
+      );
+      assert(
+        label + ": lists every phase",
+        track.phases.every((p) => html.includes(p.title)),
+        "a phase is missing from the plan table"
+      );
+      // The planned total must equal the sum of the phases' own durations, or
+      // the headline number and the table beneath it disagree.
+      const totalWeeks = track.phases.reduce(
+        (n, p) => n + (Number(p.durationWeeks) || 0),
+        0
+      );
+      assert(
+        label + ": planned total matches the phase rows",
+        html.includes(">" + totalWeeks + "</span>"),
+        "headline total is not the sum of the phase durations (" + totalWeeks + ")"
+      );
+      // With no start date there is no comparison to make, and the page must say
+      // so rather than render a confident 0%.
+      assert(
+        label + ": says when it cannot compare",
+        html.includes("Not enough information"),
+        "no start date, but no explanation of what is missing"
+      );
+    }
+  }
+
+  // --- Shortcut help ---
+  if (ShortcutHelp) {
+    const closed = renderMaybeEmpty(
+      "ShortcutHelp (closed)",
+      createElement(ShortcutHelp, { open: false, onClose: noop })
+    );
+    assert(
+      "ShortcutHelp: nothing rendered when closed",
+      closed !== null && !closed.includes("Keyboard shortcuts"),
+      "an open dialog rendered while closed"
+    );
+
+    const html = render(
+      "ShortcutHelp (open)",
+      createElement(ShortcutHelp, { open: true, onClose: noop })
+    );
+    if (html) {
+      assert(
+        "ShortcutHelp: dialog role",
+        html.includes('role="dialog"'),
+        "the panel is not announced as a dialog"
+      );
+      assert(
+        "ShortcutHelp: lists the search key",
+        html.includes("Focus search"),
+        "the search shortcut is not documented"
+      );
+      assert(
+        "ShortcutHelp: lists phase navigation",
+        html.includes("Next phase") && html.includes("Previous phase"),
+        "phase navigation shortcuts are not documented"
+      );
+      assert(
+        "ShortcutHelp: says shortcuts are ignored while typing",
+        html.includes("ignored while you are typing"),
+        "no warning that shortcuts are suspended in fields"
+      );
     }
   }
 

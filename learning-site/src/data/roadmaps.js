@@ -31,3 +31,71 @@ export function findTrack(id) {
 export function allTasks(track) {
   return track.phases.flatMap((p) => p.checklist);
 }
+
+/**
+ * The phase before and after `phaseId` within one track.
+ *
+ * Returns `{ prev, next, index, count }`. `prev`/`next` are `null` at the ends,
+ * so a caller renders a disabled control rather than a button that goes nowhere.
+ * Order comes from the array, which `build-content.mjs` emits sorted by the
+ * phase's `order` front-matter field — not from the title, so a renumbered phase
+ * cannot silently reorder navigation.
+ */
+export function neighbours(track, phaseId) {
+  if (!track || !phaseId) return { prev: null, next: null, index: -1, count: 0 };
+  const phases = track.phases || [];
+  const index = phases.findIndex((p) => p.id === phaseId);
+  if (index < 0) return { prev: null, next: null, index: -1, count: phases.length };
+  return {
+    prev: index > 0 ? phases[index - 1] : null,
+    next: index < phases.length - 1 ? phases[index + 1] : null,
+    index,
+    count: phases.length,
+  };
+}
+
+/**
+ * Total planned weeks for a track.
+ *
+ * `durationWeeks` comes from each phase's `duration_weeks` front matter. A phase
+ * without it is skipped rather than counted as zero, so a missing field lowers
+ * the total honestly instead of pretending the phase is instant.
+ */
+export function trackWeeks(track) {
+  let weeks = 0;
+  let counted = 0;
+  let missing = 0;
+  for (const p of track.phases || []) {
+    const w = Number(p.durationWeeks);
+    if (Number.isFinite(w) && w > 0) {
+      weeks += w;
+      counted++;
+    } else {
+      missing++;
+    }
+  }
+  return { weeks, counted, missing };
+}
+
+/**
+ * The first phase in a track that still has an unfinished checklist item.
+ *
+ * Used by the dashboard's reading-position card: "carry on where you left off"
+ * has to survive the phase being finished between sessions, and it has to work
+ * for a track the reader has never opened.
+ */
+export function firstUnfinishedPhase(track, done) {
+  for (const p of track.phases || []) {
+    if (p.checklist.some((c) => !done[c.id])) return p;
+  }
+  return null;
+}
+
+/** One phase by id, across every track. Returns `{ track, phase }` or null. */
+export function findPhase(phaseId) {
+  for (const track of tracks) {
+    const phase = (track.phases || []).find((p) => p.id === phaseId);
+    if (phase) return { track, phase };
+  }
+  return null;
+}

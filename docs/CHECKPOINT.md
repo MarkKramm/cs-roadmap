@@ -7,7 +7,7 @@ A snapshot of the repository's current state. Update this when a meaningful mile
 | Item | Value |
 |---|---|
 | Branch | `main` |
-| Tracked files | 106 |
+| Tracked files | 120 |
 | Working tree | Clean — nothing uncommitted, nothing untracked |
 | Unpushed | None. `main` and `origin/main` are both at `5673af3` |
 | Line endings | LF everywhere (Windows scripts excepted) |
@@ -19,8 +19,8 @@ A snapshot of the repository's current state. Update this when a meaningful mile
 | Build step | `learning-site/` — React + Vite. `npm run dev` / `npm run build` |
 | Curriculum size | **272,959 lesson words** across 23 phases, 464 fenced code blocks, 252 checklist task IDs |
 | Hands-on density | **Every phase that can carry practice now does.** Measured as concrete instructions per 1,000 lesson words, IT Phase 4 rose from **0.11 → 2.8** and Phase 6 from 0.17, the two worst in the repository. Nine phases gained work totalling roughly +37,000 words, all additive, after this metric found that four IT and five cyber phases *taught* skills without ever having the reader perform them. The remaining low-density phases — soft skills, specialization choice, certifications, job application — are ones where prose is correct, because you cannot run a terminal command to practise an interview answer |
-| Checks | `lint-content` 106 files / 0 issues; `audit-content` 0 issues across 23 phases; `audit-lesson-ast` 23 lessons / 0 loss; `audit-readability` 0 of 23 outside target and **0 paragraphs over 90 words**; `test:smoke` 85 renders / 0 failures; `test:search` 41 checks / pass; production build clean |
-| Task IDs | 228 total (IT 66, cyber 162) |
+| Checks | `lint-content` 119 files / 0 issues; `audit-content` 0 issues across 23 phases; `audit-lesson-ast` 23 lessons / 0 loss; `audit-readability` 0 of 23 outside target and **0 paragraphs over 90 words**; `test:smoke` **162** renders / 0 failures; `test:ui` **42** checks / pass; `test:search` 41 checks / pass; `test:highlight` 37 checks / pass; production build clean |
+| Task IDs | 252 total (IT 90, cyber 162) |
 | CI | `.github/workflows/ci.yml` — two jobs on push to `main` and on PRs (D-008). Runs lint, content audit, lesson-parser audit, readability audit, build, smoke and search. **`cyber-restructure-check.mjs` is deliberately excluded**: it reads a before-snapshot from `process.env.TEMP`, which is not in the repository, so it can only ever fail on a fresh clone. It is a one-off migration tool for a restructure pass, not a standing guard. Last verified green: `2ec1871` |
 | Milestone | M3 complete — the site renders the lessons themselves, not just the structured sections |
 | Search | Full-text across all 23 lessons, both tracks (D-013). A build-time inverted index (term → segment id, **no prose**) emitted as `generated/search.json` — 471 KB raw, 180 KB as a delivered chunk, and **not referenced by `index.html`**, so a reader who never searches pays nothing and the main bundle stays at 105 KB gzipped. Results deep-link across tracks to the matching heading. Three silent-failure bugs were found by testing the index against the engine and are now guarded by `test:search` |
@@ -28,8 +28,9 @@ A snapshot of the repository's current state. Update this when a meaningful mile
 | Paragraph density | **Zero paragraphs over 90 words anywhere in the repository.** The readability audit now counts per-paragraph density and fails the build on anything over 150 words; the previous per-phase *average* could not see a single 190-word wall among twenty short paragraphs, which is how 33 of them accumulated in the IT track. All 33 were split at natural seams with every word preserved — proved by `git diff --word-diff`, where inserting a blank line is invisible and four of the five files therefore report 0/0 tokens |
 | Cyber depth track | Six new modules added as Phases 9–14, because the core path lists cloud, detection, IR, scripting, GRC and web security as target roles but taught none of them: cloud and identity, detection engineering, incident response and DFIR, scripting and automation, GRC and compliance, and web application security. All $0, all with explicit legal-boundary sections |
 | Cyber rebalance | Phases 4, 5 and 6 were the thinnest lessons in the track (4,788 / 5,200 / 5,828) and are now level with the rest (9,045 / 9,329 / 9,311). Phase 4 gained a full lab build, a twelve-row troubleshooting table, evidence capture and malware isolation; Phase 5 a weighted decision matrix and the first 90 days of each path; Phase 6 a fourth project, an annotated weak-versus-strong report, and interview follow-ups |
-| Lesson rendering | The site parses each lesson into a block AST at build time (`scripts/lesson-ast.mjs`) and renders it with a table of contents and scroll-spy (D-011). Lessons ship as per-phase files loaded on demand, which took the initial bundle from 1.96 MB back to 355 KB (D-012). Two guards protect the path, since a parser bug deletes content rather than crashing: `audit-lesson-ast.mjs` and the lesson assertions in `test:smoke` |
+| Lesson rendering | The site parses each lesson into a block AST at build time (`scripts/lesson-ast.mjs`) and renders it with a table of contents and scroll-spy (D-011). Lessons ship as per-phase files loaded on demand, which took the initial bundle from 1.96 MB back to 394 KB (D-012). Two guards protect the path, since a parser bug deletes content rather than crashing: `audit-lesson-ast.mjs` and the lesson assertions in `test:smoke` |
 | Site UI | Sidebar is viewport-pinned and scrolls independently; below 860px it becomes an off-canvas drawer with Escape, backdrop-click and scroll locking (D-010). View changes reset scroll to the top. Lesson body has a reading measure, horizontally scrolling tables, and focus-visible states |
+| Navigation & reading (D-014) | Seven `ROADMAP.md` open items closed in one pass. **Prev/next phase navigation** rendered twice per phase (compact strip + named cards), honest at both track boundaries rather than vanishing. **Per-section done toggles** on every `###`/`####` heading, keyed by heading id and namespaced per phase — a **separate** store from the phase checklist, so neither number lies. **Reading-position bar** measuring the `.lesson` region, not the page, plus a resume prompt that suggests and waits. **Schedule view** comparing work done against calendar elapsed once a start date is set, framed as a readout rather than a verdict. **Keyboard shortcuts** (`/`, `⌘K`, `j`/`k`, `n`/`p`, `g d`, `g s`, `?`) with none bound to a checkbox. **Reading-size control** scaling one custom property on the lesson body. **A second breakpoint at 560px** and a `prefers-reduced-motion` block |
 | Phase 1 (IT) | Structurally repaired and deepened. Four rendering defects fixed, the legacy task block folded in, and the lesson taken from ~4,400 to ~23,800 words across 13 parts (evidence reading, the local→remote career route, working with real users, and five worked tickets) |
 | Phases 2–4 (IT) | Deepened to the Phase 1 standard. Phase 2, 4,337 → 9,709 words. Phase 3, 3,370 → 16,680. Phase 4, 6,137 → 9,482 |
 | Phases 5–9 (IT) | Deepened to the same standard, taking the IT lesson prose from roughly 32,800 to roughly 97,300 words. A structural defect was fixed along the way: Phases 6, 7 and 8 each had lesson content stranded after the closing sections |
@@ -59,7 +60,7 @@ edit. For the exact current state, run `git --no-pager log --oneline -n 1`.
 ├── LICENSE
 ├── docs/
 ├── scripts/                 (content tooling)
-├── learning-site/           (React + Vite; 5 pages, 8 components, 5 hooks;
+├── learning-site/           (React + Vite; 7 pages, 12 components, 11 hooks;
 │                             generated/ and dist/ ignored)
 └── career-roadmaps/
     ├── README.md
@@ -77,14 +78,15 @@ All of the following were re-verified against a **from-scratch rebuild** — `ge
 - [x] All files valid UTF-8; no CR bytes; no BOM; no mojibake in any edited file (verified at byte level, since a PowerShell console misrenders correct UTF-8).
 - [x] `.gitattributes` and `.editorconfig` in place.
 - [x] Remote configured. **`main` and `origin/main` are both at `b980d11`; nothing is unpushed.**
-- [x] `lint-content.mjs` — 102 files, 0 issues.
+- [x] `lint-content.mjs` — 119 files, 0 issues.
 - [x] `audit-content.mjs` — 0 issues across 23 phases.
 - [x] `audit-lesson-ast.mjs` — all 23 lessons parse with no content loss.
 - [x] `audit-readability.mjs` — 0 of 23 phases outside target (avg para ≤ 45, avg sentence ≤ 18, ≥ 8 tables).
 - [x] `cyber-restructure-check.mjs` — no phase lost content; 132,563 lesson words.
 - [x] `build-content.mjs` — 228 phase task IDs (IT 66, cyber 162), 23 lesson files.
-- [x] `npm run test:smoke` — 84 renders across 23 phases and 191 tools, 0 failures.
-- [x] `npm run build` — clean; initial bundle 355 KB with 23 on-demand lesson chunks.
+- [x] `npm run test:smoke` — 162 renders across 23 phases and 191 tools, 0 failures.
+- [x] `npm run test:ui` — 42 checks across pace arithmetic, phase navigation, shortcut targeting and section-key namespacing.
+- [x] `npm run build` — clean; initial bundle 394 KB (117 KB gzipped) with 23 on-demand lesson chunks.
 - [x] 256 checklist IDs, all globally unique.
 - [x] CI and the Pages deploy are **green on `9629c89`**, verified through the GitHub API: `CI` and `Deploy to GitHub Pages` both report `completed / success`, and deployments exist for `e2fbae5`, `b980d11` and `9629c89`. The site is live at <https://markkramm.github.io/cs-roadmap/>.
 
@@ -112,6 +114,7 @@ Read this first.
 - [x] **Wrote the five module-review follow-ups.** A worked "wrong first guess" and a five-rung setup diagnostic ladder in module 09, a reversed wrong-automation case in module 12, a worked risk-scoring disagreement in module 13, and a residual-incompetence statement in all six modules — each naming a real limitation rather than a humble generality. 366 lines added, nothing deleted.
 - [x] **Added full-text search.** See the Search row above and D-013.
 - [x] **Confirmed the site is deployed.** It was already live — see the Deploy row above. No new hosting was needed.
+- [x] **Gave the reader somewhere to go** (D-014). The phase page had no "next"; a 15,500-word lesson reported no depth and offered no place to stop; "0/90 · 0%" had no reference point. All three were consequences of the same thing the earlier work established — the lesson is 84–95% of a phase file — so the application had grown a reader without growing the affordances a reader needs. Closed with prev/next phase navigation, per-section done toggles stored separately from the checklist, a lesson-scoped reading bar, a resume prompt that suggests rather than jumps, a Schedule view, keyboard shortcuts with none bound to a checkbox, a reading-size control, and a 560px breakpoint.
 
 ### Paragraph density, current state
 
@@ -136,9 +139,10 @@ node scripts/cyber-restructure-check.mjs # no cyber phase shrank
 cd learning-site
 npm run build                            # production build
 npm run test:smoke                       # render every phase with real data
+npm run test:ui                          # pace, navigation, shortcuts, section keys
 npm run test:search                      # index and query engine agree
 ```
 
 Note: `cyber-restructure-check.mjs` exits 2 on a fresh clone because its baseline lives in `TEMP`. That is expected and it is why CI does not run it.
 
-Expected results: lint `106 files, 0 issues`; content audit `0 issues`; lesson AST `all 23 lessons, no content loss`; readability `0 of 23` outside target and `0 paragraphs over 90 words`; smoke `85 renders across 23 phases and 191 tools, 0 failures`; search `41 checks, pass`.
+Expected results: lint `119 files, 0 issues`; content audit `0 issues`; lesson AST `all 23 lessons, no content loss`; readability `0 of 23` outside target and `0 paragraphs over 90 words`; smoke `162 renders across 23 phases and 191 tools, 0 failures`; ui `42 checks, pass`; search `41 checks, pass`.

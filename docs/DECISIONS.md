@@ -2,6 +2,24 @@
 
 A lightweight decision log (ADR-style). Newest first.
 
+## D-014 — Progress has two axes, and a phase remembers where you were
+
+- **Date:** 2026-09-15
+- **Status:** Accepted
+- **Context:** The site renders each lesson body in full (D-011) and ships it as its own file loaded on demand (D-012). Measurement afterwards exposed the shape of a problem that had been invisible while the lessons were only on GitHub: a lesson is **84–95% of its phase file**, IT Phase 1 alone has 66 `###`/`####` subheadings, and the longest runs ~15,500 words. Against that, the only completion signal in the application was the phase checklist — 7–19 items sitting **below** the lesson. A reader four hours into a lesson had no way to record that they had finished the section they were reading, no sense of how far in they were, and no way back to where they stopped. Meanwhile the phase page ended after its exit criteria with **nothing after it**: on a 9–14 phase track whose whole point is sequence, there was no "next" anywhere in the UI, and the only route to the following phase was to scroll to the top and aim at the sidebar.
+- **Decision:** Three separate pieces of state, kept deliberately apart.
+  1. **Lesson section state** ([`hooks/useLessonProgress.js`](../learning-site/src/hooks/useLessonProgress.js)), keyed by the heading id the lesson parser already emits and namespaced by phase id — `it-01#part-7`. Persisted under its own key, `cs-roadmap:lesson-sections:v1`.
+  2. **Reading position** ([`hooks/useReadingState.js`](../learning-site/src/hooks/useReadingState.js)), recording the last phase opened and, per phase, the last heading on screen, under `cs-roadmap:reading:v1`.
+  3. **Schedule start date** ([`hooks/useSchedule.js`](../learning-site/src/hooks/useSchedule.js)), one date per track, under `cs-roadmap:schedule:v1`.
+  Navigation is derived, not stored: [`data/roadmaps.js`](../learning-site/src/data/roadmaps.js) gained `neighbours(track, phaseId)`, which reads the phase array's order rather than parsing titles.
+- **Consequences:** The application gains a reason to distinguish *reading* from *completing*, and the distinction is enforced structurally rather than by convention — three storage keys, three labels, two counters on a phase page that never merge. This is the part worth recording, because the easy version of this feature is one progress bar, and one progress bar would make one of the two numbers lie: either section ticks would inflate the phase completion test the exit criteria depend on, or finishing a phase would silently discard the reader's place in a lesson.
+  - **A heading id is the identity, and it derives from the heading text.** Rewording a heading retires its state rather than mis-attributing it — the same rule the checklist IDs follow ([`CONTENT-SCHEMA.md`](CONTENT-SCHEMA.md) → Checklist task IDs). A scroll offset was rejected for the same reason: an offset into content that can be regenerated is a number with no meaning after the next content edit.
+  - **"Reset progress" does not clear reading state.** The button says "Reset all progress" and the reader means the checklist. Deleting their place in a lesson they were halfway through would be a surprise the label did not warn about.
+  - **The resume prompt suggests and waits.** Nothing jumps on load. A reader who deliberately scrolled to the top has said something by doing so.
+  - **The reading bar measures the lesson, not the page.** A document-scoped bar would count the checklist, tools, tasks, deliverable and exit criteria as reading, and would report a reader halfway through a lesson as a fraction of the whole page.
+  - **A keyboard shortcut must not be able to change saved state.** Navigation, search and view switching are bound; checkbox toggling is not, and that omission is a decision rather than an oversight.
+  - **`test-ui.mjs` was added because none of the existing guards could see any of this.** `smoke-render.mjs` runs no effects and no handlers, so it cannot observe a shortcut that never fires, a pace figure wrong by a week, or two phases colliding on a section key — and a collision would render a tick in one phase as a tick in another, which is invisible in every screenshot and every render assertion. The section-key namespacing has its own test for exactly that reason.
+
 ## D-013 — Search uses a build-time inverted index, not the lesson text
 
 - **Date:** 2026-09-15
@@ -61,6 +79,7 @@ A lightweight decision log (ADR-style). Newest first.
 - **Context:** M2 adds three destinations (tools library, portfolio tracker, application tracker) alongside the dashboard and the per-phase detail view. D-006 left routing open. The site is a single-user local tool: no server, no shareable URLs, no deep links, no analytics. A router would add a dependency and a URL surface to solve problems this tool does not have.
 - **Decision:** Keep navigation in `App.jsx` as a single `view` string — `dashboard` | `phase` | `tools` | `portfolio` | `applications` — alongside the existing `trackId` and `openPhaseId`. No router dependency.
 - **Consequences:** No new dependency. The browser's back and forward buttons do not move between views; the sidebar and the in-page Back button are the only navigation, which is why both stay visible on every view. If deep links are ever wanted, the switch in `App.jsx` is the single seam to replace — no component below it needs to change.
+- **Amended by D-014:** the view list gained `schedule`, and keyboard shortcuts now reach every view — but navigation is still local state, and the browser's back button still does not move between views. D-014 added a second, complementary route through the content (`j`/`k` between phases, `g d` and `g s` between views) rather than a URL surface.
 
 ## D-006 — Learning site is built with React and Vite
 
