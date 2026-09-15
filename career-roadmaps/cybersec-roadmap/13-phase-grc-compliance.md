@@ -1131,6 +1131,149 @@ You can now write a scorable risk statement, build a register with an honest spr
 
 **Say it this way:** “I have built a full GRC artefact set for an invented company — register, control matrix, policy, vendor assessment — and I can talk through every judgement in it. The part I have not done is the part with other people in the room.” The artefacts then do the rest of the work, because they are checkable.
 
+### Part 10 — The worked artefact set
+
+Part 9 told you to invent a company and build six artefacts. This part shows one built, so you have a target to aim at rather than a blank page.
+
+The company is the same one described above: a 40-person Philippine BPO serving one overseas client. Every figure below is invented. That is the point — the reasoning is what transfers, not the data.
+
+#### The risk register, filled in
+
+Ten risks, scored on a published 5×5 scale, with a deliberate spread and one acceptance.
+
+| ID | Risk statement | L | I | Score | Treatment | Owner | Residual |
+|---|---|---|---|---|---|---|---|
+| R-01 | A staff member's credentials are phished, allowing access to client data | 4 | 5 | 20 | Enforce MFA, phishing simulation, conditional access | IT Security | 12 |
+| R-02 | A lost laptop exposes cached client records | 3 | 4 | 12 | Full-disk encryption, MDM remote wipe | IT Ops | 6 |
+| R-03 | A departed employee retains system access | 2 | 4 | 8 | Leaver checklist, quarterly access review | HR + IT | 4 |
+| R-04 | Ransomware encrypts the shared file server | 2 | 5 | 10 | Offline backups tested quarterly, EDR | IT Ops | 5 |
+| R-05 | A vendor with data access suffers a breach | 3 | 4 | 12 | Vendor assessment, contractual notification clause | Compliance | 8 |
+| R-06 | Client data is processed outside the agreed jurisdiction | 2 | 4 | 8 | Data-flow mapping, DPA review | Compliance | 4 |
+| R-07 | A power outage halts operations during a client SLA window | 3 | 3 | 9 | UPS, documented failover to a second site | Facilities | 6 |
+| R-08 | Staff use personal USB drives to move client data | 3 | 3 | 9 | **Accepted** — policy prohibits it; enforcement cost exceeds the risk given existing controls | IT Security | 9 |
+| R-09 | A privileged account is misused by an insider | 1 | 5 | 5 | Least privilege, session logging, separation of duties | IT Security | 3 |
+| R-10 | A privacy complaint is mishandled past the notification deadline | 2 | 4 | 8 | Documented breach procedure, named decision owner | Compliance | 4 |
+
+**Notice the shape of this table.** It has 20s, 5s, and one row that says *accepted* with a reason. A register where everything is 15–20 is the failure mode, and a reviewer spots it in seconds.
+
+**Notice also that R-08's residual equals its inherent score.** Accepting a risk means the number does not go down. If your accepted row shows a reduced residual, you have not accepted anything — you have treated it and mislabelled it.
+
+#### R-01, worked as a full register entry
+
+A register row is a summary. The entry behind it is where the thinking lives, and this is the format to copy.
+
+| Field | Value |
+|---|---|
+| **ID** | R-01 |
+| **Risk statement** | A staff member's credentials are phished, allowing access to client data |
+| **Asset** | Client case management system, containing personal data of the client's customers |
+| **Threat** | Credential phishing, external, opportunistic |
+| **Vulnerability** | No MFA enforced on the case management system; users authenticate with a password only |
+| **Existing controls** | Email filtering, annual security awareness training, password policy |
+| **Likelihood** | 4 — phishing is the most reported vector and three staff reported attempts last quarter |
+| **Impact** | 5 — a breach of client personal data triggers notification obligations and contractual penalties |
+| **Inherent score** | 20 (Critical) |
+| **Treatment** | Mitigate |
+| **Planned controls** | MFA on the case management system, conditional access by geography, quarterly phishing simulation |
+| **Owner** | IT Security Manager |
+| **Target date** | End of next quarter |
+| **Residual score** | 12 (High) — MFA removes most credential-only attacks but does not remove session theft |
+| **Review date** | Quarterly, or on any incident |
+| **Disagreement recorded** | Ops Lead scored likelihood 3, arguing phishing attempts rarely succeed. Recorded, not averaged. Owner decided on 4 using the reported-attempt data |
+
+**The last row is the one that matters.** Two people disagreed, the disagreement was recorded rather than smoothed away, and the accountable owner decided with both numbers visible. Averaging to 3.5 would have destroyed the information that Ops Lead believes the current training is working — which is itself worth knowing.
+
+#### The control matrix, with honest gaps
+
+Ten controls mapped to NIST CSF 2.0, plus the second framework each also satisfies. Note that three rows are not "pass".
+
+| Control | CSF 2.0 | Also satisfies | Status | Evidence held |
+|---|---|---|---|---|
+| MFA on all remote access | PR.AA | ISO 27001 A.8.5 | **Pass** | Conditional access policy export, sample auth log |
+| Full-disk encryption on laptops | PR.DS | ISO 27001 A.8.24 · PCI 3.5 | **Pass** | MDM compliance report |
+| Quarterly access review | PR.AA | ISO 27001 A.5.18 | **Partial** — Q1 and Q2 done, Q3 slipped | Two signed review sheets |
+| Offline backup restore test | PR.DS · RC.RP | ISO 27001 A.8.13 | **Pass** | Restore test record with timings |
+| Leaver checklist | PR.IP | ISO 27001 A.5.11 | **Partial** — no evidence of HR-to-IT handoff timing | Checklist template only |
+| Security awareness training | PR.AT | ISO 27001 A.6.3 | **Pass** | Completion records, simulation results |
+| EDR on all endpoints | DE.CM | ISO 27001 A.8.16 | **Pass** | Agent coverage report |
+| Vendor security assessment | GV.SC | ISO 27001 A.5.19 | **Fail** — one vendor with data access never assessed | Assessment template only |
+| Log retention for 12 months | DE.AE | ISO 27001 A.8.15 · PCI 10.5 | **Not tested** — retention configured, never verified | Configuration screenshot only |
+| Incident response plan tested | RS.MA | ISO 27001 A.5.24 | **Not tested** — plan written, never exercised | Plan document only |
+
+**Three rows are not passes, and two say "not tested".** That is what a real matrix looks like. A matrix where every row passes tells a reviewer that either the company is unusually mature or the author is marking their own homework — and they will assume the second.
+
+**"Not tested" is a legitimate status, and marking it as "Pass" is the one thing that ends a GRC interview.** You cannot evidence a control you have never verified.
+
+#### The management response to an audit finding
+
+The format an auditor expects, and the reasoning that makes it credible.
+
+| Field | Content |
+|---|---|
+| **Finding** | One vendor with access to client personal data has not undergone a security assessment (ref: control GV.SC) |
+| **Risk rating** | High |
+| **Root cause** | No process defined for assessing vendors onboarded before the compliance programme began. Not a resourcing failure — a process gap |
+| **Immediate action** | Vendor suspended from new data transfers pending assessment, completed within 14 days |
+| **Corrective action** | Vendor assessment procedure documented and added to onboarding. Retrospective assessments scheduled for all pre-existing vendors |
+| **Owner** | Compliance Manager |
+| **Target date** | Assessment complete in 14 days; procedure in 30; retrospective sweep in 90 |
+| **Residual risk accepted** | Data already transferred to the vendor remains at risk until their assessment completes. Accepted by the accountable owner, recorded, with the end date stated |
+| **Verification** | Internal audit to confirm the procedure is followed for the next two onboardings |
+
+**The root-cause row is what separates a strong response from a weak one.** "We did not have enough staff" is not a root cause; it is an excuse that recurs. "No process existed for vendors onboarded before the programme" names something fixable.
+
+**The residual risk row is the second thing reviewers look for.** A response that claims the issue is fully closed when data is still sitting with an unassessed vendor is not credible.
+
+#### The one-page policy extract
+
+A policy nobody could follow is the classic weak artefact. Here is a section written so it could actually be enforced.
+
+> **3. Access control**
+>
+> **3.1** Access to client systems is granted on a least-privilege basis. A user receives the minimum access required for their role, approved by their line manager and the system owner.
+>
+> **3.2** Multi-factor authentication is required for all remote access and for all systems holding client personal data. Requests for an exception are made in writing to the IT Security Manager and are reviewed quarterly.
+>
+> **3.3** Access is reviewed quarterly by system owners. The review records the reviewer, the date, and any access removed. Reviews are retained for three years.
+>
+> **3.4** Access is removed within one business day of a leaver's last working day. Human Resources notifies IT on the leaver's final week; IT confirms removal in writing to Human Resources.
+>
+> **3.5** Shared accounts are prohibited except where a system cannot support individual accounts. Where one exists, it is documented in the access register with a named owner and a compensating control.
+>
+> **Exceptions.** Any deviation from this policy requires a written exception approved by the IT Security Manager, with an expiry date not exceeding twelve months, recorded in the exception register.
+>
+> **Review.** This policy is reviewed annually, or on any significant change to systems or threats.
+>
+> **Owner.** IT Security Manager. **Approved by.** Managing Director. **Next review.** [date]
+
+**Why this is enforceable and a policy full of "should" is not:** every clause names a role, a frequency, an artifact, or a deadline. Clause 3.4 has the one-business-day rule *and* names who notifies whom. Clause 3.5 acknowledges the exception everyone actually has instead of pretending it does not exist.
+
+#### The vendor assessment, decided with conditions
+
+The weak ending is "approved". The strong ending states what you are carrying.
+
+| Question | Supplier's answer | Assessment |
+|---|---|---|
+| Where is data stored? | Singapore and Ireland | Acceptable — both in the agreed jurisdictions |
+| Who can access it? | Support staff in two regions | **Condition** — confirm access logging is enabled for support sessions |
+| Is access logged and retained? | "Yes" — no retention period stated | **Condition** — obtain the retention period in writing |
+| Encryption at rest? | AES-256 | Acceptable |
+| Breach notification timeframe? | "As soon as practicable" | **Condition** — amend to a fixed 48-hour contractual notice |
+| Sub-processors? | Uses one cloud provider | Acceptable — provider named and assessed |
+| Independent assurance? | SOC 2 report from 2023 | Acceptable with **condition** — request the current report at renewal |
+
+**Decision: Approved with conditions.** Three conditions to be met within 30 days; the contractual notice period is a blocker for onboarding any new data until amended.
+
+**Residual risk accepted:** the 2023 SOC 2 report does not cover the current year. Accepted by the Compliance Manager, recorded in the risk register as R-05, with re-review at contract renewal.
+
+That last paragraph is the whole exercise. Anyone can write "approved". Saying *what you approved, with which conditions, and what you are still carrying* is the job you are applying for.
+
+#### Now build yours
+
+The artefacts above are a model, not a template to copy. Invent your own company — a different sector, a different size, a different country — and work through the same six artefacts.
+
+The test is not whether your register looks like this one. It is whether you can defend every number in it out loud. If you cannot say why R-01 is a 20 and not a 12, that row is not finished.
+
 ### Key takeaways
 
 - **Governance sets the appetite, risk measures against it, compliance proves it.** Three functions, three artefacts, and conflating them is why many security programmes cannot explain themselves.
