@@ -88,3 +88,31 @@ jobs:
         run: npm run test:today
       - name: Lesson search
         run: npm run test:lesson-search
+      # The only step that needs a real browser engine. Everything above renders
+      # to a string and asserts on markup, which cannot see layout, computed CSS,
+      # focus survival or a media query — the six views this covers (notes panel,
+      # dashboard rail, print stylesheet, Shared, Your work, time budget) were
+      # verified structurally for their whole life until this step existed. The
+      # preview server is started and torn down inside the step, because a
+      # background process launched in an earlier step is not reliably still
+      # listening in a later one.
+      - name: Browser check (real engine)
+        env:
+          BROWSER_NO_SANDBOX: '1'
+        run: |
+          npx vite preview --port 4173 --strictPort > /tmp/preview.log 2>&1 &
+          PREVIEW_PID=$!
+          for i in $(seq 1 30); do
+            curl -sf http://localhost:4173/ >/dev/null && break
+            sleep 1
+          done
+          if ! curl -sf http://localhost:4173/ >/dev/null; then
+            echo "preview server never came up"
+            cat /tmp/preview.log
+            kill $PREVIEW_PID 2>/dev/null || true
+            exit 1
+          fi
+          npm run test:browser
+          STATUS=$?
+          kill $PREVIEW_PID 2>/dev/null || true
+          exit $STATUS

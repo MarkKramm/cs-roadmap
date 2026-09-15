@@ -16,6 +16,7 @@
     "test:notes": "node scripts/test-notes.mjs",
     "test:work": "node scripts/test-work.mjs",
     "test:today": "node scripts/test-today.mjs",
+    "test:browser": "node scripts/browser-check.mjs",
     "test": "npm run test:highlight && npm run test:ui && npm run test:data && npm run test:notes && npm run test:work && npm run test:today && npm run test:lesson-search && npm run test:search && npm run test:smoke",
     "dev": "npm run build:content && vite",
     "build": "npm run build:content && vite build",
