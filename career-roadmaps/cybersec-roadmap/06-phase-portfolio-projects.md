@@ -80,11 +80,17 @@ Pentest:
 
 Phase 5 asked you to name three projects that prove your target role. This phase is where you actually build them, and it is the longest in the cyber track — 8 to 12 weeks, longer than any phase before it. That length is not padding. It is the honest amount of time it takes to produce three pieces of work that a hiring manager will believe.
 
-Here is the problem this lesson exists to solve. **Doing the work and proving the work are two different skills**, and beginners almost universally practise only the first. You have already done a lot of work: Wazuh rules in Phase 4, traffic captures, blue-team labs, PortSwigger challenges. Almost none of it currently exists in a form anyone else can evaluate. An employer cannot see your screen history. They cannot see the afternoon you spent working out why a decoder was not matching. They see only what you hand them, and what most beginners hand them is a repository of screenshots with filenames like `Screenshot 2024-11-03 141022.png`.
+Here is the problem this lesson exists to solve. **Doing the work and proving the work are two different skills**, and beginners almost universally practise only the first. The second skill is not a formality you add at the end — it is a separate craft, and it is the one an employer is actually paying to read.
+
+You have already done a lot of work: Wazuh rules in Phase 4, traffic captures, blue-team labs, PortSwigger challenges. Almost none of it currently exists in a form anyone else can evaluate.
+
+An employer cannot see your screen history. They cannot see the afternoon you spent working out why a decoder was not matching. They see only what you hand them, and what most beginners hand them is a repository of screenshots with filenames like `Screenshot 2024-11-03 141022.png`.
 
 Read the exit criterion again, because the qualifiers are doing real work:
 *"3 portfolio reports that are **clear, honest, evidence-based**, and aligned
 with your target cyber role."* Four adjectives, four separate failure modes.
+
+It is worth seeing how each one fails on its own, because they are not variations on a single mistake:
 
 | Qualifier | How it fails | What it costs you |
 |---|---|---|
@@ -352,7 +358,19 @@ exclusion you added.
 
 **Generate events safely, and be explicit about it.** Run your trigger in an isolated VM with no network route to anything real. Never test detections against a production system, an employer's network, or a live service — this is both an ethics matter and, in some jurisdictions, a legal one. State in the report that the events were self-generated in an isolated lab.
 
-**The report's centrepiece should be an investigation, not an installation.** The installation is the prerequisite; the value is in what you did when the alert fired. Take one alert end to end: what triggered it, the raw log line behind it, what you checked next (process tree, user context, network connections, file hashes), what you concluded, and — critically — whether you decided it was a true or false positive and how you justified that call. That narrative is a miniature version of the daily work of a SOC analyst, and a reviewer reading it can see whether you think like one.
+**The report's centrepiece should be an investigation, not an installation.** The installation is the prerequisite; the value is in what you did when the alert fired.
+
+Take one alert end to end:
+
+| Step | What to document |
+|---|---|
+| **Trigger** | What triggered it |
+| **Raw log line** | The raw log line behind it |
+| **Checks** | What you checked next — process tree, user context, network connections, file hashes |
+| **Conclusion** | What you concluded |
+| **Verdict** | Critically, whether you decided it was a true or false positive, and how you justified that call |
+
+That narrative is a miniature version of the daily work of a SOC analyst, and a reviewer reading it can see whether you think like one.
 
 #### Project 2 — Network traffic analysis
 

@@ -806,7 +806,17 @@ This is not only ethics — it is self-protection. Certification claims are triv
 
 Certification comes up in three ways, and each needs a prepared answer.
 
-**"Do you have any certifications?"** If none earned: *"Not yet — I've mapped the Security+ objectives against my gaps and I'm working through them while I finish my portfolio. I decided to build the practical evidence first rather than buy an exam as a substitute."* That answer converts an apparent gap into evidence of judgement, and it is exactly the reasoning this phase taught you. If you do hold one, name it and immediately connect it to practice: *"I have SC-900, and it maps directly to the identity and access work I do at my current job."*
+**"Do you have any certifications?"** Two cases, two answers.
+
+If none earned:
+
+> *"Not yet — I've mapped the Security+ objectives against my gaps and I'm working through them while I finish my portfolio. I decided to build the practical evidence first rather than buy an exam as a substitute."*
+
+That answer converts an apparent gap into evidence of judgement, and it is exactly the reasoning this phase taught you.
+
+If you do hold one, name it and immediately connect it to practice:
+
+> *"I have SC-900, and it maps directly to the identity and access work I do at my current job."*
 
 **"Why did you choose that certification?"** This is where the 30-post evidence pays off. *"I searched 30 postings for the roles I'm targeting and found it required in six and preferred in fourteen, so it clears a real filter in my market. I also checked that the objectives overlap with what I've already labbed."* That is a specific, verifiable, non-defensive answer, and it is rare.
 
