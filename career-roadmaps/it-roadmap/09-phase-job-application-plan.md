@@ -293,24 +293,221 @@ Those weeks are not a waiting period. They are when you:
 
 Keep the process running. It works.
 
-### Key takeaways
+### Part 5 — The application materials, written out
 
-- **The search is a process to run, not a lottery to enter.** Volume, tracking, and iteration are the whole job.
-- **Target roles where entry-level is actually the requirement.** Titles lie; the requirements section does not.
-- **5–10 applications per week, rising to 15**, and 50+ total — consistency beats intensity.
-- **Track conversion, not just count.** Applications → responses → interviews → offers tells you which stage to fix.
-- **Customise the top third** with the ad's own vocabulary, honestly. Ten minutes per application.
-- **Two resume versions**: Helpdesk/IT Support and NOC/Networking Support.
-- **One polite follow-up, then stop.** Thank-you within 24 hours of an interview; ask for feedback once after a rejection.
-- **Answer technical questions in three layers:** plain explanation, lab example, troubleshooting approach.
-- **"I don't know, but here's how I'd find out"** is a valid, professional answer.
-- **Any request for money is a scam.** No exceptions, ever.
-- **Message real people, not just postings.** One conversation is worth fifty cold applications.
-- **Review every two weeks.** Adjust one variable at a time, and let the ads tell you what to study next.
+Parts 1 to 4 covered strategy. This part gives you the actual documents, because "customise your top third" is advice, and a cover note you can adapt is a tool.
 
-### Practice this next
+#### The cover note that works for a self-taught candidate
 
-The tasks below are the phase, and the order matters. Build the tracker first — with the Follow-up column working — because everything else depends on it. Then create or update the four profiles (OnlineJobs.ph, LinkedIn, JobStreet, Kalibrr), write both resume versions, and start applying at the low end of the volume target while your resume is still settling. Prepare the twenty technical Q&A answers in three layers each, and think about the specific reason each question is on the list. The LinkedIn connection requests are a genuine part of the strategy, not filler: a message to a support lead that mentions a specific thing you built is a real conversation starter, and some of your interviews will come from exactly that. Finally, do the two-week review honestly, because the search that iterates beats the search that merely repeats.
+Most application advice says to write a cover letter. Most cover letters are ignored, because they are three paragraphs of restated resume and enthusiasm. The version that works is short, specific, and treats the reader's time as valuable.
+
+For a remote application, keep it under 200 words. Here is the structure:
+
+```text
+Subject: IT Support application — Juan Dela Cruz (UTC+8, full US/EU overlap)
+
+Hello [Name],
+
+I am applying for the [exact role title] role. I am an entry-level IT support
+technician based in the Philippines, and I work UTC+8 with full overlap into
+both US and EU business hours.
+
+What I can do now: Windows user and group administration, NTFS and share
+permissions, TCP/IP and DNS troubleshooting, and structured ticket
+documentation. My portfolio has 15 documented practice tickets written in the
+reported/observed/action/verified format, a two-subnet routed lab network, and
+a PowerShell inventory script — each with the diagnostic reasoning recorded,
+not just the outcome.
+
+What I do not have is experience in a production environment at volume, and I
+would rather say that than waste your time. What I would ask for is the chance
+to show how I work through a problem, which the portfolio demonstrates better
+than this message can: [link]
+
+Thank you for reading.
+
+Juan Dela Cruz
+```
+
+**Why this works.** The subject line carries the two facts a remote employer filters on — the role and the timezone overlap. The first paragraph answers "can we work with this person's hours" before they have to ask. The second answers "what can they actually do" with specifics rather than adjectives. The third answers "are they honest" by naming the gap before the interviewer finds it. And it is short enough to actually be read.
+
+Note the boldest move: **volunteering the weakness.** This feels dangerous and it is a genuine advantage. Every other applicant writes only strengths; the reviewer has read forty of those. A candidate who names their own gap accurately reads as someone who will tell the truth about a production incident — which is worth more than two years of claimed experience.
+
+#### Adapting it per application
+
+You do not rewrite this per application. You change three things:
+
+1. **The role title**, exactly as the ad states it. "IT Support Specialist" and "Service Desk Analyst" are different searches, and using the ad's own words is a small but real signal.
+2. **The "what I can do now" list**, reordered to put the ad's stated requirements first.
+3. **One sentence of specificity** about that company if you can honestly write one — their product, their market, or something from the ad. If you cannot write it honestly, leave it out. Generic flattery ("I have always admired your company") is worse than silence because it is obviously copied.
+
+That is a five-minute edit, not a rewrite, and it keeps the volume sustainable.
+
+#### The follow-up, which almost nobody sends
+
+Two weeks after applying, if you have heard nothing, send one short message. Once, and then stop.
+
+```text
+Hello [Name],
+
+I applied for the [role] role on [date] and wanted to confirm it reached you.
+I remain interested. If it helps, my portfolio is at [link] — the ticket
+portfolio is the most relevant part.
+
+I will not follow up again, so no reply is needed if the role has been filled.
+
+Thank you,
+Juan Dela Cruz
+```
+
+**Why this works more often than people expect.** It is short, it adds something (the portfolio link pointing at the relevant section), and it explicitly promises not to nag. Releasing the reader from the obligation to reply is what makes them willing to. It also occasionally surfaces an application that was lost, which is a real phenomenon at small companies.
+
+**Send it once.** A second follow-up converts a patient candidate into a persistent one, and the difference matters.
+
+### Part 6 — A remote interview, mechanically
+
+The content of the interview is Phases 7 and 8. This part covers the mechanics, because remote interviews fail for reasons that have nothing to do with answers.
+
+#### The day before
+
+| Check | Why |
+|---|---|
+| **Test the video platform** | Install Teams, Zoom, Meet, or whatever they named, and open it. "I could not join" reads as unprepared regardless of the cause |
+| **Test audio, not just video** | Bad audio is far more damaging than bad video. If you can borrow or buy one thing, make it a cheap headset |
+| **Check your connection** | Know what your upload speed is. If it is poor, ask whether a phone call is an option before the interview, not during it |
+| **Confirm the time in their timezone** | Write it down converted to yours. Getting a timezone wrong is the most avoidable failure in remote hiring |
+| **Charge everything** | Laptop, phone, headset. A dead battery mid-interview ends the opportunity |
+
+#### The setup
+
+- **Light on your face, not behind you.** A window behind you turns you into a silhouette, which is genuinely hard to interview.
+- **Camera at eye level.** A laptop on a desk looks up your nose. A stack of books under it fixes this for free.
+- **Background: plain, or blurred.** Whatever is behind you should not be more interesting than you.
+- **Phone face down and silenced.** Not vibrate.
+- **Have your portfolio open in another window**, not minimized, so you can share your screen in one click if asked.
+
+#### The first ninety seconds decide the tone
+
+Open with the timezone and availability, unprompted. "Thank you for the time — I am in Manila, so I am UTC+8, and I have full overlap with your morning." This does three things: it demonstrates the practical fit immediately, it shows you have thought about remote work as a working arrangement rather than a convenience, and it signals that you can communicate clearly at the start — which is what the next forty minutes are actually testing.
+
+#### Sharing your screen without fumbling
+
+You will be asked to walk through an artefact. Practise this before the interview, because a candidate who cannot find their own file looks disorganised.
+
+- Have the portfolio open in a browser tab, already scrolled to the relevant project.
+- When asked, share that single window or tab, not the entire desktop — it avoids showing your notifications and other tabs.
+- **Narrate while you show.** "This is the ticket; the observed section is the command output I collected, and the cause is at the bottom." Silence while scrolling is the most common remote-interview mistake.
+- If something does not load, say so calmly and describe it instead. Handling a small technical failure gracefully is itself evidence of the job skill.
+
+#### Handling the technical question you cannot answer
+
+This happens to everyone. The sequence that works:
+
+1. **Say so immediately.** "I have not worked with that directly." Do not stall, and do not bluff.
+2. **Say what you do know that is adjacent.** "I understand [related concept] from building [artefact] — I would expect this to work similarly, but I would want to check."
+3. **Say how you would find out.** "I would start with the vendor documentation and then test it in a lab before touching anything live."
+4. **Stop talking.** Beginners fill the silence and talk themselves into a worse answer.
+
+What the interviewer records is not "did not know X". It is "does not bluff, reasons from what they know, and knows where to look". For an entry-level role that is a strong result.
+
+#### The questions you ask
+
+You are also evaluating them, and asking good questions is scored. Three that produce real information:
+
+- "What does the first month look like for someone in this role?" — Reveals whether onboarding exists, which tells you a great deal about the team.
+- "How does the team handle tickets that need to be escalated?" — Invites them to describe the process, and shows you think in terms of escalation rather than working alone.
+- "What does the schedule look like across timezones?" — Necessary for remote work, and it confirms they have actually thought about it.
+
+Avoid asking about salary in the first interview unless they raise it. Not because it is impolite, but because the information is usually available later and better, and the first interview is short.
+
+#### Within an hour afterwards
+
+Send a short thank-you note. Three sentences: thank them, reference one specific thing discussed, confirm continued interest. This is not a formality — it is the second time your written communication is being assessed, and written communication is a significant part of the job.
+
+### Part 7 — Rejection, and the loop that makes it useful
+
+Part 4 described the two-week review. This part deals with the part that is harder to write about, which is what to do with a rejection on the day it arrives.
+
+#### What a rejection actually tells you
+
+Almost nothing about you, and something specific about your process. Sort them:
+
+| What happened | What it means | What to change |
+|---|---|---|
+| **No response at all** | Your top third did not match the ad, or you were filtered on a stated requirement | Compare the ad's vocabulary with your resume, literally side by side |
+| **Rejected at screening** | Something in the first conversation did not land — often the degree answer or the availability question | Rehearse those two specifically |
+| **Rejected after a technical interview** | A knowledge or explanation gap | Identify the question you handled worst and write it up as a portfolio note |
+| **Rejected after the final round** | Usually not about skill — often about fit, timing, or an internal candidate | Ask for feedback once; then move on, because this one rarely contains a fixable lesson |
+| **You withdrew** | The process or the role was wrong | Keep the record, because knowing what you will not accept is useful information |
+
+The third row is where the real return is. **A question you fumbled is a study plan with a deadline attached**, and writing it up as a portfolio artefact converts a rejection into an improvement.
+
+#### Asking for feedback, once
+
+After an interview-stage rejection, send one short request:
+
+```text
+Hello [Name],
+
+Thank you for the update, and for the time your team spent with me.
+
+If you are able to share it, I would value knowing which part of the process
+was weakest, so I can work on it. I understand if policy does not allow it.
+
+Thank you either way.
+
+Juan Dela Cruz
+```
+
+Most will not reply. The ones who do sometimes give genuinely useful, specific information — and the practice of asking calmly is itself a professional habit identical to the follow-up on a ticket.
+
+#### The arithmetic that keeps you applying
+
+Two facts worth writing down where you can see them during a quiet week:
+
+**First, the base rate is low for everyone.** A self-taught candidate with no professional experience should expect a response rate in the low single digits for cold applications. Fifty applications producing two interviews is a normal outcome, not a verdict. The candidates who get hired are almost always the ones who kept the volume up long enough for the base rate to work.
+
+**Second, one yes is the entire result.** You are not trying to be liked by fifty employers. You are trying to find one that says yes, and every rejection narrows the search rather than ending it. This is why the tracker matters: it turns an emotional process into a visible pipeline, and a pipeline with twenty open applications looks very different from "nobody wants me".
+
+#### The rule for a bad week
+
+Rejections cluster, and a week with three of them feels like evidence when it is only variance. The discipline: **on the day a rejection arrives, do not change anything.** Do not rewrite the resume, do not lower your targets, do not apply to something you do not want. Log it in the tracker, note anything specific you learned, and keep the day's pipeline moving. Change things at the two-week review, when you can see the pattern, because that is when a change is based on data rather than on mood.
+
+### Part 8 — Key takeaways
+
+- **The search is a process, not a verdict.** Most self-taught beginners fail on volume, targeting, or tracking — not on skill.
+- **Every application has a cost.** Spend it where you can plausibly win.
+- **The fastest way into security is an IT support job this year**, not a security application this year.
+- **Track the conversion, not the count.** Applications → responses → interviews → offers, because each stage's failure has a different fix.
+- **Customise the top third, not the whole resume.** At fifteen applications a week, anything else burns you out.
+- **A cover note under 200 words that names the timezone, the specifics, and the gap** beats three paragraphs of enthusiasm.
+- **Volunteering your weakness is an advantage.** Everyone else lists only strengths; naming your gap accurately reads as someone who tells the truth.
+- **Change three things per application:** the exact role title, the order of your skills, and one honest sentence of specificity.
+- **Send one follow-up, then stop.** Promising not to nag is what makes a reader willing to reply.
+- **Open a remote interview with your timezone and overlap, unprompted.**
+- **Bad audio damages an interview far more than bad video.** A cheap headset is the highest-return purchase.
+- **When you cannot answer, say so, say what is adjacent, say how you would find out, then stop talking.**
+- **Narrate while sharing your screen.** Silence while scrolling is the most common remote-interview mistake.
+- **A rejection tells you almost nothing about you and something specific about your process.** Sort them by stage.
+- **A question you fumbled is a study plan.** Write it up as a portfolio artefact.
+- **Do not change anything on the day a rejection arrives.** Change at the two-week review, when you can see the pattern rather than the mood.
+
+### Part 9 — Practice this next
+
+The tasks below produce the artefacts and the habits. Build the tracker spreadsheet first, because everything else depends on it, then write the five answers and the twenty technical Q&As, and rehearse them out loud with someone asking follow-ups.
+
+Then work this list, which turns the plan into a running search:
+
+1. **Write your cover note and adapt it three times** for three real job ads you find today. Time yourself — the adaptation should take five minutes, not fifty. If it takes longer, the note is too long.
+2. **Send one follow-up** to anything you have already applied for, using the Part 5 structure, and then genuinely do not send a second.
+3. **Run the day-before checklist** against your own equipment, including a real test call on whichever platform the next interview uses. Fix the audio before you need it.
+4. **Record a mock interview** with a friend on a video call, and watch the recording. You are looking for three things: whether you look at the camera or at your own face on screen, whether your audio is clear, and whether you narrate when sharing a screen.
+5. **Practise the screen-share walkthrough** on your own portfolio until you can open the right project and start talking within ten seconds. Then do it again with the file closed, to prove you can recover.
+6. **Write your answer to a question you genuinely cannot answer**, using the four-step sequence, and say it aloud. The skill is stopping after step four.
+7. **Build the rejection-sorting table into your tracker** as a column, and log every past rejection into it. Then look at which row dominates — that row is your next two weeks of work.
+8. **Write the arithmetic where you can see it.** Put the low single-digit response rate and the "one yes is the whole result" line somewhere visible, and read them on the day a rejection arrives, before you decide anything.
+9. **Ask for feedback once** on any application that reached an interview stage, using the short structure — and record the outcome in the tracker either way.
+10. **Set the two-week review as a recurring calendar event**, with the three review questions written into the description. The loop only works if it is scheduled rather than remembered.
 
 ## Tools for This Phase
 
