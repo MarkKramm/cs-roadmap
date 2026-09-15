@@ -473,6 +473,315 @@ Two facts worth writing down where you can see them during a quiet week:
 
 Rejections cluster, and a week with three of them feels like evidence when it is only variance. The discipline: **on the day a rejection arrives, do not change anything.** Do not rewrite the resume, do not lower your targets, do not apply to something you do not want. Log it in the tracker, note anything specific you learned, and keep the day's pipeline moving. Change things at the two-week review, when you can see the pattern, because that is when a change is based on data rather than on mood.
 
+### The working system, built piece by piece
+
+Parts 1 to 7 described the plan. This section builds the machine: a tracker, a worked application, a source list, a timezone script, five rehearsed answers, and a weekly routine. Each exercise produces a file you keep.
+
+#### Exercise 1 — Build the tracker in 20 minutes
+
+Open Google Sheets or LibreOffice Calc and create a sheet named `Applications`. Put these columns in row 1, in this order, then freeze row 1. The right-hand column explains why each one exists.
+
+| Column | Why it exists | What beginners get wrong |
+|---|---|---|
+| Company | So you recognise the name when they call | Leaving it blank for "that SaaS one" |
+| Role title | Exactly as the ad wrote it, so you know which resume you sent | Paraphrasing it, then not finding the ad again |
+| Source | Which board it came from | Skipping it, so you cannot tell which board works |
+| Date applied | Starts the follow-up clock | Using the date you *found* it |
+| Resume version | `HD` (helpdesk) or `NOC` | Not having two versions to compare |
+| Contact name | The human, not the company | Leaving it blank after a screening call |
+| Follow-up date | **The column that runs your day** | **The one beginners always forget** |
+| Stage | Applied → Screening → Interview → Offer / Rejected / Ghosted | Writing "waiting" instead of a stage |
+| Outcome | Filled in at the end, with the reason if given | Never filling it in at all |
+| Notes | Verbatim quotes, tools named, doubts | Writing feelings instead of facts |
+
+**The column beginners always forget is the follow-up date.** They build a record and mistake it for a system. A record tells you what happened; only a date tells you what to do today.
+
+**Set it with a formula, not by hand.** In `G2` paste `=IF(D2="","",D2+7)` and drag it down, so every application gets a follow-up date seven days out. Then conditional-format column G to turn red when the date is today or earlier — that is your to-do list.
+
+#### The tracker, filled in — eight realistic rows
+
+Here is what a week 3 sheet actually looks like. Copy these in, then delete them once you have your own.
+
+| Company | Role title | Source | Date applied | Ver | Contact | Follow-up | Stage | Outcome | Notes |
+|---|---|---|---|---|---|---|---|---|---|
+| Northwind MSP | IT Support Specialist | LinkedIn | 2026-03-02 | HD | — | 2026-03-09 | Ghosted | No response | Ad named "Intune, ticketing, M365". Followed up 03-09 |
+| BrightCare BPO | Service Desk Analyst | JobStreet PH | 2026-03-02 | HD | Ana R. | 2026-03-09 | Rejected | "Needs 1 yr BPO" | First rejection with a stated reason |
+| Lumen SaaS | Technical Support Rep | OnlineJobs.ph | 2026-03-03 | HD | — | 2026-03-10 | Screening | Call booked 03-12 | Asked for 4 h US overlap, said yes |
+| Coral Freight | Helpdesk Technician | Indeed PH | 2026-03-03 | HD | — | 2026-03-10 | Ghosted | No response | Ad 30+ days old; low odds, applied anyway |
+| Verdant Cloud | NOC Technician (Junior) | We Work Remotely | 2026-03-04 | NOC | — | 2026-03-11 | Applied | — | Wants Zabbix; I have Uptime Kuma only |
+| Harbour IT | Desktop Support | Kalibrr | 2026-03-05 | HD | — | 2026-03-12 | Rejected | "Role filled" | 3 days from open to filled; too slow |
+| Lumen SaaS | Technical Support Rep | OnlineJobs.ph | 2026-03-12 | HD | Ana R. | 2026-03-19 | Interview | 2nd round 03-18 | Asked how I'd explain DNS to a non-technical user |
+| Tala Health | IT Support Associate | LinkedIn | 2026-03-16 | HD | Mark D. | 2026-03-23 | Applied | — | Recruiter viewed profile twice; no message yet |
+
+Read the sheet the way you will read it in week ten. Eight applications produced one interview, one screening, two explicit rejections, two ghosts, and two still open. The rejections are specific, and each is a decision: "Needs 1 yr BPO" tells you to apply where BPO experience is not gated, and "role filled in 3 days" tells you to apply within 48 hours of posting.
+
+#### Exercise 2 — One application, start to finish
+
+Below is a realistic posting, summarised, then the complete response. Everything after it explains the choices, so you can reproduce the reasoning rather than the text.
+
+```text
+Helpdesk Technician (Remote — US Hours)
+Northwind Managed Services | Full-time | Salary: not stated
+A 40-person MSP supporting small businesses across the US Pacific
+time zone; first point of contact for tickets from ~60 client sites.
+
+Do: triage tickets by email/chat/phone; reset passwords and unlock
+accounts; manage M365 users; troubleshoot Windows 10/11, printers,
+and VPN; document every ticket in our PSA (ConnectWise); escalate
+network issues to Tier 2.
+
+Need: 1+ year helpdesk experience (strong candidates without it
+considered if the portfolio shows real work); Windows, TCP/IP, and
+DNS fundamentals; excellent written English; overlap with 8am-5pm
+Pacific.
+
+Nice to have: CompTIA A+, M365 admin, PowerShell.
+```
+
+**What they actually want, versus the wish list.** Almost every posting mixes must-haves with a wish list, and beginners read the whole thing as a gate. Split it:
+
+| Line in the ad | Verdict | Why |
+|---|---|---|
+| 1+ year helpdesk experience | Soft | The ad itself says they will consider candidates without it |
+| Windows troubleshooting | Must | The core of the job, every day |
+| TCP/IP and DNS fundamentals | Must | Named explicitly; Phase 3 covers this |
+| Excellent written English | Must | You write to clients all day; the cover note is the test |
+| 8am–5pm Pacific overlap | Must | Non-negotiable logistics; address it first |
+| M365 account management | Must-ish | Named twice in responsibilities; you have lab experience |
+| CompTIA A+ | Wish | "Nice to have" is a wish list. Do not self-reject |
+| PowerShell | Wish | Bonus, and you have a script to show |
+| ConnectWise | Wish | Every PSA is learnable in a week; never a reason to skip |
+
+**The rule for wish lists: if it is under "nice to have", or it is a certification, or it is a product you have never used, it is not a gate.** Apply.
+
+**The resume emphasis chosen.** Version `HD`, with three deliberate moves. The summary line names Windows, M365, and TCP/IP troubleshooting plus US Pacific overlap. The skills list is reordered to lead with those three. Project bullets put the 15 practice tickets first, the M365 lab second, and the PowerShell script third.
+
+The `NOC` version would lead with the routed lab and packet captures, and mention Windows support last. **Same evidence, different order** — that is the whole difference between the two versions.
+
+**The cover note sent.** Under 200 words, and it names the timezone in the subject line.
+
+```text
+Subject: Helpdesk Technician application — Juan Dela Cruz (UTC+8, full US Pacific overlap)
+
+Hello Northwind team,
+
+I am applying for the Helpdesk Technician role. I work UTC+8, which
+gives me full overlap with your 8am-5pm Pacific hours without any
+shift adjustment on your side.
+
+What I can do now: Windows 10/11 troubleshooting, M365 user and
+group administration, password resets and account unlocks, TCP/IP
+and DNS diagnostics, and clear ticket documentation. My portfolio
+has 15 practice tickets written in reported/observed/action/verified
+format, an M365 admin lab, and a PowerShell inventory script.
+
+What I do not have is production volume — 60 client sites is a pace
+I have not worked at yet, and I would rather say so than have you
+discover it in week two. What I would ask for is the chance to show
+how I work a ticket: [portfolio link]
+
+Thank you for reading.
+
+Juan Dela Cruz
+```
+
+**The follow-up, sent on day seven** — because the tracker said so, not because of a feeling. Use the Part 5 template unchanged; the only edit is naming the role and the date you applied.
+
+```text
+Hello Northwind team,
+
+I applied for the Helpdesk Technician role on 2 March and wanted to
+confirm it reached you. I remain interested, and I am still available
+for full Pacific overlap. My portfolio is at [link] — the ticket
+portfolio is the most relevant part.
+
+I will not follow up again, so no reply is needed if the role has
+been filled.
+
+Thank you,
+Juan Dela Cruz
+```
+
+**What changes for a different posting.** This is the part worth learning, so here is a second ad in one line: *"NOC Technician (Junior) — remote, EU hours, monitor alerts in Zabbix, escalate outages, 12-hour shifts including weekends."*
+
+| Element | Northwind (helpdesk) | Verdant (NOC) |
+|---|---|---|
+| Resume version | `HD` | `NOC` |
+| Summary first line | Windows, M365, TCP/IP support | Network monitoring and alert triage |
+| First project bullet | 15 practice tickets | Routed two-subnet lab + packet captures |
+| Skills order | Windows, M365, DNS, ticketing | TCP/IP, subnetting, Wireshark, monitoring |
+| Timezone sentence | "full overlap with 8am–5pm Pacific" | "UTC+8 gives me your EU morning and I can take weekend shifts" |
+| Named gap | Production volume (60 sites) | No Zabbix; I have run Uptime Kuma and will learn it |
+| Honest specificity | Their 60 client sites | Their 12-hour shift pattern |
+
+Six edits, eight minutes, same underlying evidence. The reader scans for their own nouns, and `NOC`, `Zabbix`, and `EU` in the top third is what keeps them reading.
+
+#### Exercise 3 — Where the jobs actually are
+
+Budget is $0, so every source below is free to search. The right-hand columns matter more than the list.
+
+| Source | Best for | Entry-level density | Typical response | Watch out for |
+|---|---|---|---|---|
+| OnlineJobs.ph | PH-based remote work for US/AU/UK employers | High | Employer replies via the platform | Low rates; scam "agencies" charging fees |
+| LinkedIn Jobs | International remote postings, recruiter contact | Medium | Recruiter messages, not email | Postings reposted for months |
+| Indeed PH | Volume and aggregator coverage | Medium | Often none | Duplicate and expired ads |
+| JobStreet PH | Local and hybrid roles, BPOs | High | Email, often slow | On-site roles mislabelled remote |
+| Kalibrr | PH startups and tech companies | Medium | Email or platform | Small volume |
+| We Work Remotely | Remote-first international employers | Low | Email, real replies | Senior-heavy; filter hard |
+| RemoteOK | Remote tech roles, salary shown | Low | Email | High competition per posting |
+| Company career pages | Steady entry-level support hiring | High | ATS email | Slow processes, long forms |
+
+**Filter for genuinely entry-level, mechanically.** Search these exact strings rather than browsing categories: `"entry level" helpdesk remote`, `"no experience" IT support`, `"fresh graduate" IT support`, `"willing to train" technical support`, and `"0-2 years" support`. Then apply three filters.
+
+- **Reject anything asking for 3+ years** unless it also says "or equivalent portfolio". That phrase is rare, and it is a real door.
+- **Reject titles containing Senior, Lead, Principal, Staff, or II/III.** Title inflation is not your friend here.
+- **Reject postings older than 21 days** unless the company is large and hiring continuously. Sorting by date is the highest-value habit in this phase.
+
+**The tell that a posting will never respond.** Learn to spot these in ten seconds; skipping them is free:
+
+| Signal | What it means |
+|---|---|
+| Posted 30+ days ago and still listed | Filled or frozen; the board was never updated |
+| "Always hiring" with no role specifics | Resume harvesting, not a vacancy |
+| Salary wildly above market for entry level | Bait for a fee, a scam, or commission-only work |
+| No company name, or "confidential client" | A recruiter farming CVs |
+| Responsibilities listing every technology in existence | Written by committee, or aspirational |
+| A paid test, paid training, or a deposit | Scam. Stop, every time |
+| An interview conducted entirely in a chat app | Fake recruiter, or identity harvesting |
+| Passport, bank details, or a selfie with ID before an offer | Identity theft setup |
+| "Earn $500/week, no experience, flexible hours" in a DM | Classic advance-fee scam |
+
+**These are not rare edge cases.** Entry-level remote seekers in the Philippines are a deliberately targeted group, and the offers are built to look real. Read Part 3 again if any of those signals appear, and hold the one absolute rule: **money only ever flows toward you.**
+
+**The three scams that actually reach this reader.** The first is the **advance-fee job**: a friendly recruiter, a quick chat-only "interview", then a request for a training fee, a laptop deposit, or a "processing" charge.
+
+The second is the **equipment-reimbursement scheme**, where you buy gear on your own card and are promised repayment that never comes — the "employer" is a reseller. The third is **identity harvesting**, where a fake onboarding form collects your passport scan, bank details, and a selfie holding your ID, then disappears.
+
+All three follow the same script: they move fast, they flatter you, they avoid video calls, and they eventually want either money or documents. **A real employer will always do a live video call with the team, and will never ask you to pay anything.**
+
+If you are unsure, search the company name plus "scam", check the domain's age, and ask for the video call in writing. Refusing to do that is itself the answer.
+
+#### Exercise 4 — Your timezone sentence, written once
+
+You will be asked about hours in nearly every screening call. The wrong answer is vague and apologetic; the right answer is a specific, verifiable overlap.
+
+| Weak (never say this) | Strong — the exact sentence, per region |
+|---|---|
+| "I'm flexible with any hours." | **US Pacific:** "I am in Manila, UTC+8, which gives me full overlap with your 8am–5pm Pacific — your morning is my late night, and I can commit to that." |
+| "I can work nights if I have to." | **US Eastern:** "UTC+8 means your 9am–5pm Eastern is 10pm–6am here. I can work that shift, and I would rather tell you that now." |
+| "Any timezone works for me." | **Australia:** "I am two to three hours behind Sydney, so your full business day overlaps mine." |
+| "I'll adjust my schedule." | **Europe:** "I overlap your entire morning and into your early afternoon, and I can start earlier if that helps." |
+| "I don't know my timezone." | **Any region:** "I work UTC+8, so I have full overlap with your business day and I've written the conversions down." |
+
+Each strong line does the same three things: names the timezone, computes the overlap in *their* hours, and removes the employer's perceived risk. "Flexible" is unverifiable; an overlap is testable.
+
+**When they ask "what hours can you work?", answer in three parts.** State your timezone, state the overlap in *their* hours, and state one limit you will actually hold. Example: "I'm UTC+8. I overlap your whole Pacific business day and I'm available from your 8am. The one limit I'd flag is that I keep Sundays free — everything else is open."
+
+**Saying "no limits at all" is the answer that loses offers.** It reads as someone who has not thought about remote work, and employers know a person claiming to work any hour will burn out. One honest, small limit makes the rest of your commitment believable.
+
+#### Exercise 5 — The five first questions, weak and strong
+
+These five open almost every entry-level remote screening call. Write your own answer, compare it with the model beside it, and note the gap.
+
+**1. "Tell me about yourself."**
+
+- Weak: "I'm Juan, I'm from Manila, I've been studying IT for about a year and I really like computers and technology."
+- Strong: "I'm an IT support technician in Manila. For the last year I've been building the fundamentals — Windows and Linux administration, networking, and M365 — and documenting it as a portfolio: 15 practice tickets, a routed lab network, and a PowerShell inventory script. I'm looking for a remote helpdesk role where I can work a real ticket queue."
+- Why: the strong version runs present → evidence → direction in about 25 seconds, and names a role so the interviewer knows where to file you. The weak one recites facts already on your resume.
+
+**2. "Why IT?"**
+
+- Weak: "I've always loved computers since I was a kid, and I want to grow in the IT industry."
+- Strong: "I like the diagnostic part. In my lab I had a DNS problem where the client resolved but ping failed, and tracing it to the wrong gateway taught me more than a week of reading. That moment — where the evidence finally points somewhere — is what I want to do all day."
+- Why: the strong answer names a specific pleasure and proves it with a story. "I love computers" is said by every candidate and distinguishes nobody.
+
+**3. "You don't have a degree — how did you learn?"**
+
+- Weak: "I couldn't afford university, but I've been teaching myself and I think I know enough now."
+- Strong: "Self-study, deliberately. I worked through a curriculum covering networking, Windows and Linux, and helpdesk process, and I built each phase as something I could show — the ticketing portfolio and the lab network are both on my site. I don't have a degree; I do have the work."
+- Why: no apology and no overclaiming. It converts the absence into a method and points at evidence in the same breath. Defensiveness loses this question, not the missing degree.
+
+**4. "Tell me about a difficult user."**
+
+- Weak: "I haven't worked with users yet, so I don't really have an example."
+- Strong: "A user reported 'the internet is broken' and was frustrated. Instead of taking the report literally, I asked what they were doing when it failed — it was one internal app, not the internet. Their session had expired. I verified the fix with them before closing, then wrote it up as a ticket so the next agent would recognise it."
+- Why: this is your Phase 7 STAR story. The strongest part is refusing the literal report, which is the actual skill in the job. "I have no example" is answerable with a lab or a classmate, so never leave it empty.
+
+**5. "What are your salary expectations?"**
+
+- Weak: "I'm flexible — whatever the budget is, I'm sure it's fine."
+- Strong: "I don't have a number I need to anchor to yet, since this would be my first role. If there's a posted range, I'll work within it. Can I ask what range is budgeted for this level?"
+- Why: there is no good answer here, so the goal is to avoid anchoring low and avoid refusing. "Flexible" invites the minimum, and a beginner naming a number first anchors at the bottom of their own range. **Deflect once, ask for their range, and remember that "I'd like to understand the range for the level first" is a complete, professional answer.**
+
+#### Exercise 6 — The rejection post-mortem, one row per rejection
+
+This is the template that makes Part 7 operational. Open a second sheet named `Post-mortems` and give it these seven columns.
+
+| Column | What goes in it |
+|---|---|
+| Date | The day the rejection arrived |
+| Company + role | Copied from the tracker, so the two sheets join |
+| Stage reached | Applied / Screening / Technical / Final |
+| Stated reason | Their words if they gave any; "none given" if not |
+| My honest read | What you think actually happened — keep it factual |
+| One change | The single thing you will do differently next time |
+| Review date | The next two-week review, from Part 4 |
+
+**Four filled-in examples**, so you can see the difference between a useful post-mortem and a diary entry:
+
+| Stage | Stated reason | My honest read | One change |
+|---|---|---|---|
+| Applied | None given | Ad asked for A+ and I have no cert; I applied anyway | Target ads that list skills, not certs; keep A+ as a later goal |
+| Screening | "Moving forward with candidates with more experience" | I rambled on "tell me about yourself" past 60 seconds | Time the answer at 25 seconds and stop |
+| Technical | "Couldn't explain subnetting clearly" | I know /24 but froze on /26 and said "I'd look it up" without reasoning | Add three subnetting drills and one portfolio note |
+| Final | "Another candidate was a closer fit" | Nothing I can fix; the process was fair | No change. Log it and keep applying |
+
+**The last row matters as much as the others.** Some rejections carry no lesson, and forcing one out of them is how people invent problems to solve. Writing "no change" honestly is a valid result.
+
+**Then read the column, not the row.** After ten post-mortems, count which value dominates in *One change*. Three saying "resume keywords" means your next two weeks are resume work. That count is the input to the two-week review.
+
+#### Exercise 7 — Your week, as a checklist
+
+Five to eight quality applications a week is the honest number alongside study, not fifteen. Fifteen is reachable only once your resume is stable and your templates exist. Here is the shape of a real week.
+
+| Day | Task | Time | Why that day |
+|---|---|---|---|
+| Monday | Open the tracker, sort by follow-up date, send every due follow-up | 30 min | Start the week with owed work, not new work |
+| Monday | Apply to 2 roles, fully tailored | 60 min | Fresh postings appear after the weekend |
+| Tuesday | Study block — keep the curriculum moving | 90 min | The search never replaces the study |
+| Wednesday | Apply to 2 roles + 2 LinkedIn connection requests | 75 min | Midweek is when recruiters read |
+| Thursday | Study block + 1 mock interview answer, recorded | 60 min | Rehearsal needs its own slot or it never happens |
+| Friday | Apply to 1–2 roles + log the week's outcomes | 60 min | Close the loop before the weekend |
+| Friday | Update `Stage` and `Outcome` for every open row | 15 min | Stale stages are how a pipeline hides itself |
+| Every second Friday | The two-week review from Part 4 | 45 min | The pattern only appears across weeks |
+
+**Total: about six hours a week**, roughly five to eight applications. That is sustainable next to study, and sustainable beats heroic.
+
+**Rules that keep the week honest:**
+
+- **Volume is quality-controlled, not maximised.** Five tailored applications beat fifteen copied ones.
+- **Never apply on a Sunday evening out of guilt.** Guilt-applications are low quality and poison your response data.
+- **Log the outcome the same day**, even when it is "no response". An unlogged week looks like nothing happened.
+- **If a week collapses, do Monday and Friday only.** The follow-up sweep and the logging keep the system alive.
+
+#### Exercise 8 — What "done" looks like at week ten
+
+Compare your own sheet against this, because a beginner alone has no signal about whether they are on track.
+
+| Signal | Week 10 healthy | Week 10 warning |
+|---|---|---|
+| Applications submitted | 50–80 total | Under 20 |
+| Follow-ups sent | One per application, 5–7 days later | None, or four to the same company |
+| Responses | 5–15% of applications | 0% after 30+ applications |
+| Interviews or screenings | At least 2 | None, despite a healthy response rate |
+| Post-mortem rows | One per rejection, with a change | None written |
+| Targeting | Tailored to the ad's own nouns | Same resume sent everywhere |
+| Study progress | Still moving through the curriculum | Stopped in week 3 to "focus on applying" |
+
+**If the warning column is you, change one variable and only one.** Rewrite the top third of your resume, or change your target role family — not both. Then run the loop two more weeks and read the numbers again.
+
+**Where the artefacts live.** Every exercise above ends in a file. Keep them in one folder — `job-search/` beside your portfolio — so nothing depends on memory: the tracker sheet with its `Post-mortems` tab, the worked application, `sources.md`, `availability.md`, `interview-answers.md`, and `progress.md`.
+
 ### Part 8 — Key takeaways
 
 - **The search is a process, not a verdict.** Most self-taught beginners fail on volume, targeting, or tracking — not on skill.
