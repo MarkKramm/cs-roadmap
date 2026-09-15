@@ -928,6 +928,203 @@ That sentence does two things at once. It tells the reviewer you have *real* pro
 
 **The one thing never to do.** Do not sanitise by deleting a couple of hostnames and calling it done. Sanitisation means the artifact is genuinely non-identifying, and if you cannot make it so, do not publish it. A partial sanitisation is worse than none, because it creates the appearance of care without the substance.
 
+### Part 4 — Build it, step by step
+
+Parts 1 to 3 explained what the portfolio has to do. This part is the actual work, in order, with the commands and the templates you type over.
+
+Work it top to bottom. Do not skip to the reports — the container, the evidence habit and the sanitisation pass are what separate a portfolio that gets read from a folder of screenshots.
+
+#### Step 1 — Create the container first
+
+Create the repository before you have anything to put in it. An empty structure is a commitment device, and it means each finished project has somewhere to go instead of sitting in a downloads folder.
+
+```bash
+mkdir cyber-portfolio
+cd cyber-portfolio
+git init
+mkdir -p 01-siem-detection 02-network-analysis 03-blue-team-lab
+mkdir -p assets
+```
+
+Create a `.gitignore` immediately, because lab work generates files that should never be published:
+
+```gitignore
+# Never commit these
+*.pcapng
+*.evtx
+*.log
+.env
+*.key
+*.pem
+secrets/
+node_modules/
+```
+
+The `.gitignore` is not housekeeping. A pcap or an EVTX file can contain real network data, real usernames and real hostnames. Committing one is the most common way a beginner leaks something.
+
+**Check yourself:** `git status` should show the directories and the `.gitignore`, and nothing else.
+
+#### Step 2 — Write the top-level README while the projects are empty
+
+This is counter-intuitive and it works. The README is the page a reviewer actually reads, and writing it first tells you what each project has to demonstrate.
+
+Type over this template. Replace every bracketed section.
+
+```markdown
+# Cybersecurity Portfolio
+
+Entry-level security analyst portfolio. Each project below is a lab I built
+and documented myself, running on hardware I own.
+
+## Projects
+
+| # | Project | What it demonstrates | Skills |
+|---|---|---|---|
+| 1 | [SIEM detection engineering](01-siem-detection/) | Building detections and tuning out false positives | Log analysis, rule writing, triage |
+| 2 | [Network traffic analysis](02-network-analysis/) | Answering a question from packet data | Wireshark, protocol analysis, reporting |
+| 3 | [Blue team lab](03-blue-team-lab/) | Working an incident end to end | Timeline reconstruction, containment, reporting |
+
+## How to read these
+
+Each project folder contains:
+- `README.md` — the summary, the question it answers, and the result
+- `report.md` — the full write-up with an evidence table
+- `evidence/` — screenshots and sanitised artifacts
+
+## Environment
+
+All work is in an isolated lab on my own hardware, using no live or
+third-party systems. Sample data is either synthetic or publicly available
+training data.
+
+## Contact
+
+[your email] · [your LinkedIn or GitHub]
+```
+
+**Why the table matters:** a reviewer gives your repository about thirty seconds. The table is what they read in that time. If they cannot tell what you can do from three rows, the rest of the repository does not get opened.
+
+#### Step 3 — Build the evidence habit before you need it
+
+The single most common portfolio failure is finishing a project and then discovering you cannot prove any of it. Screenshots taken after the fact look staged because they are.
+
+While you work, keep an evidence log. One line per action, with a timestamp.
+
+| Time | Action | Command or click | Result | Evidence file |
+|---|---|---|---|---|
+| 14:02 | Started lab VM | `vagrant up` | VM booted, IP 192.168.56.10 | `01-vm-boot.png` |
+| 14:09 | Generated test traffic | `nmap -sS 192.168.56.10` | 3 open ports found | `02-scan.png` |
+| 14:15 | Confirmed alert fired | Wazuh dashboard | Rule 5710 triggered | `03-alert.png` |
+
+Rule: **capture at the moment it happens, not afterwards.** A screenshot of a terminal you can no longer reproduce is worth very little, and an interviewer may ask you to reproduce it.
+
+#### Step 4 — The investigation narrative template
+
+Every report in this portfolio follows the same shape. Consistency is what makes three projects read as one body of work rather than three attempts.
+
+```markdown
+# [Project name]
+
+## Summary
+[Three sentences. What the question was, what you found, what it means.]
+
+## Question
+[The specific thing this project answers. One sentence.]
+
+## Environment
+[Your lab. Be specific about what is yours and what is synthetic.]
+
+## What I did
+[Numbered steps. Enough that someone could repeat it.]
+
+## Evidence
+| # | Time | What it shows | File |
+|---|---|---|---|
+| 1 | 14:15 | Rule 5710 firing on the scan | `03-alert.png` |
+
+## Findings
+[What the data actually showed. Facts, not conclusions yet.]
+
+## What this means
+[The conclusion, and the business consequence in one sentence.]
+
+## What I got wrong
+[The false positive you created and how you fixed it. This section
+is the one that gets interviews.]
+
+## Limitations
+[What this project does not prove. Be honest and specific.]
+
+## What I would do next
+[The obvious next step, and why you did not do it here.]
+```
+
+**The "What I got wrong" section is not optional.** Every candidate's portfolio looks polished. Almost none of them show a mistake and its correction, which is the single strongest signal that you actually did the work rather than following a tutorial.
+
+#### Step 5 — Write the tuning story properly
+
+The most valuable 200 words in this portfolio are the account of a rule you wrote that fired on something harmless, and what you changed.
+
+Weak version:
+
+> I tuned the rule to reduce false positives.
+
+Strong version:
+
+> My first rule alerted on any failed login, which fired 340 times in the first
+> hour because a service account retries on a schedule. I narrowed it to five
+> failures from the same source within sixty seconds, excluding the service
+> account by SID. Alerts dropped to two that hour, and both were worth
+> investigating. The tradeoff is that a slow password spray — one attempt per
+> minute across many accounts — would now be missed, which is why I added a
+> second rule for that pattern.
+
+The strong version proves four things: you built it, you measured it, you understand the tradeoff, and you know what your fix does not catch. That last clause is what separates a practitioner from someone who followed instructions.
+
+#### Step 6 — The sanitisation pass, as a checklist
+
+Run this before every commit. It takes two minutes and it is the step people skip.
+
+| Check | Pass condition |
+|---|---|
+| Hostnames | No real internal names. Replace with `dc01`, `ws01`, `web01` |
+| IP addresses | Only RFC 1918 lab ranges (`10.`, `192.168.`, `172.16-31.`) or documentation ranges (`192.0.2.`, `198.51.100.`) |
+| Usernames | No real people. `jsmith` becomes `user1` |
+| Email addresses | No real addresses, including your own if you did not mean to publish it |
+| Screenshots | Re-read every one. Window titles, browser tabs and terminal prompts leak more than you expect |
+| File metadata | Check `git log` for your real email if you did not want it public |
+| Employer references | Nothing identifying the organisation, the product version, or the actual process |
+
+**Screenshots are the one people get wrong.** A terminal screenshot has your username in the prompt, your hostname in the prompt, and often a real internal IP in the output. Zoom in and check before you commit.
+
+#### Step 7 — Rehearse the five questions out loud
+
+The portfolio is finished when you can talk about it, not when the files exist. Do this aloud, with no notes, for each project.
+
+| Question | What a strong answer does |
+|---|---|
+| What was the question? | States the specific thing you set out to answer |
+| What did you find? | Gives the finding, not the process |
+| How do you know? | Points at the evidence, by name |
+| What would you do differently? | Names a real mistake or limitation |
+| What does this mean for the business? | Answers in consequence, not in tooling |
+
+If you cannot answer the fourth one, your project is missing the "What I got wrong" section or you have not written it honestly. If you cannot answer the fifth, read your own Summary section as though you were a manager with three minutes.
+
+#### A note on what this portfolio does and does not prove
+
+Be precise about this in interviews, because a reviewer will probe it.
+
+| This portfolio shows | This portfolio does not show |
+|---|---|
+| You can build a lab and run it end to end | Production scale, or data volume beyond your own lab |
+| You can write detections and tune them | Tuning against a real queue with a real SLA |
+| You can investigate an incident you generated | An incident under time pressure with real consequences |
+| You can write for a non-technical reader | Writing reviewed by a security team or an auditor |
+| You can handle evidence and sanitise it | Evidence meeting a legal or forensic chain-of-custody standard |
+
+State that boundary yourself, before you are asked. A candidate who says "this is a lab, so it does not show production tuning — but here is how I would approach tuning at volume" is more credible than one who lets the interviewer discover the limit.
+
 ### Key takeaways
 
 - **Doing the work and proving the work are different skills**, and this phase exists to close the gap. Your screen history is invisible to an employer; only the artifacts count.

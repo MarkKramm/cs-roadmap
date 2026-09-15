@@ -931,6 +931,150 @@ Likewise, recommendation quality is a test:
 
 The GRC connection is direct. Recommendations become risk register entries, and the controls that address them map to CIS or NIST — which is the phase's final deliverable, the five-risk control-mapping table.
 
+### Part 7 — Hands-on: the six domains, applied
+
+Parts 1 to 6 covered six domains. This part makes you use each one on your own machine, because the difference between knowing what MFA is and having configured it is the difference between a definition and a skill.
+
+Everything below runs on hardware you own or an account you created. **You may only run these against your own systems.** That is not a formality — port scanning, even locally, is the habit you are building, and the habit has to include knowing where the boundary is.
+
+#### Domain 1 — Identity: audit your own authentication
+
+Start with yourself. This is the fastest way to make identity security concrete.
+
+| Step | Command or action | What you are looking for |
+|---|---|---|
+| 1 | Check your email at **haveibeenpwned.com** | Which breaches include you — most people are in several |
+| 2 | List every account with MFA enabled | The protected set |
+| 3 | List every account without it | This is your work queue |
+| 4 | Find your recovery options for each | A stale recovery email is an unlocked back door |
+| 5 | Check for old app passwords and OAuth grants | Access you granted years ago and forgot |
+
+**On Windows, see what your own account can do:**
+
+```powershell
+whoami /all
+net user $env:USERNAME
+Get-LocalGroupMember -Group Administrators
+```
+
+**On Linux:**
+
+```bash
+id
+sudo -l
+getent group sudo
+```
+
+**What healthy looks like:** your daily account is *not* a local administrator. On Linux, `sudo -l` shows only what you actually need, not `(ALL : ALL) ALL` for no reason.
+
+**Self-check:** name the one account whose compromise would hurt you most. If it does not have MFA, stop and fix that before continuing.
+
+#### Domain 2 — Endpoint: read a real detection
+
+Windows Defender keeps a history. Reading it teaches you what endpoint telemetry actually looks like.
+
+```powershell
+Get-MpThreatDetection | Select-Object -First 5
+Get-MpComputerStatus | Select-Object AMServiceEnabled, RealTimeProtectionEnabled
+Get-MpPreference | Select-Object -ExpandProperty ExclusionPath
+```
+
+| Question | Why it matters |
+|---|---|
+| Is real-time protection on? | The single most important endpoint control |
+| What does the threat history show? | Real detections on your own machine, named |
+| **What is in the exclusion list?** | An exclusion is a hole. A folder excluded "temporarily" two years ago is still a hole |
+
+**The exclusion list is the exercise.** Look at it critically. Every entry is somewhere malware can run unopposed. On a home machine you may find entries you did not add, put there by an installer.
+
+#### Domain 3 — Network: see your own traffic
+
+**Only run this on your own network.** Scanning a network you do not own or administer is exactly the line Part 5 of Phase 1 described.
+
+```bash
+# Your own machine, and your own gateway only
+ip addr            # or: ipconfig /all on Windows
+ip route           # or: route print
+ss -tulpn          # or: netstat -ano on Windows
+```
+
+Then look at what is listening and decide what should not be:
+
+| Finding | Question to ask |
+|---|---|
+| A port listening on `0.0.0.0` | Does this need to be reachable from other machines, or only `127.0.0.1`? |
+| A service you do not recognise | What installed it, and do you still use it? |
+| A port open that you never configured | Investigate before assuming it is fine |
+
+**Self-check:** for each listening port, say whether you could turn it off without breaking something you use. Ports you cannot justify are the finding.
+
+#### Domain 4 — Web: test your own application
+
+Phase 1 noted you have a web development background, which is a real advantage here. Use it.
+
+In your browser's developer tools, on **a site you built yourself**:
+
+| Step | What to do | What to look for |
+|---|---|---|
+| 1 | Submit a form and watch the Network tab | Where does the data go, and over what scheme? |
+| 2 | Find the session cookie | Is `HttpOnly` set? Is `Secure` set? Is `SameSite` set? |
+| 3 | Look at response headers | Is `Content-Security-Policy` present? |
+| 4 | Try typing `'` into a search field | An error page here is a finding |
+| 5 | Try `../../etc/passwd` in a file parameter | Anything other than a clean rejection is a finding |
+
+If you have an old project, you will almost certainly find that your session cookie lacks `HttpOnly`. That discovery is worth more than reading the OWASP Top 10, because you found it yourself in your own code.
+
+**Do not test any site you do not own.** If you want to practise against something realistic, use a purpose-built target like OWASP Juice Shop or DVWA in a local container — both are free and both are designed for exactly this.
+
+#### Domain 5 — Vulnerability management: build a real triage table
+
+Take five findings — from your own `nmap` output above, from a Nessus/OpenVAS scan of your own lab, or from the CVE exercise in Phase 1 — and score them.
+
+| # | Finding | Exploitability | Exposure | Impact | Priority | Fix, owner, date |
+|---|---|---|---|---|---|---|
+| 1 | | Easy / Moderate / Hard | Internet / LAN / Local | High / Med / Low | | |
+| 2 | | | | | | |
+| 3 | | | | | | |
+| 4 | | | | | | |
+| 5 | | | | | | |
+
+Then answer this, in writing: **which one do you fix first, and why not the CVSS 9.8?**
+
+If your answer is "the 9.8 is on a machine that is off and unreachable, and the 7.5 is on the box facing the internet," you have understood the entire point of the phase.
+
+#### Domain 6 — Incident response: work one incident fully
+
+Pick the single most interesting finding from any exercise above and take it all the way through the six steps.
+
+| Phase | What you produce |
+|---|---|
+| Preparation | What you had in place before, and what you lacked |
+| Identification | What you observed, and how you knew it was not normal |
+| Containment | What you did, and what it cost |
+| Eradication | The root cause, not the mechanism |
+| Recovery | How you confirmed it was actually fixed |
+| Lessons learned | The one control that would have prevented it |
+
+Then write the finding in the two shapes from earlier in this lesson, so you can feel the difference:
+
+> **Mechanism:** "An unused service was listening on all interfaces."
+>
+> **Root cause:** "No process exists to review listening services after software installation, so services enabled by installers are never disabled."
+
+The second one can be fixed by a control. The first one cannot.
+
+#### What you now have that you did not before
+
+| You can now | You still cannot |
+|---|---|
+| Audit your own identity and endpoint configuration and find gaps | Do this at organisational scale, with a directory and an MDM |
+| Read listening ports and judge which are unjustified | Design network segmentation or write firewall rules |
+| Test your own web application for common flaws | Do a security code review, or test an app behind a WAF |
+| Score findings and defend a prioritisation | Run a vulnerability programme with SLAs and exception handling |
+| Work one incident through all six phases | Do it under time pressure, or to an evidentiary standard |
+
+That is a real foundation, and stating its edges plainly is what makes it credible.
+
 ### Key takeaways
 
 - **The exit criterion is a three-part question**: which logs, which controls, which response steps. Answering all three about one incident is the skill this phase builds.

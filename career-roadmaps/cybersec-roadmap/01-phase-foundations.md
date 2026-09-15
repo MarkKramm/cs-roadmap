@@ -549,6 +549,145 @@ When you eventually want to practise against something that is not a purpose-bui
 
 If there is no programme and no contact, the answer is no. There are more than enough legal practice environments to keep you busy for years. There is no version of this where testing an unapproved target is worth it.
 
+### Part 6 — Your first hands-on work
+
+Parts 1 to 5 taught the vocabulary and the boundaries. This part is where you stop reading and start doing, because a definition you have never applied is a definition you cannot defend in an interview.
+
+Every exercise below runs on the laptop you already own, costs nothing, and touches nothing you do not control. **Everything here is on your own machine or an account you created** — that is what makes it practice rather than an incident.
+
+#### Exercise 1 — Write your own glossary, in your own words
+
+The phase glossary has about 50 terms. Copying definitions is not learning; rewriting them is.
+
+Work through the terms and for each one write **one sentence in your own words** plus, for at least ten of them, a concrete example. A term with no example you can produce is a term you have not understood yet — go back rather than move on.
+
+Here is the difference between a copied definition and an owned one:
+
+| Term | Copied | Owned |
+|---|---|---|
+| Vulnerability | “A weakness in a system” | “The unlocked back window — a flaw that exists whether or not anyone finds it” |
+| Exploit | “Code that takes advantage of a vulnerability” | “The person who tries the window — the vulnerability is the flaw; the exploit is the action” |
+| Risk | “Potential for loss” | “The window is unlocked (vulnerability), the neighbourhood has burglars (threat), so the chance of a break-in is the risk” |
+
+**Self-check:** cover the left column and explain each term aloud from memory. If you stall, that term needs another pass.
+
+#### Exercise 2 — Audit your own account security
+
+This is the only exercise in the phase that improves your life immediately, so do it in week one.
+
+| Step | What you do | What healthy looks like |
+|---|---|---|
+| 1 | Install a password manager (Bitwarden free, or KeePassXC offline) | You can unlock it and it stores at least one entry |
+| 2 | Check your email at **haveibeenpwned.com** | You know exactly which breaches include you — most people are in several |
+| 3 | Change the password on your email account, and make it unique | The email account is the master key to everything else; it goes first |
+| 4 | Turn on MFA for that email account | A code, an app, or a hardware key — not SMS if you can avoid it |
+| 5 | Turn on MFA for your bank and any account holding money | Same |
+| 6 | Write down which accounts still lack MFA | That list is your next week's work |
+
+**Why email first:** whoever controls your email can reset the password on almost everything else. Securing it first protects every other account you own.
+
+**Self-check:** can you name the one account that, if compromised, would cause you the most damage? If you cannot, you have not finished the audit.
+
+#### Exercise 3 — Read a real advisory and extract the facts
+
+Go to the National Vulnerability Database (nvd.nist.gov) and search for **CVE-2021-41773**, the Apache path-traversal flaw used as an example earlier in this lesson.
+
+Answer these six questions from the page alone. Do not read a news article first — learn to read the primary source.
+
+| Question | What you are looking for |
+|---|---|
+| What software and version is affected? | The affected product and version range |
+| What is the flaw, in one sentence? | The description, in your own words |
+| What can an attacker do with it? | Impact — read files, execute code, deny service |
+| What is the severity score, and what does it mean? | The CVSS base score and its vector |
+| What is the fix? | The patched version |
+| How would you know if you were affected? | Version check, or log evidence |
+
+**The interview version of this question** is: “Tell me about a vulnerability you have read about recently.” You now have a real answer with specifics, which is worth far more than a memorised definition.
+
+#### Exercise 4 — Classify five findings by CIA
+
+Sorting real findings into Confidentiality, Integrity and Availability is the fastest way to make the triad useful rather than abstract.
+
+For each finding below, decide which property is primarily affected, and say what the *secondary* effect is. Answers follow.
+
+| # | Finding |
+|---|---|
+| 1 | A database backup is stored unencrypted on a shared drive |
+| 2 | An attacker alters the amount on a bank transfer record |
+| 3 | Ransomware encrypts the file server |
+| 4 | A website is flooded with traffic until it stops responding |
+| 5 | An employee emails a customer list to their personal address |
+
+**Answers:**
+
+| # | Primary | Why | Secondary |
+|---|---|---|---|
+| 1 | Confidentiality | The data is readable by anyone with drive access | Integrity — you may never know who read it |
+| 2 | Integrity | The record no longer reflects reality | Availability — the correct data is effectively gone |
+| 3 | Availability | The files cannot be used | Confidentiality — stolen copies may also exist |
+| 4 | Availability | The service is unreachable | Integrity — logs may be incomplete |
+| 5 | Confidentiality | Data left the boundary | Integrity — no record of who else received it |
+
+**Self-check:** for each answer you got wrong, write one sentence on why the primary property was the other one. Nearly every real incident touches two properties; naming the primary one is the skill.
+
+#### Exercise 5 — Map phishing to MITRE ATT&CK
+
+Open **attack.mitre.org** and find the technique for phishing. Then build this table for three more techniques a beginner should know.
+
+| Tactic | Technique | What the attacker is trying to do | One way a defender would see it |
+|---|---|---|---|
+| Initial Access | Phishing (T1566) | Get a foothold by convincing a user to act | Mail filters, user reports, suspicious sender domains |
+| Credential Access | *(find it yourself)* | | |
+| Execution | *(find it yourself)* | | |
+| Exfiltration | *(find it yourself)* | | |
+
+**Why this matters in an interview:** “tactics are the *why*, techniques are the *how*” is a sentence that separates candidates who have used ATT&CK from candidates who have read about it. Filling this table is what earns you the right to say it.
+
+#### Exercise 6 — Analyse a phishing email properly
+
+Find a phishing email in your own spam folder. **Do not click anything in it**, and do not open attachments. Open the raw headers if you know how, or just read the message.
+
+Write a one-page analysis with these four sections, in this order:
+
+1. **What the attacker wanted** — credentials, a payment, a click, malware.
+2. **Which technique they used** — name the ATT&CK technique and the psychological lever (urgency, authority, fear, curiosity).
+3. **Why it is convincing** — the specifics: correct logo, plausible sender, a real-looking invoice number.
+4. **What a defender or user should have done** — reporting, filtering, verifying out of band.
+
+**Self-check:** keep it to one page. Concise reporting is a skill, and this is your first rep at it. If your analysis runs long, you are describing the email rather than analysing it.
+
+#### Exercise 7 — Answer “what would you have done?”
+
+Reading about an incident is easy. Deciding what you would have done, out loud, is the interview.
+
+Pick one widely reported breach — a major retailer, a hospital group, a software supply chain — and write answers to these five questions. Use only public reporting.
+
+| Question | What a strong answer does |
+|---|---|
+| What was the initial access? | Names the vector and how the attacker got in |
+| Which control failed? | Names a specific control from Part 4, not “security was bad” |
+| Which CIA property was affected? | Picks the primary one and justifies it |
+| What would have detected it earlier? | Names a detection, not a product |
+| What would you have done in the first hour? | Shows a sequence — contain, preserve evidence, escalate, communicate |
+
+**This is the exercise to do last**, because it uses everything in Parts 1 to 5 at once. If you can answer all five from what you know rather than from the article, you are ready for Phase 2.
+
+#### A note on what you have and have not done
+
+You have now applied the core vocabulary to real material and secured your own accounts. That is genuinely more than most beginners do.
+
+Be honest about the boundary when you talk about it:
+
+| You can now | You cannot yet |
+|---|---|
+| Explain CIA, threat, vulnerability, exploit, control and risk with your own examples | Configure or harden a real system — that starts in Phase 2 |
+| Read a CVE advisory and extract the facts that matter | Assess a vulnerability's real impact in a specific environment |
+| Name phishing variants and map them to ATT&CK | Investigate a live phishing campaign or write detection logic |
+| Say which control failed in a published breach | Build or tune that control yourself |
+
+Saying that plainly in an interview is a strength. Overclaiming is the thing that ends the conversation.
+
 ### Key takeaways
 
 - **The CIA triad is a checklist, not a slogan.** Ask which property broke. Most real incidents break more than one.
