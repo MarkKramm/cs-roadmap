@@ -213,22 +213,6 @@ The phase task is a workflow diagram: **request → triage → troubleshoot → 
 
 Two arrows most diagrams miss, and most real environments have: **escalation** (from troubleshoot to a specialist, carrying your notes) and **reopen** (from close back to troubleshoot, when the fix did not hold). Drawing them shows you understand support as a loop, not a straight line.
 
-### Key takeaways
-
-- **Tools encode process.** A ticketing system is a model of how work flows, not a complaint database.
-- **Incident = symptom; problem = cause.** Repeating incidents are a signal to investigate, not to keep closing.
-- **Impact and urgency are different inputs** to priority. "It's urgent" is not enough information.
-- A good ticket contains **failed diagnostic steps**, because those tell the next technician what they can skip.
-- **Templates scale quality.** Build the five, copy them forever.
-- **Never ask for a password, and always get consent before a remote session.** These two rules define a trustworthy support technician.
-- **Inventory needs a warranty date**, because age changes the repair decision.
-- **A runbook without "known false positives"** will be ignored within a month.
-- Support workflow is a loop: **escalation out, reopen back in.**
-
-### Practice this next
-
-The tasks below produce five artefacts, and each one is interview evidence. Build the workflow diagram with the escalation and reopen arrows included. Populate the inventory with ten fictional devices. Write the five templates *and use one on a real problem you have* — that is the only way to find out whether your diagnostic questions are the right ones. Then write your one runbook, and finish with the change request template for "install software for user", because it forces you to think about approval, licence, and rollback.
-
 ### Part 4 — Two skills that make the tools work
 
 #### Reading vendor documentation without drowning
@@ -262,6 +246,22 @@ Good escalation is a structured handover, and it includes:
 The last point matters more than it sounds. A user who thinks they are being ignored becomes angry; a user who has been told "I've passed this to our specialist, they'll call you within the hour" is patient. **Escalating well is mostly about keeping the user informed**, and that is a skill you can demonstrate in an interview with a two-sentence answer.
 
 The corresponding duty is on the receiving end: when you are handed work, respect the notes you were given. Repeating diagnostics someone already documented wastes everyone's time and signals that you did not read the handover.
+
+### Key takeaways
+
+- **Tools encode process.** A ticketing system is a model of how work flows, not a complaint database.
+- **Incident = symptom; problem = cause.** Repeating incidents are a signal to investigate, not to keep closing.
+- **Impact and urgency are different inputs** to priority. "It's urgent" is not enough information.
+- A good ticket contains **failed diagnostic steps**, because those tell the next technician what they can skip.
+- **Templates scale quality.** Build the five, copy them forever.
+- **Never ask for a password, and always get consent before a remote session.** These two rules define a trustworthy support technician.
+- **Inventory needs a warranty date**, because age changes the repair decision.
+- **A runbook without "known false positives"** will be ignored within a month.
+- Support workflow is a loop: **escalation out, reopen back in.**
+
+### Practice this next
+
+The tasks below produce five artefacts, and each one is interview evidence. Build the workflow diagram with the escalation and reopen arrows included. Populate the inventory with ten fictional devices. Write the five templates *and use one on a real problem you have* — that is the only way to find out whether your diagnostic questions are the right ones. Then write your one runbook, and finish with the change request template for "install software for user", because it forces you to think about approval, licence, and rollback.
 
 ## Tools for This Phase
 

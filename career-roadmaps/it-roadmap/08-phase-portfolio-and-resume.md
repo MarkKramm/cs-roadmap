@@ -245,24 +245,6 @@ Then the About section, in three short paragraphs: what you are targeting, what 
 
 Two consistent habits matter more than any optimisation: **list your portfolio in your contact info**, and **log in weekly**. An inactive profile is shown to fewer people, and it looks stale to anyone who checks.
 
-### Key takeaways
-
-- **The resume gets about thirty seconds.** Design for a scan, not for a read.
-- **Specificity creates credibility.** Name the tool, the action, and the verifiable outcome.
-- **Evidence beats claims.** A working portfolio link outweighs any adjective on the resume.
-- **The projects section replaces work experience** for entry-level candidates, and it carries the application.
-- **No exaggeration, ever.** Every resume line is a future interview question, and links are clickable.
-- **README first.** A reviewer who reads only your portfolio front page should already understand you.
-- **One page, single column, standard headings** — for human readers and parsers alike.
-- **Mirror the job ad's keywords honestly; never fabricate them.**
-- **LinkedIn is a search index.** Headline and About are the fields that get you found.
-- **"Remote-ready Philippines"** belongs where a recruiter filter can see it.
-- **Test with a stranger.** If they cannot say what role you want, the portfolio is not done.
-
-### Practice this next
-
-The tasks below are assembly work, and you can start with the smallest one. Create the folder structure, then write the README before you add anything else — it is the file that does the most work per minute spent. Pull in the artefacts from earlier phases, write the eight project bullets using the context/tools/action/evidence/result pattern, and turn three of them into STAR summaries for the deliverable. Then write the resume, and finish with the review task in the list: have one person, or an AI tool, read it for clarity *and for anything that overstates what you did*. That last instruction is not a formality. An outside reader will catch the one bullet that says more than you can defend, and finding it now is far better than finding it in an interview.
-
 ### Part 4 — Making the portfolio genuinely useful
 
 #### Using GitHub well, if you use it
@@ -309,6 +291,24 @@ The estimated time note in this phase says it plainly: two weeks to build, then 
 The weekly habit matters because **every interview generates new material.** A question you could not answer well becomes a short write-up. A troubleshooting session with a friend's laptop becomes a portfolio entry. A job ad full of unfamiliar terms becomes a study list. Fifteen minutes a week keeps the portfolio improving, and it means that when a promising role appears, your evidence is already current.
 
 The reverse is also true. A portfolio that was built once and never touched looks exactly like what it is: an assignment finished and abandoned. Reviewers notice dates.
+
+### Key takeaways
+
+- **The resume gets about thirty seconds.** Design for a scan, not for a read.
+- **Specificity creates credibility.** Name the tool, the action, and the verifiable outcome.
+- **Evidence beats claims.** A working portfolio link outweighs any adjective on the resume.
+- **The projects section replaces work experience** for entry-level candidates, and it carries the application.
+- **No exaggeration, ever.** Every resume line is a future interview question, and links are clickable.
+- **README first.** A reviewer who reads only your portfolio front page should already understand you.
+- **One page, single column, standard headings** — for human readers and parsers alike.
+- **Mirror the job ad's keywords honestly; never fabricate them.**
+- **LinkedIn is a search index.** Headline and About are the fields that get you found.
+- **"Remote-ready Philippines"** belongs where a recruiter filter can see it.
+- **Test with a stranger.** If they cannot say what role you want, the portfolio is not done.
+
+### Practice this next
+
+The tasks below are assembly work, and you can start with the smallest one. Create the folder structure, then write the README before you add anything else — it is the file that does the most work per minute spent. Pull in the artefacts from earlier phases, write the eight project bullets using the context/tools/action/evidence/result pattern, and turn three of them into STAR summaries for the deliverable. Then write the resume, and finish with the review task in the list: have one person, or an AI tool, read it for clarity *and for anything that overstates what you did*. That last instruction is not a formality. An outside reader will catch the one bullet that says more than you can defend, and finding it now is far better than finding it in an interview.
 
 ## Tools for This Phase
 
