@@ -173,7 +173,7 @@ Two, and both are load-bearing.
 
 | Width | What changes |
 |---|---|
-| ≤ 860px | The sidebar becomes an off-canvas drawer behind a hamburger button in a sticky topbar, with Escape, backdrop-click and scroll locking. The lesson TOC drops to one column. |
+| ≤ 860px | The sidebar becomes an off-canvas drawer behind a hamburger button in a sticky topbar, with Escape, backdrop-click and scroll locking. The reading bar runs the full width, because the sidebar no longer occupies a column. The lesson toolbar stops being sticky — the topbar owns the single `top: 0` slot and would otherwise sit over it. The lesson TOC drops to one column. |
 | ≤ 560px | Phone layout. Spacing tightens, the pager and plan rows stack, page headings step down a size, and the smallest touch target is brought to **40px** — a mis-tap on a 24,000-word lesson loses the reader's place. The per-section done control stops relying on hover and is always visible, since a touch device has no hover to reveal it with. That is the same rule the code-block copy button follows. |
 
 ## Still open

@@ -798,6 +798,21 @@ a:hover {
   .content__topbar {
     display: flex;
   }
+
+  /* The sidebar is off-canvas from here down, so the reading bar must stop
+     starting at its width. Without this the bar began 260px into the viewport
+     and floated over the middle of the prose for the whole 561–860px band. */
+  .reading-bar {
+    left: 0;
+  }
+
+  /* Two stickies cannot share `top: 0`. The topbar has the higher z-index, so
+     the lesson toolbar slid underneath it and the section count, the tick
+     toggle and the size chips were all hidden behind it on every phone. The
+     topbar is the one that must stay, so the toolbar gives up sticking here. */
+  .lesson-tools {
+    position: static;
+  }
 }
 
 /* The drawer's own affordances are desktop-invisible. */

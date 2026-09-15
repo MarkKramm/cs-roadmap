@@ -27,7 +27,7 @@
 // contentEditable, so typing "jk" into a job-notes field does not navigate away
 // from it.
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 export const SHORTCUTS = [
   { keys: "/", label: "Focus search" },
@@ -60,10 +60,18 @@ export function isTypingTarget(el) {
 export function useShortcuts({ onNext, onPrev, onSearch, onView }) {
   const [helpOpen, setHelpOpen] = useState(false);
 
-  useEffect(() => {
-    // A two-key sequence ("g" then a destination) needs one byte of memory.
-    let pending = "";
+  // The "g then d" sequence needs one byte of memory, and it lives in a ref
+  // rather than inside the effect below so that a re-subscribe cannot swallow it
+  // mid-sequence. Checked rather than assumed: `neighbours()` returns references
+  // into the module-level phase array, so `next`/`prev` are identity-stable
+  // across renders and the handlers below are `useCallback`-stable — the effect
+  // does NOT currently re-subscribe between the two keys, and there was no
+  // observed failure here. Keeping the memory in a ref costs nothing and removes
+  // the failure mode entirely, which matters because the symptom would be `g`
+  // silently doing nothing rather than an error.
+  const pending = useRef("");
 
+  useEffect(() => {
     function onKey(e) {
       // Never swallow a browser or OS shortcut. Ctrl+K is claimed below only
       // when there is no other modifier, so Ctrl+Shift+K and friends still work.
@@ -94,8 +102,8 @@ export function useShortcuts({ onNext, onPrev, onSearch, onView }) {
       if (typing) return;
 
       // "g" arms a two-key sequence; anything else clears it.
-      if (pending === "g") {
-        pending = "";
+      if (pending.current === "g") {
+        pending.current = "";
         if (e.key === "d") {
           e.preventDefault();
           onView && onView("dashboard");
@@ -118,7 +126,7 @@ export function useShortcuts({ onNext, onPrev, onSearch, onView }) {
           setHelpOpen((v) => !v);
           return;
         case "g":
-          pending = "g";
+          pending.current = "g";
           return;
         case "j":
         case "n":
