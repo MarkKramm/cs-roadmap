@@ -2,7 +2,29 @@
 
 A chronological record of working sessions. Newest first.
 
-## 2026-09-15 (latest) — Search, five module follow-ups, and a red build that was worth having
+## 2026-09-15 (latest) — Four read-only phases, found by a metric that could not lie
+
+**Goal:** Maximise curriculum building while API access lasts. Chosen by measurement rather than by topic.
+
+**The defect no existing guard could see.** Every check in this repository tests internal consistency: does the parser lose content, is the prose dense, do the links resolve. None of them asks whether a reader can *do* anything after finishing a phase. Counting concrete instructions per 1,000 lesson words answered it in one pass: **IT Phase 4 (helpdesk) sat at 0.11 and Phase 6 (ticketing) at 0.17**, against **4.84** for the strongest phase in the repo. Those phases were not thin — 9,478 and 5,734 words — they were *passive*. A reader finished 9,478 words about helpdesk work and had never worked a ticket.
+
+This also retroactively explains an earlier conclusion in this log. A previous session assessed the IT track for depth and found "no pass is needed" for Phases 6 and 7, reasoning from word counts. **Word count was the wrong measure**, and it said two phases were fine that a reader could not act on. The phase that needed the most work was not the shortest — it was the one with the lowest ratio of doing to reading.
+
+**What was added, all additive, roughly +37,000 words across nine phases.** IT 4, 6, 7, 8, 9 and cyber 1, 3, 6, 11, 13. Phase 4 went from 0.11 to **2.8** instructions per 1,000 words, above the strongest phase in the repository.
+
+Every addition ends in something the reader keeps — a healthy baseline, a tracker, a written report, a portfolio artefact — rather than in notes. Every exercise has an answer, a model response, or a scoring key, because **an exercise the reader cannot check is not usable by someone studying alone**. That constraint shaped all of them, and it is why so much of the new material is weak-versus-strong pairs rather than instructions.
+
+Three additions are worth singling out for *what they refuse to do*:
+
+- **Phase 8's defence drill runs to a cut verdict.** It shows the five-question drill working on a resume line that **fails** and should be removed, rather than three clean passes. A drill that only ever validates is not a drill.
+- **Phase 11's incident timeline marks every row as fact or inference with its source**, and claims neither that the user opened the attachment deliberately nor that data left the network — because neither was established. The root cause is written at three layers so each line names something a control can close.
+- **Phase 13's risk register has one row explicitly accepted**, with residual equal to inherent score, because accepting a risk means the number does not go down. A register where everything is 15–20, or where the accepted row shows improvement, tells a reviewer the author is marking their own homework.
+
+**Two audit failures found by re-running the guards rather than trusting the reports.** Both had been reported green. Phase 4 had *Practice this next* before *Key takeaways*; Phase 7 had new content stranded after the closing pair. Same checks, same files, opposite result twenty minutes apart — because the first run happened while the writes were still in flight. **A guard result only means something once the writes have stopped**, and a report is not evidence.
+
+**The pattern worth carrying forward.** Every wrong number in this project has come from a *measurement* bug, never a content bug: the regex `^0[1-9]-` that silently excluded phases 10+, the per-phase average that could not see a 190-word wall among short paragraphs, and the word-count framing that hid four read-only phases. All three are the same mistake — **a metric that cannot fail is not a metric.**
+
+## 2026-09-15 — Search, five module follow-ups, and a red build that was worth having
 
 **Goal:** Two items chosen from the roadmap queue — write the five module-review follow-ups, and add full-text search across lessons.
 
