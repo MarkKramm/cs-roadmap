@@ -160,6 +160,17 @@ function collect(file, lines, cls) {
       return;
     }
 
+    // A HEADING asserts nothing. The first pass emitted "#### Rung 3 — `ping`
+    // the gateway" as a claim to verify, and a verifier can only answer
+    // "unverifiable" — correctly, because there is no claim in a heading. Rows
+    // like that waste a reader's attention and, worse, inflate the file so the
+    // rows that DO assert something are harder to find.
+    if (/^#{1,6}\s/.test(line)) return;
+
+    // Same for a self-assessment checklist item ("I can use `ipconfig`") — it
+    // states what the reader should be able to do, not what is true.
+    if (/^\s*-\s*\[[ xX]\]/.test(line)) return;
+
     if (/^## /.test(line)) {
       skip = /^## (?:Quiz|Specific topics to learn|Skills you'll gain|Tools for This Phase|Free\/cheap resources|Estimated time)\b/.test(
         line,
@@ -174,10 +185,25 @@ function collect(file, lines, cls) {
     // Dedupe within a line but keep order — a line often repeats one value.
     const seen = new Set();
     const uniq = hits.filter((h) => (seen.has(h) ? false : (seen.add(h), true)));
+
+    // CROSS-REFERENCES ARE NOT CLAIMS. "Finish by proving the same thing
+    // without `nslookup`, using the pair from Part 3" names a tool but asserts
+    // nothing about it. These were a large share of the first pass's
+    // unverifiable rows.
+    if (/\b(?:from|in|see|per)\s+Part\s+\d|\bas (?:shown|described)\b|\bsee (?:above|below)\b|^\s*(?:Finish|Then|Next|Now)\b[^.]*\b(?:from|using) (?:the )?(?:pair|list|table|steps?)\b/i.test(line)) {
+      return;
+    }
+
     out.push({
       file,
       line: i + 1,
       text: line.replace(/\s+$/, ""),
+      // The two lines either side give a verifier the sentence a table cell was
+      // cut from. A bare "`ipconfig /all`" in a table row is unanswerable; the
+      // claim is in the row's OTHER cells, and in the sentence introducing the
+      // table. Carrying context is what turns a dead row into a checkable one.
+      before: (lines[i - 1] || "").replace(/\s+$/, "").slice(0, 200),
+      after: (lines[i + 1] || "").replace(/\s+$/, "").slice(0, 200),
       hits: uniq,
       inFence: fence,
     });
@@ -347,11 +373,26 @@ for (const cls of CLASSES) {
   for (const r of rows) {
     n++;
     // Pipe characters inside the quoted text would break the table.
-    const text = r.text.replace(/\|/g, "\\|").replace(/\s+/g, " ").trim();
-    const shown = text.length > 200 ? text.slice(0, 200) + " …" : text;
+    const esc = (s) => s.replace(/\|/g, "\\|").replace(/\s+/g, " ").trim();
+    const text = esc(r.text);
+    const shown = text.length > 260 ? text.slice(0, 260) + " …" : text;
     const loc = `${r.file}:${r.line}`;
     const run = r.inFence ? " ▶" : "";
     w(`| ${n} | \`${loc}\`${run} | ${shown} | |`);
+    // CONTEXT, but only where the row cannot stand alone. A sentence that makes
+    // its own assertion needs no help; a table cell or a terse fragment does,
+    // and without it a verifier can only answer "unverifiable" — which is what
+    // happened to about ninety rows on the first pass. Emitting context for
+    // every row would triple the file and bury the list, so it is emitted only
+    // when the claim text is short enough to be a fragment.
+    if (text.length < 110) {
+      const b = esc(r.before || "");
+      const a = esc(r.after || "");
+      const parts = [];
+      if (b && !/^[|\s:-]*$/.test(b)) parts.push(`↑ ${b.length > 150 ? b.slice(0, 150) + " …" : b}`);
+      if (a && !/^[|\s:-]*$/.test(a)) parts.push(`↓ ${a.length > 150 ? a.slice(0, 150) + " …" : a}`);
+      if (parts.length) w(`| | | <sub>${parts.join("<br>")}</sub> | |`);
+    }
   }
   w();
   if (rows.some((r) => r.inFence)) {
