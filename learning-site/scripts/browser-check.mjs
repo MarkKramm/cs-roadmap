@@ -1143,7 +1143,31 @@ async function main() {
       'the quiz did not return to its unanswered state',
     );
 
-    // A phase without a quiz must not render an empty quiz shell.
+    // A phase with a quiz must render a real quiz, not an empty scaffold.
+    //
+    // THIS CHECK REPLACED ONE THAT HAD BECOME VACUOUS, AND BOTH STEPS MATTER.
+    //
+    // The original clicked IT 01 "Computer Fundamentals" and asserted no quiz
+    // rendered, because IT 01 was the one phase with no quiz section. Every phase
+    // in the curriculum now has a quiz, so that assertion failed — not because
+    // the product regressed, but because its subject had been fixed.
+    //
+    // The first attempt at a replacement asserted "either there is no quiz
+    // container, or the container holds questions". That passed even with the
+    // component's empty-quiz branch deliberately rewritten to render
+    // `<div className="quiz" />`, because no phase reaches that branch any more.
+    // **A check that cannot fail is not a check**, and keeping it would have
+    // traded a real assertion for the appearance of one. It was removed.
+    //
+    // What replaced it tests something that is true, reachable, and load-bearing:
+    // the phase that USED to have no quiz now has one, and it renders with real
+    // questions and a real heading. That is the property a reader depends on, and
+    // it fails if the quiz stops rendering — which is a plausible regression in a
+    // way that the empty branch no longer is.
+    //
+    // The empty branch itself is still covered, at the level where it can be
+    // reached: `learning-site/scripts/test-quiz.mjs` asserts `summarise([], {})`
+    // and `summarise(null, {})` both report `empty`.
     await cdp.eval(`(() => {
       const b = [...document.querySelectorAll('.sidebar__link')]
         .find(x => /Computer Fundamentals/.test(x.textContent));
@@ -1151,13 +1175,27 @@ async function main() {
       return !!b;
     })()`);
     await sleep(700);
-    const quizAbsent = await cdp.eval(
-      `(() => ({ quiz: !!document.querySelector('.quiz'), heading: [...document.querySelectorAll('h2')].some(h => h.textContent.trim() === 'Quiz') }))()`,
+    const quizShape = await cdp.eval(
+      `(() => {
+        const q = document.querySelector('.quiz');
+        return {
+          container: !!q,
+          questions: q ? q.querySelectorAll('.quiz__q').length : 0,
+          heading: [...document.querySelectorAll('h2')].some(h => h.textContent.trim() === 'Quiz'),
+        };
+      })()`,
     );
     check(
-      'quiz: a phase without a quiz renders no quiz section',
-      !quizAbsent.quiz && !quizAbsent.heading,
-      'an empty quiz shell rendered',
+      'quiz: a phase with a quiz renders real questions, not an empty shell',
+      quizShape.container && quizShape.questions > 0,
+      quizShape.container
+        ? `the quiz container rendered with ${quizShape.questions} question(s)`
+        : 'no quiz container rendered on a phase that has one',
+    );
+    check(
+      'quiz: the quiz section is headed',
+      quizShape.heading,
+      'the quiz rendered without its heading',
     );
 
     // ---------------------------------------------------------------------
