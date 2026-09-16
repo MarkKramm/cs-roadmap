@@ -397,7 +397,13 @@ function buildPhase(file) {
 // --- main ---
 
 const files = walk(CONTENT).filter((f) => /-phase-[a-z0-9-]+\.md$/.test(basename(f))).sort();
-const byTrack = { it: [], cyber: [] };
+// Every track the pipeline knows about. A `track:` value in a phase's
+// front-matter that is not named here fails the build below rather than being
+// silently dropped — which is what stops a new track half-shipping, because the
+// track's own JSON is only emitted for a key that already exists.
+const KNOWN_TRACKS = ["it", "cyber", "advance"];
+const byTrack = {};
+for (const t of KNOWN_TRACKS) byTrack[t] = [];
 
 for (const f of files) {
   const p = buildPhase(f);
@@ -493,7 +499,7 @@ const termCount = search.terms ? search.terms.split("\n").length : 0;
 
 console.log("");
 console.log("wrote " + Object.keys(byTrack).length + " index files to " + relative(ROOT, OUT).replace(/\\/g, "/"));
-console.log("wrote " + (byTrack.it.length + byTrack.cyber.length) + " lesson files (" +
+console.log("wrote " + KNOWN_TRACKS.reduce((n, t) => n + byTrack[t].length, 0) + " lesson files (" +
   Math.round(totalLessonBytes / 1024) + " KB) to " + relative(ROOT, join(OUT, "lessons")).replace(/\\/g, "/"));
 console.log("wrote search.json — " + search.segments.length + " segments, " +
   termCount + " terms (" + Math.round(searchBytes / 1024) + " KB, " +

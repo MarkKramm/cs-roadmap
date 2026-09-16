@@ -1,4 +1,4 @@
-// Flattened view of every tool in both tracks, plus the cost → badge mapping.
+// Flattened view of every tool in all three tracks, plus the cost → badge mapping.
 //
 // Tools live inside phases in the generated JSON, because that is how the
 // Markdown tables are authored. The tools library needs them as one flat list

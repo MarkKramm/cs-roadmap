@@ -122,6 +122,18 @@ function checkBytes(file, bytes) {
 }
 
 // Blank out code so prose rules only see prose. Line numbers are preserved.
+//
+// Bare URLs are blanked along with code, and that is a fix rather than a
+// convenience. The `?` rules exist to catch a straight quote used as an opening
+// quote, and their comment claimed "no legitimate English sentence produces
+// it" — but a URL query string does: `?code=IS-100.c` is a delimiter, not a
+// quote. The first phase to cite a URL with a query parameter (advance 03, three
+// FEMA course links) made the rule fire three times on correct content. A guard
+// that fails on a real URL is a guard a writer learns to route around, so the
+// rule is narrowed rather than the URLs being rewritten to avoid it.
+//
+// Scope: `proseOnly` feeds `checkProse` only. `checkHeadingSpacing` reads the
+// raw lines, so blanking here cannot hide a glued heading.
 function proseOnly(text) {
   const lines = text.split("\n");
   let inFence = false;
@@ -132,7 +144,9 @@ function proseOnly(text) {
       return "";
     }
     if (inFence) return "";
-    return line.replace(/`[^`]*`/g, (m) => " ".repeat(m.length));
+    return line
+      .replace(/`[^`]*`/g, (m) => " ".repeat(m.length))
+      .replace(/https?:\/\/\S+/g, (m) => " ".repeat(m.length));
   });
 }
 

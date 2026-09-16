@@ -175,9 +175,10 @@ export default function Dashboard({
   // reader, and this curriculum forbids shame UI.
   const portfolioCount = readPortfolio().length;
   const applicationCount = readApplications().length;
-  // Counted across both tracks, because the Tools page this chip opens lists
-  // both. A chip reading 42 that opens a page reading 191 is a chip that lies,
-  // and the reader has no way to tell which of the two numbers is wrong.
+  // Counted across all three tracks, because the Tools page this chip opens
+  // lists all three. A chip reading 42 that opens a page reading 251 is a chip
+  // that lies, and the reader has no way to tell which of the two numbers is
+  // wrong.
   const toolCount = allTools().length;
   const readiness = [
     { id: "portfolio", label: "Portfolio", value: portfolioCount },

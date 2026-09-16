@@ -4,10 +4,11 @@ This roadmap is built for a beginner in the Philippines with basic past web-dev 
 
 ## The Strategy
 
-You have two linked goals:
+You have three linked goals, taken in order:
 
 1. **Goal A — IT first, 3–6 months:** land a remote entry-level IT role such as helpdesk, IT support, service desk, junior NOC, or junior sysadmin assistant.
 2. **Goal B — Cybersecurity next, 6–18 months:** build toward SOC Analyst L1, junior GRC, IT security analyst, or junior pentest trainee roles while you gain real IT experience.
+3. **Goal C — Mid-level next, years 1–3 of the job:** once you hold a security role, move from working tickets to owning outcomes. This is the third track, `advance-roadmap/`, and it is deliberately **not** for someone who has not worked in the field yet.
 
 The honest hiring-manager view: cybersecurity is possible without a degree, but it is rarely the first job. Your fastest practical path is:
 
@@ -86,3 +87,4 @@ Everything here is doable with free tools/resources. The only optional spend is 
 3. `it-roadmap/checklist-master.md`
 4. `shared/weekly-tracker-template.md`
 5. `cybersec-roadmap/00-overview.md` after IT Phase 2
+6. `advance-roadmap/00-overview.md` — only once you hold a security role

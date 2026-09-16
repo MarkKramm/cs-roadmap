@@ -21,7 +21,10 @@ const FENCE = BT + BT + BT;
 // Curriculum order. The reader starts at IT 01 and works forward into cyber,
 // so a term expanded in cyber 02 is *not* available to a reader in cyber 05 —
 // but it is available to someone reading IT 01 in order.
-const TRACKS = ['it-roadmap', 'cybersec-roadmap'];
+// The third track is read after cyber in curriculum order: a reader reaches
+// mid-level material only after holding a security role, so a term expanded in
+// advance 01 is available to advance 02 and not to anything earlier.
+const TRACKS = ['it-roadmap', 'cybersec-roadmap', 'advance-roadmap'];
 
 function collect() {
   const files = [];

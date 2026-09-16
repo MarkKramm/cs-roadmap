@@ -6,6 +6,7 @@
 
 import it from "./generated/it.json";
 import cyber from "./generated/cyber.json";
+import advance from "./generated/advance.json";
 
 export const tracks = [
   {
@@ -21,6 +22,13 @@ export const tracks = [
     short: "Cyber",
     note: "Second goal — entry-level cyber in 6–18 months.",
     phases: cyber.phases,
+  },
+  {
+    id: "advance",
+    label: "Mid-Level Cyber",
+    short: "Advance",
+    note: "After your first security role — the jump from doing the work to owning it.",
+    phases: advance.phases,
   },
 ];
 

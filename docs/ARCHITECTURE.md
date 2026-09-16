@@ -17,9 +17,10 @@ Study material lives under `career-roadmaps/` in three tracks:
 
 | Track | Path | Role |
 |---|---|---|
-| Strategy | `career-roadmaps/README.md` | Explains the two-goal plan and how to use both tracks |
+| Strategy | `career-roadmaps/README.md` | Explains the three-goal plan and how to use all three tracks |
 | IT | `career-roadmaps/it-roadmap/` | First goal — remote entry-level IT in 3–6 months |
 | Cybersecurity | `career-roadmaps/cybersec-roadmap/` | Second goal — entry-level cyber in 6–18 months |
+| Mid-Level Cyber | `career-roadmaps/advance-roadmap/` | Third goal — the years after your first security role, once the entry-level job is held |
 | Shared | `career-roadmaps/shared/` | Cross-cutting rules, resources, tracker |
 
 ### File naming convention
@@ -59,6 +60,6 @@ Keep new phases consistent with this shape.
 
 ## Continuous integration
 
-`.github/workflows/ci.yml` runs on every push to `main` and every pull request, as two jobs, split so a content typo fails in seconds without paying for a dependency install. **Content integrity** runs `lint-content`, `audit-content`, `audit-lesson-ast`, `audit-readability` and `audit-refs` at the repository root with no install. **Learning site** runs `npm ci`, `npm run build`, then the eleven site suites — `test:smoke`, `test:search`, `test:highlight`, `test:ui`, `test:data`, `test:notes`, `test:work`, `test:today`, `test:lesson-search` and `test:browser` — under `learning-site/`. Node 24. It is check-only; deployment is a separate concern (see [`ROADMAP.md`](ROADMAP.md)).
+`.github/workflows/ci.yml` runs on every push to `main` and every pull request, as two jobs, split so a content typo fails in seconds without paying for a dependency install. **Content integrity** runs `lint-content`, `audit-content`, `audit-lesson-ast`, `audit-readability`, `audit-refs` and `audit-time-budget` at the repository root with no install. **Learning site** runs `npm ci`, `npm run build`, then the eleven site suites — `test:smoke`, `test:search`, `test:highlight`, `test:render-inline`, `test:ui`, `test:data`, `test:notes`, `test:work`, `test:today`, `test:lesson-search` and `test:browser` — under `learning-site/`. Node 24. It is check-only; deployment is a separate concern (see [`ROADMAP.md`](ROADMAP.md)).
 
 `test:browser` is the only step needing a real engine and a process manager: it starts `vite preview`, polls it with `curl` until it answers, runs the check, and kills the server on both paths. It sets `BROWSER_NO_SANDBOX=1` (a container does not grant the capability Chrome's sandbox needs) and `BROWSER_CHECK_STRICT=1` (a missing browser must fail, not skip). `cyber-restructure-check.mjs` is deliberately excluded — its baseline lives outside the repository, so it can only fail on a fresh clone. See [`WORKFLOW.md`](WORKFLOW.md) → "Continuous integration".

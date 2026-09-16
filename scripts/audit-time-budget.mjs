@@ -42,7 +42,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 
 const ROOT = 'career-roadmaps';
-const TRACKS = ['it-roadmap', 'cybersec-roadmap'];
+const TRACKS = ['it-roadmap', 'cybersec-roadmap', 'advance-roadmap'];
 
 const findings = [];
 const note = (file, line, message) => findings.push({ file, line, message });
@@ -74,6 +74,12 @@ function listPhaseFiles() {
   const out = [];
   for (const track of TRACKS) {
     const dir = path.join(ROOT, track);
+    // Declared before its first phase file exists; see the note in
+    // audit-refs.mjs for why this is printed rather than silently skipped.
+    if (!fs.existsSync(dir)) {
+      console.log(`note: ${track} — no directory yet, skipped`);
+      continue;
+    }
     for (const f of fs.readdirSync(dir).sort()) {
       if (/^\d{2}-phase-.*\.md$/.test(f)) out.push({ track, file: path.join(dir, f) });
     }
@@ -213,6 +219,10 @@ for (const { track, file } of phases) {
 // Class 4 - track overview tables vs the phase files they point at.
 for (const track of TRACKS) {
   const rel = `${ROOT}/${track}/00-overview.md`;
+  if (!fs.existsSync(rel)) {
+    console.log(`note: ${track}/00-overview.md — not written yet, no timeline to cross-check`);
+    continue;
+  }
   const lines = fs.readFileSync(rel, 'utf8').split(/\r?\n/);
   // "saw a table row" is a different question from "am I inside a table right
   // now". Tracking only the latter made this check pass on both overviews for

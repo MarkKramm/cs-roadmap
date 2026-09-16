@@ -14,6 +14,22 @@ The IT roadmap is the fastest realistic path to paid work. The cyber roadmap bui
 
 Those are realistic windows, not targets. They assume 10–15 focused hours per week, a beginner starting point, and buffer weeks for the inevitable off-weeks. Optimistic timelines ("become a SOC analyst in 3 months") are common online and set beginners up to feel like failures when they do not hit them.
 
+### There is a third track. Do I have to do it?
+
+No, and this is the one place in the curriculum where **not finishing is the expected outcome**. The IT and cyber tracks are sequential and completion-oriented: each ends at a hire, and skipping a phase leaves a gap that shows up later. The mid-level track (`career-roadmaps/advance-roadmap/`) is different on purpose. It assumes you already hold a security role, and it is built so each of its six phases stands alone.
+
+Take the two or three your current job is actually asking for. Working through all six because the list has six items is the wrong reason to read a phase. The `00-overview.md` has a table matching common situations to the phases that address them.
+
+### What makes the mid-level track different from the other two?
+
+Three things, and each one is a deliberate choice rather than a scope increase.
+
+**It gates on prior employment.** The overview says plainly that it is not for someone who has not held a security role, because every phase assumes context — real alerts, real users, real consequences — that a lab cannot supply. That is the same honesty the entry-level tracks apply to themselves.
+
+**Most of the hours are writing, not reading.** From Phase 3 onward the deliverable is a document somebody else acts on: a decision log, a runbook, a business case, a coverage map. At this level the writing *is* the work, so the weekly rhythm puts the writing block midweek rather than at the end.
+
+**The $0 rule still holds, with no exception.** Everything is doable at zero cost, every paid or freemium row names a free alternative in the same row, and the single TryHackMe Premium exception in the cyber track does not carry over — nothing in the mid-level track depends on it.
+
 ### Why a $0 budget?
 
 Two reasons. First, the person this was built for does not have $500 for a bootcamp. Second, most paid courses teach the same material that is available for free — the money buys structure and accountability, not knowledge. Free resources are enough to reach entry-level employability, and the curriculum proves it by using only free tools.

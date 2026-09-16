@@ -6,7 +6,12 @@ import fs from 'node:fs';
 import path from 'node:path';
 
 const FENCE = '`'.repeat(3);
-const tracks = ['it-roadmap', 'cybersec-roadmap'];
+// Every track directory this scan reads. A new track is invisible to the audit
+// until it is named here, and the failure mode is the one this repository keeps
+// recording: a clean report that never looked at the new files. The loop below
+// prints a note when a declared track has no directory yet, so "nothing to
+// report" can never be confused with "nothing was read".
+const tracks = ['it-roadmap', 'cybersec-roadmap', 'advance-roadmap'];
 
 // Two thresholds, deliberately different.
 // EDITORIAL is the standard the writing is held to and is reported, never
@@ -21,6 +26,13 @@ const rows = [];
 
 for (const track of tracks) {
   const dir = path.join('career-roadmaps', track);
+  // Declared tracks can exist before their first phase file does; see the note
+  // in audit-refs.mjs. A silent skip here would report a clean track average
+  // for a track that was never read.
+  if (!fs.existsSync(dir)) {
+    console.log(`note: ${track} — no directory yet, skipped`);
+    continue;
+  }
   for (const f of fs.readdirSync(dir).sort()) {
     // Phases only: two-digit numbers from 01 (01 … 14), excluding 00-overview,
   // which is a strategy document and has no lesson region. The earlier
@@ -140,16 +152,22 @@ console.log('  Longest average sentence:');
 // list of phase names. The earlier version listed the original eight cyber
 // phases by name, so the six modules added as 09–14 were counted as IT and the
 // cyber average described only part of the track.
-const groups = { IT: [], CYBER: [] };
+const groups = { IT: [], CYBER: [], ADVANCE: [] };
 for (const r of rows) {
-  const isCyber = r.track === 'cybersec-roadmap';
-  groups[isCyber ? 'CYBER' : 'IT'].push(r);
+  const key = r.track === 'cybersec-roadmap' ? 'CYBER'
+    : r.track === 'advance-roadmap' ? 'ADVANCE'
+    : 'IT';
+  groups[key].push(r);
 }
 
 console.log('\n=== track averages (the number that matters) ===');
 const avgOf = (g, f) => (g.reduce((n, x) => n + f(x), 0) / g.length);
-for (const k of ['IT', 'CYBER']) {
+for (const k of ['IT', 'CYBER', 'ADVANCE']) {
   const g = groups[k];
+  // An empty group would divide by zero and print NaN rather than saying so.
+  // A track with no phase files is a real state (the track exists before its
+  // first phase is written), so it is reported plainly instead of crashing.
+  if (!g.length) { console.log(`  ${pad(k, 8)} phases=0`); continue; }
   console.log(
     `  ${pad(k, 6)} phases=${g.length}` +
     `  avg para=${avgOf(g, (x) => x.avgPara).toFixed(1)}` +

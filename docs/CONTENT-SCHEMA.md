@@ -21,7 +21,7 @@ To be added to every phase file. YAML between `---` delimiters at the very top.
 ```yaml
 ---
 id: it-03-networking-basics        # stable, unique, never reused
-track: it                          # it | cyber
+track: it                          # it | cyber | advance
 phase: 3                           # numeric phase index
 order: 30                          # sort key; phase * 10
 title: Networking Basics
@@ -38,7 +38,7 @@ exit_criteria: >
 Field notes:
 
 - **`id`** is permanent. Renaming the file does not change it. Progress saved against `id` survives reorganization.
-- **`track`** is `it` or `cyber` — one per top-level folder.
+- **`track`** is `it`, `cyber`, or `advance` — one per top-level folder. The value must be one of the three names in `KNOWN_TRACKS` in [`scripts/build-content.mjs`](../scripts/build-content.mjs); a phase naming a track that is not listed there **fails the build** rather than being dropped, because the track's own JSON is only emitted for a key that already exists.
 - **`order`** is `phase * 10` by convention, leaving room to insert phases later without renumbering.
 - **`energy_mix`** lists which of `low` / `normal` / `high` energy modes a phase's tasks suit. Used by the site's daily-task picker.
 - **`deliverable`** mirrors the `## Deliverable / proof of work` section's target path.
@@ -53,7 +53,7 @@ Each `- [ ]` line under `## Checklist` gets a trailing HTML comment with a stabl
 - [ ] I understand IPv6 basics and AAAA DNS records. <!-- id: it-03-c03 energy: normal -->
 ```
 
-- **ID format:** `<track>-<phase>-c<NN>`, zero-padded, sequential within the phase. Track is `it` or `cyber`, phase is the two-digit number from the filename. `it-03-c01`, `cyber-09-c01`.
+- **ID format:** `<track>-<phase>-c<NN>`, zero-padded, sequential within the phase. Track is `it`, `cyber`, or `advance`, phase is the two-digit number from the filename. `it-03-c01`, `cyber-09-c01`, `advance-01-c01`.
 - **IDs never change.** Adding a task appends a new ID. Removing a task retires its ID but does not renumber.
 - IDs must be **globally unique**, not merely unique within a phase — the build fails on a duplicate. The site treats an ID as the identity of a task, so a collision across two phases would make progress on one appear against the other.
 - The `energy:` hint is optional. When present, the site's low-energy mode only offers `energy: low` tasks.
@@ -80,13 +80,13 @@ The comment carries three fields, and the **field order is fixed**: `id`, then `
   | `ongoing` | **Not a single timed sitting.** Recurring, week-gated, multi-session or hardware-gated work. |
 
   `ongoing` is an exclusion rather than a length: it means *more time would not help*, so a task carrying it is never offered as a time-boxed suggestion (see `DECISIONS.md` → D-021).
-- **`energy`** is one of `low`, `normal`, `high`, matching the checklist's `energy:` hint. All 183 practice tasks carry a value.
+- **`energy`** is one of `low`, `normal`, `high`, matching the checklist's `energy:` hint. All 252 practice tasks carry a value.
 
 **Positional minting is now a fallback, not the normal path.** The build still mints `<phase-id>-tNN` from position for any task line that carries no `<!-- id: … -->` comment, so a partially migrated file cannot fail the build — but it **reports the count**, because a silently minted id is the one thing that would let an answer follow a position rather than a question. The build prints both numbers on every run:
 
 ```text
-task bands:  183 banded, 0 authored without a band, 0 still minted from position
-task energy: 183 of 183 practice task(s) carry an energy value
+task bands:  252 banded, 0 authored without a band, 0 still minted from position
+task energy: 252 of 252 practice task(s) carry an energy value
 ```
 
 The minted-from-position count is currently **0**. A future edit that adds a task without its comment raises that number instead of passing quietly, which is the signal to author the comment rather than to accept the mint.
@@ -150,7 +150,7 @@ Column order is fixed by [`CONTENT-GUIDE.md`](CONTENT-GUIDE.md).
 
 ## The lesson region
 
-Everything between `## Lesson: <Title>` and the next `## ` heading is the lesson — the part that actually teaches. Measured across both tracks it is **84–95% of every phase file**, so it is the largest thing the schema carries and the reason the site is worth opening.
+Everything between `## Lesson: <Title>` and the next `## ` heading is the lesson — the part that actually teaches. Measured across all three tracks it is **84–95% of every phase file**, so it is the largest thing the schema carries and the reason the site is worth opening.
 
 The build parses it with [`scripts/lesson-ast.mjs`](../scripts/lesson-ast.mjs) into a block AST. The parser supports exactly the Markdown subset the curriculum uses, which was measured rather than assumed: `###`/`####`/`#####` headings, paragraphs, bullet and ordered lists (including one level of nesting), tables, fenced code blocks, and blockquotes. Inline `**bold**`, `*italic*`, and `` `code` `` are carried through as raw text and formatted by the site's `renderInline.jsx`.
 
@@ -173,7 +173,7 @@ Two rules the parser keeps:
 - **Nothing is dropped.** A line that matches no block becomes a paragraph, and any construct the parser does not recognise is recorded in `unknown`, which **fails the build**. Content that cannot be rendered must be a loud error, not a silently missing paragraph.
 - **Heading IDs are unique.** Duplicates get a numeric suffix so a table of contents never links two entries to the same anchor.
 
-`node scripts/audit-lesson-ast.mjs` verifies both across every phase by comparing the AST's characters against the source with markup stripped. It currently reports zero loss on all 23 lessons. **Run it after any change to the parser.**
+`node scripts/audit-lesson-ast.mjs` verifies both across every phase by comparing the AST's characters against the source with markup stripped. It currently reports zero loss on all 29 lessons. **Run it after any change to the parser.**
 
 ## Output: generated JSON
 
@@ -182,6 +182,7 @@ The build script emits a small index per track plus one file per lesson:
 ```text
 learning-site/src/data/generated/it.json
 learning-site/src/data/generated/cyber.json
+learning-site/src/data/generated/advance.json
 learning-site/src/data/generated/lessons/<phase-id>.json
 learning-site/src/data/generated/search.json
 learning-site/src/data/generated/shared.json
@@ -217,11 +218,11 @@ learning-site/src/data/generated/shared.json
 
 ### Why the lessons are separate files
 
-The lesson bodies total roughly 1.7 MB of JSON. Inlining them into the track indexes made the site's single JS bundle 1.9 MB, which delayed first paint for content the reader had not asked for. Each lesson is therefore its own file, imported dynamically by `src/hooks/useLesson.js` when a phase is opened, and cached per phase id in memory.
+The lesson bodies total roughly 2.5 MB of JSON. Inlining them into the track indexes made the site's single JS bundle 1.9 MB, which delayed first paint for content the reader had not asked for. Each lesson is therefore its own file, imported dynamically by `src/hooks/useLesson.js` when a phase is opened, and cached per phase id in memory.
 
 ### `search.json` — the full-text index
 
-Search needs to find a phrase across all 23 lessons without loading all of them. This file holds an inverted index — term to segment id — and **no prose**, so it does not duplicate the lesson files. See [`DECISIONS.md`](DECISIONS.md) → D-013 for the measurements behind that choice; storing segment text came to 473 KB gzipped against 180 KB for this.
+Search needs to find a phrase across all 29 lessons without loading all of them. This file holds an inverted index — term to segment id — and **no prose**, so it does not duplicate the lesson files. See [`DECISIONS.md`](DECISIONS.md) → D-013 for the measurements behind that choice; storing segment text came to 473 KB gzipped against 180 KB for this.
 
 ```json
 {
@@ -243,7 +244,7 @@ Search needs to find a phrase across all 23 lessons without loading all of them.
 | `segments[].a` | The heading's anchor id, used to scroll to the hit. Empty for the lesson-level opening segment. |
 | `segments[].p` | Phase id. Resolves to a lesson file at `lessons/<p>.json`. |
 | `segments[].pt` | Phase title, for the result row. |
-| `segments[].k` | Track id — `it` or `cyber`. |
+| `segments[].k` | Track id — `it`, `cyber`, or `advance`. Resolved against `tracks` in `src/data/roadmaps.js` to label the result row; a hardcoded two-track test here once labelled every non-cyber hit as IT. |
 | `terms` | One line per term, `term:delta,delta,…`, where the deltas are ascending segment indices encoded in base36. |
 | `common` | Terms appearing in more than 20% of segments. Kept so the engine can match and report them, but excluded from the query's AND — see D-013. |
 

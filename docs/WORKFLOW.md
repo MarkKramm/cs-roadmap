@@ -68,7 +68,7 @@ Note: when creating a new file, the editor in this environment has repeatedly wr
 
 ## Verifying a content edit changed nothing structural
 
-The build turns the phase Markdown into `learning-site/src/data/generated/{it,cyber}.json`, and that JSON is what the site renders. To prove an edit was content-only — a lesson, a reworded paragraph — capture the JSON before and after and diff it, ignoring `generatedAt`:
+The build turns the phase Markdown into `learning-site/src/data/generated/{it,cyber,advance}.json`, and that JSON is what the site renders. To prove an edit was content-only — a lesson, a reworded paragraph — capture the JSON before and after and diff it, ignoring `generatedAt`:
 
 ```powershell
 Copy-Item 'learning-site\src\data\generated\it.json' 'it.baseline.json'
@@ -98,7 +98,7 @@ cd ..; git worktree remove '.head-check' --force
 | Job | What it runs | Working directory |
 |---|---|---|
 | Content integrity | `lint-content` → `audit-content` → `audit-lesson-ast` → `audit-readability` → `audit-refs` | repository root |
-| Learning site | `npm ci` → `build` → `test:smoke` → `test:search` → `test:highlight` → `test:ui` → `test:data` → `test:notes` → `test:work` → `test:today` → `test:lesson-search` → `test:browser` | `learning-site/` |
+| Learning site | `npm ci` → `build` → `test:smoke` → `test:search` → `test:highlight` → `test:render-inline` → `test:ui` → `test:data` → `test:notes` → `test:work` → `test:today` → `test:lesson-search` → `test:browser` | `learning-site/` |
 
 Both jobs use Node 24, matching the local toolchain. The workflow is check-only: it does not deploy, publish, or touch secrets — see [`DECISIONS.md`](DECISIONS.md) → D-008. To reproduce it locally, run the commands under "How to verify quickly" in [`CHECKPOINT.md`](CHECKPOINT.md).
 
@@ -119,7 +119,7 @@ node scripts/audit-readability.mjs  # prose density targets
 cd learning-site && npm run test:smoke   # the lesson renders for every phase
 ```
 
-**Run `audit-lesson-ast.mjs` after any change to `lesson-ast.mjs`.** It compares each lesson's parsed blocks against its source with markup stripped, and reports a non-zero delta, an unrecognised construct, or a lesson with no headings. It currently reports zero loss on all 23 lessons.
+**Run `audit-lesson-ast.mjs` after any change to `lesson-ast.mjs`.** It compares each lesson's parsed blocks against its source with markup stripped, and reports a non-zero delta, an unrecognised construct, or a lesson with no headings. It currently reports zero loss on all 29 lessons.
 
 ## Guards on the curriculum text
 
@@ -143,6 +143,8 @@ node scripts/audit-terms.mjs        # acronym MEASUREMENT — always exits 0, ne
 
 The smoke test renders the lesson for every phase and asserts that the table and code-block counts match the AST, that heading IDs are unique, that every table-of-contents entry resolves, and that no literal `**` or backtick reaches rendered prose. It excludes `<pre>` and `<code>` from that last check, because a `markdown` fence legitimately displays `**bold**` as an example.
 
+**`npm run test:render-inline` guards the inline formatter directly** — `src/lib/renderInline.jsx`, which turns `**bold**`, `*italic*` and `` `code` `` inside a JSON string into React elements. It is a separate guard from the smoke test for the reason D-027 records: the smoke test can only catch a formatter bug on content that already writes the shape that trips it, and `renderInline` had a real one — emphasis and code matched in a single alternation, so a code span whose content contained an asterisk (`Resource: "*"`) shredded both spans and leaked a literal backtick. `advance-04` was the one lesson in 29 that wrote it. `smoke-render.mjs` caught the symptom; this test holds the **rule**, over 34 cases on the real module, including the exact shipped string and the adjacent nesting shapes. It needs no corpus and no build, so a new lesson that writes `"*"` inside a code span is covered the moment it is authored.
+
 ## Checklist before committing
 
 - [ ] `node scripts/lint-content.mjs` reports no issues.
@@ -151,6 +153,7 @@ The smoke test renders the lesson for every phase and asserts that the table and
 - [ ] `node scripts/audit-refs.mjs` reports no broken cross-reference (for any change to a phase file).
 - [ ] `node scripts/audit-time-budget.mjs` reports `findings: 0` (for any change to a phase file or a track overview).
 - [ ] `cd learning-site && npm run test:smoke` passes (for any change touching the site).
+- [ ] `cd learning-site && npm run test:render-inline` passes (for any change to `renderInline.jsx` or to inline Markdown in the content).
 - [ ] `cd learning-site && npm run test:browser` passes with a preview server running (for any change touching a view, a stylesheet or a control).
 - [ ] File is LF (no CR bytes) unless it is a Windows-native script.
 - [ ] File is UTF-8 without BOM.

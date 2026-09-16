@@ -65,7 +65,25 @@ for (const file of walk(CONTENT).filter((f) => f.endsWith(".md"))) {
 
   const lines = text.split("\n");
   const rel = relative(CONTENT, file).replace(/\\/g, "/");
-  const track = rel.startsWith("it-roadmap/") ? "it" : "cyber";
+  // Directory name to track id. The earlier version was a binary test —
+  // `it-roadmap/` meant "it", everything else meant "cyber" — which silently
+  // wrote a `cyber` id and a `track: cyber` front-matter into any phase file
+  // outside the IT directory. A third track makes that a wrong id rather than a
+  // missing one, and a wrong id is worse: ids are permanent and a reader's
+  // progress is stored against them. An unmapped directory now throws instead of
+  // guessing.
+  const TRACK_BY_DIR = {
+    "it-roadmap": "it",
+    "cybersec-roadmap": "cyber",
+    "advance-roadmap": "advance",
+  };
+  const dirName = rel.split("/")[0];
+  const track = TRACK_BY_DIR[dirName];
+  if (!track) {
+    throw new Error(
+      "add-frontmatter: no track id for directory '" + dirName + "' — add it to TRACK_BY_DIR"
+    );
+  }
   const phaseNum = Number(name.slice(0, 2));
   const phasePad = String(phaseNum).padStart(2, "0");
   const slug = name.replace(/\.md$/, "").replace(/^\d+-/, "").replace(/^phase-/, "");

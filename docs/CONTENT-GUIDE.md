@@ -114,11 +114,22 @@ When adding a phase file, keep the numeric prefix and renumber nothing. Insert g
 
 ## Adding a new track
 
-1. Create `career-roadmaps/<new-track>/00-overview.md`.
-2. Add the track to `career-roadmaps/README.md` (the strategy document).
-3. Add a `TOOLBOX.md` if the track has tools.
-4. Update the content-model table in [`ARCHITECTURE.md`](ARCHITECTURE.md).
-5. Commit with a `docs:` prefix.
+Adding a track is mostly plumbing, and the plumbing is the part that fails silently. **A new track is invisible to six scripts until it is named in each of them**, and every one of those scripts will print a clean, confident report having never read the new files. That is the same failure this repository has recorded three times in other forms, so the steps below are ordered so that the first thing you do is make the track visible.
+
+1. **Choose the track id.** It is a single lowercase word (`it`, `cyber`, `advance`) and it appears in three places that must agree: the phase front-matter's `track:` field, the directory name's mapping, and the JSON filename. The directory name is *not* the id — `cybersec-roadmap/` holds `track: cyber` — so a track needs a directory-to-id mapping rather than a string prefix test.
+2. **Name it in every script that walks tracks.** There is no single registry; the list is deliberately duplicated so each script's scope is readable in the script itself. Search for the existing two names and add the third:
+   - `scripts/build-content.mjs` → `KNOWN_TRACKS` (a phase naming an unlisted track fails the build)
+   - `scripts/audit-content.mjs`, `scripts/audit-refs.mjs`, `scripts/audit-readability.mjs`, `scripts/audit-terms.mjs`, `scripts/audit-time-budget.mjs` → each has its own `TRACKS` / `tracks` list
+   - `scripts/add-frontmatter.mjs` → `TRACK_BY_DIR`, which maps a directory to an id and **throws** on an unmapped one
+   - `learning-site/src/data/roadmaps.js` → the `import` and the `tracks` entry, which is what the sidebar, dashboard and search read
+3. **Make every walker tolerate a track that has no directory yet.** A track is named in those lists before its first phase file is written, so `readdirSync` on a path that does not exist throws `ENOENT`. Catch it and **print a note** — `note: <track> — no directory yet, skipped` — because a silent skip makes "0 findings" indistinguishable from "looked at nothing". The guards do this; copy that pattern.
+4. **Create `career-roadmaps/<new-track>/00-overview.md`**, including a timeline table whose week counts match each phase file's front-matter. `audit-time-budget.mjs` cross-checks this table against the phase files and will fail on a mismatch.
+5. **Write the phases**, then generate `checklist-master.md` from their `## Checklist` sections.
+6. **Add the track to `career-roadmaps/README.md`** (the strategy document) and to the content-model table in [`ARCHITECTURE.md`](ARCHITECTURE.md).
+7. **Run the full guard suite** before committing. `audit-content.mjs`, `audit-refs.mjs` and `audit-readability.mjs` each print how many files they read; confirm that number went up.
+8. Commit with a `docs:` prefix.
+
+**Verifying the plumbing, without writing content.** The cheapest way to prove a new track is actually wired is to declare it, create the empty directory structure, and run everything: the build should emit a `<track>.json` with `phaseCount: 0`, and each guard should print a note naming the track it skipped. If a guard reports clean with no note, the track is invisible to it — which is the bug this whole section exists to prevent.
 
 ## Anti-patterns
 

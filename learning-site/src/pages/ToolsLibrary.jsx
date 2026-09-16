@@ -4,7 +4,7 @@ import EmptyState from "../components/EmptyState.jsx";
 import { tracks } from "../data/roadmaps.js";
 import { allTools, costTone, TONES } from "../data/tools.js";
 
-// Browse every tool across both tracks.
+// Browse every tool across all three tracks.
 //
 // Read-only: the curriculum is the source of truth for what tools exist, so
 // there is nothing to add or edit here. The filters exist to answer "what

@@ -21,7 +21,12 @@ import fs from 'node:fs';
 import path from 'node:path';
 
 const ROOT = 'career-roadmaps';
-const TRACKS = ['it-roadmap', 'cybersec-roadmap'];
+// Every track whose cross-references must resolve. A `Phase N` reference is
+// resolved against the track the citing file lives in, so a new track is
+// checked by being named here — and a track that is missing from this list has
+// its broken references reported as clean, which is the failure this whole
+// script exists to prevent.
+const TRACKS = ['it-roadmap', 'cybersec-roadmap', 'advance-roadmap'];
 const BT = String.fromCharCode(96);
 const FENCE = BT + BT + BT;
 
@@ -51,6 +56,15 @@ function collect() {
   const files = [];
   for (const track of TRACKS) {
     const dir = path.join(ROOT, track);
+    // A track is named in TRACKS before its first phase file is written, so a
+    // missing directory is a legitimate state. Skipping it in silence would
+    // make "0 findings" indistinguishable from "looked at nothing" — the exact
+    // failure mode this repository has recorded three times — so a track that
+    // could not be read is printed rather than swallowed.
+    if (!fs.existsSync(dir)) {
+      console.log(`note: ${track} — no directory yet, skipped`);
+      continue;
+    }
     for (const f of fs.readdirSync(dir).sort()) {
       if (!/^\d{2}-.*\.md$/.test(f)) continue;
       files.push({ track, name: f, file: path.join(dir, f) });

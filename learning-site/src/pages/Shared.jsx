@@ -1,4 +1,4 @@
-// The shared strategy documents: the material that sits beside both tracks
+// The shared strategy documents: the material that sits beside all three tracks
 // rather than inside either one.
 //
 // WHY THIS VIEW EXISTS
@@ -123,7 +123,7 @@ export default function Shared({ initialId = null }) {
       <header className="shared__header">
         <h1>Shared</h1>
         <p className="muted">
-          The strategy documents that sit beside both tracks. Not lessons — the
+          The strategy documents that sit beside all three tracks. Not lessons — the
           rules that make a long plan survivable, every free resource the tracks
           point at, and a weekly template to copy.
         </p>

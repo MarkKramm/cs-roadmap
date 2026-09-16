@@ -108,6 +108,14 @@ function Highlighted({ text, query }) {
 /** One result row. Loads its own lesson to build the snippet. */
 function Result({ hit, query, onOpen }) {
   // Find the phase record so useLesson can resolve lessonPath.
+  // The result row's track label comes from the track registry, not from a
+  // test against "cyber". The earlier one-line form read
+  // `hit.k === "cyber" ? "Cyber" : "IT"`, so every hit outside the cyber track
+  // was labelled IT — which was true only while there were exactly two tracks.
+  // A third track makes it a wrong label rather than a missing one, and a
+  // search result naming the wrong roadmap is a defect a reader cannot debug.
+  // `hit.k` is the track id emitted by the search index, and `track` is already
+  // resolved above for `useLesson`, so the label needs no second lookup.
   const track = tracks.find((t) => t.id === hit.k) || null;
   const phase = track ? track.phases.find((p) => p.id === hit.p) || null : null;
   const { status, lesson } = useLesson(phase);
@@ -123,7 +131,7 @@ function Result({ hit, query, onOpen }) {
     <li className="search__result">
       <button type="button" className="search__link" onClick={() => onOpen(hit)}>
         <span className="search__where">
-          {hit.k === "cyber" ? "Cyber" : "IT"} · {hit.pt}
+          {track ? track.short : hit.k} · {hit.pt}
         </span>
         <span className="search__heading">{hit.h}</span>
         {text && (
@@ -153,7 +161,7 @@ export default function Search({ onOpenResult, inputId }) {
       <header className="search__header">
         <h1>Search</h1>
         <p className="muted">
-          Every lesson in both tracks. Type a term, a command, or an error string.
+          Every lesson in all three tracks. Type a term, a command, or an error string.
           Press <kbd className="kbd">/</kbd> from anywhere to get back here.
         </p>
       </header>

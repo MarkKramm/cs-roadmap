@@ -8,9 +8,16 @@ const ROOT = 'career-roadmaps';
 const BT = String.fromCharCode(96);
 const FENCE = BT + BT + BT;
 
+// Every track directory this audit walks. A new track is invisible to the script
+// until it is named here, and the failure mode is the worst one this repository
+// keeps recording: a clean report that simply never looked at the new files.
+const TRACKS = ['it-roadmap', 'cybersec-roadmap', 'advance-roadmap'];
+
 const files = [];
-for (const track of ['it-roadmap', 'cybersec-roadmap']) {
+const skippedTracks = [];
+for (const track of TRACKS) {
   const dir = path.join(ROOT, track);
+  if (!fs.existsSync(dir)) { skippedTracks.push(track); continue; }
   for (const f of fs.readdirSync(dir).sort()) {
     // 00-overview is a strategy document, not a phase file, so the phase
     // structure requirements do not apply to it. Phases use two-digit numbers
@@ -192,7 +199,11 @@ for (const { track, file } of files) {
 }
 
 // ---------- report ----------
-console.log('AUDIT: ' + files.length + ' phase files scanned\n');
+console.log('AUDIT: ' + files.length + ' phase files scanned');
+// A track that could not be read is named, so the count above is never mistaken
+// for full coverage of every declared track.
+if (skippedTracks.length) console.log('  (no directory yet, skipped: ' + skippedTracks.join(', ') + ')');
+console.log('');
 const order = [
   'BOM', 'CRLF', 'REPLACEMENT_CHAR', 'MISSING_SECTION', 'MISSING_TOPIC_SECTION',
   'SECTION_ORDER', 'NO_LESSON', 'LESSON_TOO_SHORT', 'LESSON_UNTERMINATED',

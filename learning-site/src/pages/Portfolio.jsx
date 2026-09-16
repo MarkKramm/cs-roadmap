@@ -22,7 +22,7 @@ const EMPTY_DRAFT = {
   notes: "",
 };
 
-// Every phase across both tracks, so an entry can point at its origin.
+// Every phase across all three tracks, so an entry can point at its origin.
 function phaseOptions() {
   const out = [];
   for (const track of tracks) {
