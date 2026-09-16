@@ -1312,6 +1312,121 @@ Create `portfolio/advance/07-detection-as-code.md` with:
 - An anti-pattern audit naming each instance in your queue with a repair for each
 - A scheduled review-date check that fails when an active rule is past its review date, left running in CI
 
+## Quiz
+
+Twelve questions on the material in this phase. Each has one correct answer and a short explanation — read the explanation even when you get it right, because it usually names the mistake the wrong answers represent.
+
+The self-check in Part 1 asked you to *name* these things from nothing. This asks you to *recognise* the right one among plausible alternatives, which is how an interview or a review conversation will test the same knowledge — and several of these questions turn on the exact fixture and rule logic in Part 3, so read them slowly.
+
+### Q1. A console-managed detection library has rotted for two years. What is the phase's stated reason the fix has to be structural rather than motivational? <!-- id: advance-07-q01 energy: normal -->
+
+- [ ] The analysts were not trained on the console
+- [x] Nothing in the decay ever looked like a mistake — every edit was reasonable, made by a competent person under time pressure
+- [ ] The vendor console lacked the features needed to maintain rules
+- [ ] The team had no manager enforcing a review process
+
+**Why:** The phase is precise that the library accretes rather than being sabotaged: an exclusion added at 4pm because the queue was on fire is a sensible act whose accumulated result is an unexplainable rule. The training and management answers blame the people, which the phase explicitly rules out; the vendor answer blames the product, and the phase says a commercial detection platform can be excellent and still leave you with this problem because the problem is process, not product.
+
+### Q2. You have a repository, tests, and a pipeline, but no owners, review dates, or retirement criteria. What does the phase say you have? <!-- id: advance-07-q02 energy: low -->
+
+- [x] A beautifully maintained library of rules nobody has decided to keep
+- [ ] A tidier console
+- [ ] A completed detection-as-code migration
+- [ ] A pipeline that proves the rules work
+
+**Why:** The three capabilities build on each other and each one alone is insufficient — "a repository without a pipeline is just a tidier console", and a pipeline without a lifecycle gives you a well-maintained library nobody has decided to keep. The tidier-console answer is the repository-without-pipeline case, which is a different gap from the one this question describes.
+
+### Q3. DET-031 fires 200 times a month and takes four minutes to triage per alert. Using the phase's arithmetic, what is the annual analyst cost? <!-- id: advance-07-q03 energy: normal -->
+
+- [ ] About $600
+- [ ] About $7,200 in analyst time, which is spend that earns nothing back
+- [ ] About $1,800
+- [x] About $7,200 a year, roughly the cost of a mid-range security tool licence
+
+**Why:** 200 alerts times four minutes is roughly 13.3 analyst hours a month, and at $45 an hour that is about $600 a month — about $7,200 a year, with zero true positives in the last twelve months. $600 is the monthly figure with the annual label attached; the third option is the same error in the other direction. Option 2 has roughly the right number but describes it as money spent on triage, when the phase's point is that the money bought nothing at all.
+
+### Q4. Why does the phase organise `rules/` by telemetry source rather than by threat actor, severity, or ATT&CK tactic? <!-- id: advance-07-q04 energy: low -->
+
+- [ ] Threat-actor names are sensitive and should not appear in a repository
+- [ ] Severity-based folders make CI conversion faster
+- [ ] Actor names are shorter and make better directory names
+- [x] Log sources are stable, while actor names, severities, and tactic mappings all change
+- [ ] ATT&CK requires one folder per tactic to compute coverage
+
+**Why:** The phase lists the failing alternatives directly: actors get renamed, merged, and rebranded; severity changes after tuning, which would move the file and break every link; and a rule often maps to two tactics while a file can only live in one place. The coverage claim is backwards — coverage is computed from the `tags` field inside each rule, not from where the file sits.
+
+### Q5. A rule carries `status: experimental`. What is that field actually doing? <!-- id: advance-07-q05 energy: low -->
+
+- [x] Making the honest statement that it has not been validated against your traffic
+- [ ] Marking the rule as broken and blocking it from deploying
+- [ ] Recording that the rule was written by a junior engineer
+- [ ] Setting the alert routing to the analyst queue rather than on-call
+
+**Why:** `experimental` is one of the five Sigma status values — `stable`, `test`, `experimental`, `deprecated`, `unsupported` — and it says nobody has agreed to live with this rule yet. Routing is decided by `level` plus your team's local convention about what each level means, which the phase says is a written-down local decision rather than something the specification settles.
+
+### Q6. Which pair of files does the worked repository layout place in `tests/samples/` beside the positive fixture `proc_encoded_powershell.true.json` — that is, which two fixture kinds does it supply in addition to the positive one? <!-- id: advance-07-q06 energy: low -->
+
+- [ ] `proc_encoded_powershell.yml` and `proc_encoded_powershell.md`
+- [x] `proc_encoded_powershell.false.json` and `proc_encoded_powershell.near_miss.json`
+- [ ] `proc_encoded_powershell.positive.json` and `proc_encoded_powershell.negative.json`
+- [ ] `proc_encoded_powershell.expected.json` and `proc_encoded_powershell.actual.json`
+
+**Why:** Fixtures are named after the rule with a `.<kind>.json` suffix, and the harness walks exactly three kinds: `true`, `false`, and `near_miss`. The `positive`/`negative` labels describe what those fixtures are for, but the phase never uses them as filenames, and a fixture set built from the last two options would leave the harness's `fixtures_for()` looking for files that do not exist.
+
+### Q7. Take the certutil rule from Part 3, which requires the image to end with `\certutil.exe` **and** the command line to contain one of `urlcache`, `http://`, or `https://`. Which fixture in the phase actually matches it? <!-- id: advance-07-q07 energy: high -->
+
+- [ ] Only the first — the payload download
+- [ ] The first and the third
+- [x] The first and the second — the CRL retrieval matches too, and that is correct behaviour
+- [ ] All three, because the rule only requires certutil
+
+**Why:** The second fixture runs `certutil.exe -p CRL -urlcache http://crl.example-ca.internal/root.crl`, which contains both `urlcache` and `http://`, so the rule fires exactly as designed — the phase stresses that this apparent negative is really a false positive a human closes, and it is how a rule acquires a blind spot if you treat it as proof of narrowness. Only the third fixture is a genuine near-miss: `certutil.exe -hashfile … SHA256` has no URL and no `urlcache`, so it must not match. The last option misreads the condition, which is an `and`, not certutil alone.
+
+### Q8. What is the near-miss fixture actually for? <!-- id: advance-07-q08 energy: normal -->
+
+- [ ] Proving the rule fires on the technique in your environment
+- [ ] Replacing the negative fixture so you only need one file per rule
+- [ ] Measuring the rule's false-positive rate before deployment
+- [x] Catching the tuning edit six months from now that quietly broadens the rule
+
+**Why:** The phase calls the near-miss the fixture people leave out, and names its job: an event a careless future edit would wrongly catch. It is not a substitute for the negative — the phase says a genuine negative for this rule would be a purely local certutil operation with no network indicator at all. Nor can a fixture measure false-positive rate or prove real-world detection; both sit explicitly in the "does not prove" column.
+
+### Q9. You convert a rule with the right backend but without the right processing pipeline, and it deploys cleanly. What has actually happened? <!-- id: advance-07-q09 energy: normal -->
+
+- [ ] The conversion failed and CI would have caught it
+- [ ] The rule detects correctly but with more noise than expected
+- [x] The query looks correct, matches the wrong fields, and detects nothing — which the phase calls the most expensive conversion mistake
+- [ ] The backend silently broadened every wildcard in the rule
+
+**Why:** The backend knows the query language; the pipeline is what substitutes your log schema's field names, so a rule that says `Image` can end up querying a field your index does not populate. The result is syntactically valid and deploys without complaint, which is exactly why it is expensive — nothing fails, so nothing alerts anyone to the problem. The wildcard answer describes coarser matching, a different drift cause.
+
+### Q10. A five-minute Sigma correlation rule is converted to an Elasticsearch ES|QL correlation rule. Events that straddle a five-minute clock boundary do not trigger it. Which drift cause is this? <!-- id: advance-07-q10 energy: high -->
+
+- [ ] An unsupported feature the backend should have warned about
+- [ ] A missing pipeline substituting the wrong field names
+- [ ] Coarser wildcard or case matching between the two languages
+- [x] Time-boundary behaviour — the window is clock-aligned rather than sliding, and the phase says to document it because it produces false negatives
+
+**Why:** ES|QL correlation rules use time bucketing, so a `timespan` of `5m` only matches when all the events fall inside the same clock-aligned five-minute bucket; split across a boundary, neither bucket meets the threshold. The phase's striking conclusion is that the rule is correct, the backend is correct, and the detection still misses. That makes it documentation-worthy rather than a bug — which is exactly how it differs from the other three drift causes, each of which is caught by reading the conversion output or comparing field names.
+
+### Q11. You measure a rule at 3% precision. Under which condition does the phase steer you toward tuning rather than retiring? <!-- id: advance-07-q11 energy: high -->
+
+- [ ] When the rule's owner has left the team
+- [ ] When the rule maps to a technique that is in your coverage scope
+- [x] When the benign matches are one dominant cause rather than a long tail of different causes
+- [ ] When fewer than 50 alerts were produced in the measurement period
+
+**Why:** Grouping the benign causes before deciding is the step people skip. Twenty-two of twenty-nine matches from a single cause is a fixable tuning problem; five alerts from five different causes is a rule that will never be precise enough to page on, and demotion or retirement may be the right answer. Owner history and coverage scope do not enter the decision — the retirement record in the phase retires a rule for long-tail benign causes plus a better replacement, and says nothing about who owned it.
+
+### Q12. Which single sentence in a retirement record turns a deletion into a professional decision? <!-- id: advance-07-q12 energy: normal -->
+
+- [ ] The measured precision figure for the last two periods
+- [x] The accepted loss — what stops being detected once the rule is gone
+- [ ] The name of the rule that supersedes it
+- [ ] The date the detection lead approved the retirement
+
+**Why:** The phase says every retirement loses something, and naming, quantifying, and recording that loss in the coverage summary is the difference between managing a library and pruning it by feel. The other three are genuinely required evidence — the retirement table demands measured periods, a replacement's rule ID, and a dated decision — but they justify the deletion without admitting its cost, and it is the admission that makes the record defensible.
+
 ## Checklist
 
 - [ ] I can explain why a console-managed detection fails, naming the five specific things that break. <!-- id: advance-07-console-failure-modes energy: low -->

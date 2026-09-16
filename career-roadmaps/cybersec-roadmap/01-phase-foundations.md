@@ -785,6 +785,120 @@ Create `portfolio/cyber/01-foundations.md` with:
 - One phishing analysis report
 - NIST CSF one-page summary
 
+## Quiz
+
+Twelve questions on the material in this phase. Each has one correct answer and a short explanation — read the explanation even when you get it right, because it usually names the mistake the wrong answers represent.
+
+The exercises in this lesson asked you to *produce* these answers from nothing, which is the harder direction. This asks you to *recognise* the right one among plausible alternatives, which is the same knowledge tested the way an interview or a ticket will test it.
+
+### Q1. An incident takes a hospital's patient records offline for two days but no data is ever read or changed. Which property broke? <!-- id: cyber-01-q01 energy: low -->
+
+- [ ] Confidentiality — the records hold private patient information
+- [x] Availability — legitimate users could not reach the records
+- [ ] Integrity — a record must have been altered for the outage to happen
+- [ ] None of the three, because nothing was stolen
+
+**Why:** Availability is the property that breaks when access is denied, and nothing needs to be stolen for that to count as a security failure. Choosing confidentiality is the misunderstanding this phase names directly: beginners almost always equate security with confidentiality, so they reach for secrecy even when nobody read anything. “None of the three” states the same misconception out loud — damage and disclosure are not the test.
+
+### Q2. Modern ransomware operators steal data before encrypting it. What does that change about the response? <!-- id: cyber-01-q02 energy: normal -->
+
+- [x] Restoring from backup fixes availability but not confidentiality, so it is no longer sufficient on its own
+- [ ] It makes the backup irrelevant, so restoring is pointless
+- [ ] It means the incident is an integrity attack rather than an availability one
+- [ ] It means the data was never actually encrypted
+
+**Why:** The attack breaks availability first and confidentiality second, and a backup only restores the first. That is why “just restore from backup” is still correct but incomplete. Saying the backup is now pointless over-corrects — it is still exactly what gets the hospital working again. The idea that stealing data makes it an integrity attack is a category error: nothing was altered.
+
+### Q3. A scanner reports a critical vulnerability on an isolated machine that nobody can reach and that holds data nobody wants. Nothing else changes. How should you describe the risk? <!-- id: cyber-01-q03 energy: normal -->
+
+- [ ] High, because the vulnerability itself is critical
+- [ ] Zero, because the machine cannot be reached
+- [x] Low, because risk combines likelihood with impact rather than severity alone
+- [ ] Unchanged, because risk is a property of the vulnerability
+
+**Why:** Risk is likelihood × impact. The vulnerability has not changed; the likelihood of it being exploited has, and that moves the risk. Calling it high is the trap of reading a CVSS-style severity score as if it were the risk. Calling it zero is a different error — an unreachable machine today is not a guarantee about tomorrow — and treating risk as a property of the vulnerability is precisely the confusion the formula exists to fix.
+
+### Q4. Which of these is a *threat* rather than a vulnerability, an asset, or a control? <!-- id: cyber-01-q04 energy: low -->
+
+- [ ] An unpatched server that is reachable from the internet
+- [ ] A firewall rule that blocks inbound remote desktop
+- [ ] The customer database the company is required to protect
+- [x] A disgruntled insider with legitimate access
+
+**Why:** A threat is a source of danger — a criminal group, a careless employee, a flood. A person with the access and the motive is the threat. The unpatched server is the weakness a threat could take advantage of, which makes it a vulnerability; the firewall rule reduces risk, so it is a control; and the database is the thing of value, so it is an asset. All four words appear in the same sentence in the lesson, and swapping any two of them is the fastest way to lose credibility in an interview.
+
+### Q5. In the CVE-2021-41773 example, what is the crafted URL containing the path-traversal sequence? <!-- id: cyber-01-q05 energy: low -->
+
+- [ ] The vulnerability
+- [x] The exploit
+- [ ] The payload
+- [ ] The control
+
+**Why:** The exploit is the specific technique or piece of code that takes advantage of a vulnerability, and the crafted URL is exactly that. The vulnerability is the flaw in the outdated Apache version itself — it exists whether or not anyone writes a URL. The payload is what arrives after the exploit succeeds, in this case reading files such as `/etc/passwd`. Patching is the control. The lesson's sentence is worth keeping whole: a threat exploits a vulnerability, using an exploit, to deliver a payload, against an asset.
+
+### Q6. Two users both enable a second login step. One uses a password plus a PIN. The other uses a password plus a hardware key. Which statement is correct? <!-- id: cyber-01-q06 energy: normal -->
+
+- [x] Only the hardware key user has MFA, because MFA requires two different *kinds* of factor
+- [ ] Both have MFA, because both require two pieces of information
+- [ ] Neither has MFA, because a password is involved in both
+- [ ] Only the PIN user has MFA, because a PIN is easier to verify
+
+**Why:** MFA means more than one kind of evidence: something you know, something you have, something you are. A password and a PIN are both things you know, so that pair is two of the same factor, not MFA. Answering “both have MFA” makes exactly that mistake — counting credentials instead of counting kinds. The hardware key is a thing you have, so it is a genuinely different factor, and it cannot be phished remotely, which is why the lesson singles it out.
+
+### Q7. A phishing email arrives with no attachment, no link, and no malware — just a request to change a supplier's bank details, apparently from a real contact. What is this? <!-- id: cyber-01-q07 energy: normal -->
+
+- [ ] Credential harvesting, because it targets a person
+- [ ] Whaling, because only executives receive these
+- [x] Business email compromise, which is hard for technical controls because nothing technical happens
+- [ ] A worm, because it spreads through the organisation's mail
+
+**Why:** BEC impersonates or compromises a real business contact and asks for a payment or a change to payment details — often with no link at all, which leaves a scanner nothing to detect. Credential harvesting needs a fake login page; there is none here. Whaling is spear phishing aimed at executives, which is about the target rather than the absence of a payload. A worm spreads by itself across networks by exploiting vulnerabilities, which is a completely different mechanism — and mislabelling malware is the taxonomy confusion this phase warns about.
+
+### Q8. An email displays the sender as “PayPal Service” at `billing@paypal-secure.example.net`, and its link points to `paypal.com.secure-login.example.net`. Which domain is actually being used? <!-- id: cyber-01-q08 energy: high -->
+
+- [ ] `paypal.com`, because it appears in the link
+- [ ] `paypal-secure.example.net`, because that is the sender's domain
+- [ ] `secure-login.example.net`, because that is where the link starts
+- [x] `example.net` — the last two labels before the first single slash
+
+**Why:** The real domain is the last two labels before the first single slash, so `paypal.com` here is just a subdomain someone registered to look reassuring. Answering `paypal.com` is the whole trick, and it is why the routine says to hover and read rather than to trust what the text appears to say. The display name is trivially forged, which is why the lesson says to check the actual sender address instead. The correct action is to ignore the link and reach the site yourself by typing it or using a bookmark.
+
+### Q9. Which malware category spreads across networks by itself, without anyone running a file? <!-- id: cyber-01-q09 energy: low -->
+
+- [ ] Virus
+- [x] Worm
+- [ ] Trojan
+- [ ] Spyware
+
+**Why:** A worm spreads by itself, exploiting vulnerabilities without needing anyone to run anything — WannaCry in 2017 is the example the lesson gives. A virus requires a host file and a user action, which is the distinction the two words turn on. A trojan is defined by disguise rather than spread: it is software that looks legitimate and carries a hidden function. Spyware is defined by what it does — quietly gathering keystrokes, screenshots, and credentials — not by how it moves.
+
+### Q10. Why does a lockout policy alone fail to stop password spraying? <!-- id: cyber-01-q10 energy: normal -->
+
+- [ ] Because spraying uses a different password for every account
+- [ ] Because lockouts only apply to administrator accounts
+- [ ] Because spraying targets the password hash rather than the login form
+- [x] Because each account sees only one failed attempt, so the lockout threshold never triggers
+
+**Why:** Spraying reverses brute force — one common password tried against many accounts instead of many passwords against one. Each account records a single failure, so nothing locks. “A different password for every account” describes brute force with extra steps, and it would actually be *more* likely to trip a lockout, not less. The idea that lockouts only cover administrators is a fiction about scope. This is why password *reuse* is so dangerous, and why the lesson treats a password manager as the practical answer rather than a stronger lockout setting.
+
+### Q11. You want an answer to “what would you have done?” that sounds like an understanding of defence rather than a blog post. What makes it complete? <!-- id: cyber-01-q11 energy: high -->
+
+- [ ] Naming the single best tool for the situation
+- [x] Naming a preventive control that would have helped, a detective control that should have caught it, and a corrective control that limits the damage
+- [ ] Naming the attacker's tactic and technique from MITRE ATT&CK
+- [ ] Naming which of the three CIA properties was affected
+
+**Why:** The control taxonomy is sorted by *when* a control acts, and answering across all three categories is what the lesson says makes an answer sound professional. Naming one tool is the failure mode being described. Mapping to ATT&CK is genuinely useful and is a separate exercise in this phase, but it describes the attacker rather than the defender's options. Naming the affected property is part of a good answer — the lesson's five-question drill asks for it — but on its own it says nothing about what you would have done.
+
+### Q12. While testing your own practice app you mistype an address, land on a small business's site, change an `id` parameter, and see someone else's invoice. What is the correct first step? <!-- id: cyber-01-q12 energy: high -->
+
+- [ ] Change the number again to confirm the problem is real before reporting it
+- [ ] Report it publicly so the business finds out quickly
+- [x] Stop — load no further records, save nothing, and note the URL and approximate time from memory
+- [ ] Message the business and ask whether there is a reward
+
+**Why:** The four-step response is stop, document from memory, find the contact, report privately — and the order matters. Confirming it once more is the tempting one, because it feels responsible, but you have already confirmed it and every further request is another unauthorised access. Public disclosure and asking for money are two of the wrong responses the lesson names. Even a default password you guessed, or a page you reached by accident, is still unauthorised access, and intent is not a defence under Republic Act 10175.
+
 ## Checklist
 
 - [ ] I can explain CIA triad. <!-- id: cyber-01-c01 energy: low -->

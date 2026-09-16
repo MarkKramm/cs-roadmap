@@ -35,6 +35,7 @@ const LESSON = "Lesson";
 
 const OPTIONAL = [
   "Specific topics to learn",
+  "Quiz",
   "Lab setup options",
   "Path options",
   "Required projects",
@@ -313,6 +314,114 @@ function parseChecklist(lines, file) {
   return out;
 }
 
+/**
+ * Multiple-choice quiz, authored in the phase file as a `## Quiz` section.
+ *
+ * The format reuses Markdown task-list syntax — `- [x]` marks the correct
+ * option, `- [ ]` the rest — so the quiz reads correctly on GitHub and on paper
+ * with no new vocabulary to learn. That matters more than it looks: the print
+ * stylesheet exists so a phase can be studied offline, and a quiz encoded as
+ * HTML or JSON would be the one section that vanished on paper.
+ *
+ * WHY THIS FAILS LOUDLY
+ * A quiz is a claim that one answer is right. A malformed one is therefore
+ * worse than a missing one: the reader is told their correct answer is wrong,
+ * or handed a question with no answer at all. Every failure mode below is a
+ * build error rather than a silent skip, following the same reasoning as the
+ * resource-line check above.
+ *
+ * The energy value reuses the checklist vocabulary (`low`/`normal`/`high`)
+ * rather than inventing a second scale, so anything that reads energy already
+ * understands a quiz question.
+ */
+function parseQuiz(lines, phaseId, file) {
+  const out = [];
+  let cur = null;
+  const ids = new Set();
+
+  const flush = () => {
+    if (!cur) return;
+    const marked = cur.options.filter((o) => o.correct);
+    if (marked.length !== 1) {
+      fail(
+        file,
+        "quiz question " + cur.id + " has " + marked.length + " correct answers (expected exactly 1)"
+      );
+    }
+    if (cur.options.length < 2) {
+      fail(file, "quiz question " + cur.id + " has " + cur.options.length + " option(s) (expected at least 2)");
+    }
+    if (!cur.explanation) {
+      fail(file, "quiz question " + cur.id + " has no **Why:** explanation");
+    }
+    out.push({
+      id: cur.id,
+      question: cur.question,
+      energy: cur.energy,
+      options: cur.options,
+      explanation: cur.explanation,
+    });
+    cur = null;
+  };
+
+  for (const line of lines) {
+    // `### Q1. text <!-- id: … energy: … -->`
+    const h = line.match(/^###\s+(.*)$/);
+    if (h) {
+      flush();
+      const idm = h[1].match(/<!--\s*id:\s*([^\s]+)(?:\s+energy:\s*([a-z]+))?\s*-->/);
+      if (!idm) {
+        fail(file, "quiz question without an id comment: " + h[1].slice(0, 60));
+        continue;
+      }
+      if (ids.has(idm[1])) fail(file, "duplicate quiz id: " + idm[1]);
+      ids.add(idm[1]);
+      if (idm[2] && !ENERGIES.includes(idm[2])) {
+        fail(file, 'quiz question ' + idm[1] + ' has unknown energy "' + idm[2] + '"');
+      }
+      cur = {
+        id: idm[1],
+        // The `Q1.` label is stripped rather than kept: it is a reading aid in
+        // the Markdown, and the site numbers the questions itself. Keeping it
+        // renders "Q1. Q1. What does…" on the page, which is how this was
+        // caught — the build reported the label as part of the question text.
+        question: h[1]
+          .replace(/<!--.*?-->/, "")
+          .replace(/^\s*Q\d+\.\s*/i, "")
+          .replace(/\s+/g, " ")
+          .trim(),
+        energy: idm[2] || null,
+        options: [],
+        explanation: null,
+      };
+      continue;
+    }
+
+    if (!cur) continue;
+
+    const opt = line.match(/^-\s+\[([ xX])\]\s+(.*)$/);
+    if (opt) {
+      cur.options.push({
+        text: opt[2].replace(/<!--.*?-->/, "").replace(/\s+/g, " ").trim(),
+        correct: opt[1].toLowerCase() === "x",
+      });
+      continue;
+    }
+
+    const why = line.match(/^\*\*Why:\*\*\s*(.*)$/);
+    if (why) {
+      cur.explanation = why[1].replace(/\s+/g, " ").trim();
+      continue;
+    }
+  }
+  flush();
+
+  if (out.length === 0 && lines.some((l) => l.trim() !== "")) {
+    fail(file, "## Quiz section has prose but no parseable questions");
+  }
+  return out;
+}
+
 function buildPhase(file) {
   const rel = relative(CONTENT, file).replace(/\\/g, "/");
   const raw = readFileSync(file, "utf8");
@@ -381,6 +490,7 @@ function buildPhase(file) {
     tasks: numberedWithIds(sec["Hands-on practice tasks"] || [], fm.id, rel, fail),
     deliverableItems: bullets(sec["Deliverable / proof of work"] || []),
     checklist: parseChecklist(sec["Checklist"] || [], rel),
+    quiz: parseQuiz(sec["Quiz"] || [], fm.id, rel),
     lessonTitle,
     lessonBlocks: lesson.blocks,
     lessonToc: lesson.toc,
@@ -435,6 +545,8 @@ mkdirSync(OUT, { recursive: true });
 mkdirSync(join(OUT, "lessons"), { recursive: true });
 const stamp = new Date().toISOString();
 let totalIds = 0;
+let quizQuestionCount = 0;
+let quizPhaseCount = 0;
 let totalLessonBytes = 0;
 // Collected across both tracks, then emitted as one search index after the loop.
 const searchInput = [];
@@ -483,7 +595,15 @@ for (const track of Object.keys(byTrack)) {
   writeFileSync(join(OUT, track + ".json"), JSON.stringify(payload, null, 2) + "\n", "utf8");
   const ids = phases.reduce((n, p) => n + p.checklist.length, 0);
   totalIds += ids;
-  console.log(track + ".json — phases=" + phases.length + " taskIds=" + ids);
+  // Quiz coverage, counted per phase so a phase that gains one is visible.
+  for (const p of phases) {
+    if (p.quiz.length > 0) {
+      quizPhaseCount++;
+      quizQuestionCount += p.quiz.length;
+    }
+  }
+  console.log(track + ".json — phases=" + phases.length + " taskIds=" + ids + " quiz=" +
+    phases.reduce((n, p) => n + p.quiz.length, 0));
 }
 
 // One search index for the whole curriculum, emitted after both tracks so a
@@ -505,6 +625,14 @@ console.log("wrote search.json — " + search.segments.length + " segments, " +
   termCount + " terms (" + Math.round(searchBytes / 1024) + " KB, " +
   Math.round((searchBytes / totalLessonBytes) * 100) + "% of lesson bytes)");
 console.log("total phase task IDs: " + totalIds);
+// Quiz coverage, reported the same way task banding is: a phase without a quiz
+// is a valid build during the rollout, but how far the rollout has reached must
+// be visible rather than assumed. Silent partial coverage reads as "every phase
+// is quizzed" to anyone who only sees the build succeed.
+console.log(
+  "quizzes: " + quizQuestionCount + " question(s) across " + quizPhaseCount +
+  " of " + KNOWN_TRACKS.reduce((n, t) => n + byTrack[t].length, 0) + " phase(s)"
+);
 
 const sharedText = JSON.stringify(shared, null, 2) + "\n";
 writeFileSync(join(OUT, "shared.json"), sharedText, "utf8");

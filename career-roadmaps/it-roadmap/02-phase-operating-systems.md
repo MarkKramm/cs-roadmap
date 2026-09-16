@@ -1304,6 +1304,102 @@ Create `portfolio/it/02-operating-systems.md` containing:
 - **A permissions write-up:** Your shared-folder experiment — the share permission, the NTFS permission, which one won, and why. This is a strong interview artefact because it is the exact question a first-line interviewer asks.
 - **A recovery write-up:** What a system restore point did and did not bring back in your VM, and your one-paragraph answer to "the user's profile did not load — what do you do, and in what order?"
 
+## Quiz
+
+Ten questions on the material in this phase. Each has one correct answer and a short explanation — read the explanation even when you get it right, because it usually names the mistake the wrong answers represent.
+
+Part 13 asked you to *recall* these answers from nothing. This asks you to *recognise* the right one among plausible alternatives, which is the same knowledge tested the way an interview or a ticket will test it.
+
+### Q1. A user can read a file but cannot save changes to it. What is the single most likely cause? <!-- id: it-02-q01 energy: normal -->
+
+- [x] The file is on a share where the share permission allows Read but NTFS allows Change
+- [ ] The file is marked read-only in Windows Explorer
+- [ ] The user's account is a standard user rather than an administrator
+- [ ] The disk is full
+
+**Why:** Read succeeds, write fails — that split points at a permission layer that grants reading and denies writing, and on a share there are two layers. The more restrictive one wins, so a permissive share still loses to a Read-only NTFS entry. "Read-only attribute" is the tempting distractor, but it produces a different message and is rare on a share; a standard user can usually write to their own files; and a full disk fails writes everywhere, not just here.
+
+### Q2. A service is set to Automatic, and it shows as Stopped. What does this tell you? <!-- id: it-02-q02 energy: normal -->
+
+- [ ] Nothing — Automatic services are stopped until a user logs in
+- [ ] The start type was changed but not saved
+- [ ] The service has been disabled by Group Policy
+- [x] It should have started and did not, so there is a real failure to investigate
+
+**Why:** Automatic means "start at boot". Stopped means it tried and failed — so there is a cause, and Event Viewer or the service's own log will have it. An Automatic service that is stopped is a symptom, not a setting; the setting is what makes the stopped state meaningful.
+
+### Q3. Why is a service that keeps stopping usually a symptom rather than the fault? <!-- id: it-02-q03 energy: normal -->
+
+- [x] Because it often depends on something else that is failing, and you are seeing the consequence
+- [ ] Because services are restarted automatically by Windows
+- [ ] Because stopping is how a service reports an error
+- [ ] Because service logs are unreliable
+
+**Why:** Dependencies run one way — a service needs others running first. If the thing it depends on is broken, the dependent service crashes or refuses to start, and it is the one you notice. Restarting the visible service fixes nothing; the fault is upstream.
+
+### Q4. Which command tells you whether a failure is connectivity or DNS? <!-- id: it-02-q04 energy: normal -->
+
+- [ ] `ipconfig /all`
+- [x] `ping` by IP address, then `ping` by name
+- [ ] `nslookup` alone
+- [ ] `tracert` to the default gateway
+
+**Why:** Pinging an IP address skips name resolution entirely. If the IP responds but the name does not, connectivity is fine and DNS is the fault. If neither responds, you have a connectivity problem and DNS is not yet worth testing.
+
+### Q5. You take a VM snapshot *before* installing anything. Why does the order matter? <!-- id: it-02-q05 energy: low -->
+
+- [ ] Snapshots are faster on a clean install
+- [ ] It is a convention with no technical basis
+- [ ] Windows requires an activated snapshot to restore
+- [x] A snapshot captures the state at that moment, so a clean snapshot is one you can always return to
+
+**Why:** A snapshot is a point you can return to, not a backup of your work. Taking one after the install means your "clean" fallback already contains whatever you installed — including the thing you are about to break. The clean state is only available if you captured it while it was clean.
+
+### Q6. A user's desktop is empty and their documents are missing, but their password was accepted. What is the most likely explanation? <!-- id: it-02-q06 energy: normal -->
+
+- [x] Their profile failed to load and Windows gave them a temporary one
+- [ ] Their files were deleted by malware
+- [ ] They logged in with the wrong account
+- [ ] The disk has failed
+
+**Why:** Successful authentication plus an unfamiliar desktop is the signature of a temporary profile. The files are usually still in the real profile folder — which is exactly why the first action is to copy data out, not to delete the broken profile.
+
+### Q7. Before deleting a corrupted user profile, what must you do first? <!-- id: it-02-q07 energy: normal -->
+
+- [ ] Restart the machine twice
+- [ ] Remove the machine from the domain
+- [x] Copy the user's data out of the profile folder
+- [ ] Run `sfc /scannow`
+
+**Why:** The profile folder still holds the user's files even when the desktop does not show them, and deleting the profile destroys them. This is the step people skip because the empty desktop looks like the data is already gone.
+
+### Q8. `-rw-r--r--` — who can write to this file? <!-- id: it-02-q08 energy: normal -->
+
+- [ ] Everyone
+- [x] Only the owner
+- [ ] The owner and the group
+- [ ] Nobody
+
+**Why:** The three triplets are owner, group, other. `rw-` gives the owner read and write; `r--` gives the group read only; `r--` gives everyone else read only. One `w` in the whole string, in the owner's triplet.
+
+### Q9. A user cannot reach a shared folder. Which do you check first? <!-- id: it-02-q09 energy: normal -->
+
+- [ ] Whether the file is corrupted
+- [x] The NTFS permissions, then the share permissions
+- [ ] Whether the network cable is connected
+- [ ] Whether the user's password has expired
+
+**Why:** There are two permission layers and the more restrictive wins. Checking only the share permission is the classic error — it can report Full Control while NTFS denies everything. The sharing tab is the one people look at, which is precisely why it misleads.
+
+### Q10. A machine gets slower through the day and a restart fixes it. What does that pattern suggest? <!-- id: it-02-q10 energy: normal -->
+
+- [ ] Failing hardware
+- [ ] A malware infection
+- [ ] A failing disk
+- [x] Something accumulating — a leak, a filling log, or a growing process
+
+**Why:** Gradual degradation that a restart clears is the shape of accumulation, not failure. Failing hardware and malware tend to be erratic rather than predictable. The pattern is the diagnosis: what grows over a working day, and what does a restart reset?
+
 ## Checklist
 
 - [ ] I installed a Linux VM. <!-- id: it-02-c01 energy: normal -->
