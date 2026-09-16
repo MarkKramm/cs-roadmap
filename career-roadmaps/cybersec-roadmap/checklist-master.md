@@ -145,3 +145,14 @@ Use this flat checklist to track the full cybersecurity roadmap.
 - [ ] I can explain the same-origin policy and why CORS misconfiguration matters.
 - [ ] I wrote a web finding with reproduction steps and a specific remediation.
 - [ ] I can state the authorisation rule for testing any system.
+
+### OT and ICS Security
+
+- [ ] I can explain why availability and safety outrank confidentiality in OT, and give a concrete example.
+- [ ] I can place a device at the right Purdue level and say where the IT/OT boundary belongs.
+- [ ] I can name the main industrial protocols and say why they carry no authentication.
+- [ ] I can describe what happened in Stuxnet, Triton, and Colonial Pipeline, and name the control each one argues for.
+- [ ] I built a passive monitoring setup that observes industrial traffic without sending a packet to a controller.
+- [ ] I can explain why active scanning can stop a production line.
+- [ ] I wrote down the safety boundary — what I will never touch, and why — before doing any lab work.
+- [ ] I practised only in simulation or on equipment I own.

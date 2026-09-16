@@ -116,8 +116,24 @@ This is the third track. It assumes you already hold a security role and are som
 - [ ] I watched someone else run my runbook and recorded every hesitation verbatim.
 - [ ] I wrote down the lines I will not cross and how I refuse a request safely.
 
+## Phase 7 — Detection as Code
+
+- [ ] I can explain why a rule living only in a vendor console is untestable, unreviewable and unrollbackable.
+- [ ] I put my detections in a git repository with a layout I can defend.
+- [ ] I opened a pull request for a detection and had someone review it, or reviewed my own against the same checklist.
+- [ ] I wrote a positive and a negative test case for a rule, and the negative one fails when the rule is wrong.
+- [ ] I wrote a Sigma rule, converted it with `sigma-cli`, and checked the converted query against the source.
+- [ ] I can explain why a converted query can silently differ from the rule it came from.
+- [ ] I built a CI pipeline that lints and tests rules and blocks a merge that breaks one.
+- [ ] I deliberately broke a rule and watched the pipeline stop it.
+- [ ] I know that `sigma check` does not fail on issues by default, and I set the flag that makes it.
+- [ ] I mapped my rules to ATT&CK techniques and can state what coverage can and cannot tell me.
+- [ ] I wrote down the false-positive rate of a deployed rule and the tuning change that produced it.
+- [ ] I retired a rule with a dated reason rather than leaving it running forever.
+- [ ] I stated plainly what my test harness does not prove.
+
 ## Reading this checklist honestly
 
-Ninety-four items across six phases, and the overview says plainly that nobody needs all six at once. The checklist is a menu, not a syllabus. Pick the two or three phases your current role is asking of you, and check the boxes inside those.
+One hundred and seven items across seven phases, and the overview says plainly that nobody needs all seven at once. The checklist is a menu, not a syllabus. Pick the two or three phases your current role is asking of you, and check the boxes inside those.
 
 Two items on this list are not optional for anyone who touches a real system at work. The authorisation reasoning in Phase 5 and the ethical boundaries in Phase 6 are the two places where a wrong answer ends a career rather than costing a week. Everything else on this page is a skill you can get wrong and correct.

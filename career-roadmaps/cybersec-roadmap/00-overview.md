@@ -27,7 +27,7 @@ Cybersecurity is not just hacking. Entry-level cyber hiring usually rewards:
 
 ## Timeline
 
-Phases 1–8 are the core path to employability. Phases 9–14 are a **depth track**: optional, taken after Phase 8 or alongside your job search, depending on which roles you are targeting. They exist because the core path teaches you to be hireable, not to be specialised — cloud, detection engineering, incident response, scripting, GRC, and web application security are all listed as target roles in Phase 8 but were previously taught nowhere.
+Phases 1–8 are the core path to employability. Phases 9–15 are a **depth track**: optional, taken after Phase 8 or alongside your job search, depending on which roles you are targeting. They exist because the core path teaches you to be hireable, not to be specialised — cloud, detection engineering, incident response, scripting, GRC, web application security, and operational technology are all listed as target roles in Phase 8 but were previously taught nowhere.
 
 ### Core path (Phases 1–8)
 
@@ -42,9 +42,9 @@ Phases 1–8 are the core path to employability. Phases 9–14 are a **depth tra
 | 7 | Certifications | optional 4–12 weeks |
 | 8 | Job application | 8–16 weeks alongside study |
 
-### Depth track (Phases 9–14)
+### Depth track (Phases 9–15)
 
-Take the two or three that match your Phase 5 specialisation, not all six.
+Take the two or three that match your Phase 5 specialisation, not all seven.
 
 | Phase | Topic | Realistic Time | Take it if |
 |---|---|---:|---|
@@ -54,8 +54,11 @@ Take the two or three that match your Phase 5 specialisation, not all six.
 | 12 | Scripting and automation | 6 weeks | Any path — it multiplies everything else |
 | 13 | GRC, compliance and risk | 6 weeks | You are targeting GRC, compliance, or audit |
 | 14 | Web application security | 6 weeks | You are targeting pentest, or coming from a web development background |
+| 15 | OT and ICS security | 6 weeks | You work near industrial, building, or utility systems, or you want the specialism with the fewest people in it |
 
-Core path total: **6–18 months**. If working full-time, expect the longer side. Each depth-track module adds roughly six weeks, and they are meant to be taken two or three at a time rather than all six.
+Core path total: **6–18 months**. If working full-time, expect the longer side. Each depth-track module adds roughly six weeks, and they are meant to be taken two or three at a time rather than all seven.
+
+**Phase 15 is different from the other six, and the difference is safety rather than difficulty.** The other modules let you build a lab and break it as often as you like. Operational technology does not work that way: a scan can stop a production line, and there is no undo. So Phase 15 teaches passive monitoring and simulation, and it draws the boundary explicitly. Read its safety section before you touch anything.
 
 ## Suggested Weekly Schedule While Working IT
 

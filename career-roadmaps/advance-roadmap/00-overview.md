@@ -40,7 +40,7 @@ Advance roadmap -> ownership of security outcomes -> years 1–3 of the job
 
 The three tracks are **sequential, not parallel**. This one is last because every phase in it assumes you have already seen real alerts, real users, and real consequences — and the exercises are written so that you bring your own working environment to them rather than a lab you built for a course.
 
-## The six phases
+## The seven phases
 
 | Phase | Topic | Realistic Time | Take it if |
 |---|---|---:|---|
@@ -50,14 +50,15 @@ The three tracks are **sequential, not parallel**. This one is last because ever
 | 4 | Cloud and Identity Architecture | 6 weeks | You can read cloud logs, and you now need to design the controls that produce them |
 | 5 | Adversary Emulation and Purple Teaming | 6 weeks | You want to prove whether a control works instead of assuming it does |
 | 6 | Security Programme, Influence, and Mentoring | 5 weeks | You are being asked to own something, and the skill you are missing is not technical |
+| 7 | Detection as Code | 6 weeks | You write rules by hand in a console, with no review, no tests, and no way to roll one back |
 
-Total: **33 weeks — roughly eight months** — if you take all six in order while working. Most people will not. Read on.
+Total: **39 weeks — roughly nine months** — if you take all seven in order while working. Most people will not. Read on.
 
-## Take two or three, not all six
+## Take two or three, not all seven
 
 This is the most important piece of advice in the overview, and it mirrors the depth track in the cyber roadmap for the same reason.
 
-Nobody needs all six at once. The phases are built so that each one stands alone, and the right choice depends on what your job is actually asking of you this year.
+Nobody needs all seven at once. The phases are built so that each one stands alone, and the right choice depends on what your job is actually asking of you this year.
 
 | If your situation is… | Take |
 |---|---|
@@ -67,6 +68,7 @@ Nobody needs all six at once. The phases are built so that each one stands alone
 | Your organisation is moving to the cloud and you are the security voice in the room | Phase 4 |
 | You cannot answer "does this control actually work?" with evidence | Phase 5 |
 | You are being asked to own a programme, mentor someone, or argue for budget | Phase 6 |
+| Your rules live in a console, nobody reviews them, and you cannot tell which still work | Phase 7 |
 | You want to move from SOC into detection engineering | Phases 1, 2, 5 |
 | You want to move from SOC into incident response | Phase 3, then Phase 5 |
 | You want to stay technical and go deep | Phases 1, 2, 4, 5 |
@@ -86,6 +88,7 @@ The hour figures below are honest estimates, and that is the whole of their clai
 | 4 | 6 | 50–65 | Writing and testing policy, and reading a lot of documentation |
 | 5 | 6 | 46–66 | Lab work, emulation runs, and writing detections from the gaps |
 | 6 | 5 | 40–52 | Writing artefacts — briefs, metrics, plans — rather than reading |
+| 7 | 6 | 60–78 | Building a pipeline, writing fixtures, and breaking your own rules on purpose |
 
 **The pattern worth noticing:** from Phase 3 onward, most of the hours are spent *writing*, not reading. That is not padding. At this level, the work product is a document somebody else acts on — a report, a decision log, a runbook, a business case — and the writing is the job.
 
@@ -133,6 +136,7 @@ By the time you finish the phases you choose, aim for **two to four artefacts th
 2. A **threat hunt write-up** that includes a hunt which found nothing, and why that was the right result — from Phase 2.
 3. A **full incident command record** with a decision log, a comms cadence, and a post-incident review you facilitated — from Phase 3.
 4. A **cloud control design** with the policy that enforces it, the break-glass path, and the rejected alternative — from Phase 4.
+5. A **detection repository** with rules in version control, a test fixture per rule, a pipeline that blocks a broken merge, and a written note on what the pipeline does *not* prove — from Phase 7.
 
 The strongest portfolio artefact at this level is the one that shows your **reasoning**, including the option you rejected and the thing you could not determine. A candidate who says "we had no telemetry for that technique, and here is the ticket I raised to get it" reads as more senior than one who claims total coverage.
 
@@ -142,7 +146,7 @@ The entry-level tracks end at a hire. This one does not have a natural ending, b
 
 A reasonable stopping point is: **you have taken the two or three phases your current role actually needs, produced the artefacts, and can talk about them with a colleague without notes.** That is enough. The rest of the track will still be here when the job changes, and the correct time to read a phase is when you have a problem it solves.
 
-Do not work through all six because the list has six items. The tracks before this one reward completion; this one rewards relevance.
+Do not work through all seven because the list has seven items. The tracks before this one reward completion; this one rewards relevance.
 
 ## Weekly rhythm
 
