@@ -974,6 +974,119 @@ Create `portfolio/cyber/05-specialization-choice.md` with:
 - Chosen primary and backup path
 - 90-day plan
 
+## Quiz
+
+Twelve questions on the material in this phase. Each has one correct answer and a short explanation — read the explanation even when you get it right, because it usually names the mistake the wrong answers represent.
+
+There are no technical facts here to test, because the phase is a decision rather than a subject. What these check is the reasoning it teaches: which axis measures what, which paths are doors and which are destinations, and which mistakes the phase warns against by name.
+
+### Q1. The exit criterion is “My target cyber role is ____. My portfolio will prove it using these 3 projects: ____.” What does the phase say a learner who can only fill the first blank has done? <!-- id: cyber-05-q01 energy: normal -->
+
+- [x] Expressed a preference, not finished the phase
+- [ ] Completed the phase but skipped the deliverable
+- [ ] Chosen a role that is too broad to target
+- [ ] Done enough, since the projects come from Phase 6
+
+**Why:** The phase says the exit criterion is a decision plus evidence, and naming a role without the three projects that prove it means the phase is not finished. The projects do come from Phase 6, but naming them here is what makes the target real rather than aspirational.
+
+### Q2. A learner is anxious about choosing wrong. What is the phase's actual argument about deciding correctly? <!-- id: cyber-05-q02 energy: normal -->
+
+- [ ] Choosing wrong costs six months, so wait for certainty
+- [x] Choosing any path competently beats choosing none perfectly
+- [ ] All four paths are equally good, so the choice barely matters
+- [ ] The choice is reversible, so the initial answer is unimportant
+
+**Why:** The phase's answer is that six months of depth in one direction outperforms six months of sampling in four, and by a wide margin. It still insists on a method, because the failure mode it exists to prevent is the learner who switches tools every week.
+
+### Q3. How does the phase say to score the “difficulty” axis? <!-- id: cyber-05-q03 energy: normal -->
+
+- [ ] As the technical difficulty of the subject material
+- [ ] As the length of the certification path for that role
+- [ ] As the number of tools a beginner must learn
+- [x] As difficulty of entry for you, with your background
+
+**Why:** The phase says conflating the two ruins the scoring, and its table shows why: GRC has easy material and hard entry, while pentest has hard material and hard entry. Scoring the subject would rank GRC as easy when it is one of the hardest doors for this learner.
+
+### Q4. Which path does the phase call the most common entry point into cybersecurity? <!-- id: cyber-05-q04 energy: low -->
+
+- [ ] Path B — GRC
+- [x] Path A — SOC / Blue Team
+- [ ] Path C — IT Security Analyst
+- [ ] Path D — Junior Pentest
+
+**Why:** The phase gives four structural reasons for SOC being the common door: volume of roles, tier 1 being genuinely entry-level, hiring on demonstrable skill, and the process-heavy work matching an IT support background. Its main barrier is shift work, which for tier 1 is usually non-negotiable.
+
+### Q5. Which path does the phase call the most accessible for this reader's specific background? <!-- id: cyber-05-q05 energy: low -->
+
+- [ ] Path A — SOC / Blue Team
+- [x] Path C — IT Security Analyst
+- [ ] Path B — GRC
+- [ ] Path D — Junior Pentest
+
+**Why:** The phase says Path C is arguably the most accessible for this background and that the roadmap quietly steers toward it, because IT support experience is the primary qualification rather than a gap. SOC is the most common entry overall, which is a different claim from most accessible for this learner.
+
+### Q6. Why does the phase say pentest is a destination rather than a first job? <!-- id: cyber-05-q06 energy: high -->
+
+- [ ] The technical material is too hard for beginners to learn
+- [ ] Employers require a degree before considering testers
+- [x] The barrier is trust and track record, not gatekeeping
+- [ ] The certifications are more expensive than in other paths
+
+**Why:** The phase explains that employers carry liability for what testers do with production access, so they hire people they can trust, and trust comes from having seen systems in production. Its realistic routes are entering via Path A or C and pivoting, or building a public profile — not a direct application.
+
+### Q7. A learner says GRC is underrated and wants it as a first cyber job. What does the phase say about the entry barrier? <!-- id: cyber-05-q07 energy: high -->
+
+- [ ] There is no real barrier, since GRC is the least crowded path
+- [ ] The barrier is a degree, which most GRC postings require
+- [ ] The barrier is technical depth, which GRC demands more of than SOC
+- [x] Entry-level GRC often wants 2–3 years of experience, usually in audit or business
+
+**Why:** The phase calls GRC genuinely underrated and the least crowded by technical candidates, but states the barrier plainly: entry-level roles frequently ask for two to three years, often in audit, compliance, or a business function, because the work requires organisational context. That makes it more often a second role than a door.
+
+### Q8. What does the phase say job availability must be scored from? <!-- id: cyber-05-q08 energy: normal -->
+
+- [x] Counted postings you could plausibly apply for in 6–12 months
+- [ ] The reputation of the path in online security communities
+- [ ] Salary surveys for each role family in your region
+- [ ] The number of certifications each path offers
+**Why:** The phase says availability must come from counted postings rather than reputation, and calls the 20 job posts the task most likely to change your mind. Its worked example came back 9/6/3/2, and that unevenness is itself evidence about which paths are hiring.
+
+### Q9. The four paths overlap more than beginners expect. Which four things does the phase say every path shares? <!-- id: cyber-05-q09 energy: normal -->
+
+- [ ] Certifications, degrees, shift work, and tooling
+- [ ] Risk registers, policies, SIEM alerts, and pentest reports
+- [ ] Scripting, networking, Linux, and cloud platforms
+- [x] Logs, written reports, controls knowledge, and detection thinking
+
+**Why:** The phase's overlap table lists those four and concludes that the choice is about emphasis and entry point rather than locking yourself into a sealed box. Risk registers and pentest reports belong to specific paths, which is exactly the assumption the overlap table corrects.
+
+### Q10. A learner's weighted matrix gives SOC 58, GRC 47, IT Security 61, and Pentest 44. What does the phase say about the number 61? <!-- id: cyber-05-q10 energy: high -->
+
+- [ ] It is the answer, and the other paths should be discarded
+- [ ] It is meaningless unless all four scores were independently verified
+- [x] It is one learner's numbers, and the value is in doing the arithmetic
+- [ ] It means IT Security is the correct choice for anyone with this profile
+
+**Why:** The phase shows those exact totals and says they are one learner's numbers, not a verdict — the point is that doing the arithmetic forces you to notice which criterion is driving your answer. It also warns against averaging the scores into one number and ignoring the shape.
+
+### Q11. A learner discovers they cannot work night shifts. How does the phase say to treat that in the decision? <!-- id: cyber-05-q11 energy: high -->
+
+- [x] As a veto — some things disqualify rather than score low
+- [ ] As a low score on the shift and lifestyle criterion
+- [ ] As a preference to be traded off against higher interest elsewhere
+- [ ] As irrelevant, since shift work can be negotiated after hiring
+
+**Why:** The phase's fifth step says some things are not weighted but disqualify, and names shift work you cannot do alongside a path with no local postings. Its worked example says a constraint is not a preference, and that averaging it away is the mistake.
+
+### Q12. What does the phase say to look at instead of only the winning total on the decision matrix? <!-- id: cyber-05-q12 energy: normal -->
+
+- [ ] The average score across all four paths
+- [x] Which criterion drives the top score, and whether any path is within 5 points
+- [ ] Whether the winner also has the highest portfolio feasibility
+- [ ] Whether the matrix weights match the phase's suggested defaults
+
+**Why:** The phase's two diagnostics are exactly those: if job volume drives the answer it is a market decision, and if interest drives it, it is a preference decision — and those fail differently. A path within five points of the top means the backup is genuinely viable rather than a consolation.
+
 ## Checklist
 
 - [ ] I explored SOC/Blue Team. <!-- id: cyber-05-c01 energy: normal -->

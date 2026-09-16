@@ -1157,6 +1157,116 @@ Create `portfolio/cyber/09-cloud-and-identity.md` with:
 - An IAM access review table with keep, reduce, or remove decisions
 - A short legal and ethical boundaries note stating what you will and will not test
 
+## Quiz
+
+### Q1. A storage bucket was made public last Tuesday. Which event does this phase say to detect, and why? <!-- id: cyber-09-q01 energy: high -->
+
+- [x] The configuration change itself, such as `PutBucketAcl` or `PutBucketPolicy`
+- [ ] The bucket's current public state, checked once a week by a scan
+- [ ] The `GetObject` calls that read the objects afterwards
+- [ ] The bill, because public buckets attract egress charges
+
+**Why:** Detecting the configuration change catches the exposure as it is created, rather than a day later when a scan happens to run. Watching `GetObject` is the trap — by then the data has already been read, and the phase notes that public buckets are the most reported cloud misconfiguration in the world.
+
+### Q2. An application fetches a user-supplied URL server-side and will accept the address `169.254.169.254`. What does this phase say that means? <!-- id: cyber-09-q02 energy: high -->
+
+- [ ] It is a denial-of-service risk, because the request will hang
+- [x] SSRF against the metadata service is credential theft, because that endpoint dispenses credentials
+- [ ] It is harmless unless the instance has a public IP address
+- [ ] It is a logging gap, because metadata requests are not recorded
+
+**Why:** The instance metadata service hands out temporary role credentials, so reaching it through SSRF is how an unauthenticated outsider obtains them. Treating it as a hang or a DoS is the trap — the request succeeds and returns usable credentials in the response body.
+
+### Q3. Which of these is the correct description of the shared responsibility model? <!-- id: cyber-09-q03 energy: normal -->
+
+- [x] It is a work-allocation document, and identity and logging stay yours in every service model
+- [ ] The provider secures the physical layer, and the customer secures everything above it
+- [ ] Responsibility shifts entirely to the provider as you move from IaaS to SaaS
+- [ ] It applies only to IaaS, because PaaS and SaaS have no customer controls
+
+**Why:** Reading it as a work-allocation document is what makes it usable, and identity and logging never transfer to the provider. Assuming everything shifts to the provider in SaaS is the trap — the phase notes that patching on IaaS also stays yours, and that is the row teams forget.
+
+### Q4. An IAM policy grants `s3:*` on `*` to an application that only needs to read one prefix. What does this phase say about reading such a policy? <!-- id: cyber-09-q04 energy: normal -->
+
+- [x] Read it for the furthest reach it grants, not for the task it was written to support
+- [ ] Read the policy's comment to understand the author's intent
+- [ ] The policy is fine because the application only calls the read operation
+- [ ] Check whether the resource is public before worrying about the actions
+
+**Why:** A policy states permission rather than intent, and the only safe reading is the maximum it allows. Trusting the application's behaviour is the trap — the policy permits every S3 action on every resource, and a compromised or misconfigured caller can use all of it.
+
+### Q5. You need to find dormant and excessive access across your cloud identities for free. Which control does this phase point at? <!-- id: cyber-09-q05 energy: normal -->
+
+- [ ] A paid posture-management platform, because the free tools cannot do it
+- [x] An access review: export identities with last sign-in dates and justify each one
+- [ ] A penetration test of the production tenant
+- [ ] Deleting every identity that has not signed in within a year
+
+**Why:** An access review costs nothing, is what auditors ask for, and directly surfaces dormant accounts and standing admin privilege. Deleting on last sign-in alone is the trap — the reviewer must ask whether the access is still justified, which is a judgement the sign-in date cannot make.
+
+### Q6. Three CloudTrail event names are singled out as the highest-value detections. Which set matches this phase? <!-- id: cyber-09-q06 energy: normal -->
+
+- [ ] `DescribeInstances`, `ListBuckets`, and `GetObject`
+- [ ] `CreateUser`, `DeleteUser`, and `UpdateUser`
+- [ ] `PutBucketAcl`, `PutBucketPolicy`, and `DeleteBucket`
+- [x] `CreateAccessKey`, `AttachUserPolicy`, and `StopLogging`
+
+**Why:** Those three represent persistence, privilege escalation, and blinding respectively, which is why they carry the most signal. Choosing the read-only calls is the trap — enumeration events are noisy and routine, while these three change what an attacker can do or whether you can see it.
+
+### Q7. When responding to a cloud incident, why must you remove the credentials the attacker created before rotating the ones they stole? <!-- id: cyber-09-q07 energy: high -->
+
+- [ ] Because rotating first would invalidate the audit logs
+- [ ] Because created keys are always more privileged than stolen ones
+- [ ] Because the provider requires keys to be deleted in creation order
+- [x] Because otherwise they re-enter within the hour using the credentials you did not remove
+
+**Why:** An attacker who created their own access key keeps a way back in regardless of how many stolen secrets you rotate. Leaving the created keys for later is the trap — rotation feels like containment, but it addresses only the half of the access you knew about first.
+
+### Q8. Cloud API logs are much richer for *who* did something than for *what content* moved. What does this phase say that changes? <!-- id: cyber-09-q08 energy: high -->
+
+- [ ] It means cloud incidents cannot be investigated at all
+- [x] You spend more effort on scope estimation and lean on data-classification records
+- [ ] It means host forensics replaces log analysis in the cloud
+- [ ] It means the provider is responsible for scoping the breach
+
+**Why:** Knowing that 214 objects were read, without knowing what was in them, pushes the work toward estimating scope and classifying the data. Expecting host forensics to fill the gap is the trap — there is no host to image when the evidence is an API record.
+
+### Q9. Which CloudTrail fields does this phase say answer most questions about an event? <!-- id: cyber-09-q09 energy: low -->
+
+- [x] `eventName`, `userIdentity.arn`, `sourceIPAddress`, `userAgent`, `requestParameters`, and `errorCode`
+- [ ] The region, the account number, and the event source only
+- [ ] The bucket name, the object key, and the byte count
+- [ ] Only the timestamp and the identity, since everything else is metadata
+
+**Why:** Those six fields together tell you what was attempted, by which identity, from where, with what tool, with what parameters, and whether it succeeded. Relying on the timestamp and identity alone is the trap — that pair tells you an event happened without telling you what it was or whether it worked.
+
+### Q10. You find what looks like a live AWS key in a public repository. What does this phase say the line is? <!-- id: cyber-09-q10 energy: high -->
+
+- [ ] Testing the key once is acceptable if you report it afterwards
+- [x] Finding a leaked credential is research; using it is unauthorised access
+- [ ] The key is fair game because it was already public
+- [ ] Reporting it publicly is the fastest way to get it rotated
+
+**Why:** The line is the use, not the discovery, so you report it to the owner or the provider's abuse contact and never authenticate with it. Treating a public key as fair game is the trap — the phase states plainly that finding a leaked key does not authorise its use.
+
+### Q11. Why does this phase say to set a budget alarm before creating your first resource? <!-- id: cyber-09-q11 energy: low -->
+
+- [ ] Because the provider will not provision resources without a budget
+- [ ] Because it improves the accuracy of the billing dashboard
+- [x] Because leaving a resource running is the one way this phase can cost real money
+- [ ] Because a budget is required before CloudTrail can be enabled
+
+**Why:** A runaway VM or managed database bills hourly and indefinitely, and a one-dollar alarm with an email catches that mistake early. Believing the provider blocks provisioning without a budget is the trap — the overage is billed without asking, which is exactly why the guard must exist first.
+
+### Q12. Which free environments does this phase name for practising cloud attacks legally? <!-- id: cyber-09-q12 energy: normal -->
+
+- [ ] Any public cloud account you can find valid credentials for
+- [ ] Your employer's production tenant, provided you only enumerate
+- [x] CloudGoat and flaws.cloud, which you deploy in your own account
+- [ ] A paid penetration-testing lab, because free options do not exist
+
+**Why:** Purpose-built vulnerable environments exist and are free, which is why the phase says there is no reason to touch an account you do not own. Enumerating an employer's tenant is the trap — a `ListBuckets` call is still logged as that identity's activity and may breach a contract.
+
 ## Checklist
 
 - [ ] I can explain the shared responsibility model for IaaS, PaaS, and SaaS. <!-- id: cyber-09-cloud-shared-responsibility energy: low -->

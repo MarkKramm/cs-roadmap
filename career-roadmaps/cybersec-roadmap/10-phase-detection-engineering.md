@@ -1154,6 +1154,120 @@ Create `portfolio/cyber/10-detection-engineering.md` with:
 - An alert-fatigue calculation using your lab's real alert volumes
 - A short statement of which rules you would retire first and why
 
+## Quiz
+
+Twelve questions on the material in this phase. Each has one correct answer and a short explanation — read the explanation even when you get it right, because it usually names the mistake the wrong answers represent.
+
+The questions follow the phase's own order: start from a behaviour, find the log that records it, write the narrowest rule, and prove both that it fires and that you know what benign activity trips it. Several turn on details that decide whether a rule works in production at all.
+
+### Q1. You open a log, see a field, and ask “what could I alert on here?” Why does the phase call that the beginner's method? <!-- id: cyber-10-q01 energy: normal -->
+
+- [x] It produces rules that detect a legitimate tool rather than an attack
+- [ ] It produces rules that are too narrow to catch real attacks
+- [ ] It only works on Windows event logs, not on Linux
+- [ ] It cannot be expressed in the Sigma format
+
+**Why:** The phase's example is a rule that alerts when `cmd.exe` runs — easy to write, constantly firing, and detecting an administrative tool rather than an attack. The professional method inverts the order: name the behaviour, find what it changes, find the log that records the change.
+
+### Q2. You want to detect an attacker installing a new Windows service for persistence. Which log records that, and where does it live? <!-- id: cyber-10-q02 energy: normal -->
+
+- [x] Event 7045, in the System log
+- [ ] Event 7045, in the Security log
+- [ ] Event 4688, in the Security log
+- [ ] Event 4720, in the Security log
+
+**Why:** The phase flags this twice: 7045 is a classic persistence mechanism and it lives in the System log, not the Security log, so analysts hunting for persistence in the Security log alone miss it entirely. 4688 is process creation and 4720 is account creation.
+
+### Q3. A detection fires correctly but the alert does not say which host, user, or process was involved. Which of the phase's five properties has it failed? <!-- id: cyber-10-q03 energy: normal -->
+
+- [ ] Specific
+- [x] Attributable
+- [ ] Actionable
+- [ ] Maintainable
+
+**Why:** Attributable means the alert output contains enough to pivot, and the phase says this is the property that surprises people — an analyst then goes hunting for context the rule already had. Actionable is about telling the analyst what to do, which is a different requirement.
+
+### Q4. A rule filters for syslog “severity greater than 4” on authentication failures. Why does the phase call syslog severity a trap? <!-- id: cyber-10-q04 energy: normal -->
+
+- [x] Lower numbers are more severe, and many apps log auth failures at notice or info
+- [ ] Severity applies only to kernel messages, not to applications
+- [ ] Most applications log authentication failures at severity 0
+- [ ] The severity field is optional and usually absent
+
+**Why:** Syslog runs the opposite way to intuition — 0 is Emergency and 7 is Debug — so “greater than 4” looks for less urgent messages. The practical trap is that many applications log authentication failures at notice or info, which is why a rule works in a lab and never fires in production.
+
+### Q5. A host resolves a domain that no other host in the estate resolves, on a fixed schedule. Which Sysmon event gives you that without a network sensor? <!-- id: cyber-10-q05 energy: normal -->
+
+- [ ] Event ID 3, network connection with process attribution
+- [ ] Event ID 11, file creation
+- [x] Event ID 22, DNS query
+- [ ] Event ID 8, CreateRemoteThread
+
+**Why:** The phase describes exactly this pattern as beaconing and credits Event ID 22 with giving endpoint DNS visibility without a network sensor. Event 3 shows which process talked to which address, but the resolution itself comes from 22.
+
+### Q6. A process requests `lsass.exe` with access mask `0x1010` or `0x1410`. What is the phase's reading? <!-- id: cyber-10-q06 energy: high -->
+
+- [ ] Normal behaviour for most endpoint agents
+- [ ] A failed process-injection attempt
+- [ ] Evidence that Sysmon Event ID 8 is misconfigured
+- [x] The signature of credential dumping
+
+**Why:** The access masks are bit flags for what the caller wants, and reading another process's memory is what a credential dump needs — which is why the mask is the signal, and almost nothing legitimate does it. The phase concedes Event 10 is noisy and needs a filter, but this specific mask is the exception.
+
+### Q7. Five auth-log lines show four failed guesses against invented usernames, then one accepted publickey login from the same address a second later. Which rule catches the breach? <!-- id: cyber-10-q07 energy: high -->
+
+- [ ] A rule counting failures from one address above a threshold
+- [ ] A rule alerting on any failed password line
+- [ ] A rule alerting on root login attempts
+- [x] A rule correlating a success from an address that just produced failures
+
+**Why:** The phase says the first four lines are noise that a volume-based rule would catch, and the fifth is the one that says an attacker got in. The correlation is worth more than every volume-based alert in the log, because a count rule catches the noise rather than the breach.
+
+### Q8. The falsifier in a detection hypothesis is the part beginners omit. What does it do? <!-- id: cyber-10-q08 energy: normal -->
+
+- [ ] Names the ATT&CK technique the rule maps to
+- [x] Names what benign activity would produce the same signal
+- [ ] Names the analyst action when the rule fires
+- [ ] Names the log source and the fields that carry the specifics
+
+**Why:** The phase says the falsifier is what reviewers look for first, because naming what would make your rule fire wrongly proves you understand the environment rather than the tool. In the worked service-installation example, the falsifier — legitimate installers — is what dictates the rule's filter.
+
+### Q9. Which event ID records explicit credential use, which the phase calls high-value and rare? <!-- id: cyber-10-q09 energy: low -->
+
+- [ ] 4624
+- [ ] 4672
+- [ ] 4688
+- [x] 4648
+
+**Why:** 4648 records a logon attempted using explicit credentials, which is the phase's marker for RunAs, lateral movement, and scheduled tasks with stored credentials — hence rare and valuable. 4624 is any successful logon, 4672 is special privileges, and 4688 is process creation.
+
+### Q10. An alert shows a successful logon, event 4624, logon type 3, from a server to a file share at 14:00. What does the phase say that is? <!-- id: cyber-10-q10 energy: normal -->
+
+- [ ] A genuine finding — a human logged in remotely
+- [x] Usually benign — a connection rather than a person
+- [ ] A service account starting a service
+- [ ] Evidence of credential dumping
+
+**Why:** The phase's rule of thumb is that type 2 and type 10 mean a human, type 3 means a connection, and type 5 means a service, and a type 3 logon from a server to a file share is “Tuesday.” The same event ID from an address that has never connected before, as type 10, would be the finding.
+
+### Q11. You must choose between one broad rule and several narrow ones for a technique. What does the phase call the professional answer? <!-- id: cyber-10-q11 energy: high -->
+
+- [ ] The broad rule, because missed attacks cost more than analyst time
+- [ ] The single narrow rule, because it keeps the analyst comfortable
+- [x] Layered narrow rules covering the common procedures, with gaps written down
+- [ ] Whichever produces the highest rule count for the coverage report
+
+**Why:** The phase's trade table shows the broad rule drowning analysts and the single narrow rule leaving them blindsided, while layered narrow rules keep volume controlled with deliberately fewer misses. It requires writing the gap down rather than claiming complete coverage.
+
+### Q12. A colleague says the rule count went up this quarter, so detection improved. What does the phase's alert-fatigue arithmetic say? <!-- id: cyber-10-q12 energy: high -->
+
+- [ ] More rules always means more coverage, so the claim is sound
+- [ ] Rule count is irrelevant because only false positives matter
+- [x] Past the available hours, adding rules makes the organisation less secure
+- [ ] Rule count is a fine measure as long as each rule has an owner
+
+**Why:** The phase states plainly that once alerts per analyst per day exceed the available hours, the queue can only be cleared by not reading — so adding rules dilutes the ones that worked. That is what makes “why it will not drown the analyst” a technical bar rather than a courtesy requirement.
+
 ## Checklist
 
 - [ ] I can name which log source records a given attacker behaviour. <!-- id: cyber-10-behaviour-log-mapping energy: low -->

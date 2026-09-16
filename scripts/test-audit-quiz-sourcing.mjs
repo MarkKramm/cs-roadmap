@@ -19,11 +19,36 @@ const ROOT = process.cwd();
 const GUARD = join(ROOT, "scripts", "audit-quiz-sourcing.mjs");
 const PROBE = join(ROOT, "career-roadmaps", "cybersec-roadmap", "__probe-phase.md");
 
-// Run the guard with no arguments -- it scans whatever phase files exist.
+// Run the guard scoped to the probe file.
+//
+// WHY THE ARGUMENT MATTERS. The guard accepts file filters, and the controls
+// MUST use one. Scanned unscoped, the probe is checked alongside the real
+// corpus, and the sourcing rule compares every question against every phase --
+// so a probe question that happens to resemble a real phase produces a finding
+// *about that real phase*. That is what happened here: a must-pass probe
+// reported "advance-06: position C holds 8/12 answers" about a phase sitting at
+// a correct 3/3/3/3, because the probe's own quiz had been attributed to it.
+// A control that can report another file's state cannot be trusted either way.
+const PROBE_FILTER = "__probe-phase";
+
 function runGuard() {
   try {
-    const out = execFileSync(process.execPath, [GUARD], {
+    const out = execFileSync(process.execPath, [GUARD, PROBE_FILTER], {
       cwd: ROOT, // explicit: inheriting the caller's cwd silently skipped probes once
+      encoding: "utf8",
+      stdio: ["ignore", "pipe", "pipe"],
+    });
+    return { code: 0, out };
+  } catch (e) {
+    return { code: e.status === undefined ? 1 : e.status, out: (e.stdout || "") + (e.stderr || "") };
+  }
+}
+
+// The unscoped run, for the final "is the real corpus clean" check.
+function runGuardUnscoped() {
+  try {
+    const out = execFileSync(process.execPath, [GUARD], {
+      cwd: ROOT,
       encoding: "utf8",
       stdio: ["ignore", "pipe", "pipe"],
     });
@@ -185,6 +210,31 @@ control(
   }
 );
 
+// THE CONTROL THAT MATTERS MOST, and the reason the sourcing rule was rewritten.
+//
+// Every control above uses a synthetic probe quiz with generic wording, so all
+// of them passed against the first version of the guard -- which could not
+// detect a REAL misplaced question. This control lifts a genuine question out
+// of cyber-01 and plants it in the probe phase. The synthetic probes proved the
+// rules fire; only this one proves the rule fires on the defect it exists for.
+control(
+  "detects a REAL question lifted from cyber-01 and planted here",
+  goodQuiz().replace(
+    /### Q1\.[\s\S]*?\n\n(?=### Q2\.)/,
+    `### Q1. An incident takes a hospital's patient records offline for two days but no data is ever read or changed. Which security property was broken, and why does it still count as a security failure even though nothing was stolen? <!-- id: cyber-99-q01 energy: normal -->
+
+- [ ] Confidentiality — records were exposed to unauthorised readers
+- [x] Availability — legitimate users could not reach the records
+- [ ] Integrity — a record must have been altered for the outage to happen
+- [ ] None of the three, because nothing was stolen
+
+**Why:** Availability is the property that breaks when access is denied, and nothing needs to be stolen for that to count as a security failure. Choosing confidentiality is the misunderstanding this phase names directly: beginners almost always equate security with confidentiality, so they reach for secrecy even when nobody read anything. The "none of the three" option states the same misconception out loud.
+
+`
+  ),
+  true
+);
+
 // --- MUST PASS -----------------------------------------------------------------
 control("accepts a well-formed 4-question quiz", goodQuiz(), false);
 control(
@@ -238,8 +288,8 @@ try {
 } catch {}
 
 console.log("");
-console.log("=== the real corpus, with the probe removed ===");
-const real = runGuard();
+console.log("=== the real corpus, with the probe removed (unscoped run) ===");
+const real = runGuardUnscoped();
 if (real.code === 0) {
   const line = real.out.split("\n").find((l) => l.includes("questions checked")) || "";
   console.log(`  ok    corpus passes  ${line.trim()}`);

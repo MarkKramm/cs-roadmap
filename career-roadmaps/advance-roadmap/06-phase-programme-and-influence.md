@@ -1273,6 +1273,116 @@ Create `portfolio/advance/06-programme-and-influence.md` with:
 - A runbook, plus the record of a second person executing it and where they hesitated
 - The ethical-boundary note
 
+## Quiz
+
+### Q1. A dashboard shows “average time to remediate: 22.8 days” across values ranging from 3 to 180 days. What does this phase say about that number? <!-- id: advance-06-q01 energy: normal -->
+
+- [x] It describes nobody's experience and hides the outlier that matters — report the median and the p90
+- [ ] It is the correct summary because it uses every data point
+- [ ] It is fine as long as the median is shown somewhere else
+- [ ] It should be replaced by the mode, which handles lopsided data better
+
+**Why:** A mean over a distribution that lopsided is pulled by the 180-day case and tells you nothing about a typical remediation. Reporting the median elsewhere is the trap — the phase says never average a distribution you have not looked at, and the mean is the wrong statistic here, not merely an incomplete one.
+
+### Q2. Which test does this phase give for telling a metric from a vanity metric? <!-- id: advance-06-q02 energy: normal -->
+
+- [ ] Whether the number is automated rather than collected by hand
+- [ ] Whether the metric is reviewed monthly by a manager
+- [x] Could it improve while the organisation gets less safe, and would anyone change what they do this week if it halved?
+- [ ] Whether it appears on a board-level dashboard
+
+**Why:** A metric changes a decision, and those two questions separate that from a number that merely makes the programme look good. Judging by whether it is on a board dashboard is the trap — visibility is not the same as usefulness, and a vanity metric can sit at the top of the report.
+
+### Q3. A number moved in the wrong direction. How does this phase say to sequence the write-up? <!-- id: advance-06-q03 energy: normal -->
+
+- [ ] Cause first, then the direction, then the action
+- [x] State the direction first, in the first five lines, before the explanation
+- [ ] Action first, so the reader knows it is being handled
+- [ ] Omit the direction until the cause is confirmed
+
+**Why:** `Direction: worse` comes before `what changed`, because sequencing the explanation first reads as an excuse. Leading with the cause is the trap — the reader is owed the fact before the reasoning, and burying the regression makes the whole note suspect.
+
+### Q4. A risk-acceptance memo is signed by a business unit manager with a £5,000 discretionary budget, for a £30,000 control gap. What does this phase say about that signature? <!-- id: advance-06-q04 energy: high -->
+
+- [ ] It is valid, because the manager owns the risk in their unit
+- [ ] It is valid if the memo also lists compensating measures
+- [ ] It is valid provided the manager consulted the director first
+- [x] It is worthless, because the signer cannot authorise the money that would fix it
+
+**Why:** The person who accepts the risk must be able to fund the fix, otherwise they are absorbing a consequence they cannot control. Accepting the memo because it lists compensating measures is the trap — presenting that signature to an auditor as evidence of a managed risk is worse than having no memo at all.
+
+### Q5. A risk-acceptance memo has no expiry date. Why does this phase call that a defect? <!-- id: advance-06-q05 energy: normal -->
+
+- [x] Because acceptance is time-boxed, and one with no expiry is a permanent decision made by someone who may leave
+- [ ] Because auditors require a fixed review interval
+- [ ] Because the compensating measures would need re-testing
+- [ ] Because the register entry would need to be reopened annually
+
+**Why:** An acceptance that cannot lapse is a decision nobody has to revisit, so the expiry is what turns a memo into a control. Citing the audit requirement is the trap — the reason is about the decision outliving the person who made it, not about paperwork.
+
+### Q6. Which section of the risk-acceptance memo does this phase say prevents scope creep? <!-- id: advance-06-q06 energy: normal -->
+
+- [ ] The compensating measures in place during the window
+- [ ] The statement of why the risk cannot be closed immediately
+- [x] The “what is not being accepted” section
+- [ ] The list of attachments and referenced findings
+
+**Why:** Without that section, a memo accepting an untested estate for ten weeks can quietly become a memo accepting it indefinitely. Relying on the “why it cannot be closed immediately” section is the trap — that section justifies the delay but does nothing to bound it.
+
+### Q7. What does this phase say is the failure mode of mentoring? <!-- id: advance-06-q07 energy: normal -->
+
+- [ ] Neglect, because the mentor is too busy to meet
+- [ ] Friendship, because the relationship becomes social
+- [ ] Instruction, because coaching slides into telling
+- [x] Over-helpfulness, because taking the keyboard teaches them that handing work over is how it gets done
+
+**Why:** The “will not do” list exists precisely because the mentor can see the answer and the deadline is real, so helping feels kind. Neglect is the trap — the phase says strongly that the thing to guard against is doing the work for them, not failing to show up.
+
+### Q8. Why must an interview scorecard be completed before discussing the candidate with the other interviewer? <!-- id: advance-06-q08 energy: high -->
+
+- [ ] Because the hiring manager requires a written record for compliance
+- [x] Because the moment you discuss, you anchor, and independent judgement is gone
+- [ ] Because discussing first would take longer than scoring first
+- [ ] Because scoring afterwards would breach the candidate's privacy
+
+**Why:** Scoring first preserves an independent view that can be compared across interviewers, which is the whole method. Treating it as a compliance record is the trap — the point is the quality of the judgement, and a score written after a conversation is no longer independent.
+
+### Q9. A runbook works when its author follows it. What does this phase give as the actual test of a runbook? <!-- id: advance-06-q09 energy: high -->
+
+- [x] Whether someone else can follow it at 3am while the author is asleep
+- [ ] Whether every command in it has been executed at least once
+- [ ] Whether it has been approved by the team lead
+- [ ] Whether the revision history shows a recent update
+
+**Why:** The useful test is to have someone else run it while you watch without helping, and every hesitation is a defect in the document. Checking that commands have been executed is the trap — that proves the steps work for the author, who already knows what the document means.
+
+### Q10. Why does this phase say always to include the do-nothing option in a business case? <!-- id: advance-06-q10 energy: high -->
+
+- [ ] Because it makes the preferred option look cheaper by comparison
+- [ ] Because the budget process requires at least four options
+- [x] Because a reader choosing between two spends is comparing costs, while a reader comparing a spend against an exposure is deciding about risk
+- [ ] Because the do-nothing option is usually the cheapest and must be disclosed
+
+**Why:** Framing the do-nothing option with its own cost and downside turns the paper into a risk decision rather than a shopping comparison. Treating it as a required formality is the trap — the option earns its place by changing what kind of decision the reader is making.
+
+### Q11. A junior's report reads badly. Which response does this phase give as the useful one? <!-- id: advance-06-q11 energy: normal -->
+
+- [ ] Rewrite it yourself so the deadline is met
+- [x] Ask them to read paragraph two aloud and say where their attention drifts
+- [ ] Send it back with tracked changes and a note
+- [ ] Tell them to study a well-written report from the team archive
+
+**Why:** Asking a question they can answer themselves transfers the judgement rather than the correction, which is the point of mentoring. Rewriting is the trap — the phase says comment, do not edit, because doing the work for them teaches them to hand it over.
+
+### Q12. You are asked to look at a colleague's mailbox informally. What does this phase say the job requires? <!-- id: advance-06-q12 energy: high -->
+
+- [ ] Do it, because your role already gives you the access
+- [ ] Refuse and explain why the request is unethical
+- [ ] Do it and note it in your own records in case of an audit
+- [x] Ask for the authorisation in writing, and route it to whoever grants it
+
+**Why:** The useful refusal converts the request into a process step, which is much harder to override than a statement of personal discomfort. Doing it because you have the access is the trap, and lecturing on ethics is the other failure — the phase says to name what you can do instead and put the request in writing.
+
 ## Checklist
 
 - [ ] I can explain the difference between a metric and a vanity metric without notes. <!-- id: advance-06-metric-vs-vanity energy: low -->

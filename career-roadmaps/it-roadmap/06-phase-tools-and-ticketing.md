@@ -1293,8 +1293,8 @@ Two of these use the fictional week of ticket data from Part 11, on tickets othe
 
 ### Q4. What is a service request? <!-- id: it-06-q04 energy: low -->
 
-- [x] A standard, pre-approved ask
 - [ ] Something broken that needs restoring now
+- [x] A standard, pre-approved ask
 - [ ] The underlying cause of repeated incidents
 - [ ] A deliberate change with a rollback plan
 
@@ -1320,9 +1320,9 @@ Two of these use the fictional week of ticket data from Part 11, on tickets othe
 
 ### Q7. In the Part 11 week, what is the reopen rate? <!-- id: it-06-q07 energy: normal -->
 
-- [x] 2 ÷ 8 = 25%
 - [ ] 2 ÷ 10 = 20%
 - [ ] 2 ÷ 9 = 22%
+- [x] 2 ÷ 8 = 25%
 - [ ] 3 ÷ 8 = 38%
 
 **Why:** Two tickets were reopened (INC-102 and INC-108), and the denominator is the **eight closed** tickets — INC-103 is still in progress and INC-110 was never touched, so neither can have been reopened. A denominator of 10 quietly counts tickets that were never closed.
@@ -1356,10 +1356,10 @@ Two of these use the fictional week of ticket data from Part 11, on tickets othe
 
 ### Q11. What does an asset record describe? <!-- id: it-06-q11 energy: low -->
 
-- [x] A managed thing — laptop, phone, licence, printer
 - [ ] A documented solution to a known issue
 - [ ] A deliberate modification awaiting approval
 - [ ] The cause behind a group of related incidents
+- [x] A managed thing — laptop, phone, licence, printer
 
 **Why:** "Dell Latitude 5540, asset tag IT-0412" is an asset. The documented solution is the knowledge base, the modification awaiting approval is a change, and the shared cause is a problem.
 

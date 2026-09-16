@@ -1476,6 +1476,120 @@ Create `portfolio/cyber/12-scripting-automation.md` with:
 - An `automation.log` sample showing a run history including a failure
 - A short written note on three things you deliberately did not automate, and why
 
+## Quiz
+
+Twelve questions on the material in this phase. Each has one correct answer and a short explanation — read the explanation even when you get it right, because it usually names the mistake the wrong answers represent.
+
+Roughly half of these are about the code and half are about the judgement, which is the split the phase itself insists on. The hardest questions are the ones where a script does exactly what it was written to do and is still the wrong thing to have built.
+
+### Q1. A script reads a 2 GB auth log with `.read()` and splits it. It works on your test data. What does the phase say will happen? <!-- id: cyber-12-q01 energy: normal -->
+
+- [x] It fails on the first real log you point it at, usually at the worst moment
+- [ ] It runs correctly but more slowly than a streaming version
+- [ ] It silently truncates the log and misses later events
+- [ ] It works, because Python streams `.read()` internally
+
+**Why:** The phase calls this the beginner's version and says it works on test data and fails on real data. The correct pattern yields lines one at a time, so a 2 GB log never has to be in memory at once — and the failure tends to arrive exactly when you need the tool.
+
+### Q2. Why does the phase insist on `errors="replace"` when opening a log file? <!-- id: cyber-12-q02 energy: normal -->
+
+- [x] A log written in a different encoding will not crash your run
+- [ ] It strips control characters that an attacker injected into log lines
+- [ ] It converts the file to UTF-8 on disk as a side effect
+- [ ] It makes the read faster by skipping undecodable bytes
+
+**Why:** Without it, one undecodable byte stops the whole run, and the damaged character becomes a placeholder instead. That is a preventive measure against crashing, not a defence against injected control characters, which is a separate problem the phase raises under hostile input.
+
+### Q3. Your JSON parsing uses `alert["data"]["win"]["eventdata"]["commandLine"]` and it crashed mid-run. What does the phase recommend? <!-- id: cyber-12-q03 energy: normal -->
+
+- [x] Chain `.get()` calls or write a small `dig` helper with a default
+- [ ] Wrap the whole script in one `try` and print a warning
+- [ ] Validate the schema once at the top with an assertion
+- [ ] Convert the alert to CSV first, since CSV has fixed columns
+
+**Why:** Any missing level in that chain raises, and the phase's `dig` helper is eight lines that removes the whole class of crash from every script you write afterwards. A single broad `try` hides which key was missing, and the phase also warns that a fixed schema assumption breaks silently when a vendor changes it.
+
+### Q4. You are writing CSV output on Windows for a manager's spreadsheet. Which detail does the phase say prevents blank lines between rows? <!-- id: cyber-12-q04 energy: low -->
+
+- [ ] `encoding="utf-8"`
+- [x] `newline=""` in the `open` call
+- [ ] `DictWriter` with explicit fieldnames
+- [ ] `writerows` instead of a loop
+
+**Why:** The phase's table pairs `newline=""` with exactly this symptom. The other three details matter for different reasons: `encoding="utf-8"` stops a curly quote in a username corrupting output, explicit fieldnames fix the column order, and `writerows` is shorter and faster.
+
+### Q5. Your enrichment script takes a URL from an alert and fetches it. Why does the phase call that a live attack path? <!-- id: cyber-12-q05 energy: high -->
+
+- [ ] The URL may contain a payload that exploits your HTTP library
+- [ ] The fetched page may contain malware that infects your host
+- [x] An attacker who can influence the alert can make your script request from inside your network
+- [ ] The request leaks your API key to the destination
+
+**Why:** The phase names this as the server-side request forgery problem arriving through your own tooling. Its honest conclusion is that this function is not a complete defence, that proper defence is an allowlist of destinations rather than a denylist, and that the safest answer is not to fetch URLs from alerts automatically at all.
+
+### Q6. Which of these is the safe way to run `nslookup` on a hostname that came from an alert? <!-- id: cyber-12-q06 energy: normal -->
+
+- [ ] `subprocess.run(f"nslookup {hostname}", shell=True)`
+- [ ] `os.system("nslookup " + hostname)`
+- [x] `subprocess.run(["nslookup", hostname], shell=False, timeout=10)`
+- [ ] `eval("nslookup " + hostname)`
+
+**Why:** Passing arguments as a list means no shell interprets the data, so nothing can inject. Both `shell=True` forms let the shell read metacharacters in your input, and `eval` executes whatever the data contains — which the phase notes is a remote code execution vulnerability the moment the input is not yours.
+
+### Q7. A script closes alerts matching a list of known-benign patterns. It saves an hour a day. What is the phase's verdict? <!-- id: cyber-12-q07 energy: high -->
+
+- [ ] Safe to automate, since the time saving is real and measured
+- [ ] Safe provided the pattern list is reviewed quarterly
+- [ ] Safe if it logs each closure with a reason
+- [x] Dangerous, because a wrong closure produces no error and is indistinguishable from the rest
+
+**Why:** The phase's worked example shows the real intrusion closed at 04:12 with the reason “known approved software, aged file,” and the deepest error was asking “does this look like the pattern?” instead of “if I am wrong, will anyone find out?” Logging a reason does not help when the closure is identical to 263 others.
+
+### Q8. Which failure mode does the phase call the more common and the more dangerous? <!-- id: cyber-12-q08 energy: normal -->
+
+- [ ] Silent wrongness — the tool runs and the output is wrong
+- [x] Silent absence — the tool stops running and nobody notices
+- [ ] Noisy failure — the tool crashes and pages someone
+- [ ] Rate limiting — the tool is throttled by an API provider
+
+**Why:** A script that crashes loudly gets fixed, but one that stops producing output gets forgotten while the team believes it still works. The phase's defences are a run log with a start and end line, a heartbeat check, and a summary output even when there is nothing to report.
+
+### Q9. Which single design change does the phase say lets you distinguish a working tool from a broken one? <!-- id: cyber-12-q09 energy: normal -->
+
+- [ ] A non-zero exit code on failure
+- [x] Printing a summary even when there is nothing to report
+- [ ] A monthly manual sanity check
+- [ ] Logging every failure with the input that caused it
+
+**Why:** The phase says a tool that prints “checked 4,000 hashes, 0 malicious, 0 errors” every day is one you can trust, while a tool that prints nothing is indistinguishable from a broken one. The other three are real defences from the same table, but this is the one that resolves the ambiguity.
+
+### Q10. Checking one alert's hash against a threat-intelligence service takes twenty minutes by hand. Which part does the phase say to automate, and which to leave to the analyst? <!-- id: cyber-12-q10 energy: high -->
+
+- [ ] Automate the true-positive decision, leave the hash lookup manual
+- [ ] Automate everything up to and including closing the ticket
+- [x] Automate extraction, lookup, and recording; leave the true-positive decision to the analyst
+- [ ] Automate nothing, because the service is an external dependency
+
+**Why:** The phase's division automates rows one to three, enriches row four by reporting the engine count, and leaves the true-positive decision and the customer summary to the person accountable. The result removes twenty minutes of typing rather than replacing the analyst.
+
+### Q11. Your README lists requirements, setup, and usage. Which section does the phase say separates a professional tool from a learner's script? <!-- id: cyber-12-q11 energy: normal -->
+
+- [ ] The troubleshooting section
+- [ ] The requirements section
+- [ ] The usage section with real example output
+- [x] The “what it does not do” section
+
+**Why:** Writing your own limitations means a reader trusts the rest and you are never asked to defend a capability you did not claim. The other sections answer real reader questions, but the limitations section is the one the phase singles out as the marker of a professional artefact.
+
+### Q12. Your tool's detection logic depends on a parsing library's behaviour. Why does the phase say pinning versions matters more in security than in general development? <!-- id: cyber-12-q12 energy: high -->
+
+- [ ] Pinned versions are easier for a reviewer to audit for vulnerabilities
+- [ ] Pinned versions reduce the attack surface of your dependency tree
+- [ ] Auditors require a fixed dependency list for compliance
+- [x] An unpinned upgrade can change what your tool reports without your knowledge
+
+**Why:** The phase's reason is trust in the output: a detection tool whose results change silently is one you cannot rely on, and an unpinned upgrade to a parsing library changes exactly that. Auditability may be a side benefit, but the phase's argument is about the answer changing underneath you.
+
 ## Checklist
 
 - [ ] I can read a log file line by line without loading it all into memory. <!-- id: cyber-12-python-file-reading energy: low -->

@@ -1156,6 +1156,120 @@ Create `portfolio/cyber/03-security-fundamentals.md` with:
 - One mock incident timeline
 - Table mapping 5 findings to CIS or NIST controls
 
+## Quiz
+
+Twelve questions on the material in this phase. Each has one correct answer and a short explanation — read the explanation even when you get it right, because it usually names the mistake the wrong answers represent.
+
+The phase's exit criterion is a three-part question about one incident — which logs, which controls, what you do in what order — and several of these test exactly that shape. The rest check the six lenses the phase wants you literate in, with the emphasis on the counter-intuitive parts rather than the definitions.
+
+### Q1. A user's login succeeds from an unexpected country at 03:00. Why does the phase call successful logons the dangerous ones? <!-- id: cyber-03-q01 energy: normal -->
+
+- [ ] Successful logons are the only events Windows records by default
+- [ ] Failed logons cannot be investigated without the account name
+- [x] A failed login is noise, but a successful one from an unusual place is the signal
+- [ ] Successful logons always indicate that MFA was bypassed
+
+**Why:** The phase makes the point that the internet is full of automated attempts against every exposed service, so failures are background noise. A success from an unusual location for an account with no reason to be there is what a detection rule is built to surface — and it does not by itself prove MFA was bypassed.
+
+### Q2. An attacker deliberately locks out dozens of accounts by failing logins on purpose. What does the phase call that? <!-- id: cyber-03-q02 energy: high -->
+
+- [ ] Password spraying that evaded the lockout policy
+- [ ] Credential stuffing against a reused password
+- [x] A denial of service, using the lockout control against you
+- [ ] Impossible travel, because the sources are geographically distant
+
+**Why:** The phase's nuance is that lockout is a control that can itself be abused, and in some cases the spike is how an attacker forces a helpdesk call they then social-engineer. Spraying is the opposite pattern — many accounts touched once each — which does not trip lockout at all.
+
+### Q3. Logs show one account with many failures. Which pattern is that, and how does the phase contrast it? <!-- id: cyber-03-q03 energy: normal -->
+
+- [ ] Spraying — and lockout will blunt it
+- [x] Brute force — and lockout policy will trigger and blunt it
+- [ ] Impossible travel — and a VPN explains it
+- [ ] Credential stuffing — and MFA stops it
+
+**Why:** The phase pairs the two patterns directly: one account with many failures is brute force and lockout blunts it, while many accounts with one failure each is spraying and evades lockout entirely. Reading the pattern is the SOC question, not merely whether an account locked.
+
+### Q4. A login has a correct password but comes from an unmanaged device in an unexpected country, and it is blocked. Which control did that? <!-- id: cyber-03-q04 energy: normal -->
+
+- [x] Conditional access, deciding on context rather than credentials alone
+- [ ] Multi-factor authentication
+- [ ] Role-based access control
+- [ ] Least privilege, applied to the account
+
+**Why:** Conditional access is the phase's answer for policy that weighs device management, location, and risk score rather than just credentials, and the phase calls it the control that most directly addresses authentication failures. RBAC and least privilege govern what an account may reach, not whether a login is allowed at all.
+
+### Q5. You find `C:\Users\Public\svchost.exe` running. Why does the phase say this is a finding? <!-- id: cyber-03-q05 energy: normal -->
+
+- [x] Legitimate Windows binaries run from their expected directories
+- [ ] `svchost.exe` should never run as a user process
+- [ ] The filename indicates a scheduled task rather than a service
+- [ ] Files in `C:\Users\Public` are always unsigned
+
+**Why:** The phase's masquerading section makes predictability the detection: the real `svchost.exe` lives in `C:\Windows\System32`, and legitimate binaries run from their expected directories, which is exactly what makes impersonation visible. The parent-process rule is a separate check — `svchost` should be spawned by `services.exe`.
+
+### Q6. Which of these does the phase list as the weakest MFA factor, and why? <!-- id: cyber-03-q06 energy: low -->
+
+- [ ] Hardware security keys, because they cannot be relayed remotely
+- [ ] Push notifications, because they can be approved by an irritated user
+- [ ] Authenticator apps, because their codes can be intercepted
+- [x] SMS codes, because SIM swapping defeats them
+
+**Why:** The phase's ranking runs the other way: hardware keys are strongest because they cannot be relayed or intercepted remotely, and SMS is weakest precisely because SIM swapping moves the victim's number to an attacker's SIM. Push notifications sit third for a different reason — a tired user approves one.
+
+### Q7. An invoice URL is changed from `/api/invoices/1001` to `/api/invoices/1002` and it returns another customer's data. Which failure is that? <!-- id: cyber-03-q07 energy: normal -->
+
+- [ ] An authentication failure, because the attacker was not logged in
+- [x] An authorisation failure — the application checked who you are but not what you may reach
+- [ ] A session fixation weakness in the login flow
+- [ ] An accounting failure, because the access was not logged
+
+**Why:** The phase's example is exactly this pair of requests, and the diagnosis is that the application checked authentication but not authorisation. The reason it is common is the wrong assumption that the UI is a control — anything the client sends is attacker-controlled.
+
+### Q8. A developer proposes stopping SQL injection by filtering dangerous characters and blocking known bad input. What does the phase say? <!-- id: cyber-03-q08 energy: high -->
+
+- [x] The fix is parameterised queries — never letting input become code
+- [ ] It is the correct fix, provided the blocklist is kept current
+- [ ] It works if combined with output encoding on the same field
+- [ ] It works for this query but not for stored procedures
+
+**Why:** The phase calls escaping and blocklists band-aids that miss encodings, and states the lesson directly: SQL injection is not fixed by filtering input but by never letting input become code. The database did exactly what it was told, so separating structure from values removes the whole class.
+
+### Q9. Which logon type in a 4624 event means Remote Desktop? <!-- id: cyber-03-q09 energy: low -->
+
+- [ ] Type 2, local console
+- [ ] Type 3, network logon
+- [x] Type 10
+- [ ] Type 10, but only on a server
+
+**Why:** The phase's table gives type 2 as a local console login, type 3 as a network logon from a share or remote service, and type 10 as RDP. Seeing type 10 for an account that never uses RDP is the finding, and that holds regardless of whether the host is a workstation or a server.
+
+### Q10. You discover a scheduled task that an attacker created for persistence. What does the phase tell you to assume? <!-- id: cyber-03-q10 energy: high -->
+
+- [ ] That removal of the task completes eradication
+- [ ] That the task is the only mechanism, since it ran as SYSTEM
+- [ ] That the Run keys are clean, since the task superseded them
+- [x] That there are others, because attackers commonly establish two or three
+
+**Why:** The phase states the investigative habit plainly: when you find one persistence mechanism, assume there are others, so that removing one does not evict the attacker. That is why eradication follows a full enumeration rather than a single fix.
+
+### Q11. Two successful logins appear from Manila at 09:00 and London at 09:30. What does the phase say about calling this impossible travel? <!-- id: cyber-03-q11 energy: high -->
+
+- [ ] It is conclusive evidence of account compromise
+- [x] It is a prompt to investigate — VPNs cause false positives, and attackers use them too
+- [ ] It is impossible unless the user flew, so it can be closed quickly
+- [ ] It is not worth investigating unless MFA was disabled on the account
+
+**Why:** The phase gives two honest caveats that separate a thoughtful analyst from one reciting a rule: the apparent location may be the exit node rather than the user, and a real attacker may also use a VPN precisely to look plausible. The alert is a prompt, not a conclusion.
+
+### Q12. Two vulnerabilities: a CVSS 9.8 in software you do not run, and a CVSS 6.5 actively exploited on an internet-facing server holding customer data. Which does the phase prioritise? <!-- id: cyber-03-q12 energy: high -->
+
+- [ ] The 9.8, because severity bands drive the queue
+- [ ] Both equally, since both are above the medium threshold
+- [ ] The 9.8, unless the 6.5 appears in your asset inventory
+- [x] The 6.5, because CVSS alone is a poor prioritisation tool
+
+**Why:** The phase's example is exactly this pair, and its verdict is that the 9.8 in software you do not run is irrelevant while the exploited 6.5 is an emergency. The five signals that produce that judgement are KEV, EPSS, exposure, asset criticality, and existing controls.
+
 ## Checklist
 
 - [ ] I understand identity security basics. <!-- id: cyber-03-c01 energy: low -->

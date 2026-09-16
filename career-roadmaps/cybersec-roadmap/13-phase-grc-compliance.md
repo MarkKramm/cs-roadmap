@@ -1382,6 +1382,116 @@ Create `portfolio/cyber/13-grc-compliance.md` with:
 - An evidence requirements outline per control, naming the ones you could not evidence
 - A limitations section stating what the artefact set does not cover
 
+## Quiz
+
+### Q1. A business unit wants to run a service but accepts the risk of doing so with a known gap. Which risk treatment is that, in this phase's vocabulary? <!-- id: cyber-13-q01 energy: low -->
+
+- [x] Accept, because the residual risk is lived with knowingly and with a named owner
+- [ ] Mitigate, because they have decided to keep operating
+- [ ] Transfer, because the consequence has moved elsewhere
+- [ ] Avoid, because they have chosen not to close the gap
+
+**Why:** Accept is the treatment where the organisation knowingly lives with the residual risk and a named owner signs for it. Choosing mitigate is the trap, because mitigation reduces the likelihood or impact — and here nothing about the exposure has been reduced at all.
+
+### Q2. An entry on the risk register says “the file server is unpatched.” What does this phase say is missing from it? <!-- id: cyber-13-q02 energy: normal -->
+
+- [ ] The vendor name and the support contract reference
+- [ ] The CVSS score of the underlying vulnerability
+- [x] A cause, an owner, a date, and a verification — the register states a condition, not a risk
+- [ ] The name of the person who first noticed it
+
+**Why:** A condition is a symptom, and an auditor needs the cause, an owner with a date, and a verification that proves the fix. Reaching for a CVSS score is the trap because a severity number tells you how bad the flaw is, not who owns the exposure or when it will be closed.
+
+### Q3. You are mapping a single control — multi-factor authentication — against the frameworks your organisation reports on. What does this phase say about that mapping? <!-- id: cyber-13-q03 energy: normal -->
+
+- [ ] Each framework requires its own separate implementation of the control
+- [x] One control can map to several frameworks, which is why you map once and reference many times
+- [ ] The control can only be mapped to the framework it was originally bought for
+- [ ] Mapping is impossible until the control has been penetration tested
+
+**Why:** Control mapping lets one implemented control satisfy clauses in several frameworks at once, which is the whole reason a mapping exercise is worth doing. Assuming each framework needs its own implementation is the trap — it multiplies effort and produces the same control built four times.
+
+### Q4. A policy states “passwords must be strong.” An auditor asks how compliance is determined. What is the defect? <!-- id: cyber-13-q04 energy: normal -->
+
+- [ ] The policy is stale and names a product that no longer exists
+- [ ] The policy is unread because it is forty pages of legal prose
+- [ ] The policy is impossible because no tool can enforce passwords
+- [x] The policy is unenforceable because nobody, including the auditor, can determine compliance
+
+**Why:** “Strong” has no threshold, so neither a user nor an auditor can tell whether the requirement is met. Calling it impossible is the trap — password length and complexity are perfectly enforceable once the policy states a number instead of an adjective.
+
+### Q5. Which section of the policy template does this phase single out as the one beginners omit? <!-- id: cyber-13-q05 energy: low -->
+
+- [ ] The purpose section, which explains why the document exists
+- [x] The compliance and exceptions section, which says who may grant an exception and for how long
+- [ ] The definitions section, which fixes the meaning of terms
+- [ ] The revision history, which records who changed what
+
+**Why:** Without a stated exception route, people quietly ignore the policy instead, which is worse than having none at all. Skipping the purpose section is the trap because it feels optional — but the omission that actually breaks a policy is the one that leaves no lawful way to deviate.
+
+### Q6. A vendor questionnaire comes back with reassuring answers and no supporting evidence. What does this phase say a documented vendor decision needs? <!-- id: cyber-13-q06 energy: high -->
+
+- [ ] A copy of the vendor's marketing material filed with the questionnaire
+- [ ] A note that the vendor declined to provide evidence
+- [x] The evidence behind the answers, the residual risk, and an owner who accepts it
+- [ ] A higher questionnaire score so the vendor passes the threshold
+
+**Why:** A vendor assessment is a risk decision, so it needs evidence, the residual risk that remains, and a named owner who accepts it. Accepting the answers at face value is the trap — self-reported assurance with nothing behind it cannot be tested, and it transfers no accountability to anyone.
+
+### Q7. Your organisation wants to reduce the likelihood of a phishing incident. Which control type is a security awareness training programme? <!-- id: cyber-13-q07 energy: normal -->
+
+- [ ] A corrective control, because it fixes an incident after it happens
+- [x] A preventive control, and an administrative one rather than a technical one
+- [ ] A detective control, because it identifies incidents as they occur
+- [ ] A physical control, because it changes what people do in the building
+
+**Why:** Awareness training is administrative and preventive — it is a written, people-facing measure intended to stop the event occurring. Calling it detective is the trap, because detective controls notice something that has already happened, and training is meant to stop it happening at all.
+
+### Q8. A control was designed, implemented, and evidenced, and the auditor accepts it. What has actually been demonstrated? <!-- id: cyber-13-q08 energy: normal -->
+
+- [ ] That the risk it addresses has been eliminated from the register
+- [ ] That the organisation is certified against the framework
+- [ ] That no further testing of this control will ever be needed
+- [x] That the control is operating as described, with evidence that can be tested
+
+**Why:** Audit readiness means being able to show that a control operates as described and that the evidence exists to test it. Believing the risk is now eliminated is the trap — a control reduces risk, and the residual risk stays on the register with an owner.
+
+### Q9. A junior analyst says governance, risk, and compliance are three words for the same job. What is the cleanest correction? <!-- id: cyber-13-q09 energy: normal -->
+
+- [x] They are three separate functions, and each one produces different artefacts
+- [ ] They are the same job, and the three words reflect three different job titles
+- [ ] Governance is the technical work, and risk and compliance are its documentation
+- [ ] Compliance produces the risk register, and governance produces the audit evidence
+
+**Why:** Each function produces its own output, which is why the distinction is worth keeping — governance sets direction, risk assesses and treats exposure, and compliance evidences it. Treating them as one job is the trap because it hides which artefact you are actually being asked to produce.
+
+### Q10. An organisation reports “99 per cent of critical patches applied within 30 days” — after removing six systems from the critical list. What does this phase call that? <!-- id: cyber-13-q10 energy: high -->
+
+- [ ] Good risk management, because the scope was clarified
+- [ ] A legitimate exception, because the systems were documented
+- [x] The metric was made to look better by narrowing its denominator rather than by improving anything
+- [ ] A KRIs, because it measures something that has not happened yet
+
+**Why:** Moving systems off the scope list changes the number without changing the exposure, which is the definition of a metric manipulated to look good. Calling it a legitimate exception is the trap — an exception is a documented, owned, time-boxed deviation, not a quiet edit to the thing being measured.
+
+### Q11. You are collecting evidence for an external audit of your backup control. What does this phase say an auditor will actually ask for? <!-- id: cyber-13-q11 energy: high -->
+
+- [ ] A verbal assurance from the engineer who runs the backups
+- [x] The records that show the control operated, including a restore that was actually tested
+- [ ] The purchase invoice for the backup software licence
+- [ ] A summary slide stating that backups complete successfully
+
+**Why:** An auditor tests whether the control operated, so a demonstrated restore with its record is what carries weight. A summary slide is the trap — an assertion that backups succeed is exactly the claim the audit exists to verify, and it is not evidence of anything.
+
+### Q12. The Philippine Data Privacy Act applies to personal data your organisation holds. What does this phase expect you to be able to explain? <!-- id: cyber-13-q12 energy: normal -->
+
+- [ ] The full text of the Act, including every penalty provision
+- [ ] Why the Act does not apply to data held in cloud services
+- [x] Its obligations in outline, alongside the GDPR principles and data subject rights
+- [ ] How to register the organisation as a data controller in the European Union
+
+**Why:** The phase asks for the privacy obligations in outline — the DPA and the GDPR principles and rights — not an exhaustive legal reading. Assuming the Act stops at cloud-hosted data is the trap, because where the data is stored does not decide whether the law applies to it.
+
 ## Checklist
 
 - [ ] I can explain governance, risk, and compliance as three separate functions. <!-- id: cyber-13-grc-three-functions energy: low -->

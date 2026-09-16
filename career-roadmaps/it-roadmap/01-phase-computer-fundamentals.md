@@ -1652,6 +1652,116 @@ Create `portfolio/it/01-computer-fundamentals.md` containing:
 - A PC parts glossary in your own words
 - A 10-row troubleshooting symptom table
 
+## Quiz
+
+### Q1. A user says their laptop “feels slow” every afternoon but is fine in the morning, and Task Manager shows memory at 94 per cent with the disk near idle. What does that pattern point to first? <!-- id: it-01-q01 energy: normal -->
+
+- [ ] The drive is failing and should be replaced immediately
+- [x] RAM is exhausted, so the system is paging rather than short of processing power
+- [ ] The GPU driver needs reinstalling because the screen lags
+- [ ] The CPU is thermal throttling and needs a new fan
+
+**Why:** Memory pinned near the ceiling with an idle disk is the classic low-RAM signature — there is no room left to hold working data. Reaching for a failing drive is the trap because failing storage shows up as slow *reads* with disk activity pegged high, not as a disk sitting quiet while memory is full.
+
+### Q2. A desktop powers on, the fans spin, but nothing ever appears on the monitor. You have already confirmed the monitor works on another machine. What is the most useful next check? <!-- id: it-01-q02 energy: normal -->
+
+- [x] Whether the GPU is seated and the correct display cable and input are selected
+- [ ] Whether Windows finished installing its latest updates
+- [ ] Whether the user's account has a roaming profile problem
+- [ ] Whether the antivirus quarantine is blocking the boot process
+
+**Why:** “No display” is a hardware path problem — seating, cable, and the monitor's selected input — and the fans spinning proves only that power reaches the board. Checking Windows updates is the trap because the machine has not reached the operating system yet, so nothing inside Windows can be the cause.
+
+### Q3. You need to know whether a drive is healthy, degrading, or about to fail now. Which evidence does this phase tell you to read? <!-- id: it-01-q03 energy: low -->
+
+- [ ] The drive's advertised capacity and its manufacturer
+- [ ] The number of partitions currently on the disk
+- [ ] The file system type, such as NTFS versus exFAT
+- [x] The S.M.A.R.T. attributes and any reallocated or pending sector counts
+
+**Why:** S.M.A.R.T. attributes are the drive's own health telemetry, and reallocated or pending sectors are what separate “degrading” from “failing now”. Capacity and partition count are the trap because they describe how the drive is laid out, not whether its media is still reliable.
+
+### Q4. A user reports a blue screen and can only remember that it happened “a few times this week.” Where does this phase say you find the bug check history? <!-- id: it-01-q04 energy: normal -->
+
+- [ ] In the browser's download history for the day it crashed
+- [x] In the Windows event log, which records the bug check codes
+- [ ] In the printer queue, because spooler faults cause most blue screens
+- [ ] In the S.M.A.R.T. attributes of the system drive
+
+**Why:** A stop code on screen lasts seconds; the event log keeps the record, which is why it is where you reconstruct a pattern of crashes. Blaming the print spooler is the trap — it is a real cause of some faults, but you would confirm that from the logged code rather than by assuming it.
+
+### Q5. A colleague hands you a ticket that says only “computer broken, please fix.” What is the first thing this phase asks you to establish? <!-- id: it-01-q05 energy: normal -->
+
+- [x] What the user was actually doing and what they observed, in their words
+- [ ] Which replacement part you will order and how long it will take to arrive
+- [ ] Whether the user has completed their security awareness training
+- [ ] Which colleague worked on this machine most recently
+
+**Why:** A usable ticket starts with the reported symptom and the circumstances, because everything you do next is chosen from that. Ordering a part first is the trap: it commits you to a diagnosis you have not made, and it spends money before the evidence justifies it.
+
+### Q6. In the ticket lifecycle, what is the practical difference between priority and severity? <!-- id: it-01-q06 energy: high -->
+
+- [ ] Priority is set by the user, and severity is set by the vendor
+- [ ] Severity is how fast you must respond, and priority is how bad the fault is
+- [ ] They are two names for the same measurement, and either can be used
+- [x] Severity is how much the fault hurts, and priority is how soon it must be worked
+
+**Why:** Severity describes impact and priority describes the order of work, and they can legitimately disagree — one person's outage can outrank a wider but slower-burning fault. Reversing the two is the trap, because it would make the measurement of damage depend on who is complaining loudest.
+
+### Q7. A laptop will not charge and shows no charging indicator with the original power supply. Before opening anything, what does this phase suggest you check? <!-- id: it-01-q07 energy: normal -->
+
+- [ ] The CMOS battery on the motherboard
+- [ ] The GPU driver version installed on the machine
+- [x] The PSU or charger, the cable, and the charging port for damage or debris
+- [ ] The amount of free space left on the system partition
+
+**Why:** Charging faults live in the power path, and the external parts of that path are the cheapest and safest things to test first. Going straight for the CMOS battery is the trap — it explains a lost clock and reset BIOS settings, not a machine that refuses to take power.
+
+### Q8. A user says a USB headset “stopped working” after it worked yesterday. Device Manager shows an unknown device with a warning. What is the best first action? <!-- id: it-01-q08 energy: normal -->
+
+- [ ] Reinstall Windows to clear the driver problem
+- [ ] Replace the motherboard because the USB controller has failed
+- [ ] Tell the user the headset is unsupported hardware
+- [x] Try another port and another machine to separate the device from the port
+
+**Why:** Swapping the port and the host splits the fault into device-side or machine-side, and that single test decides everything you do next. Reinstalling Windows is the trap because it is enormous, slow, and destroys the evidence before you have established which side is broken.
+
+### Q9. Which of these is a *service* rather than an application, in this phase's vocabulary? <!-- id: it-01-q09 energy: low -->
+
+- [ ] A word processor the user opens to write a report
+- [x] A background process such as Windows Update or an antivirus engine
+- [ ] A web browser the user opens to read email
+- [ ] A spreadsheet the user opens to track a budget
+
+**Why:** Services run in the background without a user opening them, which is why they are managed differently from applications. Picking the browser is the trap because it is something a person launches and closes, which is precisely the property a service does not have.
+
+### Q10. A drive is nearly full and the user is panicking about losing work. Following this phase, which action is safe to take first? <!-- id: it-01-q10 energy: normal -->
+
+- [ ] Delete the largest files by size until space is recovered
+- [ ] Format the drive and restore from the most recent backup
+- [x] Run Disk Cleanup including the system files option, and clear the temporary folders
+- [ ] Move the user's documents to an external drive and delete the originals
+
+**Why:** Disk Cleanup only removes things Windows can regenerate, so it frees space without risking user data. Deleting by size is the trap — the biggest file on the disk is very often the one file the user cannot afford to lose.
+
+### Q11. A ticket has been resolved and the user confirms the fix worked. Why does this phase insist you still write the note up properly? <!-- id: it-01-q11 energy: high -->
+
+- [ ] Because the ticketing system will not let you close a ticket without one
+- [ ] Because the user is entitled to a written copy of the work performed
+- [ ] Because your manager uses the note to calculate your handle time
+- [x] Because the next analyst needs to act on your record without asking you what you did
+
+**Why:** A ticket note is a handoff, and its test is whether somebody else can pick up the machine cold. Writing it to satisfy the tool is the trap: a note that only records “fixed” closes the ticket and teaches the next person nothing when the fault returns.
+
+### Q12. You have diagnosed a fault you are not authorised to fix, and you are handing it to a senior colleague. What makes the handoff usable? <!-- id: it-01-q12 energy: high -->
+
+- [x] The symptoms, the checks you ran, what each ruled out, and what you need next
+- [ ] A summary of what you think the user did to cause the problem
+- [ ] A note that the issue is “complex” and needs someone senior
+- [ ] A list of the parts you would have ordered if you were allowed
+
+**Why:** The checks you already ran are the most valuable part of a handoff, because they stop the next person repeating them. Saying the issue is “complex” is the trap — it transfers the ticket without transferring any information, so the senior colleague starts from zero.
+
 ## Checklist
 
 - [ ] I can explain CPU vs RAM vs storage. <!-- id: it-01-c01 energy: low -->

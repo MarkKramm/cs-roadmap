@@ -1315,6 +1315,116 @@ Create `portfolio/advance/02-threat-hunting.md` with:
 - An ATT&CK layer or table marking techniques as covered, visible, or blind
 - The hours spent on each hunt, and the list of changes each one produced
 
+## Quiz
+
+### Q1. A hunt finishes and nothing malicious is found. Which phrasing does this phase call the honest one? <!-- id: advance-02-q01 energy: high -->
+
+- [x] “No evidence was found across the 888 hosts with telemetry, in the 90 days retained”
+- [ ] “No evidence of the behaviour was found in the estate”
+- [ ] “The behaviour is not present”
+- [ ] “The hunt was inconclusive and should be repeated”
+
+**Why:** The second phrasing is checkable and states the boundary of the conclusion, which is what makes a negative result trustworthy. Claiming the behaviour is not present is the trap — you cannot prove a negative, and a report that claims to is one nobody should trust.
+
+### Q2. Your hunt query returns zero rows. What does this phase say you must do before concluding the estate is clean? <!-- id: advance-02-q02 energy: high -->
+
+- [ ] Widen the time window until rows appear
+- [ ] Run the query against a different SIEM to compare results
+- [x] Prove it against a known-positive, because a wrong field name and a quiet estate look identical
+- [ ] Ask the detection engineering team whether the rule exists
+
+**Why:** A query returning zero because the field name is wrong and one returning zero because nothing happened produce identical output, and only one of them is a finding. Widening the window is the trap — it does not test whether the query could ever have matched anything.
+
+### Q3. You are writing a detection from a hunt finding. Which property does this phase say the rule needs on day one? <!-- id: advance-02-q03 energy: normal -->
+
+- [ ] The full hunt query, pasted in unchanged, for completeness
+- [ ] A severity of High, so it is never deprioritised
+- [ ] An owner in the detection engineering team only
+- [x] A documented expected rate, so that normal volume can be told from a broken exclusion
+
+**Why:** A rule with no expected rate cannot be tuned, because nobody can say whether five alerts a day is normal or a misconfiguration. Pasting the hunt query is the trap — a hunt query is optimised for completeness in one run, while a rule must be precise on every run.
+
+### Q4. Step 1 of a hunt produces 3,914 rows across 612 hosts before any filter. What does this phase say that number is? <!-- id: advance-02-q04 energy: normal -->
+
+- [x] The baseline population, which tells you the estate's normal rate
+- [ ] A failure, because a hunt must start with a filter
+- [ ] The answer, because it shows scheduled tasks are being created
+- [ ] A sign that the telemetry source is misconfigured
+
+**Why:** Starting with the population rather than the filter is what lets you judge whether a later, narrowed result set is actually small. Treating the row count as the answer is the trap — several thousand rows tells you the baseline and nothing about whether any of it is malicious.
+
+### Q5. What makes a hunt hypothesis worth spending a week on? <!-- id: advance-02-q05 energy: low -->
+
+- [ ] It is broad enough to cover several techniques at once
+- [ ] It is drawn from the most recent threat intelligence report
+- [x] It is falsifiable — you can state what evidence would disprove it
+- [ ] It matches a query you already know how to write
+
+**Why:** A hypothesis nothing could disprove cannot be answered by any query, so it is not worth the time box. Making it broad is the trap — an unfiltered hypothesis produces thousands of rows and dies when the result set cannot be narrowed.
+
+### Q6. A hunt has run for two days and no query has produced a single reviewable row. What does this phase say that usually means? <!-- id: advance-02-q06 energy: high -->
+
+- [ ] The estate is clean and the hunt can be closed with confidence
+- [x] It is usually a data problem, so verify the data with a known-positive test
+- [ ] The hypothesis was too narrow and should be broadened
+- [ ] The hunt needs more analyst hours before it can conclude
+
+**Why:** Zero reviewable rows after two days usually means the data cannot answer the question, not that nothing happened. Closing it as clean is the trap — that conclusion is exactly the unfalsifiable claim the phase warns against, and it is untested.
+
+### Q7. A hunt ended with a documented conclusion, a new detection rule, and a telemetry gap raised and fixed. Which of those does this phase call permanent and multiplicative? <!-- id: advance-02-q07 energy: high -->
+
+- [ ] The conclusion in the document
+- [ ] The new detection rule
+- [ ] None of them, because a hunt is only a point-in-time observation
+- [x] The telemetry gap raised and fixed, because every future hunt benefits
+
+**Why:** Closing a data gap makes every later hunt cheaper and more capable, which is why the phase calls it multiplicative rather than merely permanent. Choosing the detection rule is the trap — it is permanent only until somebody tunes or disables it.
+
+### Q8. A detection fires too often and an analyst disables it in a hurry. What does this phase require? <!-- id: advance-02-q08 energy: normal -->
+
+- [ ] Nothing, because a noisy rule causes alert fatigue and should go
+- [x] A ticket with an owner and a re-enable date, like any other control change
+- [ ] A note in the analyst's own log for the next shift handover
+- [ ] Immediate replacement with a rule at a higher severity
+
+**Why:** Disabling a rule removes coverage, so it is a control change and must be recorded with an owner and a date. Letting it go quietly is the trap — the phase names this as the failure mode, because the gap is then invisible to everyone who was not in the room.
+
+### Q9. A rule based on `rundll32.exe` alone is too noisy. Which tuning change does this phase say to reach for first? <!-- id: advance-02-q09 energy: normal -->
+
+- [x] Add a correlated condition, such as requiring the parent process to be `winword.exe`
+- [ ] Add an exclusion for the noisiest known-good actor
+- [ ] Raise the threshold so more evidence is required
+- [ ] Disable the rule and rely on another control
+
+**Why:** Requiring a second signal pairs two conditions that together are far sharper, and it forces the adversary to change two things instead of one. Adding an exclusion is the trap here — it removes one documented false positive without making the rule itself more precise.
+
+### Q10. Why does this phase say a hunt should end in a rule, a retired hypothesis, or a closed data gap? <!-- id: advance-02-q10 energy: high -->
+
+- [ ] Because a hunt's conclusion is only valid until the estate changes
+- [ ] Because management requires a measurable output from every hunt
+- [x] Because a hunt is a point-in-time observation, and a document alone ends when you change jobs
+- [ ] Because a detection rule is the only artefact an auditor accepts
+
+**Why:** A hunt protects nothing permanently unless something in the estate changed, which is why the output must outlive the document. Waiting for a management requirement is the trap — the reason is about durability of the control, not reporting compliance.
+
+### Q11. In the worked hunt, the join of task creation to process creation returned 1,146 rows. What does this phase say that moment represents? <!-- id: advance-02-q11 energy: high -->
+
+- [ ] Proof that the hypothesis was wrong and the hunt should restart
+- [ ] A result set ready for hand triage within the afternoon
+- [ ] Evidence that the estate has a widespread persistence problem
+- [x] The moment most hunts die, and the honest response is to narrow the join
+
+**Why:** A wide join on a busy host pulls in everything created in the following minutes, so the fix is a written narrowing decision rather than abandoning the hunt. Calling it a failure is the trap — the phase treats narrowing as hypothesis refinement, and it took 1,146 rows down to 62.
+
+### Q12. Which metric does this phase say is a headline number that says nothing about the quiet hunts? <!-- id: advance-02-q12 energy: normal -->
+
+- [ ] Telemetry gaps closed, because it is a pure gain
+- [ ] Hunts completed per month, because it only shows the programme is running
+- [x] Incidents found by hunting, because it hides every other result
+- [ ] Mean time from hunt close to detection deployed
+
+**Why:** Reporting only the incident count hides the hunts that produced detections, closed data gaps, and retired hypotheses. Treating hunts completed as the headline is the trap the phase also names — it shows activity, not whether the hunts were any good.
+
 ## Checklist
 
 - [ ] I can explain the difference between monitoring, triage, and hunting, and why the failure modes differ. <!-- id: advance-02-hunting-vs-monitoring energy: low -->

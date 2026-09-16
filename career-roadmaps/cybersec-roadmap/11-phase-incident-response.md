@@ -1249,6 +1249,116 @@ Create `portfolio/cyber/11-incident-response.md` with:
 - A full incident report using the structure in Part 7
 - A legal and ethical boundary note
 
+## Quiz
+
+### Q1. An alert fires on a workstation and the process is still running. Why does this phase say to isolate the host rather than power it off? <!-- id: cyber-11-q01 energy: high -->
+
+- [x] Because memory is the most perishable evidence and a shutdown loses it permanently
+- [ ] Because powering off takes longer than isolating at the switch
+- [ ] Because a powered-off host keeps its network connections open
+- [ ] Because the attacker can reconnect to a host that was powered down
+
+**Why:** Memory holds what you need most — the outbound address and any injected code — and it disappears the moment the machine stops. Assuming speed is the reason is the trap: isolation preserves memory, while a power-off destroys the very artefact you were trying to collect.
+
+### Q2. You are capturing evidence from a live host. Which order does this phase require? <!-- id: cyber-11-q02 energy: normal -->
+
+- [x] Memory and network state first, then the running system, then the disk
+- [ ] Disk first, then memory, because the disk holds the persistent artefacts
+- [ ] Whichever is quickest, so that containment can start sooner
+- [ ] Remote logs first, because their retention window may expire
+
+**Why:** Order of volatility starts with registers and memory, moves through network state and running processes, and reaches disk and remote logs last. Starting with the disk is the trap: memory is gone within minutes, while a disk image will still be there afterwards.
+
+### Q3. A workstation image contains the user's personal photographs and private messages. How does this phase say you handle that? <!-- id: cyber-11-q03 energy: high -->
+
+- [ ] Copy anything relevant to your own drive so the analysis is portable
+- [ ] Report everything you found so the investigation is complete
+- [x] Examine only what the investigation requires, and do not browse or copy the rest
+- [ ] Delete the unrelated material from the image to protect the user's privacy
+
+**Why:** Minimum necessary means examining what the case requires, and unrelated personal material carries an obligation not to browse, copy, or discuss it. Deleting it is the trap — you would be altering evidence, which is far worse than leaving it untouched in the image.
+
+### Q4. An incident report says the user opened a malicious attachment. What is wrong with that as a root cause? <!-- id: cyber-11-q04 energy: high -->
+
+- [ ] It names a person rather than a system, which is unfair to the user
+- [ ] It is a contributing factor, and root cause must be a single event
+- [ ] Nothing is wrong; that is the root cause and the fix follows from it
+- [x] It states the mechanism rather than the control gap, so it names nothing fixable
+
+**Why:** A root cause is a control gap — here, that macro execution from internet-sourced documents was not blocked — and each line must be something a control can close. Accepting the user action as the cause is the trap, because it leads to retraining and the identical incident six months later.
+
+### Q5. You are triaging an alert and the host turns out to be a finance workstation with access to a shared drive of client records. What does this phase tell you to do with the severity? <!-- id: cyber-11-q05 energy: high -->
+
+- [ ] Leave it as reported, because severity must match the detection rule
+- [x] Raise it, because severity reflects potential impact, and the shared-drive access widens it
+- [ ] Lower it, because only one host is affected
+- [ ] Set priority instead, and leave severity to the incident lead
+
+**Why:** Severity is about potential impact, so what the host can reach changes the assessment even when only one host is involved. Leaving it as reported is the trap — the automatic rating was based on a single machine and never considered the share access.
+
+### Q6. Which of these belongs in the timeline as a fact rather than as an inference? <!-- id: cyber-11-q06 energy: normal -->
+
+- [ ] The user deliberately opened the attachment
+- [x] An outbound connection to a specific address, taken from the firewall log
+- [ ] The attacker intended to steal the client records
+- [ ] The malware was configured to find the file share
+
+**Why:** A timeline row pairs an observable event with its source, and a firewall log entry is directly observable. Stating intent is the trap — whether the user acted deliberately or the malware was configured a certain way are inferences, and they belong in the findings as stated inferences.
+
+### Q7. A workstation was infected and the attacker had administrative access. What does this phase say about cleaning it? <!-- id: cyber-11-q07 energy: high -->
+
+- [ ] Clean it with an antivirus scan and return it to the user
+- [ ] Cleaning is fine as long as the detection rule no longer fires
+- [ ] Clean it and keep the original disk image as the only record
+- [x] Rebuild it, because “we cleaned it” is not a statement you can make about a system you do not fully understand
+
+**Why:** Administrative access means you cannot enumerate every change, so a rebuild from a known-good image is the only defensible recovery. Trusting a clean scan is the trap — the absence of a detection is not evidence that nothing remains.
+
+### Q8. Your only backup of a server predates the attacker's initial access, but a newer one exists from after it. Which do you restore? <!-- id: cyber-11-q08 energy: high -->
+
+- [ ] The newer one, because it is the most recent and loses the least data
+- [ ] Either one, because the persistence will be found by the EDR on restore
+- [x] The older, pre-compromise one, because a backup from after initial access restores the backdoor
+- [ ] Neither; restore from the original installation media only
+
+**Why:** The age of the backup must be checked against the attacker's dwell time, because a backup taken after initial access carries the persistence back in with it. Choosing the newer backup is the trap — recency is a virtue only when the image predates the compromise.
+
+### Q9. Logs show the malicious process started under three minutes after the payload was written to disk. What does this phase say that timing establishes? <!-- id: cyber-11-q09 energy: high -->
+
+- [ ] That the user manually ran the file from the temp directory
+- [ ] That the EDR agent was disabled during execution
+- [x] That the execution was automated rather than a user exploring manually
+- [ ] That the payload was downloaded rather than dropped locally
+
+**Why:** A gap of minutes between the write and the execution is consistent with automated execution, which is why the phase points at both measured gaps. Reading it as manual action is the trap — a person navigating to a temp folder and running a file takes longer and leaves different traces.
+
+### Q10. Personal data may have been accessed, and you are unsure whether it must be notified. What does this phase say your job is? <!-- id: cyber-11-q10 energy: normal -->
+
+- [x] Recognise that an obligation may exist and route the question to counsel or the DPO
+- [ ] Decide whether the breach is notifiable so the report is complete
+- [ ] State the deadline from the Data Privacy Act from memory
+- [ ] Wait until the investigation closes before mentioning it to anyone
+
+**Why:** Recognising that a legal question exists is the analyst's job, and answering it is counsel's — this is a liability that is not yours to take on. Quoting a deadline from memory is the trap, because the phase says explicitly that the answer belongs to counsel.
+
+### Q11. Which question does this phase call one to be careful with, because a junior should route it rather than answer it? <!-- id: cyber-11-q11 energy: normal -->
+
+- [ ] Whether the host should be isolated at the switch
+- [x] Whether the incident triggers a regulatory notification obligation
+- [ ] Whether memory or the disk should be captured first
+- [ ] Whether the alert should be escalated to the incident lead
+
+**Why:** The legal and regulatory threshold is decided by legal counsel or the designated officer, not by the analyst, and your part is to notice and route it. Choosing the technical questions is the trap — isolation and capture order are squarely within an analyst's own judgement.
+
+### Q12. What does this phase say a tabletop exercise is for? <!-- id: cyber-11-q12 energy: normal -->
+
+- [ ] Testing whether the detection rules fire on a simulated attack
+- [ ] Measuring how quickly the team can contain a real intrusion
+- [ ] Validating that the backup restore procedure still works
+- [x] Rehearsing decisions and exposing gaps, including who talks to a journalist or which regulator applies
+
+**Why:** A tabletop is a discussion-based rehearsal, and its most valuable injects test the parts of response that have nothing to do with technology. Expecting it to test detections is the trap — no technology is involved at all, which is precisely why it surfaces the gaps tooling cannot fix.
+
 ## Checklist
 
 - [ ] I can name the six NIST incident response stages and what each produces. <!-- id: cyber-11-nist-lifecycle energy: low -->

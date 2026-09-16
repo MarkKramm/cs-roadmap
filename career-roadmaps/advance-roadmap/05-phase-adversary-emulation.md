@@ -1230,6 +1230,116 @@ Create `portfolio/advance/05-adversary-emulation.md` with:
 - The full exercise report with the coverage number and its denominator, and a limitations section
 - The Navigator layer after the exercise, showing which techniques moved and which did not
 
+## Quiz
+
+### Q1. After running a registry run key emulation, the team finds that no event ID 13 was recorded at all. What is the correct verdict? <!-- id: advance-05-q01 energy: high -->
+
+- [x] Not detected with no telemetry — a capability gap, not a detection gap
+- [ ] Not detected, so a detection rule should be written immediately
+- [ ] Detected, because Sysmon is installed and configured
+- [ ] An invalid test, because the technique was not executed properly
+
+**Why:** No event was recorded, so no rule could ever have matched and the gap is in collection rather than detection. Sending a detection engineer to write a rule is the trap — the phase says that rule would work in the lab and never fire in production, which runs the same exclude list.
+
+### Q2. Before blaming a rule for not firing, what does this phase say you must check? <!-- id: advance-05-q02 energy: normal -->
+
+- [ ] Whether the rule exists in the SIEM's production rule set
+- [x] Whether the telemetry event is generated at all, with a count query against the log
+- [ ] Whether the analyst on shift was watching the queue
+- [ ] Whether the technique was mapped to the correct ATT&CK tactic
+
+**Why:** “No event was recorded” and “the event was recorded and no rule matched” are different findings with different owners and different fixes. Checking the rule set first is the trap — a rule cannot fire on an event that was never written.
+
+### Q3. A control owner replies that an alert goes to a queue nobody watches. How does this phase classify that? <!-- id: advance-05-q03 energy: high -->
+
+- [ ] A false positive that should be tuned away
+- [ ] Not a finding, because the rule technically works
+- [ ] A telemetry gap that needs a new log source
+- [x] A detection gap of a different kind — the rule works, the response path does not
+
+**Why:** A rule that fires correctly into a process that does not act on it is, from a detection perspective, indistinguishable from no rule at all, and the phase calls this common and invisible to a coverage map. Treating it as no finding is the trap — the control is broken in practice even though the rule is sound.
+
+### Q4. Which section of the control-failure note does this phase call the most valuable? <!-- id: advance-05-q04 energy: normal -->
+
+- [ ] The section listing the exact event IDs and timestamps observed
+- [ ] The section proposing a specific, costed fix with an owner
+- [ ] The section committing to a re-test date and method
+- [x] The “what we are not saying” section, which removes the implication that someone failed
+
+**Why:** Removing the implication of blame removes the reason to argue, and a finding that arrives without blame gets fixed faster. Choosing the commit-to-re-test section is the trap — it makes the note a measurement agreement, but it is the no-blame section that gets it acted on.
+
+### Q5. A coverage number is published as a percentage with no technique list. What does this phase call that? <!-- id: advance-05-q05 energy: normal -->
+
+- [x] A marketing claim, because a percentage without its denominator says nothing
+- [ ] A reasonable summary for an executive audience
+- [ ] A measurement, provided the lab was isolated
+- [ ] An honest figure as long as the limitations section exists
+
+**Why:** The denominator and the technique list are what make the number checkable, which is why the phase requires them published alongside it. Treating it as executive-friendly is the trap — a summary that cannot be verified tells the reader nothing about what was actually measured.
+
+### Q6. Why does this phase insist the detection hypothesis is written before the test runs? <!-- id: advance-05-q06 energy: high -->
+
+- [ ] Because the rule cannot be written until the hypothesis exists
+- [x] Because writing it afterwards is describing, not measuring
+- [ ] Because the rules of engagement require a written plan
+- [ ] Because the hypothesis determines which atomic test to run
+
+**Why:** A hypothesis recorded in advance fixes the expectation before the result is known, which is what makes the result a measurement. Writing it afterwards is the trap — the phase says that is description, because the expectation is then fitted to whatever was observed.
+
+### Q7. Which four verdicts does this phase use instead of a simple detected or not detected? <!-- id: advance-05-q07 energy: low -->
+
+- [ ] Pass, fail, blocked, and inconclusive
+- [ ] Covered, uncovered, planned, and out of scope
+- [x] Detected, partially detected, not detected with telemetry, and not detected with no telemetry
+- [ ] Critical, high, medium, and low
+
+**Why:** Separating the two “not detected” cases matters because one is a detection gap and the other is a capability gap with a different owner and fix. Collapsing them into one is the trap — it sends a rule writer to fix a collection problem.
+
+### Q8. The Sigma rule written from the run key gap sets its level to `medium` rather than `high`. Why? <!-- id: advance-05-q08 energy: high -->
+
+- [ ] Because run keys are not a persistence mechanism worth alerting on
+- [ ] Because Sigma only permits `medium` for registry-based log sources
+- [x] Because run keys are written legitimately in almost every environment, and a high severity would stop being read
+- [ ] Because the rule had not yet been converted for a backend
+
+**Why:** The honest rating reflects how often benign writers touch that path, and the phase says the emulation is what makes that visible before the rule ships. Calling run keys irrelevant is the trap — the phase says they are one of the most common Windows persistence mechanisms and survive reboot.
+
+### Q9. A rule adds filters for signed installer paths to cut alert volume. What does this phase say about that trade? <!-- id: advance-05-q09 energy: high -->
+
+- [x] Every filter buys quiet at the price of blindness, and the price belongs in the rule
+- [ ] Filters only affect performance and never change detection coverage
+- [ ] Filters should be avoided entirely so coverage stays complete
+- [ ] Filters are acceptable only if approved by the control owner
+
+**Why:** The signed-path filter means a malicious binary copied into `Program Files` writing a run key is filtered out, and writing that trade into the rule marks it as a decision rather than an oversight. Rejecting all filters is the trap — the phase treats this as a conscious trade, not a mistake.
+
+### Q10. Why does this phase reject NAT as a form of lab isolation? <!-- id: advance-05-q10 energy: normal -->
+
+- [ ] Because NAT is too slow for emulation traffic
+- [ ] Because NAT prevents the lab hosts from reaching each other
+- [x] Because the lab needs host-only or internal networking, with no shared folders or USB passthrough
+- [ ] Because NAT blocks the telemetry agent from reporting
+
+**Why:** Isolation must be verified rather than assumed, and that means host-only or internal networking plus a verified kill switch, with the output kept as a timestamped record. Trusting NAT is the trap — the phase states plainly that NAT is not isolation.
+
+### Q11. A technique was tested and the rule was written afterwards. Why does this phase say the loop is not closed? <!-- id: advance-05-q11 energy: high -->
+
+- [ ] Because the gap register still needs an owner assigned
+- [x] Because a rule written from an emulation result has not been tested until the technique is re-run against it
+- [ ] Because the Sigma rule has not been converted for a backend
+- [ ] Because the Navigator layer has not been updated
+
+**Why:** The purple team loop only counts as a loop if the last step feeds the first, so the re-test is what turns a written rule into a verified detection. Converting the rule is the trap — conversion makes it deployable but says nothing about whether it fires on the behaviour.
+
+### Q12. The exercise tested five techniques on two Windows 10 lab hosts. What does this phase say the coverage figure applies to? <!-- id: advance-05-q12 energy: high -->
+
+- [ ] The whole estate, since the lab mirrors production configuration
+- [ ] All Windows techniques, because the platform is the same
+- [ ] Every technique in the ATT&CK matrix for the tested tactics
+- [x] The techniques in the coverage summary and nothing else
+
+**Why:** An exercise on two lab hosts measured two lab hosts, and stating that is what makes the rest of the report trustworthy. Assuming the lab mirrors production is the trap — the phase notes that rules most often fail under the normal volume of legitimate activity, which a quiet lab does not reproduce.
+
 ## Checklist
 
 - [ ] I can explain the difference between adversary emulation and penetration testing without prompting. <!-- id: advance-05-emulation-vs-pentest energy: low -->

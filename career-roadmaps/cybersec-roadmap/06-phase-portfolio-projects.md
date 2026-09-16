@@ -1203,6 +1203,120 @@ A portfolio with at least 3 completed reports:
 - `incident-report.md`
 - Optional specialization reports
 
+## Quiz
+
+Twelve questions on the material in this phase. Each has one correct answer and a short explanation — read the explanation even when you get it right, because it usually names the mistake the wrong answers represent.
+
+Almost all of these are about the *proof* rather than the work, which is the distinction the phase is built on: doing the work and proving the work are two different skills. Several test whether you can tell a claim a reviewer would trust from one they would start to doubt.
+
+### Q1. The exit criterion names four qualifiers, and the phase says each fails differently. Which one is the honesty test? <!-- id: cyber-06-q01 energy: low -->
+
+- [x] Honest
+- [ ] Clear
+- [ ] Evidence-based
+- [ ] Aligned
+
+**Why:** The phase pairs honest with implying your lab was production or a synthetic alert was a real intrusion, and says reviewers detect it instantly and it destroys more credibility than a modest project ever would. Clear is the writing discipline and evidence-based is about claims tracing to artifacts.
+
+### Q2. Your report's Findings section says “I found some suspicious activity, including an encoded PowerShell command which is very dangerous.” What does the phase say is missing? <!-- id: cyber-06-q02 energy: normal -->
+
+- [x] Every claim is uncheckable — no named process, time, or command line
+- [ ] A severity rating, so a reviewer can prioritise the finding
+- [ ] A reference to the OWASP category the finding belongs to
+- [ ] An executive summary placed before the findings
+
+**Why:** The phase's weak-versus-strong table is exactly this comparison, and specificity is the first dimension: the strong version names the process, PID, exact time, and full command line so every claim is checkable. Severity is a separate dimension — the strong version states it rather than implying it with an adjective.
+
+### Q3. Which section does the phase call the single fastest way to sound like an analyst rather than a student? <!-- id: cyber-06-q03 energy: normal -->
+
+- [x] The Limitations section, stating what you could not determine
+- [ ] The Summary, because it is read first
+- [ ] The Impact section, written for a non-technical manager
+- [ ] The Method section with its reproduced commands
+
+**Why:** The phase's example admits it could not determine the parent process because the host was reimaged before volatile data was captured, and says that demonstrates you understand investigation. Impact is the business-translation test, which is a different skill from sounding like an analyst.
+
+### Q4. A screenshot shows an alert with the timestamp and surrounding interface, but the caption is `![](evidence/image1.png)`. What does the phase call that? <!-- id: cyber-06-q04 energy: normal -->
+
+- [ ] Evidence, because the screenshot itself carries the identifiers
+- [x] Decoration, because the caption is where you tell the reviewer what to conclude
+- [ ] Acceptable, provided the file is committed under a descriptive folder
+- [ ] A minor formatting issue that does not affect the finding
+
+**Why:** The phase's caption table puts a descriptive caption in the evidence column and a bare `image1.png` in the decoration column, because the caption is what lets the reviewer reach the conclusion instead of hunting for it. The screenshot having identifiers is necessary but not sufficient.
+
+### Q5. A junior says the project is finished, so the Summary can be written first. What does the phase say about that? <!-- id: cyber-06-q05 energy: normal -->
+
+- [ ] Summary first is correct, because it frames everything else
+- [ ] Summary and Environment should both be written first
+- [ ] It does not matter, provided the Summary is revised at the end
+- [x] Write Summary and Limitations last — writing them first guarantees they are wrong
+
+**Why:** The phase says these are the two sections that require knowing the whole result, which is why writing them first guarantees they are wrong. Leaving them for a later revision is close but not what the phase prescribes, and Environment belongs with the reproducible material.
+
+### Q6. What does the phase say a hiring manager is actually assessing, given that none of it is “do they know a lot”? <!-- id: cyber-06-q06 energy: high -->
+
+- [ ] Tool breadth, since listing more tools signals more experience
+- [ ] Certification count, as a proxy for verified knowledge
+- [x] Judgement, method, honesty, and follow-through
+- [ ] The number of projects, since volume shows dedication
+
+**Why:** The phase lists those four directly and says all are visible in how you wrote the report rather than in what tools you listed. It also warns against the opposite instinct — three finished projects beat six half-built folders.
+
+### Q7. Your report shows an alert firing at a specific time on a lab host you controlled. What does the phase say the Environment section must state? <!-- id: cyber-06-q07 energy: normal -->
+
+- [ ] The exact Wazuh version and rule ID used
+- [ ] A statement that the work is equivalent to production experience
+- [ ] The employer whose environment inspired the lab
+- [x] That it is an isolated lab and the alert was self-generated, not a real intrusion
+
+**Why:** The phase gives the sentence almost verbatim and says it costs nothing and buys credibility — a reviewer who discovers the work is a lab and that you described it accurately trusts you more. Claiming production equivalence is the dishonesty the phase's honest qualifier warns against.
+
+### Q8. Your three detection rules are variations of the same detection. What does the phase say about that choice? <!-- id: cyber-06-q08 energy: normal -->
+
+- [ ] It is fine, because repetition shows mastery of one technique
+- [x] Three variations show one skill; choose three demonstrating different skills
+- [ ] It is preferred, because a consistent set is easier to review
+- [ ] It is fine if each rule is documented in the same format
+
+**Why:** The phase's three-rule table wants a modified built-in rule, a custom rule for a specific behaviour, and a rule with a tuning story, and it warns that three variations of the same detection show one skill. The tuning story is the one it calls the rarest and most valuable.
+
+### Q9. An alert fires noisily on benign activity and you refine it with a whitelist. Why does the phase single this out as valuable? <!-- id: cyber-06-q09 energy: high -->
+
+- [ ] It proves you can write XML by hand rather than using a template
+- [ ] It shows you can read a vendor's documentation accurately
+- [x] Anyone can make an alert fire; employers pay for making them fire usefully
+- [ ] It demonstrates that the lab environment was correctly isolated
+
+**Why:** The phase says demonstrating that you understand false positives — because you created one and then fixed it — is direct evidence of judgement, which it calls the rarest and most valuable of the three skills. Writing XML and reading documentation are the other two rules' contributions.
+
+### Q10. Which sanitisation check does the phase say people forget and regret, alongside credentials and internal hostnames? <!-- id: cyber-06-q10 energy: low -->
+
+- [ ] Shell command history from the lab build
+- [ ] The names of the tools you used
+- [ ] Screenshots that include your desktop background
+- [x] Licence keys, especially for commercial tooling
+
+**Why:** The phase's four-item check covers credentials and API keys, internal hostnames and IPs, real usernames or personal data, and licence keys for commercial tooling. Tool names are not sensitive, and the phase encourages naming the telemetry source and event IDs you used.
+
+### Q11. You want to build part of the portfolio from the environment you support at work. What does the phase say? <!-- id: cyber-06-q11 energy: high -->
+
+- [ ] Do not use work material at all, since it is always confidential
+- [ ] Use it freely, since a real environment is stronger evidence than a lab
+- [x] Sanitise first, and consider describing the environment without exposing it
+- [ ] Use it, provided you remove only the hostnames
+
+**Why:** The phase treats this as a real advantage while insisting on sanitisation, and warns that a portfolio leaking your employer's internal addressing scheme gets you a conversation with your manager instead of a job offer. Removing only hostnames is the partial sanitisation it later calls worse than none.
+
+### Q12. A reviewer opens your repository. What does the phase say decides whether they can trust what you say, in the first sixty seconds? <!-- id: cyber-06-q12 energy: normal -->
+
+- [ ] The number of commits in the repository history
+- [x] Whether there is a Limitations section and evidence files
+- [ ] The length and detail of the top-level README
+- [ ] Whether the tools used are named in a list
+
+**Why:** The phase's sixty-second scan gives the 45–60 second window to exactly that check, and says every one of those decisions is made from the README alone. The other rows cover different questions — whether it is a portfolio at all, and whether the projects are reachable in one click.
+
 ## Checklist
 
 - [ ] I created a cyber portfolio repo/folder. <!-- id: cyber-06-c01 energy: normal -->

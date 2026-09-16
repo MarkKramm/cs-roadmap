@@ -1010,6 +1010,120 @@ Create `portfolio/advance/03-incident-command.md` with:
 - A completed handover pack, plus the list of questions the incoming commander asked
 - A post-incident review pack: timeline, contributing factors, action tracker with owners and dates, and the booked follow-up
 
+## Quiz
+
+Twelve questions on the material in this phase. Each has one correct answer and a short explanation — read the explanation even when you get it right, because it usually names the mistake the wrong answers represent.
+
+These are mostly command judgements: who decides, what gets written down, and which instinct is the trap. Several of them put you in the seat the phase keeps returning to, where you are the most senior person available and the least experienced person in the room.
+
+### Q1. You are the on-call shift lead and the best analyst on the shift. An alert fires at 01:14. What does the phase say you should do the moment you accept the commander role? <!-- id: advance-03-q01 energy: normal -->
+
+- [x] Stop being an analyst for the duration
+- [ ] Investigate first, then hand off once you have the picture
+- [ ] Work the alert and command at the same time
+- [ ] Ask the ops lead to command while you investigate
+
+**Why:** The phase's wrong-first-guess sequence shows the incident growing fifty percent while the one person responsible for noticing was busy being useful. The fix is not to be less capable but to stop doing analyst work — and if you later want it back, say so out loud and record it.
+
+### Q2. You are working solo at 2 a.m. and there is nobody to hand command to. How does the phase tell you to handle doing both jobs? <!-- id: advance-03-q02 energy: high -->
+
+- [ ] Refuse to command and work the incident as an analyst
+- [x] Timebox the hands-on work and keep the command clock running
+- [ ] Declare a lower severity so the command structure is not needed
+- [ ] Keep working until the incident closes, then write the command record
+
+**Why:** The phase's ten-minute block pattern exists for exactly this: work in blocks, then stop and look outward at what arrived while you were heads-down. Declaring lower to avoid the structure inverts the bias toward declaring, and reconstructing the record afterwards is what the scribe rule calls writing fiction.
+
+### Q3. A response has grown to twelve people. What does the phase say must change? <!-- id: advance-03-q03 energy: normal -->
+
+- [x] Team leads are added under the ops lead
+- [ ] The IC takes on more people directly and works faster
+- [ ] The scribe starts directing the technical work as well
+- [ ] A second IC is appointed to share the decision load
+
+**Why:** Span of control tops out around three to seven people, so the phase's structure table adds endpoint and identity team leads at eight to fifteen, which means the ops lead directs leads rather than individuals. Giving one commander more people produces a worse commander, not a better response; the deputy IC belongs at fifteen-plus.
+
+### Q4. Who may declare and close an incident, and who may propose a severity? <!-- id: advance-03-q04 energy: low -->
+
+- [ ] Anyone may declare; the IC closes
+- [ ] The ops lead declares, and the IC closes
+- [x] Only the IC declares and closes; anyone may detect and propose a severity
+- [ ] The IC declares, and executives close
+
+**Why:** The phase makes the IC the only person who declares and closes, because declaration is what turns normal work into an incident and rearranges people's day. Detection and proposing a severity stay open to everyone, which is why the rule is about the decision rather than about who noticed.
+
+### Q5. You see an impossible-travel alert and an unfamiliar mail rule at 01:14. Why does the phase call declaring S1 immediately the wrong first guess? <!-- id: advance-03-q05 energy: high -->
+
+- [ ] S1 is reserved for confirmed data exfiltration only
+- [ ] It breaches the requirement that severity changes are announced
+- [ ] S1 requires a change request before containment is authorised
+- [x] It spends executive goodwill and teaches the organisation your declarations are noise
+
+**Why:** The phase's counter-example has both signals turn out benign, and the lasting damage is that the next S1 gets second-guessed. The correct first guess is S2 with a written escalation trigger, so escalating later is a lookup rather than a debate at 03:00.
+
+### Q6. An IC wants a technical action performed during a live incident. Who do they ask? <!-- id: advance-03-q06 energy: normal -->
+
+- [ ] The engineer directly, to save a step
+- [ ] The scribe, so the action is recorded as it happens
+- [x] The operations lead, who is the only person directing hands-on work
+- [ ] The communications lead, who owns outward messages
+
+**Why:** The phase's rule is that the ops lead is the only person directing hands-on work, because four people giving four engineers four instructions is the fastest way to waste a response. The scribe owns the written record and comms owns everything going outward — neither directs technical work.
+
+### Q7. On a fifteen-minute bridge, an engineer's round-robin answer is “I looked at the proxy logs.” What two-part shape does the phase prescribe instead? <!-- id: advance-03-q07 energy: normal -->
+
+- [ ] What I found, and who else should check it
+- [ ] What I did, and what I will do next
+- [x] I did X, and the one thing blocking me is Y
+- [ ] What I did, and how long it took
+
+**Why:** The phase calls this the highest-leverage habit on the call because it converts a status recital into a request for help, and requests for help are what a commander can act on. A recital tells the room what they already saw.
+
+### Q8. Which section of the SITREP template does the phase say amateurs omit, and why does it matter? <!-- id: advance-03-q08 energy: normal -->
+
+- [ ] Decisions needed — it is the only section that requires action
+- [x] What we do not know — it lets the reader calibrate
+- [ ] What we have done — it prevents duplicated work
+- [ ] Next update — it sets the cadence expectation
+
+**Why:** A reader who is told the boundaries of your knowledge can calibrate what to trust, which is what makes the report trustworthy. The other sections are necessary too, but the phase singles out the unknown section as the one that separates a credible report from a confident one.
+
+### Q9. The CISO is already on the technical bridge. Should you also give them the executive briefing there? <!-- id: advance-03-q09 energy: normal -->
+
+- [ ] Yes — one briefing avoids duplicating information
+- [ ] Yes — it saves the CISO from attending two calls
+- [ ] No — executives are not entitled to technical detail
+- [x] No — you would have to be precise and reassuring in the same call
+
+**Why:** The phase's rule is never to brief an executive on a bridge they can also hear, because the two registers conflict. The point is not secrecy from the executive; it is that asking one person to be both precise and reassuring at once produces a briefing that does neither well.
+
+### Q10. The DPO asks whether the incident is notifiable. What does the phase say your responsibility is? <!-- id: advance-03-q10 energy: high -->
+
+- [ ] Determine the answer from the access logs and reply
+- [x] Route the question, preserve the evidence, and say you are not determining it
+- [ ] Refer the question to the executive briefing instead
+- [ ] Wait until the investigation closes before telling anyone
+
+**Why:** The phase is explicit that routing is your job and answering is not — the privacy escalation note says outright that notification is the DPO's determination. Guessing an answer invents legal advice, and waiting until closure may let a notification clock expire.
+
+### Q11. A rule fires and finds three files read from a payroll folder, but outbound logs on that segment are not collected. How should the executive briefing answer “how confident am I”? <!-- id: advance-03-q11 energy: high -->
+
+- [ ] Confident, because the account is contained and the rule has ended
+- [ ] Decline to answer until the investigation closes
+- [ ] Confident nothing left, because no egress alert fired
+- [x] Confident the account is contained, and not yet able to say whether data left
+
+**Why:** The phase says the fourth answer is the one people get wrong, and that “not yet able to say” is not weakness — an executive told a confident story that later falls apart stops believing the next one. No egress alert is no evidence either way, because the telemetry does not exist.
+
+### Q12. Your shift ends at 08:00 and the incident is still open. What does the phase require of the outgoing commander? <!-- id: advance-03-q12 energy: high -->
+
+- [ ] A fifteen-minute verbal summary to the incoming commander
+- [x] A written handover pack, then a warm overlap, then a public transfer
+- [ ] Staying on until it closes, since continuity matters most
+- [ ] A written pack sent by email after the shift ends
+
+**Why:** The phase says a handover is a document plus a conversation, in that order, and that the public sentence naming the new IC is what prevents two people giving conflicting instructions. A verbal-only handover costs the next shift an hour of reconstruction, and a tired commander who stays makes worse decisions than one at hour three.
+
 ## Checklist
 
 - [ ] I can explain why an incident commander does not work tickets. <!-- id: advance-03-command-vs-doing energy: low -->

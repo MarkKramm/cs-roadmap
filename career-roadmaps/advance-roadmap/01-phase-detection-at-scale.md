@@ -1360,6 +1360,120 @@ Create `portfolio/advance/01-detection-at-scale.md` with:
 - A one-page coverage summary written for a manager, including the known inaccuracies
 - A test result from one atomic test, recorded against a rule id with the date
 
+## Quiz
+
+Twelve questions on the material in this phase. Each has one correct answer and a short explanation — read the explanation even when you get it right, because it usually names the mistake the wrong answers represent.
+
+Most of these are judgement calls rather than lookups, because that is what owning a library actually is. The arithmetic appears in a few places, but the harder questions are the ones where a reasonable-sounding answer is the shortcut this phase exists to argue against.
+
+### Q1. Your queue is drowning. A colleague proposes deleting the noisiest rule outright. Which of the phase's three responses fits a rule whose *condition is broader than the behaviour*? <!-- id: advance-01-q01 energy: normal -->
+
+- [x] Tune it — the logic does not match the intent
+- [ ] Retire it — the cost exceeds the value
+- [ ] Suppress it — keep the rule and discard specified matches
+- [ ] Route it to a dashboard and stop triaging it
+
+**Why:** The phase pairs each expensive-rule cause with a response, and a condition broader than the behaviour means the rule is not describing what you meant, so you narrow it. Retirement is for a target that no longer exists, not for sloppy logic.
+
+### Q2. A rule's 30-day replay shows 1,240 matches, of which 217 are undetermined. Your manager asks you to tune until the volume drops. What does the phase say about those 217? <!-- id: advance-01-q02 energy: high -->
+
+- [ ] Tune them away first, because they are the largest single group
+- [ ] Move all 217 to a suppression list pending review
+- [x] They must not be tuned away — they are the cases the rule exists for
+- [ ] Lower the rule's level so the volume stops paging anyone
+
+**Why:** The phase is explicit that tuning away unexplained matches destroys the rule's value, because finding out what those cases are *is* the point. Suppressing them is the same error wearing different paperwork, and lowering the level hides the question rather than answering it.
+
+### Q3. A colleague wants to suppress an alert because “the IT admin does this a lot.” Why does the phase reject that suppression? <!-- id: advance-01-q03 energy: normal -->
+
+- [ ] It is technically impossible to implement in most platforms
+- [x] It suppresses a subject rather than a behaviour, hiding everything that account ever does
+- [ ] It would cost more analyst time than triaging the alerts
+- [ ] It would breach the rule's ATT&CK technique mapping
+
+**Why:** Suppressing `CcmExec.exe` spawning an encoded command removes one verified benign behaviour. Suppressing an account removes every future action of that account, including the thing the rule was built to catch — a permanent blind spot, not a tuning decision.
+
+### Q4. A rule has produced no true positives in twelve months. What does the phase say that justifies? <!-- id: advance-01-q04 energy: high -->
+
+- [ ] Retire it immediately, since a year of silence proves it is worthless
+- [x] Test whether it is *capable* of firing before retiring it
+- [ ] Promote it to production, since a quiet rule is a healthy rule
+- [ ] Delete it and reassign the owner to tuning work
+
+**Why:** A quiet rule may be detecting a technique nobody has attempted, which is the outcome you want. The phase says the question is whether the rule can fire, and that is answered by testing it, not by its alert history.
+
+### Q5. A rule fires into a queue with no owner, and median time to first action is eleven days. The coverage map colours that technique green. What has the team actually documented? <!-- id: advance-01-q05 energy: high -->
+
+- [x] Detection — but not coverage, because nobody acts on the alert
+- [ ] Coverage — a rule exists and it fires
+- [ ] Visibility — the telemetry is collected and queryable
+- [ ] Nothing at all, since an unowned queue is not a control
+
+**Why:** The phase separates visibility, detection, and coverage, and coverage requires a fired alert reaching a human who will act. A rule that fires into an unread queue produces text, not coverage — the most common lie in a coverage matrix, and usually not a deliberate one.
+
+### Q6. Rows on your coverage map show: proxy logs retained seven days and never ingested, so no web-protocol detection exists. Which gap type is that, and who owns it? <!-- id: advance-01-q06 energy: normal -->
+
+- [ ] Detection gap, owned by detection engineering, fixed in hours
+- [x] Telemetry gap, owned by the platform or network team, fixed in weeks
+- [ ] Operational gap, owned by the SOC lead, fixed by a routing change
+- [ ] Coverage gap, owned by the analyst who built the layer
+
+**Why:** A missing log source is a telemetry gap with a budget request behind it, not a rule-writing problem. The phase calls this the highest-value finding on the map precisely because no amount of rule writing fixes it — which is why filing it as a detection gap wastes the finding.
+
+### Q7. You must write a rule for a behaviour that is genuinely interesting but too noisy to page on. Which routing does the phase prescribe for hundreds of matches a month? <!-- id: advance-01-q07 energy: normal -->
+
+- [ ] The on-call paging queue at high severity
+- [ ] The standard queue, worked within the shift
+- [ ] A dashboard, tracked and never triaged
+- [x] The hunting queue, reviewed in batches and never paged
+
+**Why:** The phase's routing table gives hunting input a volume of hundreds per month reviewed in batches. Paging on it burns the on-call budget for something that is not urgent, and a dashboard throws away the review that makes it useful.
+
+### Q8. An engineer's rule passed review, went green on the coverage map, and never fired during an incident it should have caught. What step was missing? <!-- id: advance-01-q08 energy: high -->
+
+- [ ] A second reviewer signing the approve decision
+- [ ] An ATT&CK technique tag in the rule's front matter
+- [x] Running a known-bad sample through the deployed rule and seeing it fire
+- [ ] Estimating the expected alert volume before promotion
+
+**Why:** The phase's rule is that a rule is not deployed when it is committed, but when you have seen it fire on real data. Test-harness success does not prove the deployed rule works with deployed field names — that gap cost an incident a written rule should have caught.
+
+### Q9. You want to know how often a proposed rule would fire before it reaches the queue. Which test answers that? <!-- id: advance-01-q09 energy: normal -->
+
+- [ ] A unit test with one matching and one non-matching sample
+- [ ] An atomic test that executes the technique for real
+- [x] A historical replay over the last 30 days of logs
+- [ ] A review against the twelve-check standard
+
+**Why:** Unit tests prove the logic matches, and atomic tests prove deployment works, but neither tells you volume. Replay is the only one of the three that counts what would have matched in your environment, and the phase notes it is the cheap way to catch volume problems early.
+
+### Q10. A rule keeps its noisy volume but adds three filters naming `CcmExec.exe`, the Intune agent, and one fixed backup command line. Why does the phase insist the filters live in the rule rather than a platform allowlist? <!-- id: advance-01-q10 energy: normal -->
+
+- [ ] Platform allowlists are slower to evaluate at query time
+- [ ] The rule's Sigma format cannot express a platform allowlist
+- [ ] A platform allowlist would need a review date and an owner
+- [x] The filters move with the rule on migration, so it does not silently become noisy again
+
+**Why:** Attached filters travel with the rule file; platform-side allowlists are lost when the rule moves platforms. The phase also notes a filter you cannot explain is a blind spot you have not documented, which is why each filter names a specific verified benign cause.
+
+### Q11. You need to prove that a service stopping has removed process-creation telemetry from a host. What does the phase recommend? <!-- id: advance-01-q11 energy: normal -->
+
+- [x] A heartbeat rule that alerts when a host stops sending the telemetry others depend on
+- [ ] A scheduled weekly replay of every process-creation rule
+- [ ] Reviewing the coverage map against the asset inventory monthly
+- [ ] Raising the severity of every rule that reads Sysmon Event ID 1
+
+**Why:** An agent upgrade that removes Sysmon does not break the rule file — it removes the data the rule reads, and a rule that never fires looks exactly like a rule with nothing to find. The heartbeat is the phase's countermeasure, and it is called the least glamorous and most valuable detection in the library.
+
+### Q12. A reviewer finds the precision check failed on volume but the logic is correct. What decision does the review standard permit? <!-- id: advance-01-q12 energy: high -->
+
+- [ ] Reject — a rule that fails any check cannot be promoted
+- [ ] Approve — the failed check is about volume, not correctness
+- [x] Approve with conditions, attaching dated actions with a named owner
+- [ ] Return for changes and require the author to rewrite the logic
+
+**Why:** The phase's review record shows exactly this case, and the answer was a routing change plus a dated commitment. Reviewers who reject everything noisy end up with no detections, and returning it for changes implies the logic is wrong when it is not.
+
 ## Checklist
 
 - [ ] I can write a detection rule in a vendor-neutral format and convert it to my platform. <!-- id: advance-01-sigma-authoring energy: normal -->

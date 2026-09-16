@@ -2005,6 +2005,116 @@ Create `portfolio/advance/04-cloud-identity-architecture.md` with:
 - A control inventory marking every guardrail exists, enforced, or monitored
 - The rejected-alternatives section for one design decision
 
+## Quiz
+
+### Q1. A role has `AdministratorAccess` attached plus a permission boundary. What are its effective permissions? <!-- id: advance-04-q01 energy: normal -->
+
+- [ ] Everything `AdministratorAccess` grants, because it is the broader policy
+- [x] The intersection — what the identity policy allows *and* what the boundary allows
+- [ ] Everything the boundary allows, because the boundary overrides the identity policy
+- [ ] The union of both, because both are attached to the same role
+
+**Why:** A permission boundary is an intersection rather than a grant, so a permission present in only one of the two is denied. Reading it as an override is the trap — the boundary cannot grant anything the identity policy withholds, and it only ever removes.
+
+### Q2. Why does this phase keep `AdministratorAccess` attached instead of writing a tight enumerated identity policy? <!-- id: advance-04-q02 energy: high -->
+
+- [ ] Because enumerating the policy would cost more in API calls
+- [ ] Because `AdministratorAccess` is required for the boundary to attach
+- [ ] Because an enumerated policy cannot be reviewed by an auditor
+- [x] Because it leaves one variable instead of two, so a legitimate task failing is immediately visible
+
+**Why:** With `AdministratorAccess` attached, any failure is caused by the boundary, which makes it diagnosable during an incident. Tightening the identity policy is the trap — it produces the same effective permissions while making every failure ambiguous between two artefacts.
+
+### Q3. An attacker assumes a role through a chain of two assumptions. What happens to the MFA context? <!-- id: advance-04-q03 energy: high -->
+
+- [ ] It carries forward, because it is bound to the original session
+- [ ] It is refreshed automatically at each assumption
+- [ ] It is preserved only if the second role also requires MFA
+- [x] It does not survive, so `aws:MultiFactorAuthPresent` is false on the second assumption
+
+**Why:** The MFA context is a property of the first session and is not carried into a chained assumption, which is one reason this phase prefers workload identity to a chain. Assuming it carries forward is the trap — a trust policy conditioned on MFA stops protecting the moment a role chain is involved.
+
+### Q4. An OIDC trust policy omits the `sub` condition entirely. What does this phase say that means? <!-- id: advance-04-q04 energy: high -->
+
+- [ ] Only workflows on the default branch can assume the role
+- [x] Any GitHub workflow in the world can assume the role
+- [ ] Any repository in your organisation can assume the role
+- [ ] The role cannot be assumed at all, because the condition is required
+
+**Why:** The `sub` condition is the entire security content of the policy, and omitting it removes every restriction on who may assume the role. Confusing this with the `repo:acme/*` case is the trap — that at least limits it to your organisation, while an omitted `sub` limits it to nobody.
+
+### Q5. A service control policy is attached at the root of the organisation. Which two properties does this phase give it? <!-- id: advance-04-q05 energy: normal -->
+
+- [ ] It grants permissions to new accounts and is inherited downward
+- [ ] It applies to the management account and overrides identity policies
+- [ ] It replaces permission boundaries and is evaluated before identity policies
+- [x] It sets a ceiling and grants nothing, and it does not reach the management account
+
+**Why:** An SCP sets the outer limit and grants nothing on its own, which is why attaching it at the root makes every future account inherit the guardrail. Expecting it to reach the management account is the trap — that account is deliberately outside its scope.
+
+### Q6. Why does this phase say the break-glass role deliberately has no permission boundary? <!-- id: advance-04-q06 energy: high -->
+
+- [ ] Because break-glass credentials are held offline and cannot be leaked
+- [x] Because a boundary that cannot be bypassed is a boundary you cannot fix when you get it wrong
+- [ ] Because the role is used so rarely that a boundary adds no value
+- [ ] Because the boundary would slow down incident response
+
+**Why:** Break-glass exists precisely for the case where the boundary is wrong or the identity provider is down, so capping it at the same ceiling as the everyday role would make it pointless. Relying on offline storage is the trap — the controls that make it safe are the ones around it, such as one hour, fresh MFA, alerting, and a post-use ritual.
+
+### Q7. A team stores its break-glass credentials in the shared password manager and relies on CloudTrail being on. What does this phase call that? <!-- id: advance-04-q07 energy: high -->
+
+- [ ] A reasonable compromise, because the trail records every use
+- [ ] A documented control that needs only a periodic access review
+- [x] A control that exists but is not enforced, which is what the phase is named for
+- [ ] A monitoring gap that a detection query would close
+
+**Why:** Storing the credential in a shared store with no alert means nobody can say who used it or when it was last rotated, so the control exists on paper only. Trusting the trail is the trap — it records the API activity, not which individual retrieved the shared entry.
+
+### Q8. Which of these does this phase give as the measurement that proves a break-glass path actually works? <!-- id: advance-04-q08 energy: normal -->
+
+- [x] The recorded time from decision to working session, measured during a rehearsal
+- [ ] The number of credentials sealed and stored offline
+- [ ] The length of the runbook describing the procedure
+- [ ] The severity of the alert raised when the role is used
+
+**Why:** Without a measured time to access, nobody knows whether the path works until an outage tests it, which is the worst possible moment. Counting the credentials is the trap — two envelopes in a safe say nothing about whether the process around them functions.
+
+### Q9. Why does this phase reject the alternative of no standing admin with a two-hour approved elevation? <!-- id: advance-04-q09 energy: high -->
+
+- [x] Because the team is on call, and an approval at three in the morning costs more availability than the risk it removes
+- [ ] Because approval workflows are impossible to automate
+- [ ] Because two hours is too short for any administrative task
+- [ ] Because auditors do not accept time-limited elevation
+
+**Why:** The phase calls this the architecturally strongest option and still rejects it, and it says so in the document because the reason is a business argument rather than a security one. Assuming it fails technically is the trap — the objection is about availability during on-call hours.
+
+### Q10. A new guardrail is about to be rolled out. Which order does this phase recommend? <!-- id: advance-04-q10 energy: normal -->
+
+- [ ] Ship it in deny mode immediately so the control is real from day one
+- [ ] Ship it in deny mode and add exemptions for anything that breaks
+- [x] Ship it in audit mode first, then flip it to deny
+- [ ] Ship it in deny mode and rely on the deployment team to test it
+
+**Why:** Audit mode surfaces what the guardrail would block before it breaks a deployment, because a policy that breaks things on rollout day gets deleted. Starting in deny mode is the trap — the phase says plainly that the guardrail does not survive that experience.
+
+### Q11. A Rego rule compares a field to null to check that a value is absent. Why does this phase say to use `not field` instead? <!-- id: advance-04-q11 energy: high -->
+
+- [ ] Because `not field` is faster to evaluate at plan time
+- [ ] Because `field == null` is not valid Rego syntax
+- [x] Because a missing field makes the comparison undefined, so the rule silently passes
+- [ ] Because `not field` produces a clearer error message
+
+**Why:** A missing field makes the equality comparison undefined, and the rule passes without evaluating anything — a guardrail that fails open. Assuming a syntax problem is the trap: the expression is valid, and the danger is precisely that it looks correct while permitting the change it was meant to reject.
+
+### Q12. In the landing-zone design, what does this phase say decides blast radius? <!-- id: advance-04-q12 energy: low -->
+
+- [x] Where the isolation boundary is placed — the account or subscription, not the folder
+- [ ] The naming convention applied to accounts and resource groups
+- [ ] The number of subscriptions held in the organisation
+- [ ] The org chart, because teams own their own workloads
+
+**Why:** An account or subscription is an enforced boundary, which is why the design places isolation there rather than in a folder structure. Trusting a naming convention is the trap — the phase says a naming convention decides nothing about what falls together when one part is compromised.
+
 ## Checklist
 
 - [ ] I can explain why the account or subscription is the boundary and a folder is not. <!-- id: advance-04-landing-zone-design energy: low -->

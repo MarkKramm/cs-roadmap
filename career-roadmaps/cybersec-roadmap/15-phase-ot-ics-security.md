@@ -1177,6 +1177,116 @@ Create `portfolio/cyber/15-ot-ics-security.md` with:
 - A passive monitoring plan naming the events you would alert on and the ones you would not
 - A limitations section stating what you have not touched and why that is a professional choice
 
+## Quiz
+
+### Q1. A plant manager asks why confidentiality is not the top priority on the control network. What is the right answer from this phase? <!-- id: cyber-15-q01 energy: normal -->
+
+- [x] Because safety and availability come first, with integrity next and confidentiality last
+- [ ] Because control networks hold no data worth protecting
+- [ ] Because confidentiality is impossible to achieve on industrial protocols
+- [ ] Because the vendor contract forbids encrypting control traffic
+
+**Why:** OT inverts the usual triad — safety, then availability, then integrity, with confidentiality last — because the process must keep running and must not harm anyone. Saying control networks hold nothing valuable is the trap: the point is the ordering, not a claim that the data is worthless.
+
+### Q2. You have a passive capture and see a frame with function code 6 sent to TCP port 502. What is happening? <!-- id: cyber-15-q02 energy: normal -->
+
+- [ ] A read of a single holding register from a Modbus server
+- [x] A write of a single register, which is a change to the physical world
+- [ ] A DNP3 select-before-operate sequence
+- [ ] A PROFINET real-time frame with no IP header
+
+**Why:** In Modbus, codes 1–4 are reads while 5, 6, 15, and 16 are writes, which makes code 6 a single-register write. Reading it as a read is the trap, and it is the mistake the phase warns about directly — the read/write split is most of the detection strategy.
+
+### Q3. You are asked to inventory the devices on a running plant network. Why does this phase reject an Nmap scan? <!-- id: cyber-15-q03 energy: high -->
+
+- [ ] Because Nmap produces an inventory too incomplete to be useful
+- [ ] Because the plant's firewall would block the scan and waste the effort
+- [ ] Because the scan requires a licence the plant does not hold
+- [x] Because scans and probes can put fragile devices into a degraded or faulted state
+
+**Why:** The correct assumption is that any device might be fragile, and you cannot tell in advance which — so passive collection is the default. Worrying only about scan completeness is the trap, because the risk is not a bad inventory but a controller that stops answering or trips.
+
+### Q4. A safety instrumented system shares its sensors with the control system it is meant to protect. Why is that a problem? <!-- id: cyber-15-q04 energy: high -->
+
+- [ ] It makes the SIS slower to respond than the control system
+- [x] The failure that takes out the control system takes out the protection too
+- [ ] It requires the SIS to be patched on the same schedule as the PLC
+- [ ] It causes the SIS to authenticate against the control network
+
+**Why:** The word doing the work in the definition is *independent* — the SIS must have its own sensors, logic solver, and final elements. Assuming the issue is speed or patching is the trap: shared components mean a single failure removes both the control and the layer meant to catch it.
+
+### Q5. A level 1 controller is observed opening an outbound TCP session to a public address on port 443. What does this phase say about that? <!-- id: cyber-15-q05 energy: normal -->
+
+- [ ] It is normal, because controllers push telemetry to vendor clouds by design
+- [ ] It is harmless as long as the traffic is encrypted
+- [ ] It only matters if the controller also accepts inbound connections
+- [x] It is a finding on its own, regardless of what was sent
+
+**Why:** In a correctly built plant, level 0 through 3 devices have no reason to originate traffic to the internet, so any such connection is either a misconfiguration or an incident. Calling it normal telemetry is the trap — the phase states there is no legitimate reason for these devices to reach outward.
+
+### Q6. Why does this phase describe Triton as a watershed for the industry? <!-- id: cyber-15-q06 energy: high -->
+
+- [x] It made the safety system a target, because the capability was reaching it through its own engineering interface
+- [ ] It proved that air-gapped networks can be reached by removable media
+- [ ] It showed that a business network compromise can halt a pipeline
+- [ ] It was the first case of ransomware with a physical consequence
+
+**Why:** What changed the language was the ability to interact with a safety controller through its engineering interface, which is why the control that matters is who can reach the safety network. Attributing it to removable media is the trap — that is the Stuxnet lesson, a different incident with a different mechanism.
+
+### Q7. You are building a free lab to practise OT protocols. Which isolation property does this phase require? <!-- id: cyber-15-q07 energy: normal -->
+
+- [ ] The lab may share the home network as long as production is not targeted
+- [ ] The lab may reach a real plant if a weekly capture is scheduled
+- [x] The lab must be host-only, with no path to any real network in either direction
+- [ ] The lab needs a firewall rule allowing inbound only from the analyst host
+
+**Why:** A lab that can reach a plant is a plant attack waiting to happen, so the virtual switch must be host-only. Allowing inbound only from the analyst host is the trap — a rule with any inbound path still leaves a route into the lab from outside it.
+
+### Q8. In a Wireshark capture of a plant network, which filter does this phase call the highest-value alert to build a habit around? <!-- id: cyber-15-q08 energy: normal -->
+
+- [ ] `tcp.port == 502`, which catches every Modbus packet
+- [ ] `modbus`, which dissects every Modbus exchange
+- [ ] `weird.log`, which lists protocol violations
+- [x] New connections to a controller, matched by a SYN to that controller's address
+
+**Why:** New connections to a controller are rare, meaningful, and easy to explain to a non-specialist, which is what makes them worth alerting on. Picking the broad port filter is the trap — it matches all normal polling traffic too, so it would drown the signal it was meant to surface.
+
+### Q9. Colonial Pipeline appears in an OT phase. How does this phase want you to explain it? <!-- id: cyber-15-q09 energy: high -->
+
+- [x] As an IT-side ransomware incident with an OT consequence, about business-system coupling and a missing second factor
+- [ ] As a controller exploit that drove a physical process outside its limits
+- [ ] As a safety system attack that required disabling the SIS
+- [ ] As a supply-chain attack on an industrial vendor's engineering software
+
+**Why:** The lesson is about business-system coupling and a single missing factor, not about controllers at all — which is exactly why it belongs in the phase. Calling it a controller exploit is the trap, and the phase says so directly because the distinction is the point of the case study.
+
+### Q10. Which of these protocols authenticates nothing, by design rather than through a missing patch? <!-- id: cyber-15-q10 energy: low -->
+
+- [ ] DNP3, because Secure Authentication is optional and left unconfigured
+- [ ] OPC UA, because its security modes are frequently left off
+- [x] Modbus, EtherNet/IP, and PROFINET, which authenticate nothing at all
+- [ ] All of them, because no industrial protocol supports authentication
+
+**Why:** These three trust the network entirely — this is the design, not a bug awaiting a patch. Lumping DNP3 and OPC UA in with them is the trap: those two *do* have security mechanisms, and the correct question is which endpoints have them configured.
+
+### Q11. A colleague proposes using the switch's SPAN port instead of buying a hardware tap. What does this phase say a tap is actually better at? <!-- id: cyber-15-q11 energy: high -->
+
+- [ ] A tap decrypts industrial protocols that a SPAN port cannot
+- [x] A tap cannot drop packets under load and cannot be misconfigured by a tired engineer
+- [ ] A tap can send selective probes that a SPAN port cannot
+- [ ] A tap captures layer 2 frames that a SPAN port never sees
+
+**Why:** The advantage is reliability rather than hardware capability — a tap is physically in the path and has no configuration to get wrong. Expecting a tap to decrypt or probe is the trap, because a passive tap transmits nothing and industrial protocols carry no encryption to break.
+
+### Q12. You find a vulnerability in a control system while reading a capture. What is the first step this phase gives you? <!-- id: cyber-15-q12 energy: high -->
+
+- [ ] Connect to the device to see how far the flaw goes
+- [ ] Publish a proof of concept so the vendor responds faster
+- [ ] Set a disclosure deadline and tell the vendor you will publish
+- [x] Stop, do not confirm it, record what you have, and notify the asset owner immediately
+
+**Why:** On a control system, continuing to explore is a physical risk to people who are not part of the conversation, so step one is to stop. Connecting to confirm is the trap — on the web that is a legal risk, and here it can also move a real process.
+
 ## Checklist
 
 - [ ] I can explain the inverted triad and why confidentiality comes last in OT. <!-- id: cyber-15-inverted-triad energy: low -->

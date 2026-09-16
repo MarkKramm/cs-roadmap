@@ -1368,6 +1368,116 @@ Create `portfolio/cyber/14-web-app-security.md` with:
 - A configuration review with headers, cookies, CORS, error pages, and directory listings
 - A one-page legal and ethical boundary note including your disclosure sequence
 
+## Quiz
+
+### Q1. A request to a site's API returns another customer's order details when the order number is changed from 1041 to 1042. Which OWASP category does this phase place it in? <!-- id: cyber-14-q01 energy: normal -->
+
+- [ ] Injection, because the order number is a user-supplied parameter
+- [ ] Security misconfiguration, because the API is exposed to the internet
+- [ ] Cross-site scripting, because the response contains another user's data
+- [x] Broken access control, specifically an IDOR where the object reference is guessable
+
+**Why:** Changing an identifier to reach an object you do not own is IDOR, which sits under broken access control. Calling it injection is the trap because no interpreter is being subverted — the server simply never checked whether you were entitled to that record.
+
+### Q2. You test a password reset flow and find the token is short and generated from a timestamp. What does this phase say this enables? <!-- id: cyber-14-q02 energy: normal -->
+
+- [x] It narrows the token space, so a brute-force on an unrated endpoint becomes feasible
+- [ ] It lets an attacker read the victim's inbox directly
+- [ ] It makes the reset link expire too quickly for the user to use
+- [ ] It causes the application to leak the victim's password hash in the response
+
+**Why:** A predictable, short token with no rate limit turns guessing into a practical attack, and that becomes a link in the account takeover chain. Assuming expiry is the problem is the trap — an expiring token is a defence, and here the weakness is how guessable it is while it lives.
+
+### Q3. A page reflects a search term straight back into the HTML without encoding it. Which kind of cross-site scripting is that? <!-- id: cyber-14-q03 energy: normal -->
+
+- [ ] Stored XSS, because the term persists in the search history
+- [x] Reflected XSS, because the payload comes back in the immediate response
+- [ ] DOM-based XSS, because the browser builds the page
+- [ ] CSRF, because the request is crafted by another site
+
+**Why:** Reflected XSS returns the payload in the response to the same request that carried it, which is why it needs a crafted link. Calling it DOM-based is the trap — DOM-based XSS happens when client-side script writes untrusted data into the page, without the server ever echoing it.
+
+### Q4. An application sets a session cookie without the `HttpOnly` flag. What does this phase say that omission exposes? <!-- id: cyber-14-q04 energy: normal -->
+
+- [ ] The cookie will be sent over plain HTTP instead of HTTPS
+- [ ] The cookie will be sent on cross-site requests, enabling CSRF
+- [ ] The session will never expire on the server side
+- [x] The simplest form of cookie theft by cross-site scripting
+
+**Why:** `HttpOnly` stops scripts from reading the cookie, which is exactly the path XSS uses to steal a session. Confusing it with `Secure` is the trap — `Secure` governs transmission over HTTP, while `SameSite` is the flag that reduces CSRF exposure.
+
+### Q5. A logout button clears the cookie in the browser but the captured token still works. What is the defect? <!-- id: cyber-14-q05 energy: high -->
+
+- [x] The session was never invalidated server-side, so the token outlives the logout
+- [ ] The cookie was not marked `Secure`, so it travelled in the clear
+- [ ] The login did not issue a new session identifier
+- [ ] The session identifier is too short to be random
+
+**Why:** Clearing a cookie only makes the browser forget it; the server must destroy the session for the logout to mean anything. Blaming the missing new identifier on login is the trap — that is session fixation, a different defect about what happens when a session starts, not when it ends.
+
+### Q6. A server-side request forgery flaw lets an attacker make the server fetch an internal URL. What does this phase say the attacker typically combines it with in cloud environments? <!-- id: cyber-14-q06 energy: high -->
+
+- [ ] The application's own TLS certificate store
+- [x] The cloud metadata endpoint, to obtain credentials intended for the instance
+- [ ] The browser's same-origin policy, which the server inherits
+- [ ] The content security policy, which blocks outbound requests
+
+**Why:** SSRF reaches internal-only addresses, and the instance metadata service is the prize because it hands back credentials the instance already holds. Reaching for the same-origin policy is the trap — that is a browser rule, and SSRF is the server making the request, where no browser rule applies.
+
+### Q7. You are writing up five small flaws that combine into full account takeover for every user. How does this phase say you should report them? <!-- id: cyber-14-q07 energy: high -->
+
+- [ ] As five separate informational findings, each with its own severity
+- [ ] As a single finding naming only the most severe of the five issues
+- [x] As one chained finding, with each step's evidence and a single remediation plan
+- [ ] As a scanner output, leaving the reader to draw the conclusion
+
+**Why:** The severity lives in the chain, so reporting it as one finding is what gets it fixed rather than deprioritised. Splitting it into five informationals is the trap — each step alone looks minor, and the reader never sees that together they hand over every account.
+
+### Q8. A response is missing a Content Security Policy and several other security headers. What does this phase say CSP is for? <!-- id: cyber-14-q08 energy: normal -->
+
+- [ ] It encrypts the response body so it cannot be read in transit
+- [ ] It authenticates the user before the page is rendered
+- [ ] It replaces output encoding as a defence against injection
+- [x] It restricts where scripts and other resources may be loaded from, limiting XSS impact
+
+**Why:** CSP is a browser-enforced allowlist for resource loading, which is why it reduces what injected script can achieve. Treating it as a replacement for output encoding is the trap — CSP is a mitigation layer, and the injection still needs to be fixed at the point the data is written.
+
+### Q9. You find what looks like a SQL injection in a site you do not own and have no permission to test. What does this phase require of you? <!-- id: cyber-14-q09 energy: high -->
+
+- [x] Stop testing, and follow a responsible disclosure path rather than continuing to exploit it
+- [ ] Confirm the injection fully so your report is accurate before you send it
+- [ ] Test only enough to prove impact, then publish the proof of concept
+- [ ] Report it to a public forum so other researchers can verify it
+
+**Why:** Testing without authorisation is a legal boundary, so the correct action is to stop and disclose responsibly. Confirming the injection “properly” is the trap — every extra request deepens an unauthorised access, and accuracy does not make the access lawful.
+
+### Q10. An application changes the session identifier on login and again when a user gains admin rights. Why does this phase care about the second change? <!-- id: cyber-14-q10 energy: high -->
+
+- [ ] It reduces the cookie's exposure to cross-site request forgery
+- [x] It stops a pre-authentication session from being promoted into an admin session
+- [ ] It makes the identifier harder for an attacker to guess
+- [ ] It guarantees the session will expire on the server side
+
+**Why:** Issuing a new identifier at privilege change means a session created before elevation cannot be reused as an elevated one. Assuming it is about guessability is the trap — identifier length and randomness are a separate check, and this one is about what the session is allowed to become.
+
+### Q11. Burp Suite Community is what you have, and you need an automated scan of a large target. What does this phase say? <!-- id: cyber-14-q11 energy: normal -->
+
+- [ ] The Community edition scanner is unrestricted but only runs on localhost
+- [ ] Automation is impossible without a paid tool, so the phase skips it
+- [x] The free edition covers proxy, history, and Repeater fully, while the automated scanner is what Professional adds
+- [ ] The Community edition cannot intercept HTTPS traffic at all
+
+**Why:** The free edition is enough for the whole phase because interception, history, and Repeater are fully available. Believing it cannot handle HTTPS is the trap — proxy interception works on TLS once the CA certificate is trusted, and what Professional actually adds is the scanner.
+
+### Q12. A user reports being logged into someone else's account after clicking a link, with no password prompt. Which combination best fits? <!-- id: cyber-14-q12 energy: high -->
+
+- [ ] Reflected XSS plus a missing `Secure` flag on the cookie
+- [ ] An outdated component plus verbose error messages
+- [ ] SSRF plus an exposed cloud metadata endpoint
+- [x] CSRF plus a session cookie that lacks a `SameSite` restriction
+
+**Why:** CSRF makes the victim's browser send an authenticated request the user never intended, and `SameSite` is the flag that limits it. Blaming reflected XSS is the trap — XSS runs script in the victim's own session, whereas here the state change came from a request the site accepted as legitimate.
+
 ## Checklist
 
 - [ ] I can read a full HTTP request and explain the security meaning of each header. <!-- id: cyber-14-http-request-reading energy: low -->
