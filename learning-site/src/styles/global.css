@@ -1895,6 +1895,116 @@ p em {
   margin: var(--space-4) 0 0;
 }
 
+/* Deep links to the shared documents. Each is a full-width text button, matching
+   .rail-card__cta, but stacked with a little air between them so three titles do
+   not read as one paragraph. */
+.rail-links {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.rail-links .rail-card__cta {
+  padding: var(--space-1) 0;
+}
+
+/* --- Carry one phase between machines ---
+   An inline, collapsed panel beside the phase it acts on. Deliberately NOT a
+   modal like DataTransfer: that one can overwrite every storage key at once and
+   warrants a confirmation, while this import is additive by construction and can
+   never remove anything, so it does not need to interrupt the page. */
+.phase-transfer__head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-3);
+}
+
+.phase-transfer__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+  margin: var(--space-4) 0 var(--space-2);
+}
+
+.phase-transfer__note,
+.phase-transfer__message {
+  font-size: var(--text-sm);
+  margin: var(--space-2) 0 0;
+}
+
+.phase-transfer__message.is-error {
+  color: var(--danger);
+}
+
+/* Off-screen but reachable by assistive tech and by `.click()`. A file input
+   cannot be usefully styled, so it is hidden and driven by a real button. */
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* --- Where you've been ---
+   A neutral list of the reader's own file. Deliberately colourless: no warning
+   tone, no red, no "missing" styling, because the design system forbids shame UI
+   and this page is the one most able to become it. The three sections are
+   identical in weight on purpose — "not started yet" is the normal state of most
+   of a 34–112 week curriculum, not a problem to fix. */
+.path-order__header {
+  margin-bottom: var(--space-5);
+}
+
+.path-order__tracks {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  margin-bottom: var(--space-5);
+}
+
+.path-list {
+  list-style: none;
+  padding: 0;
+  margin: var(--space-4) 0 0;
+}
+
+.path-row + .path-row {
+  border-top: 1px solid var(--border);
+}
+
+.path-row__open {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  width: 100%;
+  padding: var(--space-3) 0;
+  text-align: left;
+  background: none;
+  border: 0;
+  cursor: pointer;
+  color: inherit;
+  font: inherit;
+}
+
+.path-row__open:hover .path-row__title {
+  text-decoration: underline;
+}
+
+.path-row__title {
+  font-weight: 600;
+}
+
+.path-row__meta,
+.path-empty {
+  font-size: var(--text-sm);
+}
+
 /* --- Progress ring ---
    A single-value readout. The percentage and the raw count are also rendered as
    text beside it, so the ring is never the only carrier of the number — the same

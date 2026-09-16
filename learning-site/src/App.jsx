@@ -23,6 +23,7 @@ import Search from "./pages/Search.jsx";
 import Schedule from "./pages/Schedule.jsx";
 import Shared from "./pages/Shared.jsx";
 import YourWork from "./pages/YourWork.jsx";
+import PathOrder from "./pages/PathOrder.jsx";
 import ShortcutHelp from "./components/ShortcutHelp.jsx";
 import DataTransfer from "./components/DataTransfer.jsx";
 
@@ -34,6 +35,7 @@ const VIEWS = [
   { id: "search", label: "Search" },
   { id: "shared", label: "Shared" },
   { id: "your-work", label: "Your work" },
+  { id: "where-youve-been", label: "Where you've been" },
   { id: "tools", label: "Tools" },
   { id: "portfolio", label: "Portfolio" },
   { id: "applications", label: "Applications" },
@@ -49,6 +51,12 @@ export default function App() {
   const [openPhaseId, setOpenPhaseId] = useState(null);
   const [navOpen, setNavOpen] = useState(false);
   const [dataOpen, setDataOpen] = useState(false);
+  // Which shared document to open. Owned here rather than inside Shared because
+  // a link from elsewhere in the app has to be able to name one, and because
+  // Shared is remounted on every view change — local state there would forget
+  // the choice. This is a view *parameter*, not routing: there is still no URL
+  // surface (D-007).
+  const [sharedDocId, setSharedDocId] = useState(null);
   const { done, toggle, reset } = useProgress();
   const { mode, change: changeMode } = useEnergyMode();
   const { budget, change: changeBudget } = useTimeBudget();
@@ -139,6 +147,16 @@ export default function App() {
     setView(target);
     setNavOpen(false);
   }
+
+  // Open a shared document by id, from anywhere. Used by the Views entry, which
+  // has no document in mind, and by the resource-list link on the dashboard's
+  // reference rail, which does.
+  const openShared = useCallback((docId = null) => {
+    setOpenPhaseId(null);
+    setSharedDocId(docId);
+    setView("shared");
+    setNavOpen(false);
+  }, []);
 
   // A search result can live in the other track, so this switches track as well
   // as opening the phase. The heading anchor is handed to PhaseDetail, which
@@ -232,7 +250,10 @@ export default function App() {
               className={
                 "sidebar__link" + (v.id === view ? " is-active" : "")
               }
-              onClick={() => goTo(v.id)}
+              // The bare "Shared" entry clears any document a link had chosen,
+              // so the reader always lands on the first document rather than on
+              // whichever one they last followed a link to.
+              onClick={() => (v.id === "shared" ? openShared(null) : goTo(v.id))}
             >
               {v.label}
             </button>
@@ -370,9 +391,16 @@ export default function App() {
             onOpenTrack={switchTrack}
           />
         ) : view === "shared" ? (
-          <Shared />
+          <Shared initialId={sharedDocId} onSelect={setSharedDocId} />
         ) : view === "your-work" ? (
           <YourWork onOpenPhase={openPhase} />
+        ) : view === "where-youve-been" ? (
+          <PathOrder
+            trackId={trackId}
+            done={done}
+            onOpenPhase={openPhase}
+            onOpenTrack={switchTrack}
+          />
         ) : view === "tools" ? (
           <ToolsLibrary onOpenPhase={openPhase} />
         ) : view === "portfolio" ? (
@@ -392,6 +420,7 @@ export default function App() {
             lastPhaseId={lastTrackId === trackId ? lastPhaseId : ""}
             onGoToSchedule={() => goTo("schedule")}
             onGoToView={goToView}
+            onOpenShared={openShared}
           />
         )}
       </main>

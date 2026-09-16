@@ -22,7 +22,7 @@
 // not autolink. Rendering it as prose would produce 42 unclickable URLs, so it
 // is rendered from structured data as real anchors.
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import shared from "../data/generated/shared.json";
 import LessonBlock from "../components/LessonBlock.jsx";
 
@@ -89,13 +89,19 @@ function Document({ doc }) {
   );
 }
 
-// `initialId` picks which document opens. Optional, and only ever read as the
-// useState seed — the reader's own clicks own the state from then on. It exists
-// because a page whose entire content sits behind a click is invisible to
-// server rendering, so the resources document (the one whose value depends on
-// its 42 links being real anchors) could not be covered by the smoke test at
-// all. It is also the hook a future "link to the resource list" needs.
-export default function Shared({ initialId = null }) {
+// `initialId` picks which document opens, and `onSelect` reports the reader's own
+// choice back up so the parent can remember it. Both exist because a page whose
+// entire content sits behind a click is invisible to server rendering, so the
+// resources document (the one whose value depends on its 42 links being real
+// anchors) could not be covered by the smoke test at all.
+//
+// The split of ownership is deliberate. `initialId` is the *seed* — read when the
+// view mounts and never again, because a prop that re-asserted itself would fight
+// the reader's clicks. `onSelect` is the *echo* — it goes up so the parent can
+// hand the same id back if the view remounts, which it does on every navigation.
+// Without the echo, following a link to the resource list, leaving, and coming
+// back through the sidebar would silently reopen the first document instead.
+export default function Shared({ initialId = null, onSelect = null }) {
   const docs = shared.docs || [];
   const [activeId, setActiveId] = useState(() => {
     if (initialId && docs.some((d) => d.id === initialId)) return initialId;
@@ -109,6 +115,16 @@ export default function Shared({ initialId = null }) {
   useEffect(() => {
     window.scrollTo(0, 0);
   }, [activeId]);
+
+  // Keep the parent's copy in step. Guarded on a real change so mounting does
+  // not immediately write the seed back as if the reader had chosen it.
+  const lastReported = useRef(initialId);
+  useEffect(() => {
+    if (activeId && activeId !== lastReported.current) {
+      lastReported.current = activeId;
+      if (onSelect) onSelect(activeId);
+    }
+  }, [activeId, onSelect]);
 
   if (!doc) {
     return (

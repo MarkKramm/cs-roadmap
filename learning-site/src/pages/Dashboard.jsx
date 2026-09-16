@@ -12,6 +12,7 @@ import { readApplications } from "../hooks/useApplications.js";
 import { readNotes } from "../hooks/useNotes.js";
 import { renderInline } from "../lib/renderInline.jsx";
 import { paceFor, fmtWeeks, fmtDate } from "../lib/pace.js";
+import shared from "../data/generated/shared.json";
 import { allTools } from "../data/tools.js";
 import { pickToday, addressedTaskIds, bandInfo } from "../lib/today.js";
 import {
@@ -120,12 +121,18 @@ export default function Dashboard({
   onOpenTrack,
   onOpenPhase,
   onGoToView,
+  onOpenShared,
   lastPhaseId,
   onGoToSchedule,
 }) {
   const tasks = allTasks(track);
   const trackDone = countDone(done, tasks);
   const pct = tasks.length > 0 ? Math.round((trackDone / tasks.length) * 100) : 0;
+
+  // The shared documents, for the rail's deep links. Read from the generated
+  // payload rather than hardcoded, so adding a document to `shared/` surfaces it
+  // here without touching this page.
+  const sharedDocs = shared.docs || [];
 
   // The suggestion is drawn from the PRACTICE TASKS, not the checklist.
   //
@@ -436,6 +443,28 @@ export default function Dashboard({
                   </li>
                 ))}
               </ol>
+            </div>
+          )}
+
+          {/* The shared documents sit beside all three tracks, so they belong on
+              the page a reader opens every session rather than only behind a
+              sidebar entry. Each row opens that document directly. The labels are
+              the documents' own titles, and nothing here counts or scores. */}
+          {onOpenShared && (
+            <div className="card rail-card">
+              <h2 className="rail-card__title">Beside the tracks</h2>
+              <div className="rail-links">
+                {sharedDocs.map((d) => (
+                  <button
+                    key={d.id}
+                    type="button"
+                    className="link-btn rail-card__cta"
+                    onClick={() => onOpenShared(d.id)}
+                  >
+                    {d.title}
+                  </button>
+                ))}
+              </div>
             </div>
           )}
         </aside>
