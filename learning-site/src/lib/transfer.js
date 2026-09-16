@@ -481,3 +481,224 @@ export function suggestedFilename(now) {
     ".json"
   );
 }
+
+// --- one phase, rather than the whole profile ------------------------------
+//
+// WHY THIS EXISTS
+// `exportAll` moves the reader's entire profile across ten keys. That is the
+// right answer for a new laptop and the wrong answer for the case that actually
+// comes up on a 34–112 week plan: a reader working through one phase on a work
+// machine, a library PC, or a laptop that is not the one their profile lives on.
+// They want *this phase* out and back, not a ten-key document that would
+// overwrite a profile they are not looking at.
+//
+// WHY IT IS NOT A SECOND BACKUP FORMAT
+// The emitted document is a real, valid backup — same `format`, same `version`,
+// same `data` map keyed by storage key — so `inspect` and `importAll` read it
+// with no special case. The difference is only *which ids it contains*. That
+// keeps one format, one validator and one merge rule, which is the property that
+// makes this safe to add: a phase file cannot drift from a full backup, because
+// it is the same thing with a narrower `data`.
+//
+// WHAT "THIS PHASE" MEANS FOR EACH KEY
+// Only four of the ten keys hold per-phase data, and each is narrowed by id:
+//
+//   * `progress`          — checklist task ids, filtered by the phase's own ids
+//   * `lesson-sections`   — `phaseId#sectionId` keys, filtered by prefix
+//   * `notes`             — the `phaseId` entry, so the note and every answer
+//   * `reading`           — only when this phase is the last one read
+//
+// Every other key (portfolio, applications, schedule, the three preferences) is
+// profile-shaped, not phase-shaped, and is deliberately **absent** rather than
+// exported and ignored. A phase file that carried the schedule would be a
+// whole-profile file wearing a phase's name.
+
+export const PHASE_FORMAT = "cs-roadmap-phase";
+
+/**
+ * The storage key that holds an entry per phase id, with its per-phase shape.
+ *
+ * `reading` is listed separately below because it is not a map of phase ids —
+ * it is one small object naming the last phase, which is a different question.
+ */
+const PHASE_SCOPED = [
+  {
+    key: "cs-roadmap:progress:v1",
+    // A map of task id -> true, where the ids are owned by the phase.
+    narrow: (value, ids) => {
+      const out = {};
+      for (const [k, v] of Object.entries(value)) {
+        if (ids.has(k)) out[k] = v;
+      }
+      return out;
+    },
+  },
+  {
+    key: "cs-roadmap:lesson-sections:v1",
+    // A map of "phaseId#sectionId" -> true.
+    narrow: (value, ids, phaseId) => {
+      const out = {};
+      const prefix = phaseId + "#";
+      for (const [k, v] of Object.entries(value)) {
+        if (k.startsWith(prefix)) out[k] = v;
+      }
+      return out;
+    },
+  },
+  {
+    key: "cs-roadmap:notes:v1",
+    // A map of phaseId -> { note, answers }. The whole entry, because the note
+    // and the answers belong to the phase as a unit.
+    narrow: (value, ids, phaseId) => {
+      const entry = value[phaseId];
+      return entry ? { [phaseId]: entry } : {};
+    },
+  },
+];
+
+/**
+ * Export one phase's data.
+ *
+ * @param {object} storage                a two-method storage object
+ * @param {object} phase                  the phase from data/roadmaps.js
+ * @param {string} now                    ISO stamp for the document
+ * @returns {{ok: boolean, payload: object, counts: object}}
+ */
+export function exportPhase(storage, phase, now) {
+  const phaseId = phase.id;
+  // Every id the phase owns: checklist items and practice tasks together. The
+  // progress key holds whichever the reader ticked, and both live in the same
+  // map, so filtering by only one of the two lists would silently drop half.
+  const ids = new Set();
+  for (const item of phase.checklist || []) ids.add(item.id);
+  for (const task of phase.tasks || []) ids.add(task.id);
+
+  const data = {};
+  const counts = {};
+
+  for (const { key, narrow } of PHASE_SCOPED) {
+    const read = readKey(storage, key);
+    // A key that is absent, unreadable or corrupt contributes nothing. This
+    // differs from `exportAll`, which reports those in `skipped`: a phase export
+    // is a convenience, and failing it because an unrelated key is corrupt would
+    // block a reader who only wants one phase. The counts make the omission
+    // visible rather than silent.
+    if (!read.ok || !read.present) continue;
+    const narrowed = narrow(read.value, ids, phaseId);
+    if (Object.keys(narrowed).length === 0) continue;
+    data[key] = narrowed;
+    counts[key] = Object.keys(narrowed).length;
+  }
+
+  // Reading position, only if this phase is the one the reader is actually in.
+  // Exporting it otherwise would drag another machine's "you were here" along
+  // with a phase the reader may be opening precisely because they are not.
+  const reading = readKey(storage, "cs-roadmap:reading:v1");
+  if (reading.ok && reading.present && isReadingState(reading.value)) {
+    if (reading.value.lastPhaseId === phaseId) {
+      data["cs-roadmap:reading:v1"] = reading.value;
+      counts["cs-roadmap:reading:v1"] = 1;
+    }
+  }
+
+  return {
+    ok: true,
+    counts,
+    payload: {
+      format: FORMAT,
+      version: VERSION,
+      app: "CS Roadmap",
+      kind: PHASE_FORMAT,
+      phase: { id: phaseId, title: phase.title },
+      exportedAt: now || new Date().toISOString(),
+      data,
+    },
+  };
+}
+
+/**
+ * Merge a phase export into storage.
+ *
+ * Deliberately **additive and non-destructive**: it unions into the four
+ * phase-scoped keys and can never remove what is already there. A phase file is
+ * the "carry this one phase between machines" action, and a file that could
+ * delete a reader's existing work on the machine they carried it *to* would be a
+ * trap. That is also why it does not offer Replace — `importAll` already owns
+ * the destructive path, behind a confirmation, for the whole-profile case.
+ *
+ * @returns {{ok: boolean, error?: string, written?: Array<string>, summary?: Array}}
+ */
+export function importPhase(payload, storage) {
+  const verdict = inspect(payload);
+  if (!verdict.ok) return verdict;
+
+  const written = [];
+
+  for (const [key, incoming] of Object.entries(verdict.data)) {
+    const read = readKey(storage, key);
+
+    // Unreadable existing value: refuse rather than overwrite. The reader's own
+    // data is not recoverable from the curriculum, so a merge into something
+    // this version cannot parse must fail loudly instead of guessing.
+    if (!read.ok) {
+      return {
+        ok: false,
+        error:
+          "Existing data for “" +
+          labelFor(key) +
+          "” could not be read, so nothing was imported. Export a backup first.",
+        summary: verdict.summary,
+      };
+    }
+
+    let next;
+    if (isPlainObject(incoming)) {
+      // Objects union, and the EXISTING entry wins on a collision — the same
+      // rule `mergeValue` applies to the full import, and for the same reason:
+      // the machine the reader is sitting at is the one whose writing is
+      // current, and importing twice must be a no-op. Getting this order
+      // backwards would silently replace the note they can see with a staler
+      // one from a file, which is the one direction this feature must not have.
+      const existing = isPlainObject(read.value) ? read.value : {};
+      next = { ...incoming, ...existing };
+    } else {
+      next = incoming;
+    }
+
+    try {
+      storage.setItem(key, JSON.stringify(next));
+      written.push(key);
+    } catch {
+      return {
+        ok: false,
+        error:
+          "Storage is full or unavailable, so the import stopped part-way. Keys already written: " +
+          (written.length ? written.join(", ") : "none") +
+          ".",
+        written,
+        summary: verdict.summary,
+      };
+    }
+  }
+
+  return { ok: true, written, summary: verdict.summary };
+}
+
+/** A filename naming one phase, so a reader with several can tell them apart. */
+export function suggestedPhaseFilename(phase, now) {
+  const d = now ? new Date(now) : new Date();
+  const pad = (n) => String(n).padStart(2, "0");
+  // The phase id is already kebab-case and unique, so it is the filename. The
+  // leading number is kept because it sorts the files into curriculum order.
+  return (
+    "cs-roadmap-" +
+    String(phase.id).replace(/[^a-z0-9-]/gi, "-") +
+    "-" +
+    d.getFullYear() +
+    "-" +
+    pad(d.getMonth() + 1) +
+    "-" +
+    pad(d.getDate()) +
+    ".json"
+  );
+}

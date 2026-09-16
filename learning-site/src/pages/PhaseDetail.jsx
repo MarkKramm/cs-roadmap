@@ -5,6 +5,7 @@ import Lesson from "../components/Lesson.jsx";
 import PhaseNav from "../components/PhaseNav.jsx";
 import NotesPanel from "../components/NotesPanel.jsx";
 import TaskList from "../components/TaskList.jsx";
+import PhaseTransfer from "../components/PhaseTransfer.jsx";
 import { ReadingBar, ResumePrompt, useReadingProgress } from "../components/ReadingPosition.jsx";
 import { countDone } from "../hooks/useProgress.js";
 import { useLesson } from "../hooks/useLesson.js";
@@ -98,6 +99,8 @@ export default function PhaseDetail({
       </p>
 
       <ProgressBar done={doneCount} total={phase.checklist.length} />
+
+      <PhaseTransfer phase={phase} />
 
       <section className="card">
         <h2>Goal</h2>
