@@ -2,6 +2,23 @@
 
 A lightweight decision log (ADR-style). Newest first.
 
+## D-034 — A CHANGELOG structure guard gates, and it is the one guard the topic-list experiment proved *is* buildable
+
+- **Date:** 2026-09-16
+- **Status:** Accepted
+- **Context:** `CHECKPOINT.md` had carried the same note for several passes: *"No guard reads `CHANGELOG.md`"*. `[Unreleased]` accumulated **eleven section headings** — four `Fixed`, four `Changed`, three `Added` — over at least four commits, and nothing failed, because Keep a Changelog permits one of each per release. A reader looking for what changed had to read four separate `Fixed` lists to find it. They were merged mechanically in `b9f6133`. **The shape then returned twice more in a single session on 2026-09-16**, both times because a new entry was appended *above* an existing section of the same name rather than into it — once by the comprehension pass and once by the content pass.
+  - The checkpoint recorded it rather than guarding it, on the reasoning that a CHANGELOG structure check is a claim about the text agreeing with itself and would therefore be a legitimate gate under D-022 — "it simply has not been written."
+  - **The same session established the test a candidate guard has to pass.** D-033 records that the topic-list guard was investigated and rejected: a keyword probe returned hits for all five known-undelivered topics, a 0% detection rate, because probing `Startup apps` matched the topic list, the skills list, and a *practice task* — three promises and no teaching. **A presence-based check could not distinguish a promise from a lesson, so its pass path and its skip path were the same shape.**
+- **Decision:** **Write the CHANGELOG guard, because it passes that test and the topic-list guard does not.** "Does this heading appear twice" is arithmetic on the document: a failing result and a passing result are distinguishable *by the check itself*. The contrast is the point, and it is the reason both records exist:
+  - The topic-list guard asked *whether prose constitutes teaching* — a semantic judgement about the reader's state, the same class `audit-terms.mjs` failed to converge on after five measurement fixes.
+  - This guard asks *whether a heading string occurs more than once in a version block* — a property of the text, checkable without judgement.
+- **Three classes gate:** a duplicate section heading in one version block; headings out of canonical order (Keep a Changelog fixes Added → Changed → Deprecated → Removed → Fixed → Security); and a section heading with no entries, or a version block with neither sections nor prose. `[0.1.0]` is treated exactly like `[Unreleased]`, because this repository still amends it and the historical record is worth keeping well-formed.
+- **Consequences:**
+  - **It found a real fourth defect on its first run**, which is the evidence that it is capable of failing: `[0.1.0]` listed `Fixed` before `Changed`. Fixed in the same commit.
+  - **The guard ships with its own controls** — `scripts/test-audit-changelog.mjs`, **13 fixtures** — and both run in CI, in the content job. Every defect class must exit 1 *and name what it found*; three legitimate shapes that must exit 0 are also asserted: a release that omits `Security`, a block with only one section, and a prose-only release note with no sections at all. Without those, a rewrite that silently stopped detecting anything would print the same green line as a healthy corpus.
+  - **Verified by reproducing the historical defect**, not just by asserting the fixtures pass: injecting a second `### Fixed` above the existing `### Added` produced two findings and exit 1 — the duplicate *and* the order violation it causes.
+  - **The generalisable rule, recorded because it has now paid for itself twice in one session:** before building a guard, test it against ground truth you already have. If it cannot fail on a defect you *know* exists, do not build it. If it can — and if a legitimate document passes it — then it is a check rather than a ritual.
+
 ## D-033 — A guard over a phase's topic list is not buildable, and the negative result is recorded so nobody rebuilds it
 
 - **Date:** 2026-09-16

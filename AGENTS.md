@@ -26,9 +26,12 @@ The curriculum itself is content-only. `career-roadmaps/` and `docs/` are plain 
 └── career-roadmaps/       # The actual study content
     ├── README.md          # Strategy document (start here)
     ├── it-roadmap/        # 00-overview + 9 phases + checklists
-    ├── cybersec-roadmap/  # 00-overview + 14 phases + checklists
+    ├── cybersec-roadmap/  # 00-overview + 15 phases + checklists
+    ├── advance-roadmap/   # 00-overview + 7 phases + checklists
     └── shared/            # Anti-burnout rules, resources, weekly tracker
 ```
+
+There are **three tracks, not two** — 31 phases in total. IT is the on-ramp, cybersecurity is the destination, and `advance-roadmap/` is the cyber-only mid-level track for someone already working in the field. There is deliberately **no mid-level IT track**; see [`docs/DECISIONS.md`](docs/DECISIONS.md) → D-032, and [`career-roadmaps/README.md`](career-roadmaps/README.md) for the path diagram.
 
 ## Hard rules
 

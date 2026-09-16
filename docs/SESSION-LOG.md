@@ -2,7 +2,28 @@
 
 A chronological record of working sessions. Newest first.
 
-## 2026-09-16 (latest) — The five unwritten topics, and a guard that could not be built
+## 2026-09-16 (latest) — Two guards: one that could not be built, and one that found a defect immediately
+
+**Goal:** close the last structural gap `CHECKPOINT.md` had carried for several passes — *"No guard reads `CHANGELOG.md`"* — and settle the topic-list guard the roadmap called the highest-value one absent.
+
+**The two decisions are the same decision seen twice, and that is the useful part.** The checkpoint had recorded the CHANGELOG problem and declined to guard it, on the reasoning that nobody had written the check yet. This session wrote both, tested both against defects known to exist, and got opposite answers:
+
+- **The topic-list guard cannot exist** (D-033). A keyword probe for the five already-confirmed-undelivered IT 02 topics returned hits for **all five** — a 0% detection rate. A structural check fired 125 times, on words like `changelog` and `around`. The reason is not tuning: probing `Startup apps` matched the topic list, the skills list, and a *practice task* — **three promises, no teaching** — so a presence-based check counts a promise as delivery, and **its pass path is the same shape as its skip path.** The five defects were closed by writing the content instead.
+- **The CHANGELOG guard works, and it proved itself on the first run** (D-034). It asks whether a heading string occurs twice in a version block — arithmetic on the document, where failure and success are distinguishable *by the check itself*. It immediately found a fourth defect nobody had noticed: `[0.1.0]` listed `Fixed` before `Changed`.
+
+**The rule extracted from the pair, which is the actual output:** *before building a guard, test it against ground truth you already have. If it cannot fail on a defect you know exists, do not build it.* The topic-list guard would have printed green on the exact defects it was written for, which is worse than no guard — it converts an unknown into a false assurance and stops the next person looking. This repository has now hit that failure five times.
+
+**The CHANGELOG guard shipped with 13 controls and is verified by reproducing history, not just by passing its own fixtures.** Injecting a second `### Fixed` above the existing `### Added` — the exact `b9f6133` shape — produced two findings and exit 1: the duplicate and the order violation it causes. The controls assert that every defect class exits 1 *and names what it found*, and that three legitimate shapes exit 0 (a release omitting `Security`, a block with one section, a prose-only release note). Both run in CI.
+
+**A third guard fell out of the work: the workflow now checks itself.** No YAML parser is vendored, so a malformed or dangling CI step is invisible locally — CI would fail to start, which reads as "no CI ran" rather than "CI is broken." `scripts/validate-ci.mjs` verifies all 27 steps are well-formed, that no line uses a tab, and that all 9 `node scripts/...` and 14 `npm run ...` references resolve. Verified capable of failing by injecting a reference to a script that does not exist.
+
+**A trap worth recording, because it produced a false pass during this very session.** Reproducing the historical defect with PowerShell's `Set-Content -Encoding utf8NoBOM` silently failed — that enumerator does not exist in Windows PowerShell 5.1 — so the guard ran against an unmodified file and printed `exit=0`. It looked like the guard had missed the defect; in fact the defect was never written. Redone with Node, it fired correctly. **This is the same class as the `git show > out.md` UTF-16 trap already in `CHECKPOINT.md`, and it is the second time a PowerShell write has produced a wrong measurement.**
+
+**Documentation drift fixed while in the files:** `AGENTS.md` described a two-track repository with 14 cyber phases and no `advance-roadmap/` at all; the CI table in `WORKFLOW.md` listed five content guards where nine now run; `CHECKPOINT.md` item 8 still claimed the topic-list guard was merely unwritten.
+
+**Verified:** `validate-ci` 27 steps / 0 problems; lint **165 files / 0 issues**; `audit-changelog` 0 findings; `test-audit-changelog` **13 / 0**; content audit 0; lesson AST **31 / 0 loss**; refs 0 broken; time budgets **31 / 0 findings**; readability 0 over both targets; acronym detector 16 controls / 0 failed; build clean with **390 task IDs and 278 banded, 0 minted from position**; smoke **231 renders / 0 failures**; data 86, ui 42, today 77, work 31, path-order 37.
+
+## 2026-09-16 (earlier) — The five unwritten topics, and a guard that could not be built
 
 **Goal:** close the concrete content debt the comprehension pass had named — five IT 02 bullets in `## Specific topics to learn` with no teaching behind them — and settle whether the topic-list guard `ROADMAP.md` called "the highest-value guard currently absent" could be written.
 

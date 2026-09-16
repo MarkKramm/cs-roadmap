@@ -43,6 +43,39 @@ jobs:
       # judgement, and it gates.
       - name: Audit time budgets
         run: node scripts/audit-time-budget.mjs
+      # The same structural defect appeared three times and nothing ever failed
+      # because of it. Keep a Changelog permits ONE of each section heading per
+      # release; `[Unreleased]` accumulated eleven — four `Fixed`, four `Changed`,
+      # three `Added` — over at least four commits, so a reader had to read four
+      # separate `Fixed` lists to find what changed. They were merged mechanically
+      # in b9f6133, and the shape returned twice more on 2026-09-16, each time
+      # because an entry was appended above an existing section of the same name
+      # instead of into it.
+      #
+      # This gates where the topic-list guard could not (D-033): "does this
+      # heading appear twice" is arithmetic on the document, so a failing result
+      # is distinguishable from a passing one BY THE CHECK ITSELF. The guard
+      # found a real fourth defect on its first run — `[0.1.0]` listed `Fixed`
+      # before `Changed` — which is the evidence that it is capable of failing.
+      - name: Audit CHANGELOG structure
+        run: node scripts/audit-changelog.mjs
+      # And the guard's own controls, because a check whose pass path looks like
+      # its skip path is not a check. 13 fixtures: each defect class must exit 1
+      # and name what it found, and three legitimate shapes (a release omitting
+      # `Security`, a block with only one section, a prose-only release note)
+      # must exit 0. Without this, a rewrite that silently stopped detecting
+      # anything would print the same green line as a healthy corpus.
+      - name: Audit CHANGELOG guard (self-test)
+        run: node scripts/test-audit-changelog.mjs
+      # The workflow that runs every other check had no check of its own. No YAML
+      # parser is vendored, so a malformed step is invisible locally: CI would
+      # fail to start, which reads as "no CI ran" rather than "CI is broken".
+      # This verifies each step is well-formed, that no line uses a tab, and that
+      # every `node scripts/...` and `npm run ...` the workflow names actually
+      # exists — the failure mode where a guard is renamed and its CI step
+      # silently points at nothing.
+      - name: Validate CI workflow
+        run: node scripts/validate-ci.mjs
       # The acronym audit prints a report and exits 0 whatever it finds: whether
       # a reader can decode "SSID" without help is a judgement about the reader,
       # not a claim about the text agreeing with itself, so by D-022 it is a

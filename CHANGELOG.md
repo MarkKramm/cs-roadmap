@@ -8,6 +8,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### Added
 
+- **A guard over `CHANGELOG.md` structure, with 13 controls — and it found a real defect on its first run** (`scripts/audit-changelog.mjs`, `scripts/test-audit-changelog.mjs`, D-034). `[Unreleased]` accumulated **eleven** section headings — four `Fixed`, four `Changed`, three `Added` — over at least four commits without anything failing, because Keep a Changelog permits one of each per release. A reader looking for what changed had to read four separate `Fixed` lists. They were merged mechanically in `b9f6133`, and **the shape returned twice more on 2026-09-16**, each time because a new entry was appended above an existing section of the same name rather than into it.
+  - **Three structural classes gate:** a duplicate section heading inside one version block; headings out of canonical order (Added → Changed → Deprecated → Removed → Fixed → Security); and a section heading with no entries, or a version block with neither sections nor prose. `[0.1.0]` is checked exactly like `[Unreleased]`.
+  - **It immediately found a fourth defect nobody had noticed: `[0.1.0]` listed `Fixed` before `Changed`.** That is the evidence the check can fail, which is the only thing that makes its green mean anything. It was also verified by **reproducing the historical defect** rather than only by asserting its fixtures pass — injecting a second `### Fixed` above the existing `### Added` produced two findings and exit 1, the duplicate and the order violation it causes.
+  - **`test-audit-changelog.mjs` carries 13 controls and runs in CI beside it.** Every defect class must exit 1 *and name what it found*; three legitimate shapes must exit 0 — a release that omits `Security`, a block with only one section, and a prose-only release note with no sections. Without those, a rewrite that silently stopped detecting anything would print the same green line as a healthy corpus.
+  - **This is the guard that proves D-033's test is the right test.** The topic-list guard was rejected because a presence-based check could not tell a promise from a lesson, so its pass path looked like its skip path. This one asks whether a heading string occurs twice — arithmetic on the document, where failure and success are distinguishable *by the check itself*. **The rule for the next guard: if it cannot fail on a defect you already know exists, do not build it.**
 - **The five IT 02 topics the phase listed and never taught, now written** (`career-roadmaps/it-roadmap/02-phase-operating-systems.md`). A comprehension pass found five bullets in `## Specific topics to learn` with no teaching behind them — the same defect class the malware section was added to fix, and one no guard can see. Phase 2 grew **12,272 → 15,431 words**, gaining five sections, five practice tasks, five checklist items and three deliverable artefacts:
   - **Dependent services** — the topic list named "service failures: reading status, restarting, dependent services" and only the first two were taught. Now `ServicesDependedOn` versus `DependentServices` (two names, opposite directions, easy to swap), why stopping a service takes its dependents down with it, and the repeat-ticket pattern: **a service that keeps stopping is usually a symptom, not the fault.** Worked example: a spooler that will not stay running because the RPC Endpoint Mapper is down.
   - **Startup apps** — promised as "enabling, disabling, and diagnosing slow boot". Now the distinction that makes it diagnostic (**services start before login; startup apps start at login**, which separates "slow to boot" from "slow to log in"), the four places entries actually live including Task Scheduler and the registry `Run` keys that explain "I disabled it but it still runs", a measure-first procedure that disables one entry at a time, and an explicit list of what not to disable — backup agents, endpoint security, VPN, encryption, management agents.
@@ -399,13 +404,13 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - `.editorconfig` to enforce UTF-8 and LF at save time.
 - `.gitattributes` with an LF normalization policy, binary markers, and lockfile handling.
 
+### Changed
+- Established the baseline commit for `career-roadmaps/`.
+
 ### Fixed
 - Recovered the working tree from Git objects after it was emptied, restoring all 29 content files byte-for-byte.
 - Restored content corrupted by a lossy UTF-8→ASCII conversion: em-dashes (`—`), en-dashes (`–`), curly quotes (`“ ”`), and box-drawing tree characters that had become literal `?`.
 - Normalized all text files to LF (removed CRLF churn).
-
-### Changed
-- Established the baseline commit for `career-roadmaps/`.
 
 [Unreleased]: https://github.com/MarkKramm/cs-roadmap/compare/0.1.0...HEAD
 [0.1.0]: https://github.com/MarkKramm/cs-roadmap/releases/tag/0.1.0
