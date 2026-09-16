@@ -34,7 +34,7 @@ Deepen networking and Linux skills enough to understand scans, logs, shells, ser
 
 - OSI and TCP/IP models
 - Ethernet, ARP, MAC addresses
-- IPv4 addressing and `/24`, `/25`, `/26` basics
+- IPv4 addressing, subnet masks, and CIDR — including working out the network, broadcast, and usable range for any prefix by hand
 - IPv6 basics: link-local, global unicast, AAAA records, why NAT is less central
 - DNS: A, AAAA, CNAME, MX, TXT, NS, recursive resolver, authoritative server
 - DHCP process
@@ -48,11 +48,12 @@ Deepen networking and Linux skills enough to understand scans, logs, shells, ser
 ### Linux depth
 
 - Filesystem hierarchy
-- Permissions: rwx, numeric permissions, ownership
+- Permissions: rwx, numeric permissions, ownership, and `umask` defaults for new files
 - Users/groups/sudo
 - SSH keys and `sshd`
 - Services with `systemctl`
 - Logs with `journalctl`, `/var/log/auth.log`, `/var/log/syslog`
+- Reading logs as evidence: `grep`, `awk`, `sort`, `uniq`, and `zgrep` pipelines that answer a question rather than dumping a file
 - Networking: `ip a`, `ip route`, `ss -tulpn`, `dig`, `curl`
 - Text processing: `grep`, `awk` basics, `sed` basics, pipes/redirection
 
@@ -93,11 +94,11 @@ Linux gives you the observability that makes the concepts concrete. It is also, 
 
 | What | Time | Note |
 |---|---|---|
-| Reading this lesson | ~4 hours | The thinking, not the practice |
-| Nine practice tasks | 25–40 hours | The bulk of the phase |
+| Reading this lesson | ~6 hours | The thinking, not the practice |
+| Fourteen practice tasks | 35–55 hours | The bulk of the phase |
 | Bandit wargame | 8–15 hours | Runs across all six weeks |
 | Being confused by subnetting | Counts as progress | Nearly everyone hits this wall |
-| Total | 37–59 hours across 6 weeks | The heaviest of the three foundation phases |
+| Total | 49–76 hours across 6 weeks | The heaviest of the three foundation phases |
 
 Budget honestly: this is the longer side, and it is the heaviest of the foundation phases — later phases in the track are heavier still. Budget for the confusion too — subnetting and permissions are where nearly everyone hits a wall. That is a normal part of learning this material, not a sign you are unsuited to it.
 
@@ -194,6 +195,59 @@ A `/25` splits a `/24` into two halves:
 Notice the `/25` boundary lands at `.128`, not at a round decimal number. That is because you are doing arithmetic in binary and reading it in decimal.
 
 This is the source of nearly all subnetting confusion. The numbers look arbitrary in decimal but are tidy in binary. If you write the last octet in binary, the pattern becomes obvious — `/25` is “the first bit of the last octet is the network part,” so it splits at 128.
+
+#### The one skill subnetting questions actually test
+
+Everything above tells you how many hosts a prefix holds. The question you will actually be asked is harder and more useful: **given an address and a prefix, which network is it in, what is the broadcast address, and which hosts are usable?**
+
+That is the skill. It is also the one most beginners skip, because the host-count table feels like the answer when it is only half of it.
+
+**The method is four steps, and it never changes.**
+
+1. **Find the block size.** The block size is `256 − (the interesting mask octet)`. For `/26`, the interesting octet is the fourth, its mask value is `192`, so the block size is `256 − 192 = 64`.
+2. **Find the network address.** Count up from zero in multiples of the block size until you pass the address. The multiple *below* it is the network.
+3. **Find the broadcast address.** It is one less than the *next* block.
+4. **The usable hosts sit between them**, exclusive.
+
+**Worked example — `192.168.1.100/26`.**
+
+| Step | Working | Result |
+|---|---|---|
+| Block size | fourth octet mask is 192 → `256 − 192` | **64** |
+| Multiples of 64 | `0, 64, **128**, 192, 256` | 100 falls between 64 and 128 |
+| Network address | the multiple below 100 | **192.168.1.64** |
+| Broadcast | one less than the next block (128) | **192.168.1.127** |
+| Usable hosts | between them | **192.168.1.65 – 192.168.1.126** (62 hosts) |
+
+Note that the network address is `.64`, not `.0`. **`192.168.1.100/26` is not in the `192.168.1.0` network** — even though it starts with `192.168.1`. This is the single most common beginner error, and it is the reason the exercise is worth doing by hand rather than trusting a tool.
+
+**Worked example — `10.20.30.200/27`.**
+
+| Step | Working | Result |
+|---|---|---|
+| Block size | `256 − 224 = 32` | **32** |
+| Multiples of 32 | `0, 32, …, **192**, 224, 256` | 200 falls between 192 and 224 |
+| Network address | the multiple below 200 | **10.20.30.192** |
+| Broadcast | one less than 224 | **10.20.30.223** |
+| Usable hosts | between them | **10.20.30.193 – 10.20.30.222** (30 hosts) |
+
+**Why the mask octet is the “interesting” one.** Write the prefix as four octets and find the one that is neither `255` nor `0` — that octet is where the split falls, and it is the only one you have to think about.
+
+| Prefix | Mask | Interesting octet | Block size |
+|---|---|---|---|
+| `/24` | `255.255.255.0` | fourth, value 0 | 256 — the whole octet |
+| `/25` | `255.255.255.128` | fourth, value 128 | 128 |
+| `/26` | `255.255.255.192` | fourth, value 192 | 64 |
+| `/27` | `255.255.255.224` | fourth, value 224 | 32 |
+| `/28` | `255.255.255.240` | fourth, value 240 | 16 |
+| `/29` | `255.255.255.248` | fourth, value 248 | 8 |
+| `/30` | `255.255.255.252` | fourth, value 252 | 4 |
+
+**The `/30` row is worth pausing on.** Four total addresses, two usable — which is exactly why `/30` is the classic choice for a point-to-point link between two routers. There is no room for anything else, and nothing else is wanted.
+
+**How this shows up in security work.** You rarely subnet a network by hand on the job. You do use this constantly to answer a different question: *is this address on the same segment as that one?* A firewall rule, an allowlist, or an alert that says `10.20.30.200` is “internal” is making a subnetting claim, and reading it correctly is the difference between understanding an incident and mis-scoping it.
+
+**The check that catches your own mistakes.** After any calculation, ask whether the network address is a multiple of the block size and whether the broadcast is one less than the next block. If either fails, you made an arithmetic slip — and that check costs five seconds.
 
 #### Private ranges and what they tell you
 
@@ -524,6 +578,44 @@ Confusing these leads to permissions that look restrictive and are not.
 
 Ownership changes with `chown user:group file`. Only root can give a file away to another user, which is a deliberate restriction.
 
+#### Why a new file is not world-writable, and what `umask` does
+
+Here is a question the tables above cannot answer: when you create a file, **where do its permissions come from?** You did not choose them. Something chose for you, and that something is `umask`.
+
+A fresh file is created with a default set, and the **umask subtracts from it**. The default maximum is `666` for a file and `777` for a directory — the difference being that files are not born executable, because a text file that arrived executable would be a hazard.
+
+```bash
+umask            # see the current value, usually 022
+umask -S         # the same thing in symbolic form, e.g. u=rwx,g=rx,o=rx
+```
+
+| Default maximum | umask | Result | In symbolic form |
+|---|---|---|---|
+| `666` (file) | `022` | `644` | `rw-r--r--` |
+| `777` (directory) | `022` | `755` | `rwxr-xr-x` |
+| `666` (file) | `077` | `600` | `rw-------` |
+| `777` (directory) | `077` | `700` | `rwx------` |
+
+**Umask is subtractive, which is the part that confuses people.** Writing `umask 077` does not *set* permissions to `077` — it *removes* group and other access from the defaults, leaving `600` for files and `700` for directories. A stricter umask means a larger number, which reads backwards until it clicks.
+
+**A practical rule worth adopting.** On a machine holding private keys, credentials, or client data, set a strict umask in your shell profile:
+
+```bash
+umask 077        # in ~/.bashrc — new files are private by default
+```
+
+The `chmod 600 id_rsa` habit above protects one file after the fact. **A umask protects every file you are about to create**, including the ones you forget about. That is the difference between fixing a problem and preventing a class of them, and it is the reasoning an interviewer is listening for.
+
+**Where this becomes a finding.** A service account or an automated job running with a permissive umask writes world-readable files without anyone choosing to. When you find credentials, tokens, or logs readable by every user on the box, the root cause is often a umask rather than a deliberate `chmod` — and the fix belongs in the service definition, not in a one-off correction.
+
+**One more thing worth knowing, because it is a real analyst tool.** Calling `umask` in a shell has an annoying property: it *reports* the current value and *replaces* it at the same time. So reading it and restoring it are two steps, and between them the value is wrong. On any Linux since 4.7 you can instead read it without touching it:
+
+```bash
+grep Umask /proc/self/status
+```
+
+That is the kind of detail that turns "I read about umask" into "I have actually chased a permissions finding", and it costs one command to learn.
+
 #### sudo, least privilege, and the accounting trail
 
 **`sudo`** lets a permitted user run a command as root.
@@ -686,6 +778,77 @@ You learned both terms in Phase 1. Here is what they look like in production.
 | One source address, one username, many **passwords** | Brute force | Every attempt is against the same account |
 
 In the sample above, the same source `203.0.113.45` tries `admin`, `root`, and `test`. That is the spraying shape. A brute-force attempt would show the same username over and over.
+
+#### The six log commands that answer real questions
+
+Reading a log is not the skill. **Turning a hundred thousand lines into one answer** is the skill, and it is five commands used in combination. These are the ones worth memorising cold, because they are the same on every Linux system you will ever touch and they come up in interviews.
+
+**1. Count the failures, grouped by source address.** This is the single most common question in a SOC: *who is hitting us, and how hard?*
+
+```bash
+grep "Failed password" /var/log/auth.log | awk '{print $(NF-3)}' | sort | uniq -c | sort -rn | head
+```
+
+Read it as a pipeline, left to right, because that is how you will write it:
+
+| Stage | What it does |
+|---|---|
+| `grep "Failed password"` | Keep only the failure lines |
+| `awk '{print $(NF-3)}'` | Print the fourth field **from the end** — which is the source IP in this log format |
+| `sort` | Group identical addresses together, because `uniq` only collapses *adjacent* duplicates |
+| `uniq -c` | Replace each run with a count |
+| `sort -rn` | Sort numerically, highest first |
+| `head` | Show the top ten, because you never want the whole list |
+
+The `$(NF-3)` is the part that looks like magic and is not. `NF` means “number of fields,” so `$(NF-3)` is “four fields back from the end.” The source address sits there because the line ends with a fixed tail — `from <ip> port <n> ssh2` — so counting **from the end** is more robust than counting from the start, where the username can contain spaces.
+
+**That trick generalises, and it is worth internalising:** when a log line has a variable number of fields at the front and a fixed shape at the back, count from the back.
+
+**2. Watch authentication in real time while you cause it.**
+
+```bash
+sudo tail -f /var/log/auth.log | grep --line-buffered "sshd"
+```
+
+The `--line-buffered` matters and is easy to miss. Without it, `grep` buffers its output when writing to a pipe, so the lines appear in bursts rather than as they happen. You will think the log is broken.
+
+**3. Ask *when* something started, not just whether it happened.**
+
+```bash
+grep "203.0.113.45" /var/log/auth.log | head -1     # first sighting
+grep "203.0.113.45" /var/log/auth.log | tail -1     # last sighting
+grep -c "203.0.113.45" /var/log/auth.log            # how many events
+```
+
+Those three together give you a **timeline**, and a timeline is what an incident report is built from. An address that tried twice over a month is noise. One that tried two thousand times in four minutes is an attack, and the count is what tells you which.
+
+**4. Find the successful login hidden among the failures.** This is the question that actually matters, and beginners forget to ask it:
+
+```bash
+grep "Accepted" /var/log/auth.log
+```
+
+**A brute-force campaign is only interesting if something got in.** Failures are noise until they are followed by an `Accepted` line from the same address — that is the moment the incident starts, and it is exactly the query to run after finding a noisy source.
+
+**5. Extend a search across rotated logs.** Logs rotate, so today's file is not the whole story:
+
+```bash
+zgrep "Failed password" /var/log/auth.log*
+```
+
+`zgrep` searches compressed logs too. On a system that has been running a while, `/var/log/auth.log` is only the most recent slice, and the earlier evidence is in `auth.log.1.gz`, `auth.log.2.gz` and so on. `auth.log*` catches all of them.
+
+**6. Isolate a time window.** An incident has a start and an end, and you want only what falls between them:
+
+```bash
+sed -n '/Mar 15 02:00/,/Mar 15 04:00/p' /var/log/syslog
+```
+
+This is `sed`'s range form: print from the line matching the first pattern to the line matching the second. It is the fastest way to reduce a day of logs to the hour that matters.
+
+**One safety habit, learned from breaking things.** Write the pipeline in pieces and run each stage before adding the next. `grep ... | head` first — confirm you are matching the right lines. *Then* add the `awk`. A pipeline that returns nothing is ambiguous: the filter may be wrong, the field may be wrong, or there may genuinely be no matches. Building it one stage at a time is what makes that ambiguity disappear.
+
+**What this looks like as one investigation.** Given a noisy source address, the sequence an analyst actually runs is: count it, find when it started, **check whether it ever succeeded**, and pull the surrounding window. Four commands. That is the job, and it is worth practising on your own VM until it is automatic — see the practice tasks for exactly that.
 
 #### The networking toolkit
 
@@ -1027,6 +1190,11 @@ The nine tasks are ordered roughly as a progression, and this is the reasoning b
 7. Run `nmap -sV` against your own VM IP only. <!-- id: cyber-02-t07 band: quick energy: normal -->
 8. Complete OverTheWire Bandit levels 0–10. <!-- id: cyber-02-t08 band: deep energy: high -->
 9. Write a mini-report explaining one TCP handshake capture. <!-- id: cyber-02-t09 band: focused energy: normal -->
+10. Work out the network address, broadcast, and usable range for `172.16.4.77/26` and `192.168.10.200/27` by hand, then verify both with `ipcalc`. <!-- id: cyber-02-t10 band: focused energy: normal -->
+11. Build the failed-login pipeline from the lesson against your own VM: count failures per source address, find the first and last sighting, and check whether anything was ever `Accepted`. <!-- id: cyber-02-t11 band: focused energy: high -->
+12. Set `umask 077` in your shell profile, create a file, confirm its permissions are `600`, then find a file on the system that is world-readable and explain why. <!-- id: cyber-02-t12 band: quick energy: normal -->
+13. Generate a keypair, place the public key in `authorized_keys`, disable password authentication in `sshd_config`, and prove a password login now fails. <!-- id: cyber-02-t13 band: focused energy: high -->
+14. Use `tcpdump` to capture traffic on your VM's interface, save it to a `.pcap`, then open it in Wireshark and filter to a single protocol. <!-- id: cyber-02-t14 band: focused energy: normal -->
 
 ## Deliverable / proof of work
 
@@ -1038,12 +1206,124 @@ Create `portfolio/cyber/02-networking-linux.md` with:
 - SSH setup notes
 - Bandit 0–10 notes without publishing passwords
 
+## Quiz
+
+### Q1. `192.168.1.100/26` — which network is this address actually in? <!-- id: cyber-02-q01 energy: normal -->
+
+- [x] `192.168.1.64/26`
+- [ ] `192.168.1.0/26`
+- [ ] `192.168.1.128/26`
+- [ ] `192.168.1.96/26`
+
+**Why:** A `/26` has a block size of 64, so the networks are `.0`, `.64`, `.128`, `.192`. The address `.100` falls inside the block that starts at `.64`. Choosing `.0` is the mistake this question exists to catch: the address starts with `192.168.1`, but `/26` splits that final octet into four networks and the address is not in the first one. `.96` is not a valid boundary for a block size of 64, and `.128` is the *next* network, which begins after `.100`.
+
+### Q2. A log shows 2,000 failed SSH logins from one address over four minutes, then a single `Accepted password` line from the same address. What is the significance of that last line? <!-- id: cyber-02-q02 energy: high -->
+
+- [ ] It is noise, because the failures are the actual attack
+- [ ] It confirms the password was weak
+- [x] It means the attack succeeded, which is the moment the incident starts
+- [ ] It means the address was later blocked by the firewall
+
+**Why:** Failed logins are noise until something gets in. The `Accepted` line from the same source is what converts a failed brute-force campaign into a successful compromise, and it is the first thing to check after finding a noisy source. Calling it noise inverts the priority — the failures are the attempt, and the success is the outcome. A weak password may well be *why* it succeeded, but the log line proves the success itself, which is the stronger and more actionable fact.
+
+### Q3. A service account appears in `/etc/passwd` with `/bin/bash` as its login shell. Why is that worth flagging? <!-- id: cyber-02-q03 energy: normal -->
+
+- [ ] Bash is an outdated shell with known vulnerabilities
+- [x] A service account should be locked down with `nologin`, so an interactive shell means it can be logged into
+- [ ] Service accounts must always have the same UID as root
+- [ ] That shell means the account has no password set
+
+**Why:** Service accounts exist to run processes, not to be logged into, so the expected value is `/usr/sbin/nologin`. An interactive shell on one is a finding because it is an account an attacker can actually log in as, and service accounts are frequently weakly protected and widely known by name. Bash itself is not the problem. The UID claim is wrong in the other direction — a UID of 0 is the backdoor indicator, and service accounts should sit well below 1000.
+
+### Q4. In `ls -l` output, a directory shows `d-wxr-xr-x`. What can the *owner* actually do with it? <!-- id: cyber-02-q04 energy: high -->
+
+- [ ] Read, write, and enter the directory
+- [ ] Only list the files inside it
+- [ ] Nothing, because the permissions are malformed
+- [x] Create and delete files inside it, but not list what is already there
+
+**Why:** On a directory, `w` means create and delete entries, while `r` means list them — and the owner here has `-wx`, so writing is present and reading is absent. That combination lets someone add files without seeing what is already there, which looks permissive in one direction and restrictive in the other. It is a real configuration and not malformed. The trap is carrying over file semantics, where `w` means modify contents and `x` means execute.
+
+### Q5. After setting `umask 077`, what permissions will a newly created file have? <!-- id: cyber-02-q05 energy: normal -->
+
+- [ ] `077`
+- [ ] `700`
+- [x] `600`
+- [ ] `777`
+
+**Why:** Umask is subtractive. A new file starts from a maximum of `666`, and `umask 077` removes all group and other bits, leaving `600`. The `077` answer reads the umask as if it were the resulting permissions, which is the central confusion this setting causes. `700` is what the same umask produces for a *directory*, because those start from `777`. And `777` would require a umask of `000`.
+
+### Q6. You run `grep "Failed password" auth.log | awk '{print $(NF-3)}'`. Why count fields from the end rather than from the start? <!-- id: cyber-02-q06 energy: high -->
+
+- [ ] `awk` cannot count forwards reliably
+- [ ] It is faster to process
+- [ ] The source address is always the fourth field
+- [x] The username can contain spaces, so the front of the line has a variable number of fields
+
+**Why:** Log lines like `Failed password for invalid user admin from <ip>` and `Failed password for root from <ip>` have different field counts at the front, because the username may be one word or several. The tail — `from <ip> port <n> ssh2` — is fixed, so counting back from the end lands on the address every time. Counting forwards gives the right answer for the short lines and the wrong one for the long lines, which is worse than failing outright because it works on your test case.
+
+### Q7. `ping 8.8.8.8` succeeds but `ping google.com` fails. What does that pair prove? <!-- id: cyber-02-q07 energy: normal -->
+
+- [ ] There is no network connectivity at all
+- [x] The network path works and name resolution does not
+- [ ] The default gateway is misconfigured
+- [ ] A firewall is blocking ICMP
+
+**Why:** Reaching a literal address proves routing and connectivity are fine, so the only thing left that the hostname needs and the address does not is DNS. That is what isolates the fault to resolution. A bad gateway would fail both tests. A firewall blocking ICMP would also fail both, and cannot explain a result that differs between the two commands — which is the whole reason the pair is worth running together.
+
+### Q8. A scan reports a port as `open|filtered`. What does Nmap actually know about it? <!-- id: cyber-02-q08 energy: high -->
+
+- [ ] The port is open but the service is unknown
+- [x] No response arrived, so it cannot tell whether the port is open or the packets are being dropped
+- [ ] The port is definitely filtered by a firewall
+- [ ] The scan was interrupted before it finished
+
+**Why:** `open|filtered` is what Nmap reports when it receives nothing back, and silence is genuinely ambiguous — an open port that does not reply looks exactly like a filtered one that dropped the probe. Reporting one of the two would be inventing certainty. This is why UDP scans are so often inconclusive: many services simply do not answer, so the scan cannot resolve the ambiguity without more work.
+
+### Q9. You have a keypair, and the private key is world-readable. What is the practical consequence? <!-- id: cyber-02-q09 energy: normal -->
+
+- [ ] Nothing, because the key is still encrypted
+- [ ] SSH refuses to use the key, which is the whole risk
+- [ ] The public key can be derived from it, breaking confidentiality
+- [x] Any user on the machine can authenticate as you, and SSH will also refuse the key for being too open
+
+**Why:** Two things happen at once. Anyone who can read the private key can use it, which is a full impersonation. And SSH itself refuses a private key that is readable by others, so the mistake announces itself as a `permissions are too open` error rather than failing silently — which is why `chmod 600` on a private key is a habit worth forming early. The public key is already shareable, so deriving it protects nothing.
+
+### Q10. Why does a recursive resolver fail to resolve a name that the authoritative nameserver answers for directly? <!-- id: cyber-02-q10 energy: high -->
+
+- [ ] The authoritative server has a different record set
+- [ ] Recursive resolvers only handle A records
+- [ ] Authoritative servers ignore queries from resolvers
+- [x] The resolver's cached answer may be stale, so the two are answering at different moments
+
+**Why:** The authoritative server is the source of truth for its zone and answers fresh every time, while a recursive resolver returns whatever it has cached until the TTL expires. So a disagreement between them is usually a timing difference rather than a contradiction — and it is exactly why `dig @1.1.1.1` and `dig @ns1.example.com` can differ right after a DNS change, and agree again once the TTL runs out. This is the mechanism behind propagation delays, not a fault in either server.
+
+### Q11. You find `203.0.113.45` in a log as the source of an attack. What does that address tell you? <!-- id: cyber-02-q11 energy: normal -->
+
+- [ ] It is an internal address, so an insider machine is compromised
+- [ ] It is a real routable address belonging to the attacker
+- [ ] Nothing can be concluded from an address alone
+- [x] It is documentation-range, so the log is probably an example rather than real traffic
+
+**Why:** `203.0.113.0/24` is reserved for documentation, alongside `192.0.2.0/24` and `198.51.100.0/24`. Real captured traffic essentially never originates there. This matters in analysis because these ranges appear constantly in tutorials, sample logs, and vendor documentation, and mistaking one for a live indicator sends an investigation nowhere. It is also a useful signal that you are reading an example rather than evidence.
+
+### Q12. `journalctl -u sshd` returns nothing, but `ssh` clearly works and logs exist. What is the most likely explanation? <!-- id: cyber-02-q12 energy: high -->
+
+- [ ] SSH is not running
+- [ ] `journalctl` requires root for every query
+- [x] The unit name may differ, or this distribution logs SSH to `/var/log/auth.log` instead
+- [ ] The journal has been disabled by the security policy
+
+**Why:** `-u sshd` matches a systemd unit by that exact name, and on some distributions the unit is `ssh.service` rather than `sshd.service`, so the filter matches nothing. Separately, not every distribution routes SSH into the journal — Debian and Ubuntu families also write `/var/log/auth.log`, which is often the easier place to look. Reaching for "SSH is not running" contradicts the evidence that you are connected to it, and `journalctl` does not universally require root.
+
 ## Checklist
 
 - [ ] I can explain OSI/TCP-IP models. <!-- id: cyber-02-c01 energy: low -->
 - [ ] I understand IPv4, IPv6 basics, DNS, DHCP, NAT, TCP, UDP, ICMP, HTTP, TLS. <!-- id: cyber-02-c02 energy: low -->
-- [ ] I can use Linux permissions and users. <!-- id: cyber-02-c03 energy: normal -->
-- [ ] I can SSH into my own VM. <!-- id: cyber-02-c04 energy: normal -->
+- [ ] I can work out the network address, broadcast, and usable range for any prefix by hand. <!-- id: cyber-02-c08 energy: high -->
+- [ ] I can use Linux permissions and users, and I know what `umask` does to a new file. <!-- id: cyber-02-c03 energy: normal -->
+- [ ] I can SSH into my own VM, and I have proved a password login fails once key-only auth is on. <!-- id: cyber-02-c04 energy: normal -->
+- [ ] I can turn a log file into an answer with `grep`, `awk`, `sort`, and `uniq` instead of reading it line by line. <!-- id: cyber-02-c09 energy: high -->
 - [ ] I can use Nmap safely on my own lab. <!-- id: cyber-02-c05 energy: normal -->
 - [ ] I captured and explained DNS traffic. <!-- id: cyber-02-c06 energy: normal -->
 - [ ] I completed Bandit levels 0–10. <!-- id: cyber-02-c07 energy: normal -->
