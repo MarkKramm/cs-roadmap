@@ -1218,7 +1218,9 @@ ipconfig /flushdns
 Then verify with the full ladder, and confirm `nslookup google.com` answers again.
 6. **Write the comparison table.** For each rung, one column for “what it looks like when healthy” and one for “what it looks like when this rung is broken”. That table is the artifact of this phase — it is something you built from your own machine, and it will be the most useful page in your notes.
 
-*What this teaches:* failure signatures by direct experience. Reading that `169.254` means DHCP failed is knowledge; watching your own machine print `Transmit failed. General failure.` the moment its adapter goes down — and seeing that this is *not* the same wording as a timeout — is recognition, and recognition is what you need at 2 a.m. on a real ticket. (The `169.254` address itself is worth meeting deliberately: on a machine that has just lost DHCP, `ipconfig /all` shows it as the *Autoconfiguration IPv4 Address*. Do that once, so the signature is familiar before it finds you.)
+*What this teaches:* failure signatures by direct experience. Reading that `169.254` means DHCP failed is knowledge; watching your own machine print `Transmit failed. General failure.` the moment its adapter goes down — and seeing that this is *not* the same wording as a timeout — is recognition, and recognition is what you need at 2 a.m. on a real ticket.
+
+(The `169.254` address itself is worth meeting deliberately: on a machine that has just lost DHCP, `ipconfig /all` shows it as the *Autoconfiguration IPv4 Address*. Do that once, so the signature is familiar before it finds you.)
 
 ### Part 9 — Two worked tickets
 

@@ -547,7 +547,9 @@ Type `INC-1001` in `A2`. Then in `A3` put this formula and drag it down:
 =IF($B3="","", "INC-" & (1000 + ROW() - 1))
 ```
 
-`ROW()` returns the row number, so row 3 produces `INC-1002`. The formula is self-maintaining: insert a row and every ID below renumbers itself. The `IF` at the front matters more than it looks. Without it, dragging the formula down twenty rows writes twenty IDs into empty rows, and every count you build on the ID column afterwards reports twenty tickets when you have logged none. With it, a row gets an ID only once you have typed its `Date Opened` — so the sheet stays honest while you grow into it.
+`ROW()` returns the row number, so row 3 produces `INC-1002`. The formula is self-maintaining: insert a row and every ID below renumbers itself. The `IF` at the front matters more than it looks.
+
+Without it, dragging the formula down twenty rows writes twenty IDs into empty rows, and every count you build on the ID column afterwards reports twenty tickets when you have logged none. With it, a row gets an ID only once you have typed its `Date Opened` — so the sheet stays honest while you grow into it.
 
 #### Deriving priority from impact and urgency
 

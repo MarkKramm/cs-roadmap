@@ -851,7 +851,9 @@ Get-LocalGroupMember -Group Administrators
 
 The third command is the one to know best. **`Get-NetTCPConnection` joined to the owning process answers "what is this machine talking to, and what program is doing it"** — which is the first question in almost every host investigation.
 
-The filters in commands 5 and 6 are doing the analytical work. A service whose binary lives outside `C:\Windows` is worth looking at; a scheduled task that has *run* recently on a machine nobody changed is worth looking at. **The filter encodes the judgement**, which is the part you do not automate away — and command 6's fifteen-line comment is the other half of that lesson. A filter that looks right and quietly answers a different question is worse than no filter, because it produces confident output you have no way to check.
+The filters in commands 5 and 6 are doing the analytical work. A service whose binary lives outside `C:\Windows` is worth looking at; a scheduled task that has *run* recently on a machine nobody changed is worth looking at.
+
+**The filter encodes the judgement**, which is the part you do not automate away — and command 6's fifteen-line comment is the other half of that lesson. A filter that looks right and quietly answers a different question is worse than no filter, because it produces confident output you have no way to check.
 
 #### Worked example: a triage script that produces a report
 

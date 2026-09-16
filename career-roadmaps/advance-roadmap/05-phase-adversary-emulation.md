@@ -63,11 +63,15 @@ Learn to run adversary behaviour against systems you own or are authorised to te
 
 Every organisation has a document that says what its controls do. Very few organisations have evidence that those controls do what the document says. That gap — between the claim and the measurement — is the space this phase occupies.
 
-This phase is defensive. Read that again before anything else, because the framing matters more than any tool in it. You are not learning to become an offensive operator, and you are not learning to sell penetration tests. You are learning to **produce real adversary behaviour against your own organisation's controls, in a controlled and authorised way, for the sole purpose of measuring whether those controls work and improving the ones that do not.** The output of this phase is a detection and a report, not a shell. If at any point the exercise is producing access rather than producing evidence, something has gone wrong.
+This phase is defensive. Read that again before anything else, because the framing matters more than any tool in it. You are not learning to become an offensive operator, and you are not learning to sell penetration tests.
+
+You are learning to **produce real adversary behaviour against your own organisation's controls, in a controlled and authorised way, for the sole purpose of measuring whether those controls work and improving the ones that do not.** The output of this phase is a detection and a report, not a shell. If at any point the exercise is producing access rather than producing evidence, something has gone wrong.
 
 That distinction is why the phase opens with authorisation rather than with tooling. A person who knows how to run an Atomic test and does not know who is allowed to authorise it is a liability, and the consequences are legal rather than disciplinary.
 
-**Unauthorised testing is a crime.** Running adversary behaviour against systems you do not own and are not authorised to test is unauthorised access, and it is criminal in the Philippines under the Cybercrime Prevention Act of 2012 and equivalent law almost everywhere else. It is also a fast route to dismissal, to a civil claim, and to the end of a security career before it starts. This phase assumes one condition throughout, and never relaxes it: **you only ever run adversary behaviour against systems you own, or systems for which you hold written permission from someone entitled to grant it.** Everything below is written inside that boundary.
+**Unauthorised testing is a crime.** Running adversary behaviour against systems you do not own and are not authorised to test is unauthorised access, and it is criminal in the Philippines under the Cybercrime Prevention Act of 2012 and equivalent law almost everywhere else. It is also a fast route to dismissal, to a civil claim, and to the end of a security career before it starts.
+
+This phase assumes one condition throughout, and never relaxes it: **you only ever run adversary behaviour against systems you own, or systems for which you hold written permission from someone entitled to grant it.** Everything below is written inside that boundary.
 
 **This phase assumes you already hold a first security job**, roughly one to three years in. So it does not explain what a SIEM is or how to read a firewall log. What it does assume is that you have never been the person who decides what gets emulated, who signs the authorisation, or who has to tell a system owner that the control they built did not fire. Those are the new skills, and they are mostly judgement rather than tooling.
 
@@ -283,7 +287,9 @@ Read section 8 again. **The person running the exercise has unilateral authority
 
 **Section 4, the out-of-scope list, is the one that saves you.** A scope that says only what is in scope leaves everything else ambiguous. Writing down explicitly what is forbidden removes the argument that a system "wasn't mentioned".
 
-**Section 7 is where the purple team actually starts.** Deciding in advance who knows is a real decision with real trade-offs. Telling the SOC means you measure detection honestly, because a human who knows the test is running will connect the dots faster than the rule did. Not telling the SOC means you measure something closer to reality, but you risk the exercise being escalated as a real incident and consuming the whole team's evening. The common middle ground is to tell one named person in the SOC who does not participate in triage, so that a real escalation can be deconflicted without the responders being tipped off.
+**Section 7 is where the purple team actually starts.** Deciding in advance who knows is a real decision with real trade-offs. Telling the SOC means you measure detection honestly, because a human who knows the test is running will connect the dots faster than the rule did.
+
+Not telling the SOC means you measure something closer to reality, but you risk the exercise being escalated as a real incident and consuming the whole team's evening. The common middle ground is to tell one named person in the SOC who does not participate in triage, so that a real escalation can be deconflicted without the responders being tipped off.
 
 ### Part 3 — Building a lab that cannot escape
 

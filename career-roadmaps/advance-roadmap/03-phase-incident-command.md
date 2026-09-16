@@ -68,9 +68,17 @@ The gap between those two things is not technical depth. It is a completely diff
 
 An **incident commander** (IC) is the single person accountable for the response to an incident. They decide what happens next, who does it, what gets communicated, and when the incident is over. They do not personally run the forensic tools, they do not personally reset the passwords, and — this is the part people resist — they do not personally do the thing they are best at, even when they could do it faster than the person who has been assigned it.
 
-This phase teaches that job. It teaches you how to declare an incident and defend the severity you chose, how to fill four roles that most teams have never named, how to run a call that produces decisions instead of a recital of what everyone has already seen, how to tell an executive the truth about something you do not understand yet, how to hand an incident to the next shift without losing an hour, and how to run the meeting afterwards that decides whether any of it was worth doing.
+This phase teaches that job.
 
-It also teaches the situation you will actually be in, which the textbooks quietly skip: **you will be the most senior person available and the least experienced person in the room.** You will be commanding a response that includes a network engineer with fifteen years of experience, a helpdesk lead who knows where every file lives, and an external consultant the company pays more than your annual salary. You will have been in security for three years and you will be telling them what to do. That is not a hypothetical. That is what being the on-call shift lead at a small company means.
+It teaches you how to declare an incident and defend the severity you chose, how to fill four roles that most teams have never named, how to run a call that produces decisions instead of a recital of what everyone has already seen, how to tell an executive the truth about something you do not understand yet,
+
+how to hand an incident to the next shift without losing an hour, and how to run the meeting afterwards that decides whether any of it was worth doing.
+
+It also teaches the situation you will actually be in, which the textbooks quietly skip: **you will be the most senior person available and the least experienced person in the room.**
+
+You will be commanding a response that includes a network engineer with fifteen years of experience, a helpdesk lead who knows where every file lives, and an external consultant the company pays more than your annual salary.
+
+You will have been in security for three years and you will be telling them what to do. That is not a hypothetical. That is what being the on-call shift lead at a small company means.
 
 The reason this is teachable is that command is a set of practices, not a personality. You do not need to be the loudest person or the most technically capable. You need a declaration procedure, a role table, a call agenda, a cadence, a decision log, a handover format, and the discipline to keep your hands off the keyboard. Those are all learnable in five weeks, and this lesson is how.
 
@@ -201,7 +209,9 @@ You do not need the full ICS org chart. You need four roles, and you need to kno
 
 **On a small incident, one person may hold two roles.** On a large one, each role is a full-time job. What is never acceptable is a role with no name attached, because an unnamed role is a role nobody is doing.
 
-**Unified command** is what you use when two organisations or two business units have to share authority over one incident — your company and a managed service provider, or two subsidiaries with separate IT. The failure mode it prevents is two parallel responses that disagree with each other. The structure is one incident, one set of objectives, and one commander per participating organisation, sitting in the same bridge and speaking with one voice outward. What it is not is a committee: if two people both believe they are the IC, nobody is, and the two responses will pull in different directions.
+**Unified command** is what you use when two organisations or two business units have to share authority over one incident — your company and a managed service provider, or two subsidiaries with separate IT. The failure mode it prevents is two parallel responses that disagree with each other.
+
+The structure is one incident, one set of objectives, and one commander per participating organisation, sitting in the same bridge and speaking with one voice outward. What it is not is a committee: if two people both believe they are the IC, nobody is, and the two responses will pull in different directions.
 
 **What does not adapt from emergency services.** ICS is built for events that are visible, bounded, and over in hours. Security incidents are often invisible for weeks, have no clear end, and involve an adversary who reacts to you. Three things follow, and they matter more than the parts you kept:
 
@@ -864,7 +874,9 @@ The rest of this phase is about you. This section is a single incident run all t
 | 06:25 | You hand over and stop commanding. You do not stay on the bridge "just to watch" | — | Log entry: IC change |
 | +3 days | You facilitate the post-incident review. The timeline and the decision log were both already written, so the meeting goes straight to contributing factors | All participants, DPO, IT manager | PIR report and action tracker |
 
-Read the row at 01:38 again, because it is the one that made the incident smaller. The ops lead had found the mail rule and reported it. The commander asked what *else* the same technique would have touched. That question produced a sweep that found two more forwarding rules on two more accounts — both created by the same actor, one of them dormant. Neither was in scope when the day began. That is the commander's contribution: not the finding, but the question that turns one finding into a search pattern.
+Read the row at 01:38 again, because it is the one that made the incident smaller. The ops lead had found the mail rule and reported it. The commander asked what *else* the same technique would have touched.
+
+That question produced a sweep that found two more forwarding rules on two more accounts — both created by the same actor, one of them dormant. Neither was in scope when the day began. That is the commander's contribution: not the finding, but the question that turns one finding into a search pattern.
 
 #### Where this goes wrong: the commander who joins the analysis
 

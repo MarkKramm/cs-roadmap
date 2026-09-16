@@ -1066,7 +1066,9 @@ Service Name:  VeeamEndpointAgent
 Service File Name:  "C:\Program Files\Backup Agent\agent.exe" -service
 ```
 
-**There it is.** A new agent was installed on the file server on the evening of the 2nd. The backup succeeded that night — it ran at 23:00, after the 21:14 install, and completed. So the install itself did not break it directly. What changed is that the agent's first full index scan ran the *following* night, and the 3rd is exactly when the failures begin. That is the step that ties the install to the symptom: not the install on its own, but the first scan cycle it performed afterwards. The question now is what that scan holds open.
+**There it is.** A new agent was installed on the file server on the evening of the 2nd. The backup succeeded that night — it ran at 23:00, after the 21:14 install, and completed. So the install itself did not break it directly. What changed is that the agent's first full index scan ran the *following* night, and the 3rd is exactly when the failures begin.
+
+That is the step that ties the install to the symptom: not the install on its own, but the first scan cycle it performed afterwards. The question now is what that scan holds open.
 
 **Step 4 — Identify what is locking the files.**
 

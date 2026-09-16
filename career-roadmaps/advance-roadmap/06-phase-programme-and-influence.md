@@ -168,7 +168,11 @@ A number without a definition is an opinion with a decimal point. Every metric o
 | **Owner** | Who is accountable for the number? | Nobody fixes it when it is wrong |
 | **Cadence and thresholds** | How often, and when does it turn amber? | It is read but never acted on |
 
-The **statistic** field is the one that gets skipped and the one that causes the most damage. Consider remediation times for ten critical vulnerabilities: 3, 4, 4, 5, 5, 6, 6, 7, 8, and 180 days. The mean is 22.8 days. That mean is a lie about the typical case — eight of the ten closed inside a week — and it is simultaneously a lie about the tail, because a 180-day outlier is exactly the finding an auditor wants to see. Report the median **and** the p90, and name the outlier separately. Never average a distribution you have not looked at.
+The **statistic** field is the one that gets skipped and the one that causes the most damage. Consider remediation times for ten critical vulnerabilities: 3, 4, 4, 5, 5, 6, 6, 7, 8, and 180 days. The mean is 22.8 days.
+
+That mean is a lie about the typical case — eight of the ten closed inside a week — and it is simultaneously a lie about the tail, because a 180-day outlier is exactly the finding an auditor wants to see.
+
+Report the median **and** the p90, and name the outlier separately. Never average a distribution you have not looked at.
 
 #### A worked example: the same programme, two dashboards
 

@@ -60,7 +60,9 @@ Learn to go looking for activity nobody wrote a rule for: state a hypothesis, wo
 
 ### Why this lesson exists
 
-Everything you have been trained to do so far ends in a ticket. An alert fires, you triage it, you close it or escalate it, and the queue moves on. That loop has a property you may not have noticed: **it only ever looks at things somebody already thought to ask about.** Every alert in your queue exists because a person, at some point, sat down and wrote a rule that describes a behaviour they expected to see. If an adversary does something nobody wrote a rule for, the queue will never mention it.
+Everything you have been trained to do so far ends in a ticket. An alert fires, you triage it, you close it or escalate it, and the queue moves on. That loop has a property you may not have noticed: **it only ever looks at things somebody already thought to ask about.**
+
+Every alert in your queue exists because a person, at some point, sat down and wrote a rule that describes a behaviour they expected to see. If an adversary does something nobody wrote a rule for, the queue will never mention it.
 
 Threat hunting is the work of closing that gap deliberately, before an incident forces you to. It is the one security activity whose entire purpose is to look somewhere no rule is pointing.
 
@@ -250,7 +252,9 @@ Here is the mistake to name and avoid, because it is the single most common way 
 
 **The tool-first hunt starts with a query and looks for a reason to run it.**
 
-It looks like this. An analyst reads a blog post containing a KQL query for a Cobalt Strike beacon pattern. They open the query editor, paste it, change nothing except the time range, run it, get zero rows, and write "Hunted for Cobalt Strike — nothing found." The entry goes in the log. Nothing about the estate has changed. No hypothesis was stated, no data source was checked, no conclusion was possible, and the zero rows mean almost nothing because nobody established that the data would have shown the activity if it were there.
+It looks like this. An analyst reads a blog post containing a KQL query for a Cobalt Strike beacon pattern. They open the query editor, paste it, change nothing except the time range, run it, get zero rows, and write "Hunted for Cobalt Strike — nothing found."
+
+The entry goes in the log. Nothing about the estate has changed. No hypothesis was stated, no data source was checked, no conclusion was possible, and the zero rows mean almost nothing because nobody established that the data would have shown the activity if it were there.
 
 | Tool-first hunt | Hypothesis-first hunt |
 |---|---|

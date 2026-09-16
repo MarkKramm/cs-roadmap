@@ -59,26 +59,36 @@ for (const track of tracks) {
     // Split into prose paragraphs, ignoring fences, tables, lists, headings.
     const paras = [];
     let cur = [];
+    let curLine = 0;
     let fence = false;
-    for (const l of body) {
+    const flush = () => {
+      if (cur.length) paras.push({ text: cur.join(' '), line: curLine });
+      cur = [];
+    };
+    for (let i = 0; i < body.length; i++) {
+      const l = body[i];
       if (l.trimStart().startsWith(FENCE)) {
         fence = !fence;
-        if (!fence) { if (cur.length) { paras.push(cur.join(' ')); cur = []; } }
+        if (!fence) flush();
         continue;
       }
       if (fence) continue;
       const t = l.trim();
       const isBlock = t === '' || t.startsWith('#') || t.startsWith('|') ||
         /^[-*] /.test(t) || /^\d+\. /.test(t) || t.startsWith('>');
-      if (isBlock) { if (cur.length) { paras.push(cur.join(' ')); cur = []; } continue; }
+      if (isBlock) { flush(); continue; }
+      // body is lines.slice(start.line, end.line - 1), so body[i] is file line
+      // start.line + 1 + i. Keeping that number is the whole point: a count
+      // tells an editor that work exists, a line number tells them where.
+      if (!cur.length) curLine = start.line + 1 + i;
       cur.push(t);
     }
-    if (cur.length) paras.push(cur.join(' '));
+    flush();
 
     const words = (s) => s.split(/\s+/).filter(Boolean).length;
     const totalWords = body.reduce((n, l) => n + words(l), 0);
-    const pWords = paras.map(words);
-    const sentences = paras.flatMap((p) => p.split(/(?<=[.!?])\s+/)).filter((s) => s.trim());
+    const pWords = paras.map((p) => words(p.text));
+    const sentences = paras.flatMap((p) => p.text.split(/(?<=[.!?])\s+/)).filter((s) => s.trim());
     const sWords = sentences.map(words);
 
     // Longest paragraph: the wall-of-text risk.
@@ -94,6 +104,15 @@ for (const track of tracks) {
     // The worst paragraph ever found here was 193 words, in IT Phase 1.
     const over90 = pWords.filter((n) => n > EDITORIAL).length;
     const overCeiling = pWords.filter((n) => n > CEILING).length;
+
+    // The same offenders, each with the line it starts on, sorted worst first.
+    // This is what turns the density report from a statistic into a worklist;
+    // `--list` prints it. It is reported, never gated — EDITORIAL is the
+    // standard the writing is held to, CEILING is the only thing that fails.
+    const denseParas = paras
+      .map((p) => ({ line: p.line, words: words(p.text), text: p.text }))
+      .filter((p) => p.words > EDITORIAL)
+      .sort((a, b) => b.words - a.words);
 
     const h3 = heads.filter((h) => h.level === 3 && h.line > start.line && h.line < end.line).length;
     const h4 = heads.filter((h) => h.level === 4 && h.line > start.line && h.line < end.line).length;
@@ -111,6 +130,7 @@ for (const track of tracks) {
       maxPara: longest,
       over90,
       overCeiling,
+      denseParas,
       avgSent: avg(sWords),
       h3, h4,
       wordsPerHeading: h3 + h4 ? Math.round(totalWords / (h3 + h4)) : totalWords,
@@ -198,10 +218,22 @@ const totalOver90 = rows.reduce((n, r) => n + r.over90, 0);
 const totalOverCeiling = rows.reduce((n, r) => n + r.overCeiling, 0);
 console.log(`Paragraphs over ${EDITORIAL} words: ${totalOver90} across ${dense.length} phases.`);
 console.log(`Paragraphs over ${CEILING} words: ${totalOverCeiling}.`);
+if (totalOver90) {
+  console.log(`  (pass --list for each one with its file and line; the count alone is not a worklist)`);
+}
 if (dense.length) {
   console.log('  ' + pad('phase', 42) + padL('>' + EDITORIAL, 5) + padL('>' + CEILING, 6) + padL('max', 5));
   for (const r of dense) {
     console.log('  ' + pad(r.file.slice(0, 40), 42) + padL(r.over90, 5) + padL(r.overCeiling, 6) + padL(r.maxPara, 5));
+  }
+}
+if (process.argv.includes('--list') && totalOver90) {
+  console.log(`\n=== every paragraph over ${EDITORIAL} words (${totalOver90}) ===`);
+  for (const r of rows) {
+    for (const p of r.denseParas) {
+      console.log(`  ${r.track}/${r.file}:${p.line}  ${p.words}w`);
+      console.log(`      ${p.text.slice(0, 108).replace(/\s+/g, ' ')}`);
+    }
   }
 }
 

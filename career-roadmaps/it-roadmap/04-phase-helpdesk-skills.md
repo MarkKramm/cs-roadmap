@@ -804,7 +804,9 @@ Pinging google.com [142.250.4.101] with 32 bytes of data:  <- the name resolved
 Reply from 142.250.4.101: bytes=32 time=25ms TTL=115
 ```
 
-The third block is the one to read carefully, and the evidence is in the **header line**, not the reply. **When you ping a name and the header shows `[142.250.4.101]` after it, the forward lookup succeeded** — `ping` only prints that bracketed address once it has resolved the name. Notice that all three *reply* lines look identical: they all show an IP, because that is what ICMP echoes back. So do not compare the replies; compare the first line of each block. `Pinging google.com` with no bracketed address would be the DNS failure. That is the whole test, and it costs three seconds.
+The third block is the one to read carefully, and the evidence is in the **header line**, not the reply. **When you ping a name and the header shows `[142.250.4.101]` after it, the forward lookup succeeded** — `ping` only prints that bracketed address once it has resolved the name.
+
+Notice that all three *reply* lines look identical: they all show an IP, because that is what ICMP echoes back. So do not compare the replies; compare the first line of each block. `Pinging google.com` with no bracketed address would be the DNS failure. That is the whole test, and it costs three seconds.
 
 If `8.8.8.8` answers and `google.com` fails, you have DNS failure and nothing else. Confirm it with a comparison of two servers:
 

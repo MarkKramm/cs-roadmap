@@ -607,7 +607,11 @@ The second route is the one learners skip and should not. **Forensic images of r
 | **Your own VM snapshots** | Full control, and you already know the answer, which limits the learning |
 | **A deliberately infected VM** | Real malware behaviour, in isolation, with all the legal safety that implies |
 
-The fourth entry has a hard condition attached, and it is worth stating precisely. **You may run malware only in an isolated virtual machine with no network route to anything real, on hardware you own, where you accept the risk of complete loss of that machine.** Host-only networking, no shared clipboard, no USB passthrough, and a snapshot you can discard. The one folder exception is the read-only evidence mount described in Part 6, which carries the capture *out* of the target rather than letting anything *in*. Anything less is how a learner infects their employer's network.
+The fourth entry has a hard condition attached, and it is worth stating precisely. **You may run malware only in an isolated virtual machine with no network route to anything real, on hardware you own, where you accept the risk of complete loss of that machine.**
+
+Host-only networking, no shared clipboard, no USB passthrough, and a snapshot you can discard. The one folder exception is the read-only evidence mount described in Part 6, which carries the capture *out* of the target rather than letting anything *in*.
+
+Anything less is how a learner infects their employer's network.
 
 #### Free tooling that is genuinely enough
 
