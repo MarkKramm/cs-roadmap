@@ -102,6 +102,14 @@ For each row, replace the empty last column with exactly one of:
 
 `;
 
+// A chunk can be too large for one reply. The first pass at the 160-row command
+// table stopped at row 152 of 160 -- the model ran out of room mid-table and
+// said so at a row boundary, which is rule 6 working. Rather than re-pasting
+// 45 KB to reach eight rows, `--from <n>` emits a continuation chunk starting
+// at that row, with its own copy of the instructions.
+const fromArg = process.argv.indexOf("--from");
+const FROM = fromArg > -1 ? Number(process.argv[fromArg + 1]) : null;
+
 fs.mkdirSync(OUT, { recursive: true });
 
 let written = 0;
@@ -126,10 +134,43 @@ for (const title of WANTED) {
     .toLowerCase()
     .replace(/[^a-z0-9]+/g, "-")
     .replace(/^-|-$/g, "");
-  const file = path.join(OUT, `${String(n).padStart(2, "0")}-${slug}.md`);
-  const rows = kept.filter((l) => /^\| \d+ \|/.test(l)).length;
 
-  fs.writeFileSync(file, HEADER + `# ${title}\n\n` + kept.join("\n") + "\n", "utf8");
+  // --from <n>: keep only rows numbered >= n, and drop the now-dangling
+  // context lines that belonged to the row above the cut.
+  let outLines = kept;
+  let suffix = "";
+  if (FROM) {
+    const want = new Set();
+    outLines = [];
+    let keepCtx = false;
+    for (const line of kept) {
+      const m = /^\| (\d+) \|/.exec(line);
+      if (m) {
+        keepCtx = Number(m[1]) >= FROM;
+        if (keepCtx) outLines.push(line);
+        continue;
+      }
+      // A context row belongs to the claim directly above it.
+      if (keepCtx && /^\| \| \| <sub>/.test(line)) outLines.push(line);
+    }
+    suffix = `-from-${FROM}`;
+  }
+
+  const file = path.join(OUT, `${String(n).padStart(2, "0")}-${slug}${suffix}.md`);
+  const rows = outLines.filter((l) => /^\| \d+ \|/.test(l)).length;
+
+  // A class with fewer rows than the cut point has no continuation. Writing an
+  // empty file would be a file that looks like a task and contains none.
+  if (!rows) {
+    console.log(`  ${path.basename(file).padEnd(46)}    (no rows at or after ${FROM} — skipped)`);
+    continue;
+  }
+
+  const heading = FROM
+    ? `# ${title} — rows ${FROM} onward\n\nThis is the CONTINUATION of a table whose earlier rows were already verified. **Verify only the rows below.** Do not restate or re-check earlier rows.\n`
+    : `# ${title}\n`;
+
+  fs.writeFileSync(file, HEADER + heading + "\n" + outLines.join("\n") + "\n", "utf8");
   const kb = (fs.statSync(file).size / 1024).toFixed(1);
   console.log(`  ${path.basename(file).padEnd(46)} ${String(rows).padStart(4)} rows  ${kb} KB`);
   written++;
