@@ -54,12 +54,25 @@ Run all three before trusting this section. If any ever fails, the claims below 
   are mostly inventory numbers ("a 10-device practice asset inventory") that are **illustrative
   examples rather than claims about the world**, so they are unverifiable by construction.
 
-That leaves **370 claims** that genuinely need an external source.
+## Result of the first verification pass
 
-Two classes need no external source at all, which makes them the strongest tier:
+A model with web access worked through the sections below against primary sources. **Two claims
+were wrong, and both are fixed.** They are recorded here because the *shape* of each is more
+useful than the fix:
 
-- **Stated counts and arithmetic** — recompute from the document's own numbers.
-- **Subnetting** — RFC 1918 fixes the private ranges; everything else is arithmetic.
+| Claim | What was wrong | Why no guard could see it |
+|---|---|---|
+| IT 01, `Get-PhysicalDisk` | The phase told the reader to watch for `Caution` or `Bad` from `HealthStatus`. Those are **CrystalDiskInfo's** ratings — the cmdlet returns `Healthy` / `Warning` / `Unhealthy` / `Unknown`. | Every word was spelled correctly and the sentence was internally consistent. The phase's own sample output four lines earlier printed `Healthy`, so it even contradicted itself without any check noticing. |
+| IT 02, `DISM` | A summary table said `` `DISM /RestoreHealth` ``, which **throws when run**. The full form appears 300 lines earlier in the same file. | The command *name* was right. Nothing was inconsistent. A table cell invites shortening, and the abbreviation silently became a different, broken command. |
+
+**Both are now covered by `scripts/audit-commands.mjs`**, which checks the exact string a reader
+would copy rather than the command name — and which was itself proved able to fail by
+re-injecting the original IT 02 defect, because a guard that has never failed is a comment.
+
+**The rest of the pass was `OK` or `UNVERIFIABLE`**, with a large share of `UNVERIFIABLE` falling
+on exactly what should be unverifiable: teaching method, diagnostic heuristics, resume phrasing,
+case-study narrative, and lab instructions. That distribution is itself a useful result — it means
+the worklist's verdict vocabulary is being used honestly rather than everything being stamped OK.
 
 ## What this file does NOT claim
 
@@ -125,7 +138,7 @@ doubt it; do not re-check these by hand.
 | # | Location | Text as written | Verdict |
 |---|---|---|---|
 | 1 | `01-phase-computer-fundamentals.md:277` | - File system errors, and `chkdsk` reporting bad sectors. | |
-| 2 | `01-phase-computer-fundamentals.md:284` | 2. **Read the drive health.** Open CrystalDiskInfo, or run `Get-PhysicalDisk \| Select FriendlyName, HealthStatus`. A Caution or Bad result is a hardware escalation, not a software fix. | |
+| 2 | `01-phase-computer-fundamentals.md:284` | 2. **Read the drive health.** Open CrystalDiskInfo, or run `Get-PhysicalDisk \| Select FriendlyName, HealthStatus`. The two tools use different words, so read the right one: CrystalDiskInfo says **Goo … | |
 | 3 | `01-phase-computer-fundamentals.md:290` | Like `Confirm-SecureBootUEFI` below, this needs an elevated PowerShell. `/scan` is online and safe. The full repair mode (`chkdsk C: /f`) requires a reboot and can take hours on a large HDD. Never run … | |
 | 4 | `01-phase-computer-fundamentals.md:374` | **S.M.A.R.T.** (Self-Monitoring, Analysis and Reporting Technology) is a monitoring system built into every modern HDD and SSD. The drive continuously tracks dozens of internal counters and exposes th … | |
 | 5 | `01-phase-computer-fundamentals.md:420` | \| `NTFS_FILE_SYSTEM` \| File system corruption \| Storage health; `chkdsk`; back up first \| | |
@@ -145,7 +158,7 @@ doubt it; do not re-check these by hand.
 | 19 | `02-phase-operating-systems.md:418` | **What carries over, and what does not.** Your troubleshooting *method* is identical on all three: establish scope, read the evidence, change one thing, verify. Your Windows *commands* do not carry ov … | |
 | 20 | `02-phase-operating-systems.md:521` | \| Machine is slow \| `Get-Process \\| Sort WorkingSet -Descending` or `top` \| Identify the process; stop or restart it; check RAM \| | |
 | 21 | `02-phase-operating-systems.md:522` | \| Cannot log in \| Account disabled or locked \| `Get-LocalUser`; re-enable or reset the password \| | |
-| 22 | `02-phase-operating-systems.md:527` | \| Windows Update fails \| Component store corruption \| `DISM /RestoreHealth`, then `sfc /scannow` \| | |
+| 22 | `02-phase-operating-systems.md:527` | \| Windows Update fails \| Component store corruption \| `DISM /Online /Cleanup-Image /RestoreHealth`, then `sfc /scannow` \| | |
 | 23 | `02-phase-operating-systems.md:528` | \| Service will not start \| Its own log entries \| `systemctl status` or Event Viewer; read the stated reason \| | |
 | 24 | `02-phase-operating-systems.md:529` | \| Disk full \| `Get-Volume` or `df -h` \| Disk Cleanup, temp files, old update files, logs \| | |
 | 25 | `02-phase-operating-systems.md:562` | From the command line, `MpCmdRun.exe -Scan -ScanType 2` runs a full scan, and `Get-MpThreatDetection` lists what has been found. Knowing these exist matters more than memorising them: it tells an inte … | |

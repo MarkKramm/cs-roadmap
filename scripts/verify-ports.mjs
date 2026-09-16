@@ -100,6 +100,7 @@ const CLAIMS = [
   { port: 123, expect: /ntp|network time/i, text: "NTP (if referenced)", where: "general" },
   { port: 137, expect: /netbios/i, text: "NetBIOS name service (if referenced)", where: "it 05" },
   { port: 139, expect: /netbios/i, text: "NetBIOS session service (if referenced)", where: "it 05" },
+  { port: 9100, expect: /pdl-datastream|pdl data|printer/i, text: "raw printing — IT 04 says 'nearly every network printer' listens here", where: "it 04 printer triage" },
 ];
 
 const csv = await registry();

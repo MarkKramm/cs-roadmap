@@ -281,7 +281,7 @@ HDD and SSD failures present differently, and knowing which to expect speeds up 
 #### What you would do
 
 1. **Check free space first.** It is free, instant, and the most common cause of "my computer is slow". If `C:` is above 90 % full, that is your answer — run Disk Cleanup, clear the temp folders, and remove old Windows update files.
-2. **Read the drive health.** Open CrystalDiskInfo, or run `Get-PhysicalDisk | Select FriendlyName, HealthStatus`. A Caution or Bad result is a hardware escalation, not a software fix.
+2. **Read the drive health.** Open CrystalDiskInfo, or run `Get-PhysicalDisk | Select FriendlyName, HealthStatus`. The two tools use different words, so read the right one: CrystalDiskInfo says **Good**, **Caution**, or **Bad**, while PowerShell's `HealthStatus` says **Healthy**, **Warning**, **Unhealthy**, or **Unknown**. Anything other than the top rating — `Caution` or `Bad` from CrystalDiskInfo, `Warning` or `Unhealthy` from `HealthStatus` — is a hardware escalation, not a software fix.
 3. **Back up before anything else.** If a drive is failing, the first priority is the user's data, not the diagnosis. Copy important files off immediately.
 4. **Run a file system check** only when you suspect logical corruption rather than physical failure:
    ```powershell
@@ -1382,7 +1382,7 @@ The user reports the update installed, the machine restarted, and the warning is
 
 > **Reported:** User reported repeated "Your device is low on space … free up space on C:" messages and Windows updates refusing to install. User explicitly did not want to risk personal photos stored on the machine.
 > **Changed recently:** Not applicable — gradual accumulation over years of use.
-> **Observed:** `C:` 118.2 GB total, 3.6 GB free (3.0 %) — below the threshold where Windows Update will proceed. `D:` has 612.4 GB free. Profile scan: AppData 21.5 GB, Downloads 12.8 GB, Pictures 9.6 GB. `DISM /AnalyzeComponentStore` reported 9.41 GB component store with 6 reclaimable packages and "Component Store Cleanup Recommended: Yes".
+> **Observed:** `C:` 118.2 GB total, 3.6 GB free (3.0 %) — below the threshold where Windows Update will proceed. `D:` has 612.4 GB free. Profile scan: AppData 21.5 GB, Downloads 12.8 GB, Pictures 9.6 GB. `DISM /Online /Cleanup-Image /AnalyzeComponentStore` reported 9.41 GB component store with 6 reclaimable packages and "Component Store Cleanup Recommended: Yes".
 > **Action (one change at a time):** 1) Ran Disk Cleanup with system files; removed temporary files, delivery optimisation files, and superseded Windows Update data. 2) Ran `DISM /Online /Cleanup-Image /StartComponentCleanup` to reclaim superseded component store packages. 3) Reviewed the Downloads folder **with the user**, deleted only software installers the user confirmed were no longer needed, and moved work documents and photos to `D:`. 4) Installed the pending Windows updates from Settings. Nothing in AppData was deleted; no drive compression; no restore points removed; no user photos deleted.
 > **Verified:** `C:` free space confirmed at 38.9 GB (32.9 %). User ran Windows Update themselves, reported the update completed and the low-space warning no longer appears. User confirmed their photos are present in the new location on `D:`.
 > **Cause:** System volume filled to the point where Windows Update had insufficient working space. The update failure was a symptom, not the fault.

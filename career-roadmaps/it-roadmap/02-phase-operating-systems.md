@@ -524,7 +524,7 @@ That is the cultural difference in one exercise. Windows uses proprietary format
 | Printer disappeared | Print Spooler service, then driver | Restart the spooler; reinstall the driver |
 | No sound | Audio service and the output device | Check the default device; restart the audio service |
 | Wi-Fi missing | Adapter driver | Device Manager status; reinstall the vendor driver |
-| Windows Update fails | Component store corruption | `DISM /RestoreHealth`, then `sfc /scannow` |
+| Windows Update fails | Component store corruption | `DISM /Online /Cleanup-Image /RestoreHealth`, then `sfc /scannow` |
 | Service will not start | Its own log entries | `systemctl status` or Event Viewer; read the stated reason |
 | Disk full | `Get-Volume` or `df -h` | Disk Cleanup, temp files, old update files, logs |
 | Application crashes repeatedly | Application log, plus its AppData `Local` folder | Reset the app's profile; check for updates |

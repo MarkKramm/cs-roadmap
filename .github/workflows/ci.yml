@@ -100,6 +100,14 @@ jobs:
         run: node scripts/verify-cidr.mjs
       - name: Verify worked metrics
         run: node scripts/verify-metrics.mjs
+      # A command can be named correctly and written wrongly. IT 02 stated DISM
+      # in full at one place and abbreviated it to `DISM /RestoreHealth` in a
+      # summary table 300 lines later — a form that throws if a beginner types
+      # it. Nothing was inconsistent and nobody lied; a table cell invites
+      # shortening, and the abbreviation silently became a broken command.
+      # This checks the exact string a reader would copy, not the command name.
+      - name: Audit abbreviated commands
+        run: node scripts/audit-commands.mjs
       # The acronym audit prints a report and exits 0 whatever it finds: whether
       # a reader can decode "SSID" without help is a judgement about the reader,
       # not a claim about the text agreeing with itself, so by D-022 it is a

@@ -2,6 +2,23 @@
 
 A lightweight decision log (ADR-style). Newest first.
 
+## D-037 — A guard may check the *string a reader would copy*, not just the thing it names
+
+- **Date:** 2026-09-16
+- **Status:** Accepted
+- **Context:** The first external verification pass (D-036) returned three errors, and **all three had the same shape: right name, broken invocation.**
+  - IT 02's summary table read `` `DISM /RestoreHealth`, then `sfc /scannow` ``. The command is DISM; the *string* throws. The phase states it correctly 300 lines earlier, so the summary table — precisely where a reader copies from — held the only broken form.
+  - IT 01's case-study log read `` `DISM /AnalyzeComponentStore` ``, missing the same scope flags, while the next line gets `StartComponentCleanup` fully right.
+  - IT 01 told the reader to watch PowerShell's `HealthStatus` for `Caution` or `Bad` — **CrystalDiskInfo's** vocabulary, not the cmdlet's, which returns `Healthy`/`Warning`/`Unhealthy`/`Unknown`. The phase's own sample output four lines earlier prints `Healthy`, so it contradicted itself and nothing noticed.
+  - **No existing guard could see any of them.** The command names were spelled right, the sentences were internally consistent, and nothing cross-referenced them. `audit-refs` checks that a *name* resolves; nothing checked that a *command* runs.
+- **Decision:** Where the reader's action is to **copy a string and paste it into a terminal**, the check tests that string, not the concept it refers to. `scripts/audit-commands.mjs` asserts the exact invocation form for commands where a plausible abbreviation is also a valid-looking but broken command.
+  - **Narrow on purpose — `DISM`, `sfc`, and `chkdsk` only.** These are the commands where a summary table invites shortening *and* the shortened form errors rather than degrading. A guard that flags valid usage gets ignored, which is strictly worse than not having it.
+  - **Proved able to fail before being trusted.** The original IT 02 defect was re-injected and the guard returned exit 1; it returns 0 without it. A guard that has never failed is indistinguishable from a comment.
+- **Consequences:**
+  - **The three defects are fixed, and this is the first content correction in the project produced by *external* verification rather than internal consistency or a comprehension reader.** The class D-036 opened is now demonstrably productive rather than theoretical: three real errors from one pass over one track.
+  - **Two of the three sat in a summary table or a case-study log** — the two places most likely to be skimmed past by an author and most likely to be copied by a reader. That is the generalisable finding, and it is why the guard exists rather than a note to be careful.
+  - **This does not generalise to every command.** Boolean-flag verification (say, every `net user` switch) is a different and much larger problem, and nothing here claims to have solved it.
+
 ## D-036 — Technical correctness is a separate class from internal consistency, and only three tiers of it can be automated
 
 - **Date:** 2026-09-16

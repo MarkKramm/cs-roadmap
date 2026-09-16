@@ -2,6 +2,28 @@
 
 A chronological record of working sessions. Newest first.
 
+## 2026-09-16 (latest) — The first external verification pass, and the shape all three errors shared
+
+**What came back.** The worklist went through a model with web access, checked against primary sources. **Three claims were wrong**, and the interesting part is not the count but that **all three had the identical shape: the name was right and the invocation was broken.**
+
+**IT 02's summary table said `` `DISM /RestoreHealth`, then `sfc /scannow` ``.** That is invalid syntax; it throws. The phase states it correctly 300 lines earlier as `DISM /Online /Cleanup-Image /RestoreHealth`. So the *summary table* — precisely the place a reader copies from — held the only broken form of a command the document gets right elsewhere. A table cell invites shortening, and the shortening silently became a different command.
+
+**IT 01's case-study log said `` `DISM /AnalyzeComponentStore` ``**, missing the same scope flags — while the line immediately after it gets `StartComponentCleanup` fully right. The same slip, in a different file, in the other place an author writes quickly.
+
+**IT 01 told the reader to watch `HealthStatus` for `Caution` or `Bad`.** Those are **CrystalDiskInfo's** ratings. PowerShell's `HealthStatus` returns `Healthy` / `Warning` / `Unhealthy` / `Unknown`. A reader following that sentence would watch for two values the cmdlet never prints — and the phase's own sample output, four lines earlier, prints `Healthy`. It contradicted itself and nothing noticed, because nothing checks whether a sentence is *true*.
+
+**Why no existing guard could see any of them.** The command names were spelled correctly. The sentences were internally consistent. Nothing cross-referenced them, so `audit-refs` had nothing to resolve — it checks that a *name* resolves, not that a *command* runs. This is D-036's thesis arriving as data rather than argument: internal consistency is orthogonal to correctness, and one pass over one track produced three errors from the gap.
+
+**The fix is a guard, not a resolution to be careful.** `scripts/audit-commands.mjs` checks *the exact string a reader would copy* rather than the command it names. It is deliberately narrow — `DISM`, `sfc`, `chkdsk` — because those are the commands where a plausible abbreviation is also a valid-looking but broken command, and a guard that flags valid usage gets ignored, which is worse than not having it. **I proved it can fail before trusting it**: re-injected the original IT 02 defect, got exit 1; removed it, got exit 0. A guard that has never failed is indistinguishable from a comment — and my first injection attempt silently failed to match the text, so the guard "passed" a test that never ran. The second attempt, run through a script file rather than a shell one-liner, is what actually proved it.
+
+**I also corrupted a file and caught it.** Using `Set-Content -Encoding utf8` to inject the test defect wrote a BOM and mangled every typographic character in IT 02 into `â€”` — the exact trap AGENTS.md rule 2 exists to prevent. `git diff` showed 198 insertions and 198 deletions on a file where I had changed one line. Restored from git immediately; content files get edited with the edit tool and never with a shell write.
+
+**Two smaller results.** Port 9100 was confirmed against IANA — `pdl-datastream`, "Printer PDL Data Stream" — so IT 04's "nearly every network printer" holds; `verify-ports` is now 19 checks. And **the changelog guard caught a duplicate `### Fixed` section in this very edit**, which is the guard doing to me what it was built to do.
+
+**The remaining worklist is honest about its verdict distribution.** A large share came back `UNVERIFIABLE` — teaching method, diagnostic heuristics, resume phrasing, case-study narrative, lab instructions. That is the vocabulary being used correctly: those are judgement calls, and marking them OK would have made the OK column mean nothing.
+
+## 2026-09-16 (earlier) — Technical correctness: the claim class no guard could see, and the assumption that had blocked it
+
 ## 2026-09-16 (latest) — Technical correctness: the claim class no guard could see, and the assumption that had blocked it
 
 **The task.** With quizzes done, I looked for the highest-value remaining work rather than the next obvious one. The corpus balance guard I had flagged was real but small. The larger item was recorded in `ROADMAP.md` as the thing nothing had ever tested: **whether the content is technically true.**

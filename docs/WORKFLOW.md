@@ -134,6 +134,7 @@ node scripts/audit-quiz.mjs              # quiz answer positions balanced, optio
 node scripts/validate-ci.mjs             # every CI step well-formed, every script it names exists
 node scripts/verify-cidr.mjs             # subnet arithmetic recomputed; RFC 1918 ranges checked
 node scripts/verify-metrics.mjs          # IT 06's worked metrics recomputed from its own table
+node scripts/audit-commands.mjs          # DISM/sfc/chkdsk written in a form that actually runs
 node scripts/audit-terms.mjs --self-test # the acronym DETECTOR — 16 controls, gates
 node scripts/audit-terms.mjs             # the acronym CORPUS — measurement, always exits 0
 ```
@@ -141,6 +142,8 @@ node scripts/audit-terms.mjs             # the acronym CORPUS — measurement, a
 **The two `verify-*` scripts are the only checks here that test whether the content is *true* rather than whether it agrees with itself** (D-036). Every other guard asks "do two places in this repository say the same thing". These recompute claims that have an answer independent of the document — subnet arithmetic, and a worked example whose stated result must follow from its own data. Both are the strongest tier available, because they depend on trusting nobody's documentation, mine included.
 
 `scripts/verify-ports.mjs` is the same idea against an external authority — the IANA registry that *assigns* port numbers — and it is **deliberately not in CI**: it needs the network, so its failure mode would eventually be "IANA was unreachable", which is a red build with nothing wrong with the content. Run it by hand after editing a port table.
+
+**`audit-commands.mjs` catches a narrower thing, and it exists because the defect happened twice.** A command can be *named* correctly and *written* wrongly: IT 02 stated `DISM /Online /Cleanup-Image /RestoreHealth` in full at one place and `DISM /RestoreHealth` in a summary table 300 lines later. The second throws if a beginner types it. Nothing was inconsistent and nobody lied — a table cell invites shortening, and the abbreviation silently became a different, broken command. The same shape had already occurred in an IT 01 case-study log. It checks the exact string a reader would copy, not the command name.
 
 `scripts/extract-claims.mjs` is not a check at all. It pulls every machine-checkable claim out of the nine IT phases into [`IT-CLAIM-VERIFICATION.md`](IT-CLAIM-VERIFICATION.md), which is a worklist for verifying the classes a machine cannot settle. Run it after editing phase content; it overwrites the file.
 
@@ -178,6 +181,7 @@ The smoke test renders the lesson for every phase and asserts that the table and
 - [ ] `node scripts/audit-changelog.mjs` reports `findings: 0`, and `node scripts/test-audit-changelog.mjs` reports `13 passed, 0 failed` (after any edit to `CHANGELOG.md`, and after any edit to either script).
 - [ ] `node scripts/audit-quiz.mjs` reports `findings: 0` (after any edit to a `## Quiz` section, or to the quiz parser).
 - [ ] `node scripts/verify-cidr.mjs` and `node scripts/verify-metrics.mjs` both pass (after any edit to a subnet table, a worked networking example, or IT 06's ticket data).
+- [ ] `node scripts/audit-commands.mjs` passes (after any edit that adds or shortens a `DISM`, `sfc`, or `chkdsk` invocation — especially inside a table cell, which is where the shortening happens).
 - [ ] `node scripts/verify-ports.mjs --refresh` passes (after any edit to a port table — run by hand, since it needs the network).
 - [ ] If phase prose changed, `node scripts/extract-claims.mjs` was re-run so [`IT-CLAIM-VERIFICATION.md`](IT-CLAIM-VERIFICATION.md) matches the content.
 - [ ] `node scripts/validate-ci.mjs` reports `0 problems` (after any edit to `.github/workflows/`, or after renaming any script a workflow names).
