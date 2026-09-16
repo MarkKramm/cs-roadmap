@@ -47,19 +47,23 @@ For each row, replace the empty last column with exactly one of:
    of this curriculum is teaching method, diagnostic reasoning, and worked
    examples, none of which is a fact about the world.
 
-# Command and cmdlet usage — rows 153 onward
+# Cryptography algorithm claims
 
-This is the CONTINUATION of a table whose earlier rows were already verified. **Verify only the rows below.** Do not restate or re-check earlier rows.
 
-| 153 | `08-phase-portfolio-and-resume.md:114` | \| "Know Linux." \| "Installed and administered Ubuntu Server in a VM: user and group management, `systemctl` service control, permissions with `chmod` and `chown`, log review in `/var/log`." \| | |
-| 154 | `08-phase-portfolio-and-resume.md:489` | **"How did you verify?"** A `ping` from the first subnet to the router's second interface, then to the host on the second subnet, then `tracert` to confirm the path actually went through pfSense rather than resolving locally. Then a Wireshark capture to see th … | |
-| 155 | `08-phase-portfolio-and-resume.md:755` ▶ | running. `systemctl status ssh` showed `active (running)`, so the service was | |
-| | | <sub>↑ **Second failure:** SSH was refused from the host even though the server was<br>↓ fine and the problem was the network. The VM was on NAT, and NAT does not let</sub> | |
-| 156 | `08-phase-portfolio-and-resume.md:768` ▶ | \| Service controllable \| `systemctl status ssh` showed `active (running)` \| | |
-| | | <sub>↑ \| User and group created \| `id labadmin` showed `uid=1001(labadmin) gid=1001(labadmin) groups=1001(labadmin),1002(helpdesk)` \|<br>↓ \| Log reading works \| `journalctl -u ssh -n 20` showed the accepted-connection line \|</sub> | |
-| 157 | `08-phase-portfolio-and-resume.md:770` ▶ | \| SSH reachable \| `ssh labadmin@127.0.0.1 -p 2222` connected from the host \| | |
-| | | <sub>↑ \| Log reading works \| `journalctl -u ssh -n 20` showed the accepted-connection line \|</sub> | |
-| 158 | `08-phase-portfolio-and-resume.md:776` ▶ | - `systemctl status <unit>` is the first command to run for any service | |
-| | | <sub>↑ Reading the error literally would have saved 40 minutes.<br>↓ problem — it distinguishes "not running" from "running but refusing".</sub> | |
-| 159 | `08-phase-portfolio-and-resume.md:1067` | \| 2 \| PowerShell 7, `Get-CimInstance` for OS and disk, `Get-Service` filtered to `Running`, `Export-Csv` for the output. \| | |
-| 160 | `09-phase-job-application-plan.md:719` | - Strong: "A user said the internet was down. I pinged `8.8.8.8` first — that worked, so routing and upstream were fine. `ping google.com` failed, so it was name resolution. `nslookup` against the local resolver got no answer, while `nslookup google.com 8.8.8. … | |
+*Key sizes, hash lengths and the broken/sound status of an algorithm are fixed facts. Telling a beginner MD5 or SHA-1 is acceptable is the kind of error that persists into their work.*
+
+**Source to check against:** The defining standard (NIST FIPS), or the IETF RFC for the protocol
+
+5 claim(s).
+
+| # | Location | Text as written | Verdict |
+|---|---|---|---|
+| 1 | `02-phase-networking-and-linux.md:585` ▶ | ssh-keygen -t ed25519 -C "lab key" # generate a keypair | |
+| | | <sub>↑ ```bash<br>↓ ssh-copy-id user@192.168.1.50 # install the public key (Linux/macOS)</sub> | |
+| 2 | `11-phase-incident-response.md:456` | \| **AmCache** \| `C:\Windows\AppCompat\Programs\Amcache.hve` \| Program execution with SHA-1 hashes and install paths \| | |
+| 3 | `11-phase-incident-response.md:464` | **AmCache is the single most under-used artefact by beginners.** It records executables with their SHA-1 hashes, which means you can take a hash you found in AmCache and check it against a public reputation service without ever having the file. | |
+| 4 | `11-phase-incident-response.md:1242` | - A memory acquisition record with tool, time, and SHA-256 hash | |
+| | | <sub>↑ - Triage records for ten alerts with severity and escalation reasoning<br>↓ - A disk image hash verification and a timeline table built from at least three sources</sub> | |
+| 5 | `14-phase-web-app-security.md:307` | **The password-storage rule is the one to know precisely.** Passwords are stored with a slow, salted, memory-hard hash: `bcrypt`, `scrypt`, or `Argon2`. Not SHA-256, and never MD5 or SHA-1. The reason is speed. A modern GPU computes billions of SHA-256 hashes  … | |
+
+_▶ marks a line inside a code block — executable, so a wrong flag or path is worse than a wrong sentence._

@@ -21,13 +21,30 @@
 // Output is Markdown, written for pasting into a chat with a model that has
 // web access: claim, location, the text as written, and an empty verdict slot.
 //
-// Run: node scripts/extract-claims.mjs > docs/IT-CLAIM-VERIFICATION.md
+// Run: node scripts/extract-claims.mjs --track cybersec
 
 import fs from "node:fs";
 import path from "node:path";
 
 const ROOT = path.resolve(import.meta.dirname, "..");
-const TRACK = path.join(ROOT, "career-roadmaps", "it-roadmap");
+
+// Track selection. Originally hardcoded to IT; generalising it is what let the
+// cyber track be MEASURED rather than assumed. The IT worklist is complete
+// (224 claims, 0 wrong) and its output is regenerated only because the file
+// documents the method.
+const TRACKS = {
+  it: { dir: "it-roadmap", label: "IT", slug: "IT", out: "IT-CLAIM-VERIFICATION.md" },
+  cybersec: { dir: "cybersec-roadmap", label: "Cybersecurity", slug: "CYBER", out: "CYBER-CLAIM-VERIFICATION.md" },
+  advance: { dir: "advance-roadmap", label: "Advanced", slug: "ADVANCE", out: "ADVANCE-CLAIM-VERIFICATION.md" },
+};
+const trackIdx = process.argv.indexOf("--track");
+const TRACK_KEY = trackIdx > -1 ? process.argv[trackIdx + 1] : "it";
+if (!TRACKS[TRACK_KEY]) {
+  console.error(`unknown track "${TRACK_KEY}" — expected: ${Object.keys(TRACKS).join(", ")}`);
+  process.exit(2);
+}
+const TRACKSEL = TRACKS[TRACK_KEY];
+const TRACK = path.join(ROOT, "career-roadmaps", TRACKSEL.dir);
 
 // --- claim classes ----------------------------------------------------------
 // Each class is something with a right answer that lives in a document: a
@@ -137,6 +154,60 @@ const CLASSES = [
     re: /\b\d[\d,.]*\s*(?:GB|MB|KB|TB|bytes|bits|hosts?|addresses|subnets?|accounts|devices|minutes|hours|days|weeks)\b/gi,
   },
 ];
+
+// --- cyber-only classes -----------------------------------------------------
+// The cyber track carries claim types IT has none of, which the density
+// measurement found rather than assumed. Each is a VERBATIM IDENTIFIER that
+// resolves to exactly one published definition, which makes them the most
+// cleanly checkable rows in the whole corpus.
+const CYBER_CLASSES = [
+  {
+    id: "cve",
+    title: "CVE identifiers and vulnerability claims",
+    why: "A CVE ID resolves to exactly one published record. The ID, the affected product, and the described impact are all fixed by that record — and an ID paired with the wrong product is a fabrication that reads as authoritative.",
+    source: "The NVD or the vendor advisory for that CVE",
+    // The ID, plus whatever the line says about it. The ID alone is trivially
+    // checkable and worthless; the CLAIM is the pairing of ID with product,
+    // version, mechanism, or impact.
+    re: /\bCVE-\d{4}-\d{4,7}\b[^.\n]{0,120}/g,
+  },
+  {
+    id: "attack",
+    title: "MITRE ATT&CK technique identifiers",
+    why: "A technique ID resolves to one entry in a versioned, published matrix. The ID and its technique name are both fixed, and the matrix is renumbered between versions.",
+    source: "The MITRE ATT&CK matrix for the named technique ID",
+    // The ID and the name it is asserted to have. `T1059.001` alone says
+    // nothing; "T1059.001 (PowerShell)" is the checkable claim.
+    re: /\bT1\d{3}(?:\.\d{3})?\b(?:\s*\(?[^)\n.]{0,60}\)?)?/g,
+  },
+  {
+    id: "standard",
+    title: "Standards, frameworks and control identifiers",
+    why: "NIST SP numbers, ISO/IEC numbers, PCI DSS requirements and OWASP categories are versioned documents with fixed numbering. A wrong control number points a reader at the wrong requirement.",
+    source: "The published standard itself (NIST CSRC, ISO, PCI SSC, OWASP)",
+    re: /\b(?:NIST\s+SP\s+\d{3}-\d+[A-Z]?|NIST\s+CSF|ISO\/IEC\s+\d{4,5}(?:-\d+)?|PCI\s+DSS(?:\s+\d+(?:\.\d+)*)?|OWASP\s+Top\s+10(?:\s+\d{4})?|CIS\s+(?:Controls?|Benchmark)s?(?:\s+v?\d+(?:\.\d+)*)?|SOC\s*2|GDPR(?:\s+Article\s+\d+)?|HIPAA|AICPA|FedRAMP|FISMA|CMMC(?:\s+Level\s+\d)?)\b[^.\n]{0,90}/g,
+  },
+  {
+    id: "cybercmd",
+    title: "Security tool commands and flags",
+    why: "Flags are fixed by each tool's own manual. A wrong flag in a lab instruction is executable code that cannot run — the same failure shape as IT 02's DISM defect.",
+    source: "The tool's own man page or vendor documentation",
+    re: /`(?:nmap|hydra|john|hashcat|sqlmap|gobuster|ffuf|nikto|tcpdump|tshark|volatility|vol|strings|xxd|base64|openssl|gpg|iptables|nft|ufw|auditctl|ausearch|systemctl|journalctl|grep|awk|sed|cut|sort|uniq|curl|wget|ssh|scp|ss|netstat|dnf|apt|snap|docker|kubectl|aws|az|gcloud|az login|Get-\w+|Set-\w+|New-\w+|Invoke-\w+|Export-\w+|Import-\w+|Select-\w+|Where-\w+|splunk|tcpdump|zeek|suricata|yara|osquery|sysmon|reg|sc|schtasks|netsh|wmic|wevtutil|Get-WinEvent|Get-Process|Get-Service|Get-ChildItem|Get-Acl|Get-LocalUser|Get-LocalGroupMember|Get-CimInstance|Get-MpThreatDetection|MpCmdRun)[^`]*`/g,
+  },
+  {
+    id: "crypto",
+    title: "Cryptography algorithm claims",
+    why: "Key sizes, hash lengths and the broken/sound status of an algorithm are fixed facts. Telling a beginner MD5 or SHA-1 is acceptable is the kind of error that persists into their work.",
+    source: "The defining standard (NIST FIPS), or the IETF RFC for the protocol",
+    re: /\b(?:AES|RSA|SHA-?1|SHA-?2|SHA-?256|SHA-?512|MD5|3DES|DES|RC4|Blowfish|ChaCha20|ECDSA|Ed25519|bcrypt|scrypt|Argon2|PBKDF2|Diffie-Hellman|ECDHE|HMAC|XOR)\b[^.\n]{0,80}\b(?:\d{2,4}[- ]?bits?|broken|deprecated|insecure|secure|collision|weak|strong|obsolete|recommended|hash|key|salt|cipher|encrypt)/gi,
+  },
+];
+
+// The IT-only classes stay IT-only: `record` is DNS-specific and already
+// verified, and `version`'s IT pattern does not match cyber's products.
+if (TRACK_KEY === "cybersec") {
+  CLASSES.push(...CYBER_CLASSES);
+}
 
 // --- read the track ---------------------------------------------------------
 
@@ -481,7 +552,7 @@ for (const f of files) {
 }
 w();
 
-const dest = path.join(ROOT, "docs", "IT-CLAIM-VERIFICATION.md");
+const dest = path.join(ROOT, "docs", TRACKSEL.out);
 fs.writeFileSync(dest, out.join("\n") + "\n", "utf8");
 process.stderr.write(`wrote ${dest}\n`);
 process.stderr.write(`${total} claims across ${files.length} phases\n`);

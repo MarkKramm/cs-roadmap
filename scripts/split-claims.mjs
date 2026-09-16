@@ -22,8 +22,21 @@ import fs from "node:fs";
 import path from "node:path";
 
 const ROOT = path.resolve(import.meta.dirname, "..");
-const SRC = path.join(ROOT, "docs", "IT-CLAIM-VERIFICATION.md");
-const OUT = path.join(ROOT, "docs", "claims-to-verify");
+
+// Which track's worklist to split, and its output folder. The IT pass is
+// complete; the cyber pass is the live one.
+const trackIdx = process.argv.indexOf("--track");
+const TRACK_KEY = trackIdx > -1 ? process.argv[trackIdx + 1] : "it";
+const TRACKS = {
+  it: { src: "IT-CLAIM-VERIFICATION.md", out: "claims-to-verify" },
+  cybersec: { src: "CYBER-CLAIM-VERIFICATION.md", out: "claims-to-verify-cyber" },
+};
+if (!TRACKS[TRACK_KEY]) {
+  console.error(`unknown track "${TRACK_KEY}" — expected: ${Object.keys(TRACKS).join(", ")}`);
+  process.exit(2);
+}
+const SRC = path.join(ROOT, "docs", TRACKS[TRACK_KEY].src);
+const OUT = path.join(ROOT, "docs", TRACKS[TRACK_KEY].out);
 
 // Which classes still need an external source, and how much of each is DONE.
 //
@@ -41,13 +54,31 @@ const OUT = path.join(ROOT, "docs", "claims-to-verify");
 // in a conversation, not in the repository, so there is nothing to read them
 // from -- and a script that guessed would be wrong in the direction of silently
 // skipping unverified rows.
-const WANTED = [
-  { title: "Command and cmdlet usage", doneThrough: 152 },
-  { title: "DNS record types", done: true, doneThrough: 4 },
-  { title: "Protocol and standard behaviour", done: true, doneThrough: 26 },
-  { title: "Product versions and editions", done: true, doneThrough: 17 },
-  { title: "Registry paths, file paths and filenames", done: true, doneThrough: 17 },
-];
+//
+// The `settled` classes (cidr, port, number) are ABSENT by design: they are
+// recomputed by scripts/verify-*.mjs, and sending them would invite a model to
+// "verify" arithmetic it cannot check.
+const WANTED_BY_TRACK = {
+  it: [
+    { title: "Command and cmdlet usage", done: true, doneThrough: 160 },
+    { title: "DNS record types", done: true, doneThrough: 4 },
+    { title: "Protocol and standard behaviour", done: true, doneThrough: 26 },
+    { title: "Product versions and editions", done: true, doneThrough: 17 },
+    { title: "Registry paths, file paths and filenames", done: true, doneThrough: 17 },
+  ],
+  cybersec: [
+    { title: "MITRE ATT&CK technique identifiers" },
+    { title: "CVE identifiers and vulnerability claims" },
+    { title: "Cryptography algorithm claims" },
+    { title: "Standards, frameworks and control identifiers" },
+    { title: "Security tool commands and flags" },
+    { title: "Protocol and standard behaviour" },
+    { title: "Registry paths, file paths and filenames" },
+    { title: "Product versions and editions" },
+    { title: "Command and cmdlet usage" },
+  ],
+};
+const WANTED = WANTED_BY_TRACK[TRACK_KEY];
 
 const lines = fs.readFileSync(SRC, "utf8").split("\n");
 
