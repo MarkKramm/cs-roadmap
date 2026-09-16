@@ -10,6 +10,7 @@
     "test:search": "npm run build:content && node scripts/test-search.mjs",
     "test:smoke": "npm run build:content && node scripts/smoke-render.mjs",
     "test:highlight": "node scripts/test-highlight.mjs",
+    "test:render-inline": "node scripts/test-render-inline.mjs",
     "test:ui": "node scripts/test-ui.mjs",
     "test:data": "node scripts/test-data.mjs",
     "test:lesson-search": "node scripts/test-lesson-search.mjs",
@@ -17,7 +18,7 @@
     "test:work": "node scripts/test-work.mjs",
     "test:today": "node scripts/test-today.mjs",
     "test:browser": "node scripts/browser-check.mjs",
-    "test": "npm run test:highlight && npm run test:ui && npm run test:data && npm run test:notes && npm run test:work && npm run test:today && npm run test:lesson-search && npm run test:search && npm run test:smoke",
+    "test": "npm run test:render-inline && npm run test:highlight && npm run test:ui && npm run test:data && npm run test:notes && npm run test:work && npm run test:today && npm run test:lesson-search && npm run test:search && npm run test:smoke",
     "dev": "npm run build:content && vite",
     "build": "npm run build:content && vite build",
     "preview": "vite preview"

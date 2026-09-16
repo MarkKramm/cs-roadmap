@@ -80,6 +80,15 @@ jobs:
       # broken search but never throws.
       - name: Search snippet highlighting
         run: npm run test:highlight
+      # renderInline is the site's whole inline-Markdown story and it had a real
+      # bug: emphasis and code were matched in one alternation, so a code span
+      # whose content contained an asterisk — the curriculum's quoted `"*"` in a
+      # key policy — shredded both spans and leaked a literal backtick into the
+      # page. smoke-render caught it on the one lesson that wrote that shape.
+      # This holds the RULE instead of the corpus, so the next lesson to write it
+      # is covered before anyone runs a full render.
+      - name: Inline Markdown formatting
+        run: npm run test:render-inline
       # The rest of the suite. Every one of these is a plain node run against a
       # module with no React and no DOM, so they cost seconds and need no extra
       # install. They were written because their failure modes are silent — a
