@@ -530,7 +530,11 @@ That is the cultural difference in one exercise. Windows uses proprietary format
 | Application crashes repeatedly | Application log, plus its AppData `Local` folder | Reset the app's profile; check for updates |
 | VM will not start | Host RAM or virtualisation disabled | Reduce VM RAM; enable virtualisation in firmware — restart, press F2 or Del at power-on, open the CPU section, set Intel VT-x or AMD-V to Enabled |
 | Forgot a Linux password | Single-user recovery | Boot to recovery, reset from the root shell |
+| Slow to boot, or slow to log in | Startup apps (Task Manager → Startup apps); services for pre-login slowness | Disable High-impact entries one at a time — see below |
 | "I think I have a virus" | What the user is actually seeing | Triage first — see below. Most are not infections |
+| "It broke after the update" | Update history; whether System Protection was on | Uninstall the specific update, roll back the driver, or restore — see below |
+| Logged in but the desktop is empty; "we can't sign in to your account" | Whether the loaded profile is a TEMP path | Copy data out first, then rebuild the profile — see below |
+| Access denied on a shared folder, but the share permission allows it | The NTFS Security tab, not the Sharing tab | The more restrictive layer wins — see Part 9 |
 
 Notice the pattern in the "where to look first" column: **it is always a log, a status, or a resource reading.** Guessing is what people do when they do not know where the evidence lives. Your job is to always know where the evidence lives.
 
@@ -562,6 +566,68 @@ From the command line, `MpCmdRun.exe -Scan -ScanType 2` runs a full scan, and `G
 **Cleaning is for a known, contained, low-privilege threat. Rebuilding is for everything else.** Saying that out loud in an interview is a stronger answer than listing removal tools.
 
 **The one thing you never do.** Never tell a user "it's fine now" without evidence. Run the scan, read the result, and record what you found and what you did. A malware ticket closed on hope is the ticket that reopens next week with worse symptoms.
+
+#### A bad update, and how to take it back
+
+"It broke after the update" is one of the most common openers in support, and it is often correct. The good news is that Windows keeps a way back, and knowing it turns a panic into a ten-minute fix.
+
+**Rolling back a specific update.** Settings → Windows Update → **Update history** → **Uninstall updates** lists what has been installed, and lets you remove one. This is the targeted fix: you know which update arrived and which symptom followed, so you remove that one and nothing else. It requires administrative rights — an ordinary user cannot do it, which is usually why they have called you.
+
+```powershell
+# What has been installed recently, newest first
+Get-HotFix | Sort-Object InstalledOn -Descending | Select-Object -First 10 HotFixID, Description, InstalledOn
+```
+
+**Rolling back a driver.** A driver update that broke a device is fixed from **Device Manager** → the device → **Properties** → **Driver** → **Roll Back Driver**. It is greyed out when Windows has no previous driver stored, which happens after a cleanup or on a fresh install — and that greyed-out state is the honest answer to "why can't I roll this back", not a fault.
+
+**The bigger hammer: a system restore point.** Windows can restore system files, drivers, and registry settings to an earlier point while leaving the user's documents alone. It is a different tool from an update rollback and it is worth knowing which is which:
+
+| Tool | What it undoes | What it keeps | When to reach for it |
+|---|---|---|---|
+| **Uninstall updates** | One specific Windows update | Everything else | You know which update broke it |
+| **Roll Back Driver** | One device driver | Everything else | One device stopped after a driver change |
+| **System Restore** | System files, drivers, registry, installed programs | Personal files | Several things broke at once, or you cannot identify the cause |
+| **Reset this PC** | Nearly everything, with a keep-files option | Personal files (if you choose) | Nothing else worked |
+
+**Two things that decide whether any of this is available, and both are set long before the ticket arrives.** First, **System Protection must have been enabled** on the drive for restore points to exist at all; a machine where it was never turned on has no restore points to offer, no matter how urgently you want one. Second, **restore points are created by updates and installers, not continuously** — so the most recent one may be weeks old, which means restoring loses the software installed since.
+
+That has a support consequence worth stating plainly: **the time to check System Protection is before the problem.** When you next set up or hand over a machine, confirm it is on. It costs nothing and it is the difference between a fixable afternoon and a reimage.
+
+**And the honest limit.** None of these touch the user's own files, which is good until the thing that broke *is* a file. A restore point will not bring back a corrupted document, and it will not remove malware. If a user is hoping a system restore will recover their spreadsheet, they have the wrong tool and you should say so before you run it — because after it finishes, they will believe you told them it would.
+
+#### "My profile is broken": the login that succeeds and the desktop that is not theirs
+
+This is a specific and very common Windows failure, and it looks alarming and is usually straightforward. The user logs in successfully — their password is accepted — but the desktop is wrong. Their wallpaper is gone, their documents are missing, their email client wants to be set up again. Sometimes a notification says it plainly: **"We can't sign in to your account."**
+
+What has happened is that the user's **user profile** — the folder holding their desktop, documents, application settings, and registry hive — has failed to load. Windows has quietly created a **temporary profile** instead, so the user is working in a fresh, empty environment that will be deleted at logoff.
+
+**The tell, and it is decisive.** Look at the path, not the desktop:
+
+```powershell
+# Which profiles exist on this machine, and which are temporary?
+Get-CimInstance Win32_UserProfile | Select-Object LocalPath, Loaded, Special
+```
+
+A loaded profile whose path ends in something like `C:\Users\TEMP` or `C:\Users\TEMP.DOMAIN.001` is the temporary profile. That is your diagnosis, and everything else follows from it.
+
+**Why it happens, in rough order of frequency:**
+
+1. **An antivirus scan quarantined a file inside the profile**, most often `NTUSER.DAT` — the registry hive that *is* the profile. This is the commonest cause and the most ironic one.
+2. **A disk problem or an unclean shutdown** damaged the hive while it was being written.
+3. **A profile-deletion tool removed the wrong folder**, or a folder was deleted manually while the user was logged in.
+4. **A permissions problem** on the profile folder, often after a migration or a restore.
+
+**What you do about it, and what you must not do.** The instinct is to delete the broken profile and let Windows rebuild it. Resist that instinct until you have copied the user's data — the profile folder still contains their files even when their *desktop* does not show them, and deleting it destroys the only copy.
+
+The safe sequence:
+
+1. **Log the user out, and confirm the temporary profile is not loaded.** A profile in use cannot be repaired.
+2. **Copy the data out** from `C:\Users\<broken-profile>` to a location outside it — their Desktop, Documents, Pictures, and Downloads folders, plus any application data they need.
+3. **Only then** remove the profile (Settings → Accounts → **Access work or school** has no such control; use **System → Advanced system settings → User Profiles → Settings**, or `Win32_UserProfile` via PowerShell), and let the user log in again so Windows builds a clean one.
+4. **Copy the data back.**
+5. **Find the cause** before you close, because a profile that broke once from a quarantined hive will break again if the antivirus does the same thing next week.
+
+**The honest framing for the user.** Their files were not deleted, and you should say that early — it is the first thing they will ask. And be straight about the second half: some application settings will not survive, because they lived in the part that broke. Their documents come back; their email profile and saved passwords may need setting up again. Promising a perfect restoration and delivering a working-but-reset machine is how a solved ticket still generates a complaint.
 
 ### Part 8 — Reading Windows like a technician
 
@@ -616,6 +682,69 @@ Get-Service | Where-Object { $_.StartType -eq 'Automatic' -and $_.Status -eq 'St
 On a healthy machine this returns nothing or one or two benign entries. On a neglected machine it returns a list — a print spooler that died weeks ago, an update service that never recovered from a failed patch, a backup agent nobody noticed had stopped. Finding those before the user does is the difference between reactive and proactive support, and it is one of the easiest wins available to a new technician.
 
 The third row matters too, for a different reason. A service that is **Disabled** was disabled on purpose, by a person or by an installer. Do not re-enable it reflexively. Find out why it was disabled first, because re-enabling it may reintroduce whatever problem prompted the change.
+
+**Dependent services, and the trap in restarting one.** Services are not independent. A service can require others to be running first, and Windows enforces that order. When you start a service, Windows starts everything it depends on; when you *stop* one, Windows stops everything that depends on it.
+
+That second half is where beginners cause outages. Stopping a service with dependents takes the dependents down with it — sometimes services the user relies on and never mentioned. Before you stop or restart anything, ask what depends on it:
+
+```powershell
+# What must be running before this one can start?
+(Get-Service -Name Spooler).DependentServices | Select-Object Name, Status
+
+# What does this service itself require?
+(Get-Service -Name Spooler).ServicesDependedOn | Select-Object Name, Status
+```
+
+Two names, two directions, and they are easy to swap. `ServicesDependedOn` is what this service *needs*; `DependentServices` is what *needs this service*. Getting them the wrong way round means you check the wrong set of services and conclude nothing is at risk.
+
+A worked example. A user reports they cannot print. You find the **Print Spooler** stopped and restart it — a reasonable instinct. But suppose the spooler was stopped because something it depends on is broken:
+
+```text
+Name                          Status
+----                          ------
+RPC Endpoint Mapper          Stopped
+```
+
+The spooler will not stay running while the RPC Endpoint Mapper is down. You restart the spooler, it starts, the user tests, and it fails again ten minutes later — and now you have "fixed" it twice. This is the pattern behind a great many repeat tickets: **a service that keeps stopping is usually a symptom, not the fault.** Read what it depends on, and read its own log entries, before restarting it a third time.
+
+The same logic explains why `Start-Service` can fail with an error naming a *different* service than the one you asked for. Windows is telling you the dependency chain could not be satisfied. That error message is the diagnosis, not a nuisance — it names the thing that is actually broken.
+
+#### Startup apps: the other thing that runs at boot
+
+Services are one answer to "what starts when this machine does". **Startup apps** are the other, and they are a different mechanism with a different fix — which is why "it takes four minutes to boot" and "it takes four minutes to log in" are not the same ticket.
+
+The distinction that matters:
+
+- **A service** starts when Windows starts, before anyone logs in. It runs in the background with no visible window, and it belongs to the system.
+- **A startup app** starts when *a user* logs in. It usually has a window, a tray icon, or a splash screen — updaters, chat clients, cloud-sync tools, vendor utilities.
+
+That difference is diagnostic. If boot is slow *before* the login screen, look at services and drivers. If the login screen appears promptly but the desktop is unusable for minutes afterwards, you are looking at startup apps.
+
+**Where they live, and why there are three places.** This is the part that trips people up: Windows has no single list. A program can register itself in more than one place, and the place it chose tells you what kind of thing it is:
+
+| Location | What puts entries there | Notes |
+|---|---|---|
+| **Task Manager → Startup apps** | Anything a user or installer registered for the current user | The visible, modern list. This is where you start |
+| **Task Scheduler** | Installers wanting to run at logon or on a schedule | Invisible in Task Manager, which is why "I disabled it but it still runs" happens |
+| **Registry: `Run` keys** | Older installers, and some malware | Two keys — one for the machine, one per user |
+| **Startup folder** | The user dragging a shortcut in | `shell:startup` in the Run box opens it |
+
+**Diagnosing slow boot properly, in order.** Resist the urge to disable things at random — that is how a user loses their backup agent and finds out months later.
+
+1. **Measure first.** Task Manager → Startup apps shows an **Impact** column (High/Medium/Low) and, on newer builds, the last BIOS time. You are looking for a small number of High-impact entries, not a long list.
+2. **Ask what changed.** Most slow-boot reports follow an install. "It started last week" plus a new app is a much better lead than a list of twenty startup items.
+3. **Disable, do not uninstall, and do it one at a time.** Disabling is reversible in seconds; uninstalling is not. Change one entry, restart, and measure again — the same one-change-at-a-time discipline you use everywhere else.
+4. **Check the other locations only if Task Manager does not explain it.** If the impact column is all Low and the machine is still slow, look at Task Scheduler and the `Run` keys:
+
+```powershell
+# Startup entries in the registry, for this user and for the whole machine
+Get-ItemProperty 'HKCU:\Software\Microsoft\Windows\CurrentVersion\Run'
+Get-ItemProperty 'HKLM:\Software\Microsoft\Windows\CurrentVersion\Run'
+```
+
+**What not to disable.** Be careful with anything that is doing a job the user depends on: backup agents, endpoint security, VPN clients, drive-encryption tools, and vendor management agents. Disabling one of those may "fix" the slowness and quietly break something an employer cares about more. When in doubt, disable, measure, and re-enable with a note in the ticket saying what you tried — that note is what stops the next technician repeating your work.
+
+**The honest limit.** Startup impact is a coarse indicator, not a measurement, and a machine can be slow to boot for reasons that have nothing to do with startup apps at all — a failing disk, insufficient RAM, a driver waiting on a device that is no longer attached. If startup apps do not explain it, go back to reading the evidence in Part 8 rather than continuing to disable things.
 
 #### The event log: three levels, and the discipline of not panicking
 
@@ -752,6 +881,49 @@ The support consequence is in the *order of the questions*. When a user cannot o
 1. **Is it a permission problem or a path problem?** "Permission denied" and "No such file or directory" are different failures with different fixes. Reading the exact error is the whole job here.
 2. **If it is permissions: which triad applies to this user?** Is the user the owner? If not, are they in the group? If neither, only `others` applies — and `others` is often empty.
 3. **Fix the membership, not the file.** Adding the user to the right group is reversible and auditable. Running `chmod 777` is neither, and it is how access control quietly degrades across an organisation. If you find yourself typing `777` on a shared system, you have almost certainly misdiagnosed the problem.
+
+#### Shared folders on Windows: two permission systems, and they multiply
+
+Everything above is the Linux model. Windows shared folders have exactly the same idea — identity plus permission — but they add a complication that causes more access-denied tickets than anything else at first-line: **a file on a shared folder is governed by two separate permission systems at once.**
+
+| Layer | Where it is set | Applies to |
+|---|---|---|
+| **Share permissions** | The folder's *Sharing* tab — the network entry point | Anyone arriving over the network |
+| **NTFS permissions** | The folder's *Security* tab — the filesystem itself | Everyone, whether local or over the network |
+
+**The rule that matters, and it is the one to memorise: the two are combined, and the more restrictive one wins.** A user does not get the union of what the two grant. They get the intersection.
+
+A user with *Full Control* on the share but *Read* on the NTFS side can read and cannot write — and the Sharing tab will happily tell you they have Full Control the whole time. That mismatch is why "but the share permission is Full Control" is a sentence that means you have only looked at half the problem.
+
+A worked example, and it is worth tracing because it is the shape of a real ticket:
+
+```text
+Share permission (Sharing tab):  Finance  ->  Change     (read + write)
+NTFS permission  (Security tab): Finance  ->  Read        (read only)
+```
+
+The user reports they cannot save into the folder. They can open every file in it, so "permissions" seems obviously fine. They can open everything because *both* layers grant read. They cannot save because the NTFS layer grants only read, and NTFS is the more restrictive of the two here. The fix is on the Security tab, not the Sharing tab — and changing the share permission, the intuitive move, would change nothing at all.
+
+Read both, every time, with one command. `icacls` shows the NTFS side:
+
+```powershell
+# NTFS permissions on a folder
+icacls "C:\Shares\Finance"
+
+# Share permissions, which icacls does not show
+Get-SmbShareAccess -Name "Finance"
+```
+
+The output of `icacls` has one detail worth knowing, because it explains a class of "but I just granted access and nothing changed":
+
+```text
+C:\Shares\Finance BUILTIN\Administrators:(OI)(CI)(F)
+                 DOMAIN\Finance:(OI)(CI)(R)
+```
+
+`(OI)` is **object inherit** — files created inside get this entry. `(CI)` is **container inherit** — subfolders do. `(F)` is full control, `(R)` is read, `(M)` is modify. When an entry shows neither `(OI)` nor `(CI)`, it applies to that folder alone and nothing inside it — which is exactly why a permission can look correct on the parent and still deny access to the file the user actually clicked. If a grant appears not to work, check whether it inherits.
+
+**Two habits that prevent most of these tickets.** First, **use groups, never individual accounts** — grant to `Finance`, not to seven people, because the eighth person then needs a group membership rather than a permission change. Second, **do not break inheritance without a reason**, and never use `Deny` when a missing `Allow` would do. `Deny` overrides every `Allow` from every source, including Administrators, so a stray `Deny` produces an access problem that is genuinely hard to find later.
 
 ### Part 10 — Guided walkthrough: read the evidence
 
@@ -1114,6 +1286,11 @@ The lesson is the reasoning; the tasks below are the doing.
 5. Use `ls`, `grep`, `chmod`, `systemctl`, and `journalctl` on Linux. <!-- id: it-02-t05 band: focused energy: normal -->
 6. Disable and re-enable a harmless startup app in Windows. <!-- id: it-02-t06 band: quick energy: low -->
 7. Export a list of running services using PowerShell. <!-- id: it-02-t07 band: quick energy: low -->
+8. Find a service with dependents and write down what would stop if you stopped it. <!-- id: it-02-t08 band: focused energy: normal -->
+9. Diagnose a slow login: open Task Manager → Startup apps, record every High-impact entry, and disable them one at a time, measuring after each restart. <!-- id: it-02-t09 band: deep energy: normal -->
+10. Create a shared folder in your VM, set the share permission to allow change and the NTFS permission to read only, then prove that the more restrictive layer wins by trying to save a file. <!-- id: it-02-t10 band: deep energy: normal -->
+11. In your VM, create a system restore point, install something harmless, restore the point, and record what came back and what did not. <!-- id: it-02-t11 band: focused energy: normal -->
+12. Explain, in writing, why a machine with no restore points cannot be fixed by a system restore — and what you would check on a new machine to prevent that. <!-- id: it-02-t12 band: quick energy: low -->
 
 ## Deliverable / proof of work
 
@@ -1123,6 +1300,9 @@ Create `portfolio/it/02-operating-systems.md` containing:
 - **Command guides:** 20 Windows commands with explanations (for example `ipconfig`, `ping`, `sfc /scannow`, `chkdsk`, `net user`) and 20 Linux commands with explanations (for example `ls`, `cd`, `chmod`, `chown`, `systemctl`, `journalctl`).
 - **Troubleshooting summaries:** 3 Event Viewer findings explained in plain language, plus your steps for three common issues — slow performance, login problems, and driver problems.
 - **Log analysis:** What you found in `/var/log/auth.log` and `/var/log/syslog`, and how you used `journalctl` to read system logs.
+- **Boot and login diagnosis:** What you found in Task Manager → Startup apps, which entries you disabled, and what changed after each restart. Include the registry `Run` keys you checked and what was in them.
+- **A permissions write-up:** Your shared-folder experiment — the share permission, the NTFS permission, which one won, and why. This is a strong interview artefact because it is the exact question a first-line interviewer asks.
+- **A recovery write-up:** What a system restore point did and did not bring back in your VM, and your one-paragraph answer to "the user's profile did not load — what do you do, and in what order?"
 
 ## Checklist
 
@@ -1133,6 +1313,11 @@ Create `portfolio/it/02-operating-systems.md` containing:
 - [ ] I can use 20 basic Linux commands. <!-- id: it-02-c05 energy: normal -->
 - [ ] I can check logs in Windows and Linux. <!-- id: it-02-c06 energy: normal -->
 - [ ] I can install/update software safely. <!-- id: it-02-c07 energy: normal -->
+- [ ] I can diagnose a slow boot or slow login and explain startup apps versus services. <!-- id: it-02-c08 energy: normal -->
+- [ ] I can explain why a service stopped, including what depends on it. <!-- id: it-02-c09 energy: normal -->
+- [ ] I can explain share permissions versus NTFS permissions, and which one wins. <!-- id: it-02-c10 energy: normal -->
+- [ ] I can roll back a bad update, and I know what a system restore does not cover. <!-- id: it-02-c11 energy: normal -->
+- [ ] I know what to do — and what never to do — when a user profile fails to load. <!-- id: it-02-c12 energy: normal -->
 
 ## You're ready to move on when...
 

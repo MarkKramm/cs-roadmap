@@ -2,7 +2,29 @@
 
 A chronological record of working sessions. Newest first.
 
-## 2026-09-16 (latest) — There is no mid-level IT track, and that is now written down
+## 2026-09-16 (latest) — The five unwritten topics, and a guard that could not be built
+
+**Goal:** close the concrete content debt the comprehension pass had named — five IT 02 bullets in `## Specific topics to learn` with no teaching behind them — and settle whether the topic-list guard `ROADMAP.md` called "the highest-value guard currently absent" could be written.
+
+**The guard cannot be built, and finding that out was worth more than building it would have been.** The item had been on the roadmap for several passes as an obviously good idea. Testing it against ground truth — the five topics already confirmed undelivered — killed it in three steps: a keyword probe returned hits for **all five** (a 0% detection rate on the exact defects it was for); a structural check fired **125 times**, keyed on words like `changelog` and `around`; and inspecting the hits showed why. Probing `Startup apps` matched the topic list, the skills list, and a *practice task* — three promises, no teaching. Any presence-based check counts that as delivered, so **its pass path and its skip path are the same shape.** Recorded as D-033, because this repository has been burned by that failure four times and a guard that fails open is worse than none: it converts an unknown into false assurance and stops the next person looking.
+
+**So the five defects were closed by writing the content, which is what the guard would never have replaced.** Phase 2 grew **12,272 → 15,431 words** across five sections:
+
+- **Dependent services** — `ServicesDependedOn` versus `DependentServices`, two names pointing opposite ways, and the pattern behind repeat tickets: a service that keeps stopping is usually a symptom, not the fault. Worked example: a spooler that will not stay up because the RPC Endpoint Mapper is down.
+- **Startup apps** — the distinction that makes the ticket diagnostic (**services start before login; startup apps start at login**, separating "slow to boot" from "slow to log in"), the four places entries actually hide including Task Scheduler and the registry `Run` keys, and an explicit list of what never to disable.
+- **NTFS versus share permissions** — **the more restrictive layer wins**, with a traced example where the Sharing tab reports Full Control and the user cannot save a byte, plus what `(OI)`/`(CI)` inheritance means and why a correct-looking parent permission denies the file actually clicked.
+- **Update rollback** — the recipe table had said "Windows Update fails → `DISM`" and stopped there, covering repair but never *undo*. Now uninstall-update, Roll Back Driver, and a four-way comparison against System Restore and Reset this PC. The two facts that decide whether recovery exists at all — System Protection enabled beforehand, restore points created by installers rather than continuously — are why **the time to check is before the problem.**
+- **Profile corruption** — the temporary-profile failure, the decisive `Win32_UserProfile` `TEMP`-path diagnostic, and the safe sequence that starts with copying the data out, because the profile folder still holds the user's files even when the desktop does not show them.
+
+**Tasks 385 → 390, checklist 7 → 12, all banded and energy-tagged** (278 of 278). Three deliverable artefacts added, all chosen because they are the artefacts an interviewer asks about — the permissions write-up especially, since "explain share versus NTFS" is a real first-line screening question.
+
+**A guard caught the fixer for the fifth time.** `audit-readability` went red on one paragraph written during this pass (96 words). Split at a sentence boundary, every word kept. The editorial backlog is back to **0 over 90 and 0 over 110**, which is where it has to stay now that the gate is at 110.
+
+**Two stale checkboxes were corrected while in the file.** `ROADMAP.md` had two entries marked `[ ]` whose own text said "Built" — the checkbox and the sentence disagreed. Both are now `[x]`. One further IT 02 topic was found to be partially covered and is named rather than dropped: "local user vs Microsoft account" defines both types but never teaches creation, conversion, or what breaks when a Microsoft account is lost.
+
+**Verified:** lint **162 files / 0 issues**; content audit 0; lesson AST **31 / 0 loss**; refs 0 broken with controls passing; time budgets **31 phases / 0 findings**; readability **0 over 110 and 0 over 90**; build clean with **278 banded, 0 minted from position**; smoke **231 renders across 31 phases and 275 tools, 0 failures**; data 86, today 77, work 31, path-order 37, ui 42; and **browser 92 checks / 0 failed** on Edge.
+
+## 2026-09-16 (earlier) — There is no mid-level IT track, and that is now written down
 
 **Question raised:** the mid-level track is cyber — what about IT? Investigated as a possible gap.
 

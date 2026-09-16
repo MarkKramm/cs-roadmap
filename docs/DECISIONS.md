@@ -2,6 +2,22 @@
 
 A lightweight decision log (ADR-style). Newest first.
 
+## D-033 — A guard over a phase's topic list is not buildable, and the negative result is recorded so nobody rebuilds it
+
+- **Date:** 2026-09-16
+- **Status:** Accepted
+- **Context:** `ROADMAP.md` listed "a phase's `## Specific topics to learn` bullets against its lesson" as **the highest-value guard currently absent**. The case for it looked strong: Phase 2 had listed *"Windows Defender and basic malware removal steps"* as a topic and never taught it, and the fourth comprehension pass found **five more IT 02 bullets undelivered** — update rollback, startup-apps diagnosis, NTFS and share permissions, login/profile corruption, and dependent services — plus advance 07 promising five named Sigma correlation constructs that appeared exactly once in 1,348 lines, in the bullet itself. Unlike the CHANGELOG-structure case, this is a claim about the text agreeing with itself, so by D-022 it would be a legitimate gate.
+  - The item also said what it needed: *"a lexicon per bullet or a keyword-set with a must-match floor, and it needs a controls pass — must-fire and must-not-fire examples"*. This session ran that experiment against **ground truth the comprehension pass had already established**, which is the first time the guard could be tested against known-true positives rather than guessed at.
+- **Decision:** **Do not build it.** The experiment failed on every approach tried, in a way that makes the class unfixable by better parsing:
+  - **A keyword probe for the five known-undelivered topics returned hits for all five.** A 0% detection rate on ground truth — the check would have printed green on 5 of 5 real defects.
+  - **A structural check — "does this phrase appear only in the topic list, skills list, or task list?" — fired 125 times** across the 24 phase files that have a topic list (451 bullets total). Sampling the output showed it keyed on generic words: `changelog`, `approving`, `square`, `around`, `drives`, `ownership`. Signal-to-noise that low is not a threshold away from working; it is measuring the wrong thing.
+  - **Inspecting what the hits actually were explained the failure.** Probing `Startup apps` in IT 02 matched three lines: the topic-list bullet, the skills-list bullet, and a *practice task* that says "disable and re-enable a harmless startup app". **Every occurrence is a promise, and none is teaching.** A presence-based check counts that as delivered — so the guard's pass path and its skip path are the same shape, which is the exact failure this repository has hit four times (the `^0[1-9]-` pattern that hid phases 10+, the per-phase average that hid 190-word walls, `renderInline` reporting nothing rather than failing, and `FORWARD_AS_PRIOR` never being able to fire at all).
+- **Consequences:**
+  - The class is **real and repeatedly confirmed** — six true positives are now on record — but it is not regex-detectable, for the same reason `audit-terms.mjs` does not converge: *"is this topic taught"* is a semantic judgement about whether prose constitutes teaching, not a property of the string. A bullet is a summary, and its words recur in the topic list, the skills list, the task list, and the deliverable — every one of which is a promise rather than a lesson.
+  - **The five IT 02 defects were closed by writing the content instead**, which is what the guard would have been a substitute for and could never have been a replacement for. See [`CHECKPOINT.md`](CHECKPOINT.md) and [`CHANGELOG.md`](../CHANGELOG.md) → Added.
+  - **The transferable rule, which is the real output of this record:** a guard is only worth building when a *failing* result and a *passing* result are distinguishable by the check itself. If the check returns "found the phrase" for both a taught topic and an untaught one, it does not measure the property — and a guard that fails open is worse than no guard, because it converts an unknown into a false assurance and stops anyone looking again.
+  - **What would replace it, if anything ever does:** the comprehension pass, run by a reader, with the topic list used as the checklist. That is exactly what the fourth pass did — the IT 02 topic-list check was a required section of the reader's brief — and it produced the six true positives this guard was supposed to find automatically. The human read is the mechanism; the guard was a hope that it could be automated away.
+
 ## D-032 — There is no mid-level IT track, and the omission is deliberate rather than unexamined
 
 - **Date:** 2026-09-16
