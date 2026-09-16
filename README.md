@@ -22,7 +22,7 @@ Start here: [`career-roadmaps/README.md`](career-roadmaps/README.md) — it expl
 3. Track progress with [`career-roadmaps/it-roadmap/checklist-master.md`](career-roadmaps/it-roadmap/checklist-master.md).
 4. Plan each week with [`career-roadmaps/shared/weekly-tracker-template.md`](career-roadmaps/shared/weekly-tracker-template.md).
 5. Only after IT Phase 2, open [`career-roadmaps/cybersec-roadmap/00-overview.md`](career-roadmaps/cybersec-roadmap/00-overview.md).
-6. Once you actually hold a security role, [`career-roadmaps/advance-roadmap/00-overview.md`](career-roadmaps/advance-roadmap/00-overview.md) — and take two or three of its six phases, not all of them.
+6. Once you actually hold a security role, [`career-roadmaps/advance-roadmap/00-overview.md`](career-roadmaps/advance-roadmap/00-overview.md) — and take two or three of its seven phases, not all of them.
 
 ## Repository layout
 
@@ -43,8 +43,8 @@ Start here: [`career-roadmaps/README.md`](career-roadmaps/README.md) — it expl
 └── career-roadmaps/
     ├── README.md          # main strategy document
     ├── it-roadmap/        # 00-overview + 9 phases + checklists
-    ├── cybersec-roadmap/  # 00-overview + 14 phases + checklists
-    ├── advance-roadmap/   # 00-overview + 6 phases + checklist (mid-level)
+    ├── cybersec-roadmap/  # 00-overview + 15 phases + checklists
+    ├── advance-roadmap/   # 00-overview + 7 phases + checklist (mid-level)
     └── shared/            # anti-burnout rules, resources, weekly tracker
 ```
 
@@ -56,6 +56,6 @@ Start here: [`career-roadmaps/README.md`](career-roadmaps/README.md) — it expl
 
 ## Status
 
-Curriculum structure complete — all **29 phases** with tools, resources, tasks, deliverables, and checklists. All three tracks carry full `## Lesson` sections: the 9 IT phases, all 14 cyber phases (8 core plus 6 depth modules), and the 6 mid-level `advance-roadmap` phases — **354,559 lesson words** in total. The learning site renders those lessons directly, with a per-lesson table of contents, and loads each one on demand. The site is complete through the Today view (dashboard, tools library, portfolio tracker, application tracker, in-lesson search, Shared, Your work, and a time-aware "what should I do today?"). CI runs **six** content guards and **eleven** site suites on every push and pull request — including one that renders the site in a real browser engine — and every one is green.
+Curriculum structure complete — all **31 phases** with tools, resources, tasks, deliverables, and checklists. All three tracks carry full `## Lesson` sections: the 9 IT phases, all 15 cyber phases (8 core plus 7 depth modules), and the 7 mid-level `advance-roadmap` phases — **330,164 lesson words** in total. The learning site renders those lessons directly, with a per-lesson table of contents, and loads each one on demand. The site is complete through the Today view (dashboard, tools library, portfolio tracker, application tracker, in-lesson search, Shared, Your work, Where you've been, and a time-aware "what should I do today?"). CI runs **six** content guards and **thirteen** site suites on every push and pull request — including one that renders the site in a real browser engine, on **two engines** — and every one is green.
 
 The site is **live** at <https://markkramm.github.io/cs-roadmap/>, published by `.github/workflows/deploy-pages.yml` on every push to `main`. What remains is tracked in [`docs/ROADMAP.md`](docs/ROADMAP.md) — the open items are improvements, not blockers.

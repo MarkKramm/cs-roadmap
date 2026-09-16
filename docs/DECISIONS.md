@@ -2,6 +2,50 @@
 
 A lightweight decision log (ADR-style). Newest first.
 
+## D-031 — The browser matrix names its engine, and a named engine that is missing fails
+
+- **Date:** 2026-09-16
+- **Status:** Accepted
+- **Context:** `browser-check.mjs` was written to cover what no string render can see — layout geometry, computed CSS, media-query behaviour, focus survival across keystrokes — and it does: 79 checks. But every run of it, local and CI, measured **Chromium**. Locally `BROWSERS` tried Edge first; in CI the runner's `/usr/bin/google-chrome` was used. The checkpoint recorded this as "two engines, not a cross-browser matrix", which was generous: two builds of one engine are two data points about one renderer, and a defect appearing only in Gecko or WebKit was invisible to **every guard in the repository**.
+  - The file already had the right instinct one level down. It printed `Browser.getVersion` and asserted on the product string, because "the file's browser list tries Edge before Chrome, so on a machine with both, every run silently measured Edge while the report said 'a real browser'". That fix made the engine **visible**; it did not make a second engine **run**.
+- **Decision:** Add Gecko as a first-class engine, make the engine **selectable by name** through `BROWSER_ENGINE`, and run the check as a **CI matrix** with one leg per engine.
+  - **A leg that names an engine and cannot find it FAILS — even outside strict mode.** This is the load-bearing part. Without it, a leg titled `firefox` whose Firefox was missing from the image would fall through the path list, find Chromium, and report a green Firefox result. That is a claim about an engine that was never started, and it is worse than no matrix because the result would be cited as cross-browser evidence. The script asserts the *requested* engine is the one that answered.
+  - **The two engines need different flags and a different resize mechanism**, and that difference is handled rather than papered over. Chromium takes `--headless=new`; Gecko takes `-headless`. Chromium resizes through `Emulation.setDeviceMetricsOverride`; **Gecko does not implement it and answers with a protocol error**, so the width band is driven through `Browser.setWindowBounds` instead. That is not a workaround for a missing feature — `matchMedia` in Firefox reads the real window, so window bounds are the mechanism the layout is genuinely computed from there.
+  - **`auto` preserves the previous behaviour.** With no `BROWSER_ENGINE` set, resolution order is unchanged (Chromium first), so every existing invocation and the local workflow behave exactly as before.
+- **Consequences:**
+  - **WebKit remains an honest gap, and is named rather than implied.** It has no headless build a runner can install without a dependency rule 3 forbids. The matrix is two engines, which is a matrix and not complete coverage — the wording in `CHECKPOINT.md` now says so instead of implying the question is closed.
+  - **Local verification is partial by necessity, and that is recorded.** This machine has Edge and no Firefox and no Chrome, so the Firefox path could be verified only as far as: it resolves the engine by name, it **fails** when the named engine is absent (observed, exit 1), and the Chromium path still passes 79 checks with the new engine-aware code. The Gecko run itself is observable only in CI. Claiming otherwise would be the exact defect this record is about.
+  - The dependency-free property survives: no new package, no driver binary, no Puppeteer. A browser is found on the system and driven over the DevTools Protocol with Node 24's global `WebSocket`.
+
+## D-030 — A phase travels on its own, and the import can only ever add
+
+- **Date:** 2026-09-16
+- **Status:** Accepted
+- **Context:** D-016 gave the reader a whole-profile backup across every registered storage key, and it is the right answer for a new laptop. It is the wrong answer for the case that actually recurs on a 34–112 week plan: a reader working through **one phase** on a work machine, a library PC, or a laptop that is not the one their profile lives on. Exporting all ten keys there would produce a document whose only safe use is to overwrite a profile the reader is not looking at.
+- **Decision:** `exportPhase` narrows a backup to the ids one phase owns, and `importPhase` merges it back **additively**.
+  - **The emitted file is a real backup** — same `format`, same `version`, same `data` map keyed by storage key, carrying only a `kind` marker. So `inspect` and `importAll` read it with **no special case**. This is the property that makes the feature safe to add: a phase file cannot drift from a full backup, because it is the same document with a narrower `data`. A separate format would have meant a second validator and a second merge rule to keep in step.
+  - **Only four keys are phase-shaped, and the other six are deliberately absent rather than exported and ignored.** `progress` (filtered by the phase's own checklist and task ids), `lesson-sections` (filtered by `phaseId#` prefix), `notes` (the phase's entry, note and answers together), and `reading` — the last only when this phase is genuinely the one being read, because exporting it otherwise would drag a false "you were here" to another machine. Portfolio, applications, schedule and the three preferences describe a *profile*, not a phase.
+  - **The import can never remove or overwrite.** Objects union with the **existing entry winning on a collision**, matching `mergeValue`'s rule for the full import and for the same reason: the machine the reader is sitting at is the one whose writing is current, and importing twice must be a no-op. It offers no Replace, because `importAll` already owns the destructive path behind a confirmation.
+  - **An unreadable existing value is refused rather than overwritten.** The reader's writing is the one thing in the store that cannot be regenerated from the curriculum, so a merge into something this version cannot parse fails loudly instead of guessing.
+- **Consequences:**
+  - **The test caught a real inversion before it shipped, which is the argument for writing it.** `test-phase-transfer.mjs` asserts 56 checks and one of them failed on the first run: the spread was ordered `{ ...existing, ...incoming }`, so an import silently **replaced** the note the reader could see with a staler one from a file — the one direction this feature must not have, and invisible in the UI, which reported success. The comment above the code already said "existing wins"; the code did the opposite. A guard that encodes the intended rule in an assertion is what caught the difference between the two.
+  - **Additivity is a design constraint, not a nicety**, and it is why this is an inline collapsed panel rather than a modal like `DataTransfer`. The full-profile import can overwrite ten keys at once and warrants a confirmation; this one cannot harm the machine it lands on, so it does not need to interrupt the page.
+  - Guarded by `test:phase-transfer` (56 checks) in the site job of CI, weighted toward rejection and merge cases rather than the round trip, following `test-data.mjs`.
+
+## D-029 — A shared document is reachable by name, and the rail links to it
+
+- **Date:** 2026-09-16
+- **Status:** Accepted
+- **Context:** D-020 made `career-roadmaps/shared/` reachable from the site for the first time, through a view reached only by clicking a sidebar entry and then a chip. `Shared.jsx` already took an `initialId` prop and read it purely as a `useState` seed — the hook a real deep-link needs, with nothing using it. The roadmap recorded the gap as "the view is currently reached only by clicking the sidebar entry and then a chip".
+- **Decision:** Make the open document a **view parameter owned by `App`**, and put a real link to each document on the dashboard's reference rail.
+  - **The state moved up because `Shared` is remounted on every view change.** Local state there would forget the reader's choice the moment they navigated away and back. `App` holds `sharedDocId`, passes it down as the seed, and receives the reader's own clicks back through `onSelect`.
+  - **The split of ownership is the decision.** `initialId` is the **seed** — read at mount and never again, because a prop that re-asserted itself would fight the reader's clicks. `onSelect` is the **echo** — it goes up so the parent can hand the same id back if the view remounts. Without the echo, following a link to the resource list, leaving, and returning through the sidebar would silently reopen the first document.
+  - **The bare "Shared" entry clears the parameter**, so a reader who clicks it lands on the first document rather than on whichever one they last followed a link to.
+  - **This is still not routing.** There is no URL, no history entry, and the browser's back button still does not move between views — D-007 stands. A view parameter is local state that one page happens to read.
+- **Consequences:**
+  - The rail carries a **"Beside the tracks"** card listing the documents by their own titles, read from the generated `shared.json` rather than hardcoded, so adding a document to `shared/` surfaces it without touching `Dashboard.jsx`.
+  - The three shared documents now have a path from the page a reader opens every session, which matters most for the anti-burnout rules — written for a reader at risk of stopping, who was previously the least likely to find them.
+
 ## D-028 — The acronym *detector* gates; the acronym *corpus report* does not
 
 - **Date:** 2026-09-16

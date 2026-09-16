@@ -3,9 +3,15 @@
 A read of all 23 phases asking one question the existing guards structurally cannot:
 **where does a motivated beginner with no IT background stop reading, and why?**
 
-The two passes below cover the 23 entry-level phases. A third pass, added later, covers the
-six advance phases — so this file now accounts for **all 29**. Read the entry-level sections
-with that in mind: every count in them is a count of 23, and it was correct when it was written.
+All three passes together cover every phase that existed when each ran. The first two cover
+the 23 entry-level phases; a third, added later, covers the six advance phases — so this file
+accounts for **all 29 lessons as of the advance pass**. Read the entry-level sections with that
+in mind: every count in them is a count of 23, and it was correct when it was written.
+
+**Two phases have since been added and no pass covers them** — cyber Phase 15 (OT and ICS
+security) and advance Phase 07 (detection as code). Both pass every mechanical guard, and
+neither has been read by a fresh reader asking where a beginner stops. That is the same gap
+the advance track sat in before the third pass, and it closes the same way.
 
 Every guard in this repository tests internal consistency — does the parser lose content,
 is the prose dense, do the cross-references resolve. None can see a phase that teaches
