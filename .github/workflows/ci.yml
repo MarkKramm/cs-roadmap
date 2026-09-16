@@ -152,6 +152,16 @@ jobs:
         run: node scripts/audit-quiz-owasp.mjs
       - name: Test quiz answer-key controls
         run: node scripts/test-audit-quiz-owasp.mjs
+      # Twenty phases gained a quiz in one pass, which is exactly the situation
+      # where a question gets written about the wrong phase, or invented rather
+      # than read. `audit-quiz` gates whether a quiz is structurally valid; this
+      # gates whether each question is *sourced from its own phase*, by checking
+      # that a question's distinctive vocabulary matches the phase it lives in
+      # better than any other phase. Every rule has a must-fail control.
+      - name: Audit quiz sourcing
+        run: node scripts/audit-quiz-sourcing.mjs
+      - name: Test quiz-sourcing controls
+        run: node scripts/test-audit-quiz-sourcing.mjs
       # A command can be named correctly and written wrongly. IT 02 stated DISM
       # in full at one place and abbreviated it to `DISM /RestoreHealth` in a
       # summary table 300 lines later — a form that throws if a beginner types
