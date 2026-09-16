@@ -2,7 +2,29 @@
 
 A chronological record of working sessions. Newest first.
 
-## 2026-09-16 (latest) — The IT track's technical claims, verified: 224 checked, zero wrong
+## 2026-09-16 (latest) — The cyber track opened: 698 claims found, 369 outstanding, first 43 verified clean
+
+**The IT track closed and the cyber track opened with the same method.** `extract-claims.mjs` now takes `--track`, and the IT output is byte-identical to its committed version, so generalising it disturbed the finished pass not at all.
+
+**698 claims across the 15 cyber phases.** 369 need an external source; the other 329 are the settled classes (ports 181, numbers 133, CIDR 11) and are recomputed by scripts rather than sent to a model.
+
+**Cyber carries claim types IT has none of** — found by the density measurement rather than assumed. Five new classes, each a verbatim identifier resolving to exactly one published definition: CVE IDs paired with a product or mechanism (4), MITRE ATT&CK technique IDs paired with their name (34), standards and control identifiers (98), security tool flags (85), and cryptography algorithm claims (5).
+
+**I checked the new patterns for false positives before building on them, because that is where the last two extractor bugs were.** Standards: **60 of 62 matches carry an assertion**, only 2 are a bare acronym. ATT&CK: **12 of 15 carry a technique name**. That is the *opposite* of the failure mode the IT `record` and `protocol` patterns had, where matching the bare token produced rows asserting nothing.
+
+**First three passes: 43 rows, zero wrong.** ATT&CK 34/34, CVE 4/4, crypto 5 rows. I verified two citations myself and both held *better* than claimed:
+
+- **`ssh-keygen -t ed25519`** — the OpenSSH manpage source (`ssh-keygen.1` line 616) says ed25519 is *"the default"* key type. The lab instruction is not merely valid, it is the current default. Read from `openssh-portable`, not a tutorial.
+- **CVE-2021-41773** — NVD, verbatim: *"A flaw was found in a change made to path normalization in Apache HTTP Server 2.4.49. An attacker could use a path traversal attack to map URLs to files outside the directories configured by Alias-like directives."* The curriculum describes it exactly.
+
+**One citation could not be upgraded, and that is the finding.** The Amcache row (`11-phase-incident-response.md:456`) returned OK citing **"Microsoft Learn Q&A"** and **Securelist** — a forum post and a vendor blog, the two source types the prompt explicitly rejects. I tried to replace them and could not:
+
+- **Microsoft Learn publishes no official Amcache documentation.** A search of their API for "Amcache.hve" returns only Q&A threads.
+- **MITRE ATT&CK never mentions it** — 0 matches for `amcache` across all **26,086** enterprise objects, checked case-insensitively.
+
+So no vendor or standards source documents this artefact at all. The claim is consistent with the professional forensics literature and with the Compatibility Assistant's documented behaviour, but **nothing primary reachable from here states it.** The honest verdict is `UNVERIFIABLE` at Tier 2 rather than `OK`, and it is recorded that way rather than letting a forum post stand in for a source. **This is the first row in either track where the verdict was right but unsupportable** — an artefact that is real, widely used, and undocumented by its vendor. Worth knowing the class exists.
+
+## 2026-09-16 (earlier) — The IT track's technical claims, verified: 224 checked, zero wrong
 
 **The result.** All five classes came back from external verification: **176 `OK`, 48 `UNVERIFIABLE`, 0 `WRONG`.** Commands (160 rows), protocol (26), versions (17), paths (17), DNS records (4).
 
