@@ -251,6 +251,20 @@ async function main() {
     cdp = await CDP.connect(target.webSocketDebuggerUrl);
     await cdp.send('Runtime.enable');
     await cdp.send('Page.enable');
+
+    // Which engine is this, actually?
+    //
+    // The file's browser list tries Edge before Chrome, so on a machine with
+    // both, every run silently measured Edge and the report said "a real
+    // browser". That is true and useless: the claim this check makes is about
+    // rendering engines, and one engine is one data point. Printing the product
+    // and version costs one round trip and makes a second-engine run provable
+    // rather than assumed.
+    const ua = await cdp.send('Browser.getVersion');
+    check('engine: identified', !!ua && !!ua.product, ua ? ua.product : 'unknown');
+    note('engine', (ua.product || '?') + ' / ' + (ua.jsVersion || '?'));
+    note('engine user-agent', (ua.userAgent || '?').slice(0, 120));
+
     await cdp.send('Emulation.setDeviceMetricsOverride', {
       width: VIEWPORT.width,
       height: VIEWPORT.height,
@@ -289,30 +303,97 @@ async function main() {
       note('rail: geometry', 'position=' + rail.position + ' width=' + rail.width + 'px');
     }
 
-    // The rail must collapse below its breakpoint, not overflow. This is the
-    // half of the D-015 claim a source read cannot confirm.
-    await cdp.send('Emulation.setDeviceMetricsOverride', {
-      width: 900,
-      height: 1000,
-      deviceScaleFactor: 1,
-      mobile: false,
-    });
-    await sleep(350);
-    const narrow = await cdp.eval(`(() => {
-      const el = document.querySelector('.dashboard__rail');
-      if (!el) return null;
-      const cs = getComputedStyle(el);
-      return {
-        width: Math.round(el.getBoundingClientRect().width),
-        docWidth: document.documentElement.scrollWidth,
-        viewport: window.innerWidth
-      };
-    })()`);
-    if (narrow) {
+    // The breakpoints are the claim. global.css declares two, and neither had
+    // ever been rendered at the width where it flips:
+    //
+    //   max-width: 860px   -> .app-shell goes flex-direction: column and
+    //                         .sidebar becomes position: fixed with
+    //                         transform: translateX(-100%), i.e. an off-canvas
+    //                         drawer. Above 860px the sidebar is a flex item.
+    //   min-width: 1180px  -> .dashboard__grid becomes two columns and
+    //                         .dashboard__rail goes sticky. Below 1180px it is
+    //                         ONE column, and a full-width rail is correct.
+    //
+    // An earlier version of this block asserted `display:none` on the rail at
+    // 620px and failed the run. That was wrong about the site, not a defect in
+    // it: the rail never had a collapse mechanism — the sidebar did — and the
+    // failure was reported against a correct layout. The assertions below are
+    // written against what global.css actually declares, and the widths sit on
+    // BOTH sides of each breakpoint (1179/1180, 860/861) so that a flip is
+    // observed rather than assumed. 861, 860, 760 and 620 are the 561–860px
+    // band this driver never rendered.
+    for (const w of [1180, 1179, 900, 861, 860, 760, 620]) {
+      const drawer = w <= 860;  // .sidebar is off-canvas at or below 860px
+      const twoCol = w >= 1180; // .dashboard__grid is two-column at 1180px and up
+      await cdp.send('Emulation.setDeviceMetricsOverride', {
+        width: w,
+        height: 1000,
+        deviceScaleFactor: 1,
+        mobile: false,
+      });
+      await sleep(350);
+      const band = await cdp.eval(`(() => {
+        const rail = document.querySelector('.dashboard__rail');
+        const grid = document.querySelector('.dashboard__grid');
+        const shell = document.querySelector('.app-shell');
+        const side = document.querySelector('.sidebar');
+        const cs = (el) => (el ? getComputedStyle(el) : null);
+        const tx = (el) => {
+          const t = cs(el) && cs(el).transform;
+          if (!t || t === 'none') return 0;
+          const m = t.match(/matrix\\(([^)]+)\\)/);
+          return m ? Number(m[1].split(',')[4]) : 0;
+        };
+        return {
+          docWidth: document.documentElement.scrollWidth,
+          viewport: window.innerWidth,
+          railWidth: rail ? Math.round(rail.getBoundingClientRect().width) : null,
+          railPosition: rail ? cs(rail).position : null,
+          shellDir: shell ? cs(shell).flexDirection : null,
+          gridCols: grid ? cs(grid).gridTemplateColumns.split(' ').length : null,
+          sidePosition: side ? cs(side).position : null,
+          sideTx: side ? tx(side) : null,
+          sideWidth: side ? Math.round(side.getBoundingClientRect().width) : null
+        };
+      })()`);
+
       check(
-        'rail: no horizontal overflow at 900px',
-        narrow.docWidth <= narrow.viewport + 1,
-        'scrollWidth=' + narrow.docWidth + ' viewport=' + narrow.viewport,
+        'band ' + w + ': no horizontal overflow',
+        band.docWidth <= band.viewport + 1,
+        'scrollWidth=' + band.docWidth + ' viewport=' + band.viewport,
+      );
+
+      // The sidebar drawer contract, max-width: 860px.
+      check(
+        'band ' + w + ': shell is ' + (drawer ? 'column' : 'row'),
+        band.shellDir === (drawer ? 'column' : 'row'),
+        'flex-direction=' + band.shellDir,
+      );
+      check(
+        'band ' + w + ': sidebar is ' + (drawer ? 'an off-canvas drawer' : 'inline'),
+        drawer
+          ? band.sidePosition === 'fixed' && band.sideTx < 0
+          : band.sidePosition !== 'fixed',
+        'position=' + band.sidePosition + ' translateX=' + band.sideTx,
+      );
+
+      // The rail contract, min-width: 1180px.
+      check(
+        'band ' + w + ': dashboard grid is ' + (twoCol ? 'two-column' : 'single-column'),
+        band.gridCols === (twoCol ? 2 : 1),
+        'grid-template-columns resolved to ' + band.gridCols + ' track(s)',
+      );
+      if (twoCol) {
+        check(
+          'band ' + w + ': rail is sticky in the second column',
+          band.railPosition === 'sticky' && band.railWidth > 200,
+          'position=' + band.railPosition + ' rail=' + band.railWidth + 'px',
+        );
+      }
+      note(
+        'band ' + w + 'px',
+        'rail=' + band.railWidth + 'px (' + band.railPosition + ') sidebar=' +
+          band.sideWidth + 'px tx=' + band.sideTx,
       );
     }
     await cdp.send('Emulation.setDeviceMetricsOverride', {
