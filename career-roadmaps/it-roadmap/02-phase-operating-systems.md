@@ -43,6 +43,9 @@ Become comfortable using and troubleshooting Windows and Linux at a beginner IT-
 - Startup apps: enabling, disabling, and diagnosing slow boot
 - Shared folders and NTFS permissions basics
 - Windows Defender and basic malware removal steps
+- BitLocker: what disk encryption protects, checking its status, and the recovery-key prompt
+- TPM and Secure Boot as the things BitLocker depends on
+- Account types when sign-in fails: local, Microsoft, and domain
 
 ### Windows command line
 
@@ -67,7 +70,8 @@ Become comfortable using and troubleshooting Windows and Linux at a beginner IT-
 ### Cross-platform troubleshooting
 
 - Slow performance: identify the resource that is saturated before acting
-- Login problems: password reset, locked accounts, profile corruption
+- Login problems: password reset, locked accounts, profile corruption, and the account type that decides the fix
+- A BitLocker recovery-key prompt: what triggered it, where the escrowed key lives, and why you never wipe first
 - Driver problems: rollback, reinstall, vendor versus Windows Update drivers
 - Service failures: reading status, restarting, checking dependent services
 - Permission errors: distinguishing file permissions from account permissions
@@ -535,6 +539,7 @@ That is the cultural difference in one exercise. Windows uses proprietary format
 | "It broke after the update" | Update history; whether System Protection was on | Uninstall the specific update, roll back the driver, or restore — see below |
 | Logged in but the desktop is empty; "we can't sign in to your account" | Whether the loaded profile is a TEMP path | Copy data out first, then rebuild the profile — see below |
 | Access denied on a shared folder, but the share permission allows it | The NTFS Security tab, not the Sharing tab | The more restrictive layer wins — see Part 9 |
+| A blue screen at boot asking for a **recovery key** | Whether the drive is BitLocker-encrypted | Do **not** wipe. Retrieve the escrowed key from Entra ID, Intune or AD — see the recipe below |
 
 Notice the pattern in the "where to look first" column: **it is always a log, a status, or a resource reading.** Guessing is what people do when they do not know where the evidence lives. Your job is to always know where the evidence lives.
 
@@ -628,6 +633,72 @@ The safe sequence:
 5. **Find the cause** before you close, because a profile that broke once from a quarantined hive will break again if the antivirus does the same thing next week.
 
 **The honest framing for the user.** Their files were not deleted, and you should say that early — it is the first thing they will ask. And be straight about the second half: some application settings will not survive, because they lived in the part that broke. Their documents come back; their email profile and saved passwords may need setting up again. Promising a perfect restoration and delivering a working-but-reset machine is how a solved ticket still generates a complaint.
+
+#### The encrypted drive that asks for a recovery key
+
+This is the ticket that turns a five-minute job into a data-loss incident, and it is worth learning before you meet it rather than during. A user's laptop restarts and, instead of the Windows login screen, shows a blue screen asking for a **recovery key** — a 48-digit number they do not have and have never heard of. Nothing is broken. The drive is encrypted, and Windows has decided it cannot verify that the machine is the same one it trusted yesterday.
+
+**What the encryption is, and why it exists.** On most business laptops the entire disk is encrypted with **BitLocker**, built into Windows. The point is physical theft: if the laptop is stolen, an encrypted disk is unreadable without the key, so the thief gets hardware and not the company's data. A technician does not need to configure BitLocker to meet this ticket, but must know what it is, because **every instruction you give from here depends on whether the drive is encrypted.**
+
+**The part that makes it work, and the part that makes it break.** BitLocker seals its key to the machine's **TPM** — a small chip on the motherboard that holds the key material and can prove the machine has not been tampered with. When the boot environment changes enough that the TPM will not release the key, Windows falls back to asking a human for the recovery key. That is the whole story behind the blue screen: *something about the machine changed, so the chip stopped vouching for it.* Common triggers, in rough order of frequency:
+
+1. **A firmware or UEFI update**, including one pushed automatically by the manufacturer.
+2. **A TPM firmware update, or clearing the TPM** — often done by a well-meaning "reset the security chip" step.
+3. **A motherboard replacement**, which is a different TPM entirely.
+4. **A BIOS setting change** — boot order, Secure Boot, or virtualisation toggles. Secure Boot is the one to know: you met `Confirm-SecureBootUEFI` in the first phase, and turning it *off* is a routine fix for other problems that will suspend or trigger BitLocker in the process.
+5. **A docking-station or hardware change** on some models.
+
+**Check the status before you touch anything else.** This needs an elevated PowerShell:
+
+```powershell
+# Is this drive encrypted, and is it currently protected or suspended?
+Get-BitLockerVolume | Select-Object MountPoint, VolumeStatus, ProtectionStatus, EncryptionPercentage
+```
+
+Read it carefully, because the two status columns answer different questions. `VolumeStatus` of `FullyEncrypted` says the data on the disk is encrypted. `ProtectionStatus` of `On` says the key is currently being protected by the TPM. A drive can be `FullyEncrypted` with protection `Off` — that is a **suspended** drive, and it is the state you deliberately put one in before a firmware update, precisely so this prompt does not appear. If you find protection `Off` on a laptop that should be protected, that is a finding worth reporting, not a detail to skip past.
+
+**Where the key lives, and the rule that follows from it.** The recovery key is not on the laptop, because a key stored beside the lock is not a lock. In a managed environment it is **escrowed** — backed up to a directory the technician can reach: **Microsoft Entra ID** (the device's BitLocker keys, visible to an administrator), **Intune**, on-premises **Active Directory**, or in some organisations a printed copy in a safe. For a personal machine it may be in the user's Microsoft account at `account.microsoft.com/devices/recoverykey`, which is the first place to send a home user.
+
+The rule follows directly: **escrow is checked before encryption is relied upon.** A laptop with BitLocker on and no escrowed key is one firmware update away from an unrecoverable disk. If you are ever asked to enable encryption on a machine, confirm where the key will be stored *first*, and say plainly that a recovery key with no backup is a liability rather than a protection.
+
+**Working the ticket, in order.**
+
+1. **Do not let anyone wipe or reimage the drive.** This is the critical step and the one people get wrong under pressure. A wipe destroys the only copy of the data, and the recovery key would have opened it.
+2. **Identify the machine and the user** from the asset tag or the user's account record.
+3. **Retrieve the escrowed key** from Entra ID, Intune or AD — search by device name, not by user, because keys are attached to the device.
+4. **Give it to the user with the exact formatting**, including the dashes. Keys are usually displayed in eight groups of six digits.
+5. **Once they are in, check `ProtectionStatus`** and re-enable protection if it is suspended: `Resume-BitLocker -MountPoint "C:"`.
+6. **Record what triggered it**, because a second occurrence on the same machine points at something repeating — a failing update, a scheduled firmware push, or a hardware fault.
+
+**What to say to the user, and what not to.** Say that the data is safe and the machine is fine, because both are true and it is the first thing they will ask. Do not tell them to "just reinstall Windows" — that advice destroys their files.
+
+Do not guess at the key or try variations; repeated wrong entries on some systems escalate the lockout. And **do not paste the recovery key into an email thread or a ticket comment that others can read** — treat it as a credential, because that is exactly what it is. Send it through the channel your organisation uses for credentials, or read it to the user on a call.
+
+**The honest boundary.** You cannot fully practise escrow on a $0 budget, because it needs a managed tenant. What you can do, and should, is practise the parts that are free: enable BitLocker in the Windows virtual machine you built in Part 5, look at `Get-BitLockerVolume` before and after, suspend and resume protection, and then write the workflow — *where would I look, in what order, for this organisation?* That written procedure is the deliverable, and it is what a first-week technician is actually expected to have.
+
+#### If the account itself is the problem: local, Microsoft, and domain
+
+A second ticket that punishes guessing is a user who cannot sign in, where the fix depends entirely on **what kind of account it is** — and the three kinds behave nothing alike when something goes wrong. You met the distinction briefly in Part 2; here is what it means when it breaks.
+
+- A **local account** exists only on that machine. Its password is stored on the machine, and an administrator on that machine can reset it — with the consequence that the user loses access to anything encrypted with their old credentials, notably files encrypted with **EFS** (Encrypting File System, Windows' per-file encryption) and saved browser passwords.
+- A **Microsoft account** is an identity held by Microsoft and used to sign in to Windows. The password is **not** reset on the machine; it is reset at `account.microsoft.com`, and only by someone who can prove they own the account. This is the important operational difference: **a helpdesk cannot reset a Microsoft account password for a user**, and a technician who tries will burn an hour before discovering it.
+- A **domain (Active Directory or Entra) account** is issued by the organisation. Its password is reset by an administrator in the directory, and the machine authenticates against that directory rather than against a local store.
+
+**How to tell which one you have.** The fastest check is on the machine, with the user present:
+
+```powershell
+# The local accounts on this machine, if any
+Get-LocalUser | Select-Object Name, Enabled, PrincipalSource
+
+# Who is actually signed in, and is it a local, Microsoft, or domain identity?
+whoami
+```
+
+`whoami` returning something like `MACHINENAME\alex` points at a local or Microsoft account on a standalone machine; `DOMAIN\alex` points at a directory. `PrincipalSource` on `Get-LocalUser` distinguishes a local account from one backed by a Microsoft or Azure identity, which is the column people miss and then argue about.
+
+**Why this matters more than it looks.** "I'm locked out of my personal Microsoft account on the work laptop" is unresolvable by any local reset, and the honest answer may be that the account can only be recovered by the user through Microsoft's own recovery process — which is a different conversation from the one the ticket implies. Knowing the account type in the first two minutes is the difference between a correct escalation and an hour of failed resets.
+
+**One warning worth carrying.** Converting a local account to a Microsoft account, or the reverse, changes how the user signs in and can affect access to files encrypted with the old credentials. It is a legitimate operation and a common one, but do it with the user's data backed up and with the user's informed agreement, never as a troubleshooting experiment on someone's only machine.
 
 ### Part 8 — Reading Windows like a technician
 
@@ -1400,6 +1471,24 @@ Part 13 asked you to *recall* these answers from nothing. This asks you to *reco
 
 **Why:** Gradual degradation that a restart clears is the shape of accumulation, not failure. Failing hardware and malware tend to be erratic rather than predictable. The pattern is the diagnosis: what grows over a working day, and what does a restart reset?
 
+### Q11. A laptop boots to a blue screen asking for a recovery key. The user is panicking and says "just reinstall Windows." What do you do first? <!-- id: it-02-q11 energy: normal -->
+
+- [ ] Reinstall Windows, since the user asked for it and the machine is unusable
+- [ ] Run `chkdsk` on the drive to repair the file system
+- [x] Find the escrowed key, because the data is intact and a wipe would destroy it
+- [ ] Replace the drive, since a recovery prompt usually means disk failure
+
+**Why:** This prompt is not a failure — it is BitLocker declining to release its key because something about the boot environment changed, most often a firmware update. The data is encrypted, not lost, and the escrowed key opens it. A reinstall is the one action that makes the situation permanent, which is why it is the step the phase says never to take.
+
+### Q12. A user cannot sign in to Windows. Why does it matter whether the account is local or a Microsoft account? <!-- id: it-02-q12 energy: high -->
+
+- [ ] It does not — the reset procedure is the same either way
+- [ ] A Microsoft account has no password to reset
+- [ ] Local accounts cannot be reset by an administrator
+- [x] The password is reset in a different place by a different person, so the fix depends on the type
+
+**Why:** A local account's password is reset on the machine by an administrator. A Microsoft account's password is reset at Microsoft, by the user, through account recovery — a helpdesk cannot do it, and trying is how an hour disappears. The account type decides who can fix it and where, which is why the phase treats identifying it as the first diagnostic step rather than a formality.
+
 ## Checklist
 
 - [ ] I installed a Linux VM. <!-- id: it-02-c01 energy: normal -->
@@ -1414,6 +1503,10 @@ Part 13 asked you to *recall* these answers from nothing. This asks you to *reco
 - [ ] I can explain share permissions versus NTFS permissions, and which one wins. <!-- id: it-02-c10 energy: normal -->
 - [ ] I can roll back a bad update, and I know what a system restore does not cover. <!-- id: it-02-c11 energy: normal -->
 - [ ] I know what to do — and what never to do — when a user profile fails to load. <!-- id: it-02-c12 energy: normal -->
+- [ ] I can check whether a drive is BitLocker-encrypted, and read `VolumeStatus` against `ProtectionStatus`. <!-- id: it-02-c13 energy: normal -->
+- [ ] I can explain what a TPM does, and name three things that trigger a recovery-key prompt. <!-- id: it-02-c14 energy: high -->
+- [ ] I know where a recovery key is escrowed, and why the key is retrieved before anything else is touched. <!-- id: it-02-c15 energy: normal -->
+- [ ] I can tell a local, Microsoft, and domain account apart, and say who can reset each one. <!-- id: it-02-c16 energy: normal -->
 
 ## You're ready to move on when...
 
