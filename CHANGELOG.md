@@ -6,13 +6,6 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
-### Fixed
-
-- **Cyber phase 01 taught a retired NIST framework — five CSF functions where CSF 2.0 has six** (`career-roadmaps/cybersec-roadmap/01-phase-foundations.md`, D-040). The phase stated that NIST CSF organises security work into **five** functions (Identify, Protect, Detect, Respond, Recover) in **four places**: a summary table, a numbered lesson section headed "NIST CSF: the five functions", a phase exit criterion, and a resources row. **CSF 2.0 (2024) added Govern**, making six.
-  - **Verified against the standard, not a blog.** NIST's own published text (CSWP 29), fetched from the DOI NIST serves: *"the CSF Core as a hierarchy of **six Functions**"* and *"The inner layer of the wheel contains only the **Govern Function**. The outer layer... contains the **other five Functions**."*
-  - **Every guard in the repository passed over it, because every one checks the text against itself.** `lint-content` saw immaculate markdown; `audit-refs` saw a resolving URL; `audit-quiz` saw a quiz that never mentioned the functions; AST diff and readability saw five parsing as cleanly as six; three comprehension passes saw a beginner following it fine. **The corpus even contradicted itself** — `13-phase-grc-compliance.md` said six, correctly, twice — and **nothing compares one phase to another.**
-  - The lesson table now teaches six, with a note explaining that CSF 2.0 added Govern to the five of CSF 1.1, because a reader **will** meet older material that says five.
-
 ### Added
 
 - **A guard for versioned framework claims** (`scripts/audit-framework-claims.mjs`, `scripts/test-audit-framework-claims.mjs`). Checks framework assertions whose **current value was read from the standard itself**, recording the source and an evidence quote per rule, and deliberately narrow — a broad "does this look stale" heuristic flags correct content.
@@ -275,6 +268,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### Fixed
 
+- **Cyber phase 01 taught a retired NIST framework — five CSF functions where CSF 2.0 has six** (`career-roadmaps/cybersec-roadmap/01-phase-foundations.md`, D-040). The phase stated that NIST CSF organises security work into **five** functions (Identify, Protect, Detect, Respond, Recover) in **four places**: a summary table, a numbered lesson section headed "NIST CSF: the five functions", a phase exit criterion, and a resources row. **CSF 2.0 (2024) added Govern**, making six.
+  - **Verified against the standard, not a blog.** NIST's own published text (CSWP 29), fetched from the DOI NIST serves: *"the CSF Core as a hierarchy of **six Functions**"* and *"The inner layer of the wheel contains only the **Govern Function**. The outer layer... contains the **other five Functions**."*
+  - **Every guard in the repository passed over it, because every one checks the text against itself.** `lint-content` saw immaculate markdown; `audit-refs` saw a resolving URL; `audit-quiz` saw a quiz that never mentioned the functions; AST diff and readability saw five parsing as cleanly as six; three comprehension passes saw a beginner following it fine. **The corpus even contradicted itself** — `13-phase-grc-compliance.md` said six, correctly, twice — and **nothing compares one phase to another.**
+  - The lesson table now teaches six, with a note explaining that CSF 2.0 added Govern to the five of CSF 1.1, because a reader **will** meet older material that says five.
 - **A `HealthStatus` vocabulary attributed to the wrong tool, and two commands written in a form that errors — all three found by the first external verification pass** (`career-roadmaps/it-roadmap/01-phase-computer-fundamentals.md`, `02-phase-operating-systems.md`, `scripts/audit-commands.mjs`). **None was reachable by any existing guard**, because in every case the text was internally consistent and spelled correctly.
   - **IT 01 told the reader to watch `HealthStatus` for `Caution` or `Bad`.** Those are **CrystalDiskInfo's** ratings; PowerShell's `HealthStatus` returns **`Healthy` / `Warning` / `Unhealthy` / `Unknown`**. A reader following the sentence would watch for two values the cmdlet never prints — and the phase's own sample output four lines earlier shows `Healthy`, so it contradicted itself with nothing noticing. Both vocabularies are now stated separately with the escalation trigger for each.
   - **IT 02's summary table said `` `DISM /RestoreHealth` ``, which throws when run.** The phase states it correctly 300 lines earlier as `DISM /Online /Cleanup-Image /RestoreHealth`, so the *table* — exactly where a reader copies from — held the only broken form.

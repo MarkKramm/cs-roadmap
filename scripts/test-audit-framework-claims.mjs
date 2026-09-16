@@ -84,6 +84,25 @@ control("unrelated text mentioning Identify once", "Identify what you own before
 control("stale CIS control count", "CIS Controls provides 20 controls covering the basics.", true);
 control("correct CIS control count", "CIS Controls v8 provides 18 controls covering the basics.", false);
 
+// The guard scans career-roadmaps/ only. docs/ is meta-documentation and
+// legitimately QUOTES retired claims when recording what was fixed -- a guard
+// that flagged DECISIONS.md for describing the bug would punish writing the
+// defect down. This control asserts the exclusion, because an earlier version
+// scanned docs/ and failed 7 "must pass" controls on its own documentation.
+{
+  const docsProbe = path.join(ROOT, "docs", "__framework-probe.md");
+  fs.writeFileSync(docsProbe, "# probe\n\nNIST CSF organises security work into five functions: Identify, Protect, Detect, Respond, Recover\n");
+  const code = runGuard();
+  fs.unlinkSync(docsProbe);
+  const passed = code === 0;
+  results.push({
+    name: "retired claim in docs/ is NOT flagged (meta-docs quote it)",
+    expectFail: false,
+    failed: !passed,
+    ok: passed,
+  });
+}
+
 console.log("");
 console.log("Framework-claim guard controls");
 console.log("=".repeat(66));

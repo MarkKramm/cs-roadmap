@@ -97,9 +97,13 @@ const RULES = [
   },
 ];
 
-// Framework-claim files only. Scanning the whole corpus for a phrase this
-// specific would be noise; these are the files that summarise external
-// standards, which is where the class lives.
+// Framework-claim detection is about CONTENT, and content lives in the
+// curriculum. docs/ is meta-documentation: it QUOTES retired claims on purpose
+// when recording what was fixed, as DECISIONS.md and CHECKPOINT.md now do. A
+// guard that flags the changelog entry describing the bug is noise of the worst
+// kind, because it punishes writing the defect down.
+//
+// So docs/ is scanned for nothing. The class lives in career-roadmaps/.
 function targets() {
   const out = [];
   for (const track of ["cybersec-roadmap", "it-roadmap", "advance-roadmap"]) {
@@ -108,9 +112,6 @@ function targets() {
     for (const f of fs.readdirSync(dir)) {
       if (f.endsWith(".md")) out.push(path.join(dir, f));
     }
-  }
-  for (const f of fs.readdirSync(path.join(ROOT, "docs"))) {
-    if (f.endsWith(".md")) out.push(path.join(ROOT, "docs", f));
   }
   return out;
 }
