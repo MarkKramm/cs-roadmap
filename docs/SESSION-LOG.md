@@ -2,7 +2,21 @@
 
 A chronological record of working sessions. Newest first.
 
-## 2026-09-16 (latest) — The unread material, read
+## 2026-09-16 (latest) — There is no mid-level IT track, and that is now written down
+
+**Question raised:** the mid-level track is cyber — what about IT? Investigated as a possible gap.
+
+**It is not a gap. It is the design, and the strategy document says so plainly.** `career-roadmaps/README.md` names three goals in order, and Goal C reads: *"once you hold a security role, move from working tickets to owning outcomes. This is the third track, `advance-roadmap/`, and it is deliberately **not** for someone who has not worked in the field yet."* The path diagram directly below shows IT's role — the on-ramp that produces *"real tickets + users + systems"*, which the cyber track then converts into a portfolio. The same document tells a newly-hired reader to *"study cyber 5–8 hours/week"* and *"turn your work experience into security stories."* IT is the on-ramp, not a destination with its own ladder.
+
+**The investigation was still worth running, because the documentation had drifted behind the decision in three places.** The strategy document was titled **"Remote IT First, Cybersecurity Next"** with a section headed **"How to Use Both Roadmaps Together"** — while that same section introduced the third track under Goal C. And **no document anywhere told the reader that the IT path ends**: someone who finishes Phase 9 and prefers IT would reasonably expect `advance-roadmap/` to continue IT, find that Phase 01 is "Detection at Scale", and have to infer the rule unaided.
+
+**That is the real defect — not the missing track, but the missing sentence.** `career-roadmaps/README.md` is retitled, opens by naming all three tracks, and its section now reads "How to Use the Three Roadmaps Together", stating plainly that there is no mid-level IT track. `it-roadmap/00-overview.md` gains a closing **"What Comes After This Track"** section naming both destinations: security, which has a track; and staying in IT, which has the job and the fundamentals but nothing further here.
+
+**Recorded as D-032**, because the advance track has D-026 explaining why it exists and the *absence* of a fourth track deserved the same treatment. `ROADMAP.md` and `CHECKPOINT.md` had recorded it neither as planned nor as considered-and-rejected — it was simply not written anywhere, which is why it read as an oversight. It is now listed under "Explicitly out of scope", with the note that D-032 is the record to amend if a fourth track is ever wanted.
+
+**Verified:** lint **162 files / 0 issues**; `audit-content` 0; `audit-refs` 0 broken with controls passing; `audit-time-budget` **31 phases / 0 findings**; readability **0 over 110 and 0 over 90**; the relative link from the IT overview resolves; and the CHANGELOG's `[Unreleased]` still carries exactly three section headers with no duplicates.
+
+## 2026-09-16 (earlier) — The unread material, read
 
 **Goal:** close the gap the previous two passes created — cyber 15 and advance 07, two whole phases no fresh reader had seen, plus the five IT sections written to a market claim rather than an existing syllabus. Five readers, one per file, working from the same brief the three prior passes used.
 

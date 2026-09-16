@@ -1,6 +1,8 @@
-# Career Roadmaps: Remote IT First, Cybersecurity Next
+# Career Roadmaps: Remote IT First, Cybersecurity Next, Mid-Level After
 
 This roadmap is built for a beginner in the Philippines with basic past web-dev exposure, no degree, no certs, no professional IT/cybersecurity experience, a $0 budget, and about **2–4 hours/day, 5 days/week**.
+
+There are **three tracks**, taken in sequence: `it-roadmap/`, `cybersec-roadmap/`, then `advance-roadmap/`. The first gets you a job, the second gets you into security, and the third — which assumes you already hold a security role — is for the years after that.
 
 ## The Strategy
 
@@ -16,7 +18,11 @@ The honest hiring-manager view: cybersecurity is possible without a degree, but 
 basic IT skills -> remote IT/support job -> real tickets + users + systems -> cyber labs + portfolio -> entry-level cyber applications
 ```
 
-## How to Use Both Roadmaps Together
+## How to Use the Three Roadmaps Together
+
+`it-roadmap/` is the on-ramp, `cybersec-roadmap/` is the destination, and `advance-roadmap/` is what comes after — in that order, and the order matters.
+
+**There is no mid-level IT track, and that is deliberate rather than an omission.** The IT roadmap has one job: get you the first remote support role. Everything it teaches past Phase 4 exists to make you better at that job and to feed the security track. If you finish the IT track and want to stay in IT — sysadmin, desktop engineering, identity and endpoint administration — this curriculum has no fourth track for you yet, and you should know that now rather than at the end of Phase 9. What it *does* give you is a job you can grow in, and the security track assumes exactly that.
 
 ### First 12–24 weeks
 

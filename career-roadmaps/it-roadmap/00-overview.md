@@ -59,3 +59,14 @@ Create a GitHub repo or Google Drive folder called `entry-level-it-portfolio` wi
 ## Application Rule
 
 Start applying after Phase 4. Do not wait until Phase 9. Application skill improves only by applying.
+
+## What Comes After This Track
+
+This track has one job, and it is worth being honest about what that means: **it gets you the first remote IT role.** It does not continue into a mid-level IT track, because this curriculum does not have one.
+
+Where you go next depends on which job you want:
+
+- **Security** — `cybersec-roadmap/` is the next track, and it is designed to run *alongside* your first IT job rather than after it. Your tickets become the material: MFA issues, suspicious emails, account lockouts, access requests, log reading. See [`../README.md`](../README.md) for how the two run together.
+- **Staying in IT** — sysadmin, desktop engineering, identity and endpoint administration, M365 or cloud administration — there is no fourth track here, and no phase file waiting for you after Phase 9. The entry-level track gives you the job and the fundamentals; what you do with them from there is on the job, plus whatever vendor documentation and certification path your employer points you at.
+
+Knowing that now is better than discovering it at the end of Phase 9. Neither answer is the wrong one — but only the security path has a track written for it.

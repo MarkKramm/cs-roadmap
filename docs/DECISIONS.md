@@ -2,6 +2,23 @@
 
 A lightweight decision log (ADR-style). Newest first.
 
+## D-032 — There is no mid-level IT track, and the omission is deliberate rather than unexamined
+
+- **Date:** 2026-09-16
+- **Status:** Accepted
+- **Context:** The repository has three tracks: `it-roadmap/` (9 phases), `cybersec-roadmap/` (15) and `advance-roadmap/` (7). The third is titled **"Mid-Level Cyber Roadmap"** and its overview states that it "assumes you already hold a security role" and that a reader who has not held one "should do the cybersecurity roadmap first." So the sequence is IT entry → cyber entry → one mid-level track, and **that track is cyber**. The IT track's last phase is a job-application plan; there is no Phase 10 for the years after the first IT job.
+  - This was raised as a possible gap and initially looked like an oversight, because `docs/ROADMAP.md` and `docs/CHECKPOINT.md` record the IT mid-level track neither as planned nor as considered-and-rejected. The advance track has a decision record explaining why it exists (D-026); a fourth track had no equivalent in either direction.
+  - **The strategy document settles it.** `career-roadmaps/README.md` states the three goals in order, and Goal C reads: *"once you hold a security role, move from working tickets to owning outcomes. This is the third track, `advance-roadmap/`, and it is deliberately **not** for someone who has not worked in the field yet."* The path diagram on the following lines makes IT's role explicit — it is the on-ramp that produces *"real tickets + users + systems"*, which the cyber track then converts into a portfolio. The same document tells the reader who has just been hired to *"study cyber 5–8 hours/week"* and *"turn your work experience into security stories."*
+- **Decision:** **No fourth track.** IT stays the on-ramp, cyber stays the destination, and the mid-level track stays security-only. The curriculum's stated purpose is to move a beginner out of remote entry-level IT and into cybersecurity; an IT-career ladder is a different product, aimed at a reader who wants to stay in IT, and adding it would dilute a plan whose main virtue is that it is one path rather than a menu.
+- **What was actually defective was the documentation, not the decision.** Three places described a two-track repository after the third track existed:
+  - `career-roadmaps/README.md` was titled *"Remote IT First, Cybersecurity Next"* and its section heading read **"How to Use Both Roadmaps Together"** — while the same section introduced Goal C and the third track. A reader arriving at that heading had no reason to expect the new track to be covered under it.
+  - Neither the IT overview nor the strategy document ever said the IT path ends. A reader who finishes Phase 9 and *prefers IT* would reasonably expect `advance-roadmap/` to continue IT, discover Phase 01 is "Detection at Scale", and have to infer the rule unaided.
+- **Consequences:**
+  - `career-roadmaps/README.md` is retitled, opens by naming all three tracks, and its section is now "How to Use the Three Roadmaps Together". It states plainly that there is no mid-level IT track and that this is deliberate.
+  - `it-roadmap/00-overview.md` gains a closing **"What Comes After This Track"** section naming both destinations — security, which has a track; and staying in IT, which has the job and the fundamentals but no track here. The section says so rather than leaving the reader to find out at Phase 9.
+  - **The gap is now named rather than implied**, which is the same standard this repository applies to its browser-coverage gap (D-031) and its untimed task estimates. A curriculum that cannot say what it does not cover is claiming more than it delivers.
+  - **If a fourth track is ever wanted**, this record is the thing to amend. It would be 5–7 phases on Windows Server and AD at scale, Intune and endpoint fleet management, M365 administration, networking beyond first-line, automation, and vendor/cloud administration — and it would need its own answer to "who is this for", because the current answer is a reader the strategy document deliberately does not serve.
+
 ## D-031 — A named engine that is missing fails; Firefox itself was then attempted and removed
 
 - **Date:** 2026-09-16
