@@ -451,7 +451,9 @@ A framework is a structured list of things an organisation should consider, writ
 
 **The certification column is the one that drives business decisions.** An organisation pursues ISO 27001 certification or a SOC 2 report because a customer, a tender, or a regulator requires it — not because the framework is better than the alternatives.
 
-**One vocabulary trap worth knowing before you read any of them.** These frameworks each use the word "control" differently, and the CIS Controls are the easiest to get wrong. CIS has **18 Controls** — the numbered headings, such as *Control 1: Inventory and Control of Enterprise Assets*. Each Control contains several **Safeguards**, which are the numbered, actionable statements you actually implement — `1.1`, `1.2`, and so on. So when someone says "CIS Control 5", they mean a whole topic area, and when they say "Safeguard 5.3", they mean one specific thing to do. Mixing the two up in an interview is a small tell that you read a summary rather than the document.
+**One vocabulary trap worth knowing before you read any of them.** These frameworks each use the word "control" differently, and the CIS Controls are the easiest to get wrong. CIS has **18 Controls** — the numbered headings, such as *Control 1: Inventory and Control of Enterprise Assets*. Each Control contains several **Safeguards**, which are the numbered, actionable statements you actually implement — `1.1`, `1.2`, and so on.
+
+So when someone says "CIS Control 5", they mean a whole topic area, and when they say "Safeguard 5.3", they mean one specific thing to do. Mixing the two up in an interview is a small tell that you read a summary rather than the document.
 
 CIS also publishes **Implementation Groups (IG1, IG2, IG3)**, which are subsets of the Safeguards sized to an organisation's maturity and resources. IG1 is the basic hygiene set for a small organisation with limited security staff, and it is the sensible starting point if you are mapping controls in a home lab. The current version is **v8.1**, which realigned its mappings to NIST CSF 2.0 and added a Govern function to match.
 
