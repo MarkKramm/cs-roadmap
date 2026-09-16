@@ -88,10 +88,21 @@ const UNIVERSAL = new Set([
   'NVME', 'DHCP', 'UPS', 'GB', 'MB', 'KB', 'TB', 'PB', 'GHZ', 'MHZ', 'KHZ',
   'US', 'UK', 'PH', 'OK', 'FAQ', 'DIY', 'CEO', 'CTO', 'HR', 'SLA', 'KPI',
   'ID', 'OTP', 'MFA', '2FA', 'AD', 'AV', 'EDR', 'SIEM', 'SOC', 'CVE', 'CVSS',
+  // Cable and display standards a beginner meets on the first day of a
+  // hardware walkthrough. `USB` and `SATA` were already here; `HDMI`, `VGA`
+  // and `DVI` were not, which made the list inconsistent rather than selective
+  // -- a reader is no more likely to need "High-Definition Multimedia
+  // Interface" spelled out than "Universal Serial Bus".
+  'HDMI', 'VGA', 'DVI', 'DP',
 ]);
 
 // English words that appear in caps as a heading, a table cell or emphasis.
 // These are not initialisms at all and were the bulk of the false positives.
+//
+// A false positive here is not cosmetic: the report's whole value is that a
+// human reads the DOMAIN list, and a list padded with FAIL, LEAST and TIME
+// teaches the reader to skim past the real findings. Each entry below was
+// checked against the line that produced it rather than added from intuition.
 const ENGLISH_CAPS = new Set([
   'MOST', 'BEST', 'ALL', 'NEW', 'USE', 'NOT', 'AND', 'THE', 'FOR', 'YOU',
   'CAN', 'ANY', 'ONE', 'TWO', 'HOW', 'WHY', 'WHAT', 'WHEN', 'WHERE', 'WHO',
@@ -102,6 +113,31 @@ const ENGLISH_CAPS = new Set([
   'DELETE', 'PATCH', 'HEAD', 'OPTIONS', 'TRACE', 'HOST', 'USER', 'PASS',
   'FILE', 'DIR', 'NG', 'AUTH', 'DET', 'TLD', 'RST', 'POP', 'CRM', 'IBM',
   'PHP', 'YAML', 'IIS', 'DLL', 'SUID', 'MOST', 'BEST',
+  // Added after reading the lines that produced them:
+  //   `FAIL`  — "What a PASS tells you | What a FAIL means", a table header.
+  //   `LEAST` — "...Which is the LEAST likely cause?", sentence emphasis.
+  //   `BASE`  — used as an ordinary noun in prose.
+  //   `GAP`   — used as an ordinary noun in prose.
+  //   `TIME`  — a column heading.
+  //   `TEMP`  — a Windows directory name, not an initialism.
+  'FAIL', 'LEAST', 'BASE', 'GAP', 'TIME', 'TEMP',
+]);
+
+// Domain forms that a beginner does not need spelled out, checked one at a time
+// against their source line. These are initialisms, so they are not English
+// words -- but expanding them would be noise:
+//   CD   — "CD-ROMs", a hardware noun in ordinary use.
+//   HD   — an ordinary adjective.
+//   TV   — an ordinary noun.
+const ASSUMED_EXTRA = new Set(['CD', 'HD', 'TV']);
+
+// Currency codes. `USD`, `AUD` and `GBP` appeared in one sentence about earning
+// in a foreign currency, and no reader needs "United States Dollar" spelled out
+// to follow it. ISO 4217 codes are closer to units than to acronyms, which is
+// why they sit with GB and MB rather than in the domain list.
+const CURRENCY = new Set([
+  'USD', 'AUD', 'GBP', 'EUR', 'JPY', 'CAD', 'NZD', 'SGD', 'HKD', 'CHF', 'PHP',
+  'MYR', 'THB', 'IDR', 'VND', 'INR', 'CNY', 'KRW', 'AED', 'SAR',
 ]);
 
 function makeLineIndex(text) {
@@ -128,6 +164,8 @@ function lineOf(starts, idx) {
 function classify(acr) {
   if (UNIVERSAL.has(acr)) return 'assumed';
   if (ENGLISH_CAPS.has(acr)) return 'not-an-initialism';
+  if (ASSUMED_EXTRA.has(acr)) return 'assumed';
+  if (CURRENCY.has(acr)) return 'assumed';
   return 'domain';
 }
 
@@ -275,6 +313,57 @@ const CONTROLS = [
   ['| **SOC** | A team of analysts on shift | Not a tool at all |', 'SOC', false],
 ];
 
+// CLASSIFICATION CONTROLS.
+//
+// The CONTROLS above test the expansion detector -- whether a definition is
+// recognised. They said nothing about `classify()`, which decides whether a
+// flagged form is reported as a domain term or dismissed as an English word.
+// That gap is where a real defect lived: `FAIL` and `LEAST` were being reported
+// as unexpanded domain terms because they were missing from ENGLISH_CAPS, and a
+// report padded with words teaches its reader to skim past the real findings.
+//
+// Each entry is [form, expected class]. `domain` is the only class that becomes
+// a finding, so a wrong `domain` here is a false positive in the report.
+const CLASS_CONTROLS = [
+  // English words in caps -- must NOT be reported as domain terms.
+  ['FAIL', 'not-an-initialism'],
+  ['LEAST', 'not-an-initialism'],
+  ['PASS', 'not-an-initialism'],
+  ['BEST', 'not-an-initialism'],
+  ['TIME', 'not-an-initialism'],
+  ['TEMP', 'not-an-initialism'],
+  // Universally known, so expanding them would be noise.
+  ['USB', 'assumed'],
+  ['GB', 'assumed'],
+  ['CD', 'assumed'],
+  ['HDMI', 'assumed'],
+  // Currency codes behave like units, not acronyms.
+  ['USD', 'assumed'],
+  ['AUD', 'assumed'],
+  ['GBP', 'assumed'],
+  // GENUINE findings -- these must survive, or the fix above would have
+  // improved precision by destroying recall.
+  ['APIPA', 'domain'],
+  ['CMOS', 'domain'],
+  ['OSPF', 'domain'],
+  ['BGP', 'domain'],
+  ['BYOD', 'domain'],
+  ['DKIM', 'domain'],
+  ['DMARC', 'domain'],
+  ['SAML', 'domain'],
+  ['RBAC', 'domain'],
+  ['MTU', 'domain'],
+];
+
+function runClassControls() {
+  const failed = [];
+  for (const [form, expected] of CLASS_CONTROLS) {
+    const got = classify(form);
+    if (got !== expected) failed.push({ form, expected, got });
+  }
+  return failed;
+}
+
 function runControls() {
   const failed = [];
   for (const [line, acr, expected] of CONTROLS) {
@@ -305,9 +394,23 @@ if (controlFailures.length) {
   process.exit(1);
 }
 
+const classFailures = runClassControls();
+if (classFailures.length) {
+  process.stdout.write('ACRONYM AUDIT — SELF-TEST FAILED\n\n');
+  for (const f of classFailures) {
+    process.stdout.write(`  ${f.form}  classified "${f.got}", expected "${f.expected}"\n`);
+  }
+  process.stdout.write(
+    '\nThe classifier is not trustworthy; a wrong "domain" is a false positive\n' +
+      'in a report a human is meant to read, so no findings are printed.\n',
+  );
+  process.exit(1);
+}
+
 if (process.argv.includes('--self-test')) {
   process.stdout.write(
-    `expansion detector: ${CONTROLS.length} controls, 0 failed\n`,
+    `expansion detector: ${CONTROLS.length} controls, 0 failed\n` +
+      `classifier: ${CLASS_CONTROLS.length} controls, 0 failed\n`,
   );
   process.exit(0);
 }
@@ -414,7 +517,8 @@ const NOT_INIT = byClass(neverExpanded, 'not-an-initialism');
 
 process.stdout.write('ACRONYM AUDIT — measurement, not a gate\n');
 process.stdout.write(
-  `expansion detector: ${CONTROLS.length} controls, 0 failed (--self-test runs only these)\n\n`,
+  `expansion detector: ${CONTROLS.length} controls, 0 failed (--self-test runs only these)\n` +
+    `classifier: ${CLASS_CONTROLS.length} controls, 0 failed\n\n`,
 );
 process.stdout.write(`files scanned: ${files.length}\n`);
 process.stdout.write(`distinct shortened forms: ${distinctTotal}\n`);
