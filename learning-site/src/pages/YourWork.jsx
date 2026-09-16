@@ -22,9 +22,12 @@
 
 import { useState } from "react";
 import { readNotes } from "../hooks/useNotes.js";
+import { readQuizAnswers } from "../hooks/useQuizAnswers.js";
 import { tracks } from "../data/roadmaps.js";
 import { collectWork, summariseWork } from "../lib/yourWork.js";
+import { collectMissed, groupByPhase, summariseReview } from "../lib/review.js";
 import { renderInline } from "../lib/renderInline.jsx";
+import ReviewQueue from "../components/ReviewQueue.jsx";
 
 // The sidebar strips "Phase 3 — " from titles for width; this page has room, so
 // it keeps the number for orientation and drops only the redundant "Phase".
@@ -34,9 +37,37 @@ function shortTitle(title) {
 
 export default function YourWork({ onOpenPhase }) {
   const [notes] = useState(readNotes);
+  // Read once at mount, like the notes above: two live copies of one
+  // localStorage key drift, and this page never writes.
+  const [quizAnswers] = useState(readQuizAnswers);
 
   const groups = collectWork(notes, tracks);
   const summary = summariseWork(groups);
+
+  const missed = collectMissed(quizAnswers, tracks);
+  const reviewSummary = summariseReview(missed);
+  const reviewGroups = groupByPhase(missed);
+
+  // The review queue renders even when there is no writing yet, because it is a
+  // different kind of thing and a reader may well have answered quizzes without
+  // writing a note. Only the empty state below needs both to be absent.
+  const reviewSection = (
+    <section className="work__review">
+      <h2 className="work__review-head">Questions to revisit</h2>
+      <p className="muted">
+        {reviewSummary.questions === 0
+          ? "Nothing here yet."
+          : reviewSummary.questions === 1
+            ? "One question to look at again, from one phase."
+            : reviewSummary.questions +
+              " questions to look at again, from " +
+              reviewSummary.phases +
+              (reviewSummary.phases === 1 ? " phase." : " phases.")}{" "}
+        Nothing on this page is scored or counted.
+      </p>
+      <ReviewQueue groups={reviewGroups} onOpenPhase={onOpenPhase} />
+    </section>
+  );
 
   if (groups.length === 0) {
     return (
@@ -54,6 +85,7 @@ export default function YourWork({ onOpenPhase }) {
             own writing back.
           </p>
         </div>
+        {reviewSection}
       </>
     );
   }
@@ -127,6 +159,8 @@ export default function YourWork({ onOpenPhase }) {
           )}
         </article>
       ))}
+
+      {reviewSection}
     </>
   );
 }

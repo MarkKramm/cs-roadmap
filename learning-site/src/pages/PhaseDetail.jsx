@@ -235,7 +235,9 @@ export default function PhaseDetail({
           <h2>Quiz</h2>
           <p className="muted">
             One correct answer per question, with an explanation either way.
-            Nothing is scored or saved — refreshing starts over.
+            Nothing is scored — your answers are kept so anything you miss can be
+            found again under <strong>Your work</strong>, and{" "}
+            <strong>Start over</strong> clears them.
           </p>
           <Quiz questions={phase.quiz} />
         </section>

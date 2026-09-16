@@ -23,19 +23,40 @@
 // TaskList's answers and the authored task ids (D-019). The id comes from the
 // authored `<!-- id: phase-qNN -->` comment in the Markdown.
 //
-// State lives in the component rather than in storage, deliberately: a quiz is
-// for the moment you take it, and persisting it would turn a self-check into a
-// permanent record of how you did. Refreshing resets it, which is a feature.
+// WHERE THE ANSWERS LIVE, AND WHY THAT CHANGED
+//
+// This component originally held its answers in `useState` and the comment here
+// said that was deliberate: "a quiz is for the moment you take it, and persisting
+// it would turn a self-check into a permanent record of how you did."
+//
+// That reasoning was sound and the outcome was still wrong. Answering a set and
+// navigating away discarded the only evidence the reader had produced about what
+// they did not yet understand -- and the most useful thing the curriculum says
+// about a missed question is the `**Why:**` line, which names the misconception
+// the distractor represents. Throwing that away on every navigation left the quiz
+// as something you perform rather than something you learn from.
+//
+// SO THE CONFLICT IS RESOLVED BY NARROWING WHAT IS STORED, NOT BY DROPPING THE
+// OBJECTION. Persisted is the minimum needed to build a revisit list: **which
+// option was picked, keyed by question id**. Not persisted anywhere: whether it
+// was right, how many were right, how many were answered, any ratio, or any
+// history of a phase getting better or worse. The review page therefore shows
+// *what to look at again*, which is a statement about a pile of paper, and never
+// *how you did*, which would be the report card this file was right to refuse.
+// See docs/DECISIONS.md -> D-044.
+//
+// "Start over" still clears the set, and still exists for the reader who wants a
+// clean run at it.
 
-import { useState } from "react";
 import { renderInline } from "../lib/renderInline.jsx";
 import { correctIndex, summarise } from "../lib/quiz.js";
+import { useQuizAnswers } from "../hooks/useQuizAnswers.js";
 
 const LETTERS = "ABCDEFGH";
 
 export default function Quiz({ questions }) {
-  // questionId -> chosen option index
-  const [picked, setPicked] = useState({});
+  const ids = (questions || []).map((q) => q.id);
+  const { picked, choose, reset } = useQuizAnswers(ids);
 
   if (!questions || !questions.length) {
     return <p className="muted">This phase has no quiz yet.</p>;
@@ -90,7 +111,7 @@ export default function Quiz({ questions }) {
                       }
                       aria-pressed={chosen}
                       disabled={isAnswered}
-                      onClick={() => setPicked((p) => ({ ...p, [q.id]: oi }))}
+                      onClick={() => choose(q.id, oi)}
                     >
                       <span className="quiz__letter" aria-hidden="true">
                         {LETTERS[oi]}
@@ -135,7 +156,7 @@ export default function Quiz({ questions }) {
           <button
             type="button"
             className="chip chip--tiny"
-            onClick={() => setPicked({})}
+            onClick={reset}
           >
             Start over
           </button>

@@ -1143,6 +1143,141 @@ async function main() {
       'the quiz did not return to its unanswered state',
     );
 
+    // ---------------------------------------------------------------------
+    // Quiz answers persist, and Start over persists the clearing (D-044).
+    //
+    // THIS IS THE BEHAVIOUR THE REVIEW QUEUE DEPENDS ON, and nothing else in
+    // this suite covers it. The unit tests exercise the transform from a stored
+    // map to a revisit list; they would all pass if the store were never written
+    // at all, because they build their own input. What is checked here is the
+    // wiring the reader actually depends on: answer a question, reload the page,
+    // and the answer is still there.
+    //
+    // ORDER MATTERS TWICE, and the first version of this got it wrong.
+    //  1. It sits AFTER the Start over checks, so it begins from a cleared set
+    //     rather than from whatever the earlier checks happened to leave behind.
+    //  2. It answers a question ON THE PHASE IT WILL RELOAD INTO. The first
+    //     version clicked whatever quiz was on screen (IT 02, from the preceding
+    //     checks) and then navigated to IT 01 and asserted IT 01's answer was
+    //     revealed. Those are different phases, so the assertion could never
+    //     hold — and it failed in a way that looked exactly like a persistence
+    //     bug, complete with a correct store, because it was. The store held
+    //     `it-02-q01` while the check looked for IT 01's answer.
+    //
+    //     **A check that asserts across two different subjects is not a stricter
+    //     check, it is a broken one that reads as a real finding.** Navigating
+    //     first and answering second removes the mismatch.
+    // ---------------------------------------------------------------------
+
+    // Go to the phase this check will use, BEFORE answering anything in it.
+    await cdp.eval(`(() => {
+      const b = [...document.querySelectorAll('.sidebar__link')]
+        .find(x => /Computer Fundamentals/.test(x.textContent));
+      if (b) b.click();
+      return !!b;
+    })()`);
+    await cdp.waitFor(`!!document.querySelector('.quiz')`, 'the quiz before answering', 8000);
+    await sleep(400);
+
+    // Start over first, so this check owns the state it asserts on rather than
+    // inheriting it from the earlier quiz checks.
+    await cdp.eval(`(() => {
+      const b = [...document.querySelectorAll('.quiz button')]
+        .find(x => /start over/i.test(x.textContent));
+      if (b) b.click();
+      return !!b;
+    })()`);
+    await sleep(400);
+
+    const persistedAfterReset = await cdp.eval(
+      `(() => {
+        const raw = window.localStorage.getItem('cs-roadmap:quiz:v1');
+        const parsed = raw ? JSON.parse(raw) : {};
+        return { key: raw !== null, entries: Object.keys(parsed).length };
+      })()`,
+    );
+    check(
+      'quiz: Start over clears the stored answers too, not just the screen',
+      !persistedAfterReset.entries,
+      'the store kept ' + persistedAfterReset.entries + ' answer(s) after Start over',
+    );
+
+    // Answer one question ON THIS PHASE, then reload and confirm it came back.
+    await cdp.eval(`(() => {
+      const b = document.querySelector('.quiz .quiz__opt');
+      if (b) b.click();
+      return !!b;
+    })()`);
+    await sleep(400);
+    const beforeReload = await cdp.eval(
+      `(() => {
+        const raw = window.localStorage.getItem('cs-roadmap:quiz:v1');
+        return raw ? Object.keys(JSON.parse(raw)).length : 0;
+      })()`,
+    );
+    check(
+      'quiz: answering a question writes it to storage',
+      beforeReload > 0,
+      'nothing was stored after answering',
+    );
+
+    await cdp.send('Page.reload', { ignoreCache: false });
+    await sleep(2500);
+    // The reload returns to the dashboard, so the quiz has to be reached again.
+    //
+    // The wait here is 1400ms rather than the 900ms used for the same click
+    // earlier in the run, and the difference is not arbitrary: this click happens
+    // immediately after a reload, so it races the app shell remounting. At 900ms
+    // the click landed before the sidebar existed, the quiz never rendered, and
+    // the assertion below failed with stored=1 revealed=0 — which reads exactly
+    // like a persistence bug and was not one. The store was correct the whole
+    // time. **A timing failure that mimics the defect you are hunting is worth
+    // slowing down for**, so this waits for the element rather than guessing.
+    await cdp.waitFor(
+      `[...document.querySelectorAll('.sidebar__link')].some(x => /Computer Fundamentals/.test(x.textContent))`,
+      'the sidebar after reload',
+      8000,
+    );
+    await cdp.eval(`(() => {
+      const b = [...document.querySelectorAll('.sidebar__link')]
+        .find(x => /Computer Fundamentals/.test(x.textContent));
+      if (b) b.click();
+      return !!b;
+    })()`);
+    await cdp.waitFor(`!!document.querySelector('.quiz')`, 'the quiz after reload', 8000);
+    await sleep(400);
+    const afterReload = await cdp.eval(
+      `(() => {
+        const q = document.querySelector('.quiz');
+        return {
+          answered: q ? q.querySelectorAll('.quiz__opt--correct').length : 0,
+          // Diagnostic context: which phase is on screen, and what the store holds.
+          detail: {
+            phase: (document.querySelector('h1') || {}).textContent || null,
+            quizCount: document.querySelectorAll('.quiz').length,
+            opts: q ? q.querySelectorAll('.quiz__opt').length : 0,
+            chosen: q ? q.querySelectorAll('.quiz__opt--chosen').length : 0,
+            keys: Object.keys(JSON.parse(window.localStorage.getItem('cs-roadmap:quiz:v1') || '{}')),
+          },
+          stored: (() => {
+            const raw = window.localStorage.getItem('cs-roadmap:quiz:v1');
+            return raw ? Object.keys(JSON.parse(raw)).length : 0;
+          })(),
+        };
+      })()`,
+    );
+    check(
+      'quiz: an answer survives a page reload',
+      afterReload.stored > 0 && afterReload.answered > 0,
+      'after reload stored=' + afterReload.stored + ' revealed=' + afterReload.answered +
+        ' detail=' + JSON.stringify(afterReload.detail),
+    );
+
+    // Clean up, so a later check is not measuring this one's leftovers. The store
+    // is a real key in the reader's browser and this run should not leave state
+    // behind that changes what a subsequent assertion sees.
+    await cdp.eval(`(() => { window.localStorage.removeItem('cs-roadmap:quiz:v1'); return true; })()`);
+
     // A phase with a quiz must render a real quiz, not an empty scaffold.
     //
     // THIS CHECK REPLACED ONE THAT HAD BECOME VACUOUS, AND BOTH STEPS MATTER.

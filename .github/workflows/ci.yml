@@ -271,6 +271,15 @@ jobs:
       # look exactly like a working one.
       - name: Quiz scoring
         run: npm run test:quiz
+      # The review queue's data layer. Its failure modes are the quietest in the
+      # repository: a question collected that should not be tells a reader to
+      # revisit something they already know, and one NOT collected hides a real
+      # gap. Neither throws, neither shows up in a smoke render, and both make
+      # the page actively misleading. Every assertion here was checked by
+      # mutation testing -- the first version of the "unanswered is not a gap"
+      # rule passed while the guard enforcing it was deleted.
+      - name: Review queue
+        run: npm run test:review
 
   # The only job that needs a real browser engine. Everything in `site` renders to
   # a string and asserts on markup, which cannot see layout, computed CSS, focus

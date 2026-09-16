@@ -82,6 +82,11 @@ export const KEYS = [
     check: isNotesMap,
   },
   {
+    key: "cs-roadmap:quiz:v1",
+    kind: "map of questionId -> chosen option index",
+    check: isQuizAnswers,
+  },
+  {
     key: "cs-roadmap:time-budget:v1",
     kind: "one of quick | focused | deep",
     check: (v) => ["quick", "focused", "deep"].includes(v),
@@ -104,6 +109,25 @@ function isTrueMap(v) {
   for (const [k, val] of Object.entries(v)) {
     if (typeof k !== "string" || k === "") return false;
     if (val !== true) return false;
+  }
+  return true;
+}
+
+/**
+ * `{ questionId: optionIndex }` — the shape useQuizAnswers writes.
+ *
+ * Strict about the value being a non-negative integer, because the whole point of
+ * storing an index rather than the option text is that `isCorrect` compares it
+ * numerically. A backup carrying `"2"` as a string, or `null`, would compare
+ * against an index and silently mark a right answer wrong — the one failure mode
+ * this feature must not have. Refusing the file is louder and safer than
+ * importing answers that quietly misreport.
+ */
+function isQuizAnswers(v) {
+  if (!isPlainObject(v)) return false;
+  for (const [questionId, chosen] of Object.entries(v)) {
+    if (typeof questionId !== "string" || questionId === "") return false;
+    if (!Number.isInteger(chosen) || chosen < 0) return false;
   }
   return true;
 }

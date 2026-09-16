@@ -84,6 +84,10 @@ const POPULATED = {
       answers: { "it-01-computer-fundamentals-t01": "CPU, RAM, disk, OS build." },
     },
   }),
+  // Keyed by authored question id, valued by the option index the reader chose.
+  // Two entries rather than one so the round-trip check exercises a map with
+  // more than a single member.
+  "cs-roadmap:quiz:v1": JSON.stringify({ "it-01-q01": 0, "it-01-q02": 2 }),
   "cs-roadmap:time-budget:v1": JSON.stringify("focused"),
 };
 
@@ -225,6 +229,21 @@ const POPULATED = {
     ["cs-roadmap:reading:v1", { lastTrackId: "", lastPhaseId: "", lastSection: { p: { id: "" } } }, "a section entry needs a non-empty id"],
     ["cs-roadmap:applications:v1", [{ id: "a1", company: "Acme" }], "an application needs a role"],
     ["cs-roadmap:portfolio:v1", "nope", "portfolio must be an array"],
+    // The quiz answers are the one key whose values are COMPARED NUMERICALLY
+    // against an option index, so the validator has to be strict about the type
+    // rather than merely the shape. A backup carrying "0" as a string would
+    // compare against an index, mismatch, and silently report a right answer as
+    // wrong -- the exact defect this feature must not have. Each rejection below
+    // is a way that could reach the reader.
+    ["cs-roadmap:quiz:v1", "nope", "quiz answers must be an object"],
+    ["cs-roadmap:quiz:v1", [], "quiz answers must not be an array"],
+    ["cs-roadmap:quiz:v1", { "it-01-q01": "0" }, "a string index would compare against an integer"],
+    ["cs-roadmap:quiz:v1", { "it-01-q01": null }, "a null index is not a choice"],
+    ["cs-roadmap:quiz:v1", { "it-01-q01": 1.5 }, "a fractional index is not a choice"],
+    ["cs-roadmap:quiz:v1", { "it-01-q01": -1 }, "a negative index is not a choice"],
+    ["cs-roadmap:quiz:v1", { "it-01-q01": true }, "a boolean index is not a choice"],
+    ["cs-roadmap:quiz:v1", { "": 0 }, "a question id must be non-empty"],
+    ["cs-roadmap:quiz:v1", { "it-01-q01": 0, "it-01-q02": "x" }, "one bad entry rejects the whole file"],
   ];
   for (const [key, value, why] of cases) {
     const v = inspect({ format: FORMAT, version: VERSION, data: { [key]: value } });
@@ -249,6 +268,7 @@ const POPULATED = {
       "cs-roadmap:notes:v1": {
         "it-01-x": { note: "a note", answers: { "it-01-x-t01": "an answer" } },
       },
+      "cs-roadmap:quiz:v1": { "it-01-q01": 0, "it-01-q02": 2 },
       "cs-roadmap:time-budget:v1": "deep",
     },
   };

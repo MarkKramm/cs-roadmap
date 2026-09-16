@@ -3108,6 +3108,104 @@ p em {
   }
 }
 
+/* --- Questions to revisit (the review queue)
+   Sits below the reader's writing on the same page, because it is the same kind
+   of thing: something the reader produced, gathered from every phase so it can
+   be found again.
+
+   DELIBERATELY UNCOLOURED. The reader's own wrong choice is stated plainly and
+   the correct answer is stated plainly, and neither is red or green. Marking the
+   wrong pick in red would turn a revision aid into a correction, which is the
+   grading this product refuses everywhere else (docs/DESIGN-SYSTEM.md -> the
+   no-shame rule). The information is the option text and the explanation, not a
+   verdict colour. */
+.work__review {
+  margin-top: var(--space-7);
+  border-top: 1px solid var(--border);
+  padding-top: var(--space-5);
+}
+
+.work__review-head {
+  font-size: var(--text-base);
+  margin-bottom: var(--space-2);
+}
+
+.review__empty {
+  margin-top: var(--space-3);
+}
+
+.review__phase {
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: var(--space-2);
+  padding: var(--space-5);
+  margin-top: var(--space-4);
+}
+
+.review__phase-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-4);
+  margin-bottom: var(--space-4);
+}
+
+.review__track {
+  font-size: var(--text-xs);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.review__title {
+  font-size: var(--text-base);
+  margin: 0;
+}
+
+/* A left rule rather than a background tint: the question is set apart from its
+   explanation without either reading as a status. */
+.review__q {
+  border-left: 2px solid var(--border);
+  padding-left: var(--space-4);
+  margin-top: var(--space-5);
+}
+
+.review__q:first-of-type {
+  margin-top: 0;
+}
+
+.review__prompt {
+  font-weight: 600;
+  margin-bottom: var(--space-3);
+}
+
+.review__chosen,
+.review__answer {
+  margin-bottom: var(--space-2);
+}
+
+.review__chosen-label {
+  font-size: var(--text-xs);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--text-muted);
+}
+
+.review__letter {
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+.review__why {
+  color: var(--text-muted);
+  margin-top: var(--space-3);
+}
+
+@media (max-width: 560px) {
+  .review__phase-head {
+    flex-direction: column;
+  }
+}
+
 /* --- Print ---
    A phase is meant to be printable. The curriculum is 34–112 weeks and the
    whole point of this stylesheet is that a reader can take one phase offline on
@@ -3296,6 +3394,36 @@ p em {
 
   .quiz__foot {
     display: none;
+  }
+}
+
+@media print {
+  /* The review queue is made of the same things the quiz print rules already
+     handle -- a prompt, options, an explanation -- so it prints as a revision
+     sheet rather than being hidden. That is deliberate: a reader revising on a
+     train is exactly who this page is for, and the curriculum is meant to work
+     on paper (see the Print section above).
+
+     What changes is the chrome. The card background and border exist to group
+     the list on a screen that also has a sidebar; on paper they are ink. The
+     left rule stays, because it is what separates a question from its
+     explanation when nothing is coloured. */
+  .work__review {
+    margin-top: 1.5rem;
+    border-top: 1px solid var(--border);
+    padding-top: 0.8rem;
+  }
+
+  .review__phase {
+    background: none;
+    border: none;
+    padding: 0;
+    margin-top: 1rem;
+  }
+
+  .review__q {
+    border-left: 3px solid var(--border);
+    padding-left: 0.9rem;
   }
 }
 

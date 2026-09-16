@@ -20,8 +20,9 @@
     "test:phase-transfer": "node scripts/test-phase-transfer.mjs",
     "test:path-order": "node scripts/test-path-order.mjs",
     "test:quiz": "node scripts/test-quiz.mjs",
+    "test:review": "node scripts/test-review.mjs",
     "test:browser": "node scripts/browser-check.mjs",
-    "test": "npm run test:render-inline && npm run test:highlight && npm run test:ui && npm run test:data && npm run test:notes && npm run test:work && npm run test:today && npm run test:lesson-search && npm run test:phase-transfer && npm run test:path-order && npm run test:quiz && npm run test:search && npm run test:smoke",
+    "test": "npm run test:render-inline && npm run test:highlight && npm run test:ui && npm run test:data && npm run test:notes && npm run test:work && npm run test:today && npm run test:lesson-search && npm run test:phase-transfer && npm run test:path-order && npm run test:quiz && npm run test:review && npm run test:search && npm run test:smoke",
     "dev": "npm run build:content && vite",
     "build": "npm run build:content && vite build",
     "preview": "vite preview"
