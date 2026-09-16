@@ -91,7 +91,7 @@ That fourth item is where beginners fail, and it is the most important one.
 
 #### Time to complete
 
-**Roughly 60–80 hours over 6 weeks:**
+**Roughly 50–68 hours over 6 weeks:**
 
 | Work | Hours | Notes |
 |---|---|---|
@@ -319,6 +319,8 @@ Three of these deserve a sentence each because they are frequently misunderstood
 
 **Event ID 10 is noisy and indispensable.** It records one process opening another with specific access rights. Legitimate software triggers it constantly, so it needs a filter. But a process requesting `lsass.exe` with `0x1010` or `0x1410` access rights is the signature of credential dumping, and almost nothing legitimate does that.
 
+Those values are **access masks** — bit flags telling the kernel which operations the caller wants. `0x1010` requests `PROCESS_QUERY_LIMITED_INFORMATION` plus `PROCESS_VM_READ`; `0x1410` adds `PROCESS_QUERY_INFORMATION`. Reading another process's memory is what a credential dump needs, which is why the mask is the signal. Microsoft documents the values under "Process Security and Access Rights".
+
 **Event ID 22 gives you endpoint DNS visibility without a network sensor.** When a host resolves a domain that no other host in the estate resolves, and it does so on a fixed schedule, you are looking at beaconing.
 
 **Sysmon does not install itself with a sensible configuration.** The default configuration is close to useless. You install a community configuration — SwiftOnSecurity's or Olaf Hartong's — and you read it before you deploy it. The configuration *is* the detection engineering, and it is why "I installed Sysmon" is a much weaker statement than "I deployed Sysmon with a configuration that captures process creation, network connections, and image loads, and I modified it to reduce noise from two applications."
@@ -350,6 +352,8 @@ Linux telemetry is different in shape and equally valuable.
 | `/var/log/syslog` or `/var/log/messages` | General system messages | Plain text |
 | `/etc/passwd` and `/etc/shadow` access | Account changes | Via auditd file watches |
 | Cron | Scheduled job definitions and execution | `/var/log/cron` or journald |
+
+**This half needs a Linux host.** The Windows telemetry above runs on your own PC; auditd does not. If you do not have a Linux machine yet, do this section after Phase 11, which walks you through building one in VirtualBox — or on WSL2, which is enough for `auditctl` and `ausearch` even though it is not a full VM.
 
 The auditd rules worth writing first, because they cover the persistence and privilege-escalation behaviours that matter. Put them in `/etc/audit/rules.d/10-lab.rules`, load them with `augenrules --load`, and confirm they are live with `auditctl -l` — a rule that is written but never loaded detects nothing, which is the same lesson as the disabled event log:
 
@@ -632,7 +636,7 @@ DeviceProcessEvents
 </group>
 ```
 
-The three are structurally identical: select the image, select the flags, exclude the known-benign parents. The Wazuh version needs `negate="yes"` on that last field, because Wazuh treats a plain `<field>` as a positive match — without it the rule fires when the parent *is* the management tool, the exact inverse of the Sigma and SPL versions. That is the point of learning the logic rather than the syntax.
+The four follow the same shape — select the image, select the flags, exclude the known-benign parents — though the flag list is not identical in every version: Sigma and SPL match three (`-enc`, `-encodedcommand`, `-e`), while the KQL and Wazuh examples below match two. The Wazuh version needs `negate="yes"` on that last field, because Wazuh treats a plain `<field>` as a positive match — without it the rule fires when the parent *is* the management tool, the exact inverse of the Sigma and SPL versions. That is the point of learning the logic rather than the syntax.
 
 | Platform | Strengths | Trade-off |
 |---|---|---|
@@ -643,6 +647,10 @@ The three are structurally identical: select the image, select the flags, exclud
 | **Elastic EQL / DSL** | Powerful sequence matching, open source | Steeper learning curve, JSON-heavy |
 
 **The practical route for a learner on $0:** write in Sigma, keep the rules in a Git repository, and convert them into Wazuh rules for your lab. You demonstrate portability, version control, and a working SIEM in one artefact.
+
+Be honest about the conversion step, because this is where beginners lose an afternoon. `sigma-cli` converts a rule into a target format, but the Sigma-to-Wazuh path is not a one-command backend the way Splunk or Sentinel are: you translate the detection block by hand into Wazuh's XML, using the Wazuh rule below as the template.
+
+That is not a failure of the tooling or of you — the hand translation is the lesson, because it forces you to understand what each field matches. Keep both files: the Sigma rule is the source of truth, and the Wazuh rule is the deployment.
 
 #### Sequence detection: when one event is not enough
 
@@ -671,11 +679,11 @@ let failures =
 let successes =
   SecurityEvent
   | where EventID == 4624 and LogonType in (3, 10)
-  | project TimeGenerated, IpAddress, TargetUserName, LogonType;
+  | project SuccessTime = TimeGenerated, IpAddress, TargetUserName, LogonType;
 failures
 | join kind=inner successes on IpAddress
-| where TimeGenerated between (TimeGenerated - window .. TimeGenerated + window)
-| project TimeGenerated, IpAddress, TargetUserName, FailCount, Accounts, LogonType
+| where SuccessTime between (TimeGenerated .. TimeGenerated + window)
+| project TimeGenerated, SuccessTime, IpAddress, TargetUserName, FailCount, Accounts, LogonType
 ```
 
 That query answers a question no single-event rule can: *did a burst of failures from this address get followed by a success?* It is the detection that catches a real breach rather than the noise around it.
@@ -689,7 +697,7 @@ If you are building a detection library from nothing, this is a reasonable order
 | 1 | Service installed from a user-writable path | System 7045 | Filtering by path rather than by name |
 | 2 | Account added to a privileged group | Security 4728 / 4732 | Correlating two events |
 | 3 | Encoded PowerShell outside known tools | Sysmon 1 | Parent-process filtering |
-| 4 | Credential dumping shape | Sysmon 10 | Access-rights reasoning, and heavy tuning |
+| 4 | Credential dumping shape | Sysmon 10 | Access-rights reasoning (why `0x1010` matters), and heavy tuning |
 | 5 | New cron job or scheduled task | auditd file watch, Security 4698 | Cross-platform thinking |
 | 6 | Successful login after failures | 4625 plus 4624 | Sequence detection |
 | 7 | Security tool or logging disabled | Sysmon 4, CloudTrail `StopLogging` | Detecting the defence being removed |
@@ -912,7 +920,7 @@ The honest version is far more useful and is what an experienced interviewer wan
 
 #### Worked example: a coverage map you can defend
 
-Here is ATT&CK coverage for a small detection library of eight rules, written the honest way.
+Here is ATT&CK coverage for a small detection library, written the honest way. Six of its eight rules map to a technique and appear below; the other two — the lsass false-positive filter (DET-005) and the Sysmon-service-down check (DET-007) — are operational rules with no ATT&CK technique to map to, which is itself worth saying out loud rather than hiding in a footnote.
 
 | Tactic | Technique | Sub-technique | Rule | Coverage | Known gap |
 |---|---|---|---|---|---|
@@ -928,7 +936,7 @@ Here is ATT&CK coverage for a small detection library of eight rules, written th
 | Command and Control | T1071 | .001 Web Protocols | DET-008 | Partial | DNS-based only |
 | Exfiltration | T1041 | — | — | **None** | No egress anomaly baseline |
 
-That table is defensible in an interview, and it demonstrates more competence than a claim of full coverage. Four explicit gaps, two of them marked as planned and two as genuinely unaddressed, is what a real programme looks like.
+That table is defensible in an interview, and it demonstrates more competence than a claim of full coverage. Four explicit gaps — one marked as planned and three as genuinely unaddressed — is what a real programme looks like.
 
 **Note the "no egress baseline" row.** It is the gap that hurts most in real incidents and it is honest to say so. Volume-baselining is a real project, and pretending it is done is worse than admitting it is not.
 

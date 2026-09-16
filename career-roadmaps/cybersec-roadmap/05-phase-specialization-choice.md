@@ -483,7 +483,7 @@ Read the "biggest surprise" row carefully. In all four paths the surprise has th
 
 #### The weighted decision matrix
 
-The four-axis scoring in task 2 is the exercise the phase asks for. This is how to make it produce a decision rather than four numbers.
+Task 2 asks you to score each path on four axes — interest, difficulty, job availability, and portfolio confidence. This matrix is how to make those four numbers produce a decision: it splits them into seven criteria that can be weighed separately, so "difficulty" becomes entry accessibility and learning-curve fit rather than one vague score.
 
 **Step 1: write the criteria down before scoring anything.** Decide which criteria matter to you *now*, in your circumstances, and give each one a weight.
 
@@ -559,7 +559,7 @@ GRC has demand — the postings exist — but almost none of it is junior. The o
 
 > GRC is what I want, and the postings say I cannot have it yet. The one junior GRC role wants audit or compliance experience I do not have. SOC has five junior openings, but most are shift work, which I cannot do.
 >
-> IT Security has only three postings, but two are junior and none demands a degree — and it is the closest thing to what I already do. My support experience is the qualification rather than a gap.
+> IT Security has only three postings, but two are junior and only one mentions a degree at all — and it is the closest thing to what I already do. My support experience is the qualification rather than a gap.
 >
 > So IT Security is the realistic entry, and it is adjacent to GRC in a way that matters. The GRC work I enjoyed — building a risk register, mapping controls — happens inside IT security teams too, because access reviews, vulnerability tracking, and audit evidence all live there.
 >
@@ -688,7 +688,7 @@ axis by axis:
 | **Remote IT support experience** | **Path C** (strongest), then Path A | Direct extension of what you already do |
 | **Web development background** | **Path D**, and Path A | Real advantage for offensive work and web-attack investigation |
 | **No degree** | **Path C**, then Path A | Least obstructive; most obstructive for Path B |
-| **No certs** | Neutral for now | Addressable in Phase 7; relevant only to B and D postings |
+| **No certs** | Neutral for now | Addressable in Phase 7, and worth taking seriously — certifications carry real weight in this local market. B and D postings name them most often |
 | **$0 budget, unknown hardware** | **Path B**, then A and D via browser labs | B needs no lab at all |
 | **Burnout-prone, needs visible wins** | **Path C** and Path A | D has a long feedback cycle; B's wins are slow and document-shaped |
 
@@ -917,13 +917,14 @@ projects are named and mapped to real job requirements, this phase is done.
 
 ### Practice this next
 
-The five tasks are ordered as a funnel — broad exploration narrowing to a written commitment — and the order matters more than usual:
+The six tasks are ordered as a funnel — broad exploration narrowing to a written commitment — and the order matters more than usual:
 
 1. **Do the four mini-tasks first** (task 1), one per path, and do them properly rather than reading about the paths. This is the only way to get behavioural evidence about what you enjoy. Investigate one alert for SOC; build the 10-risk register for GRC; write the MFA rollout checklist for IT Security; do the five PortSwigger labs with remediation notes for pentest. Note *which one you were reluctant to stop doing* — that observation is more valuable than any score.
 2. **Score the four paths** (task 2) on interest, difficulty, job availability, and portfolio confidence — but interpret "difficulty" as difficulty of entry for you. Write down your axis weighting and why. Then look at the shape of the scores rather than a single average.
-3. **Read 20 job posts before deciding anything** (task 3). Five per path, recorded against the fields listed in Part 2, and hunt specifically for junior-level and zero-to-two-years roles. Let the postings correct your assumptions — they usually do.
+3. **Read 20 job posts before deciding anything** (task 3). Five per path is the discipline, recorded against the fields listed in Part 2, and hunt specifically for junior-level and zero-to-two-years roles. Expect the haul to be uneven — the worked example in Part 2 came back 9/6/3/2, because the boards are not stocked evenly, and that unevenness is itself evidence about which paths are actually hiring. Let the postings correct your assumptions — they usually do.
 4. **Choose one primary and one backup** (task 4), and choose the backup because it is adjacent rather than because it is a fallback. Write one sentence justifying each, referring to the evidence rather than to your feelings.
 5. **Write the 90-day plan last** (task 5), with all five components — target, three named projects, honest skill gaps, schedule, and a review date with falsifying evidence. The three projects should map to requirements you actually saw in the job posts, because that is what makes the exit criterion's second half true rather than aspirational.
+6. **Fill in the weighted matrix** (task 6) with your own criteria and weights, and write one sentence naming the criterion that drove your answer. This is the record of *why* the decision went the way it did — the plan above says what you will do, and the matrix says what convinced you.
 
 Then open `portfolio/cyber/05-specialization-choice.md` and check it against the deliverable list. The test is the exit criterion, said out loud in one breath: **"My target cyber role is X, and my portfolio will prove it using these three projects: A, B, and C."** If you can say that sentence and each project clearly serves the role, Phase 6 has everything it needs to start.
 

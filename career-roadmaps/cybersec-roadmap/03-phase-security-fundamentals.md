@@ -129,7 +129,7 @@ The purpose of the breadth here is not to make you good at all six. It is to mak
 | Five CVE summaries | 6–8 hours | Drawn from CISA KEV |
 | Incident timeline and report | 6–8 hours | Ties the whole phase together |
 | Control-mapping table | 3–5 hours | Your first GRC-flavoured artifact |
-| Total | 40–50 hours across 6 weeks | Comparable to Phase 2 in size, wider rather than deeper |
+| Total | 30–41 hours across 6 weeks | Comparable to Phase 2 in size, wider rather than deeper |
 
 It is comparable in size to Phase 2 but wider rather than deeper, which means it is easier to get lost in. The antidote is the deliverable: five PortSwigger labs, five CVE summaries, one incident timeline, one control-mapping table. Those four artifacts are the phase. Reading without producing them will feel productive and teach you very little.
 
@@ -269,9 +269,9 @@ A person changing jobs changes role, and their access changes with it in one ope
 
 #### The shape every access question takes
 
-Note that this is the group pattern from the IT track's sysadmin phase, scaled up and named.
+This is the group pattern from the IT track's sysadmin phase, scaled up and named — and it is the shape every access question reduces to.
 
-In fact every access question in this phase reduces to the same shape you already learned: **user → role → permission**, never user → permission directly. When an access review asks “who can read the finance share?”, the answer should be one role's membership list, not a manual audit of a hundred individual grants.
+**User → role → permission**, never user → permission directly. When an access review asks “who can read the finance share?”, the answer should be one role's membership list, not a manual audit of a hundred individual grants.
 
 #### Turning identity into log evidence
 
@@ -463,7 +463,7 @@ The second concept is **direction and state**.
 
 Modern firewalls are **stateful**. When an internal machine makes an outbound connection, the firewall remembers it and permits the return traffic automatically. This is why a rule permitting outbound traffic does not require a matching inbound rule.
 
-It also explains why the *direction* of a rule is essential context. An inbound deny for port 3389 that permits outbound 3389 tells you the rule set was written without understanding what it protects.
+It also explains why the *direction* of a rule is essential context. RDP on port 3389 is an *inbound* service — the thing you are protecting — so an inbound deny on 3389 is the correct posture, and a separate outbound permit on 3389 is ordinary and unrelated to it. What would be a finding is the reverse: an inbound *permit* for 3389 from anywhere, or an outbound deny that blocks the return traffic stateful inspection was supposed to allow. Read the direction before you judge the rule.
 
 #### Three questions to ask of any rule set
 
@@ -879,7 +879,7 @@ Worked example, which you should build your own version of:
 | 02:58:44 | Event 4688: `cmd.exe` parented by `explorer.exe` | Sysmon / 4688 | Manual execution — hands on keyboard |
 | 03:06:02 | New scheduled task created | Sysmon / Task Scheduler log | **Persistence** established |
 | 03:11:30 | Outbound connection to `198.51.100.42:443`, 850 MB transferred | Firewall / proxy log | Possible **exfiltration** |
-| 09:05:00 | Helpdesk ticket: user reports odd login alert | Ticketing system | **Identification** — nine hours late |
+| 09:05:00 | Helpdesk ticket: user reports odd login alert | Ticketing system | **Identification** — 6 h 51 m after the phishing email, and nothing noticed in between |
 
 #### What that table demonstrates
 
@@ -892,7 +892,7 @@ Read it again and notice how much it covers.
 | Process telemetry and a parent-child relationship | Part 2 |
 | Outbound connection and volume | Part 3 |
 | Scheduled task as persistence | Part 2 |
-| Identification nine hours late | Part 6 |
+| Identification 6 h 51 m late | Part 6 |
 
 It also shows the uncomfortable truth that incidents are usually identified hours or days after they begin, which is the argument for the detection improvements that come out of the lessons-learned phase.
 
@@ -1030,11 +1030,11 @@ In your browser's developer tools, on **a site you built yourself**:
 
 If you have an old project, you will almost certainly find that your session cookie lacks `HttpOnly`. That discovery is worth more than reading the OWASP Top 10, because you found it yourself in your own code.
 
-**Do not test any site you do not own.** If you want to practise against something realistic, use a purpose-built target like OWASP Juice Shop or DVWA, installed in the VirtualBox VM you built in Phase 2 — both are free and both are designed for exactly this.
+**Do not test any site you do not own.** If you want to practise against something realistic, use a purpose-built target like OWASP Juice Shop or **DVWA** (Damn Vulnerable Web Application — a deliberately insecure web app you run locally), installed in the VirtualBox VM you built in Phase 2 — both are free and both are designed for exactly this.
 
 #### Domain 5 — Vulnerability management: build a real triage table
 
-Take five findings — from your own `nmap` output above, from a Nessus/OpenVAS scan of your own lab, or from the CVE exercise in Phase 1 — and score them.
+Take five findings — from the `nmap -sV` scan you ran against your own VM in Phase 2, from a Nessus/OpenVAS scan of your own lab, or from the CVE exercise in Phase 1 — and score them.
 
 | # | Finding | Exploitability | Exposure | Impact | Priority | Fix, owner, date |
 |---|---|---|---|---|---|---|
@@ -1143,7 +1143,7 @@ The seven tasks build on each other, and the ordering below is deliberate:
 3. Find related logs in Event Viewer. <!-- id: cyber-03-t03 band: quick energy: low -->
 4. Complete 5 PortSwigger Apprentice-level labs. <!-- id: cyber-03-t04 band: deep energy: high -->
 5. Use Burp Community or OWASP ZAP to intercept your own browser traffic to a training lab. <!-- id: cyber-03-t05 band: focused energy: normal -->
-6. Pick 5 CVEs from CISA KEV and summarize affected product, impact, and fix. <!-- id: cyber-03-t06 band: focused energy: normal -->
+6. Pick 5 CVEs from CISA KEV, summarize affected product, impact, and fix, then map each to a CIS or NIST control. <!-- id: cyber-03-t06 band: focused energy: normal -->
 7. Write a mock incident timeline for a phishing login. <!-- id: cyber-03-t07 band: focused energy: normal -->
 
 ## Deliverable / proof of work
@@ -1154,7 +1154,7 @@ Create `portfolio/cyber/03-security-fundamentals.md` with:
 - 5 PortSwigger lab notes
 - 5 CVE summaries
 - One mock incident timeline
-- Table mapping 5 risks to CIS or NIST controls
+- Table mapping 5 findings to CIS or NIST controls
 
 ## Checklist
 

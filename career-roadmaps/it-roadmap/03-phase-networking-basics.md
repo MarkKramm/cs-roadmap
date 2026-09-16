@@ -25,7 +25,7 @@ Understand the networking topics that appear constantly in helpdesk, NOC, sysadm
 
 - Explain LAN, WAN, internet, router, switch, firewall, modem, access point, and ISP.
 - Understand IPv4, IPv6 basics, subnet mask, gateway, DNS, DHCP, NAT, TCP, UDP, ICMP, ports, and Wi-Fi.
-- Use `ping`, `tracert/traceroute`, `ipconfig/ifconfig/ip`, `nslookup`, `netstat/ss`, and Wireshark.
+- Use `ping`, `tracert/traceroute`, `ipconfig/ifconfig/ip`, `nslookup`, `arp -a`, `route print`, and Wireshark.
 - Build a simple network in Packet Tracer.
 - Troubleshoot “no internet,” “DNS not working,” “slow connection,” and “VPN issue.”
 
@@ -77,7 +77,7 @@ The good news is that the foundation is small. You need to understand addresses,
 
 The better news is that you can see it all working on your own home network, for free, tonight. This lesson is built around doing exactly that.
 
-**Time to complete:** 5–8 hours across the phase, most of it spent in Wireshark and Packet Tracer rather than reading. The phase is scheduled at four weeks for good reason — networking rewards repetition more than most subjects.
+**Time to complete:** roughly 20–30 hours across the phase — the scheduled four weeks at 5–8 hours a week. Most of that is spent in Wireshark, diagrams.net, and Packet Tracer rather than reading. The phase is scheduled at four weeks for good reason — networking rewards repetition more than most subjects.
 
 ### Part 1 — The mental model: what a network actually is
 
@@ -259,7 +259,7 @@ Memorise this pair. It resolves the majority of "no internet" tickets before the
 
 An IP address identifies a device. But a device runs many services at once — a web server, a mail server, and remote access all on one machine. **Ports** are how traffic is sorted to the right service. A connection is identified by the pair `IP:port`, and a conversation by the four-tuple of source and destination `IP:port`.
 
-Ports you should know cold, because they appear in firewall rules, interview questions, and troubleshooting every week:
+Ports you should know cold, because they appear in firewall rules, interview questions, and troubleshooting every week. The table below is the core eleven — the ones you will actually reach for. The phase deliverable asks you to build that out to a twenty-port table, so find and add nine more; the classic study lists are easy to find, and the test of a good addition is that you can say something about the port rather than only its number.
 
 | Port | Protocol | What it is |
 |---|---|---|
@@ -303,9 +303,9 @@ Troubleshooting is not intuition; it is a fixed sequence you run every time. Bot
 1. **Physical / link.** Is the cable seated? Is Wi-Fi switched on? Check the adapter is not disabled in Device Manager or via `ncpa.cpl`. Does the operating system report a link?
 2. **IP configuration.** Run `ipconfig /all`. Do you have a real address, or a `169.254` one? Is the mask correct? Is there a gateway?
 3. **Gateway.** `ping` your gateway. If the gateway does not answer, nothing upstream can work.
-4. **External connectivity by IP.** `ping 8.8.8.8`. This tests routing and upstream without involving DNS.
-5. **Name resolution.** `ping google.com` and `nslookup google.com`. This isolates DNS.
-6. **The specific service.** Test the actual thing: a browser, an app, a file share. Check the port with `Test-NetConnection`.
+4. **Name resolution.** `ping 8.8.8.8` first — it proves routing and upstream work *without* DNS — then `ping google.com` and `nslookup google.com`. The pair is what isolates DNS.
+5. **The specific service's port.** Test the port itself with `Test-NetConnection`.
+6. **The application.** Test the actual thing: a browser, an app, a file share.
 
 ```powershell
 Test-NetConnection google.com -Port 443
@@ -1194,7 +1194,13 @@ Replacing `“Wi-Fi”` with the exact name from `Get-NetAdapter`.
    - `ping` the gateway — you should get `Destination host unreachable` or `Transmit failed. General failure.` Note the exact wording; it is different from a timeout, and the difference tells you the operating system knew it had no route.
    - `ping 8.8.8.8` — same class of failure.
    - `nslookup google.com` — often a timeout, sometimes an immediate answer from cache. Note that a cached answer can be misleading.
-4. **Break it differently.** Re-enable the adapter, let it reconnect, then break only DNS instead: temporarily set your adapter’s DNS server to an address you know does not answer — for example `192.0.2.1`, which is a reserved documentation address that will never respond.
+4. **Break it differently.** Re-enable the adapter, let it reconnect, then break only DNS instead. The inverse command is the same cmdlet with `Enable`:
+
+```powershell
+Enable-NetAdapter -Name "Wi-Fi"
+```
+
+Wait for the adapter to come back and confirm with `ipconfig /all` before going on. Then break DNS only: temporarily set your adapter’s DNS server to an address you know does not answer — for example `192.0.2.1`, which is a reserved documentation address that will never respond.
 
 ```powershell
 Set-DnsClientServerAddress -InterfaceAlias "Wi-Fi" -ServerAddresses 192.0.2.1
@@ -1212,7 +1218,7 @@ ipconfig /flushdns
 Then verify with the full ladder, and confirm `nslookup google.com` answers again.
 6. **Write the comparison table.** For each rung, one column for “what it looks like when healthy” and one for “what it looks like when this rung is broken”. That table is the artifact of this phase — it is something you built from your own machine, and it will be the most useful page in your notes.
 
-*What this teaches:* failure signatures by direct experience. Reading that `169.254` means DHCP failed is knowledge; watching it appear on your own machine is recognition, and recognition is what you need at 2 a.m. on a real ticket.
+*What this teaches:* failure signatures by direct experience. Reading that `169.254` means DHCP failed is knowledge; watching your own machine print `Transmit failed. General failure.` the moment its adapter goes down — and seeing that this is *not* the same wording as a timeout — is recognition, and recognition is what you need at 2 a.m. on a real ticket. (The `169.254` address itself is worth meeting deliberately: on a machine that has just lost DHCP, `ipconfig /all` shows it as the *Autoconfiguration IPv4 Address*. Do that once, so the signature is familiar before it finds you.)
 
 ### Part 9 — Two worked tickets
 
@@ -1349,15 +1355,17 @@ You check what is listening on the loopback for DNS:
 ```powershell
 Get-NetTCPConnection -LocalPort 53 -State Listen -ErrorAction SilentlyContinue |
   Select-Object LocalAddress, LocalPort, OwningProcess
+Get-NetUDPEndpoint -LocalPort 53 -ErrorAction SilentlyContinue |
+  Select-Object LocalAddress, LocalPort, OwningProcess
 ```
 
 ```text
 LocalAddress LocalPort OwningProcess
 ------------ --------- -------------
 ```
-(empty)
+(both empty)
 
-Nothing is listening on port 53 at all. The service that was supposed to run locally has stopped — and the machine is still configured to depend on it.
+Nothing is listening on port 53 — not TCP, and not UDP either. Check both, because DNS is mostly a UDP protocol: the TCP query alone would only prove that nothing is serving zone transfers, and the UDP endpoint is the one that answers ordinary lookups. Here they agree, so the conclusion is safe: the resolver that was supposed to run locally has stopped, and the machine is still configured to depend on it.
 
 **What you do.**
 
@@ -1414,7 +1422,7 @@ At Phase 3, the correct action is the one taken above: identify that the configu
 
 > **Reported:** User reported “the internet is down” — no pages loading in the browser. Two router restarts had already been attempted by the user. Phone on the same Wi-Fi working normally.
 > **Changed recently:** Nothing reported by the user. No router change, no power event.
-> **Observed:** Wi-Fi connected, full signal. `ipconfig /all`: IPv4 `192.168.1.22/24`, gateway `192.168.1.1`, DHCP lease valid, **DNS Servers: `127.0.0.1`**. `ping 192.168.1.1` — 0 % loss. `ping 8.8.8.8` — 0 % loss, 24–26 ms. `ping google.com` — “could not find host”. `nslookup google.com` against `127.0.0.1` — “Server failed”. `nslookup google.com 8.8.8.8` — answered immediately. No process listening on TCP 53 on the local machine. `route print -4` showed a single default route via `192.168.1.1`.
+> **Observed:** Wi-Fi connected, full signal. `ipconfig /all`: IPv4 `192.168.1.22/24`, gateway `192.168.1.1`, DHCP lease valid, **DNS Servers: `127.0.0.1`**. `ping 192.168.1.1` — 0 % loss. `ping 8.8.8.8` — 0 % loss, 24–26 ms. `ping google.com` — “could not find host”. `nslookup google.com` against `127.0.0.1` — “Server failed”. `nslookup google.com 8.8.8.8` — answered immediately. No process listening on TCP or UDP 53 on the local machine. `route print -4` showed a single default route via `192.168.1.1`.
 > **Action (one change at a time):** 1) Reset the Wi-Fi adapter’s DNS servers to automatic (`Set-DnsClientServerAddress -ResetServerAddresses`) and flushed the DNS cache. 2) Confirmed the adapter now receives `192.168.1.1` and `8.8.8.8` via DHCP.
 > **Verified:** `nslookup google.com` resolved correctly. Asked the user to load the specific site that failed and confirm it opened — they confirmed it loaded normally.
 > **Cause:** The adapter was statically configured to use `127.0.0.1` as its DNS server, with no resolver running on that address. Traced to a leftover configuration from a discontinued VPN client. Connectivity was never at fault.
@@ -1689,6 +1697,10 @@ Then work the new material in the same way, in this order:
 
 ## Hands-on practice tasks
 
+**Before task 7 — Packet Tracer.** This phase teaches the *networking*; it does not teach the Cisco tool. Task 7 assumes you can already drop devices onto the canvas and open a device's CLI, and the checklist gates on it, so cover that first. The free **Introduction to Packet Tracer** course on Cisco NetAcad takes about two hours and is enough to build the topology below.
+
+If you would rather not create an account, the same objectives are reachable in the VirtualBox lab you built in Phase 2 — build the two subnets and the router there instead, and say in your write-up which route you took. Either is a real answer; skipping the routing entirely is not.
+
 1. Draw your home network in diagrams.net. Include the ISP modem/router, your devices, Wi-Fi access points, and how they connect. <!-- id: it-03-t01 band: focused energy: normal -->
 2. Check your IP configuration. Run `ipconfig /all` on Windows, or `ifconfig` / `ip a` on Linux. Record your IP address, subnet mask, default gateway, DHCP server, DNS server, and MAC address. <!-- id: it-03-t02 band: quick energy: low -->
 3. Test connectivity. Ping your gateway, `1.1.1.1`, `8.8.8.8`, and `google.com`. Explain why the responses differ. <!-- id: it-03-t03 band: focused energy: normal -->
@@ -1713,7 +1725,7 @@ Create `portfolio/it/03-networking-basics.md` with:
 - [ ] I can explain LAN, WAN, router, switch, modem, firewall, and access point. <!-- id: it-03-c01 energy: low -->
 - [ ] I can explain IPv4 address, subnet mask, gateway, DNS, and DHCP. <!-- id: it-03-c02 energy: low -->
 - [ ] I understand IPv6 basics and AAAA DNS records. <!-- id: it-03-c03 energy: low -->
-- [ ] I memorized at least 15 common ports. <!-- id: it-03-c04 energy: low -->
+- [ ] I memorized at least 20 common ports. <!-- id: it-03-c04 energy: low -->
 - [ ] I can use `ipconfig`, `ping`, `tracert`, and `nslookup`. <!-- id: it-03-c05 energy: normal -->
 - [ ] I captured DNS traffic in Wireshark. <!-- id: it-03-c06 energy: normal -->
 - [ ] I built a simple Packet Tracer network. <!-- id: it-03-c07 energy: normal -->

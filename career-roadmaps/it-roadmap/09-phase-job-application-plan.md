@@ -7,7 +7,7 @@ title: "Phase 9 — Job Application Plan"
 duration: "8–12 weeks alongside study"
 duration_weeks: 12
 energy_mix: [low, normal]
-deliverable: ""
+deliverable: "portfolio/it/09-job-application-plan.md"
 exit_criteria: "You are actively applying every week, improving based on feedback, and can explain your labs confidently in interviews."
 ---
 
@@ -119,7 +119,7 @@ The phase lists PH-friendly boards, and they serve different purposes:
 
 #### The numbers, and what they mean
 
-The phase targets **5–10 applications per week initially, rising to 15 per week** once your resume is stable, with a running total of at least 50. That is not arbitrary. It reflects the arithmetic of entry-level hiring: response rates for a self-taught candidate with no formal experience are low, often a few percent for cold applications. Fifty applications at a 4% interview rate is two interviews. A hundred is four. **Volume is not a substitute for quality; it is what makes quality visible.**
+The phase targets **5–10 applications per week initially, rising to 15 per week** once your resume is stable, with a running total of at least 50. That is not arbitrary. It reflects the arithmetic of entry-level hiring: interview rates for a self-taught candidate with no formal experience are low, often a few percent for cold applications. Fifty applications at a 4% interview rate is two interviews. A hundred is four. **Volume is not a substitute for quality; it is what makes quality visible.**
 
 Two things to internalise about the numbers:
 
@@ -146,7 +146,7 @@ The deliverable asks for two: **Helpdesk/IT Support** and **NOC/Networking Suppo
 - **Helpdesk/IT Support version** — leads with troubleshooting write-ups, ticketing samples, the asset inventory, and communication skills. Emphasises the human and process side.
 - **NOC/Networking version** — leads with the lab network, subnetting, packet captures, monitoring runbooks, and alert response. Emphasises the technical and analytical side.
 
-Maintain more than two and you will start confusing them, and quality will slip. Two versions, each customised in the top third per application, is the sustainable structure.
+Maintain more than two and you will start confusing them, and quality will slip. Two versions, each customised in the top third per application, is the sustainable structure — and it is what Phase 8's "one resume per role family" section means by two.
 
 #### Following up professionally
 
@@ -179,6 +179,8 @@ Rehearse these out loud, timed, with the follow-up questions included. Every one
 #### The twenty technical questions
 
 The phase asks for twenty technical Q&A covering DNS, DHCP, IP, VPN, password reset, MFA, Windows logs, and Linux permissions. The list is deliberately foundational, and that is correct — entry-level interviews test fundamentals, not depth.
+
+**Where the twenty come from.** This phase gives you eight topics, not twenty ready-made questions, because the questions you write yourself are the ones you will remember. Turn each topic below into two or three questions, and answer each in the three layers described underneath. That is how eight topics become twenty entries — you are not hunting for a list, you are expanding one.
 
 | Topic | The question behind the question |
 |---|---|
@@ -222,16 +224,20 @@ Other warning signs:
 
 The phase specifies the columns, and there is a reason each one exists:
 
+There are ten of them, and Exercise 1 below builds exactly this set — the earlier short list you may have seen elsewhere in this phase is a subset, and this is the one to use:
+
 | Column | Why it is there |
 |---|---|
 | Company | So you can recognise the name when they call |
-| Role | So you know which version of your resume you sent |
-| Link | To re-read the ad before an interview |
-| Date applied | So you know when follow-up is due |
+| Role title | Exactly as the ad wrote it, so you know which resume you sent |
+| Source | Which board it came from, so you learn which boards work |
+| Date applied | Starts the follow-up clock |
 | Resume version | To correlate outcomes with the version you used |
-| Status | Applied → screening → interview → offer / rejected |
-| Follow-up | Your next action date — the column that keeps you honest |
-| Notes | The contact's name, what was discussed, what to remember |
+| Contact name | The human, not the company |
+| Follow-up date | Your next action date — the column that keeps you honest |
+| Stage | Applied → screening → interview → offer / rejected / ghosted |
+| Outcome | Filled in at the end, with the reason if given |
+| Notes | What was discussed, what to remember |
 
 **The Follow-up column is the operational core.** Everything else is a record; that column is what tells you what to do today. Open the tracker each morning, sort by follow-up date, and do the day's work. That is the entire system.
 
@@ -510,7 +516,7 @@ Here is what a week 3 sheet actually looks like. Copy these in, then delete them
 | Coral Freight | Helpdesk Technician | Indeed PH | 2026-03-03 | HD | — | 2026-03-10 | Ghosted | No response | Ad 30+ days old; low odds, applied anyway |
 | Verdant Cloud | NOC Technician (Junior) | We Work Remotely | 2026-03-04 | NOC | — | 2026-03-11 | Applied | — | Wants Zabbix; I have Uptime Kuma only |
 | Harbour IT | Desktop Support | Kalibrr | 2026-03-05 | HD | — | 2026-03-12 | Rejected | "Role filled" | 3 days from open to filled; too slow |
-| Lumen SaaS | Technical Support Rep | OnlineJobs.ph | 2026-03-12 | HD | Ana R. | 2026-03-19 | Interview | 2nd round 03-18 | Asked how I'd explain DNS to a non-technical user |
+| Summit Retail Group | IT Support Analyst | JobStreet PH | 2026-03-12 | HD | Ben T. | 2026-03-19 | Interview | 2nd round 03-18 | Asked how I'd explain DNS to a non-technical user |
 | Tala Health | IT Support Associate | LinkedIn | 2026-03-16 | HD | Mark D. | 2026-03-23 | Applied | — | Recruiter viewed profile twice; no message yet |
 
 Read the sheet the way you will read it in week ten. Eight applications produced one interview, one screening, two explicit rejections, two ghosts, and two still open. The rejections are specific, and each is a decision: "Needs 1 yr BPO" tells you to apply where BPO experience is not gated, and "role filled in 3 days" tells you to apply within 48 hours of posting.
@@ -641,7 +647,7 @@ Budget is $0, so every source below is free to search. The right-hand columns ma
 
 | Signal | What it means |
 |---|---|
-| Posted 30+ days ago and still listed | Filled or frozen; the board was never updated |
+| Posted 30+ days ago and still listed | Filled or frozen; the board was never updated — the extreme end of the 21-day rule above |
 | "Always hiring" with no role specifics | Resume harvesting, not a vacancy |
 | Salary wildly above market for entry level | Bait for a fee, a scam, or commission-only work |
 | No company name, or "confidential client" | A recruiter farming CVs |
@@ -670,7 +676,7 @@ You will be asked about hours in nearly every screening call. The wrong answer i
 | "I'm flexible with any hours." | **US Pacific:** "I am in Manila, UTC+8, which gives me full overlap with your 8am–5pm Pacific — your morning is my late night, and I can commit to that." |
 | "I can work nights if I have to." | **US Eastern:** "UTC+8 means your 9am–5pm Eastern is 10pm–6am here. I can work that shift, and I would rather tell you that now." |
 | "Any timezone works for me." | **Australia:** "I am two to three hours behind Sydney, so your full business day overlaps mine." |
-| "I'll adjust my schedule." | **Europe:** "I overlap your entire morning and into your early afternoon, and I can start earlier if that helps." |
+| "I'll adjust my schedule." | **Europe:** "I cover your whole morning — 03:00 to 12:00 your time — and I can start earlier if that helps." |
 | "I don't know my timezone." | **Any region:** "I work UTC+8, so I have full overlap with your business day and I've written the conversions down." |
 
 Each strong line does the same three things: names the timezone, computes the overlap in *their* hours, and removes the employer's perceived risk. "Flexible" is unverifiable; an overlap is testable.
@@ -681,7 +687,7 @@ Each strong line does the same three things: names the timezone, computes the ov
 
 #### Exercise 5 — The five first questions, weak and strong
 
-These five open almost every entry-level remote screening call. Write your own answer, compare it with the model beside it, and note the gap.
+These six open almost every entry-level remote screening call — the first five are the ones Part 3 lists, and salary is the one that follows them. Write your own answer, compare it with the model beside it, and note the gap.
 
 **1. "Tell me about yourself."**
 
@@ -707,7 +713,13 @@ These five open almost every entry-level remote screening call. Write your own a
 - Strong: "A user reported 'the internet is broken' and was frustrated. Instead of taking the report literally, I asked what they were doing when it failed — it was one internal app, not the internet. Their session had expired. I verified the fix with them before closing, then wrote it up as a ticket so the next agent would recognise it."
 - Why: this is your Phase 7 STAR story. The strongest part is refusing the literal report, which is the actual skill in the job. "I have no example" is answerable with a lab or a classmate, so never leave it empty.
 
-**5. "What are your salary expectations?"**
+**5. "Give me a troubleshooting example."**
+
+- Weak: "I once fixed a printer by reinstalling the driver."
+- Strong: "A user said the internet was down. I pinged `8.8.8.8` first — that worked, so routing and upstream were fine. `ping google.com` failed, so it was name resolution. `nslookup` against the local resolver got no answer, while `nslookup google.com 8.8.8.8` answered instantly, which put the fault in the local resolver. Resetting the adapter's DNS to automatic fixed it. What I'd take from it is checking the cheap layers in order rather than guessing at the top one."
+- Why: the failed attempt and the *order* of the checks are the value. This is the story the phase calls the most persuasive part of the interview, and it is built from the Phase 3 lab.
+
+**6. "What are your salary expectations?"**
 
 - Weak: "I'm flexible — whatever the budget is, I'm sure it's fine."
 - Strong: "I don't have a number I need to anchor to yet, since this would be my first role. If there's a posted range, I'll work within it. Can I ask what range is budgeted for this level?"
@@ -742,7 +754,7 @@ This is the template that makes Part 7 operational. Open a second sheet named `P
 
 #### Exercise 7 — Your week, as a checklist
 
-Five to eight quality applications a week is the honest number alongside study — the "rising to 15" figure from Part 2 is for once your resume is stable and your templates exist, not for now. Fifteen is reachable only once your resume is stable and your templates exist. Here is the shape of a real week.
+Five to eight quality applications a week is the honest number alongside study. The "rising to 15" figure from Part 2 is for once your resume is stable and your templates exist — not for now. Here is the shape of a real week.
 
 | Day | Task | Time | Why that day |
 |---|---|---|---|
@@ -772,7 +784,7 @@ Compare your own sheet against this, because a beginner alone has no signal abou
 |---|---|---|
 | Applications submitted | 50–80 total | Under 20 |
 | Follow-ups sent | One per application, 5–7 days later | None, or four to the same company |
-| Responses | 5–15% of applications | 0% after 30+ applications |
+| Responses | Low single digits (2–5%) of applications | 0% after 30+ applications |
 | Interviews or screenings | At least 2 | None, despite a healthy response rate |
 | Post-mortem rows | One per rejection, with a change | None written |
 | Targeting | Tailored to the ad's own nouns | Same resume sent everywhere |
@@ -838,7 +850,7 @@ Then work this list, which turns the plan into a running search:
 
 ## Hands-on practice tasks
 
-1. Create an application tracker with columns: Company, Role, Link, Date, Resume Version, Status, Follow-up, Notes. <!-- id: it-09-t01 band: focused energy: normal -->
+1. Create an application tracker with the ten columns built in Exercise 1: Company, Role title, Source, Date applied, Resume version, Contact name, Follow-up date, Stage, Outcome, Notes. <!-- id: it-09-t01 band: focused energy: normal -->
 2. Apply to 5–10 roles/week at first; increase to 15/week once resume is stable. <!-- id: it-09-t02 band: ongoing energy: normal -->
 3. Customize the top third of your resume for each role type. <!-- id: it-09-t03 band: focused energy: normal -->
 4. Prepare answers for: Tell me about yourself, why IT, no degree explanation, difficult user, troubleshooting example. <!-- id: it-09-t04 band: focused energy: normal -->
@@ -851,7 +863,7 @@ Then work this list, which turns the plan into a running search:
 - Application tracker with at least 50 entries over time
 - Interview answer document
 - 2 resume versions: Helpdesk/IT Support and NOC/Networking Support
-- List of 20 technical Q&A
+- List of 20 technical Q&A (build these from the eight topics in Part 3 — two or three questions each, answered in the three layers)
 
 ## Checklist
 

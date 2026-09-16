@@ -360,7 +360,7 @@ sql_dump_20260302.tmp   5100273664 2026-03-02 01:02
 sql_dump_20260303.tmp   4982162063 2026-03-03 01:01
 ```
 
-A file appearing every day at about 01:00, roughly 5 GB each, never deleted. That is not a Windows problem — something is running a nightly job that writes a dump and fails to clean up after itself. The dates line up with the alert: thirteen days of dumps is roughly 18 GB.
+A file appearing every day at about 01:00, roughly 5 GB each, never deleted. That is not a Windows problem — something is running a nightly job that writes a dump and fails to clean up after itself. The dates line up with the alert: at ~5 GB a night, the 18.41 GB in that folder is under four days of accumulation, which is why this escalated quickly.
 
 #### What you do, and what you do not
 
@@ -374,7 +374,7 @@ You have found the cause quickly and safely. Now the temptation is to delete the
 
 > **Alert:** Disk space low on FS01, `C:` at 8.2% free (3.9 GB of 47.6 GB), 02:17 UTC.
 > **Investigated:** `Get-PSDrive` confirmed only `C:` affected; `D:` has 255.6 GB free, so the data volume is healthy and this is not user-data growth. Largest-directory scan showed `C:\Windows\Temp` at 18.41 GB, of which the largest files were `sql_dump_*.tmp` dated daily from 2026-03-01, ~5 GB each. Backup log checked first per runbook known-false-positive — no backup events, so the false positive was eliminated rather than assumed.
-> **Cause:** A nightly job outside the service desk's ownership is writing ~5 GB of temporary dump files to `C:\Windows\Temp` and never removing them. Thirteen days of accumulation took the volume to the alert threshold.
+> **Cause:** A nightly job outside the service desk's ownership is writing ~5 GB of temporary dump files to `C:\Windows\Temp` and never removing them. Under four days of accumulation took the volume to the alert threshold, so this will recur within the week unless the job is fixed.
 > **Action:** Cleared `C:\Windows\Temp` dump files after confirming their identity and daily pattern. Did **not** delete unfamiliar files. Raised a problem record so the owning team fixes the cleanup, because the files regenerate nightly.
 > **Verified:** `C:` back to 46% free immediately after clearing; alert cleared on the next monitoring cycle.
 > **For the next agent:** If this alert fires again, check `C:\Windows\Temp` first and look for `sql_dump_*.tmp`. The root cause is not fixed — the nightly job is with the application team. Growth is ~5 GB per day, so the volume has roughly four days of headroom.
@@ -509,11 +509,11 @@ Set up `Tickets` with these eleven columns, in this order:
 | F | `Summary` | `Outlook stuck after password change` | The searchable subject line |
 | G | `Impact` | `Individual` | How many people are affected |
 | H | `Urgency` | `High` | How fast it needs attention |
-| I | `Priority` | `P2` | Derived from G and H together |
+| I | `Priority` | `P3` | Derived from G and H together — this row is Individual + High, which the grid reads as P3 |
 | J | `Status` | `Resolved` | Where it sits in the lifecycle |
 | K | `Resolution` | `Cleared stale cached credential` | What actually fixed it |
 
-The first-response-time column belongs in the corporate system, and it is worth adding here as column L (`First Response`) if you want to practise the metric in Part 13. Leave it blank on tickets nobody has replied to yet — do not type a zero.
+The first-response-time column belongs in the corporate system, and it is worth adding here as column L (`First Response`) if you want to practise the metric in Part 11. Leave it blank on tickets nobody has replied to yet — do not type a zero.
 
 #### Why each field exists, in one line
 
@@ -535,6 +535,8 @@ If you cannot say why a column exists, delete it. Every field costs an agent tim
 
 Select the `Category` column in `Tickets`, then **Data → Data validation → Add rule → Dropdown**. Set the range to `Lists!$A$2:$A$8`. Repeat for the other columns using their own ranges.
 
+**On LibreOffice Calc** — the other free option named above — the menu path is different: **Data → Validity**, then choose `List` under Allow and enter the range. Everything else about the workbook is identical, and every formula here works in both. Google Sheets is the smoother route if you have the choice, because the dropdown and the `INDEX`/`MATCH` formula below use the same syntax throughout.
+
 Do this for `Status` too, and use exactly these seven values: `New`, `Assigned`, `In Progress`, `Pending`, `Resolved`, `Closed`, `Cancelled`. A status nobody chose deliberately is a status nobody maintains.
 
 #### Writing your own ID
@@ -542,21 +544,24 @@ Do this for `Status` too, and use exactly these seven values: `New`, `Assigned`,
 Type `INC-1001` in `A2`. Then in `A3` put this formula and drag it down:
 
 ```text
-="INC-" & (1000 + ROW() - 1)
+=IF($B3="","", "INC-" & (1000 + ROW() - 1))
 ```
 
-`ROW()` returns the row number, so row 3 produces `INC-1002`. The formula is self-maintaining: insert a row and every ID below renumbers itself.
+`ROW()` returns the row number, so row 3 produces `INC-1002`. The formula is self-maintaining: insert a row and every ID below renumbers itself. The `IF` at the front matters more than it looks. Without it, dragging the formula down twenty rows writes twenty IDs into empty rows, and every count you build on the ID column afterwards reports twenty tickets when you have logged none. With it, a row gets an ID only once you have typed its `Date Opened` — so the sheet stays honest while you grow into it.
 
 #### Deriving priority from impact and urgency
 
 Priority should never be typed. Put this in `I2` and drag it down:
 
 ```text
-=IF(OR($G2="",$H2=""),"", IFERROR(VLOOKUP($G2&$H2,
- Lists!$A$2:$C$17, 3, FALSE), "Check the grid"))
+=IF(OR($G2="",$H2=""),"", IFERROR(INDEX(Lists!$B$21:$E$24,
+  MATCH($G2,Lists!$A$21:$A$24,0),
+  MATCH($H2,Lists!$B$20:$E$20,0)), "Check the grid"))
 ```
 
-That is fiddly to read, so here is the lookup table it encodes. Use this directly if the formula fights you — a `VLOOKUP` against a helper column works too.
+This needs the grid placed on the `Lists` sheet, starting at row 20, exactly as printed below: `B20:E20` holds the four urgency headings, `A21:A24` the four impact labels, and `B21:E24` the sixteen priorities. Paste it there once and the formula works for every row.
+
+It is two lookups rather than one because priority has two inputs, not one. `MATCH($G2, …, 0)` finds the impact row, `MATCH($H2, …, 0)` finds the urgency column, and `INDEX` returns the cell where they meet. A single `VLOOKUP` cannot do this without a concatenated helper column, which is the other honest way to build it: add a column to `Lists` holding `=A21&B20`-style keys, concatenate `$G2&$H2` in the ticket row, and `VLOOKUP` against that. Both work; the `INDEX`/`MATCH` version avoids maintaining a second column.
 
 | Impact \ Urgency | Critical | High | Medium | Low |
 |---|---|---|---|---|
@@ -565,7 +570,9 @@ That is fiddly to read, so here is the lookup table it encodes. Use this directl
 | **Individual** | P2 | P3 | P4 | P4 |
 | **Single Site** | P3 | P4 | P4 | P4 |
 
-Read the top-left and bottom-right of that grid. An enterprise-wide outage is P1 whatever the stated urgency. One person's low-urgency request is P4 however loudly it is described. The grid is the argument-settler: when a user insists something is urgent, you are not disagreeing with them, you are reading a table.
+Read the corners of that grid. `Enterprise` + `Critical` is P1 — the top left. `Single Site` + `Low` is P4 — the bottom right. The grid is the argument-settler: when a user insists something is urgent, you are not disagreeing with them, you are reading a table.
+
+One asymmetry is worth naming, because it is the thing beginners get wrong in both directions. Impact sets how high a ticket can go; urgency decides where in that range it lands. So an `Enterprise` problem at `Low` urgency is **P3**, not P1 — a real problem, but not one that stops the business this hour. And one person's request is **P2 at the very highest**, at `Critical` urgency, however loudly it is described. Nobody's single laptop is ever P1.
 
 #### The dashboard, which is where the value is
 
@@ -573,13 +580,17 @@ Put these five formulas on `Dashboard`. Adjust the row count to match your data.
 
 | Cell | Formula | What it reports |
 |---|---|---|
-| `A2` | `=COUNTA(Tickets!A2:A200)` | Total tickets logged |
+| `A2` | `=COUNTA(Tickets!A2:A200)` | Total tickets logged — correct only because the ID formula leaves empty rows blank |
 | `A3` | `=COUNTIF(Tickets!J:J,"Resolved")+COUNTIF(Tickets!J:J,"Closed")` | Resolved or closed |
 | `A4` | `=COUNTIF(Tickets!J:J,"New")` | Unassigned backlog |
-| `A5` | `=AVERAGEIFS(Tickets!C:C,Tickets!J:J,"<>")-AVERAGEIFS(Tickets!B:B,Tickets!J:J,"<>")` | Mean time to resolve |
+| `A5` | `=IFERROR((SUMIFS(Tickets!C:C,Tickets!J:J,"Resolved")+SUMIFS(Tickets!C:C,Tickets!J:J,"Closed")-SUMIFS(Tickets!B:B,Tickets!J:J,"Resolved")-SUMIFS(Tickets!B:B,Tickets!J:J,"Closed"))/A3,"n/a")` | Mean time to resolve |
 | `A6` | `=IFERROR(A3/A2,"n/a")` | Resolution rate |
 
-The `A5` formula is ugly because Sheets stores a date-time as a single decimal number, and subtracting two of them gives a fraction of a day. Fix the display by formatting `A5` as **Duration**, then dividing by 24 in the cell if you want hours.
+The `A5` formula is ugly, and the reason is worth understanding. Sheets stores a date-time as a single decimal number — `1.5` is noon on the first day — so subtracting two of them gives a fraction of a day.
+
+That is also why the formula sums the `Resolved` and `Closed` rows explicitly rather than using a `"<>"` criterion. `AVERAGEIFS` would average *every* row with a non-blank status, including the open ones whose `Date Resolved` is empty, and would then subtract the mean of a different set of rows from the mean of another. Two averages of two different populations do not give you a mean time to resolve. Summing the closed rows and dividing by the same count that `A3` already holds does.
+
+Fix the display by formatting `A5` as **Duration**. If you want a plain number of hours, wrap the whole thing in `*24` — you are **multiplying** by 24, because you are converting a fraction of a day into hours. Dividing by 24 turns six hours into a quarter of an hour.
 
 That `IFERROR` in `A6` is not decoration. With no tickets logged, `A3/A2` is a division by zero and the cell shows `#DIV/0!`. A dashboard that screams red on day one is a dashboard people stop opening.
 
@@ -589,7 +600,7 @@ Do not build this and admire it. Log your next ten real home IT problems in it. 
 
 - **Build the four-tab workbook**, with `Lists` populated before any ticket is typed.
 - **Add dropdowns driven from `Lists`**, so a status can never be typed by hand.
-- **Write the ID formula** and drag it down at least twenty rows.
+- **Write the ID formula** and drag it down at least twenty rows — the blank-row guard means the extra rows stay empty until you need them.
 - **Derive `Priority` from `Impact` and `Urgency`** with the grid, rather than typing it.
 - **Log five real tickets of your own** — your own home problems count.
 
@@ -1112,7 +1123,7 @@ Log every one of these as a ticket in your sheet. Fill every column. Then triage
 | 3 | P4 | Hardware | Consumable, not a fault. Log it, order it, close it |
 | 4 | P2 | Email | Recurring password prompts point at a stale credential — the Part 6 pattern |
 | 5 | P3 | Service request | Scheduled work with a known date. Needs a change request, not urgency |
-| 6 | P1 | Security | Possible phishing and possible fraud. This outranks everything except an outage |
+| 6 | P2 | Security | Possible phishing and possible fraud — Individual + Critical, which is as high as a single-user ticket goes. Work it before anything else on this list |
 | 7 | P3 | Network | Intermittent and location-specific. Measure before acting |
 | 8 | P2 | Account | User cannot work. Lockout may be caused by item 4's stale credential |
 | 9 | P2 | Software | Data loss risk. Check the volume shadow copy before anything else |

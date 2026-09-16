@@ -90,7 +90,7 @@ The last one is the one candidates underestimate, and it is the one hiring manag
 
 #### Time to complete
 
-**Roughly 60–80 hours over 6 weeks:**
+**Roughly 55–74 hours over 6 weeks:**
 
 | Work | Hours | Notes |
 |---|---|---|
@@ -607,7 +607,7 @@ The second route is the one learners skip and should not. **Forensic images of r
 | **Your own VM snapshots** | Full control, and you already know the answer, which limits the learning |
 | **A deliberately infected VM** | Real malware behaviour, in isolation, with all the legal safety that implies |
 
-The fourth entry has a hard condition attached, and it is worth stating precisely. **You may run malware only in an isolated virtual machine with no network route to anything real, on hardware you own, where you accept the risk of complete loss of that machine.** Host-only networking, no shared folders, no shared clipboard, and a snapshot you can discard. Anything less is how a learner infects their employer's network.
+The fourth entry has a hard condition attached, and it is worth stating precisely. **You may run malware only in an isolated virtual machine with no network route to anything real, on hardware you own, where you accept the risk of complete loss of that machine.** Host-only networking, no shared clipboard, no USB passthrough, and a snapshot you can discard. The one folder exception is the read-only evidence mount described in Part 6, which carries the capture *out* of the target rather than letting anything *in*. Anything less is how a learner infects their employer's network.
 
 #### Free tooling that is genuinely enough
 
@@ -1008,14 +1008,14 @@ Do not open the disk yet. Answer four questions from what you can see right now.
 
 The instinct to look around first is wrong. Every minute the process runs is a minute it can move.
 
-**Contain, then investigate. The evidence does not go anywhere once the host is isolated.**
+**Capture the volatile evidence, then contain — and do both inside the same fifteen minutes.** Part 3's order is the rule for the first minutes: memory, network state, and running processes come before anything that cuts the host off. Once those are captured, isolate at the switch rather than by disabling the adapter, so the attacker's live connection stays visible. What does *not* survive is a power-off, which is why isolation is the containment step and shutdown never is.
 
 | Step | Action | Why this order |
 |---|---|---|
 | 1 | Network-isolate `WKS-014` via EDR | Stops command-and-control and lateral movement without destroying volatile state |
 | 2 | **Do not power it off** | Memory holds what you need most; a shutdown loses it |
 | 3 | Notify the user by phone, not email | The account may be compromised |
-| 4 | Disable the user's account, keep the mailbox | Stops the attacker using it while preserving mail evidence |
+| 4 | Disable the user's account, keep the mailbox | Stops the attacker using it while preserving mail evidence. Note this is a *host* incident, not a suspected cloud-account compromise — see Part 2's first-hour checklist, where the account is deliberately left enabled for a while so the audit trail keeps recording |
 | 5 | Log the time of each action | This is chain of custody starting now |
 
 | Action | Time | Who |
@@ -1032,8 +1032,12 @@ The instinct to look around first is wrong. Every minute the process runs is a m
 Now capture, most volatile first. On a lab image, or on a host you own.
 
 ```bash
+# 0. Create the evidence directory first — every command below writes into it.
+sudo mkdir -p /evidence
+
 # 1. Memory first — it disappears when the machine stops
-#    On Windows, use a free tool such as WinPmem on the live host you own.
+#    On Windows, from an elevated prompt on the live host you own:
+#      winpmem_mini_x64.exe C:\evidence\memory.raw
 #    On Linux:
 sudo dd if=/dev/mem of=/evidence/memory.img bs=1M    # where supported
 #    Better on Linux: LiME, which captures full physical memory
@@ -1051,6 +1055,8 @@ ps auxww > /evidence/processes.txt
 sudo dc3dd if=/dev/sda of=/evidence/disk.img hash=sha256 log=/evidence/acquire.log
 sha256sum /evidence/disk.img >> /evidence/hashes.txt
 ```
+
+**On the Windows host this scenario actually describes, the same four steps are:** `winpmem_mini_x64.exe` for memory; `netstat -ano`, `arp -a`, and `route print` for network state; `Get-Process` for processes; and FTK Imager or `dc3dd.exe` for the disk image. Write them into the same evidence folder and hash each one. The volatility *order* is identical — only the tool names change.
 
 | Evidence item | Method | Hash | Custody |
 |---|---|---|---|
@@ -1105,7 +1111,7 @@ An incident review that produces only a fix for the specific file has wasted the
 | Gap | What should have happened | Change made |
 |---|---|---|
 | Alert was rated Medium automatically | Severity should account for what the host can reach | Host criticality added to the severity rule |
-| Three minutes between execution and analyst review | Auto-isolation on this rule class | EDR set to auto-isolate on temp-directory process execution |
+| Six minutes between execution and first alert; ten to analyst confirmation | Auto-isolation on this rule class | EDR set to auto-isolate on temp-directory process execution |
 | Share access far exceeded the role | Least privilege on the file server | Access review scheduled; 42 users found over-provisioned |
 | No email sandboxing | Attachment detonation | Free-tier evaluation started |
 
@@ -1135,7 +1141,7 @@ Pick any two of these and answer with no notes. They are what an interviewer act
 | Why isolate before analysing? | Explains that a live attacker destroys evidence, and containment preserves more than it costs |
 | Why not power off the machine? | Names memory as the most volatile and often most valuable artefact |
 | How do you know it was malware? | Points at the path and parent process, not at a feeling |
-| What would you do differently? | Names a real gap — the Medium rating, or the three-minute review delay |
+| What would you do differently? | Names a real gap — the Medium rating, or the ten minutes between execution and analyst confirmation |
 | What did this incident teach the business? | Names the over-provisioned share access, which was the biggest finding and unrelated to malware |
 
 If you can give the fourth answer and the fifth, you have done the exercise properly. If you cannot, you have followed the steps without reviewing them.
@@ -1207,6 +1213,7 @@ Then open `portfolio/cyber/11-incident-response.md` and assemble the deliverable
 - Blue Team Labs Online — https://blueteamlabs.online/
 - The DFIR Report — https://thedfirreport.com/
 - National Privacy Commission of the Philippines — https://privacy.gov.ph/
+- Republic Act 10173, Data Privacy Act of 2012 — https://privacy.gov.ph/data-privacy-act/
 - Republic Act 10175, Cybercrime Prevention Act of 2012 — https://lawphil.net/statutes/repacts/ra2012/ra_10175_2012.html
 
 ## Hands-on practice tasks

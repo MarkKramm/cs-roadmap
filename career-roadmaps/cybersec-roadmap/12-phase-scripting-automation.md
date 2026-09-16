@@ -94,7 +94,7 @@ The half you probably do *not* have is defensive programming for hostile input. 
 
 #### Time to complete
 
-**Roughly 60–75 hours over 6 weeks:**
+**Roughly 51–66 hours over 6 weeks:**
 
 | Work | Hours | Notes |
 |---|---|---|
@@ -108,7 +108,7 @@ The half you probably do *not* have is defensive programming for hostile input. 
 
 #### What this phase is not
 
-It is not a software engineering phase. You will not learn design patterns, testing frameworks, or asynchronous programming, and you do not need to for entry-level security work.
+It is not a software engineering phase. You will not learn design patterns, async frameworks, or a full test suite, and you do not need to for entry-level security work. You will write three small tests per tool — a known-good input, a malformed one, and an empty one — because hostile input is the thing your scripts must survive, and that is the whole of the testing this phase asks for.
 
 It is not a malware analysis or exploit development phase either. You are writing defensive tooling that processes data, and the hardest thing it does is handle input that was designed to break it.
 
@@ -253,22 +253,27 @@ def parse(path: str):
 
 def find_suspicious(path: str, threshold: int):
     failures = defaultdict(int)
-    successes = defaultdict(list)
+    successes = defaultdict(list)      # ip -> list of (user, failures_before)
 
     for kind, user, ip in parse(path):
         if kind == "fail":
             failures[ip] += 1
         else:
-            successes[ip].append(user)
+            # A success only counts if a burst came *before* it. Reset the
+            # running count either way, so a success that arrives first is not
+            # credited to failures that happen afterwards — the mistake this
+            # script made in its first version.
+            if failures[ip] >= threshold:
+                successes[ip].append((user, failures[ip]))
+            failures[ip] = 0
 
     findings = []
-    for ip, users in successes.items():
-        if failures[ip] >= threshold:
-            findings.append({
-                "source_ip": ip,
-                "failures_before": failures[ip],
-                "accounts_logged_in": sorted(set(users)),
-            })
+    for ip, hits in successes.items():
+        findings.append({
+            "source_ip": ip,
+            "failures_before": max(count for _, count in hits),
+            "accounts_logged_in": sorted({user for user, _ in hits}),
+        })
     return findings
 
 
@@ -672,7 +677,7 @@ def main() -> int:
     if not api_key:
         raise SystemExit("VT_API_KEY is not set. See README.md.")
 
-    hashes = [h.strip() for h in Path(args.hashfile).read_text().splitlines() if h.strip()]
+    hashes = [h.strip() for h in Path(args.hashfile).read_text(encoding="utf-8").splitlines() if h.strip()]
     rows = []
 
     for index, file_hash in enumerate(hashes, start=1):
@@ -805,7 +810,9 @@ Get-CimInstance Win32_Service |
   Select-Object Name, State, StartMode, PathName, StartName |
   Format-Table -AutoSize
 
-# 6. Scheduled tasks created recently — a persistence favourite.
+# 6. Scheduled tasks — a persistence favourite. Note that this surfaces tasks
+#    that have RUN recently, not tasks that were CREATED recently; see the trap
+#    below for why the difference matters and why .Date cannot be trusted.
 #
 # THE TRAP HERE IS SUBTLE AND WORTH UNDERSTANDING.
 # Get-ScheduledTask does expose a Date property, so the obvious filter looks
@@ -844,7 +851,7 @@ Get-LocalGroupMember -Group Administrators
 
 The third command is the one to know best. **`Get-NetTCPConnection` joined to the owning process answers "what is this machine talking to, and what program is doing it"** — which is the first question in almost every host investigation.
 
-The filters in commands 5 and 6 are doing the analytical work. A service whose binary lives outside `C:\Windows` is worth looking at; a scheduled task created in the last thirty days on a machine nobody changed is worth looking at. **The filter encodes the judgement**, which is the part you do not automate away.
+The filters in commands 5 and 6 are doing the analytical work. A service whose binary lives outside `C:\Windows` is worth looking at; a scheduled task that has *run* recently on a machine nobody changed is worth looking at. **The filter encodes the judgement**, which is the part you do not automate away — and command 6's fifteen-line comment is the other half of that lesson. A filter that looks right and quietly answers a different question is worse than no filter, because it produces confident output you have no way to check.
 
 #### Worked example: a triage script that produces a report
 
@@ -1183,7 +1190,7 @@ print(f"evaluated={evaluated} matched={matched} routed={matched} closed=0")
 
 > I automate the *detection* of a known-benign pattern and I attach that finding to the alert. I do not automate the *closure*, because a wrongly closed alert is invisible by construction, and invisibility is the property that makes a failure permanent. The script saves the same typing either way; the difference is whether a human still gets to be wrong out loud.
 
-**Where this sits against the table above:** auto-closing alerts matching a pattern is row four of the “do not automate” judgment. The script was not badly written. It was correctly written against the wrong question — which is the failure mode this whole part exists to prevent.
+**Where this sits against the tables above:** auto-closing alerts matching a pattern is row four of the earlier “failure is loud?” table, and it is precisely the judgement the later “do not automate” table opens with — a decision a person is accountable for. The script was not badly written. It was correctly written against the wrong question — which is the failure mode this whole part exists to prevent.
 
 #### Worked example: automating the right part
 
@@ -1253,7 +1260,7 @@ verdict per hash. Read-only: it makes no changes to any system.
 
     [1/3] 44d88612fea8a8f36de82e1278abb02f -> malicious (58 engines)
     [2/3] 5d41402abc4b2a76b9719d911017c592 -> clean (0 engines)
-    [3/3] e3b0c44298fc1c149afbf4c8996fb924 -> error: not found
+    [3/3] e3b0c44298fc1c149afbf4c8996fb924 -> error: not found (0 engines)
 
     Done. 1 malicious, 1 errors, 3 checked.
 
@@ -1291,7 +1298,7 @@ verdict per hash. Read-only: it makes no changes to any system.
 
 ```bash
 python -m venv .venv
-source .venv/bin/activate
+source .venv/bin/activate        # Windows: .venv\Scripts\Activate.ps1
 pip install requests python-dotenv
 pip freeze > requirements.txt      # pins exact versions
 ```
@@ -1402,8 +1409,8 @@ The nine tasks build toward a small toolbox with a README, and each task adds on
 4. **Move the key out of the code, and prove it** (task 6). Read the key from the environment, add `.env.example` and a `.gitignore` entry, commit, and run `gitleaks` over the repository. If the scan finds anything, rotate the credential rather than deleting the file.
 5. **Write the PowerShell triage script** (task 7) as a read-only collector that writes timestamped CSV files. Wrap each collection in its own error handler so one failure does not stop the rest.
 6. **Join the two languages** (task 8). Have the PowerShell script produce a CSV, and have a Python script consume it, apply a filter that encodes a judgement, and produce a short report. This is what real security automation looks like.
-7. **Package it** (task 9). Write the README with its six sections, add `requirements.txt` with pinned versions, and give the setup instructions to someone else — or to yourself in a fresh directory — and follow them literally. Every step that needed improvisation is a missing line in the README.
-8. **Write the "what I chose not to automate" note** (task 8's second half, and worth doing carefully). Three things you deliberately left manual, with the reason. This is short and it is the most mature artefact in the phase.
+7. **Write the "what I chose not to automate" note** (task 8's second half, and worth doing carefully). Three things you deliberately left manual, with the reason. This is short and it is the most mature artefact in the phase.
+8. **Package it** (task 9). Write the README with its six sections, add `requirements.txt` with pinned versions, and give the setup instructions to someone else — or to yourself in a fresh directory — and follow them literally. Every step that needed improvisation is a missing line in the README.
 
 Then open `portfolio/cyber/12-scripting-automation.md` and assemble the deliverables. **The phase is done when your tool takes real security data in, produces a defensible answer out, handles untrusted input without breaking or leaking secrets, and comes with a README someone else could follow** — and when you can explain, without notes, which parts you left to a human and why.
 

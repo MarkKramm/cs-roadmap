@@ -115,7 +115,7 @@ roadmap is written for may not have a powerful machine.
 | 8 GB | The SIEM and one agent, if you are careful |
 | 4 GB | Not the local lab — use browser-based labs instead |
 
-Wazuh with a Windows VM and a Linux VM realistically wants 8–16 GB.
+Wazuh running alongside a Windows VM and a Linux VM realistically wants 16 GB. At 8 GB you can run the manager with one agent, *or* the victim VMs without the SIEM — the table below is the honest split, and picking one of those two paths is a legitimate way to do this phase.
 
 **If you have 4 GB, the curriculum explicitly permits you to document that
 limitation instead of pretending otherwise.** That is not a lesser outcome.
@@ -443,7 +443,7 @@ Every item below is a failure this phase's learners genuinely meet. Read it now,
 | **Guest additions will not install or the display is wrong** | The guest additions ISO is not mounted, or the guest lacks build tools | VirtualBox → Devices → Insert Guest Additions CD image; then inside the guest, check for a mounted volume | Mount the ISO, run the installer from inside the guest, and on Ubuntu install `build-essential` and the matching `linux-headers` package first |
 | **Windows guest is unusably slow** | No guest additions, no virtualisation extensions, or antivirus scanning the disk | Task Manager on the host shows sustained disk at 100% | Install guest additions, enable VT-x/AMD-V, and add the VM folder to antivirus exclusions |
 | **Nested virtualisation — a VM inside a VM will not start** | The hypervisor is not exposing virtualisation extensions to the guest | VirtualBox → Settings → System → Processor → "Enable Nested VT-x/AMD-V" is greyed out or unticked | Tick nested virtualisation if your CPU and host permit it. On many laptops it is unavailable — use a browser lab rather than fighting it |
-| **A SIEM agent never checks in** | Firewall, wrong manager address, or the service is not running | On the victim: `sudo systemctl status wazuh-agent` and `sudo tail -f /var/ossec/logs/ossec.log` | Confirm the agent's `MANAGER_IP` points at the host-only address, that outbound TCP 1514 and UDP 1514 are open, and then restart the agent |
+| **A SIEM agent never checks in** | Firewall, wrong manager address, or the service is not running | On the victim: `sudo systemctl status wazuh-agent` and `sudo tail -f /var/ossec/logs/ossec.log` | Confirm the agent's `MANAGER_IP` points at the host-only address, that **outbound TCP 1514** is open, and then restart the agent |
 | **The agent checks in but no events arrive** | The log file is not in the agent's configuration, or nothing is being written to it | On the victim, generate an event and confirm it appears in `/var/log/auth.log` | Add the log location to `ossec.conf` on the agent, then restart the agent |
 | **Clock skew breaks your timeline** | The VM suspended, or timezone drift between guest and host | Compare `date -u` inside the guest with the host's UTC time | Enable guest time synchronisation and an NTP client in each guest. Log correlations fail silently otherwise |
 | **The SSH connection to the lab drops** | The host-only network changed, or DHCP reassigned the address | `ip -brief addr` inside the guest | Fix the address statically, as Part 1 describes |
@@ -508,7 +508,7 @@ The phase's task 5 lists four safe events to generate: a failed login, a new use
 
 - **Failed login** — the highest-volume real-world signal, and the one where *pattern* matters more than any single event. Your rule should encode a threshold, as the example above does.
 - **New user created** — a persistence technique (Phase 3 listed it as ATT&CK-adjacent behaviour: account creation for continued access). The important detail is that a new user is *legitimate administration* most of the time, which makes it a perfect example of a rule that must be tuned rather than a rule that simply fires.
-- **Suspicious command string** — detecting known-abused tooling. Run the string inside your isolated victim VM and nowhere else, so the rule has a real event to fire on; the "restrict it to your lab notes" rule is about never pointing it at a system you do not own.
+- **Suspicious command string** — detecting known-abused tooling. Run the string inside your isolated victim VM and nowhere else, so the rule has a real event to fire on. Task 5 words this as *a suspicious command string in lab notes*, and that wording is doing real work: the note records what you ran, and the command itself only ever executes against a machine you own. Those are two different things, and keeping them separate is the habit.
 - **Service restart** — availability-relevant, and a useful case for discussing why a restart matters in some contexts (a database) and not others (a printer spooler). It teaches that **not every detection should be an alert**; some are just records.
 
 The rule-writing discipline, in five questions you should be able to answer for each rule you write:
@@ -535,7 +535,7 @@ The method is the same loop a detection engineer uses professionally.
 
 | Step | Action | Why this step exists |
 |---|---|---|
-| 1 | **Generate one event** on the victim VM — for example, `su - fakeuser` with a wrong password | You need a known event to trace |
+| 1 | **Generate one event** on the victim VM — for example, an SSH login attempt as a user that does not exist (`ssh fakeuser@localhost` and fail it) | You need a known event to trace |
 | 2 | **Find it in the raw log** on the victim (`/var/log/auth.log`, or Event Viewer) | Proving it exists *at the source* is what lets you isolate a forwarding failure from a detection failure |
 | 3 | **Find it in Wazuh**, first as a raw event, then as a decoded event with fields extracted | Confirms the pipeline works |
 | 4 | **Check whether a rule fired.** If no, ask whether no rule exists for it | Often the honest answer — and the reason you are writing your own |

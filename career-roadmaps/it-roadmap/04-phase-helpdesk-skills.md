@@ -75,7 +75,7 @@ That is a learnable skill set, and it is the single highest-return thing you can
 
 Do not try to memorise the scenarios in Part 4 — you will meet them in the wild soon enough. What matters is the method in Part 2 and the communication habits in Part 3, because those transfer to every ticket you will ever touch, in every role, at every level.
 
-**Time to complete:** 10–15 hours across the phase. Roughly half of that is writing: tickets, knowledge base articles, replies, and escalation notes. That is deliberate. Writing is the job.
+**Time to complete:** 10–15 hours for the reading half. Roughly half of that is writing: tickets, knowledge base articles, replies, and escalation notes. That is deliberate. Writing is the job. The four doing parts at the end add a further 6–9 hours.
 
 ### Part 1 — The ticket is the unit of work
 
@@ -695,6 +695,7 @@ The instinct is to add the user to the group. The correct move is to find out wh
 
 ```powershell
 # What does the account actually hold?
+# Needs the RSAT Active Directory module and a domain — illustration only, not runnable at home.
 Get-ADPrincipalGroupMembership jdelacruz | Select-Object Name
 
 # What does the folder require?
@@ -793,12 +794,17 @@ Five things are healthy here, and you should be able to name all five. A real IP
 Now the split test. Replace `192.168.1.1` with whatever your own `Default Gateway` line says:
 
 ```text
-Reply from 192.168.1.1: bytes=32 time=2ms TTL=64        <- the LAN is healthy
-Reply from 8.8.8.8: bytes=32 time=24ms TTL=115          <- routing and internet work
-Reply from 142.250.4.101: bytes=32 time=25ms TTL=115    <- the name resolved
+Pinging 192.168.1.1 with 32 bytes of data:                 <- the LAN is healthy
+Reply from 192.168.1.1: bytes=32 time=2ms TTL=64
+
+Pinging 8.8.8.8 with 32 bytes of data:                     <- routing and internet work
+Reply from 8.8.8.8: bytes=32 time=24ms TTL=115
+
+Pinging google.com [142.250.4.101] with 32 bytes of data:  <- the name resolved
+Reply from 142.250.4.101: bytes=32 time=25ms TTL=115
 ```
 
-The third line is the one to read carefully. **If the reply shows an IP address rather than `google.com`, name resolution worked** — `ping` prints the name only when the forward lookup succeeded. That is the whole test, and it costs three seconds.
+The third block is the one to read carefully, and the evidence is in the **header line**, not the reply. **When you ping a name and the header shows `[142.250.4.101]` after it, the forward lookup succeeded** — `ping` only prints that bracketed address once it has resolved the name. Notice that all three *reply* lines look identical: they all show an IP, because that is what ICMP echoes back. So do not compare the replies; compare the first line of each block. `Pinging google.com` with no bracketed address would be the DNS failure. That is the whole test, and it costs three seconds.
 
 If `8.8.8.8` answers and `google.com` fails, you have DNS failure and nothing else. Confirm it with a comparison of two servers:
 
@@ -1374,7 +1380,7 @@ Nothing in this exercise involves anyone else's system. You are writing about yo
 
 A short drill you can run in five minutes without an instructor or a second machine.
 
-Pick a number from 1 to 6 — that number is your draw for this drill — then pull that many keyword cards from the six below, and work one ticket from Part 11 under exactly those constraints. They force you to communicate instead of just fixing.
+Pick a number from 1 to 6 — that number is your card for this drill — then read that card from the six below, and work one ticket from Part 11 under exactly that constraint. They force you to communicate instead of just fixing. Run the drill three or four times over a week rather than all six at once; one constraint at a time is what makes it land.
 
 | # | Keyword card |
 |---|---|
@@ -1523,7 +1529,7 @@ The value of breaking things on purpose is that you see the failure signature wh
 
 - A ticket is a **record**, not a receipt. Write so the next person never has to re-investigate.
 - **Incidents are broken things; service requests are wanted things.** Classify at intake.
-- **Severity is impact, priority is urgency, SLA is the clock.** Users' stated urgency is data, not instruction.
+- **Severity is impact; priority is derived from impact and urgency together; SLA is the clock.** Users' stated urgency is data, not instruction.
 - Use **Waiting on User** honestly and never confuse **Resolved** with **Closed**.
 - **Internal notes are private; public replies are permanent.** Check the box.
 - Follow the **eight-step method** and always **isolate scope** — one user versus everyone solves most tickets.
@@ -1542,7 +1548,7 @@ The exercises below are the phase. Build the tracker, write the ten tickets, pro
 
 Parts 10 to 13 are the doing half of this lesson, and they are meant to be worked in order. Part 10 has you run the checks on your own machine and build a healthy baseline. Part 11 walks six tickets end to end, each with a weak reply and a strong one. Part 12 is escalation writing. Part 13 is a drill with an answer key so you can mark your own work.
 
-**Time to complete:** 12–18 hours if you do all four parts properly, which is more than the reading takes and is the point. Write your answers down before you look at any model answer, because a model answer read first teaches you nothing except that the text exists.
+**Time to complete:** a further 6–9 hours if you do all four parts properly — more than the reading half takes, and that is the point. Write your answers down before you look at any model answer, because a model answer read first teaches you nothing except that the text exists.
 
 Every exercise from here on has an answer, a model response, or a scoring table. Nothing in this lesson asks you to guess whether you got it right.
 

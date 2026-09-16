@@ -80,7 +80,7 @@ This phase covers two of them. **Windows** is what you will meet in the overwhel
 
 By the end of this lesson you will be able to move around Windows and Linux confidently, read a log, explain the difference between a user and a permission, install software safely, and walk a user through a fix without needing to see their screen.
 
-**Time to complete:** 4–6 hours, spread over the phase. The Linux half requires installing a virtual machine, which is itself one of the phase's deliverables — treat that as part of the lesson.
+**Time to complete:** roughly 12–18 hours across the three weeks. The Linux half requires installing a virtual machine, which is itself one of the phase's deliverables — treat that as part of the lesson.
 
 ### Part 1 — What an operating system actually does
 
@@ -226,7 +226,7 @@ PowerShell is object-oriented — commands return structured objects, not just t
 ```powershell
 Get-Process                          # running processes, sortable by CPU or memory
 Get-Service                          # services and their status
-Get-EventLog -LogName System -Newest 20
+Get-WinEvent -LogName System -MaxEvents 20
 Get-ChildItem                        # list files (the PowerShell "dir")
 Copy-Item -Path .\report.txt -Destination C:\Backup\
 ```
@@ -465,12 +465,15 @@ free -h
 # 5. Failed login attempts (a real security check)
 sudo grep "Failed password" /var/log/auth.log | tail -20
 sudo grep -c "Failed password" /var/log/auth.log
+# If /var/log/auth.log does not exist, this image routes logs to the
+# journal only. Same evidence, different door:
+sudo journalctl -u ssh --no-pager | grep "Failed password" | tail -20
 
 # 6. Recent service errors
 journalctl -p err -b --no-pager | tail -30
 ```
 
-Expected: your username, your UID and groups, kernel and distribution details, uptime, a list of login-capable accounts, disk and memory usage, any failed logins, and recent errors.
+Expected: your username, your **UID** (user ID — the number Linux uses internally for your account) and groups, kernel and distribution details, uptime, a list of login-capable accounts, disk and memory usage, any failed logins, and recent errors. On a desktop image where `/var/log/auth.log` is absent, the `journalctl` line above gives you the same failed-login evidence — an empty result from one door and a populated one from the other is a fact about the logging stack, not about your system's security.
 
 Step 5 is the one to pay attention to. On a freshly installed VM the count is near zero. On a real internet-facing server it can be in the thousands, and recognising that pattern is a foundational security skill you will build on in the cybersecurity track.
 
@@ -596,7 +599,7 @@ Beginners lose time looking in the wrong log. This is the map:
 | Why did an application crash? | Application log, plus the app's own folder under `%LOCALAPPDATA%` |
 | Why did a service not start? | System log, Event 7000/7009, and the service's own logged reason |
 | Why is the disk slow or erroring? | System log, `Disk` provider; then S.M.A.R.T. (Phase 1) |
-| Why did an update fail? | `C:\Windows\WindowsUpdate.log`, and Setup log under `C:\Windows\Logs` |
+| Why did an update fail? | `Get-WindowsUpdateLog` to build a readable log, plus Setup log under `C:\Windows\Logs` |
 | Why was a login rejected? | Security log (needs elevated rights to read) |
 | Why did a driver misbehave? | System log; look for the driver name on the BSOD (Phase 1) |
 
@@ -846,7 +849,7 @@ Not "is it faster?" — that invites a yes. You ask them to work a normal day an
 
 > "Could you use it as normal tomorrow and message me at the end of the day with how it felt at 3pm — specifically whether you still needed to restart?"
 
-The user reports no forced restart for the first time in two weeks, and free memory at end of day is 2.1 GB instead of 0.3 GB. That is evidence, not sentiment.
+The user reports no forced restart for the first time in two weeks, and free memory at end of day is 2.1 GB instead of 0.6 GB. That is evidence, not sentiment.
 
 **Final ticket note.**
 
@@ -915,7 +918,7 @@ Finance-ReadWrite
 Finance-All
 ```
 
-The account *does* hold `Finance-ReadWrite`. The machine the user is sitting at is using a stale token. That is the diagnosis: **the password change invalidated the cached credential, and the new logon has not been fully applied to the session.**
+The account *does* hold `Finance-ReadWrite`. The machine the user is sitting at is using a stale token. That is the diagnosis: **the session's token was built at an earlier logon and still carries the group list from that moment, so the change the domain already knows about has not reached this session.** The password change is what surfaced it — a fresh sign-in is what resolves it.
 
 **What you do.**
 
@@ -941,7 +944,7 @@ They do, and it does. You also confirm they can save, because read access and wr
 > **Observed:** Other users could access the same share normally, ruling out server-side or data loss. The folder opened without an access-denied error, so share-level permission was intact. `whoami /groups` on the user's machine showed a cached token; `Get-ADPrincipalGroupMembership` confirmed the account does hold `Finance-ReadWrite` and `Finance-All` on the domain side.
 > **Action:** Explained that no data was lost and confirmed the files were present server-side. Had the user sign out fully and sign back in to obtain a fresh token — a lock/unlock cycle would not have been sufficient. Confirmed the new session held the correct group memberships.
 > **Verified:** User opened the specific file required for their deadline and confirmed read access; also confirmed they could save to the share, since write is a separate permission.
-> **Cause:** Stale cached group membership following a password change. The account was correct on the domain; the user's session had not refreshed.
+> **Cause:** Stale session token predating the password change. The account was correct on the domain; the user's session had not refreshed.
 > **For the next agent:** A password change followed by an apparently empty share is a recurring pattern in this organisation. If it recurs for this user without a password change, check group membership directly rather than assuming a token problem. No permissions were changed and none needed to be — do not adjust ACLs for this symptom.
 
 **Reasoning to take away:** "Everything is gone" is very rarely data loss. The fast questions — can anyone else see it, does it say denied or empty, what changed — split the problem before you touch anything. And the user's casual afterthought ("oh, I changed my password") is frequently the actual cause; ask twice when the first answer is "nothing changed".

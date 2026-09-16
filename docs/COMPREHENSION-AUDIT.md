@@ -14,6 +14,11 @@ verbatim quote — and false positives were explicitly penalised, because a clea
 a useful result. Every finding below was re-checked against the source before a fix was
 made; two were rejected as wrong.
 
+**The verdict table below is the first pass.** A second, independent pass re-read all 23
+phases with fresh readers who had not seen the first set of reports, and it changed two
+verdicts. See [Second pass — the re-review](#second-pass--the-re-review) at the end of this
+file. Read both together; neither is final on its own.
+
 ---
 
 ## What the audit found, by phase
@@ -167,6 +172,79 @@ numbering in cyber 13, JWT in cyber 14, PSA and CompTIA A+ in IT 09, tenant and 
 cyber 09.
 
 ---
+
+## Second pass — the re-review
+
+This file's own closing note said the verdicts were one reader's judgement. This pass tested
+that claim: eight fresh readers re-read all 23 phases with no sight of the first reports, and
+roughly ninety further fixes came out of it across sixteen phases. The most useful result is
+not the fix count — it is that **the two verdict sets disagree**, in both directions.
+
+### Where the verdicts diverged
+
+| Phase | First pass | Second pass | Which held up |
+|---|---|---|---|
+| IT 02 operating systems | **would abandon** | followable with friction | second pass — the domain-tooling defect is real, but it is one ticket, not a wall |
+| IT 08 portfolio and resume | followable with friction | **would abandon** | second pass — the prior audit under-called it |
+
+That is a two-for-two miss rate on the strongest verdict either pass can issue, from readers
+given the same brief on the same files. The `would abandon` label is the least reproducible
+thing this audit produces, and the fix for that is the second read, not a better first read.
+
+### The new abandon-risk the first pass missed
+
+**IT 06's priority formula cannot return a priority.** Line 555's `VLOOKUP` builds a key from
+`$G2&$H2` — `IndividualHigh` — and looks it up in `Lists!$A$2:$C$17`, whose column A holds
+*categories* (`Hardware`, `Software`, …). No cell matches, so every row of the showcase
+workbook returns `Check the grid` — and the prose at 559 calls that range "the lookup table it
+encodes" when the grid printed at 561–566 is not in its range at all. The reader follows the
+build instructions exactly, gets a worksheet full of an error string, and has been told to
+trust the material. This is class 5 (executable code that cannot run) and class 2 (a worked
+artefact that cannot be produced), in the first thing the phase asks the reader to *build*.
+Replaced with an `INDEX`/`MATCH` pair against the grid placed explicitly on `Lists`, with the
+concatenated-helper-column alternative named as the other honest route.
+
+Three more of the same shape, found in this pass and fixed:
+
+- **Cyber 09's first executable artefact is a POSIX shell loop** handed to a reader who may
+  have no Linux shell at all, while Phase 4 explicitly permits a low-RAM reader to have no
+  local VM. The loop now says where to run it.
+- **Cyber 09's S3 audit measured the wrong thing.** It reported `NO BLOCK CONFIGURED` as the
+  only signal, but a bucket with a block configured can still be public through a *policy* —
+  which is exactly what task 5 tells the reader to create. The command now makes three checks.
+- **Cyber 13 reused R-01…R-05 for different risks** in Part 2 and Part 10 of the same phase,
+  both describing the same company. Part 2's slice is renumbered R-11…R-15.
+
+### False positives in this pass
+
+Five reported findings did not survive a re-read and were **not** applied:
+
+- Cyber 03's "malformed BSSID" — the source line is already well-formed.
+- Cyber 03's "contradictory timezone prose" — no such line exists.
+- Cyber 06's "two report templates" — both are the *top-level README*, not two report shapes.
+- Cyber 06's "acceptance omits its review date" — the review value is present in the row.
+- Cyber 13's "seven sections" — six are named, and the seventh is the header block.
+
+Two more were downgraded rather than applied. That is five rejections against two in the first
+pass, which is the expected direction: a reader primed to find defects finds some that are not
+there, and the check is what removes them.
+
+### What the second pass confirmed
+
+The same five defect classes, in the same proportions — and no sixth. The recurring shape is
+unchanged: **every one is a claim about two places that disagree**, and none is visible to a
+guard that reads one line at a time. The arithmetic class was the most productive again, with
+the IT 06 formula and the cyber 09 hour total (a stated 60–80 against parts summing to 40–56)
+both caught only by adding the numbers up.
+
+Two limits remain, and both are now recorded rather than assumed away:
+
+- **Every verdict here is still a reader's judgement.** Two passes disagree on 2 of 23 phases,
+  so a third would not be expected to reproduce either set exactly. Treat the *findings* as
+  falsifiable and the *verdicts* as advisory.
+- **Nobody has timed a single curriculum task.** Every time budget in the curriculum — and
+  there are dozens — is an author's estimate that no reader has ever measured. That is the
+  largest untested claim in the repository, and no amount of re-reading will settle it.
 
 ## The pattern worth keeping
 

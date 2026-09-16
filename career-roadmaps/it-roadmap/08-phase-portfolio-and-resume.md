@@ -7,7 +7,7 @@ title: "Phase 8 — Portfolio and Resume"
 duration: "2 weeks"
 duration_weeks: 2
 energy_mix: [low, normal]
-deliverable: ""
+deliverable: "portfolio/it/08-portfolio-and-resume.md"
 exit_criteria: "A stranger can open your portfolio and understand what you practiced, what tools you used, and what role you want."
 ---
 
@@ -66,7 +66,7 @@ The uncomfortable truth about entry-level hiring: **a hiring manager reads your 
 
 The phase exit criterion is exactly right, and worth repeating as the design principle for everything you build here: **"A stranger can open your portfolio and understand what you practiced, what tools you used, and what role you want."** Notice that it does not say "is impressed". It says "understands". Comprehension beats impressiveness, every time.
 
-**Time to complete:** roughly 12 hours across two weeks, then a light weekly update while you apply. Most of the work is assembly rather than creation — the artefacts already exist from Phases 1 to 7. You are packaging, not building from nothing.
+**Time to complete:** roughly 12 hours of *assembly* across two weeks, then a light weekly update while you apply — plus the 30-day plan in Part 16, which runs about 45–60 minutes a day and is the schedule to follow if you want the full sequence rather than the summary. Most of the work is assembly rather than creation — the artefacts already exist from Phases 1 to 7. You are packaging, not building from nothing.
 
 **The good news about your position.** You have no experience to exaggerate, which removes the temptation that ruins so many junior resumes. Everything on your resume will be genuinely true, verifiable by clicking a link, and something you can discuss in detail — because you actually did it. That is a real advantage over a candidate who claims three years of experience and cannot answer a follow-up question.
 
@@ -412,7 +412,7 @@ A practical test for every keyword you add: *if the interviewer says "tell me ab
 Customising every application is exhausting and, past a point, pointless. The workable compromise:
 
 - **Keep one master resume** containing everything true.
-- **Maintain two or three variants** by role family — helpdesk/support, networking-focused, sysadmin-focused. Change the summary, reorder the skills, and promote the most relevant project to the top.
+- **Maintain two variants** by role family — helpdesk/support and networking/NOC. These are the two Phase 9's deliverable asks for. Change the summary, reorder the skills, and promote the most relevant project to the top. More than two and you will start confusing them; quality slips.
 - **Tailor the summary only** for a specific application, because that is the one paragraph a human always reads, and it costs two minutes.
 
 That gets you most of the benefit of customisation for a fraction of the effort, and it keeps you applying when the alternative is burning out on resume editing.
@@ -589,7 +589,7 @@ Open `README.md` in a plain text editor — Notepad, VS Code, anything — and p
 Entry-level IT support technician (remote). Based in [City], Philippines (UTC+8).
 Target role: remote helpdesk / IT support.
 
-**Resume (PDF):** [resume/resume.pdf](resume/resume.pdf)
+**Resume (PDF):** [resume/resume.pdf](resume/resume.pdf) <!-- leave this line out until day 21, when the PDF actually exists; a dead link is worse than no link -->
 **Contact:** [email] · [linkedin.com/in/you] · [github.com/you]
 
 ## What's here
@@ -677,12 +677,12 @@ This is the single most valuable artefact you can produce, because for a candida
 
 #### The scenario
 
-A free, safe, offline exercise: install Ubuntu Server in VirtualBox and prove you can administer the basics. It costs nothing, needs no account, and can be done on a modest laptop with 4 GB free and virtualisation enabled.
+A free, safe, offline exercise: install Ubuntu Server in VirtualBox and prove you can administer the basics. It costs nothing, needs no account, and can be done on a modest laptop — you need virtualisation enabled, about 4 GB of RAM free on the host, and roughly 25 GB of disk to spare, since the VM claims 2 GB of RAM and a 20 GB virtual disk.
 
 | Constraint | Detail |
 |---|---|
 | Cost | $0 — VirtualBox and Ubuntu are both free |
-| Hardware | ~2 GB RAM and 15 GB disk allocated to the VM |
+| Hardware | ~2 GB RAM and 20 GB disk allocated to the VM (host needs ~4 GB RAM free and ~25 GB disk) |
 | Risk | None — nothing touches your real machine |
 | Time | 2–3 hours including the write-up |
 | Safety | You own the VM, so you may test it freely |
@@ -710,15 +710,17 @@ group, restart a service, and read a log to explain a failure.
 | Virtualisation | Enabled in BIOS (see "What went wrong") |
 | VirtualBox | 7.0.14 |
 | Guest | Ubuntu Server 24.04 LTS, 2 GB RAM, 20 GB disk |
-| Network | NAT, no port forwarding needed |
+| Network | NAT, with a port forward `2222 → 22` so the host can reach SSH |
 
 ## What I did
 
 1. Created the VM, attached the ISO, booted.
 2. Accepted defaults, chose the LVM-guided disk layout.
-3. Named the machine `lab-ubuntu-01`, created user `labadmin`.
+3. Named the machine `lab-ubuntu-01`, created user `labadmin`, created a
+   `helpdesk` group, and added `labadmin` to it.
 4. Enabled OpenSSH server during install (faster than adding it later).
-5. Booted and logged in at the console.
+5. Added a NAT port forward `2222 → 22` so the host could reach SSH.
+6. Booted and logged in at the console.
 
 ## Screenshots
 
@@ -749,17 +751,20 @@ exited. The VM booted immediately.
 is not available` names the missing feature. I read past it because I did
 not know what VT-x was, then guessed instead of looking it up.
 
-**Second failure:** SSH was refused even though I selected OpenSSH during
-install. `systemctl status ssh` showed the unit as `inactive (dead)`.
-Cause: I had skipped that step in the installer. Fix:
-`sudo systemctl enable --now ssh`, then `systemctl status ssh` to confirm
-`active (running)`. Verified by connecting from the host.
+**Second failure:** SSH was refused from the host even though the server was
+running. `systemctl status ssh` showed `active (running)`, so the service was
+fine and the problem was the network. The VM was on NAT, and NAT does not let
+the host reach the guest unless a port forward exists. Cause: I had assumed
+the service being up meant it was reachable. Fix: add a NAT port forward
+`2222 → 22` in the VM's network settings, then reconnect on that port. This
+is the failure that taught me to check *where* the block is before restarting
+a service.
 
 ## How I verified it worked
 
 | Claim | How I proved it |
 |---|---|
-| User and group created | `id labuser` showed `uid=1001(labuser) gid=1002(helpdesk)` |
+| User and group created | `id labadmin` showed `uid=1001(labadmin) gid=1001(labadmin) groups=1001(labadmin),1002(helpdesk)` |
 | Service controllable | `systemctl status ssh` showed `active (running)` |
 | Log reading works | `journalctl -u ssh -n 20` showed the accepted-connection line |
 | SSH reachable | `ssh labadmin@127.0.0.1 -p 2222` connected from the host |
@@ -1194,7 +1199,7 @@ Everything above, scheduled. Roughly 45–60 minutes a day, on a modest laptop, 
 | 2 | Create the repository on GitHub and clone it locally | Local clone |
 | 3 | Create the six folders with `.gitkeep` files | Folder skeleton pushed |
 | 4 | Write and paste the README from Part 10, replacing every bracket | Rendered README on GitHub |
-| 5 | Pin repositories, set avatar, bio, and location from Part 15 | Profile page that reads as active |
+| 5 | Set avatar, bio, and location from Part 15 (pinning comes in week 3, once there are repositories worth pinning) | Profile page that reads as active |
 | 6 | Move five existing artefacts from earlier phases into the folders | Five files committed |
 | 7 | Open the repo in a private window and run the five-second test | A list of fixes, applied |
 
@@ -1259,7 +1264,7 @@ Everything above, scheduled. Roughly 45–60 minutes a day, on a modest laptop, 
 
 ### Part 17 — Practice this next
 
-The tasks below produce three artefacts and one demonstration. The artefacts are your write-up repository with its diagrams, the README that ties the work together, and the Phase 6 workbook (a spreadsheet). The demonstration is a recorded walkthrough, and it is the one that changes how people read everything else.
+The artefacts this phase produces already exist by now: your repository with its diagrams and write-ups, the README that ties the work together, the resume PDF, and the Phase 6 workbook. What the tasks below add is the *defence* of those artefacts — the ability to stand behind every line when someone asks. Item 9 is the demonstration, and it is the one that changes how people read everything else.
 
 Then work this list, which turns the artefacts into something a stranger can actually evaluate:
 
@@ -1307,7 +1312,7 @@ Then work this list, which turns the artefacts into something a stranger can act
 - Portfolio link/folder
 - One-page resume PDF
 - LinkedIn profile draft or updated profile
-- 3 project summaries written in STAR style
+- 3 project summaries written in STAR style (use the Project/Situation/Task/Action/Result layout shown in Part 4, not the three-bullet Template 3 entry — Template 3 is the shorter resume version)
 
 ## Checklist
 

@@ -19,7 +19,7 @@ Learn how cloud environments are attacked and defended, why identity is the cont
 
 ## Estimated time
 
-**6 weeks** at 2–4 focused hours a day, 5 days a week. Roughly 60–80 hours total.
+**6 weeks** at roughly 1.5–2 focused hours a day, 5 days a week. Roughly 40–56 hours total.
 
 ## Skills you'll gain
 
@@ -81,7 +81,7 @@ The vocabulary is genuinely new — tenant (your organisation's own directory in
 
 #### Time to complete
 
-**Roughly 60–80 hours over 6 weeks**, split approximately:
+**Roughly 40–56 hours over 6 weeks**, split approximately:
 
 | Work | Hours | Notes |
 |---|---|---|
@@ -233,6 +233,10 @@ That fifth question is the one you will use in interviews, and it is the one tha
 You can answer the first two mechanically, without reading a policy by eye.
 
 **Before any of this works you need the AWS CLI**: install it, then run `aws configure` once with the IAM user's access key, secret, and a default region. Every command below reads those stored credentials, so a bare `aws` command with no configuration fails immediately.
+
+**Where to run these commands.** The blocks in this phase are POSIX shell — `while read`, `$(...)`, backslash line continuations, `2>/dev/null` — and they will not run in PowerShell. On Windows, use WSL2, Git Bash, or the Ubuntu VM from Phase 2 if you have the RAM for one. `wsl --install` from an elevated prompt installs Ubuntu in one command.
+
+Install the AWS CLI *inside* whichever shell you choose, and run `aws configure` there, so the credentials land in that shell's own home directory. If you paste one of these loops into PowerShell and get a wall of syntax errors, the shell is the problem and not you. The same applies to the S3 loop in Part 5.
 
 ```bash
 # Every policy attached to one identity, in one pass.
@@ -648,17 +652,29 @@ The fifth row is the subtle one and the one beginners miss. A pre-signed URL is 
 **The detection approach:** monitor the *configuration changes*, not the current state. A nightly scan that reports public buckets is a day late. An alert on `PutBucketAcl` and `PutBucketPolicy` fires at the moment of change.
 
 ```bash
-# List buckets and show their public-access-block configuration.
+# Three independent checks per bucket, because public access can arrive
+# through any of them, and a block on one does not close the others.
 aws s3api list-buckets --query 'Buckets[].Name' --output text | \
   while read -r b; do
-    printf '%s: ' "$b"
+    printf '=== %s\n' "$b"
+    printf '  block:  '
     aws s3api get-public-access-block --bucket "$b" \
       --query 'PublicAccessBlockConfiguration' --output json 2>/dev/null \
       || echo 'NO BLOCK CONFIGURED'
+    printf '  policy: '
+    aws s3api get-bucket-policy-status --bucket "$b" \
+      --query 'PolicyStatus.IsPublic' --output text 2>/dev/null \
+      || echo 'NO POLICY'
+    printf '  acl:    '
+    aws s3api get-bucket-acl --bucket "$b" \
+      --query 'Grants[?Grantee.URI!=`null`].Grantee.URI' --output text 2>/dev/null \
+      | grep -q . && echo 'PUBLIC GRANT' || echo 'no public grant'
   done
 ```
 
-That command is a finding generator. Every bucket printing `NO BLOCK CONFIGURED` is a line in your report.
+That command is a finding generator, and it is deliberately three checks rather than one. `NO BLOCK CONFIGURED` is a finding on its own, but it is not the whole story: a bucket *with* a block configured can still be public through a bucket policy, and `get-bucket-policy-status` is the call that answers that. Read the three lines together — a bucket is clean only when the block is present, the policy status reads `false`, and the ACL shows no public grant.
+
+The one-check version of this script, which asks only about the block, reports a bucket as safe after a policy has already opened it. That is the same defect as the disabled event log in Phase 10 and the unloaded auditd rule: a check that looks like it ran, and did not measure what you thought.
 
 #### Failure 2 — Over-permissive roles
 
@@ -774,14 +790,14 @@ The reassuring half of the comparison.
 
 | Skill from earlier phases | How it applies in the cloud |
 |---|---|
-| Reading logs and building a timeline (Phases 4, 10, 11) | A CloudTrail sequence *is* a timeline; the method is identical |
+| Reading logs and building a timeline (Phases 3 and 4) | A CloudTrail sequence *is* a timeline; the method is identical |
 | Least privilege reasoning (Phase 3) | The same reasoning, expressed in JSON instead of ACLs |
-| Order of volatility (Phase 11) | Cloud equivalent: capture the API logs before the retention window rolls |
+| Order of volatility (Phase 3) | Cloud equivalent: capture the API logs before the retention window rolls |
 | Incident report writing (Phase 6) | The same report, with API events as the evidence |
 | Segmentation thinking (Phase 2) | Becomes account separation and network policy |
 | Vulnerability management (Phase 3) | Becomes image patching and dependency scanning |
 
-If you have done Phase 11's timeline work, you already know how to do this. What is new is where the evidence lives.
+If you have done Phase 3's incident timeline and Phase 4's log reading, you already know how to do this. What is new is where the evidence lives. Phases 10 and 11 will return to both skills at greater depth, but nothing here waits on them.
 
 #### The free-tier cost trap, stated plainly
 
@@ -1082,7 +1098,7 @@ The eight tasks build in a deliberate order: establish the identity lab, then th
 5. **Read CloudTrail until a sequence tells you a story** (task 6). Generate the activity yourself — create a user, attach a policy, create an access key — then open CloudTrail and reconstruct what happened from the log alone, without looking at what you did. Write the sequence as a timeline table.
 6. **Write the detections** (task 7), at least three of them, covering logging disruption, privilege escalation, and credential creation. You do not need a SIEM for this: a saved CloudTrail filter, or a short script, is enough. What matters is that each detection names the event and says what it means.
 7. **Write the IAM access review** (task 8). Export every identity in your tenant or account with its permissions and last sign-in, and produce a table with a keep, reduce, or remove recommendation and a one-line reason for each. This is the artifact that most resembles real junior cloud security work.
-8. **Write the finding last**, using the template in Part 7, on the misconfiguration you created in task 5. Fill in all seven sections, and do not skip Verification — re-run the check and paste the output.
+8. **Write the finding last**, using the template in Part 7, on the misconfiguration you created in task 5. Fill in all six sections, and do not skip Verification — re-run the check and paste the output.
 
 Then open `portfolio/cyber/09-cloud-and-identity.md` and assemble the deliverables. **The phase is done when you can read a cloud activity log, explain who did what and whether it was expected, secure an identity with MFA and least privilege, and write a finding about a misconfigured cloud resource** — and you can hold that conversation without notes, because the artifacts are in front of you.
 

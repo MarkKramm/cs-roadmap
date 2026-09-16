@@ -583,9 +583,15 @@ This is stronger than a password because there is nothing to guess, phish, or re
 
 ```bash
 ssh-keygen -t ed25519 -C "lab key"        # generate a keypair
-ssh-copy-id user@192.168.1.50             # install the public key on the server
+ssh-copy-id user@192.168.1.50             # install the public key (Linux/macOS)
 ssh user@192.168.1.50                     # connect
 scp file.txt user@192.168.1.50:/tmp/      # copy a file over SSH
+```
+
+**Windows has no `ssh-copy-id`.** The OpenSSH client ships with Windows 10 and 11, but the key-install helper does not. Append the key yourself instead — from PowerShell:
+
+```powershell
+type $env:USERPROFILE\.ssh\id_ed25519.pub | ssh user@192.168.1.50 "mkdir -p ~/.ssh && cat >> ~/.ssh/authorized_keys"
 ```
 
 #### The two sshd_config settings that matter most
@@ -689,7 +695,7 @@ These commands are the core of the phase, and every one of them is worth running
 ip a                    # interfaces and their IP addresses
 ip route                # the routing table — where does traffic go?
 ip neigh                # the ARP table — IP-to-MAC mappings
-ss -tulpn               # listening TCP/UDP ports with owning processes
+sudo ss -tulpn          # listening TCP/UDP ports with owning processes
 dig example.com MX      # DNS records
 dig +short example.com  # just the answer
 curl -I https://example.com   # response headers only
@@ -699,7 +705,7 @@ traceroute example.com  # the path packets take
 
 #### Decoding ss -tulpn, flag by flag
 
-`ss -tulpn` is the Linux equivalent of a port scan against your own machine. Phase task 4 asks you to run it and identify every listening service.
+`ss -tulpn` is the Linux equivalent of a port scan against your own machine. Phase task 4 asks you to run it and identify every listening service. Run it with `sudo`: the `p` flag needs root to read the owning process for sockets that belong to other users, and without elevation the process column is simply empty for most of the interesting rows.
 
 | Flag | Meaning |
 |---|---|
@@ -748,7 +754,7 @@ The pipe (`|`) is the concept to internalise. It takes one command's output and 
 This works because Unix programs follow a convention — read text in, write text out. That convention is why a security analyst can answer “how many distinct IPs failed to log in today?” with one line:
 
 ```bash
-grep "Failed password" /var/log/auth.log | awk '{print $8}' | sort | uniq -c | sort -rn | head
+grep "Failed password" /var/log/auth.log | grep -oE 'from [0-9.]+' | awk '{print $2}' | sort | uniq -c | sort -rn | head
 ```
 
 Read that left to right.
@@ -756,13 +762,16 @@ Read that left to right.
 | Stage | What it does |
 |---|---|
 | `grep "Failed password" /var/log/auth.log` | Find the failed-password lines |
-| `awk '{print $11}'` | Extract the source IP column |
+| `grep -oE 'from [0-9.]+'` | Keep only the `from <address>` fragment |
+| `awk '{print $2}'` | Extract the address — field 2 of `from 203.0.113.45` |
 | `sort` | Order them so identical addresses are adjacent |
 | `uniq -c` | Collapse duplicates and count each |
 | `sort -rn` | Sort by count, descending |
 | `head` | Show the top ten |
 
-That is a real investigation query, built from five small pieces, and it is the shape of most log analysis you will do. **`awk '{print $N}'` extracts the Nth whitespace-separated field** — that is the 90% of awk you need at this stage.
+That is a real investigation query, built from small pieces, and it is the shape of most log analysis you will do. **`awk '{print $N}'` extracts the Nth whitespace-separated field** — that is the 90% of awk you need at this stage.
+
+**Why not just `awk '{print $6}'`?** Because the field number moves. In `Failed password for root from 203.0.113.45 ...` the address is field 6, but in `Failed password for invalid user admin from 203.0.113.45 ...` the words `invalid user` push it to field 8. Anchoring on the word `from` and taking the next token works for every shape. The general lesson is to match the structure, not the position.
 
 ### Part 4 — Seeing it happen: packet capture and scanning
 
@@ -783,6 +792,8 @@ sudo tcpdump -i eth0 port 53                # only DNS
 sudo tcpdump -i eth0 -n 'tcp port 80'       # only HTTP, no name resolution
 sudo tcpdump -r capture.pcap -nn            # read a saved capture
 ```
+
+`eth0` is the conventional Linux interface name, but it is not universal — a VirtualBox guest usually calls its adapter `enp0s3`. Check with `ip a` and substitute the name you actually have. A wrong interface fails immediately with `No such device`, which at least tells you the problem is the name rather than the filter.
 
 #### Display filters: the most valuable Wireshark skill
 
@@ -1010,7 +1021,7 @@ The nine tasks are ordered roughly as a progression, and this is the reasoning b
 1. Install Ubuntu or Kali in VirtualBox. <!-- id: cyber-02-t01 band: deep energy: normal -->
 2. Create two Linux users and test file permissions. <!-- id: cyber-02-t02 band: quick energy: normal -->
 3. Enable SSH in your VM and connect from your host. <!-- id: cyber-02-t03 band: focused energy: normal -->
-4. Run `ss -tulpn` and identify listening services. <!-- id: cyber-02-t04 band: quick energy: low -->
+4. Run `sudo ss -tulpn` and identify listening services. <!-- id: cyber-02-t04 band: quick energy: low -->
 5. Use `dig` or `nslookup` to inspect A, AAAA, MX, TXT records. <!-- id: cyber-02-t05 band: quick energy: low -->
 6. Capture DNS and HTTP traffic with Wireshark. <!-- id: cyber-02-t06 band: focused energy: normal -->
 7. Run `nmap -sV` against your own VM IP only. <!-- id: cyber-02-t07 band: quick energy: normal -->

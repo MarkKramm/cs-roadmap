@@ -95,7 +95,7 @@ Entry-level GRC roles are more numerous than entry-level pentest roles, and they
 
 #### Time to complete
 
-**Roughly 60–75 hours over 6 weeks:**
+**Roughly 56–70 hours over 6 weeks:**
 
 | Work | Hours | Notes |
 |---|---|---|
@@ -259,7 +259,7 @@ An example makes it concrete.
 | Residual likelihood | Unlikely (2) |
 | Residual impact | Severe (5) |
 | Residual score | 10 — High |
-| Target | Moderate (9 or below) |
+| Target | Medium (9 or below) |
 | Treatment | Segment the database into a dedicated subnet with no workstation route, by Q3 |
 | Owner | Head of Infrastructure |
 
@@ -342,23 +342,23 @@ That last row is the theme of Part 5.
 
 #### Worked example: five risks in one register
 
-Here is a slice of a register for a small Philippine BPO handling customer data for an overseas client.
+Here is a slice of a register for a small Philippine BPO handling customer data for an overseas client. The company and the ten-entry register are shown in full in Part 10; these five are a different slice, so they carry their own IDs and do not overlap with it.
 
 | ID | Risk statement | Inherent | Existing controls | Residual | Treatment | Owner | Target date |
 |---|---|---|---|---|---|---|---|
-| R-01 | Because staff access the client portal from personal devices without device management, there is a risk that a compromised personal device accesses customer records, resulting in a reportable data breach | 20 Critical | MFA on the portal; no device control | 16 Critical | Mitigate — conditional access requiring a managed device | IT Manager | Q2 |
-| R-02 | Because the legacy billing server runs an unsupported OS, there is a risk that a known exploit compromises it, resulting in an outage during invoicing | 15 High | Network segmentation; no internet exposure | 9 Medium | Accept until decommission, review quarterly | Finance Director | Q4 review |
-| R-03 | Because only one engineer holds the backup encryption key, there is a risk that a departure makes backups unreadable, resulting in extended data loss after an incident | 12 High | Key stored in a sealed envelope in the safe | 12 High | Mitigate — split the key across two custodians | Head of Infrastructure | Q2 |
-| R-04 | Because vendor security questionnaires are not completed before onboarding, there is a risk that a supplier with weak controls is engaged, resulting in a downstream breach attributed to us | 12 High | Legal review of contracts only | 12 High | Mitigate — add a security review gate | Procurement Lead | Q3 |
-| R-05 | Because security awareness training is annual and not measured, there is a risk that phishing succeeds, resulting in credential compromise | 16 Critical | Annual training; MFA | 12 High | Mitigate — quarterly simulation with reporting, plus number-matching MFA | HR and IT jointly | Q2 |
+| R-11 | Because staff access the client portal from personal devices without device management, there is a risk that a compromised personal device accesses customer records, resulting in a reportable data breach | 20 Critical | MFA on the portal; no device control | 20 Critical | Mitigate — conditional access requiring a managed device | IT Manager | Q2 |
+| R-12 | Because the legacy billing server runs an unsupported OS, there is a risk that a known exploit compromises it, resulting in an outage during invoicing | 15 High | Network segmentation; no internet exposure | 9 Medium | Accept until decommission, review quarterly | Finance Director | Q4 review |
+| R-13 | Because only one engineer holds the backup encryption key, there is a risk that a departure makes backups unreadable, resulting in extended data loss after an incident | 12 High | Key stored in a sealed envelope in the safe | 12 High | Mitigate — split the key across two custodians | Head of Infrastructure | Q2 |
+| R-14 | Because vendor security questionnaires are not completed before onboarding, there is a risk that a supplier with weak controls is engaged, resulting in a downstream breach attributed to us | 12 High | Legal review of contracts only | 12 High | Mitigate — add a security review gate | Procurement Lead | Q3 |
+| R-15 | Because security awareness training is annual and not measured, there is a risk that phishing succeeds, resulting in credential compromise | 16 Critical | Annual training; MFA | 12 High | Mitigate — quarterly simulation with reporting, plus number-matching MFA | HR and IT jointly | Q2 |
 
 Read those five and notice what makes the register useful.
 
-**R-02 is an acceptance, and it is legitimate.** The residual is Medium, the justification is a decommissioning date, and the review date is set. That is not a failure to act; it is a decision.
+**R-12 is an acceptance, and it is legitimate.** The residual is Medium, the justification is a decommissioning date, and the review date is set. That is not a failure to act; it is a decision.
 
-**R-03 has the same inherent and residual score.** That is a signal worth reading: the existing control (an envelope in a safe) does almost nothing to reduce the risk. Register entries where inherent equals residual are frequently the ones where the "control" was assumed rather than tested.
+**R-13 has the same inherent and residual score.** That is a signal worth reading: the existing control (an envelope in a safe) does almost nothing to reduce the risk. Register entries where inherent equals residual are frequently the ones where the "control" was assumed rather than tested.
 
-**R-05 names two owners.** Joint ownership is usually a warning sign, because shared accountability is often no accountability. In practice one of them should own the risk and the other should own an action.
+**R-15 names two owners.** Joint ownership is usually a warning sign, because shared accountability is often no accountability. In practice one of them should own the risk and the other should own an action.
 
 That observation — noticing that a register entry has a problem — is exactly the kind of thing an interviewer asks about.
 
@@ -366,7 +366,7 @@ That observation — noticing that a register entry has a problem — is exactly
 
 The module says to record a disagreement rather than average it away. That instruction is easy to agree with and hard to *see*, so here is the actual table.
 
-The risk is the same one from R-01 above, scored by two people in the Thursday workshop. Both are competent. Both use the published scale from earlier in this part. They land four points apart.
+The risk is the same one from R-11 above, scored by two people in the Thursday workshop. Both are competent. Both use the published scale from earlier in this part. They land four points apart.
 
 | Field | Analyst A scores | Analyst B scores |
 |---|---|---|
@@ -398,7 +398,7 @@ The honest entry records both scores, the reasoning, and the resolution — **th
 
 | Register field | Recorded value |
 |---|---|
-| **Risk ID** | R-01 |
+| **Risk ID** | R-11 |
 | **Risk statement** | Because staff access the client portal from personal devices without device management, there is a risk that a compromised personal device accesses customer records, resulting in a reportable data breach |
 | **Existing controls** | MFA enforced on the portal; no device management; no conditional access (free tenant limitation) |
 | **Scored by** | Analyst A — 20 Critical (L5 × I4); Analyst B — 12 High (L3 × I4) |
@@ -406,7 +406,7 @@ The honest entry records both scores, the reasoning, and the resolution — **th
 | **Likelihood rationale (B)** | MFA must also fail before the event occurs, which is a second control, so “possible” rather than “almost certain” |
 | **Unresolved question** | Whether the likelihood scale counts one control failure or the full chain |
 | **Resolution** | Owner scored at the **higher** value for treatment prioritisation, because the cost of treating a High that turns out to be Medium is lower than the cost of under-treating a Critical. Recorded as a decision, not as agreement |
-| **Residual score used** | 16 Critical, with the range 12–20 stated in the register |
+| **Residual score used** | 20 Critical, with the range 12–20 stated in the register |
 | **Scale defect raised** | A wording note against the likelihood definitions, to be resolved at the next review so the next risk does not repeat the argument |
 | **Treatment** | Mitigate — conditional access requiring a managed device, or an equivalent compensating control |
 | **Owner** | IT Manager |
@@ -577,7 +577,7 @@ The control matrix is the document that connects a framework requirement, your c
 |            |                                        | the discovery tool           |             |            |                                   |            |        |
 | DE.CM-01   | Networks are monitored                 | SIEM ingesting firewall,     | Detective   | SOC Lead   | Ingestion report showing 100% of  | 2026-02-15 | Partial|
 |            |                                        | endpoint, and identity logs  | Technical   |            | sources; one source has a 3-day   | Monthly    |        |
-|            |                                        |                              |             |            | gap in January (finding F-2)      |            |        |
+|            |                                        |                              |             |            | gap in January (finding F-2, logged but not worked in full here)      |            |        |
 | RS.MA-01   | The IR plan is executed on declaration | Documented plan, tested via  | Corrective  | CISO       | Tabletop report, attendance,      | 2026-01-20 | Pass   |
 |            |                                        | an annual tabletop           | Administrative |         | actions tracker                   | Annual     |        |
 | RC.RP-01   | Recovery is executed                   | Quarterly restore test of    | Corrective  | Head of    | Restore log with timing and       | 2026-02-05 | Fail   |
@@ -646,7 +646,7 @@ AUDIT FINDING F-3
                not reviewed when the backup platform was upgraded.
   Effect       Recovery time for a critical system is unknown and likely
                exceeds the 4-hour objective in the business continuity plan.
-  Risk rating  High — linked to register entry R-07.
+  Risk rating  High — linked to register entry R-04.
 
   MANAGEMENT RESPONSE
 

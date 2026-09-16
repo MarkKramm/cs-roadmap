@@ -7,7 +7,7 @@ title: "Phase 6 — Portfolio Projects"
 duration: "8–12 weeks"
 duration_weeks: 12
 energy_mix: [low, normal]
-deliverable: "wazuh-siem-lab-report.md"
+deliverable: "portfolio/cyber/06-portfolio-projects.md"
 exit_criteria: "You have 3 portfolio reports that are clear, honest, evidence-based, and aligned with your target cyber role."
 ---
 
@@ -94,7 +94,7 @@ It is worth seeing how each one fails on its own, because they are not variation
 
 | Qualifier | How it fails | What it costs you |
 |---|---|---|
-| **Clear** | A wall of technical narration with no summary | A reviewer spends ninety seconds on your project. If they cannot find the point, the point does not exist |
+| **Clear** | A wall of technical narration with no summary | A reviewer spends about a minute on your project before deciding. If they cannot find the point, the point does not exist |
 | **Honest** | Implying your lab was production, or a synthetic alert was a real intrusion | Reviewers detect this instantly, and it destroys more credibility than a modest project ever would |
 | **Evidence-based** | Asserting findings your own screenshots and logs do not support | Every claim should trace to an artifact in the repository |
 | **Aligned** | Building what interests you instead of what the role requires | Phase 5 gave you the job posts. This phase is where you obey them |
@@ -120,7 +120,7 @@ solved the publishing half once.
 
 ### Part 1 — What a portfolio actually has to do
 
-#### The reviewer, and the ninety seconds they give you
+#### The reviewer, and the minute they give you
 
 Start by being concrete about who reads this. Writing for nobody in particular
 produces the vague reports that fail the exit criterion.
@@ -391,7 +391,7 @@ Here is what happens in roughly the first minute, in order.
 | 30–45 | One project README's title and Summary | Does this person write clearly about their own work? |
 | 45–60 | Whether there is a Limitations section, and evidence files | Can I trust what they say? |
 
-Six of those decisions are made from the README alone. That is why the top-level README is the file worth rewriting repeatedly.
+Every one of those decisions is made from the README alone. That is why the top-level README is the file worth rewriting repeatedly.
 
 **What a strong top-level README contains, in order.**
 
@@ -595,7 +595,7 @@ evidence for each row:
 | 08:14:02 | User opens attachment from external sender | Mail gateway log, message ID `a3f9…` |
 | 08:14:31 | `WINWORD.EXE` spawns `powershell.exe -enc …` | Sysmon Event ID 1, host `LAB-WIN10` |
 | 08:14:33 | Encoded command decodes to a download cradle | Local decode, command captured in Event ID 1 |
-| 08:14:36 | Outbound HTTPS to `203.0.113.44:443` | Sysmon Event ID 3 / pcap |
+| 08:14:36 | Outbound HTTPS to `203.0.113.44:443` | Sysmon Event ID 3 — the host had no capture running, so the process-network event is the evidence here, not a packet record |
 | 08:15:10 | Wazuh rule 100002 fires, level 12 | Wazuh alert, rule `100002` |
 
 Then the analysis that follows from it: what the initial access was, what the
@@ -820,8 +820,10 @@ claim.
 
 #### Proving it in an interview
 
-The checklist's last item — *I can explain every project in interviews* — is the
-real acceptance test. Rehearse it before you consider the phase finished.
+The checklist's eighth item — *I can explain every project in interviews* — is the
+real acceptance test. Rehearse it before you consider the phase finished, and pair
+it with the ninth, which asks you to answer the likely follow-up questions without
+notes. Those two together are the exit criterion.
 
 For each of your three projects, you should be able to answer, out loud, without
 notes:
@@ -942,7 +944,7 @@ Create the repository before you have anything to put in it. An empty structure 
 mkdir cyber-portfolio
 cd cyber-portfolio
 git init
-mkdir -p 01-siem-detection 02-network-analysis 03-blue-team-lab
+mkdir -p wazuh-siem-lab network-traffic-analysis incident-report
 mkdir -p assets
 ```
 
@@ -982,9 +984,9 @@ and documented myself, running on hardware I own.
 
 | # | Project | What it demonstrates | Skills |
 |---|---|---|---|
-| 1 | [SIEM detection engineering](01-siem-detection/) | Building detections and tuning out false positives | Log analysis, rule writing, triage |
-| 2 | [Network traffic analysis](02-network-analysis/) | Answering a question from packet data | Wireshark, protocol analysis, reporting |
-| 3 | [Blue team lab](03-blue-team-lab/) | Working an incident end to end | Timeline reconstruction, containment, reporting |
+| 1 | [Wazuh SIEM lab](wazuh-siem-lab/) | Building detections and tuning out false positives | Log analysis, rule writing, triage |
+| 2 | [Network traffic analysis](network-traffic-analysis/) | Answering a question from packet data | Wireshark, protocol analysis, reporting |
+| 3 | [Incident report](incident-report/) | Working an incident end to end | Timeline reconstruction, containment, reporting |
 
 ## How to read these
 
@@ -1004,7 +1006,7 @@ training data.
 [your email] · [your LinkedIn or GitHub]
 ```
 
-**Why the table matters:** a reviewer gives your repository about thirty seconds. The table is what they read in that time. If they cannot tell what you can do from three rows, the rest of the repository does not get opened.
+**Why the table matters:** a reviewer gives your repository the minute described earlier in this phase. The table is what they read in that time. If they cannot tell what you can do from three rows, the rest of the repository does not get opened.
 
 #### Step 3 — Build the evidence habit before you need it
 
@@ -1130,7 +1132,7 @@ State that boundary yourself, before you are asked. A candidate who says "this i
 ### Key takeaways
 
 - **Doing the work and proving the work are different skills**, and this phase exists to close the gap. Your screen history is invisible to an employer; only the artifacts count.
-- **Two readers, two jobs.** The screener gives you under a minute at the repository front page; the hiring manager gives five to ten minutes per report. The README serves the first, the reports serve the second.
+- **Two readers, two jobs.** The screener gives you about a minute at the repository front page; the hiring manager gives five to ten minutes per report. The README serves the first, the reports serve the second.
 - **The reviewer is testing trustworthiness, not brilliance.** They want to know whether your report is accurate and whether you can investigate methodically.
 - **Summary first, limitations written last.** The Summary is the only section guaranteed to be read; the Limitations section is the fastest way to sound like an analyst.
 - **Impact is the business translation, and beginners under-write it.** Your technical finding is not the point — what it means for the business is.

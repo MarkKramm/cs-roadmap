@@ -91,6 +91,8 @@ The important distinction is not the technology; it is **centralisation**. A loc
 
 You can read this for yourself in the table above and then verify it on your own machine: open **Computer Management** (`compmgmt.msc`), go to **Local Users and Groups**, and you are looking at the local identity store. Create a test user there and you have done the same *operation* an admin does in Active Directory — just at a smaller scale.
 
+**One catch for home machines.** The `Local Users and Groups` snap-in is not present on Windows Home editions, which is what most self-study readers have. `compmgmt.msc` still opens; that node is simply missing from the tree. If you are on Home, do the same work in PowerShell instead — `New-LocalUser`, `Add-LocalGroupMember`, and `Get-LocalUser` all work on every edition, and they are the commands this phase uses from Part 3 onward anyway. You are not missing a lab; you are doing it the way that also scripts.
+
 #### Active Directory, in terms a beginner can actually hold
 
 Active Directory (AD) is a database of identities and rules, served by one or more **domain controllers**. The vocabulary you need:
@@ -247,6 +249,15 @@ Why these choices, and not others:
 - **Filtering services to automatic-and-running** is the useful view. Listing all 200 services buries the signal.
 
 Run it, and note the moment the output appears on your screen. That is the difference between having read about PowerShell and having used it. The second is what you talk about in interviews.
+
+**Before you run it, one hurdle.** Windows blocks `.ps1` files by default, so double-clicking or typing the script name gives you *"cannot be loaded because running scripts is disabled on this system."* That is the execution policy, not a mistake in your script. From an elevated prompt in the folder holding the file, run it explicitly:
+
+```powershell
+Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
+.\inventory.ps1
+```
+
+`-Scope Process` applies the change to that one window only and drops it when the window closes — a smaller change than altering the machine-wide policy, and enough for every script in this phase. If the file came from a download, `Unblock-File .\inventory.ps1` clears the separate "from the internet" flag first.
 
 #### Where automation is heading
 
@@ -452,7 +463,7 @@ Realistic output of `Get-LocalGroupMember`:
 ObjectClass Name                   PrincipalSource
 ----------- ----                   ---------------
 User        DESKTOP-7F2A\maria.santos Local
-Group       DESKTOP-7F2A\Helpdesk-Team Local
+User        DESKTOP-7F2A\Administrator Local
 ```
 
 Note the **`PrincipalSource`** column. `Local` means the identity lives on this machine. `ActiveDirectory` means it comes from a domain, and `AzureAD` means it comes from Entra ID. On a machine joined to a domain you will routinely see all three in one list, and knowing which is which stops you from hunting in the wrong identity store — the single most common way a beginner wastes an hour.
@@ -545,7 +556,7 @@ FINANCE\maria.santos                 Modify Allow             False
 FINANCE\jsantos                        Read Deny              False
 ```
 
-`Get-Acl` gives you the same information as `icacls` in a form you can filter. `IsInherited` is the `(I)` flag; `AccessControlType` is Allow or Deny. Where `icacls` wins is that it shows *scope* flags inline and works over the network with a UNC path, so you will use both.
+`Get-Acl` gives you the same information as `icacls` in a form you can filter. `IsInherited` is the `(I)` flag; `AccessControlType` is Allow or Deny. Where `icacls` wins is that it shows *scope* flags inline and works over the network with a **UNC path** (Universal Naming Convention — the `\\server\share` form), so you will use both.
 
 One practical warning: `Get-Acl` hides the scope flags. An ACE that is inherited-only (`(IO)`) appears identical to one that applies everywhere. When the *behaviour* does not match the `Get-Acl` listing, re-check with `icacls`.
 
@@ -931,8 +942,8 @@ User name                    maria.santos
 Account active               Yes
 Password last set            3/14/2025 9:02:11 AM
 Last logon                   4/2/2025 8:41:03 AM
-Local Group Memberships      *Finance-Managers     *Users
-Global Group memberships     *None
+Local Group Memberships      *Users
+Global Group memberships     *FINANCE\Finance-Managers
 ```
 
 The account is active, the password is not expired, and — importantly — the account **is** a member of `Finance-Managers`. So the user’s claim that they should have access is not wishful thinking. Something else is wrong.
@@ -1055,7 +1066,7 @@ Service Name:  VeeamEndpointAgent
 Service File Name:  "C:\Program Files\Backup Agent\agent.exe" -service
 ```
 
-**There it is.** A new agent was installed on the file server on the evening of the 2nd. The backup succeeded that night — it ran at 23:00, after the 21:14 install, and completed. So the install itself did not break it directly. But the agent is now running continuously, and the question becomes what it is holding open.
+**There it is.** A new agent was installed on the file server on the evening of the 2nd. The backup succeeded that night — it ran at 23:00, after the 21:14 install, and completed. So the install itself did not break it directly. What changed is that the agent's first full index scan ran the *following* night, and the 3rd is exactly when the failures begin. That is the step that ties the install to the symptom: not the install on its own, but the first scan cycle it performed afterwards. The question now is what that scan holds open.
 
 **Step 4 — Identify what is locking the files.**
 
@@ -1079,7 +1090,7 @@ The service is running as **`LocalSystem`**, it is set to **Automatic**, and it 
 
 **Step 5 — Confirm the overlap, and decide the fix.**
 
-Two facts together are the diagnosis: the new agent runs continuously as `LocalSystem`, and the nightly backup runs at 23:00. The agent’s scan and the backup job are competing for the same files.
+Two facts together are the diagnosis: the new agent runs as `LocalSystem` and performs a full index scan on a nightly cycle, and the backup job runs at 23:00. The agent’s scan and the backup job are competing for the same files.
 
 There are three legitimate fixes, and choosing correctly matters:
 
@@ -1091,7 +1102,7 @@ You do **not** stop the service and declare victory, and you do **not** change t
 
 **Step 6 — Apply, then verify with a real run.**
 
-Reschedule the nightly job to 01:30, clear of the agent’s scan window, then **run the job manually** rather than waiting until tomorrow:
+Reschedule the nightly job to 01:30, clear of the agent’s scan cycle, then **run the job manually** rather than waiting until tomorrow:
 
 ```text
 # Illustrative — use your backup product's own "run now" action.
@@ -1106,10 +1117,10 @@ Then do the thing that separates a technician from a button-presser: **restore o
 
 > **Reported:** Monitoring alert — nightly backup job `FILESERVER-Daily` failed or aborted on five consecutive nights (3–7 April). No user-reported impact; raised by alert only.
 > **Changed recently:** Backup agent `VeeamEndpointAgent` was installed on the file server on 2 April at 21:14 (confirmed via Service Control Manager event ID 7045). No other change found in the preceding week.
-> **Observed:** Job history showed an identical failure message each night — “The process cannot access the file because it is being used by another process” — indicating a persistent file lock rather than a transient fault. The job completed normally on 2 April. The new agent service is configured as Automatic and runs under the `LocalSystem` account, which gives it unrestricted access to local files, and it scans continuously. Its scan window overlaps the 23:00 backup start.
+> **Observed:** Job history showed an identical failure message each night — “The process cannot access the file because it is being used by another process” — indicating a persistent file lock rather than a transient fault. The job completed normally on 2 April. The new agent service is configured as Automatic and runs under the `LocalSystem` account, which gives it unrestricted access to local files, and it performs a full index scan on a nightly cycle. That scan cycle overlaps the 23:00 backup start.
 > **Action:** Rescheduled `FILESERVER-Daily` to 01:30 to clear the agent’s scan window. Did not stop or disable the agent service, and did not change the backup source selection — the agent is protecting the machine by design and the backup scope was correct. Then ran the job manually rather than waiting for the next cycle. Restored one file from the completed backup to a scratch location and confirmed it opened.
 > **Verified:** Manual job run completed with 1,286 GB written. Restored file opened correctly and matched the expected contents. Next scheduled run at 01:30 is to be confirmed on the following morning’s alert report.
-> **Cause:** Overlapping file access. The newly installed endpoint backup agent scans continuously as `LocalSystem` and held open handles on files that the nightly backup job needed to read at 23:00. The backup job and its permissions were correct throughout.
+> **Cause:** Overlapping file access. The newly installed endpoint backup agent runs a nightly full index scan as `LocalSystem` and held open handles on files that the nightly backup job needed to read at 23:00. The backup job and its permissions were correct throughout.
 > **For the next agent:** Any new agent, scanner, or indexing service installed on a machine with a scheduled backup job can break that job without any error on the agent side. When adding software to a backed-up server, check the job history the next morning. The backup job source selection is correct — do not change it if this recurs; check for new services and scheduling conflicts instead.
 
 **Reasoning to take away.** The alert said only “backup failed.” The history said *same error, five nights, starting on a specific date*. The date said *what changed*. The service list said *who changed it and with what privileges*. Each step narrowed the next, and no step required guessing. The fix was a schedule change — small, reversible, and provably verified — because the evidence pointed at a conflict rather than at a fault.
@@ -1269,7 +1280,7 @@ Microsoft Learn, Google Admin Help, local Windows tools, PowerShell, and free ba
 
 ### What's paid and why you'd upgrade
 
-Microsoft 365 business tenants, Google Workspace, RMM tools, and enterprise backup platforms are paid because businesses need real user management, compliance, support, and scale.
+Microsoft 365 business tenants, Google Workspace, **RMM tools** (Remote Monitoring and Management — the software a managed-service provider uses to patch and watch many customer machines at once), and enterprise backup platforms are paid because businesses need real user management, compliance, support, and scale.
 
 ### When it's worth paying
 

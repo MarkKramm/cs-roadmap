@@ -202,8 +202,8 @@ A screenshot with an arrow drawn on it replaces a paragraph of description, and 
 |---|---|---|
 | **Situation** | The context — where, when, what was at stake | ~15 seconds |
 | **Task** | What you specifically were responsible for | ~10 seconds |
-| **Action** | What *you* did, step by step. "I", not "we" | ~60 seconds |
-| **Result** | The outcome, and what changed because of it | ~20 seconds |
+| **Action** | What *you* did, step by step. "I", not "we" | ~50 seconds |
+| **Result** | The outcome, and what changed because of it | ~15 seconds |
 
 The **Action** section is where most candidates fail. They say "we fixed it" and hide inside the plural. The interviewer cannot assess a team — they can only assess you. Say what *you* did.
 
@@ -237,7 +237,7 @@ What you actually have is a story about **self-direction**, and it is a strong o
 
 Notice what that answer does. It does not apologise. It states the gap plainly, reframes it as evidence of initiative, points at proof, then redirects to what you want next. That is the structure, and it works precisely because it is honest.
 
-**Back it with artefacts.** A portfolio containing your PowerShell inventory script, your ticket templates, your asset inventory and your lab write-ups does the arguing for you. When you can say "here's what I built", the absence of a degree stops being the topic of conversation. **Evidence beats explanation**, every time.
+**Back it with artefacts.** A portfolio containing your PowerShell inventory script, your ticket templates, your asset inventory and your lab write-ups does the arguing for you. If you have not built all four yet, name the ones you *do* have and say plainly which are still coming — the honest version of this move is stronger than a claim you cannot back. When you can say "here's what I built", the absence of a degree stops being the topic of conversation. **Evidence beats explanation**, every time.
 
 #### Practising under realistic conditions
 
@@ -403,7 +403,7 @@ Interviewers probe, because a memorised answer has no depth beneath it. Prepare 
 
 ### Part 7 — Model answers you can compare against
 
-Parts 1 to 6 taught the moves. The practice list in "Practice this next" gave you reps. This part gives you the thing that is missing when you study alone: **something to check your work against**.
+Parts 1 to 6 taught the moves, and the practice list at the end of the phase is where you get your reps. This part gives you the thing that is missing when you study alone: **something to check your work against**.
 
 Soft skills are the hardest thing to self-teach, because there is no compiler to tell you that you got it wrong. Below is a weak attempt and a strong attempt for each of the situations this phase covers. Write yours first, then compare. Do not read the strong version first — the gap between your attempt and it is the lesson.
 
@@ -613,7 +613,9 @@ Four questions, and they work on almost every piece of support writing you will 
 
 ### Practice this next
 
-The tasks below turn this into reps. Draft your five STAR stories and tell each one out loud to a real person, timing it. Write the same explanation of a technical problem twice — once for a technical colleague, once for a non-technical user — and compare them. Then take a real ticket you have written and rewrite its closure note for a nervous user who is afraid they broke something, because that is the writing you will do most often in your first job.
+The tasks below turn this into reps. Draft your five STAR stories and tell each one out loud to a real person, timing it. Write the same explanation of a technical problem twice — once for a technical colleague, once for a non-technical user — and compare them.
+
+Then take the ticket you wrote in Phase 4 (or any of the worked tickets in this roadmap) and rewrite its closure note for a nervous user who is afraid they broke something, because that is the writing you will do most often in your first job. If you have no live tickets yet, that rewrite is the exercise — the reading of a real closure note is what you are practising, not the owning of the queue.
 
 Then push further:
 
@@ -662,6 +664,8 @@ Create `portfolio/it/07-soft-skills.md` with:
 - 5 STAR stories
 - Link or notes for a 2-minute troubleshooting recording
 - LinkedIn About draft
+
+When Phase 8 has you build the six-folder portfolio repository, this file belongs in `ticketing-samples/` alongside the Phase 6 templates — the support replies and diagnostic questions are ticket-shaped work, and that is the folder a reviewer will look in for it.
 
 ## Checklist
 

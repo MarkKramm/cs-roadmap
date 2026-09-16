@@ -95,7 +95,7 @@ It is worth being explicit, because this phase can look offensive and most entry
 
 #### Time to complete
 
-**Roughly 65–80 hours over 6 weeks:**
+**Roughly 62–78 hours over 6 weeks:**
 
 | Work | Hours | Notes |
 |---|---|---|
@@ -125,7 +125,7 @@ Host: app.example.com
 User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64)
 Accept: application/json
 Content-Type: application/json
-Content-Length: 47
+Content-Length: 35
 Cookie: session=eyJ1aWQiOjEwNDJ9.aBcDeF; csrftoken=Zx9pQ2
 Origin: https://app.example.com
 Referer: https://app.example.com/orders/1042
@@ -152,7 +152,7 @@ HTTP/1.1 200 OK
 Date: Sat, 14 Mar 2026 09:14:22 GMT
 Server: nginx/1.24.0
 Content-Type: application/json; charset=utf-8
-Content-Length: 58
+Content-Length: 61
 Set-Cookie: session=eyJ1aWQiOjEwNDJ9.aBcDeF; Path=/; HttpOnly; Secure; SameSite=Lax
 Strict-Transport-Security: max-age=31536000; includeSubDomains
 X-Content-Type-Options: nosniff
@@ -866,7 +866,7 @@ A finding is a document with a specific audience: a developer who must fix it, a
 **Severity:** Medium (base 6.5 — raise it via environmental metrics if the data is customer-confidential in your context)
 **CVSS 3.1:** 6.5 — AV:N/AC:L/PR:L/UI:N/S:U/C:H/I:N/A:N
 **OWASP Top 10:** A01 Broken Access Control
-**CWE:** CWE-639 — Authorization Bypass Through User-Controlled Key
+**CWE:** CWE-639 — Authorization Bypass Through User-Controlled Key (CWE is the Common Weakness Enumeration, the shared catalogue of flaw types; the number is the entry)
 **Affected endpoint:** GET /api/v1/orders/{order_id}/notes
 
 ### Description

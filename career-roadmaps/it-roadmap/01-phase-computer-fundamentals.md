@@ -194,9 +194,10 @@ Constant, reproducible crashes in *one* application usually mean that applicatio
 
 #### What you would do
 
-1. Check the event log for repeated `Kernel-Power` or `BugCheck` events — a real support habit:
+1. Check the event log for repeated `Kernel-Power` or `BugCheck` events — a real support habit. They come from two different providers, so it is two queries, not one:
    ```powershell
    Get-WinEvent -FilterHashtable @{LogName='System'; ProviderName='Microsoft-Windows-WER-SystemErrorReporting'} -MaxEvents 10
+   Get-WinEvent -FilterHashtable @{LogName='System'; ProviderName='Microsoft-Windows-Kernel-Power'; Id=41} -MaxEvents 10
    ```
 2. Run the built-in memory test. Search for **Windows Memory Diagnostic**, or run `mdsched.exe`, and let it restart and test. It takes roughly 10–30 minutes.
 3. **Reseat the sticks.** For a desktop, power off, unplug, open the case, release the clips, lift each stick, and push it back firmly until both clips click. A surprising number of "failing RAM" tickets are a stick that was never fully seated — often after a move or a repair.
@@ -286,7 +287,7 @@ HDD and SSD failures present differently, and knowing which to expect speeds up 
    ```powershell
    chkdsk C: /scan
    ```
-   `/scan` is online and safe. The full repair mode (`chkdsk C: /f`) requires a reboot and can take hours on a large HDD. Never run a repair check on a drive that is clicking — you will shorten its life further.
+   Like `Confirm-SecureBootUEFI` below, this needs an elevated PowerShell. `/scan` is online and safe. The full repair mode (`chkdsk C: /f`) requires a reboot and can take hours on a large HDD. Never run a repair check on a drive that is clicking — you will shorten its life further.
 5. **Escalate mechanical noise or S.M.A.R.T. warnings.** These are not fixable at the helpdesk level; they are a drive replacement.
 6. **Recommend an SSD upgrade for old HDD machines.** It is the single highest-impact, lowest-cost improvement available to a slow computer, and being the person who knows this makes you useful.
 
@@ -319,7 +320,7 @@ Manufacturer Product
 ASUSTeK       PRIME B450M-A
 ```
 
-`Confirm-SecureBootUEFI` returning `True` confirms the machine is running UEFI with Secure Boot on. An error means it is likely legacy BIOS mode — worth knowing, because firmware settings menus differ significantly between the two.
+`Confirm-SecureBootUEFI` returning `True` confirms the machine is running UEFI with Secure Boot on. Two different errors mean two different things: a *permission* error means you are not in an elevated window and tells you nothing about the firmware, while the cmdlet reporting that the command is not supported means the machine is likely in legacy BIOS mode — worth knowing, because firmware settings menus differ significantly between the two.
 
 Also built in:
 
@@ -497,7 +498,7 @@ Get-CimInstance Win32_BIOS | Select-Object Manufacturer, SMBIOSBIOSVersion, Rele
 Confirm-SecureBootUEFI
 ```
 
-Expected: board make and model, firmware version and release date, and `True` if Secure Boot is enabled. Note the firmware release date — if it is several years old, that is worth recording even if you do nothing about it.
+Expected: board make and model, firmware version and release date, and `True` if Secure Boot is enabled. Run this block in an **elevated** PowerShell — right-click the shortcut and choose *Run as administrator*. `Confirm-SecureBootUEFI` fails with a permission error in an ordinary window, and that error is not the same thing as Secure Boot being off. Note the firmware release date — if it is several years old, that is worth recording even if you do nothing about it.
 
 #### Check 5 — Watch the machine work in Task Manager
 
@@ -593,7 +594,7 @@ Your day is a queue of tickets and calls, measured on handle time, first-contact
 
 Most of these roles are **night or shifting**, because the client is awake during US or Australian business hours. Many run rotating shifts, so your "night shift" may change week to week, which is harder on the body than a steady overnight. Equipment is usually provided or a stipend given; the office has backup power and redundant internet, which is the single biggest practical advantage of working on-site.
 
-**Shared services and global capability centres.** These are the in-house back offices of foreign companies — the same bank, insurer, or software vendor, but their Philippine subsidiary. The environment is quieter and more corporate than a BPO floor: fewer calls, more tickets, better documentation culture, sometimes a proper ITIL-style process with change management and defined escalation paths.
+**Shared services and global capability centres.** These are the in-house back offices of foreign companies — the same bank, insurer, or software vendor, but their Philippine subsidiary. The environment is quieter and more corporate than a BPO floor: fewer calls, more tickets, better documentation culture, sometimes a proper **ITIL**-style process (the IT Infrastructure Library — the standard vocabulary for service desks, incident handling and change management) with change management and defined escalation paths.
 
 Shifts can still follow the parent company's timezone, but day and mid-shifts are more common here than in voice-heavy BPO work. These centres often have genuine internal mobility — you can move from service desk to infrastructure, to security operations, to a specialist team — which makes them the best long-term bet if you can get in.
 
@@ -982,7 +983,7 @@ Teams             "C:\Users\rj\AppData\Local\Microsoft\Teams\current\Teams.exe" 
 Discord           "C:\Users\rj\AppData\Roaming\Discord\Discord.exe" --autostart
 ```
 
-Seven startup entries on an 8 GB machine is enough to make the first twenty minutes of every day feel awful. Spotify, Steam, and Discord are not work software. None of them are *broken* — they are just competing for the same limited resources at the worst possible moment.
+Six startup entries on an 8 GB machine is enough to make the first twenty minutes of every day feel awful. Spotify, Steam, and Discord are not work software. None of them are *broken* — they are just competing for the same limited resources at the worst possible moment.
 
 **What you do.**
 
@@ -1088,7 +1089,7 @@ Name                            CurrentHorizontalResolution CurrentVerticalResol
 Intel(R) UHD Graphics 620                               1920                       1080
 ```
 
-Only one resolution is reported, and the user told you they normally have two screens — so Windows is seeing one display. That points at the connection between the PC and the second monitor, not at the monitor itself.
+One adapter is reported, driving a single resolution. That is consistent with Windows seeing one display — but be careful with what this command actually proves. `Win32_VideoController` is enumerated per *graphics adapter*, not per monitor, so a machine with one GPU and two monitors also returns a single row here. What the output tells you is that no second adapter appeared, not that no second screen is attached. The display count itself comes from the screen enumeration further down.
 
 Two facts narrow it further. First, **the monitor is powered on** (blue light), so it is not a dead monitor or a dead power cable. Second, **Windows sees only one display**, so the signal is not reaching the PC. "No signal" on the monitor plus one display in Windows means the problem is somewhere on the cable path or in the input selection.
 
@@ -1167,7 +1168,7 @@ You have three signals to work with, and you collect all three before changing a
 
 - **Fans spinning and any panel light on:** the machine has power.
 - **"No signal" on the monitor then sleeping:** the monitor is powered and awake but is receiving nothing on its currently selected input. A monitor with no input at all sleeps; that is normal behaviour, not a monitor fault.
-- **No beep codes and no diagnostic light on the case:** the motherboard is not reporting a POST failure. If the machine had failed memory training or had a dead GPU, you would often see a repeating beep pattern or a lit diagnostic LED, depending on the board.
+- **No beep codes and no diagnostic light on the case:** nothing on this board is *announcing* a POST failure. That is weaker evidence than it looks — plenty of boards have no speaker and no diagnostic LED at all, and a POST that fails very early can still present as silence with spinning fans. Treat this as one signal among three, not as a ruling-out.
 
 So the evidence points at the connection between the PC and the monitor, or at the monitor's input selection — the same two things as Ticket 2, but now with no picture at all rather than a second screen missing.
 
@@ -1177,7 +1178,7 @@ The order matters, and the order is: free and physical before anything invasive.
 
 1. **Check the power first, at both ends.** The user confirms the extension cord switch is on and the PC is plugged in. You ask them to confirm the *monitor's* power cable as well, and that the monitor has its own power light. It does. Good — the monitor is powered.
 
-2. **Check the monitor's input.** Same as Ticket 2: press the input/source button and read out the options and which one is highlighted. The user reports the monitor is set to **DisplayPort** and the cable is a **VGA** cable with a blue connector, going into a blue port on the back of the PC. The monitor has a VGA port and a DisplayPort, and the VGA port is empty — the cable in use runs to a different, unused input, or the cable is fine but the monitor was left on the wrong input after somebody unplugged a games console. The user switches the monitor input to **VGA**. The display comes up.
+2. **Check the monitor's input.** Same as Ticket 2: press the input/source button and read out the options and which one is highlighted. The user reports the monitor is set to **DisplayPort** and the cable is a **VGA** cable with a blue connector, going into a blue port on the back of the PC. The monitor is set to the **DisplayPort** input, but the cable plugged into it is the VGA cable — somebody unplugged a games console from the DisplayPort and never switched the input back. The user switches the monitor input to **VGA**. The display comes up.
 
 3. **If that had not worked, check the cable seating.** Unplug the VGA connector at both ends, check for bent pins — VGA connectors have fifteen thin pins and bent pins are common — and reseat firmly. VGA connectors have thumbscrews; if they are cross-threaded, the connector can sit at an angle and lose contact on some pins.
 
@@ -1554,7 +1555,6 @@ If you can answer all twenty-one, you are ready for the phase checklist. If not,
 - **Ask what changed.** New software, an update, a move, a spill, a new peripheral — the cause is usually recent, and the user knows something you do not.
 - **Hardware leaves evidence.** S.M.A.R.T. counters, bug check history, and power-loss events are recorded whether or not anyone was watching. Read the record instead of guessing from the symptom.
 - **A passing test is not a clean bill of health.** Memory faults are intermittent by nature. If the symptoms fit the fault, keep investigating even when the test passes.
-- **On a failing drive, back up before you diagnose.** The user's data outranks your curiosity, every time.
 - **For remote work, responsiveness is the product.** Acknowledge quickly, update honestly, and write notes that stand alone — because nobody can see your desk.
 - **The user's description is a starting point, not a diagnosis.** "Slow", "won't turn on", and "keeps disconnecting" are vague, and sometimes actively misleading. Convert the complaint into a specific, checkable observation before you investigate.
 - **Split the problem in half with one good question.** Does anything happen when you press power? Is only this device affected? Does it print from the printer's own panel? One well-chosen question eliminates half the possible causes.

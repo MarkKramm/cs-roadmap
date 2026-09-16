@@ -307,6 +307,8 @@ Costs are described qualitatively. Verify current figures on the official page.
 | **3** | Microsoft SC-900 | Cheap, real, and your market is Microsoft-heavy |
 | **Later** | Everything else | Situational, or premature |
 
+The priority column is **value** — how much the certification is worth to your profile once you hold it. The shortlist further down is **sequence** — what to do first, which on a $0 budget is whatever is free. The two are deliberately in opposite orders, and that is not a contradiction: you start with the free one and end with the valuable one. Read the comparison table's Verdict column with both in mind.
+
 #### CompTIA A+ — the IT support credential
 
 **What it is.** Two exams covering hardware, operating systems, networking
@@ -569,7 +571,7 @@ Revisit after two to three years in a SOC or IT security role.
 
 | Certification | Rough cost tier | Study time | HR filter weight | Best for you if… | Verdict |
 |---|---|---|---|---|---|
-| **ISC2 CC** | Free (if program open) / low | 4–8 weeks | Moderate | You can access the free program | **Start here** |
+| **ISC2 CC** | Free (if program open) / low | 4–8 weeks | Moderate | You can access the free program | **Cheapest first step** |
 | **CompTIA Security+** | High | 8–12 weeks | **High** | Your target postings name it | **Strongest paid option** |
 | **Microsoft SC-900** | Low | 2–4 weeks | Moderate | Your market runs Microsoft 365 | **Good cheap first exam** |
 | **CompTIA Network+** | High | 8–12 weeks | Moderate | Networking is your weak area | Situational |
@@ -759,7 +761,7 @@ A schedule that protects both, at roughly 2–4 hours a day across 12 weeks:
 | 7–9 | Remaining domains; begin practice questions | Finish one portfolio project | Practice-question scores |
 | 10 | Full practice exam under timed conditions | Write up remaining project | Score + weak-area list |
 | 11 | Target the weak areas the practice exam exposed | Interview rehearsal from Phase 8 | Revised notes |
-| 12 | Light review; book or delay the exam | Portfolio polish | **Decision** |
+| 12 | Light review; book or delay the exam | Portfolio polish | **Booked or deferred** |
 
 Two design choices matter.
 

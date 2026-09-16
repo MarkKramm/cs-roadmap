@@ -78,7 +78,7 @@ You are not starting from nothing. You have four assets the phase expects you to
 | A web development background | Useful for understanding application-layer weaknesses |
 | A chosen target path from Phase 5 | Tells you which postings to apply for and which to ignore |
 
-The job of this phase is to make those things legible to a hiring manager in the ninety seconds they will give your resume, and then to survive the interview.
+The job of this phase is to make those things legible to a hiring manager in the few seconds they will give your resume, and then to survive the interview.
 
 ### Part 1 — Understanding the market you are actually entering
 
@@ -444,7 +444,7 @@ After roughly 20–30 applications, the tracker data tells you which stage is fa
 | What the tracker shows | Count | What it means |
 |---|---|---|
 | Applications submitted | 28 | Below the 50 target. That is the first finding — the volume is not there yet |
-| Recruiter screens | 4 | About one in seven. That is a normal rate for this profile |
+| Recruiter screens | 4 | About one in seven — a healthy conversion, though the sample is small enough that you should not plan around it |
 | Technical interviews | 1 | The drop from four screens to one technical is the signal to work on |
 | Offers | 0 | Expected on a first pass of this size |
 

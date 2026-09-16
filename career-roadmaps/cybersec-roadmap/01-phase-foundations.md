@@ -74,7 +74,7 @@ The legal and ethical boundaries covered here are not a formality tacked onto th
 | Reading this lesson | 3–4 hours | Once, properly — not skimmed |
 | Practice tasks | 8–12 hours | The bulk of the phase |
 | Glossary task alone | 4–6 hours | Rewards the most per hour |
-| Total | 12–16 hours across 4 weeks | Deliberately unhurried |
+| Total | 15–22 hours across 4 weeks | Deliberately unhurried |
 
 Most of that time is the practice tasks rather than this reading. The glossary task, done properly in your own words, will teach you more than reading any summary — including this one.
 
@@ -332,7 +332,7 @@ Read it against the routine, line by line.
 | What you see | What it tells you |
 |---|---|
 | Display name says PayPal, address is `paypal-secure.example.net` | The display name is forged. The real domain is `example.net` |
-| The link is `paypal.com.secure-login.example.net` | The real domain is the **last** label before the first single slash — `example.net`. `paypal.com` here is just a subdomain someone registered |
+| The link is `paypal.com.secure-login.example.net` | The real domain is the **last two** labels before the first single slash — `example.net`. `paypal.com` here is just a subdomain someone registered |
 | “within 24 hours”, “will be permanently limited” | Urgency and fear. Both are levers, not information |
 | “Dear Customer” instead of your name | Bulk send, not a real account notification |
 | A link asking for credentials | Step 4 applies. Open the site yourself instead |
@@ -343,7 +343,7 @@ The correct action is to ignore the link, open `paypal.com` by typing it or usin
 
 1. Open your inbox and pick the three most recent messages that ask you to do something — click, sign in, pay, or confirm.
 2. For each one, check the actual sender address rather than the display name.
-3. Hover every link and read the last label before the first single slash. Write it down.
+3. Hover every link and read the last two labels before the first single slash. Write it down.
 4. Ask of each message: which lever is it using — urgency, authority, fear, curiosity, or familiarity?
 5. Decide whether you would act on it without a second check, and write one sentence on why.
 
@@ -467,7 +467,7 @@ The phase lists these roles. You should be able to say what each one does day to
 
 First, **SOC Analyst is the realistic first target** for most people on this path. It is the role this roadmap's exit criteria are written toward.
 
-Second, your **IT support experience is not a detour from cyber — it is the qualification.** Understanding how users, accounts, and systems actually behave in an organisation is what separates a candidate who has done labs from one who can be trusted with production. Lean into it rather than treating it as time served.
+Second, **IT support experience is not a detour from cyber — it is the qualification.** Understanding how users, accounts, and systems actually behave in an organisation is what separates a candidate who has done labs from one who can be trusted with production. If you already hold a support role, lean into it rather than treating it as time served. If you do not, the companion IT track exists to get you there, and nothing in this phase depends on having it.
 
 #### The three frameworks, and what each is for
 
@@ -535,7 +535,7 @@ The key word is *unauthorised*, not *malicious*. Running a port scan against a s
 | Rule | What it means in practice |
 |---|---|
 | **Use only legitimate targets** | Your own machines, machines you have been given in writing, and intentionally vulnerable platforms designed for practice — TryHackMe, Hack The Box, PortSwigger Web Security Academy, CyberDefenders, and local virtual machines |
-| **Never touch the four traps** | Your school network, your employer's network, your ISP, a neighbour's Wi-Fi, or a website you found interesting. These are the most common ways beginners commit a crime by accident |
+| **Never touch the five traps** | Your school network, your employer's network, your ISP, a neighbour's Wi-Fi, or a website you found interesting. These are the most common ways beginners commit a crime by accident |
 | **Know your home network boundary** | Your router and your own devices are yours. Your ISP's infrastructure beyond the router is not |
 | **Keep notes of what you did and why** | Good practice for learning, and, if there is ever a question, your evidence of legitimate purpose |
 | **Handle accidental discoveries correctly** | If you find a real vulnerability in someone else's system by accident, do not exploit it, do not tell the internet, and do not ask for money. Stop, document, and look up that organisation's **responsible disclosure** or security contact |
