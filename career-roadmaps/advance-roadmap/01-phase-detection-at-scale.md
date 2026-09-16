@@ -319,7 +319,7 @@ Checks
   Severity           pass — level lowered from medium to low
   ATT&CK mapping     pass — T1059.001
   Test evidence      pass — samples match and do not match as required
-  Cost estimate      FAIL — 248 analyst hours per month, roughly 1.6 FTE-months
+  Cost estimate      FAIL — 253 analyst hours per month, roughly 1.6 FTE-months
   Duplication        pass — no overlap with DET-002 or DET-031
   Owner and review   pass — detection-engineering, review due 2026-09-20
   Response           pass — triage note attached
@@ -376,7 +376,7 @@ This feels like theatre and it is not. Reviewing your own work against a checkli
 
 A false positive is not an annoyance. It is a purchase, made with the most constrained resource the security team has: the attention of a trained person.
 
-The unit to reason in is **minutes of analyst time per month**, converted to money. Not because the money is the point, but because “this rule costs 248 hours a month” is a sentence that changes behaviour and “this rule is noisy” is not.
+The unit to reason in is **minutes of analyst time per month**, converted to money. Not because the money is the point, but because “this rule costs 253 hours a month” is a sentence that changes behaviour and “this rule is noisy” is not.
 
 | Input | Where it comes from | Typical value |
 |---|---|---|
@@ -491,17 +491,17 @@ Here is a real-shaped case. The rule is a broad encoded-PowerShell detection, an
 | False-positive rate | 99.3% |
 | Minutes per false positive | 12 |
 | Minutes per true positive | 45 |
-| Analyst minutes spent | 14,880 |
-| Analyst hours spent | 248.0 |
+| Analyst minutes spent | 15,177 |
+| Analyst hours spent | 253.0 |
 | Loaded hourly cost | 38.00 |
-| **Monthly cost** | **9,424** |
-| Cost per alert | 7.60 |
+| **Monthly cost** | **9,612** |
+| Cost per alert | 7.75 |
 | True-positive cost | 257 |
-| Fraction of a full-time engineer | 1.55 |
+| Fraction of a full-time engineer | 1.58 |
 
 Read those numbers as a manager would.
 
-The rule costs **9,424 currency units a month** and consumes **1.55 full-time engineers**. Of the total spend, **2.7%** is spent on the nine things the rule is for. It is, in effect, a machine that turns 248 hours of skilled attention into nine investigations and 1,231 closed tickets.
+The rule costs **9,612 currency units a month** and consumes **1.58 full-time engineers**. Of the total spend, **2.7%** is spent on the nine things the rule is for. It is, in effect, a machine that turns 253 hours of skilled attention into nine investigations and 1,231 closed tickets.
 
 | Cost per true positive | Verdict |
 |---|---|
@@ -510,7 +510,7 @@ The rule costs **9,424 currency units a month** and consumes **1.55 full-time en
 | 4–20 hours | Needs tuning; track it |
 | Over 20 hours | Tune, suppress, or retire — now |
 
-At 248 hours for nine true positives, the cost per true positive is **27.6 analyst hours**. That is in the bottom band, and the answer is not “delete it”, because the technique it detects — encoded command execution — is genuinely high-impact. The answer is that the rule is currently a bad way to detect it, and Parts 6 and 7 cover the fix.
+At 253 hours for nine true positives, the cost per true positive is **28.1 analyst hours**. That is in the bottom band, and the answer is not “delete it”, because the technique it detects — encoded command execution — is genuinely high-impact. The answer is that the rule is currently a bad way to detect it, and Parts 6 and 7 cover the fix.
 
 #### What the number does not capture
 
@@ -524,7 +524,7 @@ The arithmetic is honest but incomplete, and a good write-up says so.
 | **Tuning opportunity cost** | Every hour on this rule is an hour not spent on a gap with no coverage at all |
 | **Recruitment and retention** | Nobody stays long in a role that is mostly clearing false positives |
 
-The second row is the one that hurts most over time, and it is invisible in the arithmetic. A queue that is 99% noise is a queue that people stop reading carefully, and the cost of that is not a number you can put in a spreadsheet. Say so in the write-up. “The measured cost is 9,424 per month; the unmeasured cost is that we have taught the team to skim” is a sentence that gets a rule fixed.
+The second row is the one that hurts most over time, and it is invisible in the arithmetic. A queue that is 99% noise is a queue that people stop reading carefully, and the cost of that is not a number you can put in a spreadsheet. Say so in the write-up. “The measured cost is 9,612 per month; the unmeasured cost is that we have taught the team to skim” is a sentence that gets a rule fixed.
 
 #### The cost of a *missing* rule
 
@@ -536,7 +536,7 @@ The arithmetic has a mirror image, and it is worth stating because it is used to
 | Who pays | The security team, every day | The business, eventually |
 | Fix | Tune, suppress, retire | Write, test, deploy |
 
-Both are real problems. The mistake is to keep a rule that costs 248 hours a month because *something* might be missed, when the same 248 hours could build three precise rules that cover the same technique properly. Cost is not a reason to have no detection. It is a reason to have a better one.
+Both are real problems. The mistake is to keep a rule that costs 253 hours a month because *something* might be missed, when the same 253 hours could build three precise rules that cover the same technique properly. Cost is not a reason to have no detection. It is a reason to have a better one.
 
 ### Part 4 — Alert volume and triage capacity as a budget
 
@@ -563,7 +563,7 @@ The budget is not evenly spent. A handful of rules usually consume most of it.
 
 | Rule | Alerts/month | Minutes each | Hours/month | Share of capacity |
 |---|---|---|---|---|
-| DET-014 Encoded PowerShell | 1,240 | 12 | 248.0 | 40% |
+| DET-014 Encoded PowerShell | 1,240 | 12 | 253.0 | 40% |
 | DET-002 Multiple Failed Logons | 690 | 8 | 92.0 | 15% |
 | DET-031 Admin Group Change | 410 | 15 | 102.5 | 17% |
 | DET-007 Outbound to New Domain | 300 | 20 | 100.0 | 16% |
@@ -584,7 +584,7 @@ The table above is the artefact that gets detection work prioritised, because it
 | No time is spent building | Coverage gaps stay open |
 | Analysts leave | The remaining analysts inherit the queue |
 
-Two sentences do the work. “Four rules consume 88% of our triage capacity, and one of them is 1.55 engineers.” And: “Every hour we spend tuning DET-014 returns about twelve hours a month.” The second one is the argument that gets the work scheduled, because it is a return on investment stated in the unit the manager already tracks.
+Two sentences do the work. “Four rules consume 88% of our triage capacity, and one of them is 1.58 engineers.” And: “Every hour we spend tuning DET-014 returns about twelve hours a month.” The second one is the argument that gets the work scheduled, because it is a return on investment stated in the unit the manager already tracks.
 
 #### Alert volume as a design constraint
 
@@ -597,7 +597,7 @@ Once you have the budget, it becomes an input to rule design rather than an afte
 | Hunting input — reviewed in batches | Hundreds per month is fine | Hunting queue, never paged |
 | Metric — tracked, not triaged | No practical limit | Dashboard |
 
-The single most effective way to fix a noisy rule that you still want is often to change its **routing**, not its logic. Routing an over-broad rule to a hunting queue where it is reviewed in batches of fifty converts 248 hours of triage into a two-hour weekly review, with no loss of detection.
+The single most effective way to fix a noisy rule that you still want is often to change its **routing**, not its logic. Routing an over-broad rule to a hunting queue where it is reviewed in batches of fifty converts 253 hours of triage into a two-hour weekly review, with no loss of detection.
 
 That is the right first move for DET-014, and it buys the time to tune it properly.
 
@@ -630,7 +630,7 @@ Conflating them is how a coverage map becomes fiction. Keep them separate.
 | **Coverage** | A fired alert reaches a human who will act | Name the queue, the owner, and the routing rule |
 
 ```text
-Process Injection (T1050), as a worked example of the three levels.
+Process Injection (T1055), as a worked example of the three levels.
 
   Visibility    Sysmon Event ID 8 is collected on 412 of 500 endpoints.
                 Verified by querying the last 24 hours and getting rows back.
@@ -643,7 +643,7 @@ Process Injection (T1050), as a worked example of the three levels.
                 is 11 days. Nobody acts on it within any useful window.
 ```
 
-A team that marks T1050 green because a rule exists has documented a detection. It has not documented coverage, and the difference is the entire value of the exercise.
+A team that marks T1055 green because a rule exists has documented a detection. It has not documented coverage, and the difference is the entire value of the exercise.
 
 #### Building the layer
 
@@ -712,7 +712,7 @@ Every rule has a precondition: the log it reads must exist, be parsed, and be re
 | **Retained** | Check the index retention setting | The rule works, but you cannot investigate anything older than 7 days |
 | **Complete** | Compare host count against the asset inventory | 88 of 500 endpoints are not sending logs |
 
-The fourth row is the one that produces confident, wrong coverage claims. A rule that reads Sysmon process creation is only as good as the number of endpoints running Sysmon. If 12% of the estate is not covered, then 12% of your detections do not exist on 12% of your hosts, and the coverage map is wrong in a way nobody will notice until an incident happens on the wrong machine.
+The fourth row is the one that produces confident, wrong coverage claims. A rule that reads Sysmon process creation is only as good as the number of endpoints running Sysmon. If 18% of the estate is not covered, then 18% of your detections do not exist on 18% of your hosts, and the coverage map is wrong in a way nobody will notice until an incident happens on the wrong machine.
 
 ```text
 A telemetry prerequisite note, attached to a rule
@@ -1166,7 +1166,7 @@ Decisions needed
   1. Proxy log ingestion — 8 Command and Control techniques have no
      visibility because proxy logs are retained 7 days and are not
      ingested. Cost: licence plus platform work. Owner: platform team.
-  2. Triage capacity — DET-014 consumes 1.55 engineers for 9 true
+  2. Triage capacity — DET-014 consumes 1.58 engineers for 9 true
      positives a month. Tuning work is scheduled; if it fails, the
      recommendation is retirement plus two narrower rules.
   3. Detection engineering time — closing the 41 detection gaps in
@@ -1260,9 +1260,9 @@ The **blind spots we accept** section is the one that turns a rule into a profes
 - **Detection as code means rules in version control**, with an owner, a review, a status, and a history. The commit message names the reason, not the change.
 - **A rule review is a decision, not an opinion.** Approve, approve with conditions, return, or reject — and failed checks can carry dated conditions with named owners instead of a refusal.
 - **State the expected alert volume before deployment.** An unmeasured rule will be measured later, by an analyst, without warning.
-- **False-positive cost is best expressed in analyst hours and money.** “1,240 alerts, 9 true positives, 248 hours, 1.55 engineers a month” changes behaviour in a way that “this rule is noisy” never will.
+- **False-positive cost is best expressed in analyst hours and money.** “1,240 alerts, 9 true positives, 253 hours, 1.58 engineers a month” changes behaviour in a way that “this rule is noisy” never will.
 - **Triage capacity is a budget with no overdraft.** At 10 minutes an alert and 288 usable minutes a shift, an analyst handles about 28 alerts. Four rules consuming 88% of that is normal, and it is where tuning effort belongs.
-- **Routing is often a better fix than logic.** Sending an over-broad rule to a hunting queue reviewed in batches can convert 248 hours of triage into two hours a week with no loss of detection.
+- **Routing is often a better fix than logic.** Sending an over-broad rule to a hunting queue reviewed in batches can convert 253 hours of triage into two hours a week with no loss of detection.
 - **Visibility, detection, and coverage are three different claims.** Telemetry exists, a rule fires, and a human acts. A rule firing into an unowned queue is not coverage.
 - **An honest coverage map is mostly not-green.** Sorting gaps into telemetry, detection, and operational categories turns one overwhelming problem into three work plans with different owners.
 - **Tune against verified benign causes, never against volume.** Filters must name a specific cause you have examined, and they belong in the rule so they survive a platform migration.

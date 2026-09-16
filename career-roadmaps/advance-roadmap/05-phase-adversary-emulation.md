@@ -19,7 +19,7 @@ Learn to run adversary behaviour against systems you own or are authorised to te
 
 ## Estimated time
 
-**6 weeks** at about 8–11 focused hours a week. Roughly 46–62 hours, and the lab work is most of it.
+**6 weeks** at about 8–11 focused hours a week. Roughly 46–66 hours, and the lab work is most of it.
 
 ## Skills you'll gain
 
@@ -376,7 +376,7 @@ sysmon64.exe -accepteula -i sysmonconfig-export.xml
 
 # 3. Confirm the service is running and the driver is loaded.
 Get-Service sysmon64
-Get-Service sysmon | Format-List Name, Status
+Get-Service SysmonDrv
 
 # 4. Check that events are arriving. Event ID 1 is process creation.
 Get-WinEvent -LogName "Microsoft-Windows-Sysmon/Operational" -MaxEvents 5 |
@@ -746,6 +746,8 @@ Every gap becomes a row in a register. The register is the work queue, and it ou
 | GAP-003 | T1136.001 | Not detected, no telemetry | Windows account-management auditing is not enabled | Endpoint engineering | Enable `Audit User Account Management` by GPO | High | Raised to endpoint engineering | 2026-05-06 |
 | GAP-004 | T1003.001 | Partially detected | Sysmon 10 is recorded but the volume makes a naive rule unusable | Detection engineering | Scope to non-system processes accessing `lsass.exe` with `GrantedAccess` 0x1010 | Medium | Rule drafted | 2026-04-29 |
 
+A note on the GAP-004 fix, because it is the one row whose proposed fix is not self-explanatory. `GrantedAccess` is the access mask a process requested when it opened a handle to another process, and Sysmon event ID 10 records it. `0x1010` is `PROCESS_QUERY_LIMITED_INFORMATION` combined with `PROCESS_VM_READ` — the minimum a tool needs to read another process's memory — which is why it is the value to hunt on for credential access. Related values appear in the same context and should match your rule too: `0x1410` and `0x1438`.
+
 **The Owner column is what makes a register a work queue rather than a wish list.** A finding without an owner is a finding nobody will fix. The Priority column exists so that the register can be worked in order when there are more gaps than hours, which there always are.
 
 The Re-test date is the commitment. A gap marked "fixed" without a re-test is a claim, and this entire phase exists to replace claims with measurements.
@@ -863,8 +865,10 @@ Get-WinEvent -LogName "Microsoft-Windows-Sysmon/Operational" -MaxEvents 5000 |
   Where-Object { $_.Id -eq 13 } | Measure-Object | Select-Object Count
 
 # If the count is zero, the config is dropping registry events entirely.
-# Inspect the config to find the exclude rule responsible.
-Select-String -Path "C:\evidence\sysmonconfig-export.xml" -Pattern "RegistryEvent" -Context 0, 25
+# Inspect the config to find the exclude rule responsible. Point the path at
+# the config file you downloaded in step 2 — this assumes it is in the
+# current directory, which is where that step installed from.
+Select-String -Path ".\sysmonconfig-export.xml" -Pattern "RegistryEvent" -Context 0, 25
 ```
 
 #### The detection written from the gap
@@ -1059,7 +1063,7 @@ They will sometimes. The control may be intentionally designed the way you obser
 | "That alert goes to a queue nobody watches" | A genuine and common finding | This is a detection gap of a different kind — the rule exists but the process does not. Record it as such |
 | "You are testing it wrong" | Possibly true | Ask them to show you the correct way, and re-run |
 
-**The third and fourth objections are the ones to take most seriously**, because they describe a real category of failure this phase does not otherwise reach: **a control that fires correctly into a process that does not act on it.** A rule that fires and generates an alert that nobody triages is, from the perspective of detection, indistinguishable from no rule at all. Recording that as a finding — "the rule works, the response path does not" — is a valuable and frequently missed result.
+**The fourth objection is the one to take most seriously**, because it describes a real category of failure this phase does not otherwise reach: **a control that fires correctly into a process that does not act on it.** A rule that fires and generates an alert that nobody triages is, from the perspective of detection, indistinguishable from no rule at all. Recording that as a finding — "the rule works, the response path does not" — is a valuable and frequently missed result.
 
 #### How the report lands
 
@@ -1099,7 +1103,7 @@ measure:
     data.
 
 The coverage percentage in this report applies to the 40 techniques
-listed in Appendix A and to nothing else.
+in the coverage summary and to nothing else.
 ```
 
 That paragraph costs ten minutes to write and it is the difference between a measurement and a claim.

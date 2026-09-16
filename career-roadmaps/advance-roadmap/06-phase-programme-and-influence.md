@@ -312,7 +312,7 @@ The dashboard is one page for one audience. The register is the complete list, a
 | KRI-04 | Risk | Standing privileged access | How much permanent admin exists? | Count | Count + net change | Directory export | Identity Lead | Monthly | No increase | Any increase | > 10% increase |
 | KRI-05 | Risk | Internet-exposed services without an owner | What is exposed and unaccounted for? | Count | Count | External attack surface scan | Security Architect | Monthly | 0 | 1–3 | > 3 |
 
-Read that register as a programme and you can see what it is actually doing. Two KPI rows describe speed. Four KCI rows describe whether controls are switched on. Five KRI rows describe what is accumulating. **Nothing in the register measures activity**, because activity is not a risk and not a control.
+Read that register as a programme and you can see what it is actually doing. Four KPI rows describe speed. Three KCI rows describe whether controls are switched on. Five KRI rows describe what is accumulating. **Nothing in the register measures activity**, because activity is not a risk and not a control.
 
 #### Reporting a metric that got worse
 
@@ -1191,7 +1191,7 @@ The twelve tasks build toward one artefact: a programme pack for a control gap y
 4. **Write one metric movement note** (task 4) for a number that got worse. Real or reconstructed. Lead with the direction, then the cause, then the action.
 5. **Write the one-page brief** (task 5) for a decision that is actually pending at your workplace, and send it three days before the meeting. Rewrite it twice — the third draft is the one that fits on a page.
 6. **Build the business case** (task 6) with four options including do-nothing, costs as ranges, and a named decision owner. Find out when the budget cycle closes before you write the deadline.
-7. **Negotiate the control-owner agreement** (task 7) with one real control owner, using the five-part structure in Part 5. Get it agreed, not just written.
+7. **Negotiate the control-owner agreement** (task 7) with one real control owner, using the three-part structure in Part 5 (agreement, cadence, RACI). Get it agreed, not just written.
 8. **Write the risk-acceptance memo** (task 8) for a gap you cannot close immediately, and get it signed by someone with the authority to fund the fix. If nobody with that authority will sign, that is the finding.
 9. **Write the mentoring plan** (task 9) for a junior you actually work with, with two goals, five growth tasks, and an explicit `will not do` list.
 10. **Write the interview scorecard** (task 10) for a role on your team — six competencies, three questions, and a five-point scale with evidence boxes — then run one practice interview with a colleague and score it independently.
@@ -1245,7 +1245,7 @@ Then open `portfolio/advance/06-programme-and-influence.md` and assemble the del
 4. Write a metric movement note for a number that got worse, leading with the direction before the cause. <!-- id: advance-06-t04 band: quick energy: low -->
 5. Write a one-page executive brief for a pending decision, rewrite it twice, and send it three days before the meeting. <!-- id: advance-06-t05 band: deep energy: high -->
 6. Build a business case with four options including do-nothing, ranges for cost, and a named decision owner. <!-- id: advance-06-t06 band: deep energy: high -->
-7. Negotiate and sign a control-owner agreement for one control, using the five-part structure from Part 5. <!-- id: advance-06-t07 band: focused energy: normal -->
+7. Negotiate and sign a control-owner agreement for one control, using the three-part structure from Part 5 (agreement, cadence, RACI). <!-- id: advance-06-t07 band: focused energy: normal -->
 8. Write a risk-acceptance memo for a gap you cannot close now, and get it signed by someone who can fund the fix. <!-- id: advance-06-t08 band: deep energy: high -->
 9. Write a twelve-week mentoring plan for a junior you work with, including an explicit `will not do` list. <!-- id: advance-06-t09 band: focused energy: normal -->
 10. Write an interview scorecard for a role on your team and run one practice interview, scoring it independently. <!-- id: advance-06-t10 band: focused energy: normal -->

@@ -201,6 +201,14 @@ You do not need the full ICS org chart. You need four roles, and you need to kno
 
 **On a small incident, one person may hold two roles.** On a large one, each role is a full-time job. What is never acceptable is a role with no name attached, because an unnamed role is a role nobody is doing.
 
+**Unified command** is what you use when two organisations or two business units have to share authority over one incident — your company and a managed service provider, or two subsidiaries with separate IT. The failure mode it prevents is two parallel responses that disagree with each other. The structure is one incident, one set of objectives, and one commander per participating organisation, sitting in the same bridge and speaking with one voice outward. What it is not is a committee: if two people both believe they are the IC, nobody is, and the two responses will pull in different directions.
+
+**What does not adapt from emergency services.** ICS is built for events that are visible, bounded, and over in hours. Security incidents are often invisible for weeks, have no clear end, and involve an adversary who reacts to you. Three things follow, and they matter more than the parts you kept:
+
+- **There is usually no clean demobilisation.** ICS has a formal "demobilise and debrief" stage. Here, you hand back to normal operations gradually, and the review may run for months.
+- **The adversary is not a fire.** Containment that is visible can change the attacker's behaviour. OPSEC is not an ICS concept and you have to add it.
+- **Legal and privacy obligations run in parallel, not after.** In emergency response, the investigation follows. Here, notification clocks may start on day one, which is why you have a role for counsel in the bridge.
+
 Three rules make this structure work.
 
 **The incident commander is the only person who declares and closes.** Anyone may detect, anyone may propose a severity, but the IC owns the declaration. This matters because declaration is what turns normal work into an incident, and it is the moment people rearrange their day.
@@ -299,7 +307,7 @@ DECLARATION ANNOUNCEMENT — the format that works
          account r.delacruz, confirmed by two independent sources.
   Scope: One account confirmed. Two hosts under review.
   Impact: Not yet determined. Payroll file access is suspected.
-  Roles: IC — R. Bautista. Ops — J. Lim. Comms — A. Cruz. Scribe — M. Santos.
+  Roles: IC — R. Bautista. Ops — M. Santos. Comms — A. Cruz. Scribe — J. Lim.
   Next update: 02:00Z in #inc-2026-0417-01. Bridge is open and stays open.
   Decision needed from you: none yet. Do not start work unless asked.
 ```
@@ -398,7 +406,7 @@ A **situation report** — almost always shortened to SITREP — is the written 
 SITREP-03 — INC-2026-0417-01 — 2026-04-17 02:15Z
 
 STATUS        Active. Contained. Not yet eradicated.
-SEVERITY      S2, escalated from S2 at 01:31Z. No change.
+SEVERITY      S2, declared at 01:31Z. No change.
 WHAT WE KNOW  - Account r.delacruz had a mail-forwarding rule created
                 2026-04-16 23:48Z, forwarding to an external address.
               - The account authenticated from two countries within
