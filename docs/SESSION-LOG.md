@@ -2,7 +2,24 @@
 
 A chronological record of working sessions. Newest first.
 
-## 2026-09-16 (latest) — A real defect found: the cyber track taught a retired NIST framework
+## 2026-09-16 (latest) — Verifying the standards directly found four more defects, including a whole phase taught in the wrong order
+
+**After the NIST CSF find, I verified the versioned standards myself rather than sending more tables to a model.** That was the right call: **four more defects**, and one of them was structural.
+
+**The worst: phase 14 taught the entire OWASP Top 10 in the superseded 2021 order.** OWASP's own project page says *"The most current released version is the OWASP Top 10 2025."* Between editions **six categories moved number**, **SSRF left the list** (folded into A01), **two were added**, and **two were renamed**. So **nine of the ten section headings were wrong** — the phase had a section titled `A02 — Cryptographic failures` when A02:2025 is Security Misconfiguration. A learner repeating that in an interview is simply incorrect. I renumbered the sections **and physically reordered them** into 2025 order, with a line-by-line check proving nothing was lost, and rewrote the phase to teach the categories **by name** with a 2021→2025 mapping table — because the numbers are not stable and older material online still quotes 2021.
+
+**Then three standards described from retired editions**, each verified against the standards body's own words rather than a summary:
+- **PCI DSS Req 8** requires MFA for **all access into the CDE**, not "all remote access" — the curriculum had described the **v3.2.1** rule. PCI SSC's own blog: *"implement multi-factor authentication (MFA) for all access into the CDE."*
+- **CIS** was called **"18 safeguards"**. CIS has **18 Controls**, each containing numbered **Safeguards**; its list page is headed *"The 18 CIS Critical Security Controls"*. A reader mapping controls would have used the wrong level.
+- **SOC 2** named no edition; the criteria are the **2017 TSC, revised 2022**.
+
+**And a citation defect of a kind no link checker can see.** Three NIST publications the curriculum linked to were **Withdrawn** — *"Withdrawn on April 03, 2025. Superseded by SP 800-61 Rev. 3"* — while **all three resolved with HTTP 200**. `audit-refs.mjs` was perfectly happy. **A retired document still serves a 200.** So I built `audit-nist-current.mjs` to read the withdrawal sentence itself, failing **only** on a confirmed withdrawal and never on network noise.
+
+**I used two subagents for PCI/GDPR and SOC 2/OWASP, and both were worth it — including where they found nothing.** One reported that the claim I most expected to be a defect (does the curriculum call the OWASP Top 10 a "standard"?) was a **clean pass**, and refused to invent one. The other marked two claims `UNVERIFIABLE` rather than guessing, and correctly caught that I had paraphrased a fine detail differently from the file. **Both reported `web_search` broken session-wide**, reaching everything by direct fetch.
+
+**My own guard had three more bugs, all caught by running it.** The SOC 2 rule flagged all three mentions of "Trust Services Criteria" in a file that names the edition correctly once — **requiring every sentence to repeat a year is noise**, so it became per-file. The OWASP rule flagged the *corrected* heading `A04 — Cryptographic failures`, which is a 2021 pairing **and** the right 2025 heading. And earlier the CIS rule missed "CIS Controls provides 20 controls" because it required "CIS" first. **31 controls now, up from 13.**
+
+## 2026-09-16 (earlier) — A real defect found: the cyber track taught a retired NIST framework
 
 **The verification pass found something, and it was not a typo.** Cyber pass 4 returned three `WRONG` verdicts on the same claim: `01-phase-foundations.md` taught that **NIST CSF organises security work into five functions** — Identify, Protect, Detect, Respond, Recover. **CSF 2.0 has six. It added Govern.**
 

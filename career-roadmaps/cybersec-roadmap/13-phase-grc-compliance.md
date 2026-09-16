@@ -442,14 +442,18 @@ A framework is a structured list of things an organisation should consider, writ
 |---|---|---|---|---|
 | **NIST CSF 2.0** | A voluntary framework organised around six functions: Govern, Identify, Protect, Detect, Respond, Recover | Any organisation, any size, any sector | Free | No — it is not a certification scheme |
 | **ISO/IEC 27001** | An international standard for an information security management system, with Annex A controls | Organisations wanting a certifiable management system | The standard is paid | **Yes** — certification by an accredited body |
-| **CIS Controls** | A prioritised list of 18 safeguards, with implementation groups for different maturity levels | Organisations wanting a practical starting order | Free | No |
-| **SOC 2** | An attestation against the Trust Services Criteria — security, availability, processing integrity, confidentiality, privacy | Service organisations whose customers ask | The criteria are free to read; the audit is not | **Yes** — an attestation report, not a certificate |
+| **CIS Controls** | A prioritised set of 18 **Controls**, each broken into numbered **Safeguards**, with Implementation Groups for different maturity levels | Organisations wanting a practical starting order | Free | No |
+| **SOC 2** | An attestation against the 2017 Trust Services Criteria (revised 2022) — security, availability, processing integrity, confidentiality, privacy | Service organisations whose customers ask | The criteria are free to read; the audit is not | **Yes** — an attestation report, not a certificate |
 | **PCI DSS** | A mandatory standard for organisations handling card payments | Anyone storing, processing, or transmitting card data | Free to read | **Yes** — compliance validated by an assessor or self-assessment |
 | **HIPAA** | United States law governing protected health information | Anyone handling US patient data | Free | No — it is law, not a scheme |
 | **GDPR** | European Union law governing personal data of EU residents | Anyone processing EU residents' data | Free | No |
 | **Data Privacy Act of 2012** | Philippine law governing personal data, with the National Privacy Commission as regulator | Most Philippine organisations | Free | No |
 
 **The certification column is the one that drives business decisions.** An organisation pursues ISO 27001 certification or a SOC 2 report because a customer, a tender, or a regulator requires it — not because the framework is better than the alternatives.
+
+**One vocabulary trap worth knowing before you read any of them.** These frameworks each use the word "control" differently, and the CIS Controls are the easiest to get wrong. CIS has **18 Controls** — the numbered headings, such as *Control 1: Inventory and Control of Enterprise Assets*. Each Control contains several **Safeguards**, which are the numbered, actionable statements you actually implement — `1.1`, `1.2`, and so on. So when someone says "CIS Control 5", they mean a whole topic area, and when they say "Safeguard 5.3", they mean one specific thing to do. Mixing the two up in an interview is a small tell that you read a summary rather than the document.
+
+CIS also publishes **Implementation Groups (IG1, IG2, IG3)**, which are subsets of the Safeguards sized to an organisation's maturity and resources. IG1 is the basic hygiene set for a small organisation with limited security staff, and it is the sensible starting point if you are mapping controls in a home lab. The current version is **v8.1**, which realigned its mappings to NIST CSF 2.0 and added a Govern function to match.
 
 #### NIST CSF 2.0: the one to learn first
 
@@ -528,15 +532,17 @@ SOC 2 is not a standard you implement. It is a report an auditor produces about 
 | **PCI DSS** | You store, process, or transmit cardholder data | Twelve requirement groups covering network security, protection of stored data, access control, monitoring, and testing | The card brands, through acquiring banks |
 | **HIPAA** | You handle protected health information of US individuals | Administrative, physical, and technical safeguards, plus breach notification | US Department of Health and Human Services |
 | **Data Privacy Act of 2012** | You process personal data of Philippine residents, or a Philippine entity processes personal data | Lawful basis, data subject rights, security measures, breach notification to the NPC | National Privacy Commission |
-| **GDPR** | You process personal data of EU residents | Lawful basis, data subject rights, records of processing, breach notification within 72 hours where required | EU supervisory authorities |
+| **GDPR** | You process personal data of EU residents | Lawful basis, data subject rights, records of processing, breach notification within 72 hours of becoming aware where required | EU supervisory authorities |
 
-**One control satisfies several frameworks**, and this is the observation that makes control mapping efficient rather than exhausting.
+**On PCI DSS versions:** the current standard is v4.0.1, a limited revision of v4.0 that adds clarifications but no new or deleted requirements. v3.2.1 retired on 31 March 2024. The **future-dated** requirements inside v4 — the ones that were best practice at first — became fully effective **31 March 2025**, which means they are live now and an assessor will test them.
+
+**One control satisfies several frameworks**, and this is the observation that makes control mapping efficient rather than exhausting. Note how the first row is worded: **wherever card data is reachable**, not "on remote access". PCI DSS v4.0 requires MFA for **all** access into the cardholder data environment, not only remote access — with a narrow carve-out for accounts authenticated purely with phishing-resistant factors. If you describe the requirement as remote-access-only, you have described the older v3.2.1 rule and understated what an assessor will test.
 
 The identifiers in the right-hand column are framework-specific. `PR.AA`, `DE.CM` and `PR.AT` are NIST CSF categories; `CC1`–`CC9` are the SOC 2 Common Criteria (CC6 is logical access, CC7 is system operations, CC1 and CC2 cover the control environment and communication); `ISO 27001` and `PCI DSS requirement N` are exactly what they say. You are not expected to memorise them — you are expected to look each one up once, from the framework's own published list.
 
 | Control activity | Satisfies |
 |---|---|
-| Multi-factor authentication on all remote access | NIST CSF PR.AA; ISO 27001 access control; PCI DSS requirement 8; SOC 2 CC6; a Data Privacy Act security measure |
+| Multi-factor authentication wherever card data is reachable | NIST CSF PR.AA; ISO 27001 access control; PCI DSS requirement 8; SOC 2 CC6; a Data Privacy Act security measure |
 | Centralised log collection with alerting | NIST CSF DE.CM; ISO 27001 logging; PCI DSS requirement 10; SOC 2 CC7 |
 | Annual security awareness training with records | NIST CSF PR.AT; ISO 27001 competence and awareness; PCI DSS requirement 12; SOC 2 CC1 and CC2 |
 
@@ -895,9 +901,9 @@ If your employer serves European customers, GDPR applies to the personal data of
 | **Lawful bases** | Consent, contract, legal obligation, vital interests, public task, legitimate interests — one must apply |
 | **Data subject rights** | Access, rectification, erasure, restriction, portability, objection, and rights relating to automated decision-making |
 | **Accountability** | Records of processing activities, and data protection by design |
-| **Breach notification** | To the supervisory authority within 72 hours where a breach is likely to result in a risk to rights and freedoms, and to individuals where the risk is high |
+| **Breach notification** | To the supervisory authority within 72 hours of becoming aware, where a breach is likely to result in a risk to rights and freedoms, and to individuals where the risk is high |
 | **International transfers** | Transfers outside the EU need an adequacy decision or appropriate safeguards |
-| **Penalties** | Administrative fines up to a percentage of global annual turnover, in tiers |
+| **Penalties** | Two tiers of administrative fine: up to €10 million or 2% of total worldwide annual turnover, and up to €20 million or 4% — whichever is higher in each tier. The higher tier covers the basic principles of processing, data subject rights, and international transfers |
 
 **The 72-hour element is the one that shapes incident response**, and it is why Phase 11 insists on a timeline with real timestamps. You cannot demonstrate a 72-hour notification if you cannot show when you became aware.
 

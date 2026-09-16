@@ -38,6 +38,20 @@ function control(name, line, expectFail) {
   results.push({ name, expectFail, failed, ok: failed === expectFail });
 }
 
+// For rules whose allow-list is satisfied by anything ANYWHERE in the file, the
+// shared probe file is the wrong instrument: it already contains the words that
+// satisfy the rule. This writes a throwaway file that contains ONLY the probe,
+// so a per-file rule is genuinely exercised.
+const ISOLATED = path.join(ROOT, "career-roadmaps", "cybersec-roadmap", "__probe-phase.md");
+
+function controlIsolated(name, body, expectFail) {
+  fs.writeFileSync(ISOLATED, body, "utf8");
+  const code = runGuard();
+  fs.unlinkSync(ISOLATED);
+  const failed = code !== 0;
+  results.push({ name, expectFail, failed, ok: failed === expectFail });
+}
+
 // --- must fail: the retired model, in the shapes it actually appeared --------
 control(
   "summary table says five functions",
@@ -83,6 +97,110 @@ control("unrelated text mentioning Identify once", "Identify what you own before
 // --- CIS Controls, the second rule ------------------------------------------
 control("stale CIS control count", "CIS Controls provides 20 controls covering the basics.", true);
 control("correct CIS control count", "CIS Controls v8 provides 18 controls covering the basics.", false);
+
+// --- withdrawn-publication citations ----------------------------------------
+// These were live in the corpus: every one of these links RESOLVED, which is
+// why audit-refs.mjs was happy with all three. A withdrawn document still
+// serves HTTP 200. Resolution is not currency.
+control(
+  "cites withdrawn SP 800-61 Rev. 2",
+  "- NIST SP 800-61 Rev. 2, Computer Security Incident Handling Guide — https://csrc.nist.gov/pubs/sp/800/61/r2/final",
+  true,
+);
+control(
+  "cites current SP 800-61 Rev. 3",
+  "- NIST SP 800-61 Rev. 3, Incident Response Recommendations — https://csrc.nist.gov/pubs/sp/800/61/r3/final",
+  false,
+);
+control(
+  "cites withdrawn SP 800-50",
+  "- NIST SP 800-50, Building an IT Security Awareness and Training Program — https://csrc.nist.gov/pubs/sp/800/50/final",
+  true,
+);
+control(
+  "cites current SP 800-50 Rev. 1",
+  "- NIST SP 800-50 Rev. 1, Building an IT Security Awareness and Training Program — https://csrc.nist.gov/pubs/sp/800/50/r1/final",
+  false,
+);
+control(
+  "cites withdrawn SP 800-63-3",
+  "- NIST SP 800-63C, Federation and Assertions — https://csrc.nist.gov/pubs/sp/800/63/3/final",
+  true,
+);
+control(
+  "cites current SP 800-63C Rev. 4",
+  "- NIST SP 800-63C Rev. 4, Federation and Assertions — https://csrc.nist.gov/pubs/sp/800/63/c/4/final",
+  false,
+);
+
+// --- OWASP Top 10 edition ----------------------------------------------------
+// Six of ten categories moved number between 2021 and 2025, and SSRF lost its
+// own entry. These controls pin BOTH directions -- and the "must pass" ones
+// matter most, because the first version of this rule flagged the corrected
+// headings (A04 Cryptographic failures is a 2021 pairing AND the right 2025
+// heading, so a number-then-name match is not sufficient evidence of staleness).
+control(
+  "pins the OWASP Top 10 to the 2021 edition",
+  "- OWASP Top 10 2021 in depth: A01 to A10",
+  true,
+);
+control("calls SSRF A10", "| A10 | Server-side request forgery | was A10 |", true);
+control(
+  "teaches A02 as cryptographic failures (the 2021 pairing)",
+  "#### A02 — Cryptographic failures",
+  true,
+);
+control(
+  "teaches A03 as injection (the 2021 pairing)",
+  "#### A03 — Injection",
+  true,
+);
+control(
+  "teaches A09 as logging and monitoring (the 2021 name)",
+  "#### A09 — Security logging and monitoring failures",
+  true,
+);
+control(
+  "CORRECT 2025 heading A04 Cryptographic failures",
+  "#### A04 — Cryptographic failures",
+  false,
+);
+control(
+  "CORRECT 2025 heading A02 Security misconfiguration",
+  "#### A02 — Security misconfiguration",
+  false,
+);
+control(
+  "CORRECT 2025 heading A03 Software supply chain failures",
+  "#### A03 — Software supply chain failures",
+  false,
+);
+control(
+  "explaining the 2021 history is LEGITIMATE",
+  "SSRF was its own Top 10 entry in 2021, and in 2025 it was folded into A01.",
+  false,
+);
+control(
+  "a 2021 mapping table row is LEGITIMATE",
+  "| A04 | Cryptographic failures | was A02 |",
+  false,
+);
+
+// --- SOC 2 edition -----------------------------------------------------------
+// This rule is per-file: naming the edition ONCE is enough, and the earlier
+// line-scoped version flagged all three mentions, which is the noise that
+// teaches people to ignore a guard. These use the isolated probe because the
+// shared probe file already contains the satisfying words.
+controlIsolated(
+  "describes the TSC with no edition anywhere in the file",
+  "# probe\n\nSOC 2 is an attestation against the Trust Services Criteria produced by an auditor.\n",
+  true,
+);
+controlIsolated(
+  "names the edition once, even if later lines omit it",
+  "# probe\n\nSOC 2 uses the 2017 Trust Services Criteria, revised 2022.\n\nThe Trust Services Criteria are the auditor's benchmark.\n",
+  false,
+);
 
 // The guard scans career-roadmaps/ only. docs/ is meta-documentation and
 // legitimately QUOTES retired claims when recording what was fixed -- a guard

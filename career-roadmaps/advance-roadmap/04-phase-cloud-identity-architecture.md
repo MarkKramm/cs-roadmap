@@ -1972,7 +1972,7 @@ Then open `portfolio/advance/04-cloud-identity-architecture.md` and assemble the
 - NIST SP 800-207, Zero Trust Architecture — https://csrc.nist.gov/pubs/sp/800/207/final
 - CIS Benchmarks — https://www.cisecurity.org/cis-benchmarks
 - Cloud Security Alliance Cloud Controls Matrix — https://cloudsecurityalliance.org/research/cloud-controls-matrix
-- NIST SP 800-63C, Federation and Assertions — https://csrc.nist.gov/pubs/sp/800/63/3/final
+- NIST SP 800-63C Rev. 4, Federation and Assertions — https://csrc.nist.gov/pubs/sp/800/63/c/4/final
 
 ## Hands-on practice tasks
 

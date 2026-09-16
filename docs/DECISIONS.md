@@ -2,6 +2,36 @@
 
 A lightweight decision log (ADR-style). Newest first.
 
+## D-041 — A citation that resolves is not a citation that is current, and the difference is invisible to every link checker
+
+- **Date:** 2026-09-16
+- **Status:** Accepted
+- **Context:** Hours after D-040 found the curriculum teaching a retired NIST CSF function count, directly verifying the versioned standards found **four more defects of the same family**, plus two citation defects of a new one.
+- **The citation defect: a withdrawn document still serves HTTP 200.** `audit-refs.mjs` checks that every link resolves, and it was satisfied by all three of these:
+  - **SP 800-61 Rev. 2** — withdrawn **2025-04-03**, superseded by Rev. 3
+  - **SP 800-50** — withdrawn **2024-09-12**, superseded by Rev. 1
+  - **SP 800-63-3** — withdrawn **2017-12-01**, current series is 63 Rev. 4
+
+  NIST's own page says so plainly — *"Withdrawn on April 03, 2025. Superseded by SP 800-61 Rev. 3"* — but that sentence is in the **body**, not the status code. **A green link check is not a currency check, and no amount of link checking closes the gap.**
+- **The content defects — the 2025 OWASP Top 10 renumbering was the worst of them.** `14-phase-web-app-security.md` taught **A01–A10 as ten sections in 2021 order**. OWASP's project page states *"The most current released version is the OWASP Top 10 2025."* Between editions:
+  - **six categories moved number** — A05 Security Misconfiguration became A02, A02 Cryptographic Failures became A04, A03 Injection became A05, A04 Insecure Design became A06
+  - **one category left the list** — SSRF was folded into A01
+  - **two were added** — A03 Software Supply Chain Failures, A10 Mishandling of Exceptional Conditions
+  - **two were renamed** — A07 dropped "Identification and", A09 "monitoring" became "**alerting**"
+
+  So **nine of ten section headings were wrong**, and the phase's own structure taught the old numbering. A learner quoting "A02 is cryptographic failures" in an interview is simply incorrect. Sections were renumbered **and physically reordered**, verified line-by-line to lose nothing.
+- **Three more:** PCI DSS Req 8's MFA obligation is **all access into the CDE**, not "all remote access" — the curriculum described the **v3.2.1** rule, verified against PCI SSC's own words: *"implement multi-factor authentication (MFA) for all access into the CDE (cardholder data environment)"*. CIS was described as **"18 safeguards"** when CIS has **18 Controls** each containing many **Safeguards** — the Control list page is headed *"The 18 CIS Critical Security Controls"*. SOC 2 named no edition; the criteria are the **2017 TSC, revised 2022**.
+- **Decision:**
+  - `scripts/audit-nist-current.mjs` reads the withdrawal status out of NIST's own page and fails on a **confirmed withdrawal only**. A fetch that fails for infrastructure reasons is reported as UNCHECKED and does **not** fail the build — failing on network noise teaches people to ignore a guard.
+  - `audit-framework-claims.mjs` gained rules for the OWASP edition, PCI MFA scope, CIS count and terminology, SP 800-61/50/63 revisions, and the SOC 2 edition. Controls: **31**, up from 13.
+  - The corpus now teaches the categories **by name**, because the numbers are not stable across editions.
+- **Consequences:**
+  - **A per-file rule scope was needed, and the first version got it wrong.** The SOC 2 rule originally flagged **all three** mentions of "Trust Services Criteria" in a file that names the edition correctly once. **Requiring every sentence to repeat the year is noise**, so the rule became `perFile`: naming the edition anywhere satisfies it.
+  - **The OWASP rule's first version flagged the corrected headings.** `A04 — Cryptographic failures` is a **2021 pairing and also the correct 2025 heading**, so matching number-then-name is not evidence of staleness. The rule now anchors on pairs that are **uniquely** 2021. **This is the third time in two rules that a pattern matched correct text**, which is why the control suite is 31 cases and not 5.
+  - **Subagents were deployed for PCI/GDPR and SOC 2/OWASP, and both were worth it — including where they found nothing.** One explicitly reported that claim #9 (does the curriculum call the OWASP Top 10 a "standard"?) was a **clean pass**, and refused to invent a defect. The other marked two claims `UNVERIFIABLE` rather than guessing, and correctly flagged that I had paraphrased the fine wording differently from the file.
+  - **Both reported `web_search` broken session-wide** (DeepSeek API 404, model group unavailable), reaching everything through direct `web_fetch` — the same failure the human reported earlier.
+  - **Tier-1 sources were unreachable for both standards**: EUR-Lex returned HTTP 202 with an empty body, and the PCI DSS PDF sits behind a licence-acceptance gate. Verdicts rested on tier-2 sources that **quote the primary text** (PCI SSC's own blog, a faithful GDPR mirror), which is why each carries a verbatim quote.
+
 ## D-040 — A summary of a versioned standard is a claim with a shelf life, and no self-consistency check can see it expire
 
 - **Date:** 2026-09-16

@@ -1224,8 +1224,8 @@ Then open `portfolio/advance/06-programme-and-influence.md` and assemble the del
 - NIST Cybersecurity Framework 2.0 — https://www.nist.gov/cyberframework
 - NIST SP 800-30 Rev. 1, Guide for Conducting Risk Assessments — https://csrc.nist.gov/pubs/sp/800/30/r1/final
 - NIST SP 800-39, Managing Information Security Risk — https://csrc.nist.gov/pubs/sp/800/39/final
-- NIST SP 800-50, Building an IT Security Awareness and Training Program — https://csrc.nist.gov/pubs/sp/800/50/final
-- NIST SP 800-61 Rev. 2, Computer Security Incident Handling Guide — https://csrc.nist.gov/pubs/sp/800/61/r2/final
+- NIST SP 800-50 Rev. 1, Building an IT Security Awareness and Training Program — https://csrc.nist.gov/pubs/sp/800/50/r1/final
+- NIST SP 800-61 Rev. 3, Incident Response Recommendations and Considerations for Cybersecurity Risk Management — https://csrc.nist.gov/pubs/sp/800/61/r3/final
 - CIS Critical Security Controls — https://www.cisecurity.org/controls
 - OWASP Risk Rating Methodology — https://owasp.org/www-community/OWASP_Risk_Rating_Methodology
 - OWASP Security Culture project — https://owasp.org/www-project-security-culture/

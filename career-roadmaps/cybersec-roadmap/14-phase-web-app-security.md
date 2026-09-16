@@ -37,7 +37,7 @@ Learn to find, demonstrate, and explain web application vulnerabilities on autho
 
 - HTTP in full: methods, status codes, headers, cookies, and message bodies
 - The same-origin policy, CORS, and why the browser enforces what the server cannot
-- OWASP Top 10 2021 in depth: A01 to A10
+- OWASP Top 10 in depth: all ten categories, taught by name rather than by number because the numbering moves between editions (the current edition is **2025**; 2021 is still widely quoted)
 - Broken access control and IDOR: horizontal and vertical privilege escalation
 - Injection: SQL injection, command injection, and injection into any interpreter
 - Cross-site scripting: reflected, stored, and DOM-based, and the difference that matters
@@ -249,6 +249,23 @@ Second, **a request being sent is different from a response being read**. Many t
 
 ### Part 2 — The OWASP Top 10, category by category
 
+**Read this before the sections below, because the numbering has moved.** The current edition is **OWASP Top 10:2025**, and it reordered six of the ten categories relative to 2021. The sections below are ordered and named to match **2025**. Learn the categories by their **names**, because the numbers are not stable across editions and plenty of material online still quotes 2021.
+
+| 2025 | Category | Was in 2021 |
+|---|---|---|
+| A01 | Broken access control | A01 — unchanged |
+| A02 | Security misconfiguration | was A05 |
+| A03 | Software supply chain failures | **new in 2025** |
+| A04 | Cryptographic failures | was A02 |
+| A05 | Injection | was A03 |
+| A06 | Insecure design | was A04 |
+| A07 | Authentication failures | was A07, renamed |
+| A08 | Software or data integrity failures | A08 — unchanged |
+| A09 | Security logging and alerting failures | was A09, renamed |
+| A10 | Mishandling of exceptional conditions | **new in 2025** |
+
+**Two things changed shape, not just position.** **Server-side request forgery is no longer a separate Top 10 entry** — it was folded into A01 Broken access control, because the underlying failure is an access control decision about where the server may reach. That does not make SSRF less dangerous, and this phase still teaches it in full a few sections below, but do not cite it as "A10" any more; that was 2021. And **A09 was renamed** from "logging and monitoring failures" to "logging and **alerting** failures", which sharpens the point: collecting logs you never alert on is the failure.
+
 #### A01 — Broken access control
 
 This is the most common serious web vulnerability, and the one most likely to be in code you wrote. It means the application does not properly check whether the person making the request is allowed to do what they asked.
@@ -291,7 +308,73 @@ Two details in the fixed version matter. **The ownership filter is in the query*
 
 **Why this category dominates:** authentication is a visible feature that gets tested, and authorisation is an invisible property that does not. Every developer remembers to require a login. Far fewer remember to check that the logged-in user owns the thing they are asking for.
 
-#### A02 — Cryptographic failures
+#### A02 — Security misconfiguration
+
+This is the most common finding in real assessments and the easiest to fix, which makes it the most frustrating.
+
+| Misconfiguration | Where it appears |
+|---|---|
+| Default credentials | An admin panel shipped with `admin/admin` |
+| Directory listing enabled | A web server exposing an index of uploads |
+| Verbose errors in production | A stack trace naming the framework, version, and file paths |
+| Unnecessary features enabled | Sample applications, debug endpoints, `phpinfo()` |
+| Missing security headers | No CSP, no HSTS, no `nosniff` |
+| Permissive CORS | Reflected origin with credentials |
+| Cloud storage permissions | A bucket holding backups, publicly readable |
+| Missing hardening | A container running as root, with a writable filesystem |
+
+**The verbose-error row is worth a specific example**, because it chains into other attacks.
+
+```text
+Traceback (most recent call last):
+  File "/app/api/orders.py", line 42, in get_order
+    order = db.query(Order).filter(Order.id == order_id).first()
+  File "/usr/local/lib/python3.11/site-packages/sqlalchemy/orm/query.py", line 2759
+sqlalchemy.exc.ProgrammingError: (psycopg2.errors.SyntaxError) syntax error at or near "'"
+LINE 1: SELECT * FROM orders WHERE id = 1042'
+                                         ^
+[SQL: SELECT * FROM orders WHERE id = 1042']
+```
+
+That single error page tells an attacker the framework, the language, and the database driver. It also reveals the file path, the line number, and — by echoing the query — exactly where the injection point is. It is a complete map of the next step.
+
+#### A03 — Software supply chain failures
+
+**This category is new in 2025**, and the rename from 2021's "vulnerable and outdated components" is deliberate: the failure is wider than a stale library. It covers everything between you and the code you run — a compromised build pipeline, a malicious package published under a name you typo, a dependency's dependency, a signed artefact whose signature nobody verified.
+
+You do not write most of the code you run. A modern application has hundreds of dependencies, each with its own history of vulnerabilities.
+
+| Problem | Consequence |
+|---|---|
+| An unpatched framework | A known exploit with a public proof of concept |
+| A dependency with a transitive vulnerability | A vulnerable package pulled in by a package you chose |
+| A component that is no longer maintained | No fixes will ever arrive |
+| An outdated container base image | An operating system full of known issues |
+| Client-side libraries out of date | A JavaScript library with a known XSS |
+| A build pipeline an attacker can write to | Malicious code shipped with your own signature on it |
+| A typosquatted package name | You install the attacker's package, not the one you meant |
+
+**The defender's practical answer is a software bill of materials** — a list of every component and version in the application — plus automated scanning of it. Without the inventory, you find out about a critical library vulnerability from the news.
+
+```bash
+# Python dependencies, and their known vulnerabilities.
+pip install pip-audit
+pip-audit
+
+# Node dependencies.
+npm audit
+npm audit fix
+
+# Container image scanning.
+trivy image myapp:latest
+
+# A software bill of materials for a container.
+syft myapp:latest -o spdx-json > sbom.json
+```
+
+The **software bill of materials** is becoming a contractual requirement in many sectors, because you cannot manage the risk of components you cannot enumerate.
+
+#### A04 — Cryptographic failures
 
 Sensitive data exposed because it was not properly protected, or was protected with something broken.
 
@@ -306,7 +389,7 @@ Sensitive data exposed because it was not properly protected, or was protected w
 
 **The password-storage rule is the one to know precisely.** Passwords are stored with a slow, salted, memory-hard hash: `bcrypt`, `scrypt`, or `Argon2`. Not SHA-256, and never MD5 or SHA-1. The reason is speed. A modern GPU computes billions of SHA-256 hashes per second, and only thousands of bcrypt hashes. That difference is the entire defence.
 
-#### A03 — Injection
+#### A05 — Injection
 
 Injection happens when untrusted data is interpreted as code by whatever processes it. The interpreter varies; the bug does not.
 
@@ -358,7 +441,7 @@ cursor.execute(f"SELECT * FROM orders ORDER BY {sort}")
 
 **An allowlist is the only correct answer for identifiers.** Knowing that distinction is the difference between someone who has read about SQL injection and someone who has fixed it.
 
-#### A04 — Insecure design
+#### A06 — Insecure design
 
 This category is different from the others. It is not a coding mistake; it is a design that cannot be made secure by fixing code.
 
@@ -380,69 +463,7 @@ This category is different from the others. It is not a coding mistake; it is a 
 
 Writing abuse cases takes twenty minutes and finds the same bugs that pen testing finds months later at far higher cost.
 
-#### A05 — Security misconfiguration
-
-This is the most common finding in real assessments and the easiest to fix, which makes it the most frustrating.
-
-| Misconfiguration | Where it appears |
-|---|---|
-| Default credentials | An admin panel shipped with `admin/admin` |
-| Directory listing enabled | A web server exposing an index of uploads |
-| Verbose errors in production | A stack trace naming the framework, version, and file paths |
-| Unnecessary features enabled | Sample applications, debug endpoints, `phpinfo()` |
-| Missing security headers | No CSP, no HSTS, no `nosniff` |
-| Permissive CORS | Reflected origin with credentials |
-| Cloud storage permissions | A bucket holding backups, publicly readable |
-| Missing hardening | A container running as root, with a writable filesystem |
-
-**The verbose-error row is worth a specific example**, because it chains into other attacks.
-
-```text
-Traceback (most recent call last):
-  File "/app/api/orders.py", line 42, in get_order
-    order = db.query(Order).filter(Order.id == order_id).first()
-  File "/usr/local/lib/python3.11/site-packages/sqlalchemy/orm/query.py", line 2759
-sqlalchemy.exc.ProgrammingError: (psycopg2.errors.SyntaxError) syntax error at or near "'"
-LINE 1: SELECT * FROM orders WHERE id = 1042'
-                                         ^
-[SQL: SELECT * FROM orders WHERE id = 1042']
-```
-
-That single error page tells an attacker the framework, the language, and the database driver. It also reveals the file path, the line number, and — by echoing the query — exactly where the injection point is. It is a complete map of the next step.
-
-#### A06 — Vulnerable and outdated components
-
-You do not write most of the code you run. A modern application has hundreds of dependencies, each with its own history of vulnerabilities.
-
-| Problem | Consequence |
-|---|---|
-| An unpatched framework | A known exploit with a public proof of concept |
-| A dependency with a transitive vulnerability | A vulnerable package pulled in by a package you chose |
-| A component that is no longer maintained | No fixes will ever arrive |
-| An outdated container base image | An operating system full of known issues |
-| Client-side libraries out of date | A JavaScript library with a known XSS |
-
-**The defender's practical answer is a software bill of materials** — a list of every component and version in the application — plus automated scanning of it. Without the inventory, you find out about a critical library vulnerability from the news.
-
-```bash
-# Python dependencies, and their known vulnerabilities.
-pip install pip-audit
-pip-audit
-
-# Node dependencies.
-npm audit
-npm audit fix
-
-# Container image scanning.
-trivy image myapp:latest
-
-# A software bill of materials for a container.
-syft myapp:latest -o spdx-json > sbom.json
-```
-
-The **software bill of materials** is becoming a contractual requirement in many sectors, because you cannot manage the risk of components you cannot enumerate.
-
-#### A07 — Identification and authentication failures
+#### A07 — Authentication failures
 
 | Failure | What it enables |
 |---|---|
@@ -472,9 +493,9 @@ The code and data you trust may have been modified.
 
 **Insecure deserialisation is the most dangerous item here.** In several languages, deserialising untrusted data can execute arbitrary code before any of your application logic runs. The rule is simple and absolute: **never deserialise untrusted input**. If a format must be used, use one that carries data only, such as JSON, with schema validation.
 
-#### A09 — Security logging and monitoring failures
+#### A09 — Security logging and alerting failures
 
-This category is about the defender's ability to notice. It is the one that makes every other category worse, because an exploited flaw that leaves no trace can be used indefinitely.
+This category is about the defender's ability to notice. It is the one that makes every other category worse, because an exploited flaw that leaves no trace can be used indefinitely. **The 2025 edition renamed it** from "logging and monitoring failures" to "logging and **alerting** failures", which sharpens the actual failure: the logs are usually there, and nobody is woken up by them.
 
 | Failure | Consequence |
 |---|---|
@@ -499,7 +520,24 @@ This category is about the defender's ability to notice. It is the one that make
 
 **The last row of the failure table is a security problem in its own right.** A log file containing unredacted passwords or session tokens has moved sensitive data into a system with weaker controls and longer retention.
 
-#### A10 — Server-side request forgery
+#### A10 — Mishandling of exceptional conditions
+
+**This category is new in 2025**, and it names something you have already seen three times in this phase without a label. It covers what happens when the code meets a condition it did not expect: an error it does not handle, an input outside the range it assumed, a state it never considered. The failure is not the error — it is what the application does next.
+
+| The mishandling | What it exposes |
+|---|---|
+| An unhandled exception returning a stack trace | Framework, language, file paths, and line numbers — exactly the disclosure A02 warns about |
+| Failing open instead of closed | An authorisation check that throws, and the request proceeds |
+| A partial failure left in an inconsistent state | A transaction half-applied, with an accounting or access-control consequence |
+| An error path with no logging | A failure that is invisible, which is also an A09 failure |
+| A timeout treated as success | An unverified payment or an unconfirmed revocation treated as done |
+| Resource exhaustion from an unhandled edge case | A single malformed request that takes the service down |
+
+**The rule is that the error path is a code path, and it gets the same scrutiny as the success path.** The one-line version worth remembering: **fail closed, log the failure, and never let a stack trace reach the user.**
+
+#### Server-side request forgery — now under A01
+
+**SSRF was its own Top 10 entry in 2021, and in 2025 it was folded into A01 Broken access control.** The reasoning is sound: SSRF is an access control decision that was never made, about which destinations the server is permitted to reach on the user's behalf. It stays in this phase because it is dangerous, not because it still has its own number. **Do not cite it as "A10" any more — that was 2021.**
 
 SSRF makes the server perform a request on the attacker's behalf. You met it in Phase 9 from the cloud side, where it reaches the metadata service and steals credentials. Here it is from the application side.
 
@@ -609,7 +647,7 @@ The victim's browser sends the request with the victim's session cookie attached
 
 #### Server-side request forgery, and the bypass ladder
 
-The defences from A10 can be bypassed, and knowing the ladder is what makes a test thorough.
+The defences above can be bypassed, and knowing the ladder is what makes a test thorough.
 
 | Defence you might meet | Bypass to try |
 |---|---|

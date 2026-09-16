@@ -114,7 +114,7 @@ It is not a legal qualification either. This phase teaches you to recognise when
 
 #### The six stages
 
-The canonical model is NIST SP 800-61, and it is worth learning by its real names because interviewers use them.
+The canonical model is NIST SP 800-61, and it is worth learning by its real names because interviewers use them. **Note the revision:** SP 800-61 Rev. 3 (April 2025) superseded Rev. 2, and it restates these same stages as the *previous* life cycle model before mapping each one onto CSF 2.0. The stage names below are unchanged and are still what an interviewer means — Rev. 3 keeps them in a table that pairs each stage with the CSF 2.0 functions it serves.
 
 | Stage | What happens | The artefact you produce |
 |---|---|---|
@@ -124,6 +124,8 @@ The canonical model is NIST SP 800-61, and it is worth learning by its real name
 | **4. Eradication** | Remove the attacker's access and the malware | Evidence of removal, and the rebuilt or cleaned assets |
 | **5. Recovery** | Return to normal operation, carefully and watchfully | Restoration records and enhanced monitoring |
 | **6. Post-Incident Activity** | Learn, improve, and prove you improved | The incident report, the lessons learned, the action tracker |
+
+Rev. 3 pairs these stages with the CSF 2.0 functions they serve: Preparation maps to **Govern** and **Protect**, Detection and Analysis to **Detect**, Containment through Recovery to **Respond** and **Recover**, and Post-Incident Activity back into **Identify** as an improvement input. If you are asked "how does incident response fit the CSF?", that mapping is the answer.
 
 Three things about this model are frequently misunderstood, and each one costs organisations real money.
 
@@ -1205,7 +1207,7 @@ Then open `portfolio/cyber/11-incident-response.md` and assemble the deliverable
 
 ## Free/cheap resources
 
-- NIST SP 800-61 Computer Security Incident Handling Guide — https://csrc.nist.gov/pubs/sp/800/61/r2/final
+- NIST SP 800-61 Rev. 3, Incident Response Recommendations and Considerations for Cybersecurity Risk Management — https://csrc.nist.gov/pubs/sp/800/61/r3/final
 - NIST SP 800-86 Guide to Integrating Forensic Techniques into Incident Response — https://csrc.nist.gov/pubs/sp/800/86/final
 - Volatility 3 documentation — https://volatility3.readthedocs.io/
 - The Sleuth Kit documentation — https://www.sleuthkit.org/sleuthkit/docs.php

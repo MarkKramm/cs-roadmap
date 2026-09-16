@@ -133,6 +133,15 @@ jobs:
         run: node scripts/audit-framework-claims.mjs
       - name: Test framework-claim controls
         run: node scripts/test-audit-framework-claims.mjs
+      # audit-refs.mjs checks that a link RESOLVES. All three withdrawn NIST
+      # publications below resolved perfectly -- a retired document still serves
+      # HTTP 200. Resolution is not currency: SP 800-61 Rev. 2, SP 800-50 and
+      # SP 800-63-3 were each live in the corpus while NIST's own page marked
+      # them "Withdrawn on <date>. Superseded by <newer>". This reads that
+      # status line. It fails only on a CONFIRMED withdrawal, never on network
+      # noise, because failing on infrastructure teaches people to ignore it.
+      - name: Audit NIST publications for withdrawal
+        run: node scripts/audit-nist-current.mjs
       # A command can be named correctly and written wrongly. IT 02 stated DISM
       # in full at one place and abbreviated it to `DISM /RestoreHealth` in a
       # summary table 300 lines later — a form that throws if a beginner types

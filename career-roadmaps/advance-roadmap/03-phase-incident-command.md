@@ -969,7 +969,7 @@ Then open `portfolio/advance/03-incident-command.md` and assemble the deliverabl
 
 ## Free/cheap resources
 
-- NIST SP 800-61 Computer Security Incident Handling Guide — https://csrc.nist.gov/pubs/sp/800/61/r2/final
+- NIST SP 800-61 Rev. 3, Incident Response Recommendations and Considerations for Cybersecurity Risk Management — https://csrc.nist.gov/pubs/sp/800/61/r3/final
 - FEMA IS-100.C Introduction to the Incident Command System — https://training.fema.gov/is/courseoverview.aspx?code=IS-100.c
 - FEMA IS-200.C Basic Incident Command System for Initial Response — https://training.fema.gov/is/courseoverview.aspx?code=IS-200.c
 - FEMA IS-700.B An Introduction to the National Incident Management System — https://training.fema.gov/is/courseoverview.aspx?code=IS-700.b
