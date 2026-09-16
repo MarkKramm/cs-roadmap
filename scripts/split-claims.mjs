@@ -25,15 +25,28 @@ const ROOT = path.resolve(import.meta.dirname, "..");
 const SRC = path.join(ROOT, "docs", "IT-CLAIM-VERIFICATION.md");
 const OUT = path.join(ROOT, "docs", "claims-to-verify");
 
-// Only the classes that still need an external source. The settled classes
-// (subnetting, ports, arithmetic) are recomputed by scripts and are skipped --
-// sending them would invite a model to "verify" arithmetic it cannot check.
+// Which classes still need an external source, and how much of each is DONE.
+//
+// This list is the fix for a real confusion: the script used to emit a chunk for
+// every class it knew how to produce, including four that had already been
+// verified. The folder then held five files and no way to tell which were
+// outstanding work and which were already finished -- so the obvious move was
+// to re-verify work that was already done.
+//
+// `doneThrough` is the last row number already verified. Rows up to it are
+// dropped, so what is on disk is exactly what is left to do. When a class is
+// fully done, set `done: true` and it stops being emitted at all.
+//
+// This is hand-maintained ON PURPOSE. The results of a verification pass live
+// in a conversation, not in the repository, so there is nothing to read them
+// from -- and a script that guessed would be wrong in the direction of silently
+// skipping unverified rows.
 const WANTED = [
-  "Command and cmdlet usage",
-  "DNS record types",
-  "Protocol and standard behaviour",
-  "Product versions and editions",
-  "Registry paths, file paths and filenames",
+  { title: "Command and cmdlet usage", doneThrough: 152 },
+  { title: "DNS record types", done: true, doneThrough: 4 },
+  { title: "Protocol and standard behaviour", done: true, doneThrough: 26 },
+  { title: "Product versions and editions", done: true, doneThrough: 17 },
+  { title: "Registry paths, file paths and filenames", done: true, doneThrough: 17 },
 ];
 
 const lines = fs.readFileSync(SRC, "utf8").split("\n");
@@ -112,9 +125,26 @@ const FROM = fromArg > -1 ? Number(process.argv[fromArg + 1]) : null;
 
 fs.mkdirSync(OUT, { recursive: true });
 
+// Start from a clean folder. A stale chunk from a previous run is
+// indistinguishable from outstanding work, and the whole point of this script
+// is that what is on disk equals what is left to do.
+let removed = 0;
+for (const f of fs.readdirSync(OUT)) {
+  if (f.endsWith(".md")) {
+    fs.unlinkSync(path.join(OUT, f));
+    removed++;
+  }
+}
+if (removed) console.log(`cleared ${removed} stale chunk(s) from a previous run\n`);
+
 let written = 0;
 let n = 0;
-for (const title of WANTED) {
+for (const spec of WANTED) {
+  const title = spec.title;
+  if (spec.done) {
+    console.log(`  ${title.padEnd(44)}    (fully verified — not emitted)`);
+    continue;
+  }
   const body = sections.get(title);
   if (!body) {
     console.log(`WARNING: section not found — "${title}"`);
@@ -135,25 +165,25 @@ for (const title of WANTED) {
     .replace(/[^a-z0-9]+/g, "-")
     .replace(/^-|-$/g, "");
 
-  // --from <n>: keep only rows numbered >= n, and drop the now-dangling
-  // context lines that belonged to the row above the cut.
+  // Rows already verified are dropped, so the file on disk is only what is
+  // left. `--from <n>` can still override this by hand.
+  const cut = FROM || (spec.doneThrough ? spec.doneThrough + 1 : null);
   let outLines = kept;
   let suffix = "";
-  if (FROM) {
-    const want = new Set();
+  if (cut && cut > 1) {
     outLines = [];
     let keepCtx = false;
     for (const line of kept) {
       const m = /^\| (\d+) \|/.exec(line);
       if (m) {
-        keepCtx = Number(m[1]) >= FROM;
+        keepCtx = Number(m[1]) >= cut;
         if (keepCtx) outLines.push(line);
         continue;
       }
       // A context row belongs to the claim directly above it.
       if (keepCtx && /^\| \| \| <sub>/.test(line)) outLines.push(line);
     }
-    suffix = `-from-${FROM}`;
+    suffix = `-from-${cut}`;
   }
 
   const file = path.join(OUT, `${String(n).padStart(2, "0")}-${slug}${suffix}.md`);
@@ -162,12 +192,12 @@ for (const title of WANTED) {
   // A class with fewer rows than the cut point has no continuation. Writing an
   // empty file would be a file that looks like a task and contains none.
   if (!rows) {
-    console.log(`  ${path.basename(file).padEnd(46)}    (no rows at or after ${FROM} — skipped)`);
+    console.log(`  ${path.basename(file).padEnd(46)}    (nothing left at or after row ${cut} — skipped)`);
     continue;
   }
 
-  const heading = FROM
-    ? `# ${title} — rows ${FROM} onward\n\nThis is the CONTINUATION of a table whose earlier rows were already verified. **Verify only the rows below.** Do not restate or re-check earlier rows.\n`
+  const heading = cut && cut > 1
+    ? `# ${title} — rows ${cut} onward\n\nThis is the CONTINUATION of a table whose earlier rows were already verified. **Verify only the rows below.** Do not restate or re-check earlier rows.\n`
     : `# ${title}\n`;
 
   fs.writeFileSync(file, HEADER + heading + "\n" + outLines.join("\n") + "\n", "utf8");
