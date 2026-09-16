@@ -2,6 +2,24 @@
 
 A lightweight decision log (ADR-style). Newest first.
 
+## D-036 — Technical correctness is a separate class from internal consistency, and only three tiers of it can be automated
+
+- **Date:** 2026-09-16
+- **Status:** Accepted
+- **Context:** Every guard in this repository tests *internal consistency* — does the parser lose content, do cross-references resolve, does a table sum to the number the prose claims. Both comprehension passes test whether a beginner can *follow* the text. **Neither can see a sentence that is perfectly consistent, perfectly clear, and factually wrong.** The only error of that class ever found here — `modbus.func_code >= 15`, which also matches function code 43 and every exception response — was caught by a reader who happened to know Modbus. Three comprehension passes and nine content guards had all passed over it.
+  - The blocker was always sourcing. In the session that tried to close this, `web_search` was returning HTTP 401 and Indeed blocks automated fetching, so the item sat recorded as unclosable by an agent.
+  - **That blocker was wrong, and the correction is the reason this decision exists.** Search is broken; direct retrieval of primary sources is not. RFC Editor and Microsoft Learn both fetch cleanly. The assumption that "no search" meant "no verification" had gone unexamined for several passes.
+- **Decision:** Treat technical correctness as its own class, and split it by **what the claim rests on** rather than by topic:
+  - **Tier 1 — recomputation.** Claims with an answer derivable from the repository itself: all subnet arithmetic, and a worked example whose stated result must follow from its own data. Verified by machine, no source needed.
+  - **Tier 2 — the assigning authority.** Claims fixed by a registry or spec. The port table is checked against the **IANA registry that assigns port numbers**, not against a document that agrees with it. That distinction is the whole value: IANA is the assignment record, so a match is not corroboration.
+  - **Tier 3 — judgement.** Whether advice is good, whether an analogy helps, whether the emphasis is right. **Not verifiable, and marked `UNVERIFIABLE` rather than laundered into a pass.** A phase calling `/26` "the point where most beginners close the tab" is pedagogy, not fact, and marking it OK would make the OK column meaningless.
+- **Consequences:**
+  - **The division of labour is by tier, not by convenience.** 954 raw claims reduce to **216 that need a source** once tiers 1 and 2 are settled by machine; the remainder are handed to a human or a model *with web access* to check. `UNVERIFIABLE` is an offered verdict so that honest "I can't check this" does not get recorded as "checked".
+  - **A model's answer is never the source.** If the verification path were "ask a model whether port 445 is SMB", that is tier 3 dressed as tier 2 — recall of the same registry, with no way to distinguish a correct recollection from a plausible one. The citation is the artifact; the assertion is not.
+  - **Two verifiers run in CI, and the third deliberately does not.** `verify-cidr.mjs` and `verify-metrics.mjs` recompute from the repository alone, so a failure always means the content is wrong. `verify-ports.mjs` needs the network, so its failure mode would one day be "IANA was unreachable" — a red build with nothing wrong, which is how a guard teaches people to ignore it.
+  - **Claim extraction is not coverage.** `extract-claims.mjs` finds claims of the classes it knows about. Prose that is wrong in a way no pattern catches — a bad analogy, a misleading emphasis, an outdated practice — is invisible to it and always will be. A clean result means *these classes were checked*, nothing more.
+  - **Version claims carry a shelf life the others do not.** 18 product-version claims are true today and may rot on any release. They are flagged as the class to re-check periodically, which no other class requires.
+
 ## D-035 — Quizzes are authored in Markdown task-list syntax, and the set is validated separately from the question
 
 - **Date:** 2026-09-16

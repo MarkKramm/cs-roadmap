@@ -85,6 +85,21 @@ jobs:
       # silently points at nothing.
       - name: Validate CI workflow
         run: node scripts/validate-ci.mjs
+      # Every other guard in this repository tests INTERNAL CONSISTENCY — does
+      # the parser lose content, do cross-references resolve, does a table sum
+      # to the number the prose claims. The comprehension passes test whether a
+      # beginner can FOLLOW the text. Both are blind to a sentence that is
+      # perfectly consistent, perfectly clear, and factually wrong.
+      #
+      # These two recompute what has a right answer independent of any source:
+      # subnet arithmetic (RFC 1918 fixes the ranges; the rest is maths) and the
+      # worked service-desk metrics in IT 06. Both are the strongest tier of
+      # verification available, because they depend on trusting nobody's
+      # documentation — not the author's, not a model's.
+      - name: Verify subnetting arithmetic
+        run: node scripts/verify-cidr.mjs
+      - name: Verify worked metrics
+        run: node scripts/verify-metrics.mjs
       # The acronym audit prints a report and exits 0 whatever it finds: whether
       # a reader can decode "SSID" without help is a judgement about the reader,
       # not a claim about the text agreeing with itself, so by D-022 it is a

@@ -132,9 +132,17 @@ node scripts/audit-changelog.mjs         # one of each section per release, cano
 node scripts/test-audit-changelog.mjs    # the CHANGELOG guard's own 13 controls, gates
 node scripts/audit-quiz.mjs              # quiz answer positions balanced, option counts consistent
 node scripts/validate-ci.mjs             # every CI step well-formed, every script it names exists
+node scripts/verify-cidr.mjs             # subnet arithmetic recomputed; RFC 1918 ranges checked
+node scripts/verify-metrics.mjs          # IT 06's worked metrics recomputed from its own table
 node scripts/audit-terms.mjs --self-test # the acronym DETECTOR — 16 controls, gates
 node scripts/audit-terms.mjs             # the acronym CORPUS — measurement, always exits 0
 ```
+
+**The two `verify-*` scripts are the only checks here that test whether the content is *true* rather than whether it agrees with itself** (D-036). Every other guard asks "do two places in this repository say the same thing". These recompute claims that have an answer independent of the document — subnet arithmetic, and a worked example whose stated result must follow from its own data. Both are the strongest tier available, because they depend on trusting nobody's documentation, mine included.
+
+`scripts/verify-ports.mjs` is the same idea against an external authority — the IANA registry that *assigns* port numbers — and it is **deliberately not in CI**: it needs the network, so its failure mode would eventually be "IANA was unreachable", which is a red build with nothing wrong with the content. Run it by hand after editing a port table.
+
+`scripts/extract-claims.mjs` is not a check at all. It pulls every machine-checkable claim out of the nine IT phases into [`IT-CLAIM-VERIFICATION.md`](IT-CLAIM-VERIFICATION.md), which is a worklist for verifying the classes a machine cannot settle. Run it after editing phase content; it overwrites the file.
 
 **`audit-refs.mjs` gates, and `FORWARD_AS_PRIOR` is now a detector rather than a `(0)` nobody could trust.** It exits 1 when a `Part N` names a heading the file does not have, or a `Phase N` names a number the track does not contain — both are claims about the text agreeing with itself, which is the test for whether a class belongs in CI. It found IT 06 sending the reader to "Part 5's structure" for a note in Part 4, and IT 07 referring to a nonexistent "Part 8".
 
@@ -169,6 +177,9 @@ The smoke test renders the lesson for every phase and asserts that the table and
 - [ ] `node scripts/audit-time-budget.mjs` reports `findings: 0` (for any change to a phase file or a track overview).
 - [ ] `node scripts/audit-changelog.mjs` reports `findings: 0`, and `node scripts/test-audit-changelog.mjs` reports `13 passed, 0 failed` (after any edit to `CHANGELOG.md`, and after any edit to either script).
 - [ ] `node scripts/audit-quiz.mjs` reports `findings: 0` (after any edit to a `## Quiz` section, or to the quiz parser).
+- [ ] `node scripts/verify-cidr.mjs` and `node scripts/verify-metrics.mjs` both pass (after any edit to a subnet table, a worked networking example, or IT 06's ticket data).
+- [ ] `node scripts/verify-ports.mjs --refresh` passes (after any edit to a port table — run by hand, since it needs the network).
+- [ ] If phase prose changed, `node scripts/extract-claims.mjs` was re-run so [`IT-CLAIM-VERIFICATION.md`](IT-CLAIM-VERIFICATION.md) matches the content.
 - [ ] `node scripts/validate-ci.mjs` reports `0 problems` (after any edit to `.github/workflows/`, or after renaming any script a workflow names).
 - [ ] `cd learning-site && npm run test:smoke` passes (for any change touching the site).
 - [ ] `cd learning-site && npm run test:render-inline` passes (for any change to `renderInline.jsx` or to inline Markdown in the content).

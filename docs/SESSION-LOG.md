@@ -2,7 +2,31 @@
 
 A chronological record of working sessions. Newest first.
 
-## 2026-09-16 (latest) — Quizzes across the whole IT on-ramp, and the corpus defect the guard could not see
+## 2026-09-16 (latest) — Technical correctness: the claim class no guard could see, and the assumption that had blocked it
+
+**The task.** With quizzes done, I looked for the highest-value remaining work rather than the next obvious one. The corpus balance guard I had flagged was real but small. The larger item was recorded in `ROADMAP.md` as the thing nothing had ever tested: **whether the content is technically true.**
+
+**The gap, stated precisely.** Every guard in this repository tests *internal consistency* — does the parser lose content, do cross-references resolve, does a table sum to the number the prose claims. Both comprehension passes test whether a beginner can *follow* the text. **Neither can see a sentence that is perfectly consistent, perfectly clear, and factually wrong.** The only error of that class ever found here — `modbus.func_code >= 15`, which also matches function code 43 and every exception response — was caught by a reader who happened to know Modbus. That is not a method.
+
+**The item had been recorded as unclosable by an agent, and that was simply wrong.** It sat blocked on sourcing: `web_search` returning HTTP 401 and Indeed blocking automated fetching. Before proposing anything I tested the assumption, and it did not survive. **Search is broken; direct retrieval of primary sources is not.** RFC Editor returned 200 immediately, Microsoft Learn returned 200, and IANA's full port registry downloaded without trouble. The inference "no search means no verification" had gone unexamined across several passes.
+
+**I demonstrated the method on a known error before proposing it as work.** Fetching the Modbus function-code table settled the old finding from a citable source: function codes run 1–255, 128–255 are exception responses, and **code 43 is Read Device Identification** — so `>= 15` did match it, and the earlier fix was right. That is what verification looks like: not "I checked and it seems right", which is just my recall with extra steps.
+
+**Three tiers, and only two are automatable.** Tier 1 recomputes claims with an answer independent of any document — subnet arithmetic, or a worked example whose result must follow from its own data. Tier 2 checks against the *assigning authority* — the port table against the IANA registry that assigns port numbers, which is the assignment record itself rather than a document that agrees. **Tier 3 is judgement** — whether advice is good, whether an analogy helps — and it is not verifiable at all.
+
+**The tier-3 honesty is the load-bearing part of the design.** A phase calling `/26` "the point where most beginners close the tab" is pedagogy, not fact. Marking it `OK` would launder an opinion into a verified column and make the whole column meaningless, so `UNVERIFIABLE` is an offered verdict in the worklist rather than a failure to try.
+
+**What was built.** `extract-claims.mjs` pulls machine-checkable claims out of the nine IT phases: **954 raw, filtered to 216 that genuinely need a source** after settled classes are removed, emitted as a 432-line worklist with a verdict slot per row and written for pasting into a chat. Two tuning passes were needed — the first returned 233 CIDR hits in IT 03 alone, almost all of them addresses inside worked examples that assert nothing, which buried the ~20 that could be wrong.
+
+**Three classes are now closed by machine, all passing.** `verify-cidr.mjs` — **42 checks** recomputing every CIDR table row, every mask-to-prefix equivalence, each RFC 1918 range's real span, and IT 03's worked `/26` example (`192.168.10.0/26` → network `.0`, broadcast `.63`, 62 usable). `verify-metrics.mjs` — **15 checks** recomputing all five of IT 06's metrics from its own ticket table, including which three tickets qualify as first-contact resolutions and the exactly-15 boundary case. `verify-ports.mjs` — **18 checks** against IANA.
+
+**One deliberate inconsistency, recorded as a decision rather than left implicit.** `verify-ports.mjs` is **not** in CI. It needs the network, so its failure mode would one day be "IANA was unreachable" — a red build with nothing wrong with the content, which is precisely how a guard teaches people to ignore it. The two that recompute from the repository alone do run in CI.
+
+**What is honestly still open:** 216 claims need a human or a model with sources — 153 command/cmdlet usages, 24 protocol assertions, 18 product-version claims (the class most likely to **rot**), 14 registry and path strings, 7 DNS record types. And the method cannot reach the class that matters most in the soft-skill phases.
+
+**Verified:** lint 174/0; audit-content 0; audit-quiz 0; changelog guard 0 with 13 controls; validate-ci 32 steps / 0; verify-cidr 42/0; verify-metrics 15/0; verify-ports 18/0.
+
+## 2026-09-16 (earlier) — Quizzes across the whole IT on-ramp, and the corpus defect the guard could not see
 
 **Goal:** choose the next quiz batch. I recommended IT 03–05 and argued against "finish the three tracks", on the grounds that the IT on-ramp is read first and in order by someone preparing for their first job — where a self-check is worth most — while cyber and advance phases are read later and more often as reference. The choice made was the full IT track: **IT 03–09**.
 
