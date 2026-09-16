@@ -43,6 +43,23 @@ jobs:
       # judgement, and it gates.
       - name: Audit time budgets
         run: node scripts/audit-time-budget.mjs
+      # The acronym audit prints a report and exits 0 whatever it finds: whether
+      # a reader can decode "SSID" without help is a judgement about the reader,
+      # not a claim about the text agreeing with itself, so by D-022 it is a
+      # measurement and not a gate. Its DETECTOR, though, is a claim about the
+      # text, and that part was silently broken — emphasis-wrapped definitions
+      # (`**SPF** (Sender Policy Framework)`), a noun between term and gloss
+      # (`CIDR notation (Classless Inter-Domain Routing)`), table-cell
+      # expansions, and an em-dash inside a gloss were all reported as "never
+      # explained" while printing the explanation as the evidence.
+      #
+      # So `--self-test` gates the instrument and nothing else: 16 controls, a
+      # failure stops the run before any finding prints. Deliberately NOT
+      # `node scripts/audit-terms.mjs` — that form always exits 0, and wiring it
+      # here would add a check whose pass path is indistinguishable from never
+      # having run.
+      - name: Audit acronym detector (self-test)
+        run: node scripts/audit-terms.mjs --self-test
       # cyber-restructure-check.mjs is deliberately NOT run here. It compares the
       # cyber phases against a "before" snapshot captured at the start of the
       # 2026 restructure pass, and reads it from process.env.TEMP — a

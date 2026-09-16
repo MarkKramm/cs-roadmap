@@ -146,18 +146,77 @@ function escapeRe(s) {
 // Accepted shapes, all of which explain the term to a reader encountering it:
 //   Random Access Memory (RAM)          expansion then short form
 //   RAM (Random Access Memory)          short form then expansion
-//   MSP is a managed service provider   "X is a ..." definition
+//   CIDR notation (Classless ...)       term + noun, then expansion
+//   MSP is a Managed Service Provider   "X is a ..." definition, capitalised
 //   NOC — a Network Operations Centre   dash apposition
 //   ISACA's CISA (audit)                expansion in parentheses, singular
+//
+// Markdown emphasis is stripped before matching. Without that, one of the
+// commonest shapes in this repo — the term in bold, immediately followed by its
+// expansion — was invisible: `**SPF** (Sender Policy Framework)` does not match
+// `SPF\s*\(`, because `**` sits between the term and its own definition. The
+// audit reported terms as never explained while printing the explanation on the
+// same line as its evidence, which is the worst kind of detector defect: the
+// finding and the false positive are indistinguishable in the report.
+function stripEmphasis(s) {
+  return s.replace(/\*+/g, '');
+}
+
+// A table row is one line, and this repo explains a term by putting the
+// expansion in the cell beside it: `| **GRC** | Governance, Risk, and
+// Compliance |`. No parenthesis appears, so every pattern above misses it and
+// the report calls an explained term unexplained.
+//
+// The test is the acronym's own letters rather than a shape. Take the words of
+// the next cell that start with a capital, drop the joining words ("and", "of",
+// "the"), and the first letters must spell the acronym. That is precise: it
+// fires on `Governance, Risk, and Compliance` -> GRC and stays silent on
+// `| **SIEM** | Collects logs from many sources |`, which a pattern matching
+// "a capitalised phrase follows" would wrongly accept. A spelling test cannot
+// be satisfied by an unrelated description, which is the property worth having.
+const JOINERS = new Set(['and', 'of', 'the', 'for', 'in', 'to', 'a', 'an']);
+
+function initialsSpell(line, idx, acr) {
+  const bar = line.indexOf('|', idx);
+  if (bar === -1) return false;
+  const rest = line.slice(bar + 1);
+  const end = rest.indexOf('|');
+  const cell = end === -1 ? rest : rest.slice(0, end);
+
+  const words = cell.match(/\b[A-Z][A-Za-z-]*\b/g) || [];
+  const initials = words
+    .filter((w) => !JOINERS.has(w.toLowerCase()))
+    .map((w) => w[0].toUpperCase())
+    .join('');
+  return initials === acr.toUpperCase();
+}
+
 function expandedAt(text, idx, acr) {
   const lineStart = text.lastIndexOf('\n', idx - 1) + 1;
   const lineEnd = text.indexOf('\n', idx);
-  const line = text.slice(lineStart, lineEnd === -1 ? text.length : lineEnd);
+  const raw = text.slice(lineStart, lineEnd === -1 ? text.length : lineEnd);
+  const line = stripEmphasis(raw);
 
+  // Dashes are inside the character class on purpose. "UID (user ID — the
+  // number Linux uses internally)" is a definition, and an em-dash in the
+  // middle of the gloss is the curriculum's normal punctuation, so a class of
+  // [A-Za-z0-9 -] alone rejected it and the term was reported as never
+  // explained with its explanation printed as the evidence.
   const parenAfter = new RegExp(
-    escapeRe(acr) + 's?\\s*\\([A-Za-z][A-Za-z0-9 -]{3,}\\)',
+    escapeRe(acr) + 's?\\s*\\([A-Za-z][A-Za-z0-9 —–-]{3,}\\)',
   );
   if (parenAfter.test(line)) return true;
+
+  // "CIDR notation (Classless Inter-Domain Routing)" — the term carries a noun
+  // and the expansion follows the pair. Exactly one lowercase word is allowed
+  // between the acronym and the opening bracket, which is tight on purpose: it
+  // admits "CIDR notation (" and "TLS record (" while rejecting a description
+  // that happens to end in a parenthetical, because "API is a black box (see
+  // below)" has a second word where this pattern needs the bracket.
+  const parenAfterWithNoun = new RegExp(
+    escapeRe(acr) + 's?\\s+[a-z][a-z0-9-]*\\s*\\([A-Za-z][A-Za-z0-9 —–-]{3,}\\)',
+  );
+  if (parenAfterWithNoun.test(line)) return true;
 
   const parenBefore = new RegExp(
     '[A-Z][A-Za-z0-9-]*(?:\\s+[A-Za-z0-9][A-Za-z0-9-]*){1,5}\\s*\\(\\s*' +
@@ -166,13 +225,91 @@ function expandedAt(text, idx, acr) {
   );
   if (parenBefore.test(line)) return true;
 
+  // The expansion has to be capitalised to count. "MSP is a managed service
+  // provider" reads as a definition to a human, but accepting a lowercase
+  // common-noun phrase here also accepts "The API is a black box", and that
+  // second shape is a description, not an expansion. Over-reporting a term as
+  // unexplained is recoverable; silently declaring one explained is not.
   const isA = new RegExp(escapeRe(acr) + 's?\\s+is\\s+(?:an?|the)\\s+[A-Z]');
   if (isA.test(line)) return true;
 
-  const apposition = new RegExp(escapeRe(acr) + 's?\\s+[—–-]\\s+[A-Z]');
+  // The article is optional, because "NOC — a Network Operations Centre" and
+  // "NOC — Network Operations Centre" are both definitions. The earlier pattern
+  // required a capital immediately after the dash, so it missed the first of
+  // them, which is the form the curriculum uses.
+  const apposition = new RegExp(
+    escapeRe(acr) + 's?\\s+[—–-]\\s+(?:an?\\s+|the\\s+)?[A-Z]',
+  );
   if (apposition.test(line)) return true;
 
+  // The expansion sitting in the next table cell, verified by initials.
+  if (initialsSpell(line, line.indexOf(acr), acr)) return true;
+
   return false;
+}
+
+// Controls for the expansion detector, in the same discipline as audit-refs.
+// The failure being guarded against is silent in both directions: a detector
+// that has stopped recognising a shape reports "never explained", and a
+// detector that has started recognising too much reports nothing at all. Both
+// are just output. The must-fire cases are shapes the curriculum contains,
+// including the bold-then-parenthesis form that was broken; the must-not-fire
+// cases are the near-misses a looser pattern starts accepting, because a
+// description is not a definition.
+const CONTROLS = [
+  ['Random Access Memory (RAM) is the main store.', 'RAM', true],
+  ['This is called a NOC (Network Operations Centre).', 'NOC', true],
+  ['Holds **SPF** (Sender Policy Framework), which proves the sender.', 'SPF', true],
+  ['Expected: your username, your **UID** (user ID — the number Linux uses) and groups.', 'UID', true],
+  ['**CIDR notation** (Classless Inter-Domain Routing) is the shortcut.', 'CIDR', true],
+  ['A NOC — a Network Operations Centre — is staffed around the clock.', 'NOC', true],
+  ['The queue depth is sampled as Queue Length (QLEN) per second.', 'QLEN', true],
+  ['SPF is the record you add to your DNS zone.', 'SPF', false],
+  ['The API is rate limited to ten calls a second.', 'API', false],
+  ['The API is a black box (see the appendix).', 'API', false],
+  ['CIDR blocks are written with a suffix, not a full mask.', 'CIDR', false],
+  ['A DPO is accountable for the notification decision.', 'DPO', false],
+  ['| **GRC** | Governance, Risk, and Compliance | Writes policies |', 'GRC', true],
+  ['| **DPO** | Data Protection Officer | Owns the notification call |', 'DPO', true],
+  ['| **SIEM** | Collects logs from many sources | A platform, not a process |', 'SIEM', false],
+  ['| **SOC** | A team of analysts on shift | Not a tool at all |', 'SOC', false],
+];
+
+function runControls() {
+  const failed = [];
+  for (const [line, acr, expected] of CONTROLS) {
+    const got = expandedAt(line, line.indexOf(acr), acr);
+    if (got !== expected) failed.push({ line, acr, expected, got });
+  }
+  return failed;
+}
+
+// The controls run on EVERY invocation and a failure stops the audit before a
+// single finding is printed. This mirrors audit-refs deliberately: a detector
+// nobody tests is a detector nobody can trust, and this one was quietly
+// misreporting emphasis-wrapped definitions as never explained. Note the
+// declaration order — runControls reads CONTROLS, so the call sits below that
+// const. Calling it above produced `Cannot access 'CONTROLS' before
+// initialization` in the sibling script, which is the loud failure that made
+// the omission visible there.
+const controlFailures = runControls();
+if (controlFailures.length) {
+  process.stdout.write('ACRONYM AUDIT — SELF-TEST FAILED\n\n');
+  for (const f of controlFailures) {
+    process.stdout.write(`  ${f.acr}  on "${f.line}"\n`);
+    process.stdout.write(
+      `      expected ${f.expected ? 'FIRE' : 'silent'}, got ${f.got ? 'FIRE' : 'silent'}\n`,
+    );
+  }
+  process.stdout.write('\nThe expansion detector is not trustworthy; no findings printed.\n');
+  process.exit(1);
+}
+
+if (process.argv.includes('--self-test')) {
+  process.stdout.write(
+    `expansion detector: ${CONTROLS.length} controls, 0 failed\n`,
+  );
+  process.exit(0);
 }
 
 const files = collect();
@@ -275,7 +412,10 @@ const DOMAIN = byClass(neverExpanded, 'domain');
 const ASSUMED = byClass(neverExpanded, 'assumed');
 const NOT_INIT = byClass(neverExpanded, 'not-an-initialism');
 
-process.stdout.write('ACRONYM AUDIT — measurement, not a gate\n\n');
+process.stdout.write('ACRONYM AUDIT — measurement, not a gate\n');
+process.stdout.write(
+  `expansion detector: ${CONTROLS.length} controls, 0 failed (--self-test runs only these)\n\n`,
+);
 process.stdout.write(`files scanned: ${files.length}\n`);
 process.stdout.write(`distinct shortened forms: ${distinctTotal}\n`);
 process.stdout.write(`  expanded at first use: ${distinctTotal - findings.length}\n`);
