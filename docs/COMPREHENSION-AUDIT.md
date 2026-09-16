@@ -246,6 +246,73 @@ Two limits remain, and both are now recorded rather than assumed away:
   there are dozens — is an author's estimate that no reader has ever measured. That is the
   largest untested claim in the repository, and no amount of re-reading will settle it.
 
+---
+
+## Third pass — the advance track
+
+The two passes above covered the 23 entry-level phases. The advance track — six phases, ~75,000
+words — had never been read by anyone but its author, and this pass closed that gap: one reader
+per phase, six in total, working from the same brief.
+
+**45 findings were reported, and about nine did not survive re-checking against the source.**
+Those nine are not recorded individually, because a finding that does not reproduce has no line
+number to cite; what is worth recording is the ratio. Roughly one in five was wrong, which is
+between the first entry-level pass (two wrong of many) and the second (five rejected as false
+positives). A reader who reports nothing is more suspect than one who reports something wrong.
+
+### The findings that were real
+
+| Class | Phase | What it was |
+|---|---|---|
+| Arithmetic that does not close | advance 01 | stated 14,880 minutes where its own script computes `1,231 × 12 + 9 × 45 = 15,177` |
+| A retired identifier | advance 01 | `T1050` for Process Injection, renumbered to T1055 before ATT&CK v7 |
+| Two people in one seat | advance 03 | Ops to J. Lim and Scribe to M. Santos in the declaration, reversed everywhere else |
+| A term promised and never delivered | advance 03 | `unified command` in the topic list, absent from all 1,027 lines |
+| A promise half-kept | advance 03 | topics offered "what adapts and what does not"; only the first half was covered |
+| Wrong tooling in a worked example | advance 05 | `Get-Service SysmonDrv` and a config path that does not exist as printed |
+| A table that does not sum | advance 06 | four KPI / three KCI / five KRI rows against prose saying otherwise |
+| A stated range against its own parts | advance 05 | 46–62 hours where the parts sum to 46–66 |
+
+### The five that needed verification rather than a sentence
+
+All five are in advance 04, and all five were held back from the first batch of fixes because
+each turns on a technical claim. **None needed an external source: the file argues against
+itself in every case**, which is the reason they are worth citing here as a class.
+
+- **The break-glass trust policy denied every assumption it was written to allow.** The phase
+  defines `aws:MultiFactorAuthPresent` (line 764) as a property of the *AWS credentials making
+  the call*, states (768) that the MFA context is not propagated through a chain, and states
+  again (1873) that it is false on a chained assumption. It then prints a policy whose Action is
+  `sts:AssumeRoleWithSAML` with that key required to be true. A federated role is handed its
+  credentials by the IdP's assertion — the MFA happened at the IdP, before the assertion was
+  signed, and is invisible to these keys. The policy would have denied the role for everyone,
+  including the person who did present MFA.
+- **A command-line example read a profile nothing created.** `aws sts assume-role` prints
+  credentials to stdout and writes no profile, so `aws configure get role.access_key` was looking
+  for something that never existed.
+- **A CI workflow described as using OIDC while holding no credential at all.** `permissions:
+  contents: read`, no `id-token: write`, no credential step — because it never calls AWS. It
+  plans and evaluates policy locally. The OIDC comparison was to a design it does not use.
+- **A cross-reference to a pattern that exists nowhere.** `DenyOutsideRegionAndBreakGlass` appeared
+  exactly once in the file: in the sentence citing it as being in Part 2.
+- **A free-tier claim that was true except for the one policy its own table said to build.**
+  Conditional Access is Entra ID **P1**. The sibling cyber phase says so plainly at its line 380,
+  which makes this an internal contradiction rather than an external one.
+
+### What this pass says about the method
+
+**The instrument that found the advance-04 defects was the phase's own prose.** Every one of the
+five is a place where two statements in one file cannot both be true, and reading for that is a
+different activity from reading for "does this teach well". The entry-level passes were mostly
+looking for the second thing; the highest-yield findings here came from the first.
+
+**Two guards caught the fixer, not the content.** While the five were being applied, the
+readability gate went red on three paragraphs written during the fix (130, 122 and 112 words),
+and `audit-refs` flagged `Phase 09` inside a phase-04 file as a reference to advance phase 9.
+Both were mine, both were caught before the commit, and both are the same lesson as the
+`renderInline` bug: a passing suite is not evidence that a change was correct, only that the
+checks it runs did not notice.
+
 ## The pattern worth keeping
 
 Every one of the four structural classes above is invisible to a guard that reads a file one
@@ -253,3 +320,10 @@ line at a time, because each is a claim about *two* places that disagree. That i
 for a new guard — the acronym experiment shows how badly a semantic guard generalises. It is an
 argument for this audit existing as a periodic human read, and for the findings being written
 down with line numbers so the next read starts from them.
+
+**The advance pass added one refinement to that.** The highest-yield question was not "can a
+beginner follow this" — it was "do these two sentences both claim to be true". That question is
+closer to machine-checkable than the comprehension question is, and `audit-refs.mjs` and
+`audit-time-budget.mjs` are the two instances of it that already gate. The rest still needs a
+reader, and a reader who is told to look for self-contradiction finds more than one told to look
+for difficulty.
