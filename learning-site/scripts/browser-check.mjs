@@ -44,18 +44,27 @@ const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
 // Every engine this script can drive, grouped by the family that decides which
 // flags it needs. The grouping is load-bearing rather than cosmetic: Chromium
-// takes `--headless=new` and speaks CDP over `--remote-debugging-port`, while
-// Firefox takes `-headless` and speaks the same protocol over
-// `--remote-debugging-port` only from version 86, with `--remote-allow-hosts`
-// needed when it binds to anything but localhost. A flat list would have to guess
-// which flag set to use, and guessing wrong is a browser that never starts and a
-// run that times out looking like a slow machine.
+// takes `--headless=new` and speaks CDP over `--remote-debugging-port`.
 //
-// WHY THE ENGINE IS NOW SELECTABLE
-// This list used to be Chromium-only, and the file's own checkpoint recorded the
-// consequence: 79 checks on two engines, both Chromium, so a defect that appears
-// only in Firefox or WebKit was invisible to every guard in the repository. Two
-// Chromium builds are two data points about one engine, not two engines.
+// THE FIREFOX ENTRY IS A RECORDED DEAD END, NOT A SUPPORTED TARGET.
+//
+// This file briefly claimed Gecko as a first-class engine. It is not one, and the
+// CI leg written to prove it failed on its first run. The cause is not a bug here:
+// **Mozilla removed Firefox's CDP implementation.** Its own documentation for
+// `remote.active-protocols` states plainly: "With the end of the CDP support,
+// WebDriver BiDi is the only available protocol, and the preference was removed in
+// Firefox 141." So `--remote-debugging-port` no longer exposes a CDP endpoint that
+// `Browser.getVersion` can reach, and no flag or path list can fix that. Driving
+// Firefox means implementing WebDriver BiDi — different framing, different
+// handshake, a real protocol implementation rather than a configuration change.
+//
+// The paths and flag are kept deliberately, because the failure they produce is
+// the useful part: with `BROWSER_ENGINE=firefox` this script finds the binary,
+// launches it, fails to find a CDP target, and exits 1 saying so. That is what
+// turned a silent wrong-engine run into a legible failure. What must NOT happen is
+// for this entry to be read as "Firefox is covered" — it is not, and the honest
+// state of this repository is that it verifies **Chromium only**, across two
+// builds (Edge locally, Chrome/Chromium in CI).
 const ENGINES = {
   chromium: {
     label: 'Chromium',
@@ -73,9 +82,12 @@ const ENGINES = {
       '/Applications/Microsoft Edge.app/Contents/MacOS/Microsoft Edge',
     ],
   },
+  // NOT SUPPORTED — see the block comment above. Kept so a named-engine request
+  // fails loudly and explainably rather than silently resolving to Chromium.
   firefox: {
-    label: 'Gecko',
+    label: 'Gecko (CDP removed by Mozilla — cannot be driven this way)',
     headlessFlag: '-headless',
+    cdpSupported: false,
     paths: [
       'C:\\Program Files\\Mozilla Firefox\\firefox.exe',
       'C:\\Program Files (x86)\\Mozilla Firefox\\firefox.exe',
@@ -87,13 +99,11 @@ const ENGINES = {
   },
 };
 
-// Which engine to look for. `auto` keeps the old behaviour — first match wins,
-// which on this machine and on the ubuntu runner is Chromium — so an existing
-// invocation is unchanged. CI sets this per matrix leg so each engine is
-// requested by name, and a leg that cannot find its engine FAILS rather than
-// silently measuring the other one. That distinction is the whole point: a
-// matrix leg that ran Chromium while claiming Firefox would be worse than no
-// matrix at all.
+// Which engine to look for. `auto` keeps the original behaviour — first match
+// wins, which on this machine and on the ubuntu runner is Chromium — so an
+// existing invocation is unchanged. Naming an engine is still supported and still
+// fails loudly when the engine cannot be found, because that guard is what made
+// the Firefox dead end legible instead of silent.
 const WANT = (process.env.BROWSER_ENGINE || 'auto').toLowerCase();
 
 function findBrowser() {
@@ -325,6 +335,28 @@ async function main() {
   const browser = found.path;
   const engineName = found.engine;
   const spec = found.spec || null;
+
+  // Refuse an engine that cannot be driven by this protocol, and say why.
+  //
+  // Without this the run proceeds, launches Firefox, and dies later at
+  // `findPageTarget` with "browser never exposed a page target on port 9222" —
+  // technically true and completely unhelpful, because it reads as a flaky
+  // startup or a slow machine. The real reason is that Mozilla removed CDP, and
+  // a script that knows that should say so.
+  if (spec && spec.cdpSupported === false) {
+    process.stdout.write('BROWSER CHECK FAILED — ' + engineName + ' cannot be driven by this script.\n\n');
+    process.stdout.write('  This script speaks the Chrome DevTools Protocol (CDP).\n');
+    process.stdout.write('  Mozilla removed Firefox\'s CDP implementation: its documentation for\n');
+    process.stdout.write('  `remote.active-protocols` states that "with the end of the CDP support,\n');
+    process.stdout.write('  WebDriver BiDi is the only available protocol, and the preference was\n');
+    process.stdout.write('  removed in Firefox 141."\n\n');
+    process.stdout.write('  So `--remote-debugging-port` exposes no CDP endpoint here, and no flag\n');
+    process.stdout.write('  or path change fixes it. Firefox needs a WebDriver BiDi implementation,\n');
+    process.stdout.write('  which is a different protocol rather than a configuration change.\n\n');
+    process.stdout.write('  This repository therefore verifies Chromium only. Gecko and WebKit are a\n');
+    process.stdout.write('  known, named gap. Run without BROWSER_ENGINE to use Chromium.\n');
+    process.exit(1);
+  }
 
   process.stdout.write('browser: ' + browser + '\n');
   process.stdout.write('engine:  ' + engineName + (spec ? ' (' + spec.label + ')' : '') + '\n');
