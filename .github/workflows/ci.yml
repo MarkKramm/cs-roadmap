@@ -142,6 +142,16 @@ jobs:
       # noise, because failing on infrastructure teaches people to ignore it.
       - name: Audit NIST publications for withdrawal
         run: node scripts/audit-nist-current.mjs
+      # A stale LESSON misinforms a reader. A stale ANSWER KEY tells a learner
+      # they are WRONG for being right, which is the worst outcome a self-study
+      # curriculum can produce. The 2021->2025 OWASP renumbering moved six of
+      # ten categories, so any quiz that binds a category NUMBER to a category
+      # NAME may now have a wrong key. Checked separately from the lesson text
+      # because a quiz is the one place the corpus asserts an answer.
+      - name: Audit quiz answer keys for stale OWASP numbering
+        run: node scripts/audit-quiz-owasp.mjs
+      - name: Test quiz answer-key controls
+        run: node scripts/test-audit-quiz-owasp.mjs
       # A command can be named correctly and written wrongly. IT 02 stated DISM
       # in full at one place and abbreviated it to `DISM /RestoreHealth` in a
       # summary table 300 lines later — a form that throws if a beginner types

@@ -2,6 +2,20 @@
 
 A lightweight decision log (ADR-style). Newest first.
 
+## D-042 — An answer key is not a lesson, and a guard that prints without failing is worse than no guard
+
+- **Date:** 2026-09-16
+- **Status:** Accepted
+- **Context:** After restructuring phase 14's OWASP content (D-041), the obvious follow-up question was whether the 2021→2025 renumbering had left **any quiz asking a question whose correct answer is now wrong**. That is a different failure class from everything checked so far.
+- **A stale lesson and a stale answer key are not the same defect.** A stale lesson misinforms a reader, who may notice. **A stale answer key tells a learner they are WRONG for being right** — the worst outcome a self-study curriculum can produce, because the reader is actively penalised for correct knowledge and has no way to detect it.
+- **Decision:** `scripts/audit-quiz-owasp.mjs` checks whether any quiz question binds an OWASP category **number** to a category **name**. That binding is the only form the renumbering can break.
+- **Result: clean. 128 questions across 10 quizzes, zero bindings.** The renumbering cannot have staled a key. Two apparent hits were false positives — a **Checklist** section that follows a quiz, and `A10` matching inside a networking answer about **port 445**.
+- **Consequences:**
+  - **The guard had no `process.exit(1)` and the control suite caught it.** It *printed* `OWASP NUMBER + CATEGORY IN AN ANSWER — 1 question(s) to read` and exited **0**, so CI would have stayed green on a real defect. Three "must fail" controls failed against it. **A guard that detects and does not fail is worse than no guard, because it looks like coverage** — the failure is invisible in the output, which is the same shape as the encoding guard's wrong character class (D-039) and the framework guard's substring match (D-040).
+  - **Fixing the exit code immediately exposed a real false positive.** Searching the whole question block included the `**Why:**` explanation, which may legitimately *discuss* a category — "A10 is not a category reference here" is a sentence *about* a wrong reading, not an answer. Scope is now the question and its options. **The false positive only became visible once the guard could actually fail**, which is why the two bugs were inseparable.
+  - **The control harness itself was wrong first.** `execFileSync` inherited the caller's working directory, so the guard never saw the probe file — every "must fail" control passed silently. Fixed by passing `cwd` explicitly. **A control that cannot fail is the same defect one level up.**
+  - **Three questions in a row, the honest answer was "no defect here."** The SOC 2/OWASP subagent reported the same for the "is it called a standard?" claim, and refused to invent one. **A verification method that cannot return a clean result is not verification** — it is a defect generator.
+
 ## D-041 — A citation that resolves is not a citation that is current, and the difference is invisible to every link checker
 
 - **Date:** 2026-09-16
