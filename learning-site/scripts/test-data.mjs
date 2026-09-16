@@ -88,6 +88,13 @@ const POPULATED = {
   // Two entries rather than one so the round-trip check exercises a map with
   // more than a single member.
   "cs-roadmap:quiz:v1": JSON.stringify({ "it-01-q01": 0, "it-01-q02": 2 }),
+  // The narrowest allowed entry: `id` and `name` only. A reader who has just
+  // written a certification down, before checking the price or picking a date,
+  // must survive a backup round trip — so the fixture is deliberately missing
+  // every optional field, not filled in.
+  "cs-roadmap:certifications:v1": JSON.stringify([
+    { id: "c1", name: "CompTIA Security+" },
+  ]),
   "cs-roadmap:time-budget:v1": JSON.stringify("focused"),
 };
 
@@ -244,6 +251,15 @@ const POPULATED = {
     ["cs-roadmap:quiz:v1", { "it-01-q01": true }, "a boolean index is not a choice"],
     ["cs-roadmap:quiz:v1", { "": 0 }, "a question id must be non-empty"],
     ["cs-roadmap:quiz:v1", { "it-01-q01": 0, "it-01-q02": "x" }, "one bad entry rejects the whole file"],
+    // A certification with no name is not a certification. The validator requires
+    // `id` and `name` only, so a restore refuses a nameless entry rather than
+    // importing a blank row the reader cannot identify or delete safely.
+    ["cs-roadmap:certifications:v1", "nope", "certifications must be an array"],
+    ["cs-roadmap:certifications:v1", [{ id: "c1" }], "a certification needs a name"],
+    ["cs-roadmap:certifications:v1", [{ name: "Security+" }], "a certification needs an id"],
+    ["cs-roadmap:certifications:v1", [{ id: "c1", name: "" }], "an empty name is not a name"],
+    ["cs-roadmap:certifications:v1", [{ id: "", name: "Security+" }], "an empty id is not an id"],
+    ["cs-roadmap:certifications:v1", [{ id: "c1", name: "Security+" }, { id: "c2" }], "one bad entry rejects the whole file"],
   ];
   for (const [key, value, why] of cases) {
     const v = inspect({ format: FORMAT, version: VERSION, data: { [key]: value } });
@@ -269,6 +285,7 @@ const POPULATED = {
         "it-01-x": { note: "a note", answers: { "it-01-x-t01": "an answer" } },
       },
       "cs-roadmap:quiz:v1": { "it-01-q01": 0, "it-01-q02": 2 },
+      "cs-roadmap:certifications:v1": [{ id: "c1", name: "CompTIA Security+" }],
       "cs-roadmap:time-budget:v1": "deep",
     },
   };

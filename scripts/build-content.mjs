@@ -533,7 +533,13 @@ for (const track of Object.keys(byTrack)) {
 // channel. Calling it later would push errors into an array nobody reads again
 // — a build that fails silently, which is the failure mode this whole pipeline
 // exists to avoid.
-const shared = buildShared(join(CONTENT, "shared"), (m) => fail("shared", m));
+//
+// It takes the CONTENT root rather than a single directory, because the
+// documents now come from two tracks: `career-roadmaps/shared/` and three
+// standalone files in `career-roadmaps/cybersec-roadmap/` that are not phases
+// and so are invisible to the phase walk above. Each DOCS entry names its own
+// directory. See shared-content.mjs and D-020.
+const shared = buildShared(CONTENT, (m) => fail("shared", m));
 
 if (errors.length) {
   console.error("CONTENT BUILD FAILED — " + errors.length + " error(s):");

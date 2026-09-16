@@ -9,6 +9,7 @@ import { countDone } from "../hooks/useProgress.js";
 import { readStarts } from "../hooks/useSchedule.js";
 import { readPortfolio } from "../hooks/usePortfolio.js";
 import { readApplications } from "../hooks/useApplications.js";
+import { readCertifications } from "../hooks/useCertifications.js";
 import { readNotes } from "../hooks/useNotes.js";
 import { renderInline } from "../lib/renderInline.jsx";
 import { paceFor, fmtWeeks, fmtDate } from "../lib/pace.js";
@@ -187,9 +188,11 @@ export default function Dashboard({
   // that lies, and the reader has no way to tell which of the two numbers is
   // wrong.
   const toolCount = allTools().length;
+  const certCount = readCertifications().length;
   const readiness = [
     { id: "portfolio", label: "Portfolio", value: portfolioCount },
     { id: "applications", label: "Applications", value: applicationCount },
+    { id: "certifications", label: "Certifications", value: certCount },
     { id: "tools", label: "Tools", value: toolCount },
   ];
 

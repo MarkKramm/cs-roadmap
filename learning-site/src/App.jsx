@@ -19,6 +19,7 @@ import PhaseDetail from "./pages/PhaseDetail.jsx";
 import ToolsLibrary from "./pages/ToolsLibrary.jsx";
 import Portfolio from "./pages/Portfolio.jsx";
 import Applications from "./pages/Applications.jsx";
+import Certifications from "./pages/Certifications.jsx";
 import Search from "./pages/Search.jsx";
 import Schedule from "./pages/Schedule.jsx";
 import Shared from "./pages/Shared.jsx";
@@ -39,6 +40,7 @@ const VIEWS = [
   { id: "tools", label: "Tools" },
   { id: "portfolio", label: "Portfolio" },
   { id: "applications", label: "Applications" },
+  { id: "certifications", label: "Certifications" },
 ];
 
 // Given to Search so `/` and Ctrl+K can drop the cursor into the box rather than
@@ -407,6 +409,8 @@ export default function App() {
           <Portfolio />
         ) : view === "applications" ? (
           <Applications />
+        ) : view === "certifications" ? (
+          <Certifications />
         ) : (
           <Dashboard
             track={track}

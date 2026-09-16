@@ -1278,6 +1278,134 @@ async function main() {
     // behind that changes what a subsequent assertion sees.
     await cdp.eval(`(() => { window.localStorage.removeItem('cs-roadmap:quiz:v1'); return true; })()`);
 
+    // ---------------------------------------------------------------------
+    // 15b. Certifications — the round trip a render test cannot see
+    // ---------------------------------------------------------------------
+    //
+    // The smoke test renders the empty state and asserts the copy, but it runs
+    // without localStorage, so it can never observe an entry being written and
+    // read back. That round trip is the entire feature: the hook is the only
+    // thing between the reader's typing and their next visit, and nothing above
+    // exercises it.
+    //
+    // The record is written through the real form rather than by seeding the key,
+    // because a check that seeds storage verifies the READER, not the writer. If
+    // the form stopped calling `add()` this would still pass on a seeded key.
+    const openedCerts = await cdp.eval(`(() => {
+      const b = [...document.querySelectorAll('.sidebar__link')]
+        .find(x => /Certifications/.test(x.textContent));
+      if (!b) return false;
+      b.click();
+      return true;
+    })()`);
+    check('certifications: reachable from the sidebar', openedCerts);
+    await cdp.waitFor(`!!document.querySelector('.certifications')`, 'the certifications page', 8000);
+    await sleep(300);
+
+    const certEmpty = await cdp.eval(
+      `(() => {
+        const el = document.querySelector('.certifications');
+        return { text: el ? el.textContent : '', table: !!document.querySelector('.app-table') };
+      })()`,
+    );
+    check(
+      'certifications: starts empty for a new reader',
+      certEmpty.table === false && /No certifications yet/.test(certEmpty.text),
+      'table=' + certEmpty.table,
+    );
+
+    // Fill the form the way a reader does.
+    await cdp.eval(`(() => {
+      const b = [...document.querySelectorAll('.certifications button')]
+        .find(x => /Add a certification/.test(x.textContent));
+      if (b) b.click();
+      return !!b;
+    })()`);
+    await cdp.waitFor(`!!document.querySelector('.certifications form')`, 'the certification form', 8000);
+
+    await cdp.eval(`(() => {
+      const form = document.querySelector('.certifications form');
+      const input = form.querySelector('input[type="text"]');
+      const setter = Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, 'value').set;
+      setter.call(input, 'CompTIA Security+');
+      input.dispatchEvent(new Event('input', { bubbles: true }));
+      return input.value;
+    })()`);
+    await sleep(200);
+
+    const submitted = await cdp.eval(`(() => {
+      const form = document.querySelector('.certifications form');
+      const btn = [...form.querySelectorAll('button')].find(b => /Add certification/.test(b.textContent));
+      if (!btn || btn.disabled) return 'disabled';
+      btn.click();
+      return 'clicked';
+    })()`);
+    check('certifications: the add button enables once a name is typed', submitted === 'clicked', submitted);
+    await sleep(400);
+
+    const stored = await cdp.eval(
+      `(() => {
+        const raw = window.localStorage.getItem('cs-roadmap:certifications:v1');
+        let parsed = null;
+        try { parsed = raw ? JSON.parse(raw) : null; } catch { parsed = 'unparseable'; }
+        return {
+          count: Array.isArray(parsed) ? parsed.length : -1,
+          name: Array.isArray(parsed) && parsed[0] ? parsed[0].name : null,
+          status: Array.isArray(parsed) && parsed[0] ? parsed[0].status : null,
+          inTable: !!document.querySelector('.app-table'),
+          shown: (document.querySelector('.app-table') || {}).textContent || '',
+        };
+      })()`,
+    );
+    check(
+      'certifications: adding one writes it to storage',
+      stored.count === 1 && stored.name === 'CompTIA Security+',
+      'count=' + stored.count + ' name=' + stored.name,
+    );
+    check(
+      'certifications: the new entry is on the page',
+      stored.inTable && /CompTIA Security\+/.test(stored.shown),
+      'table=' + stored.inTable,
+    );
+    // The default status, which is the one the phase leaves a reader in. If the
+    // form ever defaulted to something further along, that would be the product
+    // telling the reader they have progressed when they have only written a name.
+    check(
+      'certifications: an unnamed status defaults to considering',
+      stored.status === 'considering',
+      'status=' + stored.status,
+    );
+
+    // The round trip. This is the assertion that would have caught the quiz bug,
+    // where answers were held in component state and never reached storage.
+    await cdp.send('Page.reload');
+    await cdp.waitFor(`!!document.querySelector('.sidebar')`, 'the shell after reload', 8000);
+    await cdp.eval(`(() => {
+      const b = [...document.querySelectorAll('.sidebar__link')]
+        .find(x => /Certifications/.test(x.textContent));
+      if (b) b.click();
+      return !!b;
+    })()`);
+    await cdp.waitFor(`!!document.querySelector('.certifications')`, 'certifications after reload', 8000);
+    await sleep(400);
+    const survived = await cdp.eval(
+      `(() => {
+        const t = document.querySelector('.app-table');
+        return { present: !!t, text: t ? t.textContent : '' };
+      })()`,
+    );
+    check(
+      'certifications: an entry survives a page reload',
+      survived.present && /CompTIA Security\+/.test(survived.text),
+      'present=' + survived.present,
+    );
+
+    // Clean up, so this run does not leave a certification in the profile and
+    // change what a later check or a re-run sees.
+    await cdp.eval(
+      `(() => { window.localStorage.removeItem('cs-roadmap:certifications:v1'); return true; })()`,
+    );
+
     // A phase with a quiz must render a real quiz, not an empty scaffold.
     //
     // THIS CHECK REPLACED ONE THAT HAD BECOME VACUOUS, AND BOTH STEPS MATTER.

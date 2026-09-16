@@ -185,7 +185,18 @@ Three, and all three are load-bearing.
 
 ## Still open
 
+**This list is checked against the code, not carried forward.** Two entries here —
+the print stylesheet and progress export — were listed as open long after both had
+shipped, and they are recorded in `DECISIONS.md` as **D-017** and **D-016**. A
+"still open" list that names finished work is worse than no list: it is the one
+place in this repository that could tell a future contributor to build something
+that already exists, and it did so for a version of this file's whole lifetime.
+**When an item here ships, delete it in the same commit.**
+
 - **Icon set.** None. Components use text labels and a single check glyph.
 - **Animation library.** None. Transitions are CSS-only and under 150ms, per the anti-patterns above. A `prefers-reduced-motion` block zeroes the duration for readers who ask the system for less motion.
-- **Print stylesheet.** A phase cannot yet be taken offline on paper.
-- **Progress export.** Progress, portfolio and applications live in three `localStorage` keys with no way to move them between machines or back them up. The dashboard rail now surfaces the counts, which makes the risk visible without closing it.
+- **A glossary.** The curriculum defines 272 domain acronyms and a guard
+  (`scripts/audit-terms.mjs`) verifies each is explained **where it is used**, but
+  there is no way to look one up on its own. Closing this is more than a page: the
+  guard checks explanations in context and never extracts them, so it needs new
+  build tooling to produce the data first.

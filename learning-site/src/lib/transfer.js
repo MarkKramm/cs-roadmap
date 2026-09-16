@@ -87,6 +87,15 @@ export const KEYS = [
     check: isQuizAnswers,
   },
   {
+    key: "cs-roadmap:certifications:v1",
+    kind: "array of certification entries",
+    // Only `id` and `name` are required, matching the hook: a reader who has just
+    // written down a certification they are considering can record it before they
+    // have checked the price or picked a date, and a validator demanding those
+    // fields would refuse to restore their own backup.
+    check: (v) => isEntryArray(v, ["id", "name"]),
+  },
+  {
     key: "cs-roadmap:time-budget:v1",
     kind: "one of quick | focused | deep",
     check: (v) => ["quick", "focused", "deep"].includes(v),
@@ -350,6 +359,8 @@ export function labelFor(key) {
     "lesson-sections": "Lesson sections ticked",
     portfolio: "Portfolio entries",
     applications: "Applications",
+    certifications: "Certifications",
+    quiz: "Quiz answers",
     schedule: "Schedule start dates",
     reading: "Reading position",
     "energy-mode": "Energy mode",

@@ -32,24 +32,71 @@ import { parseLesson } from "./lesson-ast.mjs";
 // The documents, in the order a reader should meet them. Anti-burnout first is
 // deliberate: on a plan this long, the rule that says a 25-minute day is a
 // success is more load-bearing than any resource link.
+//
+// WHY DOCUMENTS FROM THE CYBER TRACK SIT HERE TOO
+// `career-roadmaps/cybersec-roadmap/` carries three standalone documents that are
+// not phases, so `build-content.mjs` — which walks for `*-phase-*.md` — never
+// sees them, and until now nothing else did either: they had **zero references**
+// anywhere in the site. The cyber track tells the reader to consult them.
+//
+// This is not a new decision. D-020 named exactly this gap for
+// `career-roadmaps/shared/` and closed it by rendering those documents from a
+// build artifact. The same problem had simply been left open on the other track,
+// and the reader it strands is the same one: someone deciding whether a $0
+// budget can carry them, or whether one month of TryHackMe Premium is worth
+// buying — which is why `when-to-buy-thm-premium.md` matters more than its
+// length suggests.
+//
+// `dir` names the track directory so a document's source path stays honest in
+// the payload; it is not a routing concept. All three are `kind: "doc"` and
+// render through the same path as everything else — no new block types, no new
+// render branch. All three were checked against the parser before being listed:
+// **zero unparsed constructs**, so the build's unknown-block guard is a real
+// check on them rather than a formality.
 const DOCS = [
   {
+    dir: "shared",
     file: "anti-burnout-rules.md",
     id: "anti-burnout-rules",
     kind: "doc",
     blurb: "The rules that make a 34–112 week plan survivable. Read this first.",
   },
   {
+    dir: "shared",
     file: "weekly-tracker-template.md",
     id: "weekly-tracker-template",
     kind: "doc",
     blurb: "A one-page weekly template, meant to be copied rather than filled in here.",
   },
   {
+    dir: "shared",
     file: "resource-list.md",
     id: "resource-list",
     kind: "resources",
     blurb: "Every free resource the two tracks point at, grouped by subject.",
+  },
+  {
+    dir: "cybersec-roadmap",
+    file: "WHEN-TO-BUY-THM-PREMIUM.md",
+    id: "when-to-buy-thm-premium",
+    kind: "doc",
+    blurb:
+      "Whether to pay for TryHackMe Premium, and for how long — a $0-budget question answered honestly.",
+  },
+  {
+    dir: "cybersec-roadmap",
+    file: "FREE-TOOL-MAP.md",
+    id: "free-tool-map",
+    kind: "doc",
+    blurb: "Every paid tool the cyber track mentions, and the free alternative for it.",
+  },
+  {
+    dir: "cybersec-roadmap",
+    file: "TOOLBOX.md",
+    id: "cyber-toolbox",
+    kind: "doc",
+    blurb:
+      "The cyber track's toolkit, with the phase and practice task each tool belongs to.",
   },
 ];
 
@@ -118,20 +165,23 @@ function parseResources(markdown, fail) {
 /**
  * Build the shared-document payload.
  *
- * @param {string} sharedDir absolute path to career-roadmaps/shared
+ * @param {string} contentRoot absolute path to career-roadmaps — the root, not a
+ *   single track directory, because documents come from more than one track and
+ *   each DOCS entry names its own `dir`.
  * @param {(msg: string) => void} fail called for each contract violation
  * @returns {{generatedAt: string, docs: Array<object>}}
  */
-export function buildShared(sharedDir, fail) {
+export function buildShared(contentRoot, fail) {
   const docs = [];
 
   for (const spec of DOCS) {
-    const path = join(sharedDir, spec.file);
+    const rel = spec.dir + "/" + spec.file;
+    const path = join(contentRoot, spec.dir, spec.file);
     let markdown;
     try {
       markdown = readFileSync(path, "utf8");
     } catch {
-      fail("missing shared document: " + spec.file);
+      fail("missing shared document: " + rel);
       continue;
     }
 
@@ -141,11 +191,11 @@ export function buildShared(sharedDir, fail) {
       kind: spec.kind,
       title,
       blurb: spec.blurb,
-      sourcePath: "career-roadmaps/shared/" + spec.file,
+      sourcePath: "career-roadmaps/" + rel,
     };
 
     if (spec.kind === "resources") {
-      const groups = parseResources(markdown, (m) => fail(spec.file + ": " + m));
+      const groups = parseResources(markdown, (m) => fail(rel + ": " + m));
       const count = groups.reduce((n, g) => n + g.resources.length, 0);
       if (count === 0) fail(spec.file + ": parsed zero resource entries");
       docs.push({ ...base, groups, resourceCount: count });
@@ -161,7 +211,7 @@ export function buildShared(sharedDir, fail) {
     // checkbox branch in lesson-ast.mjs: the weekly tracker's `- [ ]` lines are
     // list items with a `checked` flag, not unknown constructs.
     for (const line of parsed.unknown) {
-      fail(spec.file + ": unsupported construct: " + line);
+      fail(rel + ": unsupported construct: " + line);
     }
 
     docs.push({

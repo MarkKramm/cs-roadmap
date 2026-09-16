@@ -129,6 +129,7 @@ try {
   const ToolsLibrary = await load("/src/pages/ToolsLibrary.jsx");
   const Portfolio = await load("/src/pages/Portfolio.jsx");
   const Applications = await load("/src/pages/Applications.jsx");
+  const Certifications = await load("/src/pages/Certifications.jsx");
   const Search = await load("/src/pages/Search.jsx");
   const Schedule = await load("/src/pages/Schedule.jsx");
   const PhaseNav = await load("/src/components/PhaseNav.jsx");
@@ -1047,6 +1048,36 @@ try {
       "shared.json contains no documents"
     );
 
+    // The three documents from the cyber track are named explicitly, because
+    // nothing else in this file would notice if they silently disappeared from
+    // the build. The loop below covers whatever `shared.json` happens to contain,
+    // so removing a document makes the corpus smaller and every remaining
+    // assertion still passes — a shrinking corpus is invisible to a per-document
+    // loop. These three had **zero references** anywhere in the site before they
+    // were listed, which is how they went unnoticed for the life of the project;
+    // a check that names them is what stops that recurring.
+    for (const id of ["when-to-buy-thm-premium", "free-tool-map", "cyber-toolbox"]) {
+      assert(
+        "Shared: the cyber track's " + id + " is reachable",
+        sharedData.docs.some((d) => d.id === id),
+        "a cyber-track document is missing from the corpus"
+      );
+    }
+
+    // Every document must name an honest source path, and it must be a path that
+    // exists. This is what caught the cost of adding a second source directory:
+    // the payload used to hardcode `career-roadmaps/shared/` for every entry, so
+    // a cyber document would have claimed to live somewhere it does not.
+    for (const doc of sharedData.docs) {
+      assert(
+        "Shared: " + doc.id + " names a real source path",
+        typeof doc.sourcePath === "string" &&
+          doc.sourcePath.startsWith("career-roadmaps/") &&
+          !doc.sourcePath.includes("//"),
+        "source path is missing or malformed: " + doc.sourcePath
+      );
+    }
+
     for (const doc of sharedData.docs) {
       const html = render(
         "Shared: " + doc.id,
@@ -1228,6 +1259,52 @@ try {
         html.includes("Add an application"),
         "no way to add the first application"
       );
+    }
+
+    // Certifications. Same reasoning as Applications: localStorage is unavailable
+    // in the server renderer, so this is the empty-state branch.
+    //
+    // This page is asserted rather than assumed because it was momentarily
+    // invisible to this file. The smoke test renders pages from an explicit list,
+    // so a new page that nobody adds here is silent: the suite passed at 234
+    // renders both with and without the page wired in. The count not changing was
+    // the only signal, and a count that does not change is not a check.
+    if (Certifications) {
+      const html = render("Certifications", createElement(Certifications));
+      if (html) {
+        assert(
+          "Certifications: heading",
+          html.includes("Certifications"),
+          "page heading not rendered"
+        );
+        assert(
+          "Certifications: empty state",
+          html.includes("No certifications yet"),
+          "empty-state message not rendered"
+        );
+        assert(
+          "Certifications: add affordance",
+          html.includes("Add a certification"),
+          "no way to record the first certification"
+        );
+        assert(
+          "Certifications: names the phase that asks for the decision",
+          html.includes("Phase 07"),
+          "the page does not say where the decision comes from"
+        );
+        // The no-shame rule, asserted rather than trusted. `deferred` is an
+        // outcome the phase explicitly endorses, so an empty-state or form that
+        // nudged the reader toward booking would be a defect. Checking the
+        // status vocabulary is present is what keeps the page honest if someone
+        // later "improves" it into a progress meter.
+        assert(
+          "Certifications: no percentage or completion language",
+          !/%|percent|complete|progress/i.test(
+            html.replace(/<[^>]+>/g, " ").replace(/Certifications/g, "")
+          ),
+          "the page grades the reader"
+        );
+      }
     }
   }
 
