@@ -2,6 +2,31 @@
 
 A lightweight decision log (ADR-style). Newest first.
 
+## D-040 — A summary of a versioned standard is a claim with a shelf life, and no self-consistency check can see it expire
+
+- **Date:** 2026-09-16
+- **Status:** Accepted
+- **Context:** Cyber verification pass 4 found a real defect in **four places in `01-phase-foundations.md`**: the phase taught that NIST CSF organises security work into **five** functions (Identify, Protect, Detect, Respond, Recover) — in a summary table, in a numbered lesson section headed "NIST CSF: the five functions", in a phase exit criterion, and in a resources row. **CSF 2.0 (2024) has six: it added Govern.**
+- **I verified this against the standard, not a blog.** NIST's own published text (CSWP 29), fetched from the DOI NIST serves and inflated from the PDF streams, says verbatim: *"This figure depicts the CSF Core as a hierarchy of **six Functions**, each of which contains multiple Categories"* and *"The inner layer of the wheel contains only the **Govern Function**. The outer layer, which surrounds the Govern circle, contains the **other five Functions**."* The pass had cited `digitalsecurityauthority.com` and a NIST blog post; neither is the standard.
+- **Why every guard in this repository passed over it.** Each was checking the text against *itself*:
+  - `lint-content` — the markdown was immaculate
+  - `audit-refs` — the `nist.gov/cyberframework` URL resolved perfectly
+  - `audit-quiz` — the phase quiz never mentioned the functions
+  - `audit-content` — the structure was intact
+  - AST diff, readability — five functions parsed and read as cleanly as six
+  - three comprehension passes — a beginner follows "five functions" without difficulty
+  - **`audit-encoding`** — every byte was valid UTF-8
+- **The corpus contradicted itself and nothing noticed.** `13-phase-grc-compliance.md` said **six** and listed Govern correctly, twice. Phase 01 said five. **Both were internally consistent, and nothing compares one phase to another.**
+- **Decision:**
+  - `scripts/audit-framework-claims.mjs` checks framework assertions whose **current value was read from the standard itself**, and records the source and the evidence quote for each rule. It is deliberately **narrow and evidence-based** — a broad "does this look stale" heuristic would flag correct content.
+  - **Explaining the history is legitimate and must not be flagged.** "CSF 2.0 added Govern to the five functions of CSF 1.1" teaches the reader why they will see five elsewhere; the guard's `allow` list exists for exactly this, and the corrected phase now says it.
+  - **The guard must be proved able to fail**: `scripts/test-audit-framework-claims.mjs` supplies **12 controls** — 4 shapes of the retired model must fail, and correct text, headings, historical notes, slash-separated lists and a CIS count must pass.
+- **Consequences:**
+  - **The first version of the rule flagged the corrected text.** Its pattern for "a list omitting Govern" matched `Identify, Protect, Detect, Respond, Recover`, which is a **substring of the correct six-function list**. Caught by running the guard against the fixed corpus before committing it. **A guard that flags correct content teaches people to ignore it**, so the pattern was anchored on the count word or on the list *starting* at Identify.
+  - **The control test then caught a second real bug.** The CIS rule required "CIS" *before* the number, so "CIS Controls provides 20 controls" was missed. Both shapes are now matched.
+  - **This class is the reason `UNVERIFIABLE` exists, turned up to eleven.** The IT pass produced 48 honest `UNVERIFIABLE` rows; this was an `OK`-shaped claim that had quietly become false. **A versioned standard summarised in a beginner curriculum is a time bomb with a long fuse**, and the only durable defence is a rule that names the version and quotes the evidence.
+  - **Phase 13 was right and phase 01 was wrong, and the reader hitting phase 01 first learned the wrong structure.** Order matters: the on-ramp is read before the depth phase, so the error landed first.
+
 ## D-039 — A guard needs both structural checks and a known-bad list, because each misses what the other catches
 
 - **Date:** 2026-09-16

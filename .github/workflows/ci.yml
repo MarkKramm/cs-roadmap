@@ -120,6 +120,19 @@ jobs:
         run: node scripts/audit-encoding.mjs
       - name: Test encoding-guard controls
         run: node scripts/test-audit-encoding.mjs
+      # A versioned external standard gets summarised, the summary is accurate
+      # when written, the standard is revised, and the summary silently becomes
+      # false. Every other guard checks the text against ITSELF -- a document
+      # that says "five functions" consistently, cleanly and readably is wrong
+      # in a way none of them can reach. Cyber phase 01 taught five NIST CSF
+      # functions when CSF 2.0 has six, in four places including a numbered
+      # lesson table, while phase 13 said six correctly and nothing compared
+      # the two. This checks claims whose current value was read from the
+      # standard itself.
+      - name: Audit versioned framework claims
+        run: node scripts/audit-framework-claims.mjs
+      - name: Test framework-claim controls
+        run: node scripts/test-audit-framework-claims.mjs
       # A command can be named correctly and written wrongly. IT 02 stated DISM
       # in full at one place and abbreviated it to `DISM /RestoreHealth` in a
       # summary table 300 lines later — a form that throws if a beginner types

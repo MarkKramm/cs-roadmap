@@ -475,21 +475,24 @@ Beginners often see frameworks as bureaucratic overhead. They are actually share
 
 | Framework | What it is | Its value to you |
 |---|---|---|
-| **NIST CSF** | Organises security work into five functions: Identify, Protect, Detect, Respond, Recover | A coverage checklist. It shows you which part of the job an organisation is neglecting |
+| **NIST CSF** | Organises security work into six functions: Govern, Identify, Protect, Detect, Respond, Recover | A coverage checklist. It shows you which part of the job an organisation is neglecting |
 | **MITRE ATT&CK** | A knowledge base of real attacker **tactics, techniques, and procedures (TTPs)**, observed in the wild and organised into a matrix | Lets you describe behaviour rather than tools — and behaviour survives tool changes |
 | **OWASP Top 10** | The ten most critical web application security risks, maintained by the Open Worldwide Application Security Project | Web-specific. Because your background includes web development, this is the framework you are best positioned to understand quickly |
 
-#### NIST CSF: the five functions
+#### NIST CSF: the six functions
+
+CSF 2.0 (2024) added **Govern** to the five functions of CSF 1.1. Govern sits at the centre and surrounds the other five: it is the function that makes the rest work, because someone has to own the risk decision. You will see older material that lists five, and interviewers sometimes still say "the five functions" out of habit.
 
 | Function | What it covers | Example activities |
 |---|---|---|
-| 1. **Identify** | Know what you have and what matters | Asset inventory, risk assessment |
-| 2. **Protect** | Put controls in place | Access control, training, patching |
-| 3. **Detect** | Notice incidents | Monitoring, logging, detection rules |
-| 4. **Respond** | Act on incidents | Containment, communication, analysis |
-| 5. **Recover** | Restore and improve | Backups, lessons learned, resilience |
+| 1. **Govern** | Set the direction, and own the risk decision | Risk strategy, roles and responsibilities, policy, supply-chain risk |
+| 2. **Identify** | Know what you have and what matters | Asset inventory, risk assessment |
+| 3. **Protect** | Put controls in place | Access control, training, patching |
+| 4. **Detect** | Notice incidents | Monitoring, logging, detection rules |
+| 5. **Respond** | Act on incidents | Containment, communication, analysis |
+| 6. **Recover** | Restore and improve | Backups, lessons learned, resilience |
 
-Many breaches are Respond failures more than Protect failures. The organisation had controls, but no plan for what to do when one failed.
+Many breaches are Respond failures more than Protect failures. The organisation had controls, but no plan for what to do when one failed. A Govern failure is worse still, and quieter: nobody owned the decision, so nothing was decided.
 
 #### MITRE ATT&CK: tactics versus techniques
 
@@ -743,7 +746,7 @@ The tasks below all build on this lesson, so a suggested order:
 3. **Read the OWASP Top 10 through the lens of your web development background** (task 4). You have an advantage here over most beginners: you have probably written code that was vulnerable to injection without knowing it. Write your summary with that in mind.
 4. **Do the MITRE ATT&CK task as a mapping exercise** (task 5). Take five techniques and, for each, write the attacker's goal and one way a defender would detect it. This is exactly the thinking a SOC analyst does.
 5. **Write the phishing analysis last** (task 6), after you have read Part 3, and structure it as: what the attacker wanted, which technique they used, why the message is convincing, and what a defender or a user should have done. Keep it to one page — concise reporting is a skill and this is your first rep at it.
-6. **Close with the NIST CSF task** (task 7) and read your own one-page summary back. If you can explain all five functions using an example of your own rather than one from this lesson, the phase's exit criteria are met and you are ready for Phase 2.
+6. **Close with the NIST CSF task** (task 7) and read your own one-page summary back. If you can explain all six functions using an example of your own rather than one from this lesson, the phase's exit criteria are met and you are ready for Phase 2.
 
 ## Tools for This Phase
 
@@ -754,7 +757,7 @@ The tasks below all build on this lesson, so a suggested order:
 | Have I Been Pwned | Breach lookup | Free | https://haveibeenpwned.com/ | Check your email safely | Firefox Monitor |
 | VirusTotal | File/URL reputation | Free/freemium | https://www.virustotal.com/ | Check a known safe URL/hash from docs | urlscan.io |
 | MITRE ATT&CK | Attack technique knowledge base | Free | https://attack.mitre.org/ | Map phishing to ATT&CK techniques | OWASP WSTG for web |
-| NIST CSF | Security framework | Free | https://www.nist.gov/cyberframework | Summarize Identify/Protect/Detect/Respond/Recover | CIS Controls |
+| NIST CSF | Security framework | Free | https://www.nist.gov/cyberframework | Summarize Govern/Identify/Protect/Detect/Respond/Recover | CIS Controls |
 
 ## Free/cheap resources
 

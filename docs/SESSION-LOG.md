@@ -2,7 +2,41 @@
 
 A chronological record of working sessions. Newest first.
 
-## 2026-09-16 (latest) — The cyber track opened: 698 claims found, 369 outstanding, first 43 verified clean
+## 2026-09-16 (latest) — A real defect found: the cyber track taught a retired NIST framework
+
+**The verification pass found something, and it was not a typo.** Cyber pass 4 returned three `WRONG` verdicts on the same claim: `01-phase-foundations.md` taught that **NIST CSF organises security work into five functions** — Identify, Protect, Detect, Respond, Recover. **CSF 2.0 has six. It added Govern.**
+
+**I verified it against the standard rather than the model's citation**, which pointed at `digitalsecurityauthority.com` and a NIST blog post — neither of which is the standard. I fetched NIST's own published text (CSWP 29) from the DOI NIST serves, inflated the PDF streams, and read:
+
+> *"This figure depicts the CSF Core as a hierarchy of **six Functions**, each of which contains multiple Categories."*
+>
+> *"The inner layer of the wheel contains only the **Govern Function**. The outer layer, which surrounds the Govern circle, contains the **other five Functions**."*
+
+**It was wrong in four places in one phase** — a summary table, a numbered lesson section headed "NIST CSF: the five functions", a phase exit criterion, and a resources row. All four are fixed; the lesson table now teaches six, with a note explaining that CSF 2.0 added Govern to the five of CSF 1.1, because a reader **will** meet older material that still says five.
+
+**Every guard in this repository passed over it**, and the reason is the point:
+
+| Guard | Why it said nothing |
+|---|---|
+| `lint-content` | the markdown was immaculate |
+| `audit-refs` | the `nist.gov/cyberframework` URL resolved |
+| `audit-quiz` | the quiz never mentioned the functions |
+| `audit-content` | the structure was intact |
+| AST diff, readability | five parsed and read as cleanly as six |
+| three comprehension passes | a beginner follows "five functions" fine |
+| `audit-encoding` | every byte was valid UTF-8 |
+
+**Every one checks the text against itself.** A document that says five functions consistently, cleanly and readably is wrong in a way none of them can reach. **The corpus even contradicted itself**: `13-phase-grc-compliance.md` said six and listed Govern correctly, twice. Nothing compared the two phases, because nothing compares one phase to another.
+
+**So I built the check that can see it.** `scripts/audit-framework-claims.mjs` verifies framework assertions whose current value was read **from the standard itself**, recording the source and an evidence quote per rule. It is narrow on purpose: a broad "does this look stale" heuristic flags correct content.
+
+**Two bugs in my own guard, both caught by testing it rather than trusting it.** The first version flagged the *corrected* text, because its pattern for "a list omitting Govern" matched `Identify, Protect, Detect, Respond, Recover` — a **substring of the correct six-function list**. I only saw it because I ran the guard against the fixed corpus before committing. Then the control test caught the CIS rule requiring "CIS" *before* the number, so "CIS Controls provides 20 controls" slipped through. **12 controls** now prove it fails on all four shapes of the retired model and passes on correct text, headings, historical notes, and slash-separated lists.
+
+**The lesson I would keep: a summary of a versioned standard is a time bomb with a long fuse.** The claim was true when written, the standard was revised, and the text silently became false — with no author error to find and no inconsistency to detect. The only durable defence is a rule that names the version and quotes the evidence.
+
+**Also worth recording about this pass:** the verification model **told on itself**. Both the standards and tools tables ended with an explicit note that it could not open the primary sources and was relying on training knowledge — which invalidates every quote-less `OK` in those two tables by the prompt's own Rule 1. That honesty is why the pass is usable at all; a model that had stamped `OK` silently would have produced 183 confident rows of unknown provenance.
+
+## 2026-09-16 (earlier) — The cyber track opened: 698 claims found, 369 outstanding, first 43 verified clean
 
 **The IT track closed and the cyber track opened with the same method.** `extract-claims.mjs` now takes `--track`, and the IT output is byte-identical to its committed version, so generalising it disturbed the finished pass not at all.
 
