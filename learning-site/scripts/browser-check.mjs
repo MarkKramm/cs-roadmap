@@ -42,16 +42,59 @@ const VIEWPORT = { width: 1440, height: 1000 };
 
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
-const BROWSERS = [
-  'C:\\Program Files (x86)\\Microsoft\\Edge\\Application\\msedge.exe',
-  'C:\\Program Files\\Microsoft\\Edge\\Application\\msedge.exe',
-  'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe',
-  'C:\\Program Files (x86)\\Google\\Chrome\\Application\\chrome.exe',
-  '/usr/bin/google-chrome',
-  '/usr/bin/chromium',
-  '/usr/bin/chromium-browser',
-  '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome',
-];
+// Every engine this script can drive, grouped by the family that decides which
+// flags it needs. The grouping is load-bearing rather than cosmetic: Chromium
+// takes `--headless=new` and speaks CDP over `--remote-debugging-port`, while
+// Firefox takes `-headless` and speaks the same protocol over
+// `--remote-debugging-port` only from version 86, with `--remote-allow-hosts`
+// needed when it binds to anything but localhost. A flat list would have to guess
+// which flag set to use, and guessing wrong is a browser that never starts and a
+// run that times out looking like a slow machine.
+//
+// WHY THE ENGINE IS NOW SELECTABLE
+// This list used to be Chromium-only, and the file's own checkpoint recorded the
+// consequence: 79 checks on two engines, both Chromium, so a defect that appears
+// only in Firefox or WebKit was invisible to every guard in the repository. Two
+// Chromium builds are two data points about one engine, not two engines.
+const ENGINES = {
+  chromium: {
+    label: 'Chromium',
+    headlessFlag: '--headless=new',
+    paths: [
+      'C:\\Program Files (x86)\\Microsoft\\Edge\\Application\\msedge.exe',
+      'C:\\Program Files\\Microsoft\\Edge\\Application\\msedge.exe',
+      'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe',
+      'C:\\Program Files (x86)\\Google\\Chrome\\Application\\chrome.exe',
+      '/usr/bin/google-chrome',
+      '/usr/bin/chromium',
+      '/usr/bin/chromium-browser',
+      '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome',
+      '/Applications/Chromium.app/Contents/MacOS/Chromium',
+      '/Applications/Microsoft Edge.app/Contents/MacOS/Microsoft Edge',
+    ],
+  },
+  firefox: {
+    label: 'Gecko',
+    headlessFlag: '-headless',
+    paths: [
+      'C:\\Program Files\\Mozilla Firefox\\firefox.exe',
+      'C:\\Program Files (x86)\\Mozilla Firefox\\firefox.exe',
+      '/usr/bin/firefox',
+      '/usr/bin/firefox-esr',
+      '/snap/bin/firefox',
+      '/Applications/Firefox.app/Contents/MacOS/firefox',
+    ],
+  },
+};
+
+// Which engine to look for. `auto` keeps the old behaviour — first match wins,
+// which on this machine and on the ubuntu runner is Chromium — so an existing
+// invocation is unchanged. CI sets this per matrix leg so each engine is
+// requested by name, and a leg that cannot find its engine FAILS rather than
+// silently measuring the other one. That distinction is the whole point: a
+// matrix leg that ran Chromium while claiming Firefox would be worse than no
+// matrix at all.
+const WANT = (process.env.BROWSER_ENGINE || 'auto').toLowerCase();
 
 function findBrowser() {
   // An explicit override first, so the skip path can be exercised on a machine
@@ -60,17 +103,24 @@ function findBrowser() {
   const override = process.env.BROWSER_PATH;
   if (override) {
     try {
-      if (fs.existsSync(override)) return override;
+      if (fs.existsSync(override)) return { path: override, engine: 'override' };
     } catch {
       /* fall through to the known paths */
     }
     return null;
   }
-  for (const p of BROWSERS) {
-    try {
-      if (fs.existsSync(p)) return p;
-    } catch {
-      /* an unreadable path is not a candidate */
+
+  // `auto` tries Chromium first, preserving the previous resolution order.
+  const order = WANT === 'firefox' ? ['firefox'] : WANT === 'chromium' ? ['chromium'] : ['chromium', 'firefox'];
+
+  for (const name of order) {
+    const spec = ENGINES[name];
+    for (const p of spec.paths) {
+      try {
+        if (fs.existsSync(p)) return { path: p, engine: name, spec };
+      } catch {
+        /* an unreadable path is not a candidate */
+      }
     }
   }
   return null;
@@ -167,6 +217,38 @@ function note(name, detail) {
   results.push({ name, ok: true, detail: String(detail), informational: true });
 }
 
+/**
+ * Set the viewport width, using whichever mechanism the running engine honours.
+ *
+ * Chromium's `Emulation.setDeviceMetricsOverride` is exact and is what the width
+ * band was built on. Gecko does not implement it and answers with a protocol
+ * error rather than ignoring it, so a Firefox run that reused the call would fail
+ * on the first width rather than measuring the wrong thing — better, but still a
+ * broken run. `Browser.setWindowBounds` is the Gecko-supported equivalent: it
+ * resizes the real window, which is what the media queries actually respond to.
+ *
+ * The distinction is not cosmetic. `matchMedia` in Firefox reads the window, so
+ * driving the band through the window is not a workaround for a missing feature —
+ * it is the correct mechanism there, and the one a real Firefox reader's layout
+ * is computed from.
+ */
+async function setWidth(cdp, width, isGecko, height = 1000) {
+  if (isGecko) {
+    const { windowId } = await cdp.send('Browser.getWindowForTarget');
+    await cdp.send('Browser.setWindowBounds', {
+      windowId,
+      bounds: { width, height },
+    });
+    return;
+  }
+  await cdp.send('Emulation.setDeviceMetricsOverride', {
+    width,
+    height,
+    deviceScaleFactor: 1,
+    mobile: false,
+  });
+}
+
 async function findPageTarget() {
   for (let i = 0; i < 80; i++) {
     try {
@@ -208,29 +290,51 @@ window.__type = function (el, text) {
 // failure — a run that connects, executes a handful of assertions and exits 0
 // because the page it measured was an error page.
 const STRICT = process.env.BROWSER_CHECK_STRICT === '1';
-const MIN_CHECKS = 40;
+// Raised from 40 to 70 as the suite grew to 92 checks across nine areas. The
+// floor exists to catch a run that connected to an error page and asserted
+// almost nothing, so it has to sit near the real count: a floor far below it
+// stops being a floor. It is deliberately not AT 92, so adding or removing a
+// check does not require editing this line.
+const MIN_CHECKS = 70;
 
 async function main() {
-  const browser = findBrowser();
-  if (!browser) {
-    if (STRICT) {
+  const found = findBrowser();
+  if (!found) {
+    // A CI leg that named an engine and could not find it must fail even outside
+    // strict mode: the leg exists to measure that engine, and quietly skipping
+    // while the job reports success is the exact silent-pass shape this project
+    // has been bitten by repeatedly.
+    const namedEngine = WANT === 'firefox' || WANT === 'chromium';
+    if (STRICT || namedEngine) {
       process.stdout.write('BROWSER CHECK FAILED — no browser found at any known path.\n');
-      process.stdout.write('BROWSER_CHECK_STRICT=1 requires a real engine; this is not a skip.\n');
+      if (namedEngine) {
+        process.stdout.write(
+          'BROWSER_ENGINE=' + WANT + ' was requested by name, so a missing engine is a failure.\n'
+        );
+      }
+      if (STRICT) {
+        process.stdout.write('BROWSER_CHECK_STRICT=1 requires a real engine; this is not a skip.\n');
+      }
       process.exit(1);
     }
     process.stdout.write('BROWSER CHECK SKIPPED — no browser found at any known path.\n');
-    process.stdout.write('Set BASE_URL to a running preview and install Edge/Chrome to run it.\n');
+    process.stdout.write('Set BASE_URL to a running preview and install a browser to run it.\n');
     process.exit(0);
   }
 
+  const browser = found.path;
+  const engineName = found.engine;
+  const spec = found.spec || null;
+
   process.stdout.write('browser: ' + browser + '\n');
+  process.stdout.write('engine:  ' + engineName + (spec ? ' (' + spec.label + ')' : '') + '\n');
   process.stdout.write('base:    ' + BASE + '\n\n');
 
   const profile = fs.mkdtempSync(path.join(os.tmpdir(), 'cs-roadmap-cdp-'));
   const flags = [
     '--remote-debugging-port=' + PORT,
     '--user-data-dir=' + profile,
-    '--headless=new',
+    spec ? spec.headlessFlag : '--headless=new',
     '--no-first-run',
     '--no-default-browser-check',
     '--disable-extensions',
@@ -239,8 +343,11 @@ async function main() {
   ];
   // Chrome's own sandbox needs a kernel capability a container does not grant,
   // so on a CI runner it refuses to start without this. Kept behind a flag so a
-  // local run keeps the sandbox on.
-  if (process.env.BROWSER_NO_SANDBOX === '1') flags.push('--no-sandbox', '--disable-dev-shm-usage');
+  // local run keeps the sandbox on. Firefox has no equivalent flag and would
+  // reject an unknown argument, hence the engine check.
+  if (process.env.BROWSER_NO_SANDBOX === '1' && engineName !== 'firefox') {
+    flags.push('--no-sandbox', '--disable-dev-shm-usage');
+  }
   flags.push(BASE);
 
   const child = spawn(browser, flags, { stdio: 'ignore' });
@@ -265,12 +372,43 @@ async function main() {
     note('engine', (ua.product || '?') + ' / ' + (ua.jsVersion || '?'));
     note('engine user-agent', (ua.userAgent || '?').slice(0, 120));
 
-    await cdp.send('Emulation.setDeviceMetricsOverride', {
-      width: VIEWPORT.width,
-      height: VIEWPORT.height,
-      deviceScaleFactor: 1,
-      mobile: false,
-    });
+    // THE ASSERTION THAT MAKES THE MATRIX MEAN ANYTHING.
+    //
+    // When an engine is requested by name, the run must be able to prove it got
+    // that engine. Without this, a CI leg named "firefox" whose Firefox was
+    // missing from the image would fall through the path list, find Chromium,
+    // and report a green Firefox result — a claim about an engine that was never
+    // started. That is the same defect class as a skip path that looks like a
+    // pass path, and it is worse here, because the result would be cited as
+    // cross-browser evidence.
+    if (WANT === 'firefox' || WANT === 'chromium') {
+      const product = String((ua && ua.product) || '').toLowerCase();
+      const agent = String((ua && ua.userAgent) || '').toLowerCase();
+      const looksGecko = /firefox/.test(product) || /firefox/.test(agent);
+      const looksChromium =
+        /chrome|chromium|edg/.test(product) || /chrome|chromium|edg/.test(agent);
+      const matches = WANT === 'firefox' ? looksGecko : looksChromium;
+      check(
+        'engine: the requested engine is the one that ran',
+        matches,
+        'wanted ' + WANT + ', got ' + (ua.product || 'unknown')
+      );
+    }
+
+    // Firefox has no `Emulation.setDeviceMetricsOverride` — it answers with a
+    // protocol error rather than ignoring the call. The width band is driven by
+    // resizing the *window* instead, which Gecko honours via the same command
+    // name on a different domain. Detected rather than assumed so a Chromium run
+    // keeps using the override, which is exact.
+    const geo = spec && spec.label === 'Gecko';
+    if (!geo) {
+      await cdp.send('Emulation.setDeviceMetricsOverride', {
+        width: VIEWPORT.width,
+        height: VIEWPORT.height,
+        deviceScaleFactor: 1,
+        mobile: false,
+      });
+    }
 
     // Wait for React to mount something.
     await cdp.waitFor('!!document.querySelector(".app-shell")', 'app shell to mount', 15000);
@@ -325,12 +463,7 @@ async function main() {
     for (const w of [1180, 1179, 900, 861, 860, 760, 620]) {
       const drawer = w <= 860;  // .sidebar is off-canvas at or below 860px
       const twoCol = w >= 1180; // .dashboard__grid is two-column at 1180px and up
-      await cdp.send('Emulation.setDeviceMetricsOverride', {
-        width: w,
-        height: 1000,
-        deviceScaleFactor: 1,
-        mobile: false,
-      });
+      await setWidth(cdp, w, geo);
       await sleep(350);
       const band = await cdp.eval(`(() => {
         const rail = document.querySelector('.dashboard__rail');
@@ -396,12 +529,7 @@ async function main() {
           band.sideWidth + 'px tx=' + band.sideTx,
       );
     }
-    await cdp.send('Emulation.setDeviceMetricsOverride', {
-      width: VIEWPORT.width,
-      height: VIEWPORT.height,
-      deviceScaleFactor: 1,
-      mobile: false,
-    });
+    await setWidth(cdp, VIEWPORT.width, geo, VIEWPORT.height);
     await sleep(300);
 
     // ---------------------------------------------------------------------
@@ -728,7 +856,111 @@ async function main() {
     check('your work: carries no progress bar', !work.hasProgressbar);
 
     // ---------------------------------------------------------------------
-    // 7. Console cleanliness across the whole run
+    // 7. Where you've been — the neutral list, same no-denominator rule
+    //
+    // This page is the one most able to become a completion-scold, which the
+    // design system forbids. Its own unit test asserts the module carries no
+    // `remaining`/`percent` field; this asserts the same rule in a live DOM,
+    // where a component could reintroduce it at the rendering layer.
+    // ---------------------------------------------------------------------
+    await cdp.eval(`(() => {
+      const b = [...document.querySelectorAll('.sidebar__link')]
+        .find(x => x.textContent.trim() === "Where you've been");
+      if (b) b.click();
+      return !!b;
+    })()`);
+    await sleep(600);
+
+    const path = await cdp.eval(`(() => {
+      const text = document.body.innerText;
+      const rows = document.querySelectorAll('.path-row');
+      return {
+        length: text.length,
+        hasHeading: text.includes("Where you've been"),
+        rowCount: rows.length,
+        // The rule, in the DOM: no "N of M", no percentage, no progressbar, and
+        // no warning colour on anything describing an untouched phase.
+        hasOfN: /\\b\\d+\\s+of\\s+\\d+\\b/.test(text),
+        hasPercent: /\\d+\\s?%/.test(text),
+        hasProgressbar: !!document.querySelector('[role=progressbar]'),
+        hasScold: /\\b(behind|overdue|remaining|catch up|you have not)\\b/i.test(text)
+      };
+    })()`);
+    check('where youve been: renders', path.length > 200, path.length + ' chars');
+    check('where youve been: shows its heading', path.hasHeading);
+    check('where youve been: lists phases', path.rowCount > 0, path.rowCount + ' rows');
+    check('where youve been: carries no "N of M" count', !path.hasOfN);
+    check('where youve been: carries no percentage', !path.hasPercent);
+    check('where youve been: carries no progress bar', !path.hasProgressbar);
+    check(
+      'where youve been: uses no scolding language',
+      !path.hasScold,
+      'found a scold word in the rendered text',
+    );
+
+    // ---------------------------------------------------------------------
+    // 8. Carry this phase — present, collapsed, and additive by construction
+    // ---------------------------------------------------------------------
+    await cdp.eval(`(() => {
+      const b = [...document.querySelectorAll('.sidebar__link')]
+        .find(x => /Computer Fundamentals/.test(x.textContent));
+      if (b) b.click();
+      return !!b;
+    })()`);
+    await sleep(700);
+
+    const transfer = await cdp.eval(`(() => {
+      const sec = document.querySelector('.phase-transfer');
+      if (!sec) return { found: false };
+      const toggle = sec.querySelector('.link-btn');
+      const beforeBtns = sec.querySelectorAll('button').length;
+      return {
+        found: true,
+        title: sec.querySelector('h2') ? sec.querySelector('h2').textContent.trim() : '',
+        collapsed: !sec.querySelector('.phase-transfer__actions'),
+        expanded: !!(toggle && toggle.getAttribute('aria-expanded') === 'false'),
+        beforeBtns
+      };
+    })()`);
+    check('phase transfer: panel is present on a phase page', transfer.found);
+    check(
+      'phase transfer: collapsed by default',
+      transfer.collapsed,
+      'actions visible before expanding',
+    );
+
+    // Expand it and confirm the two real actions appear.
+    await cdp.eval(`(() => {
+      const sec = document.querySelector('.phase-transfer');
+      const btn = sec && sec.querySelector('.link-btn');
+      if (btn) btn.click();
+      return !!btn;
+    })()`);
+    await sleep(400);
+    const expanded = await cdp.eval(`(() => {
+      const sec = document.querySelector('.phase-transfer');
+      if (!sec) return { found: false };
+      const btns = [...sec.querySelectorAll('button')].map(b => b.textContent.trim());
+      const text = sec.innerText;
+      return {
+        found: true,
+        hasExport: btns.some(t => /Export this phase/.test(t)),
+        hasImport: btns.some(t => /Import into this phase/.test(t)),
+        hasFileInput: !!sec.querySelector('input[type=file]'),
+        saysAdditive: /never removes or overwrites/i.test(text)
+      };
+    })()`);
+    check('phase transfer: export action appears when expanded', expanded.hasExport);
+    check('phase transfer: import action appears when expanded', expanded.hasImport);
+    check('phase transfer: a real file input is present', expanded.hasFileInput);
+    check(
+      'phase transfer: states that importing is additive',
+      expanded.saysAdditive,
+      'the panel does not tell the reader that import cannot destroy work',
+    );
+
+    // ---------------------------------------------------------------------
+    // 9. Console cleanliness across the whole run
     // ---------------------------------------------------------------------
     const errs = cdp.consoleErrors.filter((e) => e && e.trim() !== '');
     check(

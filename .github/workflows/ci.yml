@@ -124,18 +124,89 @@ jobs:
         run: npm run test:today
       - name: Lesson search
         run: npm run test:lesson-search
-      # The only step that needs a real browser engine. Everything above renders
-      # to a string and asserts on markup, which cannot see layout, computed CSS,
-      # focus survival or a media query — the six views this covers (notes panel,
-      # dashboard rail, print stylesheet, Shared, Your work, time budget) were
-      # verified structurally for their whole life until this step existed. The
-      # preview server is started and torn down inside the step, because a
+      # One phase carried to another machine, keyed by id rather than position.
+      # Narrowing a whole-profile export down to one phase is where a filter can
+      # silently drop a note or drag a second phase's progress along, and the
+      # import reports success either way. Additive by construction, asserted.
+      - name: Single-phase transfer
+        run: npm run test:phase-transfer
+      # "Where you've been" is the page most able to become a completion-scold,
+      # which the design system forbids. Its rows carry no `remaining` or
+      # `percent` field at all, so the no-denominator rule is a property of the
+      # data rather than of the rendering — asserted here so a rewrite cannot
+      # quietly reintroduce a score.
+      - name: Path order
+        run: npm run test:path-order
+
+  # The only job that needs a real browser engine. Everything in `site` renders to
+  # a string and asserts on markup, which cannot see layout, computed CSS, focus
+  # survival or a media query — the six views this covers (notes panel, dashboard
+  # rail, print stylesheet, Shared, Your work, time budget) were verified
+  # structurally for their whole life until this job existed.
+  #
+  # WHY THIS IS A MATRIX NOW
+  # It previously ran once, on the runner's Google Chrome. That is Chromium, and
+  # the local runs it was meant to complement used Edge — also Chromium. So the
+  # claim "verified in a real browser" rested on two builds of ONE engine, and a
+  # defect that appears only in Firefox or WebKit was invisible to every guard in
+  # the repository. A second Chromium build is not a second engine.
+  #
+  # Each leg names its engine through BROWSER_ENGINE, and the script FAILS when a
+  # named engine is missing rather than falling through to the other one — so a
+  # leg titled "firefox" cannot report a green result that was really Chromium.
+  # That assertion is the reason this matrix is worth having at all.
+  #
+  # WebKit is still absent: it has no headless build a runner can install without
+  # a dependency this repository does not take (rule 3), so it remains the
+  # honest gap. Two engines is a matrix, not complete coverage.
+  browser:
+    name: Browser check (${{ matrix.engine }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - engine: chromium
+            install: chromium
+          - engine: firefox
+            install: firefox
+    defaults:
+      run:
+        working-directory: learning-site
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: learning-site/package-lock.json
+      - name: Install dependencies
+        run: npm ci
+      - name: Build
+        run: npm run build
+      # ubuntu-latest ships Chrome and Firefox preinstalled, but not necessarily
+      # at the paths the script looks in, and a runner image change could move
+      # them. Installing the one this leg wants makes the leg's precondition
+      # explicit rather than inherited — and the script still fails loudly if the
+      # engine is not where it should be, so this cannot paper over a missing
+      # browser either.
+      - name: Ensure ${{ matrix.engine }} is present
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq ${{ matrix.install }}
+          if [ "${{ matrix.engine }}" = "firefox" ]; then
+            which firefox || ls -l /usr/bin/firefox* || true
+          else
+            which google-chrome || which chromium || which chromium-browser || true
+          fi
+      # The preview server is started and torn down inside the step, because a
       # background process launched in an earlier step is not reliably still
       # listening in a later one.
       - name: Browser check (real engine)
         env:
           BROWSER_NO_SANDBOX: '1'
           BROWSER_CHECK_STRICT: '1'
+          BROWSER_ENGINE: ${{ matrix.engine }}
         run: |
           npx vite preview --port 4173 --strictPort > /tmp/preview.log 2>&1 &
           PREVIEW_PID=$!
