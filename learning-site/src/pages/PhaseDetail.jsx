@@ -5,6 +5,7 @@ import Lesson from "../components/Lesson.jsx";
 import PhaseNav from "../components/PhaseNav.jsx";
 import NotesPanel from "../components/NotesPanel.jsx";
 import TaskList from "../components/TaskList.jsx";
+import Quiz from "../components/Quiz.jsx";
 import PhaseTransfer from "../components/PhaseTransfer.jsx";
 import { ReadingBar, ResumePrompt, useReadingProgress } from "../components/ReadingPosition.jsx";
 import { countDone } from "../hooks/useProgress.js";
@@ -228,6 +229,17 @@ export default function PhaseDetail({
           ))}
         </ul>
       </section>
+
+      {phase.quiz && phase.quiz.length > 0 && (
+        <section className="card">
+          <h2>Quiz</h2>
+          <p className="muted">
+            One correct answer per question, with an explanation either way.
+            Nothing is scored or saved — refreshing starts over.
+          </p>
+          <Quiz questions={phase.quiz} />
+        </section>
+      )}
 
       <section className="card">
         <h2>Free vs Paid</h2>

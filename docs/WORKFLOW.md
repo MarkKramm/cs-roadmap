@@ -130,6 +130,8 @@ node scripts/audit-refs.mjs              # every "Part N" and "Phase N" referenc
 node scripts/audit-time-budget.mjs       # stated totals match their own parts and overview
 node scripts/audit-changelog.mjs         # one of each section per release, canonical order
 node scripts/test-audit-changelog.mjs    # the CHANGELOG guard's own 13 controls, gates
+node scripts/audit-quiz.mjs              # quiz answer positions balanced, option counts consistent
+node scripts/validate-ci.mjs             # every CI step well-formed, every script it names exists
 node scripts/audit-terms.mjs --self-test # the acronym DETECTOR — 16 controls, gates
 node scripts/audit-terms.mjs             # the acronym CORPUS — measurement, always exits 0
 ```
@@ -166,6 +168,8 @@ The smoke test renders the lesson for every phase and asserts that the table and
 - [ ] `node scripts/audit-refs.mjs` reports no broken cross-reference (for any change to a phase file).
 - [ ] `node scripts/audit-time-budget.mjs` reports `findings: 0` (for any change to a phase file or a track overview).
 - [ ] `node scripts/audit-changelog.mjs` reports `findings: 0`, and `node scripts/test-audit-changelog.mjs` reports `13 passed, 0 failed` (after any edit to `CHANGELOG.md`, and after any edit to either script).
+- [ ] `node scripts/audit-quiz.mjs` reports `findings: 0` (after any edit to a `## Quiz` section, or to the quiz parser).
+- [ ] `node scripts/validate-ci.mjs` reports `0 problems` (after any edit to `.github/workflows/`, or after renaming any script a workflow names).
 - [ ] `cd learning-site && npm run test:smoke` passes (for any change touching the site).
 - [ ] `cd learning-site && npm run test:render-inline` passes (for any change to `renderInline.jsx` or to inline Markdown in the content).
 - [ ] `cd learning-site && npm run test:browser` passes with a preview server running (for any change touching a view, a stylesheet or a control).

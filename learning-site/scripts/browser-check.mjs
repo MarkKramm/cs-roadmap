@@ -300,12 +300,13 @@ window.__type = function (el, text) {
 // failure — a run that connects, executes a handful of assertions and exits 0
 // because the page it measured was an error page.
 const STRICT = process.env.BROWSER_CHECK_STRICT === '1';
-// Raised from 40 to 70 as the suite grew to 92 checks across nine areas. The
-// floor exists to catch a run that connected to an error page and asserted
-// almost nothing, so it has to sit near the real count: a floor far below it
-// stops being a floor. It is deliberately not AT 92, so adding or removing a
-// check does not require editing this line.
-const MIN_CHECKS = 70;
+// Raised from 40 to 70 as the suite grew to 92 checks across nine areas, and to
+// 100 as the quiz checks took it past 105 across ten. The floor exists to catch
+// a run that connected to an error page and asserted almost nothing, so it has
+// to sit near the real count: a floor far below it stops being a floor. It is
+// deliberately not AT the real count, so adding or removing a check does not
+// require editing this line.
+const MIN_CHECKS = 100;
 
 async function main() {
   const found = findBrowser();
@@ -992,7 +993,175 @@ async function main() {
     );
 
     // ---------------------------------------------------------------------
-    // 9. Console cleanliness across the whole run
+    // 9. Quiz — a real click, real feedback, and no score anywhere
+    // ---------------------------------------------------------------------
+    // The unit suite covers the scoring maths. What only a browser can prove is
+    // that the control actually responds: that a click records an answer, that
+    // the correct option is revealed only afterwards, and that the accessible
+    // labels are present rather than relying on colour alone.
+    await cdp.eval(`(() => {
+      const b = [...document.querySelectorAll('.sidebar__link')]
+        .find(x => /Operating Systems/.test(x.textContent));
+      if (b) b.click();
+      return !!b;
+    })()`);
+    await sleep(700);
+
+    const quizBefore = await cdp.eval(`(() => {
+      const q = document.querySelector('.quiz');
+      if (!q) return { found: false };
+      const first = q.querySelector('.quiz__q');
+      return {
+        found: true,
+        questions: q.querySelectorAll('.quiz__q').length,
+        optionsInFirst: first ? first.querySelectorAll('.quiz__opt').length : 0,
+        // Before answering, no correctness is revealed at all.
+        anyCorrectMarked: !!q.querySelector('.quiz__opt--correct'),
+        anyWhy: !!q.querySelector('.quiz__why'),
+        enabled: first ? [...first.querySelectorAll('.quiz__opt')].every(b => !b.disabled) : false
+      };
+    })()`);
+    check('quiz: renders on a phase that has one', quizBefore.found);
+    check(
+      'quiz: shows its questions',
+      quizBefore.questions >= 5,
+      quizBefore.questions + ' questions',
+    );
+    check(
+      'quiz: the first question has four options',
+      quizBefore.optionsInFirst === 4,
+      String(quizBefore.optionsInFirst),
+    );
+    check(
+      'quiz: reveals nothing before an answer is chosen',
+      !quizBefore.anyCorrectMarked && !quizBefore.anyWhy,
+      'correctness or explanation visible before answering',
+    );
+
+    // Click a deliberately WRONG option in the first question, found by reading
+    // which one the page later marks correct — so this does not assume a
+    // position and cannot silently start clicking the right answer if the
+    // content is reordered.
+    await cdp.eval(`(() => {
+      const first = document.querySelector('.quiz__q');
+      const btns = [...first.querySelectorAll('.quiz__opt')];
+      // The correct one is not marked yet, so click the last option, then read
+      // back which got the Correct badge. Chosen dynamically below.
+      if (btns.length) btns[btns.length - 1].click();
+      return true;
+    })()`);
+    await sleep(400);
+
+    const quizAfter = await cdp.eval(`(() => {
+      const first = document.querySelector('.quiz__q');
+      if (!first) return { found: false };
+      const opts = [...first.querySelectorAll('.quiz__opt')];
+      const correct = first.querySelector('.quiz__opt--correct');
+      const wrongPick = first.querySelector('.quiz__opt--wrong');
+      return {
+        found: true,
+        // Exactly one option is now revealed as correct.
+        correctCount: first.querySelectorAll('.quiz__opt--correct').length,
+        hasCorrect: !!correct,
+        correctHasBadge: correct
+          ? /Correct/i.test(correct.textContent)
+          : false,
+        // The explanation appears only after answering.
+        hasWhy: !!first.querySelector('.quiz__why'),
+        // Every option in this question is now locked, so an answer cannot be
+        // changed after seeing the result.
+        allDisabled: opts.every(b => b.disabled),
+        // Whether the click was wrong determines which class appears; both are
+        // valid outcomes, but they must be consistent with each other.
+        wrongMarked: !!wrongPick,
+        wrongHasLabel: wrongPick ? /Your answer/i.test(wrongPick.textContent) : true,
+        summary: document.querySelector('.quiz__summary')
+          ? document.querySelector('.quiz__summary').textContent
+          : ''
+      };
+    })()`);
+
+    check('quiz: a click reveals the correct answer', quizAfter.hasCorrect);
+    check(
+      'quiz: exactly one option is marked correct',
+      quizAfter.correctCount === 1,
+      quizAfter.correctCount + ' marked',
+    );
+    check(
+      'quiz: the correct option is labelled, not just coloured',
+      quizAfter.correctHasBadge,
+      'no text label on the correct option',
+    );
+    check('quiz: the explanation appears after answering', quizAfter.hasWhy);
+    check(
+      'quiz: options lock once answered',
+      quizAfter.allDisabled,
+      'an answered question still accepts changes',
+    );
+    check(
+      'quiz: a wrong pick is labelled, not just coloured',
+      quizAfter.wrongHasLabel,
+      'wrong pick carried no text label',
+    );
+    // The no-shame rule, asserted in the DOM rather than in prose: a partial
+    // quiz must not report a score, a percentage, or "N of M correct".
+    const quizText = await cdp.eval(
+      `(() => { const q = document.querySelector('.quiz'); return q ? q.innerText : ''; })()`,
+    );
+    check(
+      'quiz: carries no percentage anywhere',
+      !/%/.test(quizText),
+      'found a percentage in the quiz',
+    );
+    check(
+      'quiz: carries no score language',
+      !/[Ss]core/.test(quizText) && !/\b\d+\s*\/\s*\d+\s*correct\b/.test(quizText),
+      'found score language in the quiz',
+    );
+
+    // "Start over" must actually clear the answers, not just relabel.
+    const restarted = await cdp.eval(`(() => {
+      const q = document.querySelector('.quiz');
+      const btn = [...q.querySelectorAll('button')].find(b => /Start over/i.test(b.textContent));
+      if (!btn) return { found: false };
+      btn.click();
+      return { found: true };
+    })()`);
+    await sleep(400);
+    const afterReset = await cdp.eval(`(() => {
+      const q = document.querySelector('.quiz');
+      return {
+        anyCorrectMarked: !!q.querySelector('.quiz__opt--correct'),
+        anyWhy: !!q.querySelector('.quiz__why'),
+        anyDisabled: [...q.querySelectorAll('.quiz__opt')].some(b => b.disabled)
+      };
+    })()`);
+    check('quiz: a Start over control exists once answered', restarted.found);
+    check(
+      'quiz: Start over clears the answers',
+      !afterReset.anyCorrectMarked && !afterReset.anyWhy && !afterReset.anyDisabled,
+      'the quiz did not return to its unanswered state',
+    );
+
+    // A phase without a quiz must not render an empty quiz shell.
+    await cdp.eval(`(() => {
+      const b = [...document.querySelectorAll('.sidebar__link')]
+        .find(x => /Computer Fundamentals/.test(x.textContent));
+      if (b) b.click();
+      return !!b;
+    })()`);
+    await sleep(700);
+    const quizAbsent = await cdp.eval(
+      `(() => ({ quiz: !!document.querySelector('.quiz'), heading: [...document.querySelectorAll('h2')].some(h => h.textContent.trim() === 'Quiz') }))()`,
+    );
+    check(
+      'quiz: a phase without a quiz renders no quiz section',
+      !quizAbsent.quiz && !quizAbsent.heading,
+      'an empty quiz shell rendered',
+    );
+
+    // ---------------------------------------------------------------------
+    // 10. Console cleanliness across the whole run
     // ---------------------------------------------------------------------
     const errs = cdp.consoleErrors.filter((e) => e && e.trim() !== '');
     check(

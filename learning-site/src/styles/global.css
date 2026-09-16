@@ -3127,6 +3127,178 @@ p em {
    Page-break rules matter more than anything else here: a code block split across
    a page boundary is unreadable, and a table split mid-row is worse. */
 
+/* --- Quiz ------------------------------------------------------------------
+
+   A quiz question is a set of buttons rather than radio inputs. Radios would
+   need a shared `name` per question and a form around them, and the correct
+   answer is revealed by disabling the group — which reads more naturally as
+   "this question is done" than a disabled radio does.
+
+   The right/wrong colours are the one place in the site that uses a semantic
+   colour, and they are deliberately not the only signal: the correct option
+   carries a "Correct" label and the reader's wrong pick carries "Your answer",
+   so the distinction survives greyscale printing and colour blindness. Colour
+   alone would fail both. */
+
+.quiz {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.quiz__q {
+  border-left: 3px solid var(--border);
+  padding-left: 0.9rem;
+}
+
+.quiz__q--right {
+  border-left-color: var(--success);
+}
+
+.quiz__q--wrong {
+  border-left-color: var(--danger);
+}
+
+.quiz__prompt {
+  margin: 0 0 0.6rem;
+  font-weight: 600;
+}
+
+.quiz__num {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 1.5rem;
+  height: 1.5rem;
+  margin-right: 0.5rem;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  font-size: 0.8rem;
+  font-weight: 700;
+  vertical-align: middle;
+}
+
+.quiz__energy {
+  margin-left: 0.5rem;
+  padding: 0.05rem 0.4rem;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  font-size: 0.7rem;
+  font-weight: 400;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--text-muted);
+  vertical-align: middle;
+}
+
+.quiz__options {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.quiz__opt {
+  display: flex;
+  align-items: baseline;
+  gap: 0.55rem;
+  width: 100%;
+  padding: 0.5rem 0.7rem;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--bg-elevated);
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.quiz__opt:hover:not(:disabled) {
+  border-color: var(--accent);
+}
+
+.quiz__opt:disabled {
+  cursor: default;
+}
+
+.quiz__opt--chosen {
+  border-color: var(--accent);
+}
+
+.quiz__opt--correct {
+  border-color: var(--success);
+}
+
+.quiz__opt--wrong {
+  border-color: var(--danger);
+}
+
+.quiz__letter {
+  flex: none;
+  font-weight: 700;
+  font-size: 0.8rem;
+  color: var(--text-muted);
+}
+
+.quiz__badge {
+  margin-left: auto;
+  flex: none;
+  padding: 0.05rem 0.4rem;
+  border-radius: 999px;
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.quiz__badge--wrong {
+  color: var(--danger);
+}
+
+.quiz__why {
+  margin: 0.7rem 0 0;
+  padding: 0.6rem 0.75rem;
+  border-left: 3px solid var(--border);
+  background: var(--bg-subtle);
+  font-size: 0.95rem;
+}
+
+.quiz__foot {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  border-top: 1px solid var(--border);
+  padding-top: 0.75rem;
+}
+
+.quiz__foot p {
+  margin: 0;
+}
+
+.quiz__summary {
+  font-weight: 600;
+}
+
+@media print {
+  /* On paper the quiz prints as a question list: the buttons lose their chrome
+     and the correct answer is marked, so the printed page is usable as a
+     worksheet rather than as a record of what the reader clicked. This is why
+     the format is authored as Markdown task-list syntax — the same [x] the
+     printer would have shown anyway. */
+  .quiz__opt {
+    border: none;
+    padding: 0.15rem 0;
+    background: none;
+  }
+
+  .quiz__foot {
+    display: none;
+  }
+}
+
 @media print {
   /* Repaint for paper. The dark theme would empty a toner cartridge and is
      unreadable on a laser printout anyway; the site's own tokens are overridden

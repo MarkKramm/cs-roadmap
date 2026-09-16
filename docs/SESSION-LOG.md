@@ -2,7 +2,27 @@
 
 A chronological record of working sessions. Newest first.
 
-## 2026-09-16 (latest) — Two guards: one that could not be built, and one that found a defect immediately
+## 2026-09-16 (latest) — Quizzes, and the guard that catches what a per-question check cannot
+
+**Goal:** the curriculum could measure whether the *text* was followable — every comprehension pass did that — but nothing measured whether the *reader* retained it. Add quizzes.
+
+**The request was "go heavy on all the lessons", and the first move was to not do that.** Generating ~400 questions is fast, but a quiz is a *claim that an answer is correct*, and nothing in this repository verifies technical truth. Every pass so far has tested internal consistency — do these two sentences both claim to be true — so writing 400 answer keys from the same unverified text multiplies any error in it by 400 with no way to notice. There is a second reason specific to this reader: they are a beginner studying alone, and the comprehension passes worked because fresh readers hit unknowable gaps. A quiz written by the author of the text tests the author's understanding of it, which is a different claim.
+
+**So: a vertical slice — three phases, one per track, chosen for different register.** IT 02 (procedural), cyber 01 (conceptual), advance 07 (code-heavy). 34 questions. If the format survives three teaching styles, scaling is mechanical.
+
+**Authored in Markdown task-list syntax, and the deciding factor was paper.** `- [x]` marks the correct option, with an authored `<!-- id: phase-qNN energy: … -->` comment. Same syntax the checklist already uses, so it stays readable with `git` and a text editor — and it *prints*. The print stylesheet exists so a phase can be studied offline, and a quiz encoded as HTML or JSON would have been the one section that vanished on paper.
+
+**The guard found, immediately, what two green builds and two author self-checks had missed.** The build validates each question: missing `[x]`, two `[x]`, absent `**Why:**`, duplicate id. What it cannot see is a defect of the *set*. My first draft of IT 02 put **seven of ten correct answers in position C** — every question individually valid, build green, and a reader answering "C" every time scores 70% without reading. Then `audit-quiz.mjs` caught advance 07 at **seven of twelve in C with position A never used**, a skew its own author had verified and reported as "spread" using a max-repeat test that could not detect the pattern. That is the fifth time in this repository a writer's self-check passed while the artifact was wrong.
+
+**Not a scored test, and that is asserted rather than promised.** The site carries no `N of M` and no percentage anywhere else by the no-shame rule, and a quiz is the one place a number would feel natural and still be wrong. The summary names the questions to revisit: *"A few to look at again — questions 1, 2"* is actionable, *"70%"* is not. The unit suite and the browser check both assert that no percentage or score language reaches the DOM.
+
+**Architecture followed the existing split.** Pure scoring logic in `learning-site/src/lib/quiz.js`, tested under plain Node with 53 checks and no DOM or build step — matching `lib/yourWork.js` and `lib/transfer.js`. The component only renders. A real-browser pass adds 15 more (the suite is now **107 checks, 0 failed**), because a control proven only in a unit test is a control that might not work when clicked.
+
+**Two testing mistakes worth recording, both mine.** A fixture I wrote asserted `[1, 2]` for two missed questions and got `[1]` — the code was right and my fixture was wrong, because I reused position `0` as a "wrong" answer for a question whose correct answer *is* position `0`. The test failed loudly, which is the point of it. And the IT 02 quiz was destroyed mid-session by a `git checkout --` used to undo a deliberately injected test fixture, because the quiz had not been committed yet; it was rewritten. The lesson is the ordering, not the tool: **commit before running a destructive test.**
+
+**Verified:** lint 169/0; content audit 0; AST 31/0 loss; readability 0 over both targets; refs 0 broken; time budgets 31/0; changelog guard 0 with 13 controls; **audit-quiz 0 findings across 34 questions**; validate-ci 30 steps / 0; terms self-test 16/0; **test:quiz 53**; the other twelve site suites unchanged and green; smoke 231 renders; **browser 107 / 0 failed**; build reports `quizzes: 34 question(s) across 3 of 31 phase(s)`.
+
+## 2026-09-16 (earlier) — Two guards: one that could not be built, and one that found a defect immediately
 
 **Goal:** close the last structural gap `CHECKPOINT.md` had carried for several passes — *"No guard reads `CHANGELOG.md`"* — and settle the topic-list guard the roadmap called the highest-value one absent.
 

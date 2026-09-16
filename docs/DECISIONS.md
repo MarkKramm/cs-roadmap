@@ -2,6 +2,25 @@
 
 A lightweight decision log (ADR-style). Newest first.
 
+## D-035 — Quizzes are authored in Markdown task-list syntax, and the set is validated separately from the question
+
+- **Date:** 2026-09-16
+- **Status:** Accepted
+- **Context:** The curriculum has 278 practice tasks and 31 phase checklists, but **no way to check whether the reading landed**. Every comprehension pass measures whether the *text* is followable; nothing measures whether the *reader* retained it. A quiz is the obvious instrument, and the request was to go heavy across all 31 phases.
+  - **"All 31 phases" was the wrong first move, for the reason D-033 and D-034 keep returning to.** Generating ~400 questions is fast, but a quiz is a *claim that an answer is correct*. Nothing in this repository verifies technical truth — every pass so far has tested internal consistency, "do these two sentences both claim to be true". Writing 400 answer keys from the same unverified text multiplies any error in it by 400, with no way to notice.
+  - **A second reason is specific to this reader.** They are a beginner studying alone, and the comprehension passes were productive precisely because fresh readers hit unknowable gaps. A quiz written by the author of the text tests the author's understanding of it, which is not the same claim.
+- **Decision:** **Build a vertical slice first — three phases, one per track** (IT 02, cyber 01, advance 07), chosen for *different register*: procedural, conceptual, code-heavy. If the format survives three teaching styles, scaling is mechanical. 34 questions shipped.
+  - **Authored in Markdown task-list syntax**, `- [x]` marking the correct option, with an authored `<!-- id: phase-qNN energy: … -->` comment. Same syntax the checklist already uses, so the content stays readable with `git` and a text editor, and — the deciding factor — **it prints**. The print stylesheet exists so a phase can be studied offline; a quiz encoded as HTML or JSON would have been the one section that vanished on paper.
+  - **The explanation is mandatory and shown even when the answer is right.** A correct answer for the wrong reason is the most common way a beginner mis-learns, and it is invisible to any score. The `**Why:**` line names the misconception each distractor represents.
+  - **Not a scored test.** The site carries no `N of M` and no percentage anywhere else, by the no-shame rule. The summary names the questions to revisit instead — "A few to look at again — questions 1, 2" is actionable; "70%" is not. Asserted in the unit suite and the browser check rather than left to prose.
+- **Consequences:**
+  - **The build fails loudly on a malformed question** — missing or duplicated `[x]`, absent `**Why:**`, duplicate id, unknown energy, or a section with prose but no questions. A quiz that tells a reader their correct answer is wrong is worse than no quiz.
+  - **The set is guarded separately, and that guard found a real defect immediately.** `scripts/audit-quiz.mjs` checks properties of the collection, which the build cannot: the first draft of IT 02 put **seven of ten answers in position C**, and advance 07 put **seven of twelve in C with position A never used**. Both builds were green and every question was individually valid — yet a reader answering "C" every time scores 70% without reading. No per-question check can see that.
+  - **The positional gate is 50%, deliberately, not an even split.** With 10 questions over 4 positions an even split is arithmetically impossible, and a 25% ± 1 rule would fail honest quizzes for no reason. 50% is where guessing one letter beats reading, which is the property worth gating.
+  - **advance 07's skew survived its author's own verification**, which reported the positions as "spread" using a max-repeat test that could not detect the pattern. That is the fifth time in this repository a writer's self-check passed while the artifact was wrong, and it is why a guard exists rather than a note in the authoring guide.
+  - **Architecture follows the existing split:** pure logic in `learning-site/src/lib/quiz.js`, tested under plain Node (53 checks, no DOM, no build), matching `lib/yourWork.js` and `lib/transfer.js`. The component renders. A real-browser check adds 15 more, because a control proven only in a unit test is a control that might not work when clicked.
+  - **Coverage is reported, not assumed.** Every build prints `quizzes: 34 question(s) across 3 of 31 phase(s)`, so partial rollout cannot be mistaken for completion.
+
 ## D-034 — A CHANGELOG structure guard gates, and it is the one guard the topic-list experiment proved *is* buildable
 
 - **Date:** 2026-09-16

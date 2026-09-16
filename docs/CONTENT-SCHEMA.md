@@ -107,10 +107,42 @@ The build script reads these `##` headings. Missing mandatory headings are a bui
 | `## Hands-on practice tasks` | `tasks` | Array of numbered strings |
 | `## Deliverable / proof of work` | `deliverableItems` | Array of bullet strings |
 | `## Checklist` | `checklist` | Array of `{ id, text, energy }` |
+| `## Quiz` | `quiz` | Array of question objects — see "The quiz section" below |
 | `## You're ready to move on when...` | `exitCriteria` | Plain text |
 | `## Free vs Paid` | `freeVsPaid` | Object with three sub-fields |
 
-Optional headings (`## Specific topics to learn`, `## Lab setup options`, `## Path options`, `## Required projects`, `## Recommended order`, `## Target roles`) map to `topics` as an array of `{ heading, items }`.
+Optional headings (`## Specific topics to learn`, `## Quiz`, `## Lab setup options`, `## Path options`, `## Required projects`, `## Recommended order`, `## Target roles`) map to `topics` as an array of `{ heading, items }` — except `## Quiz`, which is parsed into its own structure rather than into `topics`.
+
+### The quiz section
+
+`## Quiz` is optional and currently present in **3 of 31 phases** — a deliberate vertical slice, one phase per track, so the format was proven before it was scaled. The build reports coverage on every run rather than assuming it, because silent partial coverage reads as "every phase is quizzed" to anyone who only sees the build succeed.
+
+The format reuses **Markdown task-list syntax**: `- [x]` marks the correct option. That choice is load-bearing rather than cosmetic — the print stylesheet exists so a phase can be studied offline, and a quiz encoded as HTML or JSON would be the one section that vanished on paper. Authored this way, the quiz reads correctly on GitHub, in a text editor, and in print, with no new vocabulary to learn.
+
+```markdown
+### Q1. A user can read a file but cannot save changes. Most likely cause? <!-- id: it-02-q01 energy: normal -->
+
+- [x] The share permission allows Read but NTFS allows Change
+- [ ] The file is marked read-only in Windows Explorer
+- [ ] The account is a standard user rather than an administrator
+- [ ] The disk is full
+
+**Why:** Read succeeds, write fails — that split points at a permission layer that grants reading and denies writing.
+```
+
+| Element | Requirement |
+|---|---|
+| Heading | `### Q<n>. <question> <!-- id: <phase-id>-q<nn> energy: <low\|normal\|high> -->` |
+| `id` | Authored, unique, matching the phase's own prefix — never minted from position (D-019) |
+| Options | At least 3, each `- [ ]` or `- [x]`, with **exactly one** `[x]` |
+| Explanation | A single-line `**Why:**` after the options |
+| `energy` | Reuses the checklist vocabulary so anything that reads energy already understands a question |
+
+`energy` is `low` for quick factual recall, `normal` for reasoning about a scenario, `high` for multi-step judgement.
+
+**The build fails rather than skipping** on a missing `[x]`, two `[x]` marks, a missing `**Why:**`, a duplicate id, an unknown energy, or a section with prose but no parseable questions. A quiz is a claim that one answer is right, so a malformed one is worse than a missing one — it tells the reader their correct answer is wrong.
+
+**The set is validated separately**, in `scripts/audit-quiz.mjs`, because a per-question check cannot see a defect of the collection. The first quiz written for this repository put **seven of its ten correct answers in position C**: every question was individually valid and the build was green, yet a reader answering "C" every time scored 70% without reading. The guard gates position skew above 50%, unused positions, and erratic option counts.
 
 ### Sections deliberately NOT extracted
 

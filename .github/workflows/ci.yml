@@ -67,6 +67,15 @@ jobs:
       # anything would print the same green line as a healthy corpus.
       - name: Audit CHANGELOG guard (self-test)
         run: node scripts/test-audit-changelog.mjs
+      # The build fails on a malformed question — no marked answer, two marked
+      # answers, a missing **Why:**, a duplicate id. What it CANNOT see is a
+      # defect of the SET: the first quiz written for this repository put seven
+      # of its ten correct answers in position C. Every question was
+      # individually valid and the build was green, yet a reader answering "C"
+      # every time scored 70% without reading the questions. That is a property
+      # of the collection, so it needs a check that sees the whole set.
+      - name: Audit quiz answer balance
+        run: node scripts/audit-quiz.mjs
       # The workflow that runs every other check had no check of its own. No YAML
       # parser is vendored, so a malformed step is invisible locally: CI would
       # fail to start, which reads as "no CI ran" rather than "CI is broken".
@@ -170,6 +179,13 @@ jobs:
       # quietly reintroduce a score.
       - name: Path order
         run: npm run test:path-order
+      # The quiz's scoring maths, under plain Node. Its failure modes are all
+      # quiet: a question marked correct against the wrong option, an
+      # unanswered question counted as wrong, or the "which to reread" numbers
+      # off by one — none of which throw, and each of which makes a broken quiz
+      # look exactly like a working one.
+      - name: Quiz scoring
+        run: npm run test:quiz
 
   # The only job that needs a real browser engine. Everything in `site` renders to
   # a string and asserts on markup, which cannot see layout, computed CSS, focus
