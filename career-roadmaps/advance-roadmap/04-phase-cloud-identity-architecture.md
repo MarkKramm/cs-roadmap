@@ -777,7 +777,13 @@ The fixes are three, and only one of them is usually the right answer.
 
 The third answer is the one this phase is aiming at, and it is the subject of the next part.
 
-For a role that is assumed directly and where MFA is meaningful, the condition is short and worth writing every time.
+For a role that is assumed directly and where MFA is meaningful **on the AWS side**, the condition is short and worth writing every time.
+
+**Which roles those are is the part worth getting right, because the key above does not mean what it looks like it means here.** `aws:MultiFactorAuthPresent` describes whether *the AWS credentials making the call* were obtained with MFA.
+
+A role assumed through `sts:AssumeRoleWithSAML` is handed its credentials by the identity provider's assertion. The MFA that actually happened took place at the identity provider, before the assertion was ever signed, and it is not visible to these condition keys.
+
+So a trust policy for a federated role that requires `aws:MultiFactorAuthPresent: true` does not enforce fresh MFA. It denies the assumption, every time, including for the person who did present MFA. The `sts:AssumeRole` path — where a human authenticates to AWS directly and then assumes a role — is the one these keys describe.
 
 ```json
 {
@@ -801,7 +807,15 @@ For a role that is assumed directly and where MFA is meaningful, the condition i
 }
 ```
 
-`aws:MultiFactorAuthAge` is measured in seconds, so `900` means the MFA had to happen within the last fifteen minutes. That is the setting that turns MFA from “you have it” into “you used it, recently, for this.”
+Read that policy as a shape rather than as a drop-in for the federated role it names. The `Sid` and the assertion in `Principal` describe a SAML federation, and the two MFA conditions are the ones that do not apply to it — which makes it a useful thing to have looked at, because it is exactly the mistake this section exists to prevent. What the shape *is* correct for is a role assumed through `sts:AssumeRole` by a principal that authenticated to AWS directly.
+
+**The federated version is enforced on the other side of the boundary.** For `sts:AssumeRoleWithSAML`, fresh MFA belongs in the identity provider's policy — a Conditional Access rule requiring an authentication strength for the group assigned to that role.
+
+What the AWS trust policy can usefully constrain is the assertion itself: `SAML:aud` to pin the audience, `SAML:sub` to pin who may assert it, and `sts:SourceIdentity` with `sts:SetSourceIdentity` so the originating human survives into CloudTrail.
+
+That split is the same one the earlier trust policy describes: the trust policy says the identity provider may assert this role, and the identity provider says who may assert it and how recently they proved it.
+
+`aws:MultiFactorAuthAge` is measured in seconds, so on the roles it *does* apply to, `900` means the MFA had to happen within the last fifteen minutes. That is the setting that turns MFA from “you have it” into “you used it, recently, for this.”
 
 #### Working with roles from the command line
 
@@ -816,9 +830,20 @@ aws sts assume-role \
   --duration-seconds 3600
 
 # Use them for a single call without exporting anything.
-AWS_ACCESS_KEY_ID=$(aws configure get role.access_key) \
-AWS_SECRET_ACCESS_KEY=$(aws configure get role.secret_key) \
-AWS_SESSION_TOKEN=$(aws configure get role.token) \
+# assume-role prints JSON to stdout and writes no profile, so the values are
+# read from that output rather than from `aws configure get`, which would be
+# looking for a profile that nothing here created.
+CREDS=$(aws sts assume-role \
+  --role-arn arn:aws:iam::222233334444:role/OrgAuditReadOnly \
+  --role-session-name audit-2026-03-14 \
+  --external-id c1f4b0a7-2d8e-4a3f-9b21-6a0e5d7c4f88 \
+  --duration-seconds 3600 \
+  --query 'Credentials.[AccessKeyId,SecretAccessKey,SessionToken]' \
+  --output text)
+
+AWS_ACCESS_KEY_ID=$(echo "$CREDS" | cut -f1) \
+AWS_SECRET_ACCESS_KEY=$(echo "$CREDS" | cut -f2) \
+AWS_SESSION_TOKEN=$(echo "$CREDS" | cut -f3) \
 aws sts get-caller-identity
 
 # Who am I, and through which path did I get here?
@@ -1351,7 +1376,13 @@ jobs:
 
 The `paths:` filter matters more than it looks. A policy check that runs on every pull request, including documentation changes, is a policy check that gets disabled because it is slow and noisy. Scoping it to changes that can actually violate a guardrail is what keeps it switched on.
 
-Note also that this workflow uses GitHub's OIDC token implicitly — `permissions: contents: read` and no AWS credentials stored — which is the same design as Part 5. A pipeline that checks policy should not itself be holding a static key.
+Note also what this workflow does *not* carry: no stored cloud credential and no secret of any kind. It reads the repository, runs Terraform, and evaluates policy locally — it never calls the cloud provider, so it never needs a credential to call it with.
+
+That is worth separating from the OIDC design in Part 5, because the two look alike and are not the same thing. This workflow holds no key because it does not talk to AWS.
+
+A workflow that *does* — one that reads live state, or applies a plan — has to get a credential from somewhere, and that is the case OIDC federation exists for: a `permissions: id-token: write` grant and a trust policy pinned to the repository and ref, instead of a static key in a secret.
+
+If this job ever grew a step that queried the real account, adding `id-token: write` and the Part 5 trust policy is the change to make, and adding a long-lived access key is not.
 
 ### Part 8 — Break-glass, network, and evidence at organisational scale
 
@@ -1516,7 +1547,9 @@ An organisation trail or a central log workspace has four properties that matter
 
 The fourth property is a decision that has to be made before an incident and defended afterwards. A ninety-day retention is a cost decision and a real one. What matters is that when an incident happens on day ninety-one, someone has already written down that the evidence would be gone and the business accepted that risk. That sentence in a report is the difference between an accepted risk and a surprise.
 
-**Regions you do not use is the detail worth internalising.** An attacker with credentials will attempt to create resources in a region the organisation does not monitor, because the guardrails and the alerts are attached to the regions people use. An SCP that denies every action outside an approved region list — of which the `DenyOutsideRegionAndBreakGlass` pattern in Part 2 is one shape — removes that option entirely, and it costs nothing.
+**Regions you do not use is the detail worth internalising.** An attacker with credentials will attempt to create resources in a region the organisation does not monitor, because the guardrails and the alerts are attached to the regions people use. An SCP that denies every action outside an approved region list removes that option entirely, and it costs nothing.
+
+The shape is one `Deny` statement with a `StringNotEquals` condition on `aws:RequestedRegion` against the approved list, and the part that needs care is the escape hatch rather than the denial: the same policy has to leave the break-glass and security-tooling principals able to work in the regions they are pinned to, or the guardrail that stops an attacker also stops the response. That is the pattern this phase applies again in Part 9.
 
 ### Part 9 — The worked design decision: a permission boundary and break-glass path for an administrator role
 
@@ -1911,7 +1944,7 @@ Then open `portfolio/advance/04-cloud-identity-architecture.md` and assemble the
 | Open Policy Agent | General-purpose policy engine with the Rego language | Free/open-source | https://www.openpolicyagent.org/ | Write a rule that rejects an IAM role with no permission boundary | Conftest, which wraps the same engine for a single-file check |
 | Checkov | Static analysis of Terraform, CloudFormation, and Kubernetes manifests | Free/open-source | https://www.checkov.io/ | Scan a Terraform directory and fix one high-severity finding | Trivy, which scans IaC alongside containers and dependencies |
 | Azure Policy | Platform-enforced guardrails at management-group scope, with audit and deny effects | Free, built-in | https://learn.microsoft.com/en-us/azure/governance/policy/overview | Define a deny policy, assign it in `DoNotEnforce`, then enforce it | AWS service control policies, which set the same kind of ceiling |
-| Microsoft Entra ID | Identity provider, Conditional Access, and the sign-in and audit logs used for detection | Freemium | https://learn.microsoft.com/en-us/entra/identity/ | Build one Conditional Access policy that requires MFA for a privileged role | Keycloak, self-hosted, with SAML or OIDC federation to the cloud |
+| Microsoft Entra ID | Identity provider, Conditional Access, and the sign-in and audit logs used for detection | Freemium | https://learn.microsoft.com/en-us/entra/identity/ | Write the Conditional Access policy that would require MFA for a privileged role, then say which licence it needs | Keycloak, self-hosted, with SAML or OIDC federation to the cloud |
 | AWS IAM Identity Center | Central SSO, permission sets, and account assignment | Free, built-in | https://docs.aws.amazon.com/singlesignon/latest/userguide/what-is.html | Create a permission set and assign it to one group in one account | Keycloak or Entra ID federating directly to each account by SAML |
 | AWS CloudTrail | Management-event audit log for every account, the evidence base for every query in this phase | Free, built-in | https://docs.aws.amazon.com/awscloudtrail/latest/userguide/cloudtrail-user-guide.html | Create an organisation trail delivering to a log archive account | Azure Activity Log, exported to a Log Analytics workspace |
 | HashiCorp Vault | Secrets management, dynamic credentials, and short-lived secret issuance | Paid | https://developer.hashicorp.com/vault | Run the dev server and read a secret with a short-lived token | AWS SSM Parameter Store standard tier, or SOPS with age keys in Git |
@@ -1999,13 +2032,15 @@ You can design a landing zone, write enforced permission-boundary and SCP guardr
 
 ### What's free and enough
 
-Everything this phase teaches can be built on free tiers. AWS Organizations, service control policies, IAM permission boundaries, IAM Identity Center, and CloudTrail management events cost nothing at the scale of a personal account, and Azure management groups, Azure Policy, and the Entra ID free tier are the same story on the Microsoft side. Terraform, Open Policy Agent, Conftest, and Checkov are all free and open source, and they are the actual tooling a great many production teams use rather than a cut-down substitute. Rego and the Terraform AWS provider both have documentation good enough to learn from directly, and the AWS Security Reference Architecture, the Well-Architected Security Pillar, and NIST SP 800-207 are free and are the documents the designs in this phase are derived from. A personal AWS account and a personal Entra ID tenant, both free, are sufficient for every task here.
+Everything this phase teaches can be built on free tiers, with **one scoped exception stated plainly rather than glossed**: Conditional Access is an Entra ID **P1** feature and is not in the free tier — the same licence boundary the cyber track's cloud-and-identity phase states. AWS Organizations, service control policies, IAM permission boundaries, IAM Identity Center, and CloudTrail management events cost nothing at the scale of a personal account. On the Microsoft side, Azure management groups, Azure Policy, and the Entra ID free tier are the same story — free covers users, groups, MFA registration, and the sign-in and audit logs, and stops short of Conditional Access. Terraform, Open Policy Agent, Conftest, and Checkov are all free and open source, and they are the actual tooling a great many production teams use rather than a cut-down substitute. Rego and the Terraform AWS provider both have documentation good enough to learn from directly, and the AWS Security Reference Architecture, the Well-Architected Security Pillar, and NIST SP 800-207 are free and are the documents the designs in this phase are derived from. A personal AWS account and a personal Entra ID tenant, both free, are sufficient for every task here.
+
+So the Conditional Access policy named in the resource table is designed and documented rather than built, unless your employer already has P1 — which many do, and it is the licence to use if you have it. The mechanism that matters is the same one you *can* run free: the IdP decides who may assert the role and how recently they proved it, and the trust policy decides what the assertion is allowed to do.
 
 The honest limit is where the free tier stops. Customer-managed KMS keys are charged per key and per request, Secrets Manager is charged per secret, AWS Config is charged per configuration item, and CloudTrail data events are charged. Design all of those on paper, prove the mechanism where you can with the free AWS-managed keys and the free SSM Parameter Store standard tier, and write down which parts you designed without running. That distinction is a strength in a portfolio, not an admission.
 
 ### What's paid and why you'd upgrade
 
-Enterprise cloud security posture platforms such as Wiz, Prisma Cloud, and Orca add graph-based analysis across an entire estate, agentless workload scanning, and continuous compliance reporting with an evidence trail. Paid identity governance products add entitlement review workflows and automated access certification. HashiCorp Vault's enterprise features add dynamic credential issuance and multi-tenant secret isolation. Paid training and certification tracks, including the AWS and Azure security certifications, are the largest line item in this space, and for someone already in a security role they are almost always employer-funded rather than self-funded. Commercial SIEM and XDR platforms add correlation and retention that a free tier cannot, which matters at organisational scale and not at all for practice.
+Entra ID **P1** is the one paid licence this phase's own material leans on, because it is what turns Conditional Access from a document into an enforcement point — and it is also the licence most employers already have, which is why the design work stays portable even when the practice does not. Enterprise cloud security posture platforms such as Wiz, Prisma Cloud, and Orca add graph-based analysis across an entire estate, agentless workload scanning, and continuous compliance reporting with an evidence trail. Paid identity governance products add entitlement review workflows and automated access certification. HashiCorp Vault's enterprise features add dynamic credential issuance and multi-tenant secret isolation. Paid training and certification tracks, including the AWS and Azure security certifications, are the largest line item in this space, and for someone already in a security role they are almost always employer-funded rather than self-funded. Commercial SIEM and XDR platforms add correlation and retention that a free tier cannot, which matters at organisational scale and not at all for practice.
 
 ### When it's worth paying
 
