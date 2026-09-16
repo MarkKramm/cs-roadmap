@@ -2,6 +2,26 @@
 
 A lightweight decision log (ADR-style). Newest first.
 
+## D-043 — A guard is only as good as the controls you dare to run against it, and a check whose subject was fixed is a trap
+
+- **Date:** 2026-09-16
+- **Status:** Accepted
+- **Context:** Twenty of 31 phases had no quiz. Adding them created a new failure class nothing checked: **a question inserted into the wrong phase**. Structure would be perfect — four options, one `[x]`, a long `**Why:**` — while the question tested material from a different lesson entirely. The corpus, not the frontmatter, defines what "belongs" to a phase.
+- **Decision:** `scripts/audit-quiz-sourcing.mjs` scores each question against every phase and **fails when another phase matches it better**. The rule is read from the corpus: a question must share more distinctive vocabulary with its own phase than with any other, gated at a **1.30x ratio**.
+- **The first version of this guard passed all its controls while being unable to catch the real defect.** Planting a genuine cyber-01 question into cyber-15 scored own=17 versus bestOther=15 — a margin of **2** where the rule wanted 4 — and the guard **exited 0 on a question that was actually in the wrong place**. The controls were synthetic, and synthetic controls are written by the same mind that wrote the rule, so they encoded the same blind spot.
+- **The fix came from measuring instead of adjusting the number.** Scoring only the question and options put every real question at a margin of 2–4 terms. Scoring the **whole block including the `**Why:**` line** moved the margin to **15–29 terms at ratios of 1.39–2.21** across all 14 other phases. The explanation carries most of the discriminating signal, because it names the specific lesson, lab and task the question came from. The threshold now has real headroom rather than sitting on top of the data.
+- **A control that plants a *real* question is now permanent**, so this exact regression cannot return.
+- **Two more bugs in the same guard, both caught by its own controls, both worth generalising:**
+  - **The id rule was read from the frontmatter rather than the corpus.** Frontmatter ids look like `it-02-operating-systems`, so the guard expected `cyber-01-foundations-q01`. The real convention is `cyber-01-q01`. This produced **141 findings across 10 quizzes that were passing**. *The corpus is the specification* — reading a rule from a plausible-looking field instead of from the data is how a guard manufactures work.
+  - **An "exactly 4 options" rule contradicted a deliberate decision.** `audit-quiz.mjs` permits **4 or 5**, so that an honest fifth distractor is not padding. Two guards disagreeing about the same file is a defect in whichever was written without reading the other.
+- **A separate trap: a check whose subject is fixed by the thing you just did.** The browser suite asserted that a phase without a quiz renders no quiz section — true while IT 01 was the only such phase, and impossible to satisfy once every phase had one. CI failed on a correct change.
+- **The first replacement was worse than the failure.** It asserted "either no quiz container, or a container with questions" — and **passed even with the component's empty branch deliberately rewritten to render an empty shell**, because no phase reaches that branch any more. It was caught by breaking the component on purpose and watching the check stay green. **`null || x > 0` is a tautology when `x` is always 12.**
+- **Consequences:**
+  - **Proving a guard can fail is not optional, and the proof must use the real defect, not a synthetic one.** The sourcing guard's synthetic controls were green while it exited 0 on a genuinely misplaced question.
+  - **When a check's premise disappears, delete the check rather than generalising it into something unfalsifiable.** The replacement now asserts what is reachable and load-bearing — the phase that used to have no quiz renders real questions under a real heading — proven able to fail by forcing the component to return early for every phase (exit 1). The empty branch stays covered where it *is* reachable, in `test-quiz.mjs`, which asserts `summarise([], {})` and `summarise(null, {})` both report `empty`.
+  - **One existing quiz was beatable at exactly the threshold.** IT 06 put **7 of 14 answers in position A** — passing a rule that only forbids *more than* 50%, while scoring 50% for any reader who answers "A" every time. A threshold is not a target. Rebalanced by reordering options only.
+  - **A defect in the corpus can be a defect in a test's assumption.** 283 practice tasks carry authored bands and **not one has been timed** — the oldest open item, and the only one no automated pass can close.
+
 ## D-042 — An answer key is not a lesson, and a guard that prints without failing is worse than no guard
 
 - **Date:** 2026-09-16
