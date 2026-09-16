@@ -865,6 +865,120 @@ Then work this list, which turns the plan into a running search:
 - 2 resume versions: Helpdesk/IT Support and NOC/Networking Support
 - List of 20 technical Q&A (build these from the eight topics in Part 3 — two or three questions each, answered in the three layers)
 
+## Quiz
+
+Twelve questions on the material in this phase. Each has one correct answer and a short explanation — read the explanation even when you get it right, because it usually names the mistake the wrong answers represent.
+
+The phase's own exercises asked you to *recall* these answers from nothing. This asks you to *recognise* the right one among plausible alternatives, which is the same knowledge tested the way a real application process will test it.
+
+### Q1. What does the phase say silence after your applications is actually telling you? <!-- id: it-09-q01 energy: normal -->
+
+- [ ] That the industry will not hire self-taught beginners without a degree
+- [x] That something in your top third or your targeting needs fixing
+- [ ] That you need to apply to a wider range of seniority levels
+- [ ] That you should wait longer before drawing any conclusion at all
+
+**Why:** The phase is explicit: silence is data about your resume's top third, not about you as a person. The industry-will-not-hire story is the conclusion the phase names as the usual beginner mistake, and it is the one that ends a search early. Applying wider or waiting passively both skip the actual diagnosis the tracker exists to produce.
+
+### Q2. A posting asks for 3+ years of experience but says nothing about a portfolio. What does the phase's filtering rule say? <!-- id: it-09-q02 energy: low -->
+
+- [ ] Apply anyway, because requirements are always negotiable in practice
+- [ ] Apply, but send the NOC version of the resume instead
+- [x] Reject it, unless the ad also says “or equivalent portfolio”
+- [ ] Apply first and decide after they respond
+
+**Why:** The rule is mechanical: reject anything asking for 3+ years unless it also carries the "or equivalent portfolio" phrase, which the phase calls rare and a real door. "Requirements are negotiable" sounds optimistic but spends an application where you cannot plausibly win, and which resume version you send is a separate decision entirely.
+
+### Q3. You have five hours this week and a list of twenty roles. Which approach matches the phase's guidance? <!-- id: it-09-q03 energy: normal -->
+
+- [x] Tailor the top third for five to eight roles and keep the volume steady
+- [ ] Submit to all twenty so your sample size grows as fast as possible
+- [ ] Submit to the five you can write a full custom resume for
+- [ ] Wait for a week when you have more time so none are rushed
+
+**Why:** The phase's honest number is five to eight quality applications a week alongside study, with the top third customised in about ten minutes each. Mass-submitting twenty is volume without tailoring, which the phase says produces silence; rewriting whole resumes is what burns people out; and waiting for a better week is how a search stops.
+
+### Q4. Which part of your resume does the phase tell you to customise per application, and why? <!-- id: it-09-q04 energy: low -->
+
+- [x] The top third — the summary, skills list, and first project bullet — which a scanner reads first
+- [ ] The whole resume, because a tailored document always beats a generic one
+- [ ] The references section, because it is checked on a screening call
+- [ ] The education section, so the missing degree is framed correctly
+
+**Why:** The top third is the summary, the skills list, and the first project bullet, and it takes about ten minutes to adjust. Rewriting the whole resume per application is unsustainable at fifteen applications a week and the phase predicts burnout within two weeks. References and education are not the parts a scanner reads first.
+
+### Q5. A job ad names Zabbix and your monitoring lab used Uptime Kuma. What does the phase's worked example do with that gap? <!-- id: it-09-q05 energy: normal -->
+
+- [ ] Leave it out of the application and hope the question never comes up
+- [x] Name it as the gap, mention the tool you did use, and say you will learn it
+- [ ] Claim familiarity with Zabbix, since the concepts are broadly similar
+- [ ] Apply only to postings that name no monitoring tool at all
+
+**Why:** The worked comparison lists "No Zabbix; I have run Uptime Kuma and will learn it" as the NOC application's named gap. Volunteering the weakness is what the phase calls the boldest and most effective move, because every other applicant writes only strengths. Overclaiming is the bluff the interview sequence exists to prevent, and filtering out every unfamiliar tool leaves almost nothing to apply to.
+
+### Q6. Why does the phase say the failed attempts belong inside your troubleshooting story? <!-- id: it-09-q06 energy: normal -->
+
+- [ ] Because they prove you have encountered the problem in real life
+- [ ] Because interviewers prefer longer answers to short ones
+- [ ] Because they show you are honest about your skill level
+- [x] Because they demonstrate method rather than luck
+
+**Why:** The phase calls the failed attempts the most persuasive part of the troubleshooting answer, precisely because they show a repeatable method rather than a lucky guess. Honesty is the point of the "I don't know, but here is how I would find out" sequence, not of the troubleshooting story, and length is never the goal.
+
+### Q7. An employer asks you to cover a laptop deposit that they will reimburse on your first payslip. What does the phase say? <!-- id: it-09-q07 energy: low -->
+
+- [x] End the conversation — any request for money from you is a scam
+- [ ] Ask for the reimbursement promise in writing before paying
+- [ ] Pay it only if the amount is small relative to the salary offered
+- [ ] Check the company website and pay if it looks legitimate
+
+**Why:** Money only ever flows toward you. The rule has no test, no threshold, and no amount small enough to make it safe: legitimate employers never charge for equipment, onboarding, or "processing", refundable or otherwise. Getting it in writing or researching the company both negotiate with a rule the phase says is absolute.
+
+### Q8. You have applied to thirty roles and received no response at all. What does the phase's stage diagnosis point to? <!-- id: it-09-q08 energy: normal -->
+
+- [ ] Your interview performance, so rehearse the five answers
+- [ ] Your offer negotiation, so prepare a salary range
+- [x] Your resume's top third or your targeting
+- [ ] Your follow-up timing, so send more follow-ups sooner
+
+**Why:** Each stage's failure has its own fix, and applications with no responses point at the top third or the targeting — the phase's remedy is comparing the ad's vocabulary with your resume literally side by side. Interview answers explain interviews that go nowhere, and negotiation only matters once you have an offer to discuss.
+
+### Q9. A rejection arrives on a Tuesday morning and you feel like rewriting everything. What is the phase's rule for that day? <!-- id: it-09-q09 energy: high -->
+
+- [ ] Rewrite the resume immediately while the motivation is high
+- [ ] Lower your target roles so the next batch is easier to win
+- [ ] Stop applying for the rest of the week and restart next Monday
+- [x] Change nothing, log it, and keep the pipeline moving until the two-week review
+
+**Why:** Rejections cluster, and a week with three of them feels like evidence when it is only variance. The phase is specific: on the day a rejection arrives, do not rewrite the resume, do not lower your targets, do not apply to something you do not want. Change at the two-week review, when a change is based on data rather than mood — which also rules out the pause, since stopping is how most people fail this phase.
+
+### Q10. An interview asks about a technology you have genuinely never used. What does the four-step sequence have you do third? <!-- id: it-09-q10 energy: normal -->
+
+- [ ] Say what you do know that is adjacent to the question
+- [ ] Stop talking and let the interviewer move on
+- [x] Say how you would find out — documentation first, then a lab test
+- [ ] Ask the interviewer to explain the technology to you
+
+**Why:** The sequence is: say so immediately, say what you know that is adjacent, say how you would find out, then stop talking. The adjacent knowledge is step two and stopping is step four, so both are real moves from the sequence placed in the wrong slot. Asking them to teach you inverts the interview, which is meant to test how you reason and where you look.
+
+### Q11. What does the phase say the Follow-up date column in the tracker is actually for? <!-- id: it-09-q11 energy: low -->
+
+- [ ] Recording the date you last heard from the employer
+- [x] Telling you what to do today, because it is the column that runs your day
+- [ ] Measuring how quickly each employer responds to you
+- [ ] Deciding which companies are worth applying to again
+
+**Why:** Every other column is a record of what happened; only a date tells you what to do today. The phase calls it the column beginners always forget, because they build a record and mistake it for a system. Response speed and re-application are things you might infer from the sheet later, but neither is what the column is for.
+
+### Q12. It is week ten and your response rate is healthy but no screening call has turned into an interview. Where is the phase's review loop pointing you? <!-- id: it-09-q12 energy: high -->
+
+- [ ] Your top third, because the resume is not matching the ads
+- [ ] Your targeting, because you are applying to the wrong role family
+- [ ] Your volume, because ten weeks was not enough applications
+- [x] Your first-conversation answers, and you should rehearse those two questions
+
+**Why:** A healthy response rate means the top third is working — the resume is getting you read. Screening calls that go nowhere usually mean the answers to "tell me about yourself" or the degree question need work, and those are the two to rehearse specifically. Blaming targeting or volume would change the one variable that is currently succeeding.
+
 ## Checklist
 
 - [ ] I created an application tracker. <!-- id: it-09-c01 energy: normal -->

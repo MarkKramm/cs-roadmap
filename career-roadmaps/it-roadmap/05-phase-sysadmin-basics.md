@@ -1324,6 +1324,138 @@ Create `portfolio/it/05-sysadmin-basics.md` with:
 - Google Workspace admin workflow notes
 - Small-business patching checklist
 
+## Quiz
+
+Fourteen questions on the material in this phase. Each has one correct answer and a short explanation — read the explanation even when you get it right, because it usually names the mistake the wrong answers represent.
+
+Several of these are the efficient-access and backup rules applied to cases the phase does not spell out. That is the point: the rule is short, and recognising where it applies is the actual skill.
+
+### Q1. A share grants Read. NTFS grants Modify. What access does the user get? <!-- id: it-05-q01 energy: normal -->
+
+- [ ] Modify, because NTFS is more granular
+- [ ] Modify, because the two permissions add together
+- [x] Read, because the more restrictive one wins
+- [ ] It depends on the user's group membership
+
+**Why:** This is the single most confusing thing in the phase and it has a clean rule: effective access is the more restrictive of the two. A technician who checks only NTFS sees "Modify" and then spends an hour wondering why the user cannot save.
+
+### Q2. Why does the phase assign permissions to groups rather than to individual people? <!-- id: it-05-q02 energy: normal -->
+
+- [ ] Group permissions are processed faster by Windows
+- [x] Groups make access answerable — you can read one membership list
+- [ ] Individual permissions are not supported by NTFS
+- [ ] Groups reduce the total number of permissions needed
+
+**Why:** The phase's test is the audit question "who can read the finance folder?" Assign permissions to people and the honest answer becomes "I would have to check." Groups make that question a single lookup — and they survive people joining, moving, and leaving.
+
+### Q3. What does "cloud sync is not a backup" mean? <!-- id: it-05-q03 energy: normal -->
+
+- [ ] Cloud storage is too expensive for real backups
+- [ ] Sync is slower than a scheduled backup
+- [x] Sync propagates the mistake — including ransomware encryption
+- [ ] Cloud providers do not guarantee file durability
+
+**Why:** OneDrive and Drive keep files *in step*, so an accidental deletion, a bad edit, or mass encryption is faithfully copied to every synced device. A backup keeps an independent copy you can go back to; sync keeps a current one.
+
+### Q4. A user cannot save changes to a file that worked yesterday. What is the most likely cause? <!-- id: it-05-q04 energy: high -->
+
+- [ ] The file is corrupt
+- [ ] The disk is full
+- [ ] The user's password expired
+- [x] A parent folder's permissions changed and the child inherited it
+
+**Why:** Inheritance means a change to a parent reaches its children, and "it worked yesterday" plus a permission error is that pattern. It is also why the reach of a change surprises the person who made it — they changed one folder and affected every folder beneath.
+
+### Q5. An explicit Deny and an inherited Allow both apply to a user. What is the result? <!-- id: it-05-q05 energy: normal -->
+
+- [ ] Allow wins, because the user is in a group that grants it
+- [x] Deny wins, because an explicit Deny overrides an inherited Allow
+- [ ] The user is prompted to choose
+- [ ] Both are logged and access is granted for one session
+
+**Why:** Explicit Deny takes precedence, which is why the phase calls deny entries the usual culprit behind inexplicable access failures. When someone "definitely has permission" and still cannot get in, an explicit deny somewhere above them is where to look.
+
+### Q6. Which backup type needs the full backup plus only the latest of its own kind to restore? <!-- id: it-05-q06 energy: normal -->
+
+- [ ] Incremental
+- [x] Differential
+- [ ] Full
+- [ ] Snapshot
+
+**Why:** A differential copies everything changed since the last *full*, so restore needs the full plus the most recent differential. Incremental copies everything since the last backup *of any kind*, so restoring it needs the full plus every increment in the chain — which is what makes it the smallest backup and the slowest restore.
+
+### Q7. What does the 3-2-1 rule require? <!-- id: it-05-q07 energy: low -->
+
+- [ ] Three backups, taken two days apart, stored for one year
+- [ ] Three administrators, two approvals, one change window
+- [x] Three copies, on two media, with one off-site
+- [ ] Three sites, two providers, one encryption key
+
+**Why:** Three copies of the data, on two different media, with one copy off-site. The phase gives a faithful $0 approximation for a home lab: the original, an external drive, and cloud storage.
+
+### Q8. A backup job has run successfully every night for a year. What does the phase say that proves? <!-- id: it-05-q08 energy: high -->
+
+- [ ] The data is protected and the policy is sound
+- [ ] The schedule and retention settings are correct
+- [ ] Not much, until the job's logs have been reviewed
+- [x] Nothing, until you have restored from it
+
+**Why:** A backup is only a backup if you have restored from it and the file opened — everything else is optimism. Unverified backups fail when you need them, which is why a test restore is the phase's most valuable habit.
+
+### Q9. What is a mobile device management (MDM) enrolment for? <!-- id: it-05-q09 energy: low -->
+
+- [ ] Encrypting the device's local disk only
+- [x] Letting the organisation push settings to and set conditions on the device
+- [ ] Backing up the user's personal photos
+- [ ] Replacing the need for a domain account
+
+**Why:** Enrolment gives the device an identity the organisation recognises, after which it can be configured, held to compliance conditions, and wiped if lost. The phase names four jobs — enrol, configure, enforce compliance, wipe.
+
+### Q10. A user's ticket says "my device isn't compliant". What is usually wrong? <!-- id: it-05-q10 energy: normal -->
+
+- [ ] The device is not connected to the corporate VPN
+- [ ] The user's licence has expired
+- [x] A required condition is failing — often encryption, an update, or screen lock
+- [ ] The device was enrolled with the wrong email address
+
+**Why:** Non-compliance is a specific verdict, not a vague fault: something on the required list is not satisfied. The phase names encryption, an out-of-date OS, and a disabled screen lock as the common three. A wrong email at sign-in is what causes a failure to *enrol*, which is a different ticket.
+
+### Q11. On which platform does a user see a genuine separate work profile? <!-- id: it-05-q11 energy: normal -->
+
+- [x] Android
+- [ ] iOS
+- [ ] Both, identically
+- [ ] Neither — BYOD never separates work data
+
+**Why:** Android has a real, visible work profile the employer can wipe without touching personal apps. iOS has no system-level work profile at all — protection is applied per managed app, which is why an iPhone user will never find that setting. Saying "work profile" for Android and "app-level protection" for iOS keeps you accurate.
+
+### Q12. Which request should be treated as an account-takeover attempt until proven otherwise? <!-- id: it-05-q12 energy: high -->
+
+- [ ] A password reset from a user at their desk
+- [ ] A request to install approved software
+- [ ] A request to map an additional network drive
+- [x] A request to move someone's MFA to a new phone
+
+**Why:** Moving the second factor hands over the account completely, and the caller can supply any phone number they like. The phase is explicit: follow the Phase 4 identity verification discipline, and never accept the new number the caller gives you.
+
+### Q13. A newly enrolled laptop builds itself when the user signs in. What is this? <!-- id: it-05-q13 energy: low -->
+
+- [ ] A group policy refresh
+- [x] Autopilot
+- [ ] A test restore
+- [ ] Conditional access
+
+**Why:** Autopilot is Microsoft's enrolment path: the user unboxes the laptop, connects to Wi-Fi, signs in with their work account, and the machine configures itself — nobody images anything by hand. Conditional access decides *whether* a device may connect; Autopilot decides *what ends up on it*.
+
+### Q14. Which is the strongest argument for keeping most users as standard users rather than local administrators? <!-- id: it-05-q14 energy: normal -->
+
+- [ ] It reduces the number of support tickets
+- [ ] It is required for domain membership
+- [x] One compromised account is the difference between one machine and the company
+- [ ] It makes software installation faster
+
+**Why:** That is least privilege stated plainly. Admin rights granted "because it was convenient during setup" widen the blast radius of any single compromised account — which is why the phase treats least privilege as a security control rather than an inconvenience.
+
 ## Checklist
 
 - [ ] I understand local vs domain vs cloud identity. <!-- id: it-05-c01 energy: low -->

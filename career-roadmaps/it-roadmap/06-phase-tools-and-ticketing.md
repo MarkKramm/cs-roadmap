@@ -1258,6 +1258,138 @@ Create `portfolio/it/06-tools-and-ticketing.md` with:
 - The Part 12 rewritten ticket with its defect list
 - The Part 13 fifteen-ticket triage table and linked problem record
 
+## Quiz
+
+Fourteen questions on the material in this phase. Each has one correct answer and a short explanation — read the explanation even when you get it right, because it usually names the mistake the wrong answers represent.
+
+Two of these use the fictional week of ticket data from Part 11, on tickets other than the ones worked there. The arithmetic is the same; recognising which tickets belong in the denominator is the part people get wrong.
+
+### Q1. What is the difference between an incident and a problem? <!-- id: it-06-q01 energy: normal -->
+
+- [ ] An incident is urgent; a problem is not
+- [x] An incident is a symptom; a problem is the underlying cause
+- [ ] An incident affects one user; a problem affects many
+- [ ] An incident is unplanned; a problem is scheduled
+
+**Why:** You fix incidents and investigate problems. The phase's practical signal is repetition: when the same incident keeps reappearing, stop closing tickets and start asking why. Severity and user count are impact, which is a different axis.
+
+### Q2. A user says "this is urgent!" What does a support team still need to know? <!-- id: it-06-q02 energy: normal -->
+
+- [ ] How long the problem has existed
+- [ ] Whether they have tried restarting
+- [x] Whether it affects one person or the whole company
+- [ ] Which operating system they are running
+
+**Why:** Urgency and impact are separate inputs and priority comes from both. "Urgent" tells you how quickly it needs attention and nothing about scope — and the team cannot set a priority without knowing whether "it" is one person or the entire company.
+
+### Q3. Which part of a ticket does the phase call the most valuable, and almost nobody records? <!-- id: it-06-q03 energy: normal -->
+
+- [x] The diagnostic steps that failed
+- [ ] The closure note sent to the user
+- [ ] The resolution steps that worked
+- [ ] The user's original description
+
+**Why:** If you flushed DNS and it did not help, that fact saves the next technician ten minutes of trying it again. Failed steps narrow the search for whoever picks the ticket up next, and they are routinely left out because they feel like evidence of wasted effort.
+
+### Q4. What is a service request? <!-- id: it-06-q04 energy: low -->
+
+- [x] A standard, pre-approved ask
+- [ ] Something broken that needs restoring now
+- [ ] The underlying cause of repeated incidents
+- [ ] A deliberate change with a rollback plan
+
+**Why:** "Add me to the Sales group" is a service request — routine, pre-approved, no incident behind it. A broken thing needing restoration is an incident; a cause behind repeated incidents is a problem; a modification with approval and rollback is a change.
+
+### Q5. Which summary line would a search actually match, months later? <!-- id: it-06-q05 energy: normal -->
+
+- [ ] "Help!!!"
+- [ ] "Email broken"
+- [ ] "User called, fixed it"
+- [x] "Outlook stuck connecting after password change — J. Donnelly"
+
+**Why:** A summary is a subject line a search would match, so it names the symptom, the trigger, and the user. "Email broken" is not searchable and not specific; "fixed it" belongs in the resolution field, not the summary.
+
+### Q6. Why do templates matter more than writing one perfect ticket? <!-- id: it-06-q06 energy: normal -->
+
+- [ ] They are required by most ticketing systems
+- [ ] They make tickets shorter to read
+- [x] They turn a good day's work into every day's work
+- [ ] They remove the need for a knowledge base
+
+**Why:** Nobody writes that carefully when they are busy — which is why the phase asks for five templates with the diagnostic questions already in place. The suspicious-email template is the clearest case: working its list takes thirty seconds and catches the user who clicked and did not mention it.
+
+### Q7. In the Part 11 week, what is the reopen rate? <!-- id: it-06-q07 energy: normal -->
+
+- [x] 2 ÷ 8 = 25%
+- [ ] 2 ÷ 10 = 20%
+- [ ] 2 ÷ 9 = 22%
+- [ ] 3 ÷ 8 = 38%
+
+**Why:** Two tickets were reopened (INC-102 and INC-108), and the denominator is the **eight closed** tickets — INC-103 is still in progress and INC-110 was never touched, so neither can have been reopened. A denominator of 10 quietly counts tickets that were never closed.
+
+### Q8. In that same week, why is the mean time to resolve a misleading figure? <!-- id: it-06-q08 energy: high -->
+
+- [ ] Because it excludes the tickets that were never closed
+- [ ] Because the sample of eight tickets is too small to mean anything
+- [x] Because two tickets carry most of it, and both span an overnight period
+- [ ] Because it is measured from the first response rather than from the open time
+
+**Why:** INC-107 and INC-109 together add 2,430 of the 2,950 minutes. Both span an overnight period that a professional report would exclude or explain — so one MTTR figure with no note misleads its own reader. Excluding unclosed tickets is correct, not the flaw.
+
+### Q9. Tickets INC-101, INC-105 and INC-106 all have a first response of 5–20 minutes and were resolved in 45, 15 and 15 minutes. Under the phase's definition, which count as first-contact resolutions? <!-- id: it-06-q09 energy: high -->
+
+- [x] INC-105 and INC-106, because the response-to-resolution gap is 10 and 0 minutes
+- [ ] All three — they were all handled the same day
+- [ ] Only INC-105, because 15 minutes is the fastest
+- [ ] None — first contact resolution requires a single interaction
+
+**Why:** The definition measures the gap between the *response* and the *resolution*, not from the open time. INC-101's gap is 20 → 45, which is 25 minutes, so it fails. State your definition in any report, because the same week yields 25% or 38% depending on the rule chosen.
+
+### Q10. Which is the single most serious finding in the Part 11 week? <!-- id: it-06-q10 energy: high -->
+
+- [ ] The 25% reopen rate
+- [ ] The 6.1-hour mean time to resolve
+- [x] INC-110 had no first response at all
+- [ ] The 80-minute outlier on INC-109
+
+**Why:** Every other problem on that board is a tuning issue. INC-110 is a ticket nobody touched — a process failure, not a speed failure — and the fix is a daily sweep of `Status = New`. A high reopen rate is bad, but it is a pattern you can work on; an untouched ticket may never be seen again.
+
+### Q11. What does an asset record describe? <!-- id: it-06-q11 energy: low -->
+
+- [x] A managed thing — laptop, phone, licence, printer
+- [ ] A documented solution to a known issue
+- [ ] A deliberate modification awaiting approval
+- [ ] The cause behind a group of related incidents
+
+**Why:** "Dell Latitude 5540, asset tag IT-0412" is an asset. The documented solution is the knowledge base, the modification awaiting approval is a change, and the shared cause is a problem.
+
+### Q12. A dashboard shows fast closes and rising first-contact resolution. What does the phase warn you to check alongside it? <!-- id: it-06-q12 energy: high -->
+
+- [ ] The mean first-response time
+- [x] The reopen rate
+- [ ] The number of open tickets
+- [ ] The asset inventory count
+
+**Why:** Speed metrics can be improved by closing tickets before the fix has actually held — which is exactly what the 25% reopen rate in that week shows. Chasing FCR without watching reopens is how a desk looks fast and leaves users still broken.
+
+### Q13. What is the practical signal that an incident should become a problem record? <!-- id: it-06-q13 energy: normal -->
+
+- [x] The same incident keeps reappearing
+- [ ] The user asks for it to be escalated
+- [ ] The ticket breaches its service target
+- [ ] More than one technician has touched it
+
+**Why:** Repetition is the signal to stop closing tickets and start asking why. A single incident, however slow or however many people touched it, does not by itself indicate an underlying cause worth investigating.
+
+### Q14. In the Part 11 week, why does INC-109 not count toward the 4-hour breach figure, while INC-110 does? <!-- id: it-06-q14 energy: high -->
+
+- [x] INC-109's 80-minute response is inside 4 hours; INC-110 has no response at all
+- [ ] INC-109 was resolved, so it cannot breach
+- [ ] INC-109 had a fast response, and INC-110 had none
+- [ ] Both breach, and the phase's answer of one is an error
+
+**Why:** The target is a 4-hour *first response*, and 80 minutes is well inside it — the 80-minute figure is an outlier worth noting, not a breach. INC-110 was opened Friday and never answered, so it has breached by the end of the week. Being resolved has nothing to do with a response target.
+
 ## Checklist
 
 - [ ] I understand incident, request, problem, change, asset, and KB. <!-- id: it-06-c01 energy: low -->

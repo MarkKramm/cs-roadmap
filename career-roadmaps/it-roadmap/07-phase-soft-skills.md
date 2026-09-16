@@ -667,6 +667,120 @@ Create `portfolio/it/07-soft-skills.md` with:
 
 When Phase 8 has you build the six-folder portfolio repository, this file belongs in `ticketing-samples/` alongside the Phase 6 templates — the support replies and diagnostic questions are ticket-shaped work, and that is the folder a reviewer will look in for it.
 
+## Quiz
+
+Twelve questions on the material in this phase. Each has one correct answer and a short explanation — read the explanation even when you get it right, because it usually names the mistake the wrong answers represent.
+
+The phase's own exercises asked you to *recall* these answers from nothing. This asks you to *recognise* the right one among plausible alternatives, which is the same knowledge tested the way an interview or a real ticket will test it.
+
+### Q1. A user's opening message is “Email not working, please fix ASAP.” What is the first thing you do? <!-- id: it-07-q01 energy: low -->
+
+- [x] Acknowledge that mail is down and that you are on it
+- [ ] Ask them to describe the exact error message first
+- [ ] Check the mail server logs before replying
+- [ ] Tell them to raise a ticket through the proper channel
+
+**Why:** The phase is explicit that the acknowledgement comes before the diagnosis — a user who feels heard will wait while you investigate, and a user who feels unheard escalates. Asking for the error wording is the right *second* move, which is why it is the tempting distractor; the worked transcript opens with “Got it — mail is down and you need it working” before any question. Checking logs silently and saying nothing is the behaviour that makes users chase you.
+
+### Q2. You need to know whether Outlook is broken or the whole account is. Which question gets you the useful fact? <!-- id: it-07-q02 energy: normal -->
+
+- [x] “Can you sign in to webmail in a browser right now?”
+- [ ] “Have you tried clearing your DNS cache?”
+- [ ] “Did you change something recently?”
+- [ ] “Is the Outlook account broken?”
+
+**Why:** The phase calls this pair a masterclass — “Is Outlook broken?” invites a guess, while “Can you sign in to webmail?” produces a fact that eliminates half the diagnostic tree. The DNS-cache question hands the user a cause-level theory they cannot evaluate, which is exactly the anchoring the phase warns about. “Did you change something?” is close to a useful question but is asked as an accusation-shaped yes/no rather than the phase's version, “When did it last work correctly, and what happened between then and now?”
+
+### Q3. A user offers their own theory about what is wrong. How should you treat it? <!-- id: it-07-q03 energy: normal -->
+
+- [ ] Follow it first, because the user knows their own machine best
+- [x] Ask about symptoms instead, because a user's theory of the cause is usually unreliable
+- [ ] Repeat it back as the working diagnosis so they feel heard
+- [ ] Ignore it and run your standard checklist from the top
+
+**Why:** The phase's rule is “ask about symptoms, not causes” — a user's theory anchors you on the wrong path, which is why the table contrasts “Is it a network issue?” with “Does this happen in every program, or just the browser?” Following the theory first is the well-meaning beginner's mistake, because it feels respectful of the user's knowledge. Adopting their theory as the diagnosis is worse than ignoring it, since you then investigate a cause nobody has evidence for.
+
+### Q4. You have a list of six things you need from a user. How should you ask? <!-- id: it-07-q04 energy: low -->
+
+- [x] One at a time, because a wall of six questions gets three answered
+- [ ] All six at once, so you only interrupt them once
+- [ ] Only the ones they can answer without leaving their desk
+- [ ] In writing, so they can work through them at their own pace
+
+**Why:** The phase's procedure says “ask only the necessary questions — one at a time, because a wall of six questions gets three answered.” Batching them is the efficiency instinct that backfires. Limiting the list to desk-friendly questions is a reasonable courtesy but does not fix the underlying problem, and the phase's own model replies show three questions at most, numbered, each with a stated reason.
+
+### Q5. You tell a user you will come back in fifteen minutes. What does the phase say is most important about that promise? <!-- id: it-07-q05 energy: normal -->
+
+- [ ] Making sure fifteen minutes is genuinely achievable before you say it
+- [ ] Avoiding ETAs entirely until you have a diagnosis
+- [x] Coming back at that time even if you have nothing new, because “either way” is the point
+- [ ] Only promising a time once you know the fix
+
+**Why:** “Either way” is named the most important phrase in the procedure — a user told “I'll update you in fifteen minutes, even if I have nothing yet” does not need to chase you, while a user given silence for two hours has already decided you forgot. Being realistic about the estimate matters, but the failure the phase names is the silent technician, not the optimistic one. Waiting until you know the fix before promising anything is how a ticket dies of silence.
+
+### Q6. A user says “I'm not sure, I'll look into it” is all they got last time. What makes the strong version of “I don't know yet” different? <!-- id: it-07-q06 energy: normal -->
+
+- [ ] It apologises for the delay before explaining anything
+- [x] It names what you do know, your plan, and a time you will return
+- [ ] It gives a likely cause so the user has something to hold on to
+- [ ] It avoids the words “I don't know” altogether
+
+**Why:** The phase's formula is acknowledge, commit, and follow through — naming what you *do* know demonstrates that your not-knowing is informed rather than helpless, and the specific time commitment is what makes it credible. Offering a likely cause to comfort the user is the confident guess the phase warns against in the same breath. Avoiding the admission outright is the false confidence that loses the user's confidence permanently.
+
+### Q7. A user clicked a convincing phishing link. Which reply follows the phase's “empathy without blame” guidance? <!-- id: it-07-q07 energy: normal -->
+
+- [ ] “You must have clicked something you shouldn't have.”
+- [ ] “I'll need to report this — you should know better than to click these.”
+- [x] “These emails are convincingly made, and it's easy to click. The important thing now is what we do next.”
+- [ ] “Let's not worry about how it happened, let's just move on.”
+
+**Why:** Never blaming the user is not politeness — blame makes people defensive, and defensive people withhold the detail you actually need. The first two options are the reprimand the phase replaces. The last one looks kind but skips the matter entirely, and the phase's shape is to normalise the mistake *and* redirect to the next action, the way “There's an easier way to do this that'll save you time — can I show you?” replaces a correction with an offer.
+
+### Q8. You write a chat message to a colleague in another time zone. Which opening follows the async rules? <!-- id: it-07-q08 energy: low -->
+
+- [ ] A paragraph explaining the whole history, with the request at the end
+- [ ] Just the ticket number, since they can look it up
+- [ ] “Quick one — are you around?” followed by the detail when they reply
+- [x] “Can you check whether the printer on floor 2 is online? User in room 214 cannot print.”
+
+**Why:** The first async rule is to lead with the ask, so the reader knows what you want in six words — burying it at the bottom of a paragraph is named the most common async mistake. The ticket-number-only message withholds context the reader cannot see. “Are you around?” is a real habit and it fails for the same reason: it makes the reader ask a question before they can act, which is exactly what asynchrony is meant to avoid.
+
+### Q9. You are handing a ticket to a colleague in another zone at the end of your day. When do you write the handover note? <!-- id: it-07-q09 energy: normal -->
+
+- [ ] In the morning, once you have re-read the ticket and can summarise it properly
+- [x] When you finish, because your notes are the only continuity that exists while you sleep
+- [ ] Only once the ticket is resolved, so the note is complete
+- [ ] Verbally, on the next call, to avoid a half-finished written record
+
+**Why:** The phase says to write the handover note when you finish, not when you start your day — if someone in another zone picks up your ticket while you sleep, your notes are the only continuity that exists. Waiting until morning means the person who needed them worked without them. Holding the note back until resolution is the same error in a different shape: the handover exists precisely for the unresolved middle of a ticket.
+
+### Q10. A status update reads “still investigating, will update soon.” How many of the four user questions does it answer? <!-- id: it-07-q10 energy: normal -->
+
+- [ ] All four, briefly
+- [ ] Three — it is short but complete
+- [ ] None, because it gives no ETA
+- [x] One, and only barely
+
+**Why:** The phase scores it directly: an update that says “still investigating, will update soon” answers only the first question — does anyone know this is broken — and only barely. It says nothing about when it will be fixed, whether the user should do anything meanwhile, or whether it has been escalated. Reading this as “none” is the tempting over-correction; the ticket is at least logged, which is one genuine fact.
+
+### Q11. A user is shouting at you about a laptop that will not boot, and they are wrong about one detail. What does the phase's de-escalation sequence say to do first? <!-- id: it-07-q11 energy: high -->
+
+- [ ] Correct the detail immediately so the diagnosis starts from accurate information
+- [ ] Ask them to lower their voice before you continue
+- [ ] Transfer the call to a manager, since abuse is not part of the job
+- [x] Let the whole complaint land, even the parts that are wrong
+
+**Why:** The first move is to let them finish — interrupting an angry person to correct a detail escalates the situation and costs you nothing to avoid. Correcting early is the technician's instinct and it is the single move the sequence forbids first. Refusing abuse is legitimate, but the phase places it fifth, after you have named the impact and said what you are doing now; reaching for it as an opening skips the steps that usually make it unnecessary.
+
+### Q12. You applied a print-server change and printing has been down since. What does the honest note look like? <!-- id: it-07-q12 energy: high -->
+
+- [ ] “Some issues may have been experienced with printing this morning. This is being looked into.”
+- [ ] “A change was made that appears to have affected printing. We are investigating.”
+- [x] “I broke printing this morning and I am fixing it now. At 09:15 I applied a driver update… I rolled it back at 09:40.”
+- [ ] “Printing should be back shortly. Apologies for any inconvenience.”
+
+**Why:** Speed matters more than the size of the mistake, and the note must be immediate, in active voice, naming what you did, when, the effect, and what you are doing about it — the passive voice is where accountability goes to hide, and everyone can hear it. The first two options are exact paraphrases of the phase's weak version, where nobody did anything. The last one is reassuring but empty: it says nothing about the cause, the times, or the rollback, so the reader learns nothing they can act on.
+
 ## Checklist
 
 - [ ] I wrote 5 professional support replies. <!-- id: it-07-c01 energy: normal -->

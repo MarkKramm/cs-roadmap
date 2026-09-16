@@ -2,7 +2,23 @@
 
 A chronological record of working sessions. Newest first.
 
-## 2026-09-16 (latest) — Quizzes, and the guard that catches what a per-question check cannot
+## 2026-09-16 (latest) — Quizzes across the whole IT on-ramp, and the corpus defect the guard could not see
+
+**Goal:** choose the next quiz batch. I recommended IT 03–05 and argued against "finish the three tracks", on the grounds that the IT on-ramp is read first and in order by someone preparing for their first job — where a self-check is worth most — while cyber and advance phases are read later and more often as reference. The choice made was the full IT track: **IT 03–09**.
+
+**Verification came before authoring for the two phases where being wrong is not a matter of taste.** IT 03 is the densest phase in the repository (91 code fences) and carries all the subnet arithmetic. I recomputed every row of its CIDR table and its worked `/26` example independently before writing a single question that depended on them — all seven rows agree, and `192.168.10.0/26` is network `.0`, broadcast `.63`, 62 usable. IT 06's worked metrics week was checked the same way: first-response mean 27.2, MTTR 368.75 (6.1 h), reopen 25%, FCR 37.5%, and the 2,430-of-2,950 minute concentration all reproduce exactly. That is cheap insurance on questions whose wrongness would otherwise be invisible.
+
+**Ninety-four new questions across seven phases, taking coverage to 10 of 31 and the corpus to 128.** Two subagents wrote IT 07 and IT 09; I wrote the other five.
+
+**Three phases had questions that answered a different phase's material.** Writing a batch makes this likelier, not less: IT 08 briefly gained a question about metric definitions, which is IT 06's material, and IT 03's draft leaned on port facts IT 02 already covers. Both were replaced with questions from their own file. A quiz asks "did *this* phase land?", so a question sourced elsewhere measures the wrong thing — and it would have looked fine in every automated check.
+
+**The guard gated three times, and the third one was mine.** IT 09's first draft put nothing in position A. A subagent self-caught an `A=0 C=7` skew in its own draft and fixed it. Then **IT 06 — which I wrote — shipped 8 of 14 in position C with position A unused.** I had pre-planned the answer distribution for IT 03, 04 and 05 and then wrote IT 06 straight through. Pre-planning some phases and not others is exactly how that happens, and the guard caught it before commit.
+
+**Then the defect one level above the guard.** With ten quizzes in place I checked the corpus rather than each set: every quiz passed the 50% gate individually, but the **corpus had drifted to A=17.2% against C=35.2%**, and three phases sat exactly on the 50% line — passing by a hair. A reader working the track in order would notice the pattern across phases, and no per-quiz check can see it. Nineteen answers were reordered to reach **A=25.0% B=25.0% C=27.3% D=22.7%**. The guard was not wrong; a pass is only as strong as the level it inspects. Recorded in `CONTENT-SCHEMA.md` as the obvious next guard, with the numbers it should assert.
+
+**Verified:** lint 169/0; audit-content 0; **audit-quiz 0 findings across 10 quizzes / 128 questions**, corpus positions A=32 B=32 C=35 D=29; changelog guard 0 with 13 controls; the build reports `quizzes: 128 question(s) across 10 of 31 phase(s)`.
+
+## 2026-09-16 (earlier) — Quizzes, and the guard that catches what a per-question check cannot
 
 **Goal:** the curriculum could measure whether the *text* was followable — every comprehension pass did that — but nothing measured whether the *reader* retained it. Add quizzes.
 

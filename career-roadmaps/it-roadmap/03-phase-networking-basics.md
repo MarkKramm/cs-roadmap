@@ -1722,6 +1722,138 @@ Create `portfolio/it/03-networking-basics.md` with:
 - Table of 20 common ports
 - Troubleshooting write-up for no internet
 
+## Quiz
+
+Fourteen questions on the material in this phase. Each has one correct answer and a short explanation — read the explanation even when you get it right, because it usually names the mistake the wrong answers represent.
+
+Parts of this phase asked you to *recall* things from nothing. This asks you to *recognise* the right answer among plausible alternatives, which is how a ticket or an interview will actually test it. Several questions here are the arithmetic from Part 6 done on numbers you have not seen before — that is deliberate, because the point of subnetting is being able to do it on an address you were handed rather than the one in the example.
+
+### Q1. A user's Wi-Fi shows "Connected" but nothing loads. `ipconfig` reports `169.254.14.7`. What is the actual problem? <!-- id: it-03-q01 energy: normal -->
+
+- [ ] The DNS server is unreachable
+- [ ] The Wi-Fi password is wrong
+- [x] The device never got a DHCP lease
+- [ ] The gateway is down
+
+**Why:** A `169.254` address is the address a device gives *itself* when DHCP does not answer. It is not "no internet" — it is "no DHCP", which is a much narrower thing to investigate.
+
+### Q2. You need to know whether a DNS problem is your resolver's fault or the domain's. Which comparison answers that? <!-- id: it-03-q02 energy: normal -->
+
+- [ ] `ping google.com` twice to check for packet loss
+- [ ] `ipconfig /all` against `ipconfig /displaydns`
+- [ ] `tracert google.com` against `tracert 8.8.8.8`
+- [x] `nslookup google.com` against `nslookup google.com 8.8.8.8`
+
+**Why:** The second form asks a *specific* server. If your local resolver and `8.8.8.8` disagree, the domain is fine and your resolver is the fault. `tracert` shows the path, not the translation.
+
+### Q3. A `/27` subnet — how many usable host addresses does it give you? <!-- id: it-03-q03 energy: normal -->
+
+- [x] 30
+- [ ] 32
+- [ ] 62
+- [ ] 14
+
+**Why:** `/27` is `255.255.255.224`, so the block size is `256 − 224 = 32`. Every subnet loses two addresses to the network and broadcast, so usable is `32 − 2 = 30`. Picking 32 forgets those two; 62 is `/26`; 14 is `/28`.
+
+### Q4. Which port would you check first for a Windows file-share problem? <!-- id: it-03-q04 energy: low -->
+
+- [ ] 3389
+- [ ] 143
+- [x] 445
+- [ ] 22
+
+**Why:** 445 is SMB, which carries Windows file and printer sharing. 3389 is RDP (remote desktop), 143 is IMAP (mail), 22 is SSH.
+
+### Q5. `ping 8.8.8.8` succeeds but `ping google.com` fails. What does that pair prove? <!-- id: it-03-q05 energy: normal -->
+
+- [x] The network is fine and DNS is broken
+- [ ] There is no connectivity at all
+- [ ] The gateway is misconfigured
+- [ ] The firewall is blocking ICMP
+
+**Why:** `8.8.8.8` proves routing and upstream work with no DNS involved. Adding the name and failing isolates the break to name resolution — which is why this is the phase's most valuable single diagnostic.
+
+### Q6. A user says a site shows "Your connection is not private". Which is the LEAST likely cause? <!-- id: it-03-q06 energy: high -->
+
+- [ ] An expired certificate on the site
+- [ ] The laptop's system clock is wrong
+- [ ] A corporate proxy inspecting traffic
+- [x] The laptop has a virus
+
+**Why:** Certificate errors are a specific, diagnosable class: expiry, a wrong clock, a captive portal, or an inspecting proxy. Reaching for "virus" skips the four things it almost always is.
+
+### Q7. Which protocol guarantees delivery by numbering bytes, acknowledging receipt, and retransmitting losses? <!-- id: it-03-q07 energy: low -->
+
+- [ ] UDP
+- [x] TCP
+- [ ] ICMP
+- [ ] ARP
+
+**Why:** TCP is connection-oriented and reliable — it opens with the `SYN`, `SYN-ACK`, `ACK` handshake and retransmits what is lost. UDP is best-effort by design; ICMP carries diagnostics; ARP maps IP to MAC.
+
+### Q8. You are handed `192.168.10.100/26`. What is the broadcast address? <!-- id: it-03-q08 energy: high -->
+
+- [ ] 192.168.10.255
+- [ ] 192.168.10.128
+- [x] 192.168.10.127
+- [ ] 192.168.10.63
+
+**Why:** `/26` has a block size of 64, so the subnets are `.0`, `.64`, `.128`, `.192`. The address `.100` sits inside the `.64` block, which runs `.64`–`.127`. The last address in a block is the broadcast. `.255` assumes a `/24`; `.63` is the broadcast of the *previous* subnet — the classic off-by-one-block error.
+
+### Q9. What does `Test-NetConnection google.com -Port 443` tell you that `ping google.com` does not? <!-- id: it-03-q09 energy: normal -->
+
+- [x] Whether the specific port is actually answering
+- [ ] Whether the site's certificate is valid
+- [ ] Whether DNS resolution is working at all
+- [ ] The physical route to the server
+
+**Why:** `ping` proves the host answers ICMP; it says nothing about whether the *service* is listening. `Test-NetConnection` reports DNS resolution, the resolved IP, reachability, and the port state in one command — which is why the phase calls it the most useful modern Windows command.
+
+### Q10. A subnet mask is always which of these? <!-- id: it-03-q10 energy: low -->
+
+- [ ] A run of `0`s followed by a run of `1`s
+- [x] A run of `1`s followed by a run of `0`s, with no gaps
+- [ ] Any arrangement of 32 bits
+- [ ] Always `255.255.255.0`
+
+**Why:** The leading `1`s identify the network portion and the trailing `0`s the host portion, with no gap between them. That no-gaps rule is what makes CIDR notation possible at all — a slash and a count would be meaningless otherwise.
+
+### Q11. A device is hand-configured with the address `192.168.1.0` on a `/24` network. What happens? <!-- id: it-03-q11 energy: normal -->
+
+- [ ] It works, but with no internet access
+- [ ] It works and takes the gateway's role
+- [ ] It gets a duplicate-address warning and is reassigned by DHCP
+- [x] It cannot communicate, and the failure looks arbitrary
+
+**Why:** `.0` is the *network address* — it names the subnet itself and no device may hold it. This is the phase's argument for doing the arithmetic before setting a static IP, because the resulting fault does not obviously point at its own cause.
+
+### Q12. Which tool maps a hostname to its IPv4 address? <!-- id: it-03-q12 energy: low -->
+
+- [x] An `A` record
+- [ ] An `MX` record
+- [ ] A `CNAME` record
+- [ ] A `TXT` record
+
+**Why:** `A` maps a name to an IPv4 address. `AAAA` does the same for IPv6, `CNAME` is an alias to another name, `MX` says where mail goes, and `TXT` carries arbitrary text.
+
+### Q13. `ipconfig /renew` alone did not fix a missing DHCP lease. Why does the phase tell you to run `release` first? <!-- id: it-03-q13 energy: normal -->
+
+- [ ] `release` clears the DNS cache
+- [ ] `renew` is deprecated without it
+- [x] `renew` alone often just re-uses the existing lease
+- [ ] `release` resets the network adapter driver
+
+**Why:** The order matters because `renew` can hand back the same lease it already holds. `release` gives the address up first, which is what forces a fresh exchange. Neither touches the DNS cache — that is `ipconfig /flushdns`.
+
+### Q14. In the phase's fixed troubleshooting order, which layer comes immediately after checking IP configuration? <!-- id: it-03-q14 energy: normal -->
+
+- [x] The gateway
+- [ ] Name resolution
+- [ ] The application
+- [ ] The specific service's port
+
+**Why:** The order is physical/link → IP configuration → gateway → name resolution → the service's port → the application. Gateway comes before DNS because if the router is unreachable, nothing upstream can work regardless of what DNS says.
+
 ## Checklist
 
 - [ ] I can explain LAN, WAN, router, switch, modem, firewall, and access point. <!-- id: it-03-c01 energy: low -->

@@ -1314,6 +1314,138 @@ Then work this list, which turns the artefacts into something a stranger can act
 - LinkedIn profile draft or updated profile
 - 3 project summaries written in STAR style (use the Project/Situation/Task/Action/Result layout shown in Part 4, not the three-bullet Template 3 entry — Template 3 is the shorter resume version)
 
+## Quiz
+
+Fourteen questions on the material in this phase. Each has one correct answer and a short explanation — read the explanation even when you get it right, because it usually names the mistake the wrong answers represent.
+
+Several of these are the phase's weak-versus-strong rewrites tested the other way round: given a strong bullet, identify what makes it strong. That is the judgement you will need when you are writing your own.
+
+### Q1. What is the entire goal of the hiring manager's first thirty seconds? <!-- id: it-08-q01 energy: normal -->
+
+- [ ] To rank every applicant against each other
+- [x] To decide whether to spend four more minutes on this one
+- [ ] To check whether the resume uses the right template
+- [ ] To verify the candidate's employment dates
+
+**Why:** The phase is blunt about this: the thirty-second scan exists to earn a longer look, not to make a decision. Everything in the top third — name, headline, summary, most recent role — is judged on whether it is worth reading further.
+
+### Q2. Where does the portfolio link belong? <!-- id: it-08-q02 energy: low -->
+
+- [ ] In the footer, to keep the top clean
+- [ ] In the cover letter only
+- [x] Near the top, because proof is what most junior candidates lack
+- [ ] In a separate attachment
+
+**Why:** The manager scans for proof — something that exists outside the resume — and that is exactly where junior candidates have nothing. The phase's advice is to design backwards from the scan list, which puts the link in the top third rather than buried at the bottom.
+
+### Q3. Which bullet is strongest, and why? <!-- id: it-08-q03 energy: high -->
+
+- [ ] "Good with computers and quick to learn new systems"
+- [ ] "Experienced with Windows, Active Directory, and networking"
+- [x] "Diagnosed and resolved 15 practice helpdesk tickets covering password resets, VPN failures, and printer faults, documented in a public ticket-template repository"
+- [ ] "Passionate about IT with a strong work ethic"
+
+**Why:** The rule is that every bullet names a tool, a specific action, and a verifiable outcome. The third does all three and is demonstrably honest — the repository exists. The second sounds stronger but invites "what have you done with it?", which is the trap the phase warns about.
+
+### Q4. Why does the phase say a lab project can read as experience without exaggerating? <!-- id: it-08-q04 energy: normal -->
+
+- [x] Because the professional format is what conveys competence
+- [ ] Because hiring managers cannot tell lab work from real work
+- [ ] Because entry-level roles do not require real experience
+- [ ] Because virtual labs are equivalent to production systems
+
+**Why:** Same activity, five times the credibility, entirely through specificity and evidence — context, tools, action, evidence, result. Nothing is invented; the weak version simply fails to show what was actually done.
+
+### Q5. A resume claims "experienced with Active Directory". What does the phase say the problem is? <!-- id: it-08-q05 energy: normal -->
+
+- [ ] It is too vague to be useful
+- [x] Everything on a resume is an interview question, and this one converts a good interview into a bad one
+- [ ] It is a keyword an ATS will reject
+- [ ] It is too long for an entry-level resume
+
+**Why:** The next question is "what have you done with it?" — and the honest answer, "I studied the concepts and practised local equivalents", is perfectly fine *if the resume said that too*. Overstating is not caught by the ATS; it is caught by the interviewer.
+
+### Q6. What is the correct framing of a self-taught path? <!-- id: it-08-q06 energy: normal -->
+
+- [ ] An apology for lacking formal experience
+- [ ] A confident claim of equivalent professional experience
+- [ ] An explanation of why you could not get experience
+- [x] Precise: "I completed this curriculum, built these artefacts, and here they are"
+
+**Why:** Precision is more persuasive than either apology or inflation, and it is the only framing that survives follow-up questions. The artefacts are the argument; hedging or inflating both get in the way of it.
+
+### Q7. Why does the portfolio have a folder per category rather than one long page? <!-- id: it-08-q07 energy: low -->
+
+- [ ] It makes the repository easier to maintain
+- [x] Each folder exists because a hiring manager will look for that category
+- [ ] It is required by GitHub's presentation rules
+- [ ] It keeps the README short enough to read
+
+**Why:** The structure is designed around the manager's checklist — troubleshooting writeups, networking, Windows/Linux, ticketing samples, scripts, resume. The layout is an argument about what you have, organised in the order someone will look for it.
+
+### Q8. Which is a red flag to the manager doing the scan? <!-- id: it-08-q08 energy: low -->
+
+- [x] An obvious uncustomised template
+- [ ] A portfolio link near the top
+- [ ] A summary that names the target role
+- [ ] Skills that mirror the job ad's vocabulary
+
+**Why:** The phase lists the red flags explicitly: exaggerated claims, unexplained gaps, generic objective statements, and an obvious uncustomised template. The other three are the things a well-targeted resume is *supposed* to do.
+
+### Q9. Which version of the DHCP bullet follows the phase's rule? <!-- id: it-08-q09 energy: high -->
+
+- [ ] "Learned about DHCP and how it assigns addresses"
+- [ ] "Configured a DHCP scope on a lab server and it worked"
+- [x] "Configured a DHCP scope, then captured the DORA exchange in Wireshark to confirm it"
+- [ ] "Studied DHCP discovery, offer, request and acknowledgement"
+
+**Why:** It names the action, the tool used to verify it, and the specific thing that was confirmed. The second has an action but no evidence; the first and fourth describe study rather than something you can demonstrate.
+
+### Q10. An interviewer points at a resume bullet and asks "what went wrong?". Why do they ask that? <!-- id: it-08-q10 energy: high -->
+
+- [x] Because the failed attempts are what prove you actually did the work
+- [ ] To find out whether you make mistakes under pressure
+- [ ] To check whether the project was technically difficult enough
+- [ ] To see whether you will admit fault in a professional setting
+
+**Why:** The phase's distinction is texture: someone who did the work has specific problems and specific fixes, while someone who only read about it is smooth and vague. A candidate with nothing that went wrong has usually not done the thing.
+
+### Q11. What does the phase say about keyword matching on a resume? <!-- id: it-08-q11 energy: normal -->
+
+- [ ] It is only needed to defeat ATS software
+- [x] A human is checking whether you have met the technologies in the job ad
+- [ ] It should be done by repeating the job ad verbatim
+- [ ] It matters less than the cover letter
+
+**Why:** The phase is careful here — the reason to mirror the job ad's vocabulary is not that software demands it, but that a person is checking for a genuine match. Repeating the ad verbatim is the uncustomised-template failure in a different costume.
+
+### Q12. A bullet says "Took notes" as its evidence. What is missing? <!-- id: it-08-q12 energy: normal -->
+
+- [ ] Nothing — notes are legitimate evidence
+- [ ] The name of the course it came from
+- [ ] The date the notes were written
+- [x] Anything another person could open and check
+
+**Why:** Evidence in the phase's sense is a diagram, packet capture, or artefact in the portfolio repository — something verifiable. Notes may be useful to you, but they are not evidence to a reader who cannot see them.
+
+### Q13. What is the strongest reason to keep every resume claim strictly true? <!-- id: it-08-q13 energy: high -->
+
+- [x] Verification is trivially easy now, and a manager who checks will remember
+- [ ] Employers run formal background checks
+- [ ] It is the ethical choice, and ethics matter
+- [ ] ATS software flags inconsistent claims
+
+**Why:** The phase gives two reasons and notes the ethical one first — but the practical one is that your portfolio has links. A manager who clicks and finds less than the resume implied has learned something about your integrity they will not forget. Note the phase's framing: honesty is a strategy, not *only* a virtue.
+
+### Q14. Which pairing matches the phase's weak-to-strong rewrite? <!-- id: it-08-q14 energy: high -->
+
+- [x] "Learned PowerShell" → "Wrote a PowerShell inventory script reporting OS version, disk space, and running services"
+- [ ] "Know Linux" → "Familiar with Linux environments"
+- [ ] "Did some networking" → "Strong networking fundamentals"
+- [ ] "Good with computers" → "Excellent computer skills across platforms"
+
+**Why:** The strong version names what was built and what it reported, so it can be demonstrated. The other three swap a vague phrase for a more confident vague phrase — the same claim with better adjectives, which is exactly what the phase says a hiring manager is trained to see through.
+
 ## Checklist
 
 - [ ] I created a portfolio folder or GitHub repo. <!-- id: it-08-c01 energy: normal -->

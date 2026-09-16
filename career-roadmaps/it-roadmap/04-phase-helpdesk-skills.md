@@ -1623,6 +1623,138 @@ Create `portfolio/it/04-helpdesk-skills.md` with:
 - A healthy baseline note for your own machine, with what broken would look like beside each reading
 - Your written answers to the twelve Part 11 drill situations, with your reasons, kept even where you scored them wrong
 
+## Quiz
+
+Fourteen questions on the material in this phase. Each has one correct answer and a short explanation — read the explanation even when you get it right, because it usually names the mistake the wrong answers represent.
+
+This phase is mostly judgement, so most of these questions are scenarios rather than definitions. Where a question has a "best" answer rather than a strictly correct one, the explanation says why the others are weaker — that reasoning is the part worth absorbing.
+
+### Q1. A caller asks you to reset their password. You cannot verify their identity. What does the phase say the right answer is? <!-- id: it-04-q01 energy: high -->
+
+- [ ] Refuse, and end the call
+- [ ] Reset it but log that verification was skipped
+- [x] Decline for now, escalate, and say how they can be verified
+- [ ] Ask their manager to approve it verbally
+
+**Why:** The answer when verification is impossible is "not yet, and here is how we get there" — never a flat no and never a shortcut. Logging a reset you should not have done does not undo it, and a verbal approval from someone you also have not verified proves nothing.
+
+### Q2. Thirty users in one building lose network access; everyone elsewhere is fine. Where is the fault? <!-- id: it-04-q02 energy: normal -->
+
+- [ ] A core service such as DNS or the identity provider
+- [ ] One user's device or profile
+- [x] The network or infrastructure at that site
+- [ ] A single application's backend
+
+**Why:** Many users at one location points at that site's switch, Wi-Fi, uplink, or power. "Everyone, everything" would be a core service; a single application's backend would affect its users regardless of where they sit.
+
+### Q3. Which single question does the phase call the most powerful in support? <!-- id: it-04-q03 energy: low -->
+
+- [ ] "Have you tried restarting?"
+- [x] "Was this working yesterday?"
+- [ ] "Can you send me a screenshot?"
+- [ ] "Which browser are you using?"
+
+**Why:** Almost all breakage has a recent cause — an update, a new install, a password change, a desk move. Asking what changed finds that cause instead of hunting for it. The restart question is a fix attempt, not a diagnostic.
+
+### Q4. The user says "it works now" and you never saw it work. What should the ticket status be? <!-- id: it-04-q04 energy: normal -->
+
+- [ ] Closed as fixed
+- [ ] Closed as cannot reproduce
+- [ ] Escalated to the next tier
+- [x] Unresolved or monitoring
+
+**Why:** "The user said it works" is not verification, and closing a ticket you never confirmed invites the user to lose confidence in the process. The phase is explicit: if you could not reproduce and could not verify, the honest status is unresolved or monitoring.
+
+### Q5. A caller says their manager already approved the reset and asks you to "just do it this once". What is that? <!-- id: it-04-q05 energy: normal -->
+
+- [ ] A reasonable request from a busy employee
+- [x] The attack — a request to skip the process rather than follow it
+- [ ] A process gap you should escalate as feedback
+- [ ] Grounds for immediately blocking the account
+
+**Why:** "Approved already", "just this once", "cannot take a call" are each a request to bypass verification. The phase's point is that the whole attack depends on the agent taking a shortcut, not on technical sophistication — but note you also do not have to win the argument, only complete the request safely.
+
+### Q6. Which verification method does the phase rate strongest, and why? <!-- id: it-04-q06 energy: high -->
+
+- [ ] A one-time code to a registered device — it proves possession
+- [ ] Security questions and employee ID — only the real user knows them
+- [ ] The caller's manager confirming by email from their own account
+- [x] A callback to the number on record, which you look up yourself
+
+**Why:** You initiating the call defeats caller-ID spoofing, and it requires the attacker to also control the manager's line. A one-time code is only moderate because the broken channel may be exactly what the caller is reporting. Knowledge-based answers are weak alone — often public or already breached.
+
+### Q7. During a remote session the user's personal photo folder is briefly visible. What do you do? <!-- id: it-04-q07 energy: normal -->
+
+- [ ] Mention it to lighten the mood
+- [ ] Report it to your manager as a policy matter
+- [x] Say nothing about it, ever
+- [ ] Ask them to close it so you are not exposed to it
+
+**Why:** Privacy in support is a habit, not a policy you follow. Naming what you incidentally saw — even kindly — turns a private moment into a shared one. The obligation is to look only at what the ticket requires and to stay quiet about anything else.
+
+### Q8. You cannot reproduce a reported fault after three attempts. What is the correct documentation? <!-- id: it-04-q08 energy: normal -->
+
+- [ ] "No fault found — user error suspected"
+- [ ] "Fixed — monitor for recurrence"
+- [x] "Issue did not reproduce across three attempts; user unable to demonstrate"
+- [ ] "Waiting on user to provide more detail"
+
+**Why:** Documenting what you actually observed is a legitimate and useful finding. The first option blames the user on no evidence, and the second claims a fix you did not make.
+
+### Q9. What makes a workaround acceptable rather than a cop-out? <!-- id: it-04-q09 energy: normal -->
+
+- [ ] It costs nothing to implement
+- [ ] It requires no escalation
+- [x] You say which one you are giving them, and log it
+- [ ] It permanently fixes the underlying cause
+
+**Why:** A workaround that gets the user working now is often better than a perfect fix in two hours — but only if it is labelled as a workaround. The failure mode is a temporary measure that quietly becomes permanent because nobody recorded that the cause was never fixed.
+
+### Q10. Why does the phase treat an MFA reset as the highest-risk request of all? <!-- id: it-04-q10 energy: high -->
+
+- [ ] It generates more tickets than password resets
+- [ ] It requires a manager's approval every time
+- [ ] It cannot be logged in the ticketing system
+- [x] It hands over the account completely
+
+**Why:** The password alone is no longer the whole credential. Resetting someone's second factor removes the one control still standing between an attacker and full access, which is why the phase ranks it above an ordinary password reset.
+
+### Q11. Which of these is a compromised-account warning sign worth escalating? <!-- id: it-04-q11 energy: normal -->
+
+- [x] MFA prompts the user did not initiate
+- [ ] A user who has forgotten their password
+- [ ] A user working from a new location
+- [ ] A user whose session timed out
+
+**Why:** Unsolicited MFA prompts mean someone already has the password and is trying to satisfy the second factor. That is an active attack in progress, not a support chore — escalate it with the evidence rather than investigating it yourself.
+
+### Q12. "One user, any device" narrows a fault to what? <!-- id: it-04-q12 energy: normal -->
+
+- [ ] That device's local profile and software
+- [x] That account — permissions, MFA, password, mailbox, licence
+- [ ] The network at that user's location
+- [ ] The application's backend service
+
+**Why:** If the problem follows the person across machines, the constant is the account, not the hardware. The reverse case — one user on one device — is what points at the device.
+
+### Q13. What does the phase say to do before taking control in a remote session? <!-- id: it-04-q13 energy: low -->
+
+- [ ] Mute your own microphone to reduce noise
+- [ ] Take a screenshot of their desktop for the ticket
+- [x] Explain what you will do, and ask them to close anything personal
+- [ ] Confirm the ticket number and estimated duration
+
+**Why:** A remote session is an intrusion into someone's screen, so it is conducted deliberately: explain first, give them the chance to close anything private, and say you will ask before taking control. Narrating as you work is the next step, not this one.
+
+### Q14. A ticket reads "could not add the shared printer — access denied". Which detail must you get before troubleshooting? <!-- id: it-04-q14 energy: normal -->
+
+- [ ] The printer's IP address
+- [ ] Whether the printer is switched on
+- [ ] Which driver version is installed
+- [x] The exact error message, not a summary of it
+
+**Why:** The phase's first step is to get the problem in the user's words *and the exact error text* — "access denied" could be a permissions problem, a driver problem, or the wrong print server. A summary has already had the useful detail smoothed out of it.
+
 ## Checklist
 
 - [ ] I understand incident vs service request. <!-- id: it-04-c01 energy: low -->

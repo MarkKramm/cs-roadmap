@@ -115,7 +115,7 @@ Optional headings (`## Specific topics to learn`, `## Quiz`, `## Lab setup optio
 
 ### The quiz section
 
-`## Quiz` is optional and currently present in **3 of 31 phases** — a deliberate vertical slice, one phase per track, so the format was proven before it was scaled. The build reports coverage on every run rather than assuming it, because silent partial coverage reads as "every phase is quizzed" to anyone who only sees the build succeed.
+`## Quiz` is optional and currently present in **10 of 31 phases**. The whole IT on-ramp (02–09) is covered, plus one phase in each of the other two tracks. Phase 1 of IT has no quiz because it is orientation rather than technique. The build reports coverage on every run rather than assuming it, because silent partial coverage reads as "every phase is quizzed" to anyone who only sees the build succeed.
 
 The format reuses **Markdown task-list syntax**: `- [x]` marks the correct option. That choice is load-bearing rather than cosmetic — the print stylesheet exists so a phase can be studied offline, and a quiz encoded as HTML or JSON would be the one section that vanished on paper. Authored this way, the quiz reads correctly on GitHub, in a text editor, and in print, with no new vocabulary to learn.
 
@@ -143,6 +143,8 @@ The format reuses **Markdown task-list syntax**: `- [x]` marks the correct optio
 **The build fails rather than skipping** on a missing `[x]`, two `[x]` marks, a missing `**Why:**`, a duplicate id, an unknown energy, or a section with prose but no parseable questions. A quiz is a claim that one answer is right, so a malformed one is worse than a missing one — it tells the reader their correct answer is wrong.
 
 **The set is validated separately**, in `scripts/audit-quiz.mjs`, because a per-question check cannot see a defect of the collection. The first quiz written for this repository put **seven of its ten correct answers in position C**: every question was individually valid and the build was green, yet a reader answering "C" every time scored 70% without reading. The guard gates position skew above 50%, unused positions, and erratic option counts.
+
+**The same defect exists one level above the guard, and nothing checks it yet.** When the IT on-ramp was written as a batch of seven quizzes, every phase passed the guard individually — but the *corpus* had drifted to **A=17.2% against C=35.2%**, and three phases were sitting exactly on the 50% line, passing by a hair. A reader working through the track in order would notice the pattern across phases and gain an advantage no per-quiz check can see. Rebalancing nineteen answers brought the corpus to **A=25.0% B=25.0% C=27.3% D=22.7%**. A corpus-level balance check is the obvious next guard, and the numbers above are what it would assert.
 
 ### Sections deliberately NOT extracted
 
