@@ -992,8 +992,8 @@ There are no technical facts here to test, because the phase is a decision rathe
 ### Q2. A learner is anxious about choosing wrong. What is the phase's actual argument about deciding correctly? <!-- id: cyber-05-q02 energy: normal -->
 
 - [ ] Choosing wrong costs six months, so wait for certainty
-- [x] Choosing any path competently beats choosing none perfectly
 - [ ] All four paths are equally good, so the choice barely matters
+- [x] Choosing any path competently beats choosing none perfectly
 - [ ] The choice is reversible, so the initial answer is unimportant
 
 **Why:** The phase's answer is that six months of depth in one direction outperforms six months of sampling in four, and by a wide margin. It still insists on a method, because the failure mode it exists to prevent is the learner who switches tools every week.
@@ -1049,6 +1049,7 @@ There are no technical facts here to test, because the phase is a decision rathe
 - [ ] The reputation of the path in online security communities
 - [ ] Salary surveys for each role family in your region
 - [ ] The number of certifications each path offers
+
 **Why:** The phase says availability must come from counted postings rather than reputation, and calls the 20 job posts the task most likely to change your mind. Its worked example came back 9/6/3/2, and that unevenness is itself evidence about which paths are hiring.
 
 ### Q9. The four paths overlap more than beginners expect. Which four things does the phase say every path shares? <!-- id: cyber-05-q09 energy: normal -->

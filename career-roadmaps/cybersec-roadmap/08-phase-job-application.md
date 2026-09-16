@@ -575,6 +575,116 @@ Then open `portfolio/cyber/08-job-application.md` and confirm the deliverable li
 - 30-question interview bank
 - 3 project explanations
 
+## Quiz
+
+### Q1. You have sent 30 applications and received almost no responses at all. According to the tracker diagnoses, where is the problem? <!-- id: cyber-08-q01 energy: normal -->
+
+- [x] Targeting or resume keywords, because the failure is upstream of any human conversation
+- [ ] Your interview technique, because you are not converting
+- [ ] Your experience, because entry-level security requires prior security work
+- [ ] The market, because remote roles are oversubscribed
+
+**Why:** Almost no responses means the drop is happening at the resume screen, which the phase describes as mechanical rather than personal — it asks only whether this document matches this posting. Interview technique cannot be the cause of a problem that occurs before an interview. The market point is true as context but is not a diagnosis, because it suggests no action while targeting and keywords do.
+
+### Q2. You get four recruiter screens but only one technical interview. What does the phase say to work on? <!-- id: cyber-08-q02 energy: high -->
+
+- [ ] Your resume, because the screens show it is not landing
+- [x] Your story, because the screener may be hearing uncertainty about why you are moving
+- [ ] Your technical depth, because the interviews are too hard
+- [ ] Your application volume, because four screens is too small a sample
+
+**Why:** The screens are being granted, so the resume is working — that is the one thing not to rewrite. The conversion failure happens inside the conversation, which points at the transition narrative and the "no degree" answer. Technical depth cannot explain a drop before the technical stage, and the phase gives this exact pattern as its worked example.
+
+### Q3. A 50-application first pass produces three interviews and no offer. What does the phase say that means? <!-- id: cyber-08-q03 energy: normal -->
+
+- [x] It is a normal outcome, and the information gained is the real output of the pass
+- [ ] The strategy is not working and the target roles should change
+- [ ] The candidate is not good enough for entry-level security
+- [ ] The resume needs a complete rewrite before the next pass
+
+**Why:** The phase is explicit that a zero-offer first pass is normal rather than a signal to change careers, and that what you learn — which roles respond, which keywords matter, what the interviews ask — is what makes the second pass dramatically better. Reading it as a merit test is the misconception the phase names directly, and it is what makes the silence unbearable.
+
+### Q4. Why does the phase say your IT support background is your qualification rather than a gap? <!-- id: cyber-08-q04 energy: normal -->
+
+- [ ] Because helpdesk work is technically identical to SOC work
+- [ ] Because employers count any IT experience as security experience
+- [x] Because entry-level security postings typically assume prior IT or helpdesk experience
+- [ ] Because it substitutes for a certification in most screening systems
+
+**Why:** The phase reads SOC Analyst L1 requirements as a hiring manager would and finds one to two years of IT or helpdesk experience, ticketing familiarity, and comfort with users — which describes the IT job. The claim that any IT experience counts as security experience overstates it; the phase calls IT support a bridge that starts accumulating security experience, not an equivalent.
+
+### Q5. In the referral sequence, what should you ask for first? <!-- id: cyber-08-q05 energy: normal -->
+
+- [ ] A referral, stated briefly and politely
+- [ ] Their advice on which certification to buy
+- [ ] Their manager's contact details
+- [x] A short conversation about what their team looks for in a tier 1 hire
+
+**Why:** The sequencing is the whole point: a referral request from someone you have actually spoken to reads completely differently from one from a stranger with a pitch. Asking for information is a reasonable request most people will grant, and it builds the relationship a referral later requires. Leading with the referral is the thing the phase says learners get wrong.
+
+### Q6. After eleven applications with slow responses, what does the phase tell you to do? <!-- id: cyber-08-q06 energy: normal -->
+
+- [x] Hold course, because you will not have enough data to judge before 20–30 applications
+- [ ] Change your target role family, since the current one is not responding
+- [ ] Double your application volume to get data faster
+- [ ] Pause applications until you finish another certification
+
+**Why:** Consistency beats adjustment on the first pass, and the funnel is long and quiet by design. Changing target roles after eleven applications is reacting to noise, which is why the phase sets a threshold of roughly 20–30 before the tracker can diagnose anything. Doubling volume without a diagnosis just produces more of the same failure.
+
+### Q7. What is the honest reading of a zero-offer first pass for an entry-level cyber candidate? <!-- id: cyber-08-q07 energy: low -->
+
+- [ ] It shows the market is closed to candidates without degrees
+- [x] It is a usual outcome — the table shows usually one offer, sometimes zero on a first pass
+- [ ] It means the target roles were too senior and should be lowered
+- [ ] It proves the portfolio is not strong enough yet
+
+**Why:** The funnel table gives "usually 1, occasionally 0 on the first pass" for 50 applications, so zero is inside the expected range rather than outside it. Lowering ambitions or assuming the market is closed treats a normal statistical outcome as a verdict, which is exactly the misreading the phase's funnel framing exists to prevent.
+
+### Q8. What do the phase's three legitimate reasons to adjust the search have in common? <!-- id: cyber-08-q08 energy: high -->
+
+- [ ] They all come from advice given by other candidates
+- [ ] They all indicate that the resume needs rewriting
+- [ ] They all point to changing your target role family
+- [x] They are each a concrete, observable signal rather than a feeling about how it is going
+
+**Why:** The three are a consistent keyword gap across postings, target roles genuinely absent from your market, and the same question defeating you in three interviews — each countable and specific. The phase contrasts them with acting on silence and discouragement, which is the normal texture of the search. Only one of the three actually points at changing role family.
+
+### Q9. A posting requires a tool you have never touched and lists a degree. What does the phase's tracker exercise say to do with it? <!-- id: cyber-08-q09 energy: normal -->
+
+- [x] Record it as one you would not apply to, and write the reason down
+- [ ] Apply anyway, because volume is the goal
+- [ ] Apply and address the gap in a cover letter
+- [ ] Add the tool to your resume and learn it after applying
+
+**Why:** Knowing which postings to ignore is what keeps a 50-application target from becoming 50 wasted evenings, and writing the reason down turns a feeling into a rule you can check. Applying anyway to inflate volume defeats the purpose of the target, and claiming a tool you have not touched contradicts the phase's insistence on honesty in delivery.
+
+### Q10. What does the phase say is the highest-leverage activity most learners skip? <!-- id: cyber-08-q10 energy: low -->
+
+- [ ] Applying to more roles per week
+- [ ] Adding a certification before applying
+- [ ] Rewriting the resume for every application
+- [x] Building relationships that can lead to a referral
+
+**Why:** Referrals are described as the highest-leverage activity available and the one most often skipped because it feels like imposing. The phase corrects that reading: a referral is an employee passing your name along because they think you are worth talking to, which requires a relationship first. More applications and resume rewrites are useful but do not change who sees your name.
+
+### Q11. Why does the phase warn that "entry-level" in security is a damaging phrase? <!-- id: cyber-08-q11 energy: normal -->
+
+- [ ] Because the pay is lower than the work deserves
+- [ ] Because employers use it to justify low offers
+- [x] Because it means no prior *security* work experience, not no prior work experience at all
+- [ ] Because the roles are being automated
+
+**Why:** In practice almost every posting assumes you have already worked in IT, which is exactly why IT support is treated as the bridge rather than a detour. Reading "entry-level" as "no experience needed at all" produces applications to roles you will not clear, and it makes a perfectly qualified IT support candidate feel underqualified.
+
+### Q12. The resume screen rejects a strong candidate applying to a slightly wrong role while passing a weaker one who matches exactly. What does the phase conclude? <!-- id: cyber-08-q12 energy: high -->
+
+- [ ] The system is broken and referrals are the only way in
+- [ ] The strong candidate should apply to more senior roles
+- [ ] It shows that keyword matching measures nothing useful
+- [x] It is a mechanical property of the system, and mechanical properties can be worked with
+
+**Why:** The phase calls the screen a filter rather than a judge — it answers one narrow question in seconds, using keyword overlap and role family — and it is explicit that this is not fair and not personal. The conclusion drawn is that being mechanical makes it workable, which is why the phase has you collect keywords and target matching roles. Abandoning it for referrals treats one channel as the only channel.
+
 ## Checklist
 
 - [ ] I chose a primary cyber role family. <!-- id: cyber-08-c01 energy: normal -->

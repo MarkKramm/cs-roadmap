@@ -915,6 +915,116 @@ Create `portfolio/cyber/07-certification-decision.md` with:
 - Topic gap table
 - Exam date decision or reason to delay
 
+## Quiz
+
+### Q1. A posting lists "Security+ preferred" and another lists "Security+ required". Which one can actually exclude you? <!-- id: cyber-07-q01 energy: normal -->
+
+- [ ] The preferred one, because more people apply to it
+- [x] The required one, because it is the only category that can reject you outright
+- [ ] Neither, since the portfolio matters more than any certification
+- [ ] Both equally, because the words are interchangeable in practice
+
+**Why:** Only "required" removes you from consideration before a human reads anything, which is the one job a certification reliably performs. "Preferred" is worth having and rarely worth going into debt for. Collapsing the two is the mistake this phase warns about most directly, because it makes every mentioned certification look equally urgent.
+
+### Q2. You have twelve free weeks and no security experience. The phase says the correct order is which, and why? <!-- id: cyber-07-q02 energy: normal -->
+
+- [ ] Certification first, because the filter blocks everything else
+- [ ] Both at once, split evenly across the twelve weeks
+- [x] Portfolio first, because projects are the evidence and the certification is only the door
+- [ ] Neither, because without experience both are wasted effort
+
+**Why:** Three finished projects can do more for a candidate with no professional security experience than one certificate, which is why Phase 6 precedes Phase 7 in the roadmap. The certification-first answer is tempting because the filter is real — but clearing a filter only gets a human to read a resume that still has nothing to show them.
+
+### Q3. What are the three jobs a certification performs, according to the phase? <!-- id: cyber-07-q03 energy: low -->
+
+- [ ] Proving competence, replacing experience, and guaranteeing interviews
+- [x] Passing a filter, supplying a syllabus and deadline, and signalling follow-through
+- [ ] Raising salary, satisfying HR policy, and enabling promotion
+- [ ] Building a network, teaching fundamentals, and validating lab skills
+
+**Why:** The phase lists exactly those three, and then points out what is deliberately absent: **none of them is "proving you can do the job."** That is what the portfolio does. The first option names the three things the phase explicitly says a certification does *not* do, which is the trap of assuming the marketing is accurate.
+
+### Q4. When running the 30-job-post test, what is the point of recording whether each mention is Required, Preferred, or Mentioned? <!-- id: cyber-07-q04 energy: normal -->
+
+- [x] Only "Required" can exclude you, so the three are not worth the same to your decision
+- [ ] It makes the spreadsheet easier to sort
+- [ ] It shows which employers are hiring most urgently
+- [ ] It proves the certification is respected in the industry
+
+**Why:** The phase calls this out specifically because learners routinely collapse the three into one "mentioned" count, which makes a nice-to-have look like a gate. Counting them separately is what turns a pile of postings into an actual decision about whether to spend money.
+
+### Q5. In the objective-mapping method, what is the test for marking a topic green? <!-- id: cyber-07-q05 energy: normal -->
+
+- [ ] I have heard of this topic before
+- [ ] I could probably guess the answer on a multiple-choice question
+- [ ] I covered it in an earlier phase of the roadmap
+- [x] I understand it and could explain it to someone else, with an example
+
+**Why:** The phase is explicit that the test is not "have I heard of this" but "could I teach it", and warns that marking optimistically builds a study plan that skips exactly the material you need. Having covered a topic in an earlier phase is not the same as being able to explain it — that difference is the entire purpose of the exercise.
+
+### Q6. Your objectives list comes back mostly red. What does the phase say that means? <!-- id: cyber-07-q06 energy: normal -->
+
+- [ ] You should abandon the certification and choose an easier one
+- [x] Months of study, or that you should build foundations before attempting it
+- [ ] Your marking was too strict and should be revised downward
+- [ ] The certification is not aligned with your target role
+
+**Why:** The proportion of colours is a timeline signal: mostly green means weeks, mostly red means months or a foundations problem. Revising the marking downward is the tempting error and the destructive one, because it converts an honest measurement into a plan that skips the gaps. Poor alignment is a different problem, diagnosed by the three questions rather than by the colours.
+
+### Q7. Which of these does the phase say a certification does **not** do? <!-- id: cyber-07-q07 energy: normal -->
+
+- [ ] Pass an employer's automated filter
+- [ ] Give you a published syllabus and a deadline
+- [x] Make you competent at investigating an alert or tuning a rule
+- [ ] Signal that you can follow through on unsupervised study
+
+**Why:** Passing an exam means you can answer questions about security concepts, not that you can investigate an alert, tune a noisy rule, or write a report a manager can act on — and the phase notes that interviewers know this. The other three options are the real jobs a certification performs, which is why the distinction is worth holding precisely rather than dismissing certifications altogether.
+
+### Q8. A certification is "required" in 1 of your 30 target postings, and it costs a month's savings. What does the phase's method lead you to conclude? <!-- id: cyber-07-q08 energy: high -->
+
+- [ ] Take it, because being excluded even once is unacceptable
+- [ ] Take it, because focusing on one posting is how you get hired
+- [ ] Skip it and stop tracking certifications entirely
+- [x] It clears almost no filter for your market, so the money and weeks are probably better spent elsewhere
+
+**Why:** The method exists precisely so that a decision rests on counted evidence from your own market rather than on online advocacy, which the phase notes is louder and less specific than the postings are. The first option treats a single posting as representative, and the third over-corrects by abandoning the question rather than answering it.
+
+### Q9. Which certification does the phase map to a SOC or IT security role? <!-- id: cyber-07-q09 energy: low -->
+
+- [x] Security+, because it aligns with SOC and IT security work
+- [ ] CCNA, because networking underlies all security work
+- [ ] A GRC certification, because governance applies everywhere
+- [ ] A pentest certification, because offensive skills transfer to defence
+
+**Why:** The phase maps each certification to the role it actually aligns with: Security+ to SOC and IT security, CCNA to networking, cloud certifications to cloud. It warns that GRC and pentest certifications align with roles you do not yet hold, which makes them the most expensive kind of misalignment — good certificates aimed at the wrong job.
+
+### Q10. Why does the phase say a portfolio cannot supply the same signal as a certification? <!-- id: cyber-07-q10 energy: normal -->
+
+- [ ] A portfolio is less technically impressive than an exam pass
+- [ ] Employers do not read portfolios
+- [ ] A portfolio takes longer to build than studying for an exam
+- [x] A portfolio is self-directed, while a certification is an assessment someone else designed
+
+**Why:** The signal is about how you work under an external standard: you set a goal, sustained unsupervised study, and passed an assessment you did not write. A portfolio proves capability but is chosen and judged by you, so it cannot demonstrate the same thing. The claim that employers do not read portfolios contradicts the phase's own argument that projects are the evidence that gets you hired.
+
+### Q11. What does the phase say is the most common and most expensive mistake in this phase? <!-- id: cyber-07-q11 energy: normal -->
+
+- [ ] Choosing a certification that is too expensive
+- [ ] Starting to study without a fixed exam date
+- [x] Choosing a certification in the wrong domain, regardless of its quality
+- [ ] Trusting a third-party summary instead of the official objectives
+
+**Why:** Misalignment is expensive because the certification may be genuinely good and still do nothing for the role you are targeting — a pentest or GRC certificate points at a job you do not yet hold. Price and exam dates are real considerations, but they are handled by the three questions rather than being the failure the phase singles out.
+
+### Q12. For every objective you mark red, what does the phase tell you to add? <!-- id: cyber-07-q12 energy: normal -->
+
+- [x] A note of *how* you will close it — a video, a module, a lab, or your own notes
+- [ ] The date you expect to close it by
+- [ ] An estimate of how many exam questions it is worth
+- [ ] A copy of the official objective text, quoted verbatim
+
+**Why:** A red item with no method attached is a worry rather than a plan, so the phase pairs each one with a concrete route to closing it. It applies the same logic to green items, where you write down the example you would give — because the exam tests applied reasoning, and a producible example is proof you know it rather than merely recognise it.
+
 ## Checklist
 
 - [ ] I checked current official pricing. <!-- id: cyber-07-c01 energy: normal -->

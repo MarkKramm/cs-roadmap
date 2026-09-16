@@ -925,6 +925,120 @@ Create `portfolio/cyber/04-hands-on-labs.md` with:
 - 2 blue-team lab reports
 - 1 incident report
 
+## Quiz
+
+Twelve questions on the material in this phase. Each has one correct answer and a short explanation — read the explanation even when you get it right, because it usually names the mistake the wrong answers represent.
+
+The phase is about building something a hiring manager can look at, and the questions follow that: design decisions that decide whether the lab works, the setup failures that eat weekends, and the safety boundary you do not cross. A few check the writing, because the phase says that is where most of the portfolio value actually is.
+
+### Q1. Why does the phase insist you draw the lab diagram before installing anything? <!-- id: cyber-04-q01 energy: normal -->
+
+- [x] Designing first forces you to answer questions that would otherwise ambush you mid-install
+- [ ] It is a deliverable requirement that cannot be produced later
+- [ ] It helps you decide which hypervisor to install
+- [ ] It is needed before you can register a host-only network
+
+**Why:** The phase calls this ordering the single most important piece of advice in the phase, and lists the questions the diagram forces: how many machines and what each is for, how they reach each other, where traffic is observed, and whether addresses survive reboots. Building first produces a mess you cannot describe.
+
+### Q2. Which network mode does the phase say makes the lab safe, and why? <!-- id: cyber-04-q02 energy: normal -->
+
+- [ ] Internal network — because the host cannot reach the guests
+- [x] Host-only — no route to your real network
+- [ ] NAT — the VMs can reach the internet to patch
+- [ ] Bridged — the VMs behave as full LAN peers
+
+**Why:** Host-only is the phase's answer because the VMs are deliberately vulnerable and isolation is the point — nothing you run can reach anything real. Bridged is the one it forbids for a malware lab, and NAT is only the road out for updates.
+
+### Q3. A learner's VirtualBox reports `VT-x is not available (VERR_VMX_NO_VMX)`, but Task Manager says virtualisation is enabled. What does the phase say has happened? <!-- id: cyber-04-q03 energy: high -->
+
+- [ ] The CPU is too old to support 64-bit guests
+- [ ] VirtualBox needs reinstalling with administrator rights
+- [ ] Windows Defender is blocking the hypervisor's driver
+- [x] Something else, such as Hyper-V, has claimed the virtualisation extensions
+
+**Why:** The phase calls this the classic symptom: the CPU supports virtualisation, but Hyper-V, Virtualisation-Based Security, Windows Sandbox, the Virtual Machine Platform, or the Windows Hypervisor Platform has claimed the extensions exclusively. Disabling the offending feature and rebooting is the fix.
+
+### Q4. You have 16 GB of RAM and want to run three VMs. What is the phase's allocation rule? <!-- id: cyber-04-q04 energy: normal -->
+
+- [ ] Give each VM as much RAM as its installer asks for
+- [ ] Allocate all physical RAM to the VMs and let the host swap
+- [ ] Give the SIEM VM 8 GB and split the rest evenly
+- [x] Never allocate more than half your physical RAM to the sum of running VMs
+
+**Why:** The host operating system is also running, and the phase says a swapping host makes every guest slow while a starved guest silently kills processes — which is usually why the Wazuh installer fails halfway for no visible reason. Its 16 GB row is 4 GB plus 2 GB plus 2 GB.
+
+### Q5. Why does the phase say detection rules and screenshots both depend on static addressing? <!-- id: cyber-04-q05 energy: normal -->
+
+- [ ] Static addresses are required for the agent to authenticate
+- [ ] Host-only networks cannot issue DHCP leases at all
+- [x] Your notes and rules reference IPs, so on reboot they go stale and stop matching
+- [ ] Wazuh refuses to accept logs from addresses that change
+
+**Why:** The phase's table pairs static addresses with notes that stay accurate and rules that keep matching, against DHCP without reservations where rules silently stop matching. It also notes this mirrors production, where servers have stable addresses precisely so monitoring can depend on them.
+
+### Q6. Which log flow direction does the phase's diagram show, and why does the direction matter? <!-- id: cyber-04-q06 energy: normal -->
+
+- [ ] From the SIEM to the victims, because the manager pushes checks
+- [ ] From the host to every VM, so the host can observe traffic
+- [ ] It does not matter, because agents connect in both directions
+- [x] From the victims to the SIEM, and it determines which firewall rules you need
+
+**Why:** The phase says the arrow points from victims to the SIEM, and that most log-forwarding failures are a direction problem — the agent cannot reach the manager because the port was opened the wrong way. The agent initiates the connection to port 1514, which is what makes the direction load-bearing.
+
+### Q7. Which two adapters does the phase's pattern put on each VM? <!-- id: cyber-04-q07 energy: low -->
+
+- [ ] Bridged and host-only
+- [x] Host-only for lab traffic and NAT for internet access
+- [ ] Host-only and internal network
+- [ ] NAT and bridged
+
+**Why:** The phase's pairing is “NAT for the road out, host-only for the lab road in”, and it calls two adapters on one VM normal and correct. Bridged appears nowhere in the recommended layout because it puts a vulnerable VM on the real local network.
+
+### Q8. When does the phase say to take the snapshot that matters most? <!-- id: cyber-04-q08 energy: normal -->
+
+- [x] Immediately after install, before configuring anything
+- [ ] Only after the lab is fully configured and working
+- [ ] At the end of each week, as a backup
+- [ ] Only before running a real malware sample
+
+**Why:** The snapshot taken straight after install gives you a known-good base you can return to in seconds, and the phase pairs it with snapshotting before each experiment so every experiment is reversible. Naming them meaningfully — `clean-install`, `pre-agent`, `pre-rule-test` — is part of the same discipline.
+
+### Q9. A learner says the VM is isolated because it is a virtual machine on a bridged adapter. What does the phase say? <!-- id: cyber-04-q09 energy: high -->
+
+- [ ] Correct — any VM is isolated from the physical network by the hypervisor
+- [ ] Correct, provided the guest has no malware sample running yet
+- [x] Isolation is a property of the network path, and a bridged VM is a peer on your real LAN
+- [ ] Correct, as long as a snapshot was taken before the experiment
+
+**Why:** The phase states isolation is a property of the network path, not of the VM, and calls bridged “No. Never.” A bridged VM has a real address on your real network, so local-subnet-scanning malware would reach devices you do not own — and reverting a snapshot cannot undo that.
+
+### Q10. You want to study malware behaviour without running a live sample. Which route does the phase recommend? <!-- id: cyber-04-q10 energy: normal -->
+
+- [x] Static analysis, public sandbox reports, or your own harmless beaconing binaries
+- [ ] Run the sample in a VM with NAT so it can phone home to your monitoring
+- [ ] Run it bridged but disconnect the host's Wi-Fi immediately afterwards
+- [ ] Skip malware entirely, since the phase does not cover it
+
+**Why:** The phase's four safe routes are static analysis only, reading vendor sandbox reports, platform lab environments that give you artifacts rather than live code, and writing your own harmless binary that beacons on an interval. It also notes a NAT adapter is only partially isolated, since outbound access is a path back out.
+
+### Q11. A Wazuh rule must fire six times from one source within 120 seconds. Which two clauses does the phase say build that behavioural detection? <!-- id: cyber-04-q11 energy: high -->
+
+- [ ] `if_sid` and `level`
+- [x] `frequency` and `same_source_ip`
+- [ ] `if_matched_sid` and `negate`
+- [ ] `decoder` and `field`
+
+**Why:** The phase names `frequency` and `same_source_ip` as what turns noise into signal, built on top of `if_matched_sid` against a built-in rule. The worked alert shows the combination: rule 100001 matches built-in rule 5710 and requires six matching events in 120 seconds sharing one source IP.
+
+### Q12. In your lab incident report, the impact was genuinely none. What does the phase say to write? <!-- id: cyber-04-q12 energy: normal -->
+
+- [ ] Omit the Impact section, since there was no impact to report
+- [ ] Describe the potential worst case as though it had occurred
+- [x] Say so plainly — a controlled test with no impact is correct and professional
+- [ ] Estimate a plausible impact so the report demonstrates analytical range
+
+**Why:** The phase says saying so is correct and professional, and that a report stating “this was a controlled test, no impact, and here is what the detection would have caught in production” is far more credible than manufactured drama. It warns that inflating a lab event into a breach narrative is seen through instantly.
+
 ## Checklist
 
 - [ ] I built a lab diagram. <!-- id: cyber-04-c01 energy: normal -->
