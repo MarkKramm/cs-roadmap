@@ -19,7 +19,7 @@ Learn to run an incident from the first alert to the closing report, preserving 
 
 ## Estimated time
 
-**6 weeks** at 2–4 focused hours a day, 5 days a week. Roughly 60–80 hours, and the practice tasks dominate.
+**6 weeks** at about 9–12 focused hours a week. Roughly 55–74 hours, and the practice tasks dominate.
 
 ## Skills you'll gain
 

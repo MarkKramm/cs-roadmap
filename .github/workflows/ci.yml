@@ -33,6 +33,16 @@ jobs:
       # not gate — see the comment in the script.
       - name: Audit cross-references
         run: node scripts/audit-refs.mjs
+      # The second pass of the comprehension audit found the same defect class it
+      # always finds: a total stated in one place that disagrees with its own
+      # breakdown table elsewhere — a phase claiming 60-80 hours over parts
+      # summing to 40-56, a header calling itself the heaviest when a later phase
+      # budgets three times as much, a track overview listing 4 weeks while every
+      # phase file it points at says 6. Every instance came from an edit that
+      # changed one place and not the other, so the check is arithmetic, not
+      # judgement, and it gates.
+      - name: Audit time budgets
+        run: node scripts/audit-time-budget.mjs
       # cyber-restructure-check.mjs is deliberately NOT run here. It compares the
       # cyber phases against a "before" snapshot captured at the start of the
       # 2026 restructure pass, and reads it from process.env.TEMP — a

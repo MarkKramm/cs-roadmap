@@ -97,9 +97,9 @@ Linux gives you the observability that makes the concepts concrete. It is also, 
 | Nine practice tasks | 25–40 hours | The bulk of the phase |
 | Bandit wargame | 8–15 hours | Runs across all six weeks |
 | Being confused by subnetting | Counts as progress | Nearly everyone hits this wall |
-| Total | 40–60 hours across 6 weeks | The heaviest phase in the cyber track |
+| Total | 37–59 hours across 6 weeks | The heaviest of the three foundation phases |
 
-Budget honestly: this is the longer side, and it is the heaviest phase in the cyber track. Budget for the confusion too — subnetting and permissions are where nearly everyone hits a wall. That is a normal part of learning this material, not a sign you are unsuited to it.
+Budget honestly: this is the longer side, and it is the heaviest of the foundation phases — later phases in the track are heavier still. Budget for the confusion too — subnetting and permissions are where nearly everyone hits a wall. That is a normal part of learning this material, not a sign you are unsuited to it.
 
 #### Two notes on scope
 

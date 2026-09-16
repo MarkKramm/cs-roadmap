@@ -19,7 +19,7 @@ Learn how cloud environments are attacked and defended, why identity is the cont
 
 ## Estimated time
 
-**6 weeks** at roughly 1.5–2 focused hours a day, 5 days a week. Roughly 40–56 hours total.
+**6 weeks** at about 7–9 focused hours a week. Roughly 40–56 hours total.
 
 ## Skills you'll gain
 

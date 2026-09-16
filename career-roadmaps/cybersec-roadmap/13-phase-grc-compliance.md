@@ -19,7 +19,7 @@ Learn how organisations decide what risk to accept, how controls are chosen and 
 
 ## Estimated time
 
-**6 weeks** at 2–4 focused hours a day, 5 days a week. Roughly 60–75 hours, most of it spent writing documents rather than reading.
+**6 weeks** at about 9–12 focused hours a week. Roughly 56–70 hours, most of it spent writing documents rather than reading.
 
 ## Skills you'll gain
 

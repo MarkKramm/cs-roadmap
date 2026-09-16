@@ -19,7 +19,7 @@ Learn to find, demonstrate, and explain web application vulnerabilities on autho
 
 ## Estimated time
 
-**6 weeks** at 2–4 focused hours a day, 5 days a week. Roughly 65–80 hours, and most of it is spent in labs rather than reading.
+**6 weeks** at about 10–13 focused hours a week. Roughly 62–78 hours, and most of it is spent in labs rather than reading.
 
 ## Skills you'll gain
 

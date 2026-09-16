@@ -77,7 +77,7 @@ The good news is that the foundation is small. You need to understand addresses,
 
 The better news is that you can see it all working on your own home network, for free, tonight. This lesson is built around doing exactly that.
 
-**Time to complete:** roughly 20–30 hours across the phase — the scheduled four weeks at 5–8 hours a week. Most of that is spent in Wireshark, diagrams.net, and Packet Tracer rather than reading. The phase is scheduled at four weeks for good reason — networking rewards repetition more than most subjects.
+**Time to complete:** roughly 20–32 hours across the phase — the scheduled four weeks at 5–8 hours a week. Most of that is spent in Wireshark, diagrams.net, and Packet Tracer rather than reading. The phase is scheduled at four weeks for good reason — networking rewards repetition more than most subjects.
 
 ### Part 1 — The mental model: what a network actually is
 

@@ -48,14 +48,14 @@ Take the two or three that match your Phase 5 specialisation, not all six.
 
 | Phase | Topic | Realistic Time | Take it if |
 |---|---|---:|---|
-| 9 | Cloud and identity security | 4 weeks | You are targeting cloud, IAM, or any role touching Microsoft 365 or Azure |
-| 10 | Detection engineering | 4 weeks | You are targeting SOC, and want to do more than read other people's rules |
-| 11 | Incident response and DFIR | 4 weeks | You are targeting SOC, DFIR, or incident response |
-| 12 | Scripting and automation | 3–4 weeks | Any path — it multiplies everything else |
-| 13 | GRC, compliance and risk | 4 weeks | You are targeting GRC, compliance, or audit |
-| 14 | Web application security | 4–6 weeks | You are targeting pentest, or coming from a web development background |
+| 9 | Cloud and identity security | 6 weeks | You are targeting cloud, IAM, or any role touching Microsoft 365 or Azure |
+| 10 | Detection engineering | 6 weeks | You are targeting SOC, and want to do more than read other people's rules |
+| 11 | Incident response and DFIR | 6 weeks | You are targeting SOC, DFIR, or incident response |
+| 12 | Scripting and automation | 6 weeks | Any path — it multiplies everything else |
+| 13 | GRC, compliance and risk | 6 weeks | You are targeting GRC, compliance, or audit |
+| 14 | Web application security | 6 weeks | You are targeting pentest, or coming from a web development background |
 
-Core path total: **6–18 months**. If working full-time, expect the longer side. Each depth-track module adds roughly a month.
+Core path total: **6–18 months**. If working full-time, expect the longer side. Each depth-track module adds roughly six weeks, and they are meant to be taken two or three at a time rather than all six.
 
 ## Suggested Weekly Schedule While Working IT
 

@@ -2,6 +2,18 @@
 
 A lightweight decision log (ADR-style). Newest first.
 
+## D-025 — The time-budget guard gates, because the arithmetic class keeps coming back
+
+- **Date:** 2026-09-16
+- **Status:** Accepted
+- **Context:** The second comprehension pass found the arithmetic class productive for the third time. Across it: cyber 09 stated 60–80 hours above parts summing to 40–56, so the stated minimum exceeded the table's own maximum; cyber 02 stated 40–60 above parts summing to 37–59; cyber 02 called itself "the heaviest phase in the cyber track" while cyber 06 budgets 120–180 hours; the cyber overview listed phases 9–14 as 4 weeks each while every one of those phase files says 6 weeks in both frontmatter and prose; and IT 03 said "the scheduled four weeks at 5–8 hours a week" for a total of 20–30, where 4 × 8 = 32. `scripts/audit-time-budget.mjs` was written during that pass and ran clean, but it was never added to CI and never mentioned in `WORKFLOW.md`, `CHECKPOINT.md` or the commit checklist — so it was a guard nobody had to run and nothing would run for them.
+- **Decision:** It runs in CI, in the content job beside `audit-refs.mjs`, and it is documented in `WORKFLOW.md` with its own checklist line. Four classes are checked, all arithmetic on the text rather than judgement: a budget table whose parts must sum to the total it prints, a stated week range whose minimum is above its maximum, frontmatter `duration`/`duration_weeks` disagreeing with the bold lead of the phase's own "Estimated time" line, and a track overview table listing a different week count than the phase file it points at.
+- **Consequences:**
+  - **It satisfies the rule D-022 stated for what belongs in CI.** A class belongs in a gate when it is a claim about the text agreeing with itself — does this number equal that number — and in a periodic human read when it is a claim about the reader's state. Every check here compares two places in the same repository, which is why it gates where `audit-terms.mjs` does not.
+  - **The scoping is the load-bearing part, and it was got wrong first.** Class 1 keys off the table's own `Hours` column header, not off proximity to a heading. A schedule table (Weeks / study % / hands-on %) has time-ish cells but no Hours column and no total, so it is correctly out of scope; an earlier throwaway version summed bare "4-6" cells by accident and reported success on three tables out of the corpus. A table that *has* an Hours column but no checkable claim is a finding, not a silent skip, because a check whose skip path looks like its pass path is not a check.
+  - **Class 4 had the same defect in a different shape, and it is recorded in the file.** The first version tracked "am I inside a table right now" rather than "have I seen a table row", and since the last table in a file is always followed by prose, the flag was false by the last line and the check never cross-checked a single week count. Both versions printed a clean result.
+  - **Current state: `phases checked: 23`, `findings: 0`.** The defects above were fixed in the second pass; the guard is what keeps them fixed, since every one of them was introduced by an edit that changed one place and not the other.
+
 ## D-024 — The paragraph-density gate moved down to 110 words, and only after the backlog was zero
 
 - **Date:** 2026-09-16

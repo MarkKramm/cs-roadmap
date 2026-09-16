@@ -126,11 +126,14 @@ cd learning-site && npm run test:smoke   # the lesson renders for every phase
 Two more guards run over the phase Markdown itself, and they catch different things:
 
 ```bash
-node scripts/audit-refs.mjs    # every "Part N" and "Phase N" reference resolves
-node scripts/audit-terms.mjs   # acronym MEASUREMENT — always exits 0, never a gate
+node scripts/audit-refs.mjs         # every "Part N" and "Phase N" reference resolves
+node scripts/audit-time-budget.mjs  # stated totals match their own parts and overview
+node scripts/audit-terms.mjs        # acronym MEASUREMENT — always exits 0, never a gate
 ```
 
 **`audit-refs.mjs` gates.** It exits 1 when a `Part N` names a heading the file does not have, or a `Phase N` names a number the track does not contain — both are claims about the text agreeing with itself, which is the test for whether a class belongs in CI. It found IT 06 sending the reader to "Part 5's structure" for a note in Part 4, and IT 07 referring to a nonexistent "Part 8". It also prints `FORWARD_AS_PRIOR`, a phase citing a later phase as prior knowledge, but does **not** gate on it: the guard was wrong about that once already, matching "risk reasoning **from** Phase 13 arrives later" — a sentence that explicitly disclaims prior knowledge — as a claim of it. Read that output; nothing fails the build on it.
+
+**`audit-time-budget.mjs` gates, and it is the arithmetic class made machine-checkable.** It exits 1 when a budget table's parts do not sum to the total it prints, when a stated week range has its minimum above its maximum, when frontmatter `duration`/`duration_weeks` disagrees with the bold lead of the phase's own "Estimated time" line, or when a track overview lists a different week count than the phase file it points at. All four are claims about the text agreeing with itself, which is the test D-022 sets for a gate. It currently reports `phases checked: 23 / findings: 0`. The class it covers was the most productive one in both comprehension passes — a stated 60–80 hours above parts summing to 40–56, a phase calling itself the heaviest when a later one budgets three times as much, an overview listing 4 weeks where every phase file says 6 — and every instance came from an edit that changed one place and not the other. **Its scoping is deliberate and worth preserving:** class 1 keys off the table's own `Hours` column header, so a schedule table with time-ish cells but no Hours column is correctly out of scope, while a table that *has* an Hours column and no checkable total is a finding rather than a silent skip.
 
 **`audit-terms.mjs` never gates, and that is the finding, not a shortcut.** It was written to catch a term reaching the reader before anything says what the letters mean. Five measurement passes moved the domain count 365 → 232 → 232 → 227 → 72 and the residue was still `AMD`, `USD`, `UTC`, `PID`, `NTFS`, `CMD`, `ISP`, `SSID` — two brands, a currency code, and `PID` flagged on the line that reads "**PID** is the process ID". The class is real but not regex-detectable: "a term a beginner must decode" versus "a proper noun that happens to be capitalised" is a judgement about the reader, not a property of the string. It is retained as a prompt for a periodic human read. See [`COMPREHENSION-AUDIT.md`](COMPREHENSION-AUDIT.md).
 
@@ -146,6 +149,7 @@ The smoke test renders the lesson for every phase and asserts that the table and
 - [ ] `node scripts/audit-lesson-ast.mjs` reports no content loss (for any change touching the parser or a lesson).
 - [ ] `node scripts/audit-readability.mjs` reports no phase outside the target.
 - [ ] `node scripts/audit-refs.mjs` reports no broken cross-reference (for any change to a phase file).
+- [ ] `node scripts/audit-time-budget.mjs` reports `findings: 0` (for any change to a phase file or a track overview).
 - [ ] `cd learning-site && npm run test:smoke` passes (for any change touching the site).
 - [ ] `cd learning-site && npm run test:browser` passes with a preview server running (for any change touching a view, a stylesheet or a control).
 - [ ] File is LF (no CR bytes) unless it is a Windows-native script.

@@ -2,7 +2,25 @@
 
 A chronological record of working sessions. Newest first.
 
-## 2026-09-16 (latest) — The audit re-read itself, and two of its verdicts did not survive
+## 2026-09-16 (latest) — A guard that was never wired to anything
+
+**Goal:** close the gap the second comprehension pass left behind. That pass found its most productive defect class for the third time — arithmetic that only disagrees when you read two places at once — and wrote `scripts/audit-time-budget.mjs` to catch it. The script ran clean, reported `phases checked: 23 / findings: 0`, and was then mentioned in **no document and no workflow**. It was a guard that nothing would ever run, which is the same defect this repository has now recorded three times in other forms: a check that cannot fail, a regex that cannot match, a skip that reads as a pass.
+
+**The fix is three lines of YAML, a checklist line and a decision record, and the work was in noticing it was missing.** `audit-refs.mjs` had a CI step, a `WORKFLOW.md` section and a D-record. `audit-time-budget.mjs` had none of the three, so it lived in the repository as a script a human might one day remember to run. It now runs in the content job beside `audit-refs.mjs`, appears in the commit checklist, and is written up as D-025.
+
+**What it checks is four things, and all four are arithmetic on the text.** A budget table whose parts must sum to the total it prints; a stated week range whose minimum exceeds its maximum; frontmatter `duration`/`duration_weeks` disagreeing with the bold lead of the phase's own "Estimated time" line; and a track overview listing a different week count than the phase file it points at. That is the test D-022 set for a gate — *is this a claim about the text agreeing with itself* — and every check here compares two places in the same repository. The classes that fail that test, term decodability and a forward phase cited as prior knowledge, still print without gating, and that has not changed.
+
+**Two of the script's own checks were wrong first, and both printed a clean result.** Class 1 originally summed bare `4-6` cells in a schedule table by accident and reported success on three tables out of the corpus; it now keys off the table's own `Hours` column header, and a table that *has* an Hours column but no checkable total is a **finding**, not a silent skip — a check whose skip path looks like its pass path is not a check. Class 4 tracked "am I inside a table right now" rather than "have I seen a table row", and since the last table in a file is always followed by prose, the flag was false by the last line and it **never cross-checked a single week count**. Both wrong versions were green. Both are now recorded in the file's own comments rather than quietly fixed, because a guard's false start is evidence about whether the guard can fail.
+
+**The class is worth the guard and the history says so.** Cyber 09 stated 60–80 hours above parts summing to 40–56 — the stated minimum above the table's stated maximum. Cyber 02 stated 40–60 above parts summing to 37–59. Cyber 02 called itself the heaviest phase in the track while cyber 06 budgets 120–180 hours. The cyber overview listed phases 9–14 as 4 weeks each while every one of those phase files says 6 weeks in both frontmatter and prose. IT 03 said "the scheduled four weeks at 5–8 hours a week" for a 20–30 hour total, and 4 × 8 = 32. **Every one of those was introduced by an edit that changed one place and not the other**, which is precisely the regression a standing check prevents and precisely what a human re-read does not.
+
+**Verified:** `audit-time-budget` **23 phases / 0 findings**, `audit-refs` 0 findings, readability **0 of 23** with **0 over 110** and 0 over 90, `lint-content` **145 files / 0 issues**, `audit-content` 0 issues, lesson AST 23 / 0 loss, task IDs **252** unchanged, bands **183/0**, energy **183/183**.
+
+**One documentation correction came with it.** `CHECKPOINT.md` said **144** tracked files and `lint-content` now counts **145**: the script existed before this pass but had never been counted, because the count had been taken from the previous pass's list rather than from `git ls-files`. The same row now names all five files this date added rather than four.
+
+**Carried forward, unchanged.** The comprehension audit's *verdicts* remain advisory — two passes disagreed on 2 of 23 phases, so a third would not reproduce either set. `FORWARD_AS_PRIOR` and the acronym scan still print without gating, so each needs a human. The browser check is still one engine at two widths. And the largest untested claim is untouched by any of this: **nobody has timed a single curriculum task.** A guard that proves the arithmetic is *consistent* is not a guard that proves the numbers are *right*, and the gap between those two statements is now the whole of the remaining risk in the time budgets.
+
+## 2026-09-16 (later still) — The audit re-read itself, and two of its verdicts did not survive
 
 **Goal:** test the one claim this repository had recorded against itself. `COMPREHENSION-AUDIT.md` closed with the honest caveat that its *findings* were falsifiable — each carried a line number and a quote and was re-checked against source — while its *verdicts* were one reader's judgement. The open item said the only way to test a verdict was a second pass with different readers. This is that pass.
 
@@ -26,7 +44,7 @@ A chronological record of working sessions. Newest first.
 
 **Honest caveats, updated rather than repeated.** The verdict divergence is now measured rather than suspected, and it is the strongest argument in this repository against treating any single `would abandon` as fact. `FORWARD_AS_PRIOR` and the acronym scan still print without gating. The browser check is still one engine at two widths. And the largest untested claim is unchanged and now sharper: **nobody has timed a single curriculum task.** Every time budget here is an author's estimate, the second pass proved several of them were also internally inconsistent, and making the arithmetic add up is not the same as making the numbers right. That needs one reader with a timer, not another edit.
 
-## 2026-09-16 (later still) — The density gate moved down, but only once there was nothing left for it to catch
+## 2026-09-16 (later) — The density gate moved down, but only once there was nothing left for it to catch
 
 **Goal:** finish the tightening that the previous pass had explicitly deferred. `audit-readability.mjs` gated at 150 words per paragraph while the editorial standard was 90, and the open item said so: *"Consider tightening the gate from 150 to 110 words once the backlog is cleared."* The backlog was not cleared. Four paragraphs sat over 90 — IT 01 at 91, IT 03 at 95, IT 05 at 94, IT 07 at 93 — so the item stayed open and the gate stayed at 150.
 
@@ -42,7 +60,7 @@ A chronological record of working sessions. Newest first.
 
 **Still carried forward, unchanged by this pass.** The audit's *verdicts* are one reader's judgement — only its findings were re-verified against source. `FORWARD_AS_PRIOR` and the acronym scan print without gating, so each needs a human. The browser check is one engine at two widths, so it is not a cross-browser matrix and does not cover the 561–860px band. And **nobody has timed a single curriculum task** — every band and energy value remains an authored estimate.
 
-## 2026-09-16 (later) — A guard that could not fail, and the documentation that said it was fine
+## 2026-09-16 — A guard that could not fail, and the documentation that said it was fine
 
 **Goal:** hand the pass over cleanly. What it actually turned up was a guard whose skip path was indistinguishable from its pass path, and four documents still describing the repository as it was several passes ago.
 

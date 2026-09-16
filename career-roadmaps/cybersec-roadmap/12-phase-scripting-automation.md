@@ -19,7 +19,7 @@ Learn just enough Python and PowerShell to automate the repetitive parts of secu
 
 ## Estimated time
 
-**6 weeks** at 2–4 focused hours a day, 5 days a week. Roughly 60–75 hours, and most of it is spent writing code rather than reading about it.
+**6 weeks** at about 8–11 focused hours a week. Roughly 51–66 hours, and most of it is spent writing code rather than reading about it.
 
 ## Skills you'll gain
 

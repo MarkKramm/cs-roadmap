@@ -19,7 +19,7 @@ Learn to build detections deliberately rather than collecting alerts, so that ev
 
 ## Estimated time
 
-**6 weeks** at 2–4 focused hours a day, 5 days a week. Roughly 60–80 hours, plus ongoing tuning time.
+**6 weeks** at about 8–11 focused hours a week. Roughly 50–68 hours, plus ongoing tuning time.
 
 ## Skills you'll gain
 

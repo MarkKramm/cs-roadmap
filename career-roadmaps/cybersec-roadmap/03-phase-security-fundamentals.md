@@ -129,9 +129,9 @@ The purpose of the breadth here is not to make you good at all six. It is to mak
 | Five CVE summaries | 6–8 hours | Drawn from CISA KEV |
 | Incident timeline and report | 6–8 hours | Ties the whole phase together |
 | Control-mapping table | 3–5 hours | Your first GRC-flavoured artifact |
-| Total | 30–41 hours across 6 weeks | Comparable to Phase 2 in size, wider rather than deeper |
+| Total | 30–41 hours across 6 weeks | A little smaller than Phase 2, and wider rather than deeper |
 
-It is comparable in size to Phase 2 but wider rather than deeper, which means it is easier to get lost in. The antidote is the deliverable: five PortSwigger labs, five CVE summaries, one incident timeline, one control-mapping table. Those four artifacts are the phase. Reading without producing them will feel productive and teach you very little.
+It is a little smaller than Phase 2 but wider rather than deeper, which means it is easier to get lost in. The antidote is the deliverable: five PortSwigger labs, five CVE summaries, one incident timeline, one control-mapping table. Those four artifacts are the phase. Reading without producing them will feel productive and teach you very little.
 
 #### One strategic note about your web development background
 
