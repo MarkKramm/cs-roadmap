@@ -73,7 +73,34 @@ const CLASSES = [
     title: "DNS record types",
     why: "Defined by RFC 1035 and successors. Small set, easy to get subtly wrong.",
     source: "RFC 1035 and the IANA DNS parameters registry",
-    re: /\b(?:A|AAAA|CNAME|MX|TXT|NS|SOA|PTR|SRV|CAA)\s+record\b|\brecord type[s]?\b/gi,
+    // The first version matched `\brecord type[s]?\b` and `\bA record\b`, which
+    // pulled in ticketing rows — "A record of what was done", "a ticket is a
+    // record". The word "record" is ordinary English, and "A record" is also
+    // just a sentence starting with the article.
+    //
+    // The rule that actually separates them is NOT "does the line mention DNS".
+    // A code-block line like `nslookup google.com  # the A record` IS a DNS
+    // claim and mentions no DNS term at all; narrowing on DNS context alone
+    // dropped it. What distinguishes a claim from prose is whether the author
+    // is NAMING a record type:
+    //   - a multi-letter type (CNAME, MX, TXT, ...) followed by "record", or
+    //   - the `A` type where it is backticked, or it follows a DNS command, or
+    //     the line is inside a code fence.
+    // "A record of what was done" is none of those.
+    re: new RegExp(
+      [
+        "\\b(?:AAAA|CNAME|MX|TXT|NS|SOA|PTR|SRV|CAA)\\s+records?\\b",
+        "`A`\\s*records?\\b",
+        // "the A record" as the object of a DNS lookup, in prose or a comment.
+        // [^\n] rather than [^.\n]: the command and the phrase are separated by
+        // column-alignment spaces, and the hostname in between contains dots.
+        "(?:nslookup|dig|host|resolve|lookup)[^\\n]{0,60}?\\bA\\s+records?\\b",
+        // the phrase "record type(s)" in a DNS sentence
+        "\\brecord\\s+types?\\b(?=[^.\\n]*\\b(?:DNS|nslookup|resolver|zone|nameserver|domain)\\b)",
+        "\\bresolv(?:e|es|ing)\\b[^.\\n]{0,40}\\brecord\\b",
+      ].join("|"),
+      "gi",
+    ),
   },
   {
     id: "protocol",

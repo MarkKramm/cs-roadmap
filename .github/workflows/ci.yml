@@ -100,6 +100,14 @@ jobs:
         run: node scripts/verify-cidr.mjs
       - name: Verify worked metrics
         run: node scripts/verify-metrics.mjs
+      # A claim-extraction pattern is a claim about the corpus, and it can be
+      # wrong in both directions. The DNS-record pattern matched "A record of
+      # what was done" (ordinary English) and MISSED "nslookup google.com # the
+      # A record" (a real DNS claim) — and tightening it for the first fault
+      # caused the second. An output count cannot tell you which way it is
+      # wrong; a truth table can. This asserts all twelve known cases.
+      - name: Test claim-extraction patterns
+        run: node scripts/test-record-pattern.mjs
       # A command can be named correctly and written wrongly. IT 02 stated DISM
       # in full at one place and abbreviated it to `DISM /RestoreHealth` in a
       # summary table 300 lines later — a form that throws if a beginner types
