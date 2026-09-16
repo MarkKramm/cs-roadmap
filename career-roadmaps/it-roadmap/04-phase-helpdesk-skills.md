@@ -447,6 +447,16 @@ Treat a report seriously and act carefully. **Never click links or open attachme
 
 Usually a permissions or group membership issue rather than a file problem. Identify what the user is trying to reach and which group grants access, then fix the membership rather than the file — changing file permissions directly is how access control quietly degrades over time.
 
+#### Softphone has no audio
+
+The most common telephony ticket, and a genuinely common one in the Philippines: contact-centre and BPO desks support softphones as a core duty, and most other remote roles use Teams or Zoom telephony. Work in this order — **default input and output device first**, because a new headset or a monitor with speakers silently steals the default and the call audio goes somewhere the user cannot hear.
+
+Then the physical mute switch on the headset, which is the single most common cause and the one users never check. Then the microphone selected inside the application itself, which is separate from the system default. Only after those does the network matter: choppy audio that affects everyone on the call is a bandwidth or QoS problem, not a device one. Distinguishing "I cannot hear anything" from "I can hear but they cannot hear me" halves the search immediately.
+
+#### End-of-shift handover
+
+Your open tickets do not close when you do, and on a 24/7 desk someone in another timezone picks them up while you sleep. This is covered as a procedure in Phase 6.
+
 ### Part 5 — What good looks like
 
 #### Knowledge base articles are how you multiply yourself
@@ -727,7 +737,7 @@ Access tickets are where good helpdesk habits prevent real breaches. Three rules
 
 **Reasoning to take away:** A request to grant access should trigger a check of the *current* state before any change. In this ticket, doing what was asked would have changed nothing, closed the ticket, and left the user still blocked — while silently adding redundant permissions. The same discipline protects you when the request is malicious: if you always verify approver and current state, an attacker's request fails at the same gate an honest user's succeeds through.
 
-### Part 10 — Run the checks yourself, on your own machine
+### Part 8 — Run the checks yourself, on your own machine
 
 Parts 1 to 7 taught you what to do. This part makes you do it. Every command below is **read-only and safe on a laptop you own**, and each one is followed by what healthy output looks like.
 
@@ -938,7 +948,7 @@ Do this while your machine is working, not after it breaks. It takes about twent
 
 The second sentence is the part that matters. Anyone can paste output; describing the failure you would recognise beside it is diagnostic skill, and it is what a hiring manager hears when you explain this file in an interview.
 
-### Part 11 — Six tickets, worked and answered
+### Part 9 — Six tickets, worked and answered
 
 Part 7 gave you three full tickets to read. This part gives you six shorter ones to **work**, each with a weak reply, a strong reply, and the reasoning that separates them.
 
@@ -973,7 +983,7 @@ This is the ordered procedure from Part 2, written as something you actually exe
 |---|---|---|
 | 1 | Task Manager, Startup tab | How many apps launch at sign-in |
 | 2 | Task Manager, Performance tab | Disk at 100 % with CPU low |
-| 3 | `Get-Service` filter from Part 10 | A service retrying and failing at boot |
+| 3 | `Get-Service` filter from Part 8 | A service retrying and failing at boot |
 | 4 | `Get-WinEvent -FilterHashtable @{LogName='System'; Level=1,2}` | Repeated errors with boot-time timestamps |
 | 5 | `Get-Volume` | System drive below 10 % free |
 
@@ -1228,7 +1238,7 @@ Technically correct, practically useless. You have not established whether the u
 
 **Why the strong one works.** It thanks the user first, and means it. It names the specific tell in plain language — "we never email a link asking you to keep your existing password". It preserves the evidence instead of destroying it. It asks the containment question without any hint of blame, and it says so explicitly. And it tells the user what happens next.
 
-### Part 12 — Escalation writing practice
+### Part 10 — Escalation writing practice
 
 Part 3 gave you the escalation template and one worked example. This part makes you write one, and shows you the two ways people get it wrong.
 
@@ -1411,7 +1421,7 @@ Then compare your version against example B and answer three questions in writin
 
 Question 3 is the one worth keeping. **The gap between your answer and the model is your specific next thing to practise**, and it is different for everyone.
 
-### Part 13 — What would you do next? Drill and answer key
+### Part 11 — What would you do next? Drill and answer key
 
 Twelve situations. For each, decide **one** next action and write down why you chose it over the alternatives.
 
@@ -1458,7 +1468,7 @@ For each, your choices are: **resolve it now**, **gather one more piece of evide
 | 10–12 correct | You are thinking in the right order and would not be a liability on a first-line queue |
 | 7–9 | Solid instincts, with a few places where you acted before you had the evidence |
 | 4–6 | Reread Part 2's eight steps, then retake this. Do not worry yet — this is the normal first score |
-| 0–3 | Read Part 11 again, working each ticket on paper, then retake. The vocabulary is there; the order is not yet |
+| 0–3 | Read Part 9 again, working each ticket on paper, then retake. The vocabulary is there; the order is not yet |
 
 **The most common miss is 3**, and it is the one that matters most. Beginners file it as "an MFA annoyance" and reset the factor, which is precisely what the attacker wanted.
 
@@ -1518,7 +1528,7 @@ Every exercise in this part works with a single machine. Two of them are worth d
 | Scenario | What you do | What you should observe |
 |---|---|---|
 | Break your own DNS | In an **Administrator** PowerShell on a machine you own, set your adapter's DNS to `127.0.0.1`, then `ipconfig /flushdns` | `ping 8.8.8.8` still works, `ping google.com` fails. Put it back to automatic afterwards |
-| Break your own Wi-Fi | Disable the adapter, then try each Part 10 command | Every network check fails at the first step — link down means nothing else can pass |
+| Break your own Wi-Fi | Disable the adapter, then try each Part 8 command | Every network check fails at the first step — link down means nothing else can pass |
 | Fill a folder path | Create a folder with a very long name and map it, then rename the folder | The mapping reports unavailable. This is Ticket 8 with the serial numbers filed off |
 | Fill the system drive | Do not do this to test it — instead read `Get-Volume` and predict what would break below 5 % free | A prediction you can check beats a disk you have to repair |
 | One laptop plus one phone | Use the phone's hotspot for the laptop, then disable the hotspot | The laptop's whole network fails at once. Comparing that to a single-command failure teaches the scope idea physically |
@@ -1544,11 +1554,11 @@ The value of breaking things on purpose is that you see the failure signature wh
 - **Check the current state before changing anything.** Many "I need access" tickets are "access exists but has not taken effect", and granting again fixes nothing.
 - **Thank people who report their own mistakes.** A culture where users report phishing quickly is the strongest control an organisation has.
 
-### Part 14 — Practice this next
+### Part 12 — Practice this next
 
 The exercises below are the phase. Build the tracker, write the ten tickets, produce the knowledge base articles, practise remote support with a family member, write the user-friendly replies, and write the escalation notes. Keep every artefact — they become portfolio evidence and, later, interview stories.
 
-Parts 10 to 13 are the doing half of this lesson, and they are meant to be worked in order. Part 10 has you run the checks on your own machine and build a healthy baseline. Part 11 walks six tickets end to end, each with a weak reply and a strong one. Part 12 is escalation writing. Part 13 is a drill with an answer key so you can mark your own work.
+Parts 8 to 11 are the doing half of this lesson, and they are meant to be worked in order. Part 8 has you run the checks on your own machine and build a healthy baseline. Part 9 walks six tickets end to end, each with a weak reply and a strong one. Part 10 is escalation writing. Part 11 is a drill with an answer key so you can mark your own work.
 
 **Time to complete:** a further 6–9 hours if you do all four parts properly — more than the reading half takes, and that is the point. Write your answers down before you look at any model answer, because a model answer read first teaches you nothing except that the text exists.
 
@@ -1585,10 +1595,10 @@ Real ones carry the detail that only comes from having been there: the exact err
 4. Practise remote support. Use **RustDesk** or **Chrome Remote Desktop** to connect to a family member's device or a second VM, and fix a simple issue such as display settings or a cache problem. <!-- id: it-04-t04 band: focused energy: normal -->
 5. Write 5 user-friendly replies to common helpdesk issues — email not syncing, VPN not connecting, printer offline, forgotten password, and a slow laptop. Each reply must be clear, polite, and contain actionable steps. <!-- id: it-04-t05 band: focused energy: normal -->
 6. Write 3 escalation notes, each including a detailed description, the troubleshooting already performed, supporting evidence such as error messages or logs, and the reason for escalation. Score each draft against the eight rows of the Part 12 handover table, and rewrite any that scores below six. <!-- id: it-04-t06 band: focused energy: high -->
-7. Run every command in the Part 10 command table on your own machine, and write down what each result tells you. Add the output to `portfolio/it/04-healthy-baseline.md` with one sentence describing what would look different if it were broken. <!-- id: it-04-t07 band: focused energy: normal -->
-8. Work Part 11's six tickets on paper before reading the model replies. Write your triage questions, your reply to the user, and the internal note for each. Then compare your reply against the strong example and write two sentences on what you would change. <!-- id: it-04-t08 band: focused energy: high -->
-9. Retake the Part 13 drill a week later, without rereading the answer key first. Anything you get wrong twice is the thing to practise, and the two most commonly missed situations are the ones worth checking first. <!-- id: it-04-t09 band: ongoing energy: normal -->
-10. Write one knowledge base article from a fault you fixed on your own machine while running the Part 10 checks. Use a command's unexpected output as the subject — it is a real finding, it is yours, and it is more convincing in a portfolio than a generic article. <!-- id: it-04-t10 band: focused energy: normal -->
+7. Run every command in the Part 8 command table on your own machine, and write down what each result tells you. Add the output to `portfolio/it/04-healthy-baseline.md` with one sentence describing what would look different if it were broken. <!-- id: it-04-t07 band: focused energy: normal -->
+8. Work Part 9's six tickets on paper before reading the model replies. Write your triage questions, your reply to the user, and the internal note for each. Then compare your reply against the strong example and write two sentences on what you would change. <!-- id: it-04-t08 band: focused energy: high -->
+9. Retake the Part 11 drill a week later, without rereading the answer key first. Anything you get wrong twice is the thing to practise, and the two most commonly missed situations are the ones worth checking first. <!-- id: it-04-t09 band: ongoing energy: normal -->
+10. Write one knowledge base article from a fault you fixed on your own machine while running the Part 8 checks. Use a command's unexpected output as the subject — it is a real finding, it is yours, and it is more convincing in a portfolio than a generic article. <!-- id: it-04-t10 band: focused energy: normal -->
 
 ## Deliverable / proof of work
 
@@ -1599,7 +1609,7 @@ Create `portfolio/it/04-helpdesk-skills.md` with:
 - 3 escalation examples
 - 5 user communication templates
 - A healthy baseline note for your own machine, with what broken would look like beside each reading
-- Your written answers to the twelve Part 13 drill situations, with your reasons, kept even where you scored them wrong
+- Your written answers to the twelve Part 11 drill situations, with your reasons, kept even where you scored them wrong
 
 ## Checklist
 
@@ -1610,11 +1620,11 @@ Create `portfolio/it/04-helpdesk-skills.md` with:
 - [ ] I practiced or simulated remote support. <!-- id: it-04-c05 energy: normal -->
 - [ ] I can troubleshoot 8 common helpdesk issues. <!-- id: it-04-c06 energy: normal -->
 - [ ] I can write a calm response to an angry user. <!-- id: it-04-c07 energy: normal -->
-- [ ] I can run the Part 10 checks on my own machine and say what healthy output looks like. <!-- id: it-04-c09 energy: normal -->
+- [ ] I can run the Part 8 checks on my own machine and say what healthy output looks like. <!-- id: it-04-c09 energy: normal -->
 - [ ] I built my own healthy baseline and wrote what broken would look like beside it. <!-- id: it-04-c10 energy: normal -->
-- [ ] I worked all six tickets in Part 11 on paper before reading the model replies. <!-- id: it-04-c11 energy: normal -->
-- [ ] I scored myself against the Part 13 drill and reworked every answer I got wrong. <!-- id: it-04-c12 energy: normal -->
-- [ ] I wrote an escalation note that satisfies at least six rows of the Part 12 table. <!-- id: it-04-c13 energy: normal -->
+- [ ] I worked all six tickets in Part 9 on paper before reading the model replies. <!-- id: it-04-c11 energy: normal -->
+- [ ] I scored myself against the Part 11 drill and reworked every answer I got wrong. <!-- id: it-04-c12 energy: normal -->
+- [ ] I wrote an escalation note that satisfies at least six rows of the Part 10 table. <!-- id: it-04-c13 energy: normal -->
 - [ ] I started applying for entry-level IT roles after this phase. <!-- id: it-04-c08 energy: normal -->
 
 ## You're ready to move on when...

@@ -213,6 +213,27 @@ The phase task is a workflow diagram: **request → triage → troubleshoot → 
 
 Two arrows most diagrams miss, and most real environments have: **escalation** (from troubleshoot to a specialist, carrying your notes) and **reopen** (from close back to troubleshoot, when the fix did not hold). Drawing them shows you understand support as a loop, not a straight line.
 
+#### The end-of-shift handover
+
+There is a third thing most diagrams miss, and it is one you will do every single working day: the **shift handover**. It is worth its own section because this curriculum puts you on Philippine hours covering US business hours, which means your tickets are picked up by someone else while you sleep — and a ticket handed over badly is a ticket that gets re-investigated from zero.
+
+The principle is the same one that runs through this whole phase: **write so the next person never has to re-investigate.** At the end of a shift, every ticket still open in your queue needs to be safe for a stranger to pick up. "Safe" means four things are written down:
+
+| What the next person needs | Why |
+|---|---|
+| **Current state** — what you have established so far | So they do not repeat your diagnostics |
+| **Next action** — the specific thing you were about to do | So the ticket does not stall waiting for someone to think |
+| **Who is waiting** — the user, and any promised callback | So a promise made on your shift is kept on theirs |
+| **What you would do if it were yours** — your read on it | This is the difference between a handover and a dump |
+
+A handover note is four lines in the ticket, not a meeting. It looks like this:
+
+> Shift ending 22:00 PHT. Printer at 192.168.1.51 confirmed offline; port was pointed at the wrong address and I corrected it, waiting on the user to test a page before I close. If no reply by morning, call the site contact directly — the user is on leave from Thursday. Sumeet is the only other person who has seen this fault, worth asking if it recurs.
+
+**The habit worth building.** Write the handover note as you go, not at the end. A note written at 21:55 from memory is missing exactly the detail the next person needs, and the details you have forgotten are always the ones you assumed were obvious.
+
+**Why this matters more than it looks.** The handover is the moment a new hire's documentation habits are judged. A colleague who opens your ticket at 2am and finds everything they need forms an opinion of your work in about thirty seconds — and that opinion travels. It is one of the few things in entry-level support that is entirely within your control, costs five minutes, and is visible to the people who decide whether you stay.
+
 ### Part 4 — Two skills that make the tools work
 
 #### Reading vendor documentation without drowning

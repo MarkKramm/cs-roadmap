@@ -542,6 +542,26 @@ This is the table you build throughout the phase. Study the pattern of reasoning
 | Wi-Fi missing entirely | Driver disabled or missing; airplane mode; adapter failure | `Get-NetAdapter`; Device Manager status |
 | Battery will not charge | Charger, cable, port, or battery | Test with another charger; check battery report |
 | Screen flickers or tears | Cable, GPU driver, or panel | Reconnect display cable; update GPU driver from vendor |
+| Monitors stop working after returning to the desk | Dock lost power; host cable loose; monitor input wrong | Reseat the dock's host cable; check the monitor's input source |
+| Only one of two monitors works | Dock bandwidth; DisplayPort alt-mode not supported; adapter | Test the monitor directly on the laptop; try one display first |
+| Peripherals dead but the laptop screen is fine | Dock, not the laptop | Plug one device straight into the laptop to split the fault in two |
+
+#### The dock: where a remote desk actually breaks
+
+Almost everyone working remotely runs the same shape of desk — a laptop, one cable to a **docking station**, and two monitors plus keyboard, mouse, headset, and webcam hanging off the dock. Phase 1 covers the *internals* of a computer thoroughly, but the part that fails most often in this setup is outside the machine entirely, and it is worth naming before you meet it on a ticket.
+
+A dock is a **port multiplier**. The laptop has one USB-C or Thunderbolt connection, and the dock turns that single connection into many. Everything on the desk therefore depends on one cable, which makes that cable the single point of failure for a whole desk.
+
+**The one habit that solves most dock tickets.** When the user says "my monitors stopped working", the fastest way to halve the problem is to **plug one thing directly into the laptop.** If the monitor works when connected straight to the laptop, the laptop and monitor are fine and the dock — or its cable, or its power — is the fault. If it fails both ways, the fault is at the other end. One test, and you have split an ambiguous problem into two simple ones.
+
+**The four things to check, in order:**
+
+1. **Power to the dock.** A dock with its own power supply that has been unplugged, or a power strip switched off, presents exactly like a dead dock. Check the obvious thing first.
+2. **The host cable.** Reseat it at both ends. A dock cable that is *nearly* in produces intermittent faults that look like driver problems, and users rarely think to touch it.
+3. **The monitor's input source.** A monitor with both HDMI and DisplayPort connected does not always pick the one now active. This is the "it worked yesterday" ticket, and it is a menu setting on the monitor itself, not a fault.
+4. **Bandwidth and alt-mode.** Not every USB-C port carries video. Running two high-resolution monitors through a modest dock can exceed what the connection supports, so the second display silently drops. Testing one display at a time tells you whether you are looking at a fault or a limit.
+
+USB-C and Thunderbolt are worth knowing as names. **USB-C is a connector shape, not a capability** — the same physical port on two laptops can support completely different things, which is why a dock that works on one machine may not work on another. Thunderbolt is the higher-bandwidth standard, and it looks identical.
 
 ### Part 9 — The habits that make this useful on a ticket
 

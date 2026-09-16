@@ -28,6 +28,8 @@ Become comfortable using and troubleshooting Windows and Linux at a beginner IT-
 - Install and use a Linux VM.
 - Use Linux commands for files, permissions, processes, packages, services, and logs.
 - Understand users, groups, permissions, updates, drivers, startup apps, and services.
+- Recognise and respond to malware, and know when to clean versus when to rebuild.
+- Find your way around macOS well enough to support it at first-line level, and explain the Windows-to-macOS mapping.
 
 ## Specific topics to learn
 
@@ -391,6 +393,32 @@ journalctl -p err -b                 # errors since the last boot
 
 Compare this to Windows Event Viewer. Both record the same kinds of events; Linux simply hands them to you as text, which means `grep` and `journalctl` replace an entire GUI. Once you have used `journalctl --since "1 hour ago"` to find why a service died, the Windows equivalent feels clumsy.
 
+#### macOS: the third system, and why you cannot skip it
+
+Everything so far has been Windows and Linux. That is a real gap, and it is worth closing deliberately rather than hoping it does not come up — because **remote work skews heavily toward Macs.** Startups, design agencies, and most US-based software companies issue MacBooks, and "can you support Macs?" is a question asked in the screening call, before anyone has seen your technical work. Answering "I only know Windows" costs you the interview. Answering "I support Macs at first-line level, and here is the mapping" keeps you in it.
+
+The honest framing is this: **macOS is a Unix system with a friendly face.** Underneath, it is close enough to Linux that your Phase 4 skills transfer almost directly. What you need is the vocabulary to move between the three systems, and that is a table, not a course.
+
+| Idea | Windows | Linux | macOS |
+|---|---|---|---|
+| File manager | File Explorer | (the shell) | **Finder** |
+| Where apps live | `C:\Program Files` | `/usr/bin`, `/opt` | **`/Applications`** |
+| Settings | Control Panel / Settings | config files in `/etc` | **System Settings** |
+| Installer format | `.exe`, `.msi` | `.deb`, `apt` | **`.dmg`** (drag to Applications) |
+| Saved passwords | Credential Manager | `~/.ssh`, keyring | **Keychain Access** |
+| Backup | File History | `rsync`, Borg | **Time Machine** |
+| Task manager | Task Manager | `top`, `htop` | **Activity Monitor** |
+| Terminal | PowerShell, cmd | bash, zsh | **Terminal** — and it is zsh |
+| Disk utility | Disk Management | `df`, `lsblk` | **Disk Utility** |
+
+**The four macOS tickets you will actually get.** "I can't install this app" — usually a `.dmg` the user opened but never dragged to Applications, or Gatekeeper blocking an unsigned app (System Settings → Privacy & Security → **Open Anyway**). "My Mac is full" — open System Settings → General → Storage; the usual culprits are Photos, old iOS backups, and Downloads, in that order.
+
+"Keychain keeps asking for my password" — Keychain Access, look for the repeatedly-prompting entry, and check whether the login keychain's password still matches the account password, which is what happens after a password change. "It won't connect to the printer" — the same port-and-address logic from Phase 3, via System Settings → Printers & Scanners.
+
+**What carries over, and what does not.** Your troubleshooting *method* is identical on all three: establish scope, read the evidence, change one thing, verify. Your Windows *commands* do not carry over; anyone who tells you to run `sfc /scannow` on a Mac is telling you they have never used one. The macOS equivalents of the evidence you read in Part 8 exist — **Console** is Event Viewer, **Activity Monitor** is Task Manager, and `system_profiler` is `systeminfo`.
+
+**Where to practise.** You do not need to buy a Mac. Ask a friend or family member who owns one to let you look through System Settings and Finder for twenty minutes; the interface is the part you are missing, not the concepts. Then write the mapping table into your own notes, in your own words. That table is a genuinely good portfolio artefact, and it is the difference between "I have never used a Mac" and "I have not owned one, but I know where everything is."
+
 ### Part 5 — Virtual machines: your safe practice lab
 
 You should not install Linux on your only computer to learn it. Use a **virtual machine**: software that pretends to be a computer, running inside your existing one.
@@ -502,8 +530,34 @@ That is the cultural difference in one exercise. Windows uses proprietary format
 | Application crashes repeatedly | Application log, plus its AppData `Local` folder | Reset the app's profile; check for updates |
 | VM will not start | Host RAM or virtualisation disabled | Reduce VM RAM; enable virtualisation in firmware — restart, press F2 or Del at power-on, open the CPU section, set Intel VT-x or AMD-V to Enabled |
 | Forgot a Linux password | Single-user recovery | Boot to recovery, reset from the root shell |
+| "I think I have a virus" | What the user is actually seeing | Triage first — see below. Most are not infections |
 
 Notice the pattern in the "where to look first" column: **it is always a log, a status, or a resource reading.** Guessing is what people do when they do not know where the evidence lives. Your job is to always know where the evidence lives.
+
+#### Malware: the four things people call "a virus"
+
+This is the topic listed at the top of this phase, and it deserves its own recipe because the first decision is not *how to clean it* — it is **which of four different problems you are looking at.** They have different fixes, and treating one as another wastes the user's afternoon and can destroy evidence you needed.
+
+| What the user describes | What it usually is | First move |
+|---|---|---|
+| Pop-ups saying "your PC is infected, call this number" | **Scareware** — a web page, not an infection | Close the browser, do not call the number. Nothing is installed. Clear the site data and check the extension list |
+| Browser opens pages you did not ask for; search engine changed | **Browser hijack** — a malicious extension or a changed shortcut | Remove the extension; check the shortcut's target for a trailing URL; reset the browser's search settings |
+| Machine is genuinely slow, fan runs constantly, unknown processes present | **Possible real infection** | Do not start deleting files. Disconnect it from the network first, then read the evidence (Part 8) |
+| Antivirus already reported something and quarantined it | **A handled detection** | Confirm what it found, when, and that the user did not click "allow". Then scan again |
+
+**Why the order matters.** Disconnecting a possibly-infected machine from the network before you investigate is the one step that buys time: it stops any command-and-control traffic and stops the thing spreading to the shared drive. It costs nothing and it is reversible. Deleting files, by contrast, destroys the evidence you need to answer "how did this get in?" — and that question is the one your employer actually cares about.
+
+**Windows Defender, concretely.** It is already on every Windows machine and it is enough for first-line work. Open **Windows Security → Virus & threat protection**. A **quick scan** checks the places malware usually hides and takes minutes. A **full scan** checks everything and takes hours.
+
+An **offline scan** — under Scan options — restarts the machine and scans before Windows loads, which is the one that catches malware designed to hide from a running system. **Quarantine** means Defender has moved the file somewhere it cannot run; it is not deleted, and you can review or restore it.
+
+From the command line, `MpCmdRun.exe -Scan -ScanType 2` runs a full scan, and `Get-MpThreatDetection` lists what has been found. Knowing these exist matters more than memorising them: it tells an interviewer you have actually looked at Defender rather than only heard of it.
+
+**Know when to stop cleaning.** Reimaging is the correct answer more often than beginners expect. If the machine was infected with something that had administrative access, or if you cannot establish how it got in, or if the user's data is already safely backed up, a rebuild is faster, more certain, and more honest than an hour of cleaning that may leave something behind.
+
+**Cleaning is for a known, contained, low-privilege threat. Rebuilding is for everything else.** Saying that out loud in an interview is a stronger answer than listing removal tools.
+
+**The one thing you never do.** Never tell a user "it's fine now" without evidence. Run the scan, read the result, and record what you found and what you did. A malware ticket closed on hope is the ticket that reopens next week with worse symptoms.
 
 ### Part 8 — Reading Windows like a technician
 

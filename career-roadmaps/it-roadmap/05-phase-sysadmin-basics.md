@@ -36,6 +36,8 @@ Learn beginner admin tasks that make you stronger than a basic script-reading he
 - Local accounts vs domain accounts
 - Active Directory basics: domain, domain controller, OU, user, group, GPO
 - Microsoft Entra ID basics: cloud identity, MFA, conditional access concept
+- Device management: MDM enrolment, Intune and Autopilot, compliance policy, remote wipe, BYOD
+- Mobile devices: work email on a phone, authenticator enrolment, and the lost-MFA-device path
 - Google Workspace basics: users, groups, aliases, shared drives
 - Least privilege and access review
 
@@ -45,6 +47,7 @@ Learn beginner admin tasks that make you stronger than a basic script-reading he
 - Shared folder troubleshooting
 - Printer management basics
 - Software installation/removal
+- Device provisioning: standard images, `sysprep`, and cloud enrolment, as a written runbook
 - Patch/update process
 - Backups: full, incremental, cloud sync vs real backup
 
@@ -146,6 +149,40 @@ Cloud identity follows the same logic with different vocabulary:
 - **Google Workspace** has the same primitives under Google's names: users, groups, **aliases** (extra addresses delivering to one mailbox), **shared drives** (team-owned storage that survives an individual leaving), and suspension rather than deletion when someone departs.
 
 You will not have paid access to these services in this phase. You will read the official admin documentation and write down the workflows — reset a password, enable MFA, add a user to a group, suspend a user — as if you were doing them. That documentation is exactly what a support technician follows in a real job, and being able to read it quickly is a genuinely marketable skill.
+
+#### Device management: how a laptop configures itself
+
+Conditional access decides *whether* a device may connect. Something else decides *what is on it* — and that is **mobile device management**, or MDM. This section exists because it is the single biggest blind spot in most beginner IT material, and because for remote work it is not optional: when the laptop ships to your home, nobody is there to set it up, so it configures itself.
+
+**The idea in one sentence.** MDM is a service that a device enrols into, and once enrolled the organisation can push settings to it, require conditions of it, and — if it is lost or stolen — wipe it remotely.
+
+**What it actually does.** Four jobs, and they are worth naming separately because interviewers ask about them:
+
+1. **Enrol** — the device registers itself with the management service and gets an identity the organisation recognises.
+2. **Configure** — settings, Wi-Fi profiles, certificates, email accounts, and required apps are pushed, rather than typed in by hand.
+3. **Enforce compliance** — "disk encryption must be on", "the OS must be up to date", "screen lock must be enabled". A device that fails these conditions is marked *non-compliant*, and conditional access can then block it from company data.
+4. **Wipe** — a lost laptop can be remotely erased, or selectively erased so company data goes and personal files stay.
+
+**Microsoft's version is Intune, and the enrolment path is called Autopilot.** The important part for you is not the product name, it is the technician's view of it. With Autopilot, the user unboxes the laptop, connects it to Wi-Fi, signs in with their work account, and the machine builds itself: Windows installs, the organisation's configuration applies, the standard apps arrive. Nobody images anything by hand.
+
+**The tickets this generates — and these are your first-month tickets:**
+
+| What the user says | What is usually happening |
+|---|---|
+| "It says my device isn't compliant" | A required condition is failing — most often encryption, an OS update, or a screen lock that was turned off |
+| "I can't enrol my new laptop" | Wrong account used at sign-in, the device is already enrolled to someone else, or the licence is not assigned |
+| "This app won't install" | It is not in the company portal, so it is not permitted — this is a policy outcome, not a fault |
+| "I'm locked out and my phone is broken" | The MFA device is gone; this is now an **identity verification** ticket, not a convenience one |
+
+**Mobile devices are the same problem, smaller.** Phones and tablets are enrolled the same way, and the tickets are among the highest-volume in any helpdesk: setting up work email on a phone, enrolling an authenticator app, and re-enrolling that authenticator when someone changes handsets.
+
+Treat the last one with care — **a request to move someone's MFA to a new device is an account-takeover attempt until you have verified it is really them.** Follow the identity verification discipline from Phase 4, and never accept the new phone number the caller supplies.
+
+**BYOD — "bring your own device" — is the awkward middle case.** The user's personal phone holds company email, so the organisation needs *some* control over it. The convention that protects everyone is that the organisation manages a **container** — the work apps and work data — and not the whole phone.
+
+Knowing that distinction exists is enough for entry level; if a user asks whether their employer can see their photos, the honest answer is "not with a properly configured work profile, and here is who to ask to confirm."
+
+**What to write down.** You cannot lab Intune or Autopilot on a free budget, and that is fine and worth being honest about. What you *can* do is read Microsoft's own enrolment documentation and write the workflow out in your own words: what the user does, what the technician checks, and what the common failures are. That written workflow is a portfolio artefact, and it is precisely what a "have you used Intune?" interview question is really asking.
 
 ### Part 2 — Files, endpoints, and permissions
 
@@ -279,6 +316,29 @@ The phase's exit criterion is that you can explain how you would onboard a new r
 8. **Schedule the follow-up** — a check-in after a week catches small problems before they become tickets.
 
 Practise saying that list out loud, in order, in about ninety seconds. It is a genuinely strong interview answer, and it demonstrates systems thinking rather than tool knowledge.
+
+#### Step 4 in detail, because that is the one that is actually a job
+
+Steps 1 to 3 are identity work, which you can read about. Step 4 is physical work, and it is where a junior desktop hire spends their first month: a stack of laptops, a start date, and a standard to meet. Reciting "image it, join it to management, install the standard software" is a good interview answer, but it is not yet a *procedure*. Here is what the procedure actually is.
+
+**Why imaging exists at all.** The instinct is to think it is about speed. It is mostly about **consistency**. If you install Windows by hand on ten laptops, you get ten slightly different machines — different driver versions, one with a tool nobody meant to leave on it, one with the wrong regional settings. Six months later those differences are the bugs nobody can reproduce. A standard image exists so that machine number ten is identical to machine number one, and so that "it works on mine" means something.
+
+**The traditional path, and the modern one.** Historically the sequence was: install Windows on a reference machine, prepare it with **`sysprep`** (which strips out the machine-specific identity so the image can be reused), capture it, and deploy it to new hardware, often with **MDT** or a vendor tool. That path still exists in large organisations and you should be able to describe it.
+
+The modern path for a cloud-managed company is **Autopilot**, which inverts the whole idea. There is nothing to capture: the machine ships with a clean Windows, the hardware ID is registered to the organisation, and when the new hire signs in, the configuration applies itself over the internet. The image is not a file you made — it is a policy that follows the device.
+
+**What "join it to management" means, concretely.** It means the device must end up known to the organisation's management service — Entra ID joined rather than only locally signed in, enrolled in Intune (or the equivalent), and therefore subject to the compliance rules from Part 1. A device that is set up but never enrolled is a device nobody can wipe, patch, or audit. That is the failure mode to check for.
+
+**A free way to actually practise this.** You cannot lab Autopilot on a $0 budget, but you can practise the half that matters. In a virtual machine:
+
+1. Install Windows in VirtualBox — you already did this in Phase 2.
+2. Install your standard set by hand and write the list down, as a real standard would be written.
+3. Run `sysprep /generalize /oobe /shutdown` and watch what it does. Understanding why the machine-specific identity must be stripped is the concept behind every imaging tool.
+4. Snapshot before you sysprep, and restore afterwards — which is the discipline that makes a VM a safe place to break things.
+
+Then write the whole procedure out as a numbered runbook, the way you would hand it to the next technician. That runbook is portfolio evidence, and it is the artefact that answers "have you done deployments?" with something better than "I understand the concept."
+
+**The honest boundary.** You will not have administered Autopilot or MDT in production, and you should not claim you have. What you can honestly say is: you know why standard images exist, you know the difference between the traditional capture-and-deploy path and the modern cloud-enrolment path, you can describe what enrolment genuinely does, and you have written the runbook. That is a strong entry-level answer, and it is the truth.
 
 ### Part 4 — Reading access evidence like a technician
 

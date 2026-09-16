@@ -6,6 +6,7 @@ Use this flat checklist to track the full IT roadmap.
 
 - [ ] I can explain CPU vs RAM vs storage.
 - [ ] I can identify common laptop/desktop ports.
+- [ ] I can diagnose a laptop-plus-dock setup, and I know the one test that splits a dock fault from a laptop fault.
 - [ ] I can open Task Manager and explain CPU/RAM/disk/network usage.
 - [ ] I can open Device Manager and identify a driver/device issue.
 - [ ] I can check storage health and free disk space.
@@ -21,6 +22,8 @@ Use this flat checklist to track the full IT roadmap.
 - [ ] I can use 20 basic Linux commands.
 - [ ] I can check logs in Windows and Linux.
 - [ ] I can install/update software safely.
+- [ ] I can tell scareware, a browser hijack, and a real infection apart, and I know when to clean versus rebuild.
+- [ ] I can find my way around macOS well enough to support it first-line, and I wrote out the Windows-to-macOS mapping table.
 
 ## Networking Basics
 
@@ -41,6 +44,7 @@ Use this flat checklist to track the full IT roadmap.
 - [ ] I wrote 2 knowledge base articles.
 - [ ] I practiced or simulated remote support.
 - [ ] I can troubleshoot 8 common helpdesk issues.
+- [ ] I can work a softphone-no-audio ticket through device, headset, app, then network.
 - [ ] I can write a calm response to an angry user.
 - [ ] I started applying for entry-level IT roles after this phase.
 
@@ -53,6 +57,10 @@ Use this flat checklist to track the full IT roadmap.
 - [ ] I practiced folder permissions.
 - [ ] I wrote a simple PowerShell inventory script.
 - [ ] I documented M365 and Google Workspace admin workflows.
+- [ ] I can explain what MDM does, what enrolment means, and how a device becomes non-compliant.
+- [ ] I wrote out the common Intune and Autopilot ticket types and what each one actually means.
+- [ ] I know the mobile email, authenticator, and lost-MFA-device workflows, and why a lost MFA device is an identity ticket.
+- [ ] I wrote a device-provisioning runbook covering what a standard image is and what enrolment changes.
 - [ ] I created a patching checklist.
 
 ## Tools and Ticketing
@@ -64,6 +72,7 @@ Use this flat checklist to track the full IT roadmap.
 - [ ] I created a change request template.
 - [ ] I created a monitoring alert runbook.
 - [ ] I understand safe remote support behavior.
+- [ ] I can write an end-of-shift handover note covering current state, next action, who is waiting, and my read on it.
 
 ## Soft Skills
 

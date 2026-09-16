@@ -360,7 +360,7 @@ Fix: point the device (or the router's DHCP scope) at a working resolver. This i
 
 **How to write it up.** Record which step failed and what proved it. "Device had a `169.254` address; DHCP lease renewal failed; DHCP server unreachable from client VLAN; escalated to network team" is a professional note. "Rebooted, worked" is not — it teaches nobody anything and cannot be trended.
 
-### Common pitfalls, and how to avoid them
+#### Common pitfalls, and how to avoid them
 
 - **Starting at the top.** Reading browser error messages before checking whether the cable is plugged in wastes time. Always work bottom-up.
 - **Confusing private and public addresses.** Seeing `192.168.1.x` and assuming it is "your IP on the internet" leads to nonsense conclusions about what is reachable.
