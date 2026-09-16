@@ -3,6 +3,10 @@
 A read of all 23 phases asking one question the existing guards structurally cannot:
 **where does a motivated beginner with no IT background stop reading, and why?**
 
+The two passes below cover the 23 entry-level phases. A third pass, added later, covers the
+six advance phases — so this file now accounts for **all 29**. Read the entry-level sections
+with that in mind: every count in them is a count of 23, and it was correct when it was written.
+
 Every guard in this repository tests internal consistency — does the parser lose content,
 is the prose dense, do the cross-references resolve. None can see a phase that teaches
 correctly but cannot be *followed*. This audit is the human-shaped check for that.
