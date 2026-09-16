@@ -435,7 +435,7 @@ Name       PasswordLastSet      Groups
 A. Reyes   2026-03-01 09:12:04  CN=Sales,OU=Manila,DC=company,DC=local; CN=VPN-Users,...
 ```
 
-`PasswordLastSet` is recent — the user *did* change it. So the reset is working and something is expiring it again.
+`PasswordLastSet` is recent — the user *did* change it, and the reset genuinely worked. That is the puzzle, not the answer: if the password was changed days ago and the policy allows thirty days, nothing is expiring it again. So the recurring ticket cannot be the password itself, and the next check rules out the one remaining policy explanation before the real cause appears.
 
 Second, check whether a policy is shorter than the users believe:
 

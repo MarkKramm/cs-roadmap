@@ -516,6 +516,10 @@ def fetch_image(url: str):
 #   ?url=file:///etc/passwd
 ```
 
+**Those payloads describe a real deployment, not your local lab.** Juice Shop in Docker has no cloud metadata service behind it and nothing listening on `8500`. Pointing the parameter at `169.254.169.254` on your own machine therefore returns a connection error rather than credentials.
+
+That is the correct result, and it is worth writing down as the honest limitation on the finding. The payload stays in the list for what it reaches where it *does* exist — a cloud instance running with an over-permissive role, which is the case Phase 9 met from the other side.
+
 **Why SSRF is treated as critical when it exists.** The request comes from the server, which is inside the network. That often means it can reach internal services that are not exposed to the internet at all. A single SSRF can turn an external attacker into an internal one.
 
 | Defence layer | What it does | Its weakness |
@@ -787,6 +791,16 @@ ZAP is free and open source, with no feature gating, and its automated scanner i
 **Use both.** ZAP gives you the automated scan that Burp Community withholds, and Burp gives you the interface you will meet in a real team. Learning both is a day's work once you understand the concepts, because they are the same tool with different buttons.
 
 ```bash
+# Juice Shop — the target everything below runs against. Port 3000 is the
+# default, and this is the "one command" the tools table refers to.
+docker run --rm -p 3000:3000 bkimminich/juice-shop
+
+# Then open http://localhost:3000 and confirm the shop loads before going on.
+```
+
+**On Windows, Docker needs WSL2.** Docker Desktop offers to install it on first run, which needs administrator rights and a reboot; if you cannot get either, run Juice Shop inside your Phase 2 Linux VM instead, where the same `docker run` line works. Git Bash on its own is not enough — the Docker engine has to be running somewhere.
+
+```bash
 # ZAP in daemon mode, with a baseline scan against an authorised local target.
 docker run --rm -t ghcr.io/zaproxy/zaproxy:stable \
   zap-baseline.py -t http://localhost:3000 -r baseline-report.html
@@ -858,6 +872,8 @@ Random clicking in Burp finds random things. A method finds the things that matt
 #### Writing the finding, which is the actual deliverable
 
 A finding is a document with a specific audience: a developer who must fix it, and a manager who must prioritise it.
+
+**Two fields in the template below are explained further down this part** — the CVSS vector, under "CVSS, used honestly", and CWE, which is glossed inline where it appears. Read the shape now and the scoring detail when you reach it; the template is here so that the finding you write has somewhere to sit.
 
 ```text
 ## Finding 3 — Any authenticated user can read any other customer's
@@ -1244,7 +1260,7 @@ The nine tasks build a web testing capability on free lab targets, and end with 
 1. **Set up the lab environment first** (task 1): Burp Suite Community plus a browser profile you use only for authorised testing, with the CA certificate installed so HTTPS interception works. Then run OWASP Juice Shop locally with Docker, so you have a whole application as well as the PortSwigger labs.
 2. **Map an application before testing it** (task 2). With interception off, browse Juice Shop completely with the proxy recording. Produce an endpoint inventory: every path, method, parameter, and whether it required authentication. That map is what makes the rest of the testing systematic.
 3. **Do the access control labs first** (task 3), because they are the most common real vulnerability and they teach the two-account method. For each lab, record the identifier you changed and the response difference that proved it.
-4. **Test the same-origin policy by hand** (task 4). Build a tiny page on a different local origin that makes a cross-origin request to Juice Shop, observe what the browser allows and blocks, then repeat with a permissive CORS header. Seeing it once makes the concept permanent.
+4. **Test the same-origin policy by hand** (task 4). Build a tiny page on a different local origin that makes a cross-origin request to Juice Shop, and observe what the browser blocks. The second half needs a target that *does* send a permissive header, and you cannot add one to Juice Shop without rebuilding it — so run a second tiny local server of your own that answers with `Access-Control-Allow-Origin: *`, point the page at that, and watch the same request succeed. Seeing both halves once makes the concept permanent.
 5. **Work through injection properly** (tasks 5 and 6): the SQL injection Apprentice labs by hand first, then confirm one with `sqlmap` against Juice Shop on localhost and compare what the tool reports with what you found manually.
 6. **Do the XSS and CSRF labs** (task 6), covering all three XSS flavours, and for each one write down whether `HttpOnly` would have changed the impact.
 7. **Write three findings in the full format** (task 7) from the labs, each with severity, CVSS vector, reproduction with raw requests, impact in business language, remediation, and verification. Include one honest limitations note about the target being a lab.
