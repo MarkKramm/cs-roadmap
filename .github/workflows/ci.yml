@@ -108,6 +108,18 @@ jobs:
       # wrong; a truth table can. This asserts all twelve known cases.
       - name: Test claim-extraction patterns
         run: node scripts/test-record-pattern.mjs
+      # AGENTS.md rule 2 requires UTF-8 without BOM and real typographic
+      # characters, and nothing checked it. A `Set-Content -Encoding utf8` wrote
+      # a BOM plus mojibake into IT 02 and into SESSION-LOG.md — the second
+      # inside a sentence *describing* mojibake — and both were caught by luck
+      # (a 198-line diff on a one-line change) rather than by a guard. The
+      # detector checks the decidable property: a well-formed text file has no
+      # BOM, no C1 control characters, and no U+FFFD. That catches
+      # double-encoding a printable-signature scan cannot see.
+      - name: Audit text encoding
+        run: node scripts/audit-encoding.mjs
+      - name: Test encoding-guard controls
+        run: node scripts/test-audit-encoding.mjs
       # A command can be named correctly and written wrongly. IT 02 stated DISM
       # in full at one place and abbreviated it to `DISM /RestoreHealth` in a
       # summary table 300 lines later — a form that throws if a beginner types

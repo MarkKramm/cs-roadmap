@@ -2,7 +2,48 @@
 
 A chronological record of working sessions. Newest first.
 
-## 2026-09-16 (latest) — The first external verification pass, and the shape all three errors shared
+## 2026-09-16 (latest) — The IT track's technical claims, verified: 224 checked, zero wrong
+
+**The result.** All five classes came back from external verification: **176 `OK`, 48 `UNVERIFIABLE`, 0 `WRONG`.** Commands (160 rows), protocol (26), versions (17), paths (17), DNS records (4).
+
+**I spot-checked the citations rather than accepting them**, because a verdict is only as good as the document behind it. Every one held **verbatim**:
+
+- **RFC 768**, lines 23–24: *"protocol is transaction oriented, and delivery and duplicate protection are not guaranteed."*
+- **RFC 9293**, lines 1074–1076: *"A 3WHS is necessary because sequence numbers are not tied to a global clock"* — and line 986, *"The SYN and FIN are the only controls requiring this protection."* I distrusted this one because it read like a paraphrase. It was exact.
+- **RFC 3596 §2.1**: *"The AAAA resource record type is a record specific to the Internet class that stores a single IPv6 address."*
+- **The OpenSSH manual**: `.It Fl p Ar port` → *"Port to connect to on the remote host."*
+- **FHS 3.0 §5.10.1**: *"This directory contains miscellaneous log files."*
+- **Microsoft's `MSFT_PhysicalDisk`**: `HealthStatus` is `0 Healthy`, `1 Warning`, `2 Unhealthy`, `5 Unknown`.
+
+**A clean result is not a verdict on the curriculum, and I have been careful to say so in the file itself.** It means those classes were checked against sources. The extractor cannot see a **bad analogy**, a **misleading emphasis**, or **outdated practice that reads as current** — the errors most likely to actually mislead a beginner. That layer has only ever been tested by the comprehension passes.
+
+**The sourcing was weaker than the verdicts, and that is the finding I'd keep.** Several citations rested on `labex.io`, a third-party tutorial that returns **HTTP 403**, or on a French-language manpage from a backports repo, instead of the standard. The verdicts were right — I rechecked those rows against FHS 3.0, `man7.org`, and the OpenSSH source and all held — but **the citations were less evidence than they appeared**. The prompt now requires a quote and a source ranking, because a citation is only evidence if the reader can tell how strong it is.
+
+**And then the corpus turned out to have its own encoding corruption, which no guard was watching for.** While checking my new paragraphs I noticed `docs/SESSION-LOG.md` contained a mangled em-dash — inside the sentence *describing* the mojibake bug from an earlier pass. It had been sitting there through several sessions.
+
+**Getting a guard right took three attempts, and the two failures are the useful part.**
+
+My first scan enumerated printable mojibake signatures and **reported zero findings** on a file that contained one. The reason: I was reading `Get-Content` output, which was decoding the file as CP1252 and *manufacturing* the mojibake in my terminal. I was drawing conclusions about data from a tool's rendering of it. Reading the raw bytes settled it in one command.
+
+So I built `scripts/audit-encoding.mjs` on **structural properties instead** — no BOM, no C1 control characters, no U+FFFD — which is decidable and needs no list. Then I planted the real defect to check, and **the guard passed it.** An em-dash through a *single* CP1252 round trip is valid UTF-8 with no BOM and no C1 control; only a *double* round trip produces control characters, which is what IT 02's corruption had done. I had over-generalised from one sample.
+
+Adding the mojibake list back **still** missed it, because I wrote the character class with `\u2122` where `\u201d` was meant. **A wrong character class fails in the direction of silence** — no error, no warning, the regex simply never fires. Only re-planting the exact bytes exposed it.
+
+The guard now carries both kinds of check, because neither alone is sufficient: structural properties catch corruption that produces *impossible* bytes, and the list catches corruption that produces *plausible* ones. **12 controls** prove it fails on all five corruption shapes — including the verbatim defect from the committed file — and passes on clean typography, box drawing, `git checkout -- path`, and mojibake quoted inside a code span, since the corpus deliberately quotes it when documenting the bug.
+
+**I dropped one rule rather than ship it noisy.** An attempt to flag ASCII ` -- ` as a substituted em-dash matched `git checkout -- path` and `--filter` in `docs/TROUBLESHOOTING.md` — real syntax, correctly written, inside backticks. Distinguishing that needs to know whether the span is code, and **a guard that flags correct content teaches people to ignore it.**
+
+**Three handover failures, all more instructive than the content.** First, my own prompt ended with the literal line `[paste the five tables here]` — and the tables live *inside* the file being pasted, so the instruction contradicted itself. The model reported the data missing and then **produced 145 fabricated verdicts anyway**, with an invented source column and no URLs. That is the single best argument in this repository for requiring a quotable source per row: **a model handed an unreadable table does not stop, it fills in the column.**
+
+Second, the worklist folder held five chunks after four were verified, and nothing on disk said which were done — so the obvious move was to re-verify finished work. `split-claims.mjs` now records the last verified row per class, clears the folder each run, and emits **only what is left**. The done-state is hand-maintained on purpose: verdicts live in a conversation, and a script that guessed would fail by silently skipping unverified rows.
+
+Third, the 160-row table came back complete through row 152 and stopped at a row boundary. `--from <n>` now emits a continuation carrying only the remaining rows.
+
+**Claim density is now measured instead of assumed.** I had been telling myself the cyber track carried few checkable claims. `measure-claim-density.mjs` says **cyber has 2.3 per 1,000 words against IT's 3.9** — real claims, in different classes: protocols 40 vs IT's 18, versions 35 vs 16, registry paths 53 vs 21, and 15 CVE/ATT&CK identifiers IT has none of. The first run of that script reported 143 cyber version claims by matching a bare capitalised word after a product name — "NIST CSF", "Burp Suite", "OWASP Top". The real number is 35, and the correction is recorded in the script.
+
+**Also fixed along the way:** the DNS-record extractor pattern matched *"A record of what was done"* (ordinary English) while **missing** `nslookup google.com # the A record` (a real claim) — and tightening it for the first fault caused the second. `test-record-pattern.mjs` now asserts all twelve known cases and runs in CI, because **an output count cannot tell you which direction a pattern is wrong.**
+
+## 2026-09-16 (earlier) — The first external verification pass, and the shape all three errors shared
 
 **What came back.** The worklist went through a model with web access, checked against primary sources. **Three claims were wrong**, and the interesting part is not the count but that **all three had the identical shape: the name was right and the invocation was broken.**
 
@@ -16,7 +57,7 @@ A chronological record of working sessions. Newest first.
 
 **The fix is a guard, not a resolution to be careful.** `scripts/audit-commands.mjs` checks *the exact string a reader would copy* rather than the command it names. It is deliberately narrow — `DISM`, `sfc`, `chkdsk` — because those are the commands where a plausible abbreviation is also a valid-looking but broken command, and a guard that flags valid usage gets ignored, which is worse than not having it. **I proved it can fail before trusting it**: re-injected the original IT 02 defect, got exit 1; removed it, got exit 0. A guard that has never failed is indistinguishable from a comment — and my first injection attempt silently failed to match the text, so the guard "passed" a test that never ran. The second attempt, run through a script file rather than a shell one-liner, is what actually proved it.
 
-**I also corrupted a file and caught it.** Using `Set-Content -Encoding utf8` to inject the test defect wrote a BOM and mangled every typographic character in IT 02 into `â€”` — the exact trap AGENTS.md rule 2 exists to prevent. `git diff` showed 198 insertions and 198 deletions on a file where I had changed one line. Restored from git immediately; content files get edited with the edit tool and never with a shell write.
+**I also corrupted a file and caught it.** Using `Set-Content -Encoding utf8` to inject the test defect wrote a BOM and mangled every typographic character in IT 02 — the em-dash came back as three bytes of replacement junk. That is the exact trap AGENTS.md rule 2 exists to prevent. `git diff` showed 198 insertions and 198 deletions on a file where I had changed one line. Restored from git immediately; content files get edited with the edit tool and never with a shell write.
 
 **Two smaller results.** Port 9100 was confirmed against IANA — `pdl-datastream`, "Printer PDL Data Stream" — so IT 04's "nearly every network printer" holds; `verify-ports` is now 19 checks. And **the changelog guard caught a duplicate `### Fixed` section in this very edit**, which is the guard doing to me what it was built to do.
 

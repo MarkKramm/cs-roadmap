@@ -2,6 +2,42 @@
 
 A lightweight decision log (ADR-style). Newest first.
 
+## D-039 — A guard needs both structural checks and a known-bad list, because each misses what the other catches
+
+- **Date:** 2026-09-16
+- **Status:** Accepted
+- **Context:** AGENTS.md rule 2 requires UTF-8 without BOM and real typographic characters. **No guard checked it**, and corruption had accumulated in at least two files.
+- **What happened, and why it took three attempts to get right.** This is recorded in full because the failure mode was subtle and the guard was wrong twice in ways that *looked* correct:
+  1. **Corruption found.** `docs/SESSION-LOG.md` contained an em-dash stored as `U+00E2 U+20AC U+201D` — inside the sentence describing that very bug. An earlier pass had written the same corruption into IT 02.
+  2. **First scan: a list only. It reported zero findings.** I enumerated printable mojibake signatures. The corrupted sequence was on the list. The scan still missed it, because `Get-Content` was decoding the file as CP1252 and *manufacturing* the mojibake in my terminal — so I was reading corrupted display and drawing conclusions about the data. **Never diagnose encoding from a shell's rendering of a file; read the bytes.**
+  3. **Second attempt: structural properties only.** `audit-encoding.mjs` checked for a BOM, a C1 control character, and U+FFFD. These are decidable and need no list. **I planted the real defect and the guard passed it** — an em-dash through a *single* CP1252 round trip is valid UTF-8 with no BOM and no C1 control. Only a **double** round trip produces control characters, which is what IT 02's corruption had done. I had over-generalised from one sample.
+  4. **Third attempt: added the list back. Still passed the real defect.** I wrote the character class with `\u2122` where `\u201d` was meant. **A wrong character class fails in the direction of silence** — no error, no warning, the regex simply never matches. Only re-planting the exact bytes exposed it.
+- **Decision:**
+  - **The guard carries both kinds of check**, because neither alone is sufficient: **structural properties** (BOM, C1 control, U+FFFD) catch corruption that produces *impossible* bytes, and a **known-bad list** catches corruption that produces *plausible* ones.
+  - **`scripts/test-audit-encoding.mjs` re-plants the real bytes as a control.** 12 controls: it must fail on a BOM, a C1 control, a lost byte, invalid UTF-8, **and the verbatim defect from the committed file**; it must pass on clean typography, box drawing, `git checkout -- path`, and **mojibake quoted inside a code span** — because the corpus deliberately quotes it when documenting the bug, and a guard that complains about the warning is noise.
+- **Consequences:**
+  - **Never diagnose an encoding problem from what a tool prints.** `Get-Content` rendered the corrupted file and a correct file identically-ish and led me to the wrong conclusion twice; `[System.IO.File]::ReadAllBytes` and Node's `readFileSync(..., "utf8")` showed the truth immediately.
+  - **This is the same lesson as D-039's neighbours, one level down again.** The DNS-record extractor enumerated bad shapes and got both directions wrong; here, enumerating *good* shapes missed the bad one. **A pattern's failure direction is invisible in its output** — a count cannot tell you that a regex never fires.
+  - **CI now enforces rule 2**, which had been prose since the first commit, at **36 steps**.
+
+## D-038 — A worklist must contain only outstanding work, and verification output is a conversation artifact
+
+- **Date:** 2026-09-16
+- **Status:** Accepted
+- **Context:** Verification was run by handing chunks of [`IT-CLAIM-VERIFICATION.md`](IT-CLAIM-VERIFICATION.md) to a model with web access and reading verdicts back. Three failures in that loop, all of them about the *handover* rather than the content:
+  - **A prompt with an unfilled placeholder.** The first prompt ended with `[paste the five tables here]`, and the tables live *inside* the file being pasted — so "paste the file" and "paste the tables" were the same action and the instruction contradicted itself. The model reported the data missing and then produced **145 fabricated verdicts anyway**, complete with an invented source column and no URLs.
+  - **A folder that could not distinguish done from outstanding.** `split-claims.mjs` emitted every class it knew how to produce, so after four classes were verified the folder still held all five chunks. Nothing on disk said which were finished, and the obvious move was to re-verify work that was already done.
+  - **A reply that ran out of room mid-table.** The 160-row command table came back verified through row 152, stopping at a row boundary. Re-pasting 45 KB to reach eight rows is waste.
+- **Decision:**
+  - **Every chunk is a complete, self-contained message.** The instructions travel with the table, so there is no assembly step for a human to get wrong. No placeholders, ever.
+  - **The worklist contains only outstanding work.** `split-claims.mjs` records the last verified row per class, clears the output folder each run, and skips classes that are done. **Running it with no arguments must produce exactly what is left to do**, or the tool is generating confusion rather than removing it.
+  - **The done-state is hand-maintained, deliberately.** Verification verdicts live in a conversation, not in the repository, so there is nothing to read them from. A script that guessed would fail in the worst direction: silently skipping unverified rows.
+  - **A continuation is cheap.** `--from <n>` emits a chunk carrying only rows from that point, with its own instructions and a heading telling the verifier not to restate earlier rows.
+- **Consequences:**
+  - **The prompt now requires a quote and a ranked source, not just a URL.** The first five passes produced correct verdicts resting partly on a third-party tutorial that returns **HTTP 403** and on a localised manpage. The verdicts held when rechecked against the standards — but **a citation is evidence only if the reader can tell how strong it is**, so the verdict must name the source type: standard > vendor reference > tutorial > forum post.
+  - **A model's answer remains not a source.** Every `WRONG` and a sample of every `OK` were checked against the primary document before anything was changed. This is what caught that three defects from the first pass were real — and what would have caught the 145 fabricated verdicts if they had been plausible.
+  - **The failure mode of a broken handover is fabricated confidence, not an error message.** A model given an unreadable table did not stop; it filled in the column. That is the strongest argument in this repository for requiring a quotable source per row, and it is why `UNVERIFIABLE` is an available verdict rather than an admission of failure.
+
 ## D-037 — A guard may check the *string a reader would copy*, not just the thing it names
 
 - **Date:** 2026-09-16

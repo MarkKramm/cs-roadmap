@@ -54,11 +54,31 @@ Run all three before trusting this section. If any ever fails, the claims below 
   are mostly inventory numbers ("a 10-device practice asset inventory") that are **illustrative
   examples rather than claims about the world**, so they are unverifiable by construction.
 
-## Result of the first verification pass
+## Result of the verification passes
 
-A model with web access worked through the sections below against primary sources. **Two claims
-were wrong, and both are fixed.** They are recorded here because the *shape* of each is more
-useful than the fix:
+**All five classes are now verified. Zero claims were wrong.** The tables were worked through
+against primary sources, and every citation I spot-checked held *verbatim* against the document
+it named:
+
+| Table | Rows | `OK` | `UNVERIFIABLE` | `WRONG` |
+|---|---|---|---|---|
+| Command and cmdlet usage | 160 | 142 | 18 | **0** |
+| Protocol and standard behaviour | 26 | 15 | 11 | **0** |
+| Product versions and editions | 17 | 6 | 11 | **0** |
+| Registry and file paths | 17 | 9 | 8 | **0** |
+| DNS record types | 4 | 4 | 0 | **0** |
+| **Total** | **224** | **176** | **48** | **0** |
+
+Quotes checked against the source and found exact: RFC 768 ("delivery and duplicate protection
+are not guaranteed"), RFC 9293 ("A 3WHS is necessary because sequence numbers are not tied to a
+global clock"), RFC 3596 §2.1 (the AAAA definition), the OpenSSH manual ("Port to connect to on
+the remote host"), FHS 3.0 §5.10.1 for `/var/log`, and Microsoft's `MSFT_PhysicalDisk` reference
+for the `HealthStatus` values.
+
+## Two claims were wrong, and both were already fixed
+
+These came from an *earlier* pass, before this file's classes were settled. They are kept because
+the **shape** of each is more useful than the fix — and because the same shapes recur:
 
 | Claim | What was wrong | Why no guard could see it |
 |---|---|---|
@@ -69,10 +89,26 @@ useful than the fix:
 would copy rather than the command name — and which was itself proved able to fail by
 re-injecting the original IT 02 defect, because a guard that has never failed is a comment.
 
-**The rest of the pass was `OK` or `UNVERIFIABLE`**, with a large share of `UNVERIFIABLE` falling
-on exactly what should be unverifiable: teaching method, diagnostic heuristics, resume phrasing,
-case-study narrative, and lab instructions. That distribution is itself a useful result — it means
-the worklist's verdict vocabulary is being used honestly rather than everything being stamped OK.
+## The `UNVERIFIABLE` column is the honest part
+
+48 rows came back unverifiable, and they fall on exactly what should: teaching method, diagnostic
+heuristics, resume phrasing, case-study narrative, and lab instructions. **A phase saying `/26` is
+"the point where most beginners close the tab" is pedagogy, not fact**, and stamping it OK would
+have made the whole OK column meaningless.
+
+## What a clean result does NOT mean
+
+**This is not a verdict on the curriculum.** It means the classes above were checked against
+sources. The extractor cannot see a bad analogy, a misleading emphasis, or outdated practice that
+reads as current — and those are the errors most likely to actually mislead a beginner. That
+layer has only ever been tested by the comprehension passes, and it remains the largest
+unexamined risk in the repository.
+
+**One sourcing weakness is worth recording.** Several citations rested on a third-party tutorial
+(`labex.io`) that returns **HTTP 403**, or on a localised manpage, rather than on the standard
+itself. The *verdicts* were right — I rechecked those rows against FHS 3.0, `man7.org`, and the
+OpenSSH manual and all held — but the citations were weaker evidence than they appeared. The
+prompt now requires a quote and a source ranking for exactly this reason.
 
 ## What this file does NOT claim
 
