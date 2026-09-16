@@ -986,7 +986,9 @@ The group has `Modify` on NTFS and `Change` on the share. Both sides allow, so e
 
 Have the user **sign out completely and sign back in**. Not lock the screen — sign out. On a domain machine this rebuilds the token from the domain controller, and since the user is on the VPN, the domain controller is reachable.
 
-If a full sign-out does not resolve it, the next checks are, in order: confirm the machine can reach a domain controller on the VPN (`nltest /dsgetdc:company.local` — `nltest` is a domain-controller diagnostic; a successful result names a DC and its site), and confirm the group change actually replicated (checking the group’s membership from the server rather than from `net user` on the laptop, which may be reading a cached profile). Only after those do you touch a permission — and you would still not touch it, because the evidence says it is correct.
+If a full sign-out does not resolve it, the next checks are, in order: confirm the machine can reach a domain controller on the VPN (`nltest /dsgetdc:company.local` — `nltest` is a domain-controller diagnostic; a successful result names a DC and its site), and confirm the group change actually replicated (checking the group’s membership from the server rather than from `net user` on the laptop, which may be reading a cached profile).
+
+Only after those do you touch a permission — and you would still not touch it, because the evidence says it is correct.
 
 **Step 6 — Verify.**
 

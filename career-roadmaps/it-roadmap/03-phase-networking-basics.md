@@ -290,7 +290,9 @@ You can see the handshake on your own machine. In Wireshark, filter on `tcp` and
 
 #### TLS and HTTPS in one paragraph
 
-**TLS (Transport Layer Security)** wraps a connection in encryption and proves the server's identity with a **certificate**. **HTTPS** is simply HTTP carried inside TLS, on port 443. The practical support consequence: certificate errors are a common, specific, and diagnosable class of ticket. "Your connection is not private" almost always means an expired certificate, a wrong system clock, a **captive portal** (the login page a hotel or café Wi-Fi shows before it lets you online), or an **inspecting proxy** (a corporate appliance that decrypts and re-signs traffic so it can scan it) — not a virus.
+**TLS (Transport Layer Security)** wraps a connection in encryption and proves the server's identity with a **certificate**. **HTTPS** is simply HTTP carried inside TLS, on port 443.
+
+The practical support consequence: certificate errors are a common, specific, and diagnosable class of ticket. "Your connection is not private" almost always means an expired certificate, a wrong system clock, a **captive portal** (the login page a hotel or café Wi-Fi shows before it lets you online), or an **inspecting proxy** (a corporate appliance that decrypts and re-signs traffic so it can scan it) — not a virus.
 
 ### Part 5 — Troubleshooting, in a fixed order
 

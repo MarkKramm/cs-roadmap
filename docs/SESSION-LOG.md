@@ -2,6 +2,22 @@
 
 A chronological record of working sessions. Newest first.
 
+## 2026-09-16 (later still) — The density gate moved down, but only once there was nothing left for it to catch
+
+**Goal:** finish the tightening that the previous pass had explicitly deferred. `audit-readability.mjs` gated at 150 words per paragraph while the editorial standard was 90, and the open item said so: *"Consider tightening the gate from 150 to 110 words once the backlog is cleared."* The backlog was not cleared. Four paragraphs sat over 90 — IT 01 at 91, IT 03 at 95, IT 05 at 94, IT 07 at 93 — so the item stayed open and the gate stayed at 150.
+
+**The four paragraphs came first, and they are the whole argument for the order.** Each was a single paragraph carrying two ideas joined at a sentence boundary that already existed. Splitting them moved the break and changed no text — **every word preserved** — which is the same repair the 33 earlier walls of text received. Doing this *after* lowering the gate would have meant either grandfathering four known offenders or failing the build on work that was already on the list, and a gate with a grandfather list is not a gate.
+
+**Then the gate moved to 110, not to 90.** The gap is deliberate and it is the substance of D-024. A gate at the editorial target would fail on every clarification a writer adds — and the four paragraphs that were just split exist *because* the text got easier to follow, not looser. 110 sits above that noise and below a genuine wall of text: it fails on prose a reader has to re-read, and passes prose that merely wants splitting. **The failure that keeps a gate honest is one it can pass.**
+
+**Both thresholds are now named constants.** `EDITORIAL = 90` and `CEILING = 110` replace the five places the numbers used to be written as text — two column headings, two summary lines and the failure message — so the report and the gate cannot drift apart. The comment above them records why they differ, which is the part a future reader would otherwise have to reconstruct from the diff.
+
+**Verified, not assumed.** Readability **0 of 23** phases outside target, `Paragraphs over 90 words: 0 across 0 phases`, `Paragraphs over 110 words: 0`; longest paragraph **90 (IT) / 86 (cyber)**; cross-references **0 findings across 25 files**; build clean; smoke **181 renders across 23 phases and 191 tools, 0 failures**. The site suites from the previous run stand unchanged — 37 / 42 / 86 / 28 / 31 / 77 / 77 / 41 and **50 browser checks / 0 failed**.
+
+**Final state.** `HEAD == origin/main` with a clean tree after the commit. Guards: lint 144 files / 0 issues, content 0, AST 23 / 0 loss, readability 0 of 23 with **0 over 110** and 0 over 90, refs 0 across 25 files, site suite 37 / 42 / 86 / 28 / 31 / 77 / 77 / 41, smoke 181 renders / 0 failures, browser 50 / 0.
+
+**Still carried forward, unchanged by this pass.** The audit's *verdicts* are one reader's judgement — only its findings were re-verified against source. `FORWARD_AS_PRIOR` and the acronym scan print without gating, so each needs a human. The browser check is one engine at two widths, so it is not a cross-browser matrix and does not cover the 561–860px band. And **nobody has timed a single curriculum task** — every band and energy value remains an authored estimate.
+
 ## 2026-09-16 (later) — A guard that could not fail, and the documentation that said it was fine
 
 **Goal:** hand the pass over cleanly. What it actually turned up was a guard whose skip path was indistinguishable from its pass path, and four documents still describing the repository as it was several passes ago.

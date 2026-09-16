@@ -8,6 +8,15 @@ import path from 'node:path';
 const FENCE = '`'.repeat(3);
 const tracks = ['it-roadmap', 'cybersec-roadmap'];
 
+// Two thresholds, deliberately different.
+// EDITORIAL is the standard the writing is held to and is reported, never
+// gated: a 92-word paragraph is worth splitting, not a build failure.
+// CEILING is the gate. It lived at 150 while four paragraphs sat over 90 and
+// the backlog had to be cleared first; now that it is, 110 enforces the
+// editorial standard without failing on every clarification a writer adds.
+const EDITORIAL = 90;
+const CEILING = 110;
+
 const rows = [];
 
 for (const track of tracks) {
@@ -70,10 +79,9 @@ for (const track of tracks) {
     // healthy average while still being miserable to read at that spot. These
     // counts make the individual offenders visible and gateable.
     //
-    // 90 is the practical ceiling for this curriculum, 150 the hard one. The
-    // worst paragraph found so far is 193 words, in IT Phase 1.
-    const over90 = pWords.filter((n) => n > 90).length;
-    const over150 = pWords.filter((n) => n > 150).length;
+    // The worst paragraph ever found here was 193 words, in IT Phase 1.
+    const over90 = pWords.filter((n) => n > EDITORIAL).length;
+    const overCeiling = pWords.filter((n) => n > CEILING).length;
 
     const h3 = heads.filter((h) => h.level === 3 && h.line > start.line && h.line < end.line).length;
     const h4 = heads.filter((h) => h.level === 4 && h.line > start.line && h.line < end.line).length;
@@ -90,7 +98,7 @@ for (const track of tracks) {
       avgPara: avg(pWords),
       maxPara: longest,
       over90,
-      over150,
+      overCeiling,
       avgSent: avg(sWords),
       h3, h4,
       wordsPerHeading: h3 + h4 ? Math.round(totalWords / (h3 + h4)) : totalWords,
@@ -103,12 +111,12 @@ for (const track of tracks) {
 const pad = (s, n) => String(s).padEnd(n);
 const padL = (s, n) => String(s).padStart(n);
 
-console.log(pad('phase', 40) + padL('words', 7) + padL('paras', 7) + padL('avgP', 6) + padL('maxP', 6) + padL('>150', 6) + padL('avgS', 6) + padL('h3/4', 6) + padL('w/head', 8) + padL('tbl', 5) + padL('code', 6));
+console.log(pad('phase', 40) + padL('words', 7) + padL('paras', 7) + padL('avgP', 6) + padL('maxP', 6) + padL('>' + CEILING, 6) + padL('avgS', 6) + padL('h3/4', 6) + padL('w/head', 8) + padL('tbl', 5) + padL('code', 6));
 console.log('-'.repeat(103));
 for (const r of rows) {
   console.log(
     pad(r.file.slice(0, 39), 40) + padL(r.words, 7) + padL(r.paras, 7) + padL(r.avgPara, 6) +
-    padL(r.maxPara, 6) + padL(r.over150, 6) + padL(r.avgSent, 6) + padL(r.h3 + '/' + r.h4, 6) +
+    padL(r.maxPara, 6) + padL(r.overCeiling, 6) + padL(r.avgSent, 6) + padL(r.h3 + '/' + r.h4, 6) +
     padL(r.wordsPerHeading, 8) + padL(r.tables, 5) + padL(r.codeBlocks, 6),
   );
 }
@@ -169,29 +177,32 @@ for (const p of problems) {
 console.log('\n=== paragraph density ===');
 const dense = rows.filter((r) => r.over90 > 0).sort((a, b) => b.over90 - a.over90);
 const totalOver90 = rows.reduce((n, r) => n + r.over90, 0);
-const totalOver150 = rows.reduce((n, r) => n + r.over150, 0);
-console.log(`Paragraphs over 90 words: ${totalOver90} across ${dense.length} phases.`);
-console.log(`Paragraphs over 150 words: ${totalOver150}.`);
+const totalOverCeiling = rows.reduce((n, r) => n + r.overCeiling, 0);
+console.log(`Paragraphs over ${EDITORIAL} words: ${totalOver90} across ${dense.length} phases.`);
+console.log(`Paragraphs over ${CEILING} words: ${totalOverCeiling}.`);
 if (dense.length) {
-  console.log('  ' + pad('phase', 42) + padL('>90', 5) + padL('>150', 6) + padL('max', 5));
+  console.log('  ' + pad('phase', 42) + padL('>' + EDITORIAL, 5) + padL('>' + CEILING, 6) + padL('max', 5));
   for (const r of dense) {
-    console.log('  ' + pad(r.file.slice(0, 40), 42) + padL(r.over90, 5) + padL(r.over150, 6) + padL(r.maxPara, 5));
+    console.log('  ' + pad(r.file.slice(0, 40), 42) + padL(r.over90, 5) + padL(r.overCeiling, 6) + padL(r.maxPara, 5));
   }
 }
 
-// Gate: 150 words is the hard ceiling. It is deliberately above the 90-word
-// editorial target, so the build fails on genuine walls of text without
-// blocking on every paragraph that merely wants splitting.
-const tooLong = rows.filter((r) => r.over150 > 0);
+// Gate: CEILING is the hard ceiling. It was 150 until 2026-09-16, when the four
+// paragraphs over the editorial target were split and the backlog went to zero;
+// with nothing left to grandfather, the gate moved down to where the editorial
+// standard actually is. It stays above EDITORIAL on purpose, so the build fails
+// on a genuine wall of text without blocking on every paragraph that merely
+// wants splitting — the failure that keeps a gate honest is one it can pass.
+const tooLong = rows.filter((r) => r.overCeiling > 0);
 if (tooLong.length) {
-  console.log(`\nFAIL — ${tooLong.length} phase(s) contain a paragraph over 150 words:`);
+  console.log(`\nFAIL — ${tooLong.length} phase(s) contain a paragraph over ${CEILING} words:`);
   for (const r of tooLong) {
-    console.log(`  ${pad(r.file.slice(0, 40), 42)} ${r.over150} paragraph(s), longest ${r.maxPara} words`);
+    console.log(`  ${pad(r.file.slice(0, 40), 42)} ${r.overCeiling} paragraph(s), longest ${r.maxPara} words`);
   }
   console.log('Split the paragraph. Keep every word — this is about where the breaks go, not about cutting content.');
   process.exit(1);
 }
-console.log('\nNo paragraph exceeds the 150-word ceiling.');
+console.log(`\nNo paragraph exceeds the ${CEILING}-word ceiling.`);
 if (totalOver90) {
-  console.log(`(${totalOver90} over the 90-word editorial target — worth splitting, not a failure.)`);
+  console.log(`(${totalOver90} over the ${EDITORIAL}-word editorial target — worth splitting, not a failure.)`);
 }

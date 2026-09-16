@@ -1011,7 +1011,9 @@ Result: `C:` FreeGB moves from **4.1 GB to 24.6 GB**. That is the single largest
 
 *Change 2 — startup programs.*
 
-You do **not** disable items by editing the registry (Windows' internal settings database, covered in Phase 2) or hunting through folders. You open **Task Manager → Startup apps** and set the non-work entries to **Disabled** — Spotify, Steam, and Discord. You leave OneDrive and Teams alone, because those are work tools and the user relies on them, and you leave the Adobe updater alone unless the user confirms they do not use Adobe. You tell the user exactly what you disabled and why, and that they can re-enable any of them.
+You do **not** disable items by editing the registry (Windows' internal settings database, covered in Phase 2) or hunting through folders. You open **Task Manager → Startup apps** and set the non-work entries to **Disabled** — Spotify, Steam, and Discord.
+
+You leave OneDrive and Teams alone, because those are work tools and the user relies on them, and you leave the Adobe updater alone unless the user confirms they do not use Adobe. You tell the user exactly what you disabled and why, and that they can re-enable any of them.
 
 You check what is actually running right now, for the note:
 

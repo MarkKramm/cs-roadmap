@@ -2,6 +2,18 @@
 
 A lightweight decision log (ADR-style). Newest first.
 
+## D-024 — The paragraph-density gate moved down to 110 words, and only after the backlog was zero
+
+- **Date:** 2026-09-16
+- **Status:** Accepted
+- **Context:** `scripts/audit-readability.mjs` gated on 150 words per paragraph. It had gated there since per-paragraph counts were added, and 150 was chosen deliberately high: at the time, **33 paragraphs sat over the 90-word editorial target** and a gate at 90 would have failed the build on the whole IT track. Those 33 were split at natural seams with every word preserved, and the backlog went to zero. What remained was four single paragraphs — IT 01 at 91, IT 03 at 95, IT 05 at 94, IT 07 at 93 — each a few words over the editorial line and none of them a wall of text. Those four were split in this pass. That left a gate at 150 enforcing a standard of 90: **the build could not fail on a paragraph a reader would actually find hard to read until it was two thirds longer than the point at which the writing had already been judged too dense.** A gate set 60 words above the standard it protects is not a guard; it is a formality that prints its own number and never acts on it.
+- **Decision:** The gate is now **110 words** — `CEILING = 110` in `scripts/audit-readability.mjs`, with the editorial target named beside it as `EDITORIAL = 90`. 90 is reported every run and never fails; 110 fails. Both numbers live in one place rather than being spelled out in five strings, so the column headings, the summary lines and the failure message all follow the constant instead of drifting from it.
+- **Consequences:**
+  - **110, not 90, and the gap is the whole decision.** A gate at the editorial target would fail on every clarification a writer adds — the four paragraphs split in this pass exist because the text got *easier* to follow, not looser. 110 sits above that noise and below the point where a paragraph is genuinely a wall: it fails on prose a reader has to re-read, and passes prose that merely wants splitting. The failure that keeps a gate honest is one it can pass.
+  - **The order matters, and it is why this is a decision rather than a one-line change.** The backlog was cleared first, then the gate moved. Lowering it while four paragraphs were still over 90 would have meant either grandfathering them — which is how a gate acquires a permanent exception list — or failing the build on known, already-scheduled work.
+  - **The four splits preserved every word.** Each was a single paragraph carrying two ideas joined at a sentence boundary that already existed; the fix moved the break and changed no text. The audit now reports `Paragraphs over 90 words: 0 across 0 phases` and `Paragraphs over 110 words: 0`.
+  - **The gate is provably able to fail and has not fired.** `0 of 23` phases outside target, longest paragraph **90 words (IT) / 86 (cyber)**. The honest note is the one this project keeps making: a green result on a guard is only good news once the guard is known to be capable of red, and the negative test here is a one-line change to `CEILING` rather than a defect anyone has actually introduced.
+
 ## D-023 — Six views are verified in a real browser, with no test dependency
 
 - **Date:** 2026-09-16

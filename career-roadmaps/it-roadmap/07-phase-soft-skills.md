@@ -181,7 +181,9 @@ If you work with colleagues or clients in other time zones, three habits prevent
 
 The single most common failure in support is not incompetence. It is a ticket that went quiet. The technician got busy, the user assumed they were forgotten, and a solvable problem became a complaint.
 
-**Follow-up discipline is a habit, not a personality trait.** The reliable version: every open ticket gets an update at a defined interval — daily, or twice a day for high priority — even when the update is "still investigating, no news yet". Put it somewhere you will actually see it — a calendar reminder, or the ticket sheet from Phase 6 if you have built one. Studying alone with no live tickets yet, the honest version is to pick one real ongoing task of your own and apply the same interval to it.
+**Follow-up discipline is a habit, not a personality trait.** The reliable version: every open ticket gets an update at a defined interval — daily, or twice a day for high priority — even when the update is "still investigating, no news yet".
+
+Put it somewhere you will actually see it — a calendar reminder, or the ticket sheet from Phase 6 if you have built one. Studying alone with no live tickets yet, the honest version is to pick one real ongoing task of your own and apply the same interval to it.
 
 #### Explaining with screenshots
 
