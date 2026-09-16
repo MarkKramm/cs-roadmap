@@ -449,9 +449,21 @@ Usually a permissions or group membership issue rather than a file problem. Iden
 
 #### Softphone has no audio
 
-The most common telephony ticket, and a genuinely common one in the Philippines: contact-centre and BPO desks support softphones as a core duty, and most other remote roles use Teams or Zoom telephony. Work in this order — **default input and output device first**, because a new headset or a monitor with speakers silently steals the default and the call audio goes somewhere the user cannot hear.
+The most common telephony ticket, and a genuinely common one in the Philippines: contact-centre and BPO desks support softphones as a core duty, and most other remote roles use Teams or Zoom telephony.
 
-Then the physical mute switch on the headset, which is the single most common cause and the one users never check. Then the microphone selected inside the application itself, which is separate from the system default. Only after those does the network matter: choppy audio that affects everyone on the call is a bandwidth or QoS problem, not a device one. Distinguishing "I cannot hear anything" from "I can hear but they cannot hear me" halves the search immediately.
+**Start with scope, exactly as you do everywhere else** (step 5 above): is this one user, or everyone on the call? That answer chooses which half of this section you need, and asking it first is what stops you checking a headset for a fault that is on the network. One user with no audio is an endpoint problem — work the list below. Everyone on the call is an infrastructure problem, and nothing on the user's desk will fix it.
+
+**For one user, work in this order:**
+
+1. **The physical mute switch on the headset**, which is the single most common cause and the one users never check. It is invisible in software, so nothing on screen will tell you.
+2. **The default input and output device**, because a new headset or a monitor with speakers silently steals the default and the call audio goes somewhere the user cannot hear.
+3. **The microphone selected inside the application itself**, which is separate from the system default and is what catches the user whose system default is right but whose app is not.
+
+Distinguishing "I cannot hear anything" from "I can hear but they cannot hear me" halves the search immediately. The second one is the classic **one-way audio** fault: the call connects and their voice reaches you, but yours never arrives.
+
+That is usually a network-path problem rather than a device one — the audio stream is being blocked or misrouted between the two ends, often by the firewall or address translation on the way out — so it is the point at which a first-liner stops and escalates with evidence rather than continuing to change settings on the user's machine.
+
+**For everyone on the call**, the symptoms change shape. Choppy or robotic audio, delay, or people talking over each other is a bandwidth or quality-of-service problem, not a device one, and it belongs to whoever owns the network. Your job is to establish that it is everyone, record which call, when, and how bad, and hand it over — that evidence is what makes the escalation useful.
 
 #### End-of-shift handover
 

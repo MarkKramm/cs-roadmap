@@ -2,13 +2,13 @@
 
 A snapshot of the repository's current state. Update this when a meaningful milestone is reached.
 
-## Current state — 2026-09-16 (IT gap pass)
+## Current state — 2026-09-16 (comprehension pass on the unread material)
 
 | Item | Value |
 |---|---|
 | Branch | `main` |
 | Tracked files | **161**, all committed. Run `git ls-files \| Measure-Object` for the live count |
-| Working tree | **Clean and level with `origin/main`.** The previous pass's two phases, two views, three test suites and CI job are all committed and pushed (`81c9a05`), with CI run #62 green on all three jobs |
+| Working tree | **Clean and level with `origin/main`.** This pass's content fixes and doc updates are committed and pushed |
 | Line endings | LF everywhere (Windows scripts excepted) |
 | Encoding | UTF-8, no BOM |
 | Remote | `origin` → https://github.com/MarkKramm/cs-roadmap |
@@ -16,8 +16,9 @@ A snapshot of the repository's current state. Update this when a meaningful mile
 | Deploy | **Live.** `.github/workflows/deploy-pages.yml` publishes `learning-site/dist` to <https://markkramm.github.io/cs-roadmap/> |
 | License | CC BY 4.0 |
 | Build step | `learning-site/` — React + Vite. `npm run dev` / `npm run build` |
-| Curriculum size | **31 phases** in three tracks (IT 9, cyber 15, advance 7). **333,748 lesson words** — IT 121,262 across 9 phases (up from 117,678: the IT gap pass added 3,584), cyber 129,873 across 15, advance 82,613 across 7. **385 phase task IDs** (IT 90, cyber 179, advance 116), of which **273 are practice tasks**, every one banded and energy-tagged |
-| IT gap pass | An audit of all 12 IT files (~143,000 words) against real entry-level remote requirements (`docs/IT-CONTENT-AUDIT.md`) found **4 missing and 5 thin topics, and disproved 11 others**. All nine were folded into the phase that already owned them — no tenth phase. The blind spot was **Windows-plus-Linux in a market that now expects macOS and cloud-managed devices**: macOS had 2 real mentions in 143,000 words, and MDM, VoIP, mobile/BYOD, and docking stations had none. IT checklist **66 → 75 items**, one per gap. Every addition is $0 |
+| Curriculum size | **31 phases** in three tracks (IT 9, cyber 15, advance 7). **333,748 lesson words** — IT 121,262 across 9 phases, cyber 129,873 across 15, advance 82,613 across 7. **385 phase task IDs** (IT 90, cyber 179, advance 116), of which **273 are practice tasks**, every one banded and energy-tagged |
+| **This pass** | **A comprehension pass over the material no fresh reader had seen** — cyber 15, advance 07, and the five IT sections the gap pass added. Five readers, one per file, same brief as the three prior passes. **~40 findings reported, about a dozen rejected after re-checking.** Fourteen real defects fixed across five files, including a "negative" test fixture the rule actually matches, a takeaway that reverses its own table, an irreversible `sysprep` ordered before its snapshot, and conditional access taught as free. Full write-up in [`COMPREHENSION-AUDIT.md`](COMPREHENSION-AUDIT.md) → "Fourth pass — the unread material" |
+| IT gap pass | An audit of all 12 IT files (~143,000 words) against real entry-level remote requirements (`docs/IT-CONTENT-AUDIT.md`) found **4 missing and 5 thin topics, and disproved 11 others**. All nine were folded into the phase that already owned them — no tenth phase. IT checklist **66 → 75 items**, one per gap. Every addition is $0 |
 | Two new phases this pass | **Cyber 15 — OT and ICS Security** (1,216 lines, 14,093 lesson words, 10 practice tasks, 17 checklist items) and **Advance 07 — Detection as Code** (1,348 lines, 10,868 lesson words, 11 practice tasks, 22 checklist items). Both pass every guard; **neither has been read by a comprehension pass**, which `COMPREHENSION-AUDIT.md` now states rather than leaving implied |
 | Checks | `lint-content` **162** files / 0 issues; `audit-content` 0 issues across **31** phases; `audit-lesson-ast` **31** lessons / 0 loss; `audit-readability` **4 of 31 outside target** (advance 03/04/05 at 19/21/19 and **cyber 15 at 21** — all sentence length only), **0 paragraphs over 110 and 0 over 90**; `audit-refs` 0 broken and 2 informational, controls passing; `audit-time-budget` **31 phases** / 0 findings; `audit-terms --self-test` 16 controls / 0 failed; `test:render-inline` 34; `test:highlight` 37; `test:ui` 42; `test:data` 86; `test:notes` 28; `test:work` 31; `test:today` 77; `test:lesson-search` 77; **`test:phase-transfer` 56** (new); **`test:path-order` 37** (new); `test:search` 41; `test:smoke` **231 renders / 0 failures across 31 phases and 275 tools**; **`test:browser` 92 checks / 0 failures** on Edge `Edg/153.0.4234.32` (**93 when `BROWSER_ENGINE` names an engine**, which is how CI runs it — the extra check asserts the requested engine is the one that answered; up from 79; `MIN_CHECKS` raised 40 → 70; **Chromium only** — see D-031 for why the Firefox leg was attempted and removed); production build clean |
 | Time budget | A tenth `localStorage` key, `cs-roadmap:time-budget:v1` (D-021), owned by `hooks/useTimeBudget.js` and registered in `transfer.js` → `KEYS` |
@@ -102,13 +103,13 @@ edit. For the exact current state, run `git --no-pager log --oneline -n 1`.
 ├── LICENSE
 ├── docs/
 ├── scripts/                 (content tooling)
-├── learning-site/           (React + Vite; 9 pages, 18 components, 13 hooks;
+├── learning-site/           (React + Vite; 10 pages, 19 components, 13 hooks;
 │                             generated/ and dist/ ignored)
 └── career-roadmaps/
     ├── README.md
     ├── it-roadmap/          (9 phases + overview + checklist)
-    ├── cybersec-roadmap/    (14 phases + overview + checklist + extras)
-    ├── advance-roadmap/     (6 phases + overview + checklist)
+    ├── cybersec-roadmap/    (15 phases + overview + checklist + extras)
+    ├── advance-roadmap/     (7 phases + overview + checklist)
     └── shared/              (3 files)
 ```
 
@@ -182,13 +183,14 @@ Read this first.
 
 ### Open items carried into the next pass
 
-- [ ] **Three phases have now never been read by a fresh reader, not two.** Cyber 15 and Advance 07 from the previous pass, plus the materially expanded IT phases from this one — **Phase 2 grew by ~1,170 words (macOS, malware), Phase 5 by ~1,290 (MDM, mobile, imaging), and Phases 1, 4 and 6 each gained a section.** They pass every mechanical guard, and `COMPREHENSION-AUDIT.md` says so out loud rather than leaving it implied. The advance track sat in exactly this position before its third pass, and that pass found 45 findings. **This is the largest gap the last two passes created.**
-  - The IT additions are the more exposed of the two, because they are the only material in the repository written to a **market claim** — that remote entry-level work now expects macOS and cloud-managed devices — rather than to an existing syllabus. If that claim is wrong, the sections are wasted; if it is right, they close the one gap an employer tests in the screening call. Nobody has yet checked it against a real job posting from the target market.
-- [ ] **The nine IT gaps are closed; the audit that found them is not fully re-verified.** `docs/IT-CONTENT-AUDIT.md` records four MISSING and five THIN topics, all now taught, and eleven suspected gaps it disproved. What has **not** happened is a second pass over the *new* text by someone other than its author — see the item above. The audit's own two counting errors (`dock`, `Intune`) are corrected in the file rather than quietly dropped.
+- [x] **Three phases have now never been read by a fresh reader, not two — CLOSED 2026-09-16.** Cyber 15 and Advance 07, plus the materially expanded IT phases, were all read by fresh readers this pass. **~40 findings, about a dozen rejected, fourteen real fixes.** The advance track sat in exactly this position before its third pass, and that pass found 45 findings; this one found fewer, and the rate of false positives was higher (near one in three against one in five). See [`COMPREHENSION-AUDIT.md`](COMPREHENSION-AUDIT.md) → "Fourth pass — the unread material".
+  - **The market claim is now the remaining exposure, not the reading.** The IT additions are the only material in the repository written to a **market claim** — that remote entry-level work now expects macOS and cloud-managed devices — rather than to an existing syllabus. They now read correctly and one false fixture of reasoning was fixed (the dock test's over-claim), but **nobody has yet checked the claim against a real job posting from the target market.** That is an external check no agent in this session could perform: `web_search` returned HTTP 401 (invalid API key, a settings issue rather than a repository one) and Indeed blocks automated fetching. Closing it needs either working search credentials or a human reading twenty postings.
+- [ ] **The nine IT gaps are closed; the audit that found them is not fully re-verified.** `docs/IT-CONTENT-AUDIT.md` records four MISSING and five THIN topics, all now taught, and eleven suspected gaps it disproved. A second pass over the *new* text has now happened (see the closed item above), which is what this item was waiting on. What has still not happened is a check of the *market claim itself* against real postings — see the sub-item above.
 - [ ] **Firefox was attempted and failed; the failure is now part of the record rather than an open task.** The Gecko path is a recorded dead end: Mozilla removed Firefox's CDP implementation, so this script's protocol cannot reach it, and the CI leg was removed after it failed on its first run. Closing it means implementing WebDriver BiDi — real work, not a configuration change. What the attempt *did* prove is that the engine-selection guard works: the leg failed loudly instead of measuring Chromium and reporting it as Firefox.
 - [ ] **Gecko and WebKit remain absent**, named rather than implied. Gecko cannot be driven by this script at all, because Mozilla removed Firefox's CDP implementation (D-031) — closing it needs a WebDriver BiDi implementation. WebKit has no headless build a runner can install without a dependency rule 3 forbids. **The honest claim is Chromium only**, across two builds. That is a real and named gap, not coverage.
-- [ ] **Nobody has timed a single curriculum task, and two passes added 21 more of them.** The gap is wider than it was: 273 practice tasks now carry authored bands, and not one has been measured. Closing it needs one reader with a timer and a single phase.
+- [ ] **Nobody has timed a single curriculum task, and four passes have now added more of them.** The gap is wider than it was: 273 practice tasks carry authored bands, and not one has been measured. Closing it needs one reader with a timer and a single phase. **This is now the oldest open item in the repository and the only one no pass can close** — every comprehension pass has recorded it, and every one has left it exactly where it was.
 - [ ] **The acronym corpus report still needs a human**, by design (D-022). Cyber 15 carries the highest unexpanded-acronym count in the cyber track (20), and the report cannot distinguish a term a beginner can decode from one they cannot.
+- [ ] **Five IT 02 topics are listed in `## Specific topics to learn` and are still not delivered**, found by this pass's topic-list check: update rollback (line 41), startup-apps diagnosis (43), NTFS and share permissions (44), login/profile-corruption procedure (70), and dependent services (72, partial). "Local user vs Microsoft account" (39) is defined but never taught. **This is the same defect class the malware section was added to fix** — a promise in the topic list that the body does not keep — and no guard reads it. It is the concrete instance of the missing guard `ROADMAP.md` names as the highest-value one absent.
 
 - [x] **Audited all 23 phases for beginner comprehension, and fixed five structural classes of defect.** See the "Comprehension audit" row above and [`COMPREHENSION-AUDIT.md`](COMPREHENSION-AUDIT.md). 18 phases needed at least one fix; cyber 07 came back clean and was checked rather than trusted; IT 02 was judged "would abandon". Three subagent claims were rejected as wrong after re-reading the source.
 - [x] **Added a cross-reference guard, because the audit proved exactly one class is machine-checkable** (D-022). `scripts/audit-refs.mjs` exits 1 on a `Part N` reference to a heading the file does not have, or a `Phase N` reference to a number the track does not contain. It found the IT 06/IT 07 defects, then independently confirmed `cybersec 11:64`. `FORWARD_AS_PRIOR` prints but does not gate — the guard was wrong about it once already.

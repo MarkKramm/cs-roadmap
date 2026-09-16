@@ -758,7 +758,7 @@ You already know Wireshark. What changes is which columns and filters you care a
 |---|---|
 | `modbus` | Every Modbus/TCP exchange, dissected |
 | `modbus.func_code == 5 \|\| modbus.func_code == 6` | Single writes to coils and registers |
-| `modbus.func_code >= 15` | Multi-value writes, which are the higher-impact ones |
+| `modbus.func_code == 15 \|\| modbus.func_code == 16` | Multi-value writes, which are the higher-impact ones |
 | `dnp3` | DNP3 traffic, including control operations |
 | `enip` | EtherNet/IP and CIP messaging |
 | `pn_rt` | PROFINET real-time frames, if the capture saw them at layer 2 |
@@ -1086,11 +1086,11 @@ Naming that boundary as a professional choice, rather than as a gap, is the thin
 - **Thinking in zones and conduits is the skill that gets hired.** It is architecture, and it is what a control engineer can actually act on.
 - **Modbus, EtherNet/IP, and PROFINET authenticate nothing.** This is the design, not a bug awaiting a patch.
 - **DNP3 Secure Authentication and OPC UA security modes exist and are frequently left unconfigured.** Ask which endpoints, not whether the protocol supports it.
-- **In a Modbus capture, everything above function code 15 is observation and everything at or below it is control.** That single distinction is most of your detection strategy.
+- **In Modbus, codes 1–4 are reads and codes 5, 6, 15 and 16 are writes.** That single distinction is most of your detection strategy. Do not turn it into a numeric threshold: code 43 sits above the writes and is a read.
 - **PROFINET real-time traffic has no IP header**, so a routing firewall does not see it. Layer 2 separation is a different control from subnet separation.
 - **A safety instrumented system is a human-safety control, not a PLC.** You monitor it and you never send to it, and Triton is the reason the whole industry changed its language.
 - **Passive monitoring is the core defensive technique in OT**, because active scanning can put a fragile controller into a fault state.
-- **A network tap or a SPAN port plus Zeek, Suricata, Wireshark, and GRASSMARLIN is a real monitoring stack**, and every part of it is free.
+- **A SPAN port plus Zeek, Suricata, Wireshark, and GRASSMARLIN is a real monitoring stack**, and every software part of it is free. The hardware tap you would rather have is the one paid item, and a managed switch's mirror port does the same job in a lab.
 - **New connections to a controller and any write outside the normal pattern are the two highest-signal events on a plant network.**
 - **Colonial Pipeline was an IT-side ransomware incident with an OT consequence.** The lesson is about business-system coupling and a missing second factor, not about controllers.
 - **Stuxnet proved the air gap is not a control.** If a person can carry a file into a plant, the plant is connected.
@@ -1125,7 +1125,7 @@ Then open `portfolio/cyber/15-ot-ics-security.md` and assemble the deliverables.
 | GRASSMARLIN | Passive network topology and asset mapping for ICS | Free | https://github.com/nsacyber/GRASSMARLIN | Build a topology map from a saved lab capture | Zeek `conn.log` analysis, or a hand-drawn map from captures |
 | NetworkMiner | Passive host, session, and file extraction from captures | Freemium | https://www.netresec.com/?page=NetworkMiner | List hosts and sessions from your lab capture | Wireshark's conversations view |
 | OpenPLC | Free software PLC runtime for protocol practice | Free/open-source | https://openplcproject.com/ | Run a controller and make it answer Modbus requests | Any free Modbus server simulator |
-| Scapy | Packet crafting in Python, for building test traffic | Free/open-source | https://scapy.net/ | Build a Modbus read request by hand in a packet | `pymodbus` in client mode |
+| Scapy | Packet crafting in Python, for building test traffic | Free/open-source | https://scapy.net/ | Build a Modbus read request by hand in a packet — **against your own simulator only** | `pymodbus` in client mode |
 | pymodbus | Python library for Modbus clients and servers | Free/open-source | https://pymodbus.readthedocs.io/ | Write a script that reads and writes a register in your lab | `libmodbus`, or Scapy |
 | Wazuh | Free SIEM for collecting and alerting on logs | Free/open-source | https://wazuh.com/ | Ship Zeek logs into it and build one alert | Elastic Stack, or Splunk Free |
 | Shodan | Search engine for internet-exposed devices | Freemium | https://www.shodan.io/ | Read public documentation on exposed industrial services | Censys free tier, or reading published research instead |

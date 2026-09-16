@@ -44,7 +44,7 @@ Move detections out of a vendor console and into a repository: rules as reviewed
 - Code review for rules: what a reviewer checks and the decisions a review can end in
 - The Sigma rule format: `logsource`, `detection`, selections, `condition`, and field modifiers
 - Rule metadata that survives an audit: `id`, `status`, `level`, `falsepositives`, `tags`, `references`
-- Sigma correlation rules: `event_count`, `value_count`, `temporal`, `temporal_ordered`, and chaining
+- Sigma correlation rules, and the point that they need their own treatment: a correlation rule matches *across* events over a window rather than one event at a time, which means the pipeline and the fixture design are different. Read the specification for the constructs — `event_count`, `value_count`, `temporal`, `temporal_ordered`, and chaining — and note which ones your target backend can actually express
 - Sigma filters for environment-wide tuning, and why a meta-filter beats editing ten rules
 - Sample-event fixtures: positive cases, negative cases, and adversarial near-misses
 - Unit testing rules with pytest, and the difference between a schema test and a logic test
@@ -303,6 +303,10 @@ Read the parts that are not the detection logic, because those are the parts tha
 
 `status: experimental` is doing real work in that rule. Per the Sigma specification, the status values are `stable`, `test`, `experimental`, `deprecated`, and `unsupported`, and `experimental` is an honest statement that this has not been validated against your traffic. A rule that goes straight to production with no such stage is a rule nobody has agreed to live with.
 
+**`level` is spelled out for the same reason, because it is the field that decides who gets woken up.** The Sigma specification uses `informational`, `low`, `medium`, `high`, and `critical`. They are only meaningful once your team has agreed what each one routes to — the mapping is a local convention, not something the specification decides for you.
+
+Write it down next to the rules, because a `medium` that means "analyst queue in office hours" on one team means "page the on-call" on another, and the review standard below checks the level against the behaviour it claims.
+
 #### Branching and the detection pull request
 
 ```bash
@@ -421,13 +425,15 @@ Store fixtures as small JSON files, one event each. Three per rule is the workin
 }
 ```
 
-Those three files are the whole test, and the third one is the one people leave out. The first matches. The second does not match, because it has no `http://` or `https://` string.
+Those three files are the whole test, and the third one is the one people leave out. The first matches. **The second also matches** — it contains both `urlcache` and `http://`, so the rule fires on it, exactly as it should; the ticket it represents is a false positive a human then closes, not a fixture that proves the rule is narrow.
 
-Note that the second one *does* contain `urlcache`, which is exactly why the negative case has to be constructed rather than imagined. The third is a **near-miss**: certutil is invoked, but there is no URL and no `urlcache`, so it must not match. A near-miss fixture is what catches the tuning edit six months from now that quietly broadens the rule.
+That is worth being deliberate about, because a fixture that *looks* negative and is not is how a rule acquires a blind spot. The third is the **near-miss**: certutil is invoked, but there is no URL and no `urlcache`, so it must not match. A near-miss fixture is what catches the tuning edit six months from now that quietly broadens the rule.
+
+If you want a genuine negative case for this rule, write a fourth fixture: certutil invoked for a purely local operation with no network indicator at all — for example `certutil.exe -hashfile C:\Users\Public\a.dat SHA256`, which is the third fixture above. That is why the near-miss and the negative are different things, and why a rule needs both.
 
 #### The test harness
 
-Here is a working pytest harness for Sigma rules. It uses pySigma to parse each rule and match it against the fixtures.
+Here is a working pytest harness for Sigma rules. It uses pySigma to parse each rule, confirm it carries fixtures, and convert it to a backend query. **Read the note under it about what it does not prove**, because that distinction is the one an interviewer will test.
 
 ```python
 # tests/test_rule_logic.py
@@ -474,18 +480,20 @@ def test_rule_has_fixtures(rule_path):
 
 @pytest.mark.parametrize("rule_path", rule_files(), ids=lambda p: p.stem)
 def test_rule_matches_fixtures(rule_path):
-    """The generated test-backend query is compared against each fixture.
+    """The generated test-backend query is produced, and its fixtures are present.
 
-    The test backend renders the rule as a readable string, so this test
-    checks that a fixture carrying the required field values produces the
-    selection the rule describes, and that the negative fixtures do not.
+    This does NOT decide whether an event matches. A backend renders a query;
+    it does not evaluate one. What this asserts is that the rule converts to
+    something, and that the positive fixture it carries is not empty. The
+    match decision is verified by replaying the fixtures through the deployed
+    query in a lab SIEM -- see the note below.
     """
     found = fixtures_for(rule_path)
     if "true" not in found:
         pytest.skip("no fixtures")
 
     collection = SigmaCollection.from_yaml(rule_path.read_text(encoding="utf-8"))
-    backend = TextQueryTestBackend(collection)
+    backend = TextQueryTestBackend()
     queries = backend.convert(collection)
 
     assert queries, f"{rule_path.stem} converted to nothing"
@@ -1060,6 +1068,10 @@ sys.exit(1 if overdue else 0)
 
 **The figure in the third row matters more than the others.** A rule nobody will delete is a permanent tax on every analyst who will ever work your queue, and the reason it survives is almost never technical. It survives because no one has produced the evidence that would make deletion a decision rather than an insult.
 
+**Environment-specific values deserve their own rule, because they are the half of this problem that is easy to miss.** A rule that hardcodes your domain, your server naming pattern, or an internal subnet is a rule that cannot be shared, cannot be tested against a fixture from anywhere else, and silently stops matching the day the naming convention changes.
+
+The fix is the same shape as the filter mechanism earlier: keep the *logic* in the rule and move the environment-specific *values* into a pipeline or a lookup the deployment supplies. That is what makes a rule portable between your test tenant and production — and it is why "does this rule contain anything that is true only here?" is one of the twelve review checks.
+
 ### Part 9 — What the repository looks like when it works
 
 #### The end-to-end worked example
@@ -1112,7 +1124,7 @@ Checks
   Tests              pass — true, false, and near-miss fixtures all present
   Cost               FAIL — no volume estimate
   Duplication        pass — no overlap with DET-011
-  Lifecycle          pass — owner named, review due 2026-11-12
+  Lifecycle          pass — owner named, review due 2026-10-02 (three months on from the last review on 2026-07-02, per the registry)
   Response           pass — triage note attached
 
 Conditions

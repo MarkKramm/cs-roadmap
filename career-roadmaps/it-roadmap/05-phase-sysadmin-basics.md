@@ -160,7 +160,7 @@ Conditional access decides *whether* a device may connect. Something else decide
 
 1. **Enrol** — the device registers itself with the management service and gets an identity the organisation recognises.
 2. **Configure** — settings, Wi-Fi profiles, certificates, email accounts, and required apps are pushed, rather than typed in by hand.
-3. **Enforce compliance** — "disk encryption must be on", "the OS must be up to date", "screen lock must be enabled". A device that fails these conditions is marked *non-compliant*, and conditional access can then block it from company data.
+3. **Enforce compliance** — "disk encryption must be on", "the OS must be up to date", "screen lock must be enabled". A device that fails these conditions is marked *non-compliant*, and conditional access can then block it from company data. **The licensing line matters here, and it is worth knowing before an interview:** compliance policies are part of Intune, but the conditional access that *acts* on them needs **Entra ID P1**, which is a paid licence. You can read about both and describe them correctly; you cannot build either on a free tenant. Saying "conditional access needs P1" is a small detail that signals you have actually looked.
 4. **Wipe** — a lost laptop can be remotely erased, or selectively erased so company data goes and personal files stay.
 
 **Microsoft's version is Intune, and the enrolment path is called Autopilot.** The important part for you is not the product name, it is the technician's view of it. With Autopilot, the user unboxes the laptop, connects it to Wi-Fi, signs in with their work account, and the machine builds itself: Windows installs, the organisation's configuration applies, the standard apps arrive. Nobody images anything by hand.
@@ -180,7 +180,11 @@ Treat the last one with care — **a request to move someone's MFA to a new devi
 
 **BYOD — "bring your own device" — is the awkward middle case.** The user's personal phone holds company email, so the organisation needs *some* control over it. The convention that protects everyone is that the organisation manages a **container** — the work apps and work data — and not the whole phone.
 
-Knowing that distinction exists is enough for entry level; if a user asks whether their employer can see their photos, the honest answer is "not with a properly configured work profile, and here is who to ask to confirm."
+**The container works differently on the two phone platforms, and this is worth getting right.** On **Android**, the container is a real, visible thing: a **work profile**, which the user can see as a separate set of apps with a work badge, and which the employer can wipe without touching the personal side.
+
+On **iOS**, there is no separate system-level work profile at all. The equivalent protection is applied at the level of individual managed apps — the work data is held inside apps the organisation controls and cannot be copied out to personal apps — which is why an iPhone user will not see a "work profile" anywhere. Say "app-level protection" for iOS and "work profile" for Android, and you will never be caught out by a user who went looking for a setting that does not exist on their phone.
+
+Knowing that distinction exists is enough for entry level; if a user asks whether their employer can see their photos, the honest answer is "not when it is configured this way, and here is who to ask to confirm" — on Android because the work profile is a separate space, and on iOS because only the managed work apps are covered.
 
 **What to write down.** You cannot lab Intune or Autopilot on a free budget, and that is fine and worth being honest about. What you *can* do is read Microsoft's own enrolment documentation and write the workflow out in your own words: what the user does, what the technician checks, and what the common failures are. That written workflow is a portfolio artefact, and it is precisely what a "have you used Intune?" interview question is really asking.
 
@@ -333,8 +337,9 @@ The modern path for a cloud-managed company is **Autopilot**, which inverts the 
 
 1. Install Windows in VirtualBox — you already did this in Phase 2.
 2. Install your standard set by hand and write the list down, as a real standard would be written.
-3. Run `sysprep /generalize /oobe /shutdown` and watch what it does. Understanding why the machine-specific identity must be stripped is the concept behind every imaging tool.
-4. Snapshot before you sysprep, and restore afterwards — which is the discipline that makes a VM a safe place to break things.
+3. **Snapshot before you sysprep.** `sysprep /generalize` strips the machine-specific identity, and it is not something you can undo by running it again — on a real machine that install is finished. Take the snapshot first, so this stays a safe lesson.
+4. Run `sysprep /generalize /oobe /shutdown` and watch what it does. Understanding why the machine-specific identity must be stripped is the concept behind every imaging tool.
+5. Restore the snapshot afterwards, which is the discipline that makes a VM a safe place to break things.
 
 Then write the whole procedure out as a numbered runbook, the way you would hand it to the next technician. That runbook is portfolio evidence, and it is the artefact that answers "have you done deployments?" with something better than "I understand the concept."
 
@@ -1343,6 +1348,8 @@ Microsoft Learn, Google Admin Help, local Windows tools, PowerShell, and free ba
 ### What's paid and why you'd upgrade
 
 Microsoft 365 business tenants, Google Workspace, **RMM tools** (Remote Monitoring and Management — the software a managed-service provider uses to patch and watch many customer machines at once), and enterprise backup platforms are paid because businesses need real user management, compliance, support, and scale.
+
+**One licence boundary is worth naming on its own, because it is the one beginners get wrong.** Intune device management and compliance policies come with the business plans above, but **conditional access — the control that actually blocks a non-compliant device from company data — needs Entra ID P1**, a separate paid tier. A free tenant will let you read about conditional access; it will not let you build one. If you set up a free tenant to practise, expect to describe conditional access rather than configure it, and treat any free trial as an evaluation rather than a plan.
 
 ### When it's worth paying
 

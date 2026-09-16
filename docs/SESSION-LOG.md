@@ -2,7 +2,31 @@
 
 A chronological record of working sessions. Newest first.
 
-## 2026-09-16 (latest) — Four hardening tasks, and the same defect class three times
+## 2026-09-16 (latest) — The unread material, read
+
+**Goal:** close the gap the previous two passes created — cyber 15 and advance 07, two whole phases no fresh reader had seen, plus the five IT sections written to a market claim rather than an existing syllabus. Five readers, one per file, working from the same brief the three prior passes used.
+
+**~40 findings were reported and about a dozen were rejected after re-checking** — a false-positive rate near one in three, higher than the advance pass's one in five. The reason is worth recording: the brief tells the reader the highest-yield question is *self-contradiction*, and a reader primed that way starts seeing contradictions in prose that is merely loose. Every finding was re-checked against the source before anything was edited, and the rejections are as much the result as the fixes.
+
+**The best finding was a fixture that is not what it claims to be.** Advance 07's certutil rule matches `urlcache` OR `http://` OR `https://`, and the fixture the file introduces as its negative case contains **both** — so it matches, and the file's stated reason for its negativity ("it has no `http://` string") was false about text printed two paragraphs above it. A reader tracing the rule by hand would have concluded the rule was broken. The fixture is now honestly labelled as a second positive, and the genuine negative case is named.
+
+**Cyber 15's closing takeaway reversed its own lesson.** The bullet said "everything above function code 15 is observation", while the table directly above it lists codes 5, 6, 15 and 16 as *writes* — so the takeaway put single-write events, the ones the phase tells you to alert on, into the harmless bucket. A related filter, `modbus.func_code >= 15`, was described as "multi-value writes" while also matching code 43 and every error response from 0x90 up.
+
+**IT 05 had a destructive step ordered before its own safeguard.** The VM exercise ran `sysprep /generalize` as step 3 and said "snapshot before you sysprep" as step 4. A beginner following the list in order runs the step that cannot be undone before taking the snapshot that would undo it. The same file taught conditional access as available on a free tenant — the exact class the previous pass fixed in `checklist-master.md`, and the sibling cyber phase states the Entra ID P1 boundary plainly at its line 380.
+
+**IT 04's new softphone section inverted the phase's own method.** It ordered device → headset → app → network, putting *scope* last, while the same phase teaches scope isolation as step 5 of its eight-step method and calls it "the question that solves half your tickets". Scope now leads, and one-way audio is named as the point where a first-liner stops and escalates.
+
+**The guards caught the fixer again — the fourth time in this repository's history.** While the fixes above were being written, `audit-readability.mjs` went red on three paragraphs written during the fix (121, 142, 124 words) and then on a fourth (125). All four were split at sentence boundaries with every word kept, and the editorial backlog returned to zero. The lesson is the same one `renderInline` and the advance-04 pass taught: a passing suite is not evidence a change was correct, only that the checks it runs did not notice.
+
+**The CHANGELOG drift returned, and was merged mechanically again.** `[Unreleased]` had accumulated a second `### Fixed` — the third time this class has appeared — because this pass's entry was added above a pre-existing one. Merged by script: **351 content lines before and after, multiset-identical**, four headers down to three, exactly one non-empty line removed. The file's own note says a structure check would be a legitimate gate under D-022 and that nobody has written it; that is still true.
+
+**Two `CHECKPOINT.md` facts had drifted two passes behind** and were corrected: the structure block still said `cybersec-roadmap/ (14 phases)` and `advance-roadmap/ (6 phases)` against the actual 15 and 7, and counted 9 pages and 18 components against 10 and 19.
+
+**Verified after all writes stopped:** lint **162 files / 0 issues**; `audit-content` 0; lesson AST **31 / 0 loss**; `audit-refs` 0 broken with controls passing; `audit-time-budget` **31 phases / 0 findings**; readability **0 over 110 and 0 over 90**; build clean; smoke **231 renders across 31 phases and 275 tools, 0 failures**; and the full site suite — render-inline 34, highlight 37, ui 42, data 86, notes 28, work 31, today 77, lesson-search 77, phase-transfer 56, path-order 37, search 41 — plus **browser 92 checks / 0 failed** on Edge `Edg/153.0.4234.32`.
+
+**Carried forward, and one item is now the oldest in the repository.** Nobody has timed a single curriculum task, and this pass added prose without adding a measurement; that item has now survived four consecutive passes unchanged. Two new items are logged: the **IT market claim has still never been checked against a real job posting** (this session's search endpoint returned HTTP 401 and Indeed blocks fetching, so it needs working credentials or a human), and **five IT 02 topic-list bullets are still undelivered** — update rollback, startup apps, NTFS/share permissions, login corruption, and dependent services — which is the concrete instance of the guard `ROADMAP.md` calls the highest-value one absent.
+
+## 2026-09-16 (earlier) — Four hardening tasks, and the same defect class three times
 
 **Goal:** close the four items the previous pass left open, in an order that does not invalidate its own work — comprehension-audit the six never-read advance phases, then a density pass on the paragraphs that audit could not fix, then resolve the two detectors that printed without gating, then extend the browser check to a second engine and the width band it never rendered.
 

@@ -8,10 +8,11 @@ the 23 entry-level phases; a third, added later, covers the six advance phases �
 accounts for **all 29 lessons as of the advance pass**. Read the entry-level sections with that
 in mind: every count in them is a count of 23, and it was correct when it was written.
 
-**Two phases have since been added and no pass covers them** — cyber Phase 15 (OT and ICS
-security) and advance Phase 07 (detection as code). Both pass every mechanical guard, and
-neither has been read by a fresh reader asking where a beginner stops. That is the same gap
-the advance track sat in before the third pass, and it closes the same way.
+**Two phases were added after the third pass and no pass covered them** — cyber Phase 15 (OT and
+ICS security) and advance Phase 07 (detection as code). **Both are now read**, along with the five
+IT sections the gap pass added, in [Fourth pass — the unread material](#fourth-pass--the-unread-material)
+at the end of this file. The count that section accounts for is not phases but *material*: two whole
+phases plus five sections inside phases that had already been read once.
 
 Every guard in this repository tests internal consistency — does the parser lose content,
 is the prose dense, do the cross-references resolve. None can see a phase that teaches
@@ -337,3 +338,73 @@ closer to machine-checkable than the comprehension question is, and `audit-refs.
 `audit-time-budget.mjs` are the two instances of it that already gate. The rest still needs a
 reader, and a reader who is told to look for self-contradiction finds more than one told to look
 for difficulty.
+
+---
+
+## Fourth pass — the unread material
+
+The previous pass left a named gap: two phases nobody had read (cyber 15, advance 07) and five IT
+sections the gap pass had just written, which rested on a **market claim** rather than an existing
+syllabus. Five fresh readers covered them, one per file, working from the same brief.
+
+**Roughly 40 findings were reported. About a dozen did not survive re-checking and were not
+applied.** That rejection rate — near one in three — is higher than the advance pass's one in five,
+and the reason is worth recording: when a reader is told the highest-yield question is
+*self-contradiction*, they start seeing contradictions in prose that is merely loose. The check is
+what removes them, and it was applied to every finding before anything was edited.
+
+### The findings that were real, and the class they belong to
+
+| Class | Where | What it was |
+|---|---|---|
+| A fixture that is not what it claims | advance 07:424 | The "negative" fixture's `CommandLine` contains `http://`, and the rule matches on `http://` — so the declared negative case **matches**, and the stated reason was false about the file |
+| A takeaway that reverses its own lesson | cyber 15:1089 | "Everything above function code 15 is observation" — the table above it says codes 5, 6, 15 and 16 are *writes*, and 43 (a read) sits above 15 |
+| A filter that means something else | cyber 15:761 | `modbus.func_code >= 15` also matches code 43 and every error response (0x90+), so it is not "multi-value writes" |
+| "Every part of it is free" | cyber 15:1093 | The same file says a network tap "costs money, and needs an outage to install" (730) |
+| A destructive step before its safeguard | IT 05:336 | `sysprep /generalize` was step 3 and "snapshot before you sysprep" was step 4 — the irreversible command preceded the thing that protects it |
+| A paid capability taught as free | IT 05:163 | Conditional access needs **Entra ID P1**; the sibling cyber phase states this at its line 380, and this phase's "Free vs Paid" never mentioned it |
+| A platform term presented as universal | IT 05:181 | "Work profile" is Android-only; iOS has no OS-level work profile |
+| An order that inverts the phase's own method | IT 04:452 | The softphone order was device → headset → app → network, putting *scope* last, while the phase teaches scope isolation as step 5 of its eight-step method (223) |
+| A test that does not split what it claims to | IT 01:555 | The dock test says a both-ways failure means "the fault is at the other end"; item 4 says a bandwidth limit produces that same both-ways result |
+| A term never defined | IT 01:562 | "alt-mode" was load-bearing twice and defined nowhere in the file |
+| A promise not kept | advance 07:47 | Five named Sigma correlation constructs, listed as a topic, appearing **exactly once in 1,348 lines — in that list** |
+| A contradiction between two records of one rule | advance 07:1117 | Review due 2026-11-12 against the registry's own 2026-10-02, three months on from `last_reviewed` |
+| A harness that over-claims | advance 07:430/495 | "match it against the fixtures" against its own retraction that it "parses, carries fixtures, and converts" |
+| A reference to a part that does not exist yet | IT 02:418 | The macOS section is inside Part 4 and cites "Part 8", which does not begin until line 562 |
+
+### The false positives, and what they have in common
+
+- **A time table "that does not close."** Cyber 15 keeps its budget table twice, with the per-topic
+  hours redistributed between the two. The reader compared *one row* across the two tables and
+  concluded the totals disagreed. Both sum to 60–78. **The sums were never checked** — only the rows.
+- **The `enip` filter** as "unfollowable" — the table row is a Wireshark display filter and behaves
+  as one; the reader's objection was about capture visibility, which the file addresses for the
+  protocol that actually needs it.
+- **A "missing" statute route** in cyber 15 — the legal material is present and the phase is
+  explicit that it is not legal advice. Disagreement with the depth of a section is not a defect.
+- **IT 01's dock "power delivery" gap** — reported as a coverage gap, and it was a genuine thinness
+  rather than an error, so it was written in rather than logged as a defect.
+- Two IT 02 items where the reader itself flagged that it could not verify externally (a Defender
+  scan-type flag and an `Open Anyway` label), correctly declining to assert either way.
+
+The honest headline is the same as the third pass's: **the instrument that found the real defects
+was each file's own prose.** Every finding in the table above is a place where two statements
+cannot both be true, and the arithmetic and the fixture-tracing were the two techniques that paid.
+The false positives came from the same brief being read as *"find tension"* rather than
+*"find a claim that fails"*.
+
+### What this pass confirms about method
+
+**A guard caught the fixer again — for the fourth time in this repository's history.** While the
+fixes above were being written, `audit-readability.mjs` went red on **three paragraphs written
+during the fix** (121, 142 and 124 words) and then on a fourth (125). All four were split at
+sentence boundaries with every word kept, and the editorial backlog returned to zero. This is the
+same lesson as `renderInline` and the advance-04 pass: **a passing suite is not evidence that a
+change was correct, only that the checks it runs did not notice** — and here the suite noticed.
+
+**The material audit found what a fresh read always finds.** Neither of the two new phases was
+structurally broken, and both pass every mechanical guard. What they contained was one false
+fixture, one reversed takeaway, one filter that means something other than its label, one
+"everything is free" claim the file itself contradicts, and one topic list promising five
+constructs the body never teaches. None of those is visible to a guard that reads one line at a
+time, and all five would have misled a reader who trusted the page.

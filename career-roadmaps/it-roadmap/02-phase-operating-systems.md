@@ -404,7 +404,7 @@ The honest framing is this: **macOS is a Unix system with a friendly face.** Und
 | File manager | File Explorer | (the shell) | **Finder** |
 | Where apps live | `C:\Program Files` | `/usr/bin`, `/opt` | **`/Applications`** |
 | Settings | Control Panel / Settings | config files in `/etc` | **System Settings** |
-| Installer format | `.exe`, `.msi` | `.deb`, `apt` | **`.dmg`** (drag to Applications) |
+| Installer format | `.exe`, `.msi` | `.deb`, `apt` | **`.dmg`** (a disk image you mount, then copy the app out of) |
 | Saved passwords | Credential Manager | `~/.ssh`, keyring | **Keychain Access** |
 | Backup | File History | `rsync`, Borg | **Time Machine** |
 | Task manager | Task Manager | `top`, `htop` | **Activity Monitor** |
@@ -415,7 +415,7 @@ The honest framing is this: **macOS is a Unix system with a friendly face.** Und
 
 "Keychain keeps asking for my password" — Keychain Access, look for the repeatedly-prompting entry, and check whether the login keychain's password still matches the account password, which is what happens after a password change. "It won't connect to the printer" — the same port-and-address logic from Phase 3, via System Settings → Printers & Scanners.
 
-**What carries over, and what does not.** Your troubleshooting *method* is identical on all three: establish scope, read the evidence, change one thing, verify. Your Windows *commands* do not carry over; anyone who tells you to run `sfc /scannow` on a Mac is telling you they have never used one. The macOS equivalents of the evidence you read in Part 8 exist — **Console** is Event Viewer, **Activity Monitor** is Task Manager, and `system_profiler` is `systeminfo`.
+**What carries over, and what does not.** Your troubleshooting *method* is identical on all three: establish scope, read the evidence, change one thing, verify. Your Windows *commands* do not carry over; anyone who tells you to run `sfc /scannow` on a Mac is telling you they have never used one. The macOS equivalents of the evidence you have just read about in Parts 3 and 4 exist — **Console** is Event Viewer, **Activity Monitor** is Task Manager, and `system_profiler` is `systeminfo`.
 
 **Where to practise.** You do not need to buy a Mac. Ask a friend or family member who owns one to let you look through System Settings and Finder for twenty minutes; the interface is the part you are missing, not the concepts. Then write the mapping table into your own notes, in your own words. That table is a genuinely good portfolio artefact, and it is the difference between "I have never used a Mac" and "I have not owned one, but I know where everything is."
 
@@ -544,6 +544,10 @@ This is the topic listed at the top of this phase, and it deserves its own recip
 | Browser opens pages you did not ask for; search engine changed | **Browser hijack** — a malicious extension or a changed shortcut | Remove the extension; check the shortcut's target for a trailing URL; reset the browser's search settings |
 | Machine is genuinely slow, fan runs constantly, unknown processes present | **Possible real infection** | Do not start deleting files. Disconnect it from the network first, then read the evidence (Part 8) |
 | Antivirus already reported something and quarantined it | **A handled detection** | Confirm what it found, when, and that the user did not click "allow". Then scan again |
+
+**One symptom that is a trap, and it comes from Part 8.** The stopped-Automatic-service check you learned there is one of the best proactive checks in this phase — but when the stopped service is the antivirus, the EDR agent, or Windows Update, treat it as a *malware symptom* rather than a fault to fix.
+
+Disabling the protection is one of the first things most malware families do, so "Defender is set to Automatic and is not running" is a finding to investigate, not a service to start and walk away from. Read why it stopped, in the event log, before you restart anything.
 
 **Why the order matters.** Disconnecting a possibly-infected machine from the network before you investigate is the one step that buys time: it stops any command-and-control traffic and stops the thing spreading to the shared drive. It costs nothing and it is reversible. Deleting files, by contrast, destroys the evidence you need to answer "how did this get in?" — and that question is the one your employer actually cares about.
 
