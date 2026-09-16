@@ -73,6 +73,40 @@ function collect() {
   return files;
 }
 
+// --- positive controls -----------------------------------------------------
+// Each case is [line, phase the line sits in, should the cue fire].
+// The negatives matter as much as the positives: three of them are forward
+// references that are NOT claims of prior teaching, which is the false positive
+// that made this class informational in the first place.
+const CONTROLS = [
+  ['Part 3 gave you Phase 5', 3, true],
+  ['as defined in Phase 9, the queue', 4, true],
+  ['This is covered in Phase 12.', 2, true],
+  ['Build it from your Phase 8 notes', 3, true],
+  ['taught in Phase 11', 5, true],
+  ['you already have Phase 6 to hand', 3, true],
+  ['Phase 9 covers this in more detail', 3, false],
+  ['See Phase 7 for the routing table', 3, false],
+  ['Phase 4 defined the queue', 6, false],
+  ['Phase 2 gave you the triage rule', 6, false],
+];
+
+function runControls() {
+  const bad = [];
+  for (const [line, current, want] of CONTROLS) {
+    const m = line.match(/Phase\s+(\d{1,2})\b/);
+    const got = m
+      ? isForwardAsPrior(line.slice(0, m.index + m[0].length), Number(m[1]), current)
+      : false;
+    if (got !== want) {
+      bad.push(
+        `  ${want ? 'MISSED' : 'FALSE POSITIVE'}: "${line}" (in phase ${current}) -> ${got}`,
+      );
+    }
+  }
+  return bad;
+}
+
 const files = collect();
 const findings = [];
 
@@ -88,10 +122,59 @@ for (const { track, name } of files) {
 // purpose: an early version included the bare word "from" and "and", which
 // matched "Risk reasoning from Phase 13 arrives later" — a sentence that
 // explicitly flags the phase as coming later, i.e. the opposite of the defect.
-// The class is informational for that reason; only an exact name that does not
-// exist can fail a build.
-const PRIOR_CUE =
-  /(?:defined|taught|covered|learned|learnt|introduced|explained|gave you|you (?:already )?(?:have|built|did)|you (?:saw|did)|covered in|taught in|from your)\s+Phase/;
+//
+// The class stays informational, but it no longer shares the failure mode it
+// had. Two things were wrong with it:
+//
+//   1. The cue could not match a prior-knowledge verb that takes a preposition.
+//      `covered in` and `taught in` were listed with theirs; `defined` and
+//      `taught` were not, so "as defined in Phase 5" was invisible. Widened to
+//      accept the preposition any of these verbs normally takes. Measured
+//      against the corpus at the time of the change: this adds **zero** matches,
+//      so it closes a hole rather than moving a verdict.
+//   2. Nothing had ever shown the detector firing. On a corpus where it reports
+//      nothing — which is the current state — a broken detector and a clean
+//      corpus print exactly the same thing, and this repository has read a
+//      broken guard as green three times. CONTROLS below are synthetic, live in
+//      this file rather than in the curriculum so that no content edit can
+//      delete them, and run on **every** invocation.
+//
+// It still does not gate, and the reason is a real ambiguity rather than
+// timidity: "covered in Phase 9" can be a legitimate forward pointer ("read
+// ahead") or a false claim of prior teaching, and only the surrounding sentence
+// says which. That distinction is a judgement about intent, so it stays a
+// measurement a human reads — but a measurement whose instrument is proven.
+const PRIOR_VERB =
+  '(?:covered in|taught in|from your|gave you|you (?:already )?(?:have|built|did)|you (?:saw|did)|defined|taught|covered|learned|learnt|introduced|explained)';
+const PRIOR_CUE = new RegExp(PRIOR_VERB + '(?:\\s+(?:in|by|during|at))?\\s+Phase');
+
+// `head` is the line up to and including the phase number, so a verb that
+// appears *after* the citation ("Phase 9 covers this") cannot be read as a
+// prior-knowledge cue for it.
+function isForwardAsPrior(head, n, current) {
+  return n > current && PRIOR_CUE.test(head);
+}
+
+// The controls run on every invocation, and they run *here* rather than beside
+// the CONTROLS array because a `const` is in its temporal dead zone until its
+// own line executes: calling runControls() above the PRIOR_CUE declaration threw
+// "Cannot access 'PRIOR_CUE' before initialization" on the first attempt. The
+// failure was loud, which is the entire point of having controls.
+const controlFailures = runControls();
+if (controlFailures.length) {
+  process.stdout.write('CROSS-REFERENCE AUDIT — SELF-TEST FAILED\n\n');
+  for (const f of controlFailures) process.stdout.write(f + '\n');
+  process.stdout.write(
+    '\nThe forward-as-prior detector no longer matches what it documents.\n' +
+      'Findings below would be meaningless, so the audit stops here.\n',
+  );
+  process.exit(1);
+}
+
+if (process.argv.includes('--self-test')) {
+  process.stdout.write(`SELF-TEST PASSED — ${CONTROLS.length} controls, 0 failed.\n`);
+  process.exit(0);
+}
 
 for (const { track, name, file } of files) {
   const raw = fs.readFileSync(file, 'utf8');
@@ -181,7 +264,15 @@ for (const { track, name, file } of files) {
         continue;
       }
       // A forward citation inside a prior-knowledge cue.
-      if (n > current && PRIOR_CUE.test(line.slice(0, m.index + 4))) {
+      //
+      // The head runs to the END of the "Phase N" match. It previously ran to
+      // `m.index + 4`, which chops the word "Phase" to "Phas" — and since the
+      // cue regex requires that literal word, the class was structurally
+      // incapable of ever producing a finding. `FORWARD_AS_PRIOR (0)` was not a
+      // clean corpus; it was a detector that could not fire, which is the same
+      // failure this repository has recorded three times. Caught by the controls
+      // below on the first run that added them.
+      if (isForwardAsPrior(line.slice(0, m.index + m[0].length), n, current)) {
         findings.push({
           cls: 'FORWARD_AS_PRIOR',
           where: `${name}:${i + 1}`,
@@ -199,6 +290,9 @@ for (const f of findings) (byClass[f.cls] ||= []).push(f);
 
 process.stdout.write('CROSS-REFERENCE AUDIT\n\n');
 process.stdout.write(`files scanned: ${files.length}\n`);
+process.stdout.write(
+  `forward-as-prior detector: ${CONTROLS.length} controls, 0 failed\n`,
+);
 process.stdout.write(`findings: ${findings.length}\n\n`);
 
 for (const cls of Object.keys(byClass).sort()) {
@@ -211,10 +305,11 @@ for (const cls of Object.keys(byClass).sort()) {
 }
 
 // Only the two exact classes gate. A name that does not exist is arithmetic on
-// the text; "this sentence claims prior knowledge" is a judgement about
-// intent, and the guard has already been wrong about it once. FORWARD_AS_PRIOR
-// is printed for a human to read and does not fail the build — the same
-// distinction docs/COMPREHENSION-AUDIT.md draws for the acronym scan.
+// the text; "this sentence claims prior knowledge" is a judgement about intent
+// that this file has already got wrong once, when the cue list was too loose.
+// FORWARD_AS_PRIOR therefore stays a measurement — but not an unproven one, and
+// the control count above is why that sentence is now worth believing. The
+// distinction is the one docs/COMPREHENSION-AUDIT.md draws for the acronym scan.
 const EXACT = ['PART_DOES_NOT_EXIST', 'PHASE_DOES_NOT_EXIST'];
 const gating = findings.filter((f) => EXACT.includes(f.cls));
 
@@ -222,7 +317,8 @@ if (findings.length === 0) {
   process.stdout.write('All cross-references resolve.\n');
 } else if (gating.length === 0) {
   process.stdout.write(
-    `No broken names. ${findings.length} forward-as-prior observation(s) above are informational.\n`,
+    `No broken names. ${findings.length} forward-as-prior observation(s) above are informational,\n` +
+      'and the detector that produced them passed its controls this run.\n',
   );
 }
 process.exit(gating.length === 0 ? 0 : 1);
