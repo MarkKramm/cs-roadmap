@@ -1,0 +1,42 @@
+docs(claims): cyber passes 1-3 clean — 43 rows, 0 wrong, and one sourcing dead end
+
+ATT&CK (34 rows), CVE (4), and crypto (5) all came back OK with zero
+WRONG. That makes 43 cyber claims verified and 268 still outstanding.
+
+I spot-checked the citations rather than accepting them, and two held
+better than claimed:
+
+  ssh-keygen -t ed25519   The OpenSSH manpage source says ed25519 is
+                          "the default" key type (ssh-keygen.1, line 616),
+                          so the lab instruction is not merely valid but
+                          the current default. Verified against the
+                          openssh-portable source, not a tutorial.
+  CVE-2021-41773          NVD: "A flaw was found in a change made to path
+                          normalization in Apache HTTP Server 2.4.49. An
+                          attacker could use a path traversal attack."
+                          The curriculum describes it exactly.
+
+ONE CITATION COULD NOT BE UPGRADED, AND THAT IS THE FINDING
+
+The Amcache row (11-phase-incident-response.md:456) came back OK citing
+"Microsoft Learn Q&A" plus Securelist -- a forum post and a vendor blog,
+the two source types the prompt rejects. I tried to upgrade it and could
+not, because:
+
+  Microsoft Learn   no official Amcache documentation exists; a search of
+                    their API returns only Q&A threads
+  MITRE ATT&CK      0 matches for "amcache" across all 26,086 enterprise
+                    objects, checked case-insensitively
+
+So no vendor or standards source documents this artefact at all. The
+claim is consistent with the professional forensics literature and with
+the Compatibility Assistant's documented behaviour, but nothing primary
+reachable from here states it. The honest verdict is UNVERIFIABLE at
+Tier 2 rather than OK, and I have recorded it as such rather than let a
+forum post stand in for a source.
+
+This is the first row in either track where the verdict was right but
+unsupportable, and it is worth knowing the class exists: an artefact or
+practice that is real, widely used, and undocumented by its vendor.
+
+Verified: encoding 71/0 + controls 12/12; lint 190/0; validate-ci 36/0.
