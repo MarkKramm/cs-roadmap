@@ -22,6 +22,7 @@ const DONE = [
   "Cryptography algorithm claims",
   "Product versions and editions",
   "Command and cmdlet usage",
+  "Security tool commands and flags",
 ];
 
 let cls = "";

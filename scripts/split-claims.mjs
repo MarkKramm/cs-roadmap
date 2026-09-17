@@ -71,7 +71,7 @@ const WANTED_BY_TRACK = {
     { title: "CVE identifiers and vulnerability claims", done: true, doneThrough: 4 },
     { title: "Cryptography algorithm claims", done: true, doneThrough: 5 },
     { title: "Standards, frameworks and control identifiers", done: true, doneThrough: 105 },
-    { title: "Security tool commands and flags" },
+    { title: "Security tool commands and flags", done: true, doneThrough: 99 },
     { title: "Protocol and standard behaviour" },
     { title: "Registry paths, file paths and filenames" },
     { title: "Product versions and editions", done: true, doneThrough: 9 },

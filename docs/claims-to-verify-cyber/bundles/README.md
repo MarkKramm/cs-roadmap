@@ -5,14 +5,14 @@ script, which regenerates from `docs/claims-to-verify-cyber/*.md`.
 
 ## Why bundles and not one paste
 
-224 rows need a verdict, a source URL and a quote each.
+125 rows need a verdict, a source URL and a quote each.
 That reply is roughly 2.5× the prompt, so one paste asks for far more back than a
 reply reliably completes — and **it will truncate.** The IT pass's 160-row command
 table came back verified through row 152 and stopped there. Nine separate pastes fix
 the truncation and reintroduce the other failure D-038 records: a folder where nothing
 says which packs are done.
 
-So: **two bundles, numbered, in the order below.** Send one, paste the answer back,
+So: **one bundles, numbered, in the order below.** Send one, paste the answer back,
 then send the next. Each is self-contained — the rules travel with every one, per
 D-038 ("no placeholders, ever").
 
@@ -20,22 +20,17 @@ D-038 ("no placeholders, ever").
 
 | # | Bundle | Rows | Classes |
 |---|---|---|---|
-| 01 | `01-bundle.md` | 99 | security-tool-commands-and-flags |
-| 02 | `02-bundle.md` | 125 | mitre-att-ck-technique-identifiers, protocol-and-standard-behaviour, registry-paths-file-paths-and-filenames |
+| 01 | `01-bundle.md` | 125 | mitre-att-ck-technique-identifiers, protocol-and-standard-behaviour, registry-paths-file-paths-and-filenames |
 
-**Total: 224 rows across 2 bundles.**
+**Total: 125 rows across 1 bundles.**
 
 ## Order and reasoning
 
-### Bundle 01 — 99 rows
-
-- `02-security-tool-commands-and-flags.md` (99 rows) — Tool man pages settle each one. The same broken-invocation shape that produced real defects on the IT pass, at larger scale.
-
-### Bundle 02 — 125 rows
+### Bundle 01 — 125 rows
 
 - `01-mitre-att-ck-technique-identifiers.md` (34 rows) — ATT&CK IDs and technique names, checked against attack.mitre.org.
-- `03-protocol-and-standard-behaviour.md` (44 rows) — RFC-settled, mechanical, unambiguous.
-- `04-registry-paths-file-paths-and-filenames.md` (47 rows) — Microsoft Learn or the OS itself. Mechanical.
+- `02-protocol-and-standard-behaviour.md` (44 rows) — RFC-settled, mechanical, unambiguous.
+- `03-registry-paths-file-paths-and-filenames.md` (47 rows) — Microsoft Learn or the OS itself. Mechanical.
 
 ## After each reply
 

@@ -24,30 +24,34 @@ const ROOT = path.join(HERE, "..");
 const SRC = path.join(ROOT, "docs", "claims-to-verify-cyber");
 const OUT = path.join(ROOT, "docs", "claims-to-verify-cyber", "bundles");
 
-// The FOUR packs still outstanding, in the order they should be SENT.
+// The packs still outstanding, in the order they should be SENT.
 //
-// Five of the original nine are GONE from this list because they are verified:
-// standards/frameworks (105 rows), CVE (4), cryptography (5), product versions (9)
-// and command/cmdlet usage (60) -- **185 rows cleared with zero WRONG verdicts**.
-// They are withheld by `split-claims.mjs` via `done: true`, so they never reach
-// this script. That is the fix for the confusion that made a reader re-verify
-// finished work. If one reappears in this folder, the splitter's WANTED_BY_TRACK
-// list has been edited and this script will pick it up and send it again.
+// Six of the original nine are GONE from this list because they are verified:
+// standards/frameworks (105), CVE (4), cryptography (5), product versions (9),
+// command/cmdlet usage (60) and security tool commands and flags (99) -- **282 rows
+// cleared with zero WRONG verdicts**. They are withheld by `split-claims.mjs` via
+// `done: true`, so they never reach this script. That is the fix for the confusion
+// that made a reader re-verify finished work; if one reappears in this folder, the
+// splitter's WANTED_BY_TRACK list has been edited.
 //
-// Ordering principle: highest expected yield first. Command/cmdlet usage led the
-// previous plan and has now been done -- it produced no defects, but the class it
-// was grouped with on the IT pass, tool commands and flags, is the same
-// "right name, broken invocation" shape and is the largest remaining.
+// Ordering principle: highest expected yield first. Both command-shaped classes are
+// now done and both came back clean, which is itself the finding -- see
+// CYBER-CLAIM-VERIFICATION.md.
+//
+// `MAX_ROWS` below is what decides how many bundles exist. At 125 remaining rows all
+// three classes fit in ONE bundle, so this plan produces one. That is the point of
+// computing bundle boundaries rather than hard-coding them: the plan shrinks as work
+// is completed, and a hard-coded "four bundles" would have kept sending verified
+// rows forever.
 //
 // `rows` is NOT declared here. It is read from the pack at build time, because a
 // hard-coded count silently disagrees with the table beside it the moment the
 // corpus moves -- the exact defect fixed in extract-claims.mjs, where "216 claims"
 // was IT's figure printed into every track.
 const PLAN = [
-  { file: "02-security-tool-commands-and-flags.md", why: "Tool man pages settle each one. The same broken-invocation shape that produced real defects on the IT pass, at larger scale." },
   { file: "01-mitre-att-ck-technique-identifiers.md", why: "ATT&CK IDs and technique names, checked against attack.mitre.org." },
-  { file: "03-protocol-and-standard-behaviour.md", why: "RFC-settled, mechanical, unambiguous." },
-  { file: "04-registry-paths-file-paths-and-filenames.md", why: "Microsoft Learn or the OS itself. Mechanical." },
+  { file: "02-protocol-and-standard-behaviour.md", why: "RFC-settled, mechanical, unambiguous." },
+  { file: "03-registry-paths-file-paths-and-filenames.md", why: "Microsoft Learn or the OS itself. Mechanical." },
 ];
 
 // Count the data rows in a pack, so the plan above never carries a stale number.
@@ -216,4 +220,7 @@ fs.writeFileSync(
 for (const m of manifest) {
   console.log(`  ${m.name}  ${String(m.rows).padStart(3)} rows  ${String(Math.round(m.chars / 1024)).padStart(3)} KB  ~${Math.round(m.chars / 4 / 1000)}k tokens in`);
 }
-console.log(`\n  ${manifest.length} bundles, ${manifest.reduce((a, m) => a + m.rows, 0)} rows -> docs/claims-to-verify-cyber/bundles/`);
+console.log(
+  `\n  ${manifest.length} bundle${manifest.length === 1 ? "" : "s"}, ` +
+    `${manifest.reduce((a, m) => a + m.rows, 0)} rows -> docs/claims-to-verify-cyber/bundles/`,
+);
