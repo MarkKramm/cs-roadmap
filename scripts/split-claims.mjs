@@ -74,7 +74,10 @@ const OUT = path.join(ROOT, "docs", TRACKS[TRACK_KEY].out);
 // exist for them, row by row, in the document.
 const WANTED_BY_TRACK = {
   it: [
-    { title: "Command and cmdlet usage" },
+    // Only command/cmdlet usage is genuinely verified -- 161 of 161 rows, recorded
+    // by scripts/record-it-verdicts.mjs from the 2026-09-18 re-run. The other four
+    // classes are still outstanding (59 rows) and stay in the worklist.
+    { title: "Command and cmdlet usage", done: true, doneThrough: 161 },
     { title: "DNS record types" },
     { title: "Protocol and standard behaviour" },
     { title: "Product versions and editions" },

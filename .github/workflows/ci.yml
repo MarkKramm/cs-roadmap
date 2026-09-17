@@ -168,9 +168,17 @@ jobs:
         run: node scripts/test-audit-verdict-counts.mjs
       # Both tracks, because the bundler is now track-generic and the IT track has
       # real outstanding work again: its verification pass ran but its verdicts were
-      # never written into its document, so all 225 of its rows are empty.
+      # never written into its document, so most of its rows were empty.
       - name: Claim packs match the corpus (IT)
         run: node scripts/audit-claim-drift.mjs --track it
+      # Both recorders are idempotent and refuse to write a verdict whose key matches
+      # no row. Re-running them here proves every recorded verdict still has a row to
+      # live in -- if the splitter re-cuts a class and a location disappears, the
+      # verdict would otherwise silently vanish from the document on the next regen.
+      - name: Recorded verdicts still place (both tracks)
+        run: |
+          node scripts/record-cyber-verdicts.mjs
+          node scripts/record-it-verdicts.mjs
       - name: Verification bundles match their generator (both tracks)
         run: |
           node scripts/build-cyber-bundles.mjs --track cybersec

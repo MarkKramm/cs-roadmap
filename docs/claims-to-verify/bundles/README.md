@@ -5,14 +5,14 @@ script, which regenerates from `docs/claims-to-verify/*.md`.
 
 ## Why bundles and not one paste
 
-225 rows need a verdict, a source URL and a quote each.
+59 rows need a verdict, a source URL and a quote each.
 That reply is roughly 2.5Ã— the prompt, so one paste asks for far more back than a
 reply reliably completes — and **it will truncate.** The IT pass's 160-row command
 table came back verified through row 152 and stopped there. Nine separate pastes fix
 the truncation and reintroduce the other failure D-038 records: a folder where nothing
 says which packs are done.
 
-So: **two bundles, numbered, in the order below.** Send one, paste the answer back,
+So: **one bundles, numbered, in the order below.** Send one, paste the answer back,
 then send the next. Each is self-contained — the rules travel with every one, per
 D-038 ("no placeholders, ever").
 
@@ -20,23 +20,18 @@ D-038 ("no placeholders, ever").
 
 | # | Bundle | Rows | Classes |
 |---|---|---|---|
-| 01 | `01-bundle.md` | 161 | command-and-cmdlet-usage |
-| 02 | `02-bundle.md` | 64 | dns-record-types, protocol-and-standard-behaviour, product-versions-and-editions, registry-paths-file-paths-and-filenames |
+| 01 | `01-bundle.md` | 59 | dns-record-types, protocol-and-standard-behaviour, product-versions-and-editions, registry-paths-file-paths-and-filenames |
 
-**Total: 225 rows across 2 bundles.**
+**Total: 59 rows across 1 bundles.**
 
 ## Order and reasoning
 
-### Bundle 01 — 161 rows
+### Bundle 01 — 59 rows
 
-- `01-command-and-cmdlet-usage.md` (161 rows) — undefined
-
-### Bundle 02 — 64 rows
-
-- `02-dns-record-types.md` (4 rows) — undefined
-- `03-protocol-and-standard-behaviour.md` (26 rows) — undefined
-- `04-product-versions-and-editions.md` (17 rows) — undefined
-- `05-registry-paths-file-paths-and-filenames.md` (17 rows) — undefined
+- `01-dns-record-types.md` (4 rows) — undefined
+- `02-protocol-and-standard-behaviour.md` (25 rows) — undefined
+- `03-product-versions-and-editions.md` (16 rows) — undefined
+- `04-registry-paths-file-paths-and-filenames.md` (14 rows) — undefined
 
 ## After each reply
 
