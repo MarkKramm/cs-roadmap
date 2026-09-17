@@ -8,6 +8,15 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### Added
 
+- **A guard for the documentation's own figures** — `scripts/audit-doc-figures.mjs`, with
+  seven controls in `scripts/test-audit-doc-figures.mjs`. It runs the command that prints
+  each figure and fails if a document disagrees, and it is wired into CI. Six wrong numbers
+  have been found in these docs and **five were found by accident, while doing something
+  else**; this is the mechanism that was missing (D-061).
+- **A negative result, recorded because a clean one is worth as much as a finding:** all
+  **658** `file.md:NNN` citations in `docs/` resolve to an existing file and an in-range
+  line, and all **636** claim rows quote the exact text at the line they cite. Checked
+  mechanically, not sampled.
 - **The cyber verification worklist is packaged into 4 paste-ready bundles, and its header was lying about its own state** (`scripts/build-cyber-bundles.mjs`, `docs/claims-to-verify-cyber/bundles/`, D-052). The 369 outstanding cyber claims already had nine per-class packs; what they did not have was a delivery shape that survives contact with a chat window.
   - **One paste is the wrong unit, and the reason is output rather than input.** 369 rows fit in ~30k tokens going in, but every `OK` must return a verdict **plus a URL plus a quote that settles the row** — so the reply is roughly **2.5×** the prompt, and a single paste asks for ~75k tokens back. **This is not hypothetical: D-038 records the IT pass's 160-row table coming back verified through row 152 and stopping.** Nine separate pastes fix the truncation and reintroduce D-038's *other* failure — a folder where nothing says which packs are done. Four numbered bundles are the shape that avoids both.
   - **`build-cyber-bundles.mjs` generates them and asserts its own invariants.** Rows in must equal rows out (**369 = 369**, checked), each bundle must carry the full rules block (a bundle whose rules silently differed from its neighbour's would be a handover defect, so the script **refuses to merge and throws**), and output is clean LF/UTF-8 with no BOM. Re-running regenerates from the packs, so the bundles cannot drift from their source.
@@ -336,6 +345,26 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### Fixed
 
+- **Three wrong figures in `docs/CHECKPOINT.md`, all stated as current, none ever checked.**
+  The summary row said **"23 content guards, 14 site suites"** — the real counts are **19**
+  and **15**; one item said `lint-content` checked **"203 files"** when it checks **217**
+  (that line had already been wrong once before, at 162, with a parenthetical *warning* that
+  the figure goes stale — **a warning is not a mechanism**, so the number is gone and the
+  command prints it); and another said `build-content.mjs` authored **"273 practice tasks"**
+  when it is **283**, with line 145 of the same file saying 283. **Two figures for one fact,
+  in one file, neither checked against the other.** All three are now covered by the guard
+  above (D-061).
+- **The new control suite silently destroyed three real edits**, by registering its restore
+  on `process.on("exit")`: a control crashed, the handler fired, and a stale snapshot was
+  written over the working tree. Recorded as **D-062** — the restore now lives in each
+  fixture's `finally`, the target is a startup snapshot rather than a re-read, and every run
+  ends by asserting both documents are byte-identical.
+- **A correct em-dash was nearly "repaired" as mojibake.** PowerShell's `Get-Content`
+  rendered `—` as `â€"`, which is the exact signature of the CP1252 corruption this repository
+  has suffered before, so the file was treated as damaged. Reading the bytes with Node
+  showed valid UTF-8 and a clean `audit-encoding` run. Recorded as **D-063**: *read the
+  bytes, not the console* — the fix for a misdiagnosed encoding bug is a file rewrite, which
+  is how real mojibake gets introduced.
 - **Both tracks are now fully verified — cyber 411 rows and IT 225, 636 in total, zero `WRONG`** (`docs/CYBER-CLAIM-VERIFICATION.md`, `record-cyber-verdicts-dns.mjs`, `split-claims.mjs`). The last cyber class, **DNS record types**, closed at 4 `OK`. Cyber stands at **411 rows, 341 `OK`, 0 `WRONG`, 70 `UNVERIFIABLE` over 351 distinct locations**; `docs/claims-to-verify-cyber/` holds no packs because there is nothing left to send. **Every row was transcribed from a returned verdict (D-057) and every total is re-derived from the rows by a guard.**
   - **The claim count had been published as 410, and it is 411.** The wrong figure appeared in the status line, in the document's prose, and in `docs/CHECKPOINT.md` — **all three agreeing, all three copies of one remembered number.** They agreed because nothing measured them. The verdict-count guard caught it within seconds of the last rows landing, because it recomputes every class total from the rows. **A total that nothing recomputes is a guess with a citation**, and three documents repeating a figure is not corroboration. See **D-060**.
   - The DNS class is also the class that exposed a guard hole: it had been added to `split-claims.mjs` already marked `done: true`, so it emitted no worklist, counted toward no total, and could never be verified — while the guard **reported it as tracked-outstanding**, because the guard read the document and the document listed it. Check **0b** now fails when a section holds claim rows but is absent from the splitter's class list.

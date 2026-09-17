@@ -866,3 +866,114 @@ A lightweight decision log (ADR-style). Newest first.
 - **Context:** Mixed CRLF/LF caused whole-file diffs and obscured real changes.
 - **Decision:** `* text=auto eol=lf` in `.gitattributes`; CRLF reserved for `.bat`, `.cmd`, and PowerShell scripts.
 - **Consequences:** Clean, reviewable diffs.
+
+## D-061 — A figure nobody recomputes is a claim, not a measurement
+
+**Date:** 2026-09-18
+**Status:** Active
+
+Six wrong numbers have been found in this repository's own documentation. Every one had
+the same shape: a figure typed into prose, a command that prints a different figure, and
+nothing comparing them.
+
+| # | Where | Stated | Real | Found by |
+|---|---|---|---|---|
+| 1 | `IT-CLAIM-VERIFICATION.md` | a "verified" header | 225 unverified rows | reading it against the rows |
+| 2 | `CHECKPOINT.md` expected results | encoding "71 files", "16 controls" | ~227 files, 15 controls | re-running the guard by hand |
+| 3 | three places | cyber claims "410" | 411 | `audit-verdict-counts` |
+| 4 | `.github/workflows/ci.yml` | 4 recorders run | 1 ran | writing a guard for something else |
+| 5 | `CHECKPOINT.md` | `lint-content` "162", then "203" | 217 | this pass |
+| 6 | `CHECKPOINT.md` summary row | "23 content guards, 14 site suites" | 19 and 15 | this pass |
+| 7 | `CHECKPOINT.md` | `build-content` "273 practice tasks" | 283 — and line 145 of the same file said 283 | this pass |
+
+**Five of the seven were caught by accident, while doing something else.** That is the
+finding. The repository has 19 content guards, 11 test suites, and 4 verifiers, and not one
+of them looked at the documents' claims about the repository.
+
+**Decision.** Where a command prints a figure, the figure must be checked against that
+command, in CI, automatically. `audit-doc-figures.mjs` does this for the figures that
+warrant it, and `test-audit-doc-figures.mjs` proves it can fail.
+
+**Two corollaries, both learned the hard way in this pass.**
+
+1. **A historical record is an archive, and a stale figure in it is not a defect.** Rows
+   labelled "Previous pass" record what was measured *then*. Correcting them would destroy
+   the record. The guard reads present-tense claims, and control 6 asserts that a stale
+   figure inside a historical row is deliberately left alone.
+2. **A figure can be wrong the moment it is written.** Adding this guard made
+   `scripts/audit-*.mjs` nineteen, so the sentence introducing it that said eighteen was
+   false before it was saved. The control suite caught it, because a fixture asserting the
+   guard *can* fail had stopped matching. **Proximity to the thing measured is not
+   correctness.**
+
+---
+
+## D-062 — A test suite's restore must not be able to overwrite the author's work
+
+**Date:** 2026-09-18
+**Status:** Active
+
+D-058 established that a test suite may not write into the artifact it tests: control
+fixtures had written `**UNVERIFIABLE** — control fixture` into three real verdict rows.
+The fix was to move fixtures into a temp tree and assert the repository was untouched.
+
+**The fix for the fix was worse.** `test-audit-doc-figures.mjs` mutates a real document and
+restores it, because its artifact *is* the document. Its first version captured the text at
+module load and registered the restore on `process.on("exit")`. That produced two failures
+in a row:
+
+1. **A leaked mutation.** Control 4 wrote "all 30 lessons parse" and a later read picked up
+   the polluted text as the "original", so the real `CHECKPOINT.md` was left carrying the
+   mutation and the guard failed against the genuine document.
+2. **A discarded edit.** The exit handler fired after a crash and wrote back the pre-run
+   snapshot — **silently deleting a paragraph that had just been written into the file.**
+   The author's edit vanished with no error, and it was only noticed because a later check
+   said the paragraph was missing.
+
+**Decision.** Three rules, in order of importance:
+
+- **A restore exists to undo a fixture.** Every fixture restores in its own `finally`.
+  There is no process-level restore. If a fixture throws hard enough to skip its own
+  `finally`, a dirty `git status` is the correct, visible failure.
+- **The restore target is a startup snapshot, never a re-read.** Reading the "pristine"
+  text back from the file being mutated is what let one fixture inherit another's edit.
+  A second attempt read it from `git show HEAD:` — worse, because the suite then tests the
+  committed document and fails against text the author can see on screen.
+- **The suite asserts the real files are byte-identical at the end.** The check whose
+  absence allowed the original D-058 corruption.
+
+**The general form:** *a cure for "tests must not corrupt the artifact" must not itself be
+able to corrupt the artifact.* A restore that runs unconditionally at process exit is a
+write to the author's working tree, and it will eventually eat an edit.
+
+---
+
+## D-063 — A console that misrenders correct UTF-8 is not evidence of corruption
+
+**Date:** 2026-09-18
+**Status:** Active
+
+Reading `docs/CHECKPOINT.md` with PowerShell's `Get-Content` showed
+`- [x] … `audit-lesson-ast.mjs` â€" all 31 lessons parse`. That is the exact signature of
+CP1252 mojibake, and this repository has a documented history of it — `Get-Content -Raw`
+plus `WriteAllText` had previously manufactured 212 mojibake sequences in this file.
+
+The conclusion drawn was that the file was corrupted and needed repairing. **It was not.**
+Reading the bytes with Node showed a correct em-dash:
+
+```text
+codes: U+0020 U+0033 U+0031 U+0020 U+006C U+0065   (before the dash)
+```
+
+The file was valid UTF-8 without BOM and the console was rendering it wrongly.
+`audit-encoding` — which reads bytes, not consoles — had been reporting it clean throughout.
+
+**Decision.** When text looks corrupted, **read the bytes before acting**, and treat a
+console rendering as evidence of nothing. Use the `edit`/`write` tools or Node to inspect;
+`Get-Content` is not a UTF-8 reader.
+
+**Why it matters:** the "fix" for a misdiagnosed encoding bug is a rewrite of the file,
+which is precisely how real mojibake gets introduced. The repository's own note already
+said the damage "is invisible in a terminal that renders it as plausible text" — the
+converse is also true, and this pass is the instance: **a terminal can make correct text
+look damaged, and acting on that is how a correct file gets destroyed.**

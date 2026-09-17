@@ -192,8 +192,16 @@ jobs:
       # hold stop being reproducible. Three of the four were missing until now.
       - name: Every verdict recorder is wired into CI
         run: node scripts/audit-recorders-wired.mjs
-      - name: Recorder-wiring guard controls
+      - name: Verdict recorder wiring guard controls
         run: node scripts/test-audit-recorders-wired.mjs
+      # The documentation's own figures, checked against the commands that print them.
+      # Six wrong numbers have been found in these docs, and five were caught by accident
+      # while doing something else. This is the mechanism that was missing: for every
+      # figure a command can print, run the command and compare.
+      - name: Documentation figures match the commands that print them
+        run: node scripts/audit-doc-figures.mjs
+      - name: Doc-figure guard controls
+        run: node scripts/test-audit-doc-figures.mjs
       - name: Verification bundles match their generator (both tracks)
         run: |
           node scripts/build-cyber-bundles.mjs --track cybersec
