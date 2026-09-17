@@ -76,6 +76,16 @@ jobs:
       # of the collection, so it needs a check that sees the whole set.
       - name: Audit quiz answer balance
         run: node scripts/audit-quiz.mjs
+      # The corpus-level half of the same rule. A phase can balance perfectly
+      # while the track is skewed -- it happened when the IT on-ramp was written
+      # as seven quizzes at once, and every phase passed -- so the distribution
+      # is now gated across all 31 phases rather than only printed. The controls
+      # matter more than usual here: the first version of this rule was dead code
+      # twice over, and still exited 1 in the probe scenario for an unrelated
+      # per-phase reason, so a control that checked only the exit code would have
+      # called it working.
+      - name: Test corpus answer-balance controls
+        run: node scripts/test-audit-quiz-corpus.mjs
       # The workflow that runs every other check had no check of its own. No YAML
       # parser is vendored, so a malformed step is invisible locally: CI would
       # fail to start, which reads as "no CI ran" rather than "CI is broken".

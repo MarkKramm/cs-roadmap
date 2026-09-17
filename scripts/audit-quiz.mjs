@@ -23,9 +23,23 @@
 //      5 options is harder to read than one that keeps a shape, and a question
 //      with 2 options is a coin flip rather than a test.
 //
+// A THIRD CLASS WAS ADDED ON 2026-09-17, ONE LEVEL ABOVE BOTH OF THEM.
+// Classes 1 and 2 are per-phase, and a corpus can be badly skewed while every
+// phase passes. It happened: when the IT on-ramp was written as a batch of
+// seven quizzes, every phase balanced individually and the corpus still drifted
+// to A=17.2% against C=35.2%, with three phases sitting exactly on the 50% line.
+// A reader working the track in order sees the pattern across phases, which no
+// per-quiz check can observe. The corpus distribution was printed on every run
+// and never gated — and it drifted in the documentation anyway, quoted as
+// A=90 B=97 C=97 D=96 in one file while the guard printed C=98 D=97.
+//
+// Class 3 gates the corpus spread. The threshold is deliberately loose: an
+// even split is not the goal, only that no single position has become the
+// answer a guesser would learn to pick. See CORPUS_* below.
+//
 // The balance threshold is 50% rather than an even split, deliberately. With 10
 // questions and 4 positions a perfectly even split is impossible, and forcing
-// 25% ± 1 would fail honest quizzes for arithmetic reasons. 50% is the point
+// 25% Â± 1 would fail honest quizzes for arithmetic reasons. 50% is the point
 // where guessing one letter beats reading, which is the property worth gating.
 //
 // Read-only: writes nothing.
@@ -35,8 +49,27 @@ import path from 'node:path';
 const ROOT = 'career-roadmaps';
 const TRACKS = ['it-roadmap', 'cybersec-roadmap', 'advance-roadmap'];
 
+// Class 3 — corpus-level spread. The per-phase rule catches a quiz where a
+// guesser beats a reader *within one sitting*. The corpus rule catches the same
+// advantage accumulated across a whole track, which is what a reader working
+// the phases in order actually experiences.
+//
+// The band is wide on purpose. A 4-position corpus of ~380 questions averages
+// 25% each, and honest authoring will not land on 25.0 exactly. 35% is the
+// point at which one letter has become a strategy worth learning; 15% catches
+// the mirror failure, a position that has been effectively abandoned so a
+// reader who has learned to ignore it is being helped rather than tested.
+// Both bounds are named here rather than inlined, so the failure message and
+// the check cannot drift apart.
+const CORPUS_MAX_SHARE = 0.35;
+const CORPUS_MIN_SHARE = 0.15;
+
 const findings = [];
 const note = (file, line, message) => findings.push({ file, line, message });
+
+// How many questions offer each option count, corpus-wide. Class 3 needs this to
+// know which positions the corpus is *supposed* to be using — see the floor below.
+const optionShapes = new Map();
 
 const LETTER = (i) => String.fromCharCode(65 + i);
 
@@ -106,6 +139,7 @@ for (const full of files) {
     if (q.answer < 0) {
       note(rel, q.line, `${q.id} has no correct option marked with [x]`);
     }
+    optionShapes.set(q.options, (optionShapes.get(q.options) ?? 0) + 1);
   }
 
   // Class 1 — position balance, as a property of the phase's set.
@@ -156,6 +190,88 @@ for (const full of files) {
       `questions vary in option count (${sizes.join(', ')}) — ` +
         `one consistent shape per quiz reads better`,
     );
+  }
+}
+
+// Class 3 — the corpus distribution, checked AFTER every phase has contributed
+// to `globalPositions`. Anything that must hold across the whole collection has
+// to run once the collection is complete, which is why this sits here and not
+// inside the per-file loop above.
+//
+// Reported through the same `findings` array as the other two classes so it
+// gates identically; the pseudo-file names the whole corpus rather than a phase.
+const corpusPositions = Object.keys(globalPositions).map(Number).sort((a, b) => a - b);
+const corpusTotal = corpusPositions.reduce((n, p) => n + globalPositions[p], 0);
+if (corpusTotal > 0) {
+  const shares = corpusPositions.map((p) => ({ pos: p, n: globalPositions[p], share: globalPositions[p] / corpusTotal }));
+  for (const s of shares) {
+    if (s.share > CORPUS_MAX_SHARE) {
+      note(
+        '(corpus)',
+        0,
+        `across all ${corpusTotal} questions, position ${LETTER(s.pos)} holds ${s.n} answers ` +
+          `(${Math.round(s.share * 100)}%) — above the ${Math.round(CORPUS_MAX_SHARE * 100)}% ceiling, ` +
+          `so a reader who works the track in order can learn to favour one letter`,
+      );
+    }
+  }
+  // The floor applies to positions the corpus genuinely uses, which is the
+  // widest shape offered by *more than a token number* of questions.
+  //
+  // The first version read `usedCount >= 4` — the number of non-empty positions
+  // — which made the floor unreachable in precisely the case it exists for: a
+  // position with no answers is not "in use", so abandoning one lowered the
+  // count and switched the check off. Abandoning a position was the one way to
+  // guarantee the rule could not see it. Caught by a control that moved all 97
+  // D-answers to A/B/C: 32 per-phase findings fired, the corpus exit code was 1,
+  // and the floor branch never ran, so the gate looked like it worked while the
+  // new rule had never executed once.
+  //
+  // The second version derived the expectation from the widest question shape
+  // and was too strict the other way: the corpus contains exactly ONE
+  // five-option question (advance-07-q04), so it demanded an answer in E out of
+  // 382 questions and failed the real corpus. A single question offering a
+  // fifth slot does not make E a position the corpus uses; it means E has
+  // almost no opportunity to be chosen. Requiring an answer there would be the
+  // guard inventing a defect, which is the failure this file already warns
+  // about one level down.
+  //
+  // So a shape must be offered by a meaningful share of questions before its
+  // positions are required to carry answers. A position counts as available
+  // only if at least 5% of questions offer it — comfortably above a single
+  // outlier, comfortably below any real four- or five-option quiz.
+  const minOffered = Math.max(4, Math.ceil(corpusTotal * 0.05));
+  const opportunity = new Map();
+  // Iterate the Map's ENTRIES. The first version wrote `for (const shape of
+  // optionShapes)` and then read `shape.options`, which is undefined on a
+  // [key, value] pair — so the loop contributed nothing, `opportunity` stayed
+  // empty, and the floor silently never ran. That is why the control above kept
+  // failing while the guard still exited 1 for an unrelated per-phase reason:
+  // the gate was green-looking and the new branch was dead on arrival. A Map is
+  // not an array, and `for…of` does not say which one you meant.
+  for (const [options, count] of optionShapes) {
+    for (let p = 0; p < options; p++) opportunity.set(p, (opportunity.get(p) ?? 0) + count);
+  }
+  for (const [p, offered] of [...opportunity.entries()].sort((a, b) => a[0] - b[0])) {
+    if (offered < minOffered) continue;
+    const s = shares.find((x) => x.pos === p);
+    if (!s) {
+      note(
+        '(corpus)',
+        0,
+        `across all ${corpusTotal} questions, position ${LETTER(p)} holds no answers at all — ` +
+          `${offered} questions offer it, so it is effectively abandoned and a reader who ` +
+          `stops considering it is being helped`,
+      );
+    } else if (s.share < CORPUS_MIN_SHARE) {
+      note(
+        '(corpus)',
+        0,
+        `across all ${corpusTotal} questions, position ${LETTER(s.pos)} holds only ${s.n} answers ` +
+          `(${Math.round(s.share * 100)}%) — below the ${Math.round(CORPUS_MIN_SHARE * 100)}% floor; ` +
+          `an effectively abandoned position is an advantage to a reader who has noticed`,
+      );
+    }
   }
 }
 
