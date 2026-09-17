@@ -127,8 +127,17 @@ export default function PhaseTransfer({ phase }) {
               type="file"
               accept="application/json,.json"
               className="visually-hidden"
+              id="phase-transfer-file"
               onChange={onFile}
             />
+            {/* The input keeps `visually-hidden` rather than `display: none`, so
+                it stays in the accessibility tree. That only helps if it has a
+                NAME, though — it previously had no id, no label and no
+                aria-label, so a screen reader announced an unlabelled file
+                field. Same pattern as DataTransfer's picker. */}
+            <label htmlFor="phase-transfer-file" className="visually-hidden">
+              Choose a phase backup file to import
+            </label>
           </div>
 
           <p className="muted phase-transfer__note">

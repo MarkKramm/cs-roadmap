@@ -5,26 +5,19 @@
 // is always rendered rather than revealed on hover, because a touch user has no
 // hover — the same rule the code-block copy button follows.
 
-import { useEffect, useRef } from "react";
+import { useRef } from "react";
 import { SHORTCUTS } from "../hooks/useShortcuts.js";
+import { useFocusTrap } from "../hooks/useFocusTrap.js";
 
 export default function ShortcutHelp({ open, onClose }) {
   const closeRef = useRef(null);
   const panelRef = useRef(null);
-  const lastFocus = useRef(null);
 
-  // Move focus into the panel while it is open and restore it on close, so a
-  // keyboard user who opened it with `?` can dismiss it with Escape and carry on
-  // from where they were rather than from the top of the document.
-  useEffect(() => {
-    if (!open) return;
-    lastFocus.current = document.activeElement;
-    if (closeRef.current) closeRef.current.focus();
-    return () => {
-      const el = lastFocus.current;
-      if (el && typeof el.focus === "function") el.focus();
-    };
-  }, [open]);
+  // Containment, focus restore and scroll lock all come from the shared hook.
+  // This panel already had focus-in and focus-restore; what it lacked was the
+  // tab trap, so a keyboard user could Tab straight out of a dialog that
+  // declares `aria-modal="true"` into the ~40 controls behind it.
+  useFocusTrap(open, { panelRef, initialFocusRef: closeRef });
 
   if (!open) return null;
 

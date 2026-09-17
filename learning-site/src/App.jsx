@@ -14,6 +14,7 @@ import { useReadingState } from "./hooks/useReadingState.js";
 import { useReadingSize, scaleFor } from "./hooks/useReadingSize.js";
 import { useTimeBudget } from "./hooks/useTimeBudget.js";
 import { useShortcuts } from "./hooks/useShortcuts.js";
+import { useFocusTrap } from "./hooks/useFocusTrap.js";
 import Dashboard from "./pages/Dashboard.jsx";
 import PhaseDetail from "./pages/PhaseDetail.jsx";
 import ToolsLibrary from "./pages/ToolsLibrary.jsx";
@@ -72,6 +73,8 @@ export default function App() {
   } = useReadingState();
   const mainRef = useRef(null);
   const activePhaseRef = useRef(null);
+  // The drawer is the focus-trap panel on narrow screens.
+  const sidebarRef = useRef(null);
   // Set when a search result is opened, read once by the lesson renderer.
   const pendingAnchor = useRef("");
 
@@ -95,21 +98,26 @@ export default function App() {
     window.scrollTo(0, 0);
   }, [view, openPhaseId, trackId]);
 
-  // A drawer that traps the page behind it is worse than no drawer. Close on
-  // Escape, and lock background scrolling while it is open.
+  // Close the drawer on Escape. Scroll lock and TAB CONTAINMENT come from
+  // useFocusTrap, called below.
+  //
+  // The comment here used to read "A drawer that traps the page behind it is
+  // worse than no drawer", and it was right about the intent while the code did
+  // not achieve it: `body { overflow: hidden }` freezes the scrollbar and does
+  // nothing to the tab order, so a keyboard user could Tab out of the open
+  // drawer into the ~40 controls of the obscured page behind it. The drawer is
+  // modal on small screens, so it must own the tab order or stop presenting
+  // itself as covering the page.
   useEffect(() => {
     if (!navOpen) return;
     const onKey = (e) => {
       if (e.key === "Escape") setNavOpen(false);
     };
     window.addEventListener("keydown", onKey);
-    const prevOverflow = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
-    return () => {
-      window.removeEventListener("keydown", onKey);
-      document.body.style.overflow = prevOverflow;
-    };
+    return () => window.removeEventListener("keydown", onKey);
   }, [navOpen]);
+
+  useFocusTrap(navOpen, { panelRef: sidebarRef });
 
   // Keep the open phase visible in a long sidebar list.
   useEffect(() => {
@@ -231,6 +239,11 @@ export default function App() {
       <nav
         className={"sidebar" + (navOpen ? " is-open" : "")}
         aria-label="Main navigation"
+        ref={sidebarRef}
+        // Declared modal only when it is actually behaving as an overlay drawer.
+        // On a wide screen the sidebar is a permanent column and the page beside
+        // it is not obscured, so claiming modality there would be false.
+        {...(navOpen ? { role: "dialog", "aria-modal": "true" } : {})}
       >
         <button
           type="button"

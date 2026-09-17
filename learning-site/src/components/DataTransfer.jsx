@@ -27,6 +27,7 @@
 // not mid-task when they click this — they are on a settings errand.
 
 import { useCallback, useEffect, useRef, useState } from "react";
+import { useFocusTrap } from "../hooks/useFocusTrap.js";
 import {
   exportAll,
   importAll,
@@ -46,26 +47,31 @@ export default function DataTransfer({ open, onClose }) {
   const fileRef = useRef(null);
   const panelRef = useRef(null);
   const closeRef = useRef(null);
-  const lastFocus = useRef(null);
 
   // Reset to a clean slate every time the panel opens, so a failed attempt from
   // last week is not still on screen.
   useEffect(() => {
     if (!open) return;
-    lastFocus.current = document.activeElement;
     setStage("idle");
     setError("");
     setNotice("");
     setPending(null);
     setSkipped([]);
-    if (closeRef.current) closeRef.current.focus();
-    return () => {
-      const el = lastFocus.current;
-      if (el && typeof el.focus === "function") el.focus();
-    };
   }, [open]);
 
-  // Escape closes, and only while nothing irreversible is mid-flight.
+  // Focus containment, focus restore, and the scroll lock that was missing here.
+  useFocusTrap(open, { panelRef, initialFocusRef: closeRef });
+
+  // Escape closes the panel.
+  //
+  // This comment used to claim the close was conditional — "only while nothing
+  // irreversible is mid-flight" — but the handler below has never checked
+  // `stage`, so Escape closes unconditionally. The code was corrected to match
+  // the simpler behaviour rather than the comment, because a confirm-in-progress
+  // is not a state this panel can be in: the replace confirmation is a separate
+  // `pending` step that Escape safely abandons. A comment describing a guard
+  // that does not exist is worse than no comment, because the next reader
+  // trusts it instead of reading the body.
   useEffect(() => {
     if (!open) return;
     const onKey = (e) => {

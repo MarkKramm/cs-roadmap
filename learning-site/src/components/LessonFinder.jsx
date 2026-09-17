@@ -29,6 +29,11 @@ import { buildEntries, searchLesson } from "../lib/lessonSearch.js";
 export default function LessonFinder({ blocks, open, onClose, onJump }) {
   const [query, setQuery] = useState("");
   const inputRef = useRef(null);
+  // Where focus was before the panel opened, so closing it returns the reader to
+  // the control they used rather than to the top of the document. On a
+  // 5,000–24,000 word lesson page, losing focus to <body> means the next Tab
+  // restarts at the very beginning of the lesson.
+  const lastFocus = useRef(null);
 
   // Index once per lesson, not once per keystroke. buildEntries walks every
   // block and every nested list, so rebuilding it while the reader types would
@@ -40,14 +45,25 @@ export default function LessonFinder({ blocks, open, onClose, onJump }) {
   // Focus the input the moment the panel opens, so the reader can type without
   // a second click. Done in an effect rather than autoFocus so it also fires
   // when the panel is reopened after being closed.
+  //
+  // This is deliberately NOT useFocusTrap: the finder is an inline panel inside
+  // the lesson, not a modal, so Tab should move on into the lesson when the
+  // reader is done with it. Only the focus restore belongs here.
   useEffect(() => {
-    if (!open) return;
+    if (!open) return undefined;
+    lastFocus.current = document.activeElement;
     if (inputRef.current) inputRef.current.focus();
     const onKey = (e) => {
       if (e.key === "Escape") onClose();
     };
     window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
+    return () => {
+      window.removeEventListener("keydown", onKey);
+      const el = lastFocus.current;
+      if (el && typeof el.focus === "function" && document.contains(el)) {
+        el.focus({ preventScroll: true });
+      }
+    };
   }, [open, onClose]);
 
   const trimmed = query.trim();
