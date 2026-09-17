@@ -209,6 +209,13 @@ jobs:
         run: node scripts/audit-open-items.mjs
       - name: Open-item guard controls
         run: node scripts/test-audit-open-items.mjs
+      # 283 tasks carry an authored duration band and nobody has timed any of them. This
+      # cannot close that gap -- it rejects a band the UI cannot reach, or one attached to
+      # a task with no content, which is the part that IS checkable without a stopwatch.
+      - name: Task bands are plausible for their tasks
+        run: node scripts/audit-band-plausibility.mjs
+      - name: Band guard controls
+        run: node scripts/test-audit-band-plausibility.mjs
       - name: Verification bundles match their generator (both tracks)
         run: |
           node scripts/build-cyber-bundles.mjs --track cybersec

@@ -1155,3 +1155,85 @@ failures were reported against **working code**, and both were the fixture's fau
 now the sixth occurrence of this shape here (D-049, D-058, D-065), which is why
 `driftNumber` exists and why every fixture in the new suite asserts that it changed what it
 intended to change.
+
+## D-068 — A proxy must be validated against real cases before it is trusted
+
+**Date:** 2026-09-18
+**Status:** Active
+
+Asked to make the 283 untimed task bands more verifiable, the first thing built was a
+plausibility guard that scored each task's shape by counting conjunctions and sentence breaks
+in its line, then rejected a band the shape contradicted.
+
+**It was wrong three times out of three.**
+
+| Task | Band | What the guard said | Why the guard was wrong |
+|---|---|---|---|
+| `it-01-t01` | quick | "a multi-part build cannot be `quick`" | *"Write down: CPU model and core count, RAM capacity, storage type and size, OS version and build, and Wi-Fi adapter model."* One screen, reading values off it. The commas are a **list of fields to copy**, not steps to perform. |
+| `it-03-t02` | quick | same | *"Record your IP address, subnet mask, default gateway, DHCP server, DNS server, and MAC address."* One command, one transcription. |
+| `cyber-05-t01` | deep | "no procedure beyond a single step cannot carry `deep`" | The line is a **lead-in to four sub-bullets**, each a separate deliverable. The guard scored the lead-in and never looked at what followed it. |
+
+**All three bands are correct.** The proxy was measuring **list length** and calling it
+**work**.
+
+**Decision.** **A check built on a proxy is a hypothesis, and it must be run against real
+cases before it is trusted with a verdict.** The mistake was not choosing a bad proxy — any
+proxy for duration is a guess. The mistake was treating the first output as a finding instead
+of as a test of the proxy. The three tasks above are now **passing controls** in
+`test-audit-band-plausibility.mjs`: not because those bands were ever in doubt, but so that
+a future edit reintroducing a list-length proxy fails loudly instead of flagging correct
+content.
+
+**What survived is much narrower, and says so on every run.** The guard now checks only two
+things that need no stopwatch and no guess: a band or energy value the UI **cannot reach**
+(`lib/today.js` switches on exactly four bands and three energy levels), and a task with
+**no content** — a lead-in with nothing under it, which no band can describe. Everything else
+is judgement, and the guard prints that it does not and cannot confirm that `focused` means
+what a reader expects.
+
+**The general form:** *narrowing a guard to what it can actually establish is not a retreat —
+it is the difference between a check that gets trusted and one that gets disabled.* A guard
+that flags three correct tasks out of three is worse than no guard, because the first thing
+anyone does is stop reading it.
+
+---
+
+## D-069 — The claim nobody could measure, and the honest result of trying
+
+**Date:** 2026-09-18
+**Status:** Active
+
+Two open items in this repository end with *"needs a human"*. This record is about the one
+where the honest answer turned out to be **"and no human can, from here either"**, which is a
+different and more useful result than leaving it open indefinitely.
+
+**The claim.** `02-phase-operating-systems.md` argues that **macOS matters at first-line
+support now**, and the text already flags itself: *"It is a reasonable read of the remote job
+market, not a measured one — nobody has sampled the postings to put a number on it."*
+
+**The attempt.** General network access works from this environment — only the search tool is
+broken. So two real corpora were queried directly:
+
+| Source | Retrieved | Entry-level IT/helpdesk postings | Postings mentioning macOS |
+|---|---|---|---|
+| RemoteOK API | 99 postings, full text | **1** | 2 (neither an IT role) |
+| HN "Who is hiring" thread | **782** postings, full text | **0** | 2 |
+
+**782 real postings, zero entry-level IT roles.** Neither source carries the population the
+claim is about: RemoteOK skews senior and product-side, and HN skews software engineering.
+
+**Decision.** **Report the null result rather than manufacture a number.** Sampling these
+sources and quoting a percentage would produce a figure that looks measured and is not — it
+would describe developers applying to startups and be published as a fact about helpdesk
+hiring. That is strictly worse than the unmeasured opinion already in the text, because the
+opinion is labelled and a fabricated sample would not be. **A null result from the sources
+actually reachable is a finding; a number from the wrong population is a defect.**
+
+**What this changes.** Nothing in the content. The paragraph's self-aware caveat was already
+accurate and stays. What changes is the **open item**: it no longer reads as work waiting for
+someone to get around to it, and now records that two real corpora were sampled and neither
+contains the population — so the next pass does not repeat the attempt.
+
+**The corollary.** *"Nobody has checked this"* and *"this cannot be checked from here"* are
+different states and should not share a checkbox. The first is a backlog item; the second is a
+finding about the claim's reachability.

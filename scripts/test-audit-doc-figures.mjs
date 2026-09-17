@@ -203,6 +203,37 @@ driftInFile(
   +3,
 );
 
+// 5d. THE BREAKDOWN, NOT THE TOTAL. ROADMAP.md quoted "252 banded" with a distribution of
+//     quick 34 / focused 144 / deep 63 / ongoing 11 -- five stale numbers in one sentence,
+//     and the total is the only one a reader would think to re-check. Each band gets its
+//     own fixture, because a single shared one would pass whenever two errors cancelled.
+driftInFile(
+  "the focused band count drifts while the total is right -> must FAIL",
+  path.join(ROOT, "docs", "ROADMAP.md"),
+  /(Bands — focused )(\d+)(, deep \d+, quick \d+, ongoing \d+)/,
+  -7,
+);
+
+// 5e. The energy breakdown, same reasoning: three figures, one sentence.
+driftInFile(
+  "the normal energy count drifts -> must FAIL",
+  path.join(ROOT, "docs", "ROADMAP.md"),
+  /(Energy — normal )(\d+)(, high \d+, low \d+)/,
+  -9,
+);
+
+// 5f. NEGATIVE. ROADMAP.md's line above the distribution carries `183` -- "82% of the 183
+//     tasks that existed when this was measured". That is a DATED measurement in past
+//     tense, deliberately not guarded: correcting it would falsify a record. If a future
+//     edit wires it up, this control catches the guard becoming wrong about an archive.
+driftInFile(
+  "the historical 183 figure is left alone -> must PASS",
+  path.join(ROOT, "docs", "ROADMAP.md"),
+  /(82% of the )(\d+)( tasks that existed when this was measured)/,
+  -3,
+  false,
+);
+
 // 5d. The most misleading stale figure the sweep found: quiz coverage. It said "10 of 31"
 //     AND explained why IT 01 had none. The count was stale, but the RATIONALE is what made
 //     it dangerous -- a reader treats a reasoned absence as deliberate design and does not

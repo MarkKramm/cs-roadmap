@@ -8,6 +8,15 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### Added
 
+- **`scripts/audit-band-plausibility.mjs` and its seven controls** — rejects a duration
+  band the UI cannot reach, or one attached to a task with no content. It explicitly does
+  **not** claim the bands are accurate, because nobody has timed them, and it prints that
+  limit on every run. Three of its controls are the cases its first version got wrong. D-068.
+- **Seven more guarded figures: the band and energy distributions.** `ROADMAP.md` quoted
+  "252 banded" *and* a breakdown of quick 34 / focused 144 / deep 63 / ongoing 11 — five
+  stale numbers in one sentence, where the total is the only one a reader would re-check.
+  The figures guard is now **32 figures across 4 documents** with **14 controls**.
+
 - **A guard for open items that contradict themselves** — `scripts/audit-open-items.mjs`
   and six controls in `scripts/test-audit-open-items.mjs`, wired into CI. It fails when an
   unchecked box both denies and asserts its own completion, which is the shape two real
@@ -355,7 +364,15 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - `docs/DESIGN-SYSTEM.md` — sidebar contents updat
 - **A stale item that explained why it was open.** `CHECKPOINT.md`'s IT-gaps item said
   *"the audit that found them is not fully re-verified"* and then, in its next sentence, said
-  the re-verification *"has now happened"*. Re-checked against the corpus: all nine topics are
+  the re-verification *"has now happened"*. Re-checked against the corpus: all nine topic
+- **`ROADMAP.md`'s banded-task paragraph was wrong in all five figures.** It said "All
+  **252** practice tasks" against a real **283**, quoted build output reading `252 banded`,
+  and gave a distribution of quick 34 / focused 144 / deep 63 / ongoing 11 against the real
+  focused 158 / deep 74 / quick 39 / ongoing 12. The quoted command output is what made it
+  read as authoritative. **The `183` in the line above it is a different thing and was left
+  alone** — it is explicitly past tense ("the tasks that existed when this was measured"), and
+  a control now asserts the guard keeps ignoring it.
+s are
   present (`dependent services` at `02-phase-operating-systems.md:76`, NTFS versus share
   permissions at `:547`, update rollback at `:75`). **The sentence supplied a reason to keep
   reading the item as open**, which is D-064's shape in the done/outstanding class rather than

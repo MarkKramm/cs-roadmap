@@ -75,6 +75,34 @@ captured.banded = Number((/task bands:\s*(\d+) banded/.exec(build) || [])[1] ?? 
 captured.taskIds = Number((/total phase task IDs:\s*(\d+)/.exec(build) || [])[1] ?? NaN);
 captured.sharedDocs = Number((/wrote shared\.json — (\d+) document/.exec(build) || [])[1] ?? NaN);
 
+// Per-band and per-energy counts, counted from the corpus rather than read from another
+// tool's output. `build-content` prints only the total, and a total that agrees while its
+// breakdown drifts is exactly the failure ROADMAP.md had: it quoted "252 banded" with a
+// distribution of quick 34 / focused 144 / deep 63 / ongoing 11, all four parts stale.
+const bandCounts = { quick: 0, focused: 0, deep: 0, ongoing: 0 };
+const energyCounts = { low: 0, normal: 0, high: 0 };
+(() => {
+  const re = /<!--\s*id:\s*[\w-]+\s+band:\s*(\w+)\s+energy:\s*(\w+)\s*-->/g;
+  for (const track of ["it-roadmap", "cybersec-roadmap", "advance-roadmap"]) {
+    const dir = path.join(ROOT, "career-roadmaps", track);
+    for (const f of fs.readdirSync(dir).filter((x) => /^\d{2}-phase.*\.md$/.test(x))) {
+      const text = fs.readFileSync(path.join(dir, f), "utf8");
+      let m;
+      while ((m = re.exec(text)) !== null) {
+        if (m[1] in bandCounts) bandCounts[m[1]]++;
+        if (m[2] in energyCounts) energyCounts[m[2]]++;
+      }
+    }
+  }
+})();
+captured.focusedBanded = bandCounts.focused;
+captured.deepBanded = bandCounts.deep;
+captured.quickBanded = bandCounts.quick;
+captured.ongoingBanded = bandCounts.ongoing;
+captured.normalEnergy = energyCounts.normal;
+captured.highEnergy = energyCounts.high;
+captured.lowEnergy = energyCounts.low;
+
 // --- the documentation side -------------------------------------------------
 // Each assertion: the figure, and the claims that state it. A claim is a file plus a
 // regex whose FIRST capture group is the number the file publishes.
@@ -161,6 +189,44 @@ const ASSERTIONS = [
       DOC("docs/CONTENT-SCHEMA.md", /task energy:\s+(\d+) of \d+ practice/, "banded count"),
     ],
     why: "practice tasks the build bands",
+  },
+  {
+    // The breakdown, not just the total. ROADMAP.md:108 quoted "252 banded" AND a
+    // distribution of quick 34 / focused 144 / deep 63 / ongoing 11 -- five stale numbers
+    // in one sentence, where the total is the only one a reader would think to re-check.
+    key: "focusedBanded",
+    claims: [DOC("docs/ROADMAP.md", /Bands — focused (\d+), deep \d+, quick \d+, ongoing \d+/, "focused band count")],
+    why: "practice tasks banded `focused`",
+  },
+  {
+    key: "deepBanded",
+    claims: [DOC("docs/ROADMAP.md", /Bands — focused \d+, deep (\d+), quick \d+, ongoing \d+/, "deep band count")],
+    why: "practice tasks banded `deep`",
+  },
+  {
+    key: "quickBanded",
+    claims: [DOC("docs/ROADMAP.md", /Bands — focused \d+, deep \d+, quick (\d+), ongoing \d+/, "quick band count")],
+    why: "practice tasks banded `quick`",
+  },
+  {
+    key: "ongoingBanded",
+    claims: [DOC("docs/ROADMAP.md", /Bands — focused \d+, deep \d+, quick \d+, ongoing (\d+)/, "ongoing band count")],
+    why: "practice tasks banded `ongoing`",
+  },
+  {
+    key: "normalEnergy",
+    claims: [DOC("docs/ROADMAP.md", /Energy — normal (\d+), high \d+, low \d+/, "normal energy count")],
+    why: "practice tasks carrying `energy: normal`",
+  },
+  {
+    key: "highEnergy",
+    claims: [DOC("docs/ROADMAP.md", /Energy — normal \d+, high (\d+), low \d+/, "high energy count")],
+    why: "practice tasks carrying `energy: high`",
+  },
+  {
+    key: "lowEnergy",
+    claims: [DOC("docs/ROADMAP.md", /Energy — normal \d+, high \d+, low (\d+)/, "low energy count")],
+    why: "practice tasks carrying `energy: low`",
   },
   {
     key: "phases",
