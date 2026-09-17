@@ -58,7 +58,7 @@ For each row, replace the empty last column with exactly one of:
 
 | # | Location | Text as written | Verdict |
 |---|---|---|---|
-| 1 | `01-phase-foundations.md:203` | The **asset** is an old web server. The **vulnerability** is a known flaw in an outdated version of its software, published as CVE-2021-41773 in Apache's HTTP Server. The **threat** is an attacker scanning the internet for that exact version. The **exploit** i … | |
+| 1 | `01-phase-foundations.md:203` | The **asset** is an old web server. The **vulnerability** is a known flaw in an outdated version of its software, published as CVE-2021-41773 in Apache's HTTP Server. The **threat** is an attacker scanning the internet for that exact version. The **exploit** i … | **OK** — NVD: “CVE-2021-41773: A flaw was found in a change made to path normalization in Apache HTTP Server 2.4.49.” |
 | 2 | `01-phase-foundations.md:840` | **Why:** The exploit is the specific technique or piece of code that takes advantage of a vulnerability, and the crafted URL is exactly that. The vulnerability is the flaw in the outdated Apache version itself — it exists whether or not anyone writes a URL. Th … | |
 | 3 | `02-phase-networking-and-linux.md:55` | - Logs with `journalctl`, `/var/log/auth.log`, `/var/log/syslog` | |
 | | | <sub>↑ - Services with `systemctl`<br>↓ - Reading logs as evidence: `grep`, `awk`, `sort`, `uniq`, and `zgrep` pipelines that answer a question rather than dumping a file</sub> | |
@@ -69,7 +69,7 @@ For each row, replace the empty last column with exactly one of:
 | 7 | `02-phase-networking-and-linux.md:625` | Every `sudo` invocation is logged, which is why it also serves the **accounting** part of AAA. Reading `/etc/sudoers` shows who has been granted what — and a common finding in security reviews is that far too many users are in the sudo group. | |
 | 8 | `02-phase-networking-and-linux.md:645` | Reading `/etc/passwd` carefully is a genuinely useful skill. Two fields carry the security meaning. | |
 | 9 | `02-phase-networking-and-linux.md:652` | \| **Login shell** \| `/usr/sbin/nologin` \| The account exists but cannot log in interactively — how service accounts are locked down \| | |
-| 10 | `02-phase-networking-and-linux.md:661` | **SSH** gives you an encrypted shell on a remote machine. The server is `sshd` — the SSH *daemon*, where a daemon is a background service. It is configured in `/etc/ssh/sshd_config`, and it listens on port 22 by default. | |
+| 10 | `02-phase-networking-and-linux.md:661` | **SSH** gives you an encrypted shell on a remote machine. The server is `sshd` — the SSH *daemon*, where a daemon is a background service. It is configured in `/etc/ssh/sshd_config`, and it listens on port 22 by default. | **OK** — OpenSSH: sshd is the SSH daemon, configured in /etc/ssh/sshd_config, listening on port 22 by default. |
 | 11 | `02-phase-networking-and-linux.md:738` | \| `/var/log/auth.log` \| Authentication: logins, `sudo` use, SSH attempts (Debian/Ubuntu) \| | |
 | | | <sub>↑ \|---\|---\|<br>↓ \| `/var/log/secure` \| The same role on RHEL/CentOS family \|</sub> | |
 | 12 | `02-phase-networking-and-linux.md:739` | \| `/var/log/secure` \| The same role on RHEL/CentOS family \| | |
@@ -80,13 +80,13 @@ For each row, replace the empty last column with exactly one of:
 | | | <sub>↑ \| `/var/log/syslog` \| General system messages (Debian/Ubuntu) \|<br>↓ \| `/var/log/apache2/`, `/var/log/nginx/` \| Web server access and error logs \|</sub> | |
 | 15 | `02-phase-networking-and-linux.md:742` | \| `/var/log/apache2/`, `/var/log/nginx/` \| Web server access and error logs \| | |
 | | | <sub>↑ \| `/var/log/messages` \| General system messages (RHEL/CentOS) \|</sub> | |
-| 16 | `02-phase-networking-and-linux.md:757` | Watch the failures appear. Then use `grep` to pull the failed attempts out of `/var/log/auth.log`. | |
+| 16 | `02-phase-networking-and-linux.md:757` | Watch the failures appear. Then use `grep` to pull the failed attempts out of `/var/log/auth.log`. | **OK** — grep searches file contents; /var/log/auth.log is the standard authentication log on Debian/Ubuntu. |
 | 17 | `02-phase-networking-and-linux.md:839` | `zgrep` searches compressed logs too. On a system that has been running a while, `/var/log/auth.log` is only the most recent slice, and the earlier evidence is in `auth.log.1.gz`, `auth.log.2.gz` and so on. `auth.log*` catches all of them. | |
 | 18 | `02-phase-networking-and-linux.md:1140` | - **`/etc/passwd` UID 0 is root, and nothing else should be.** A non-root account with UID 0 is a backdoor; a service account with `/bin/bash` where `nologin` belongs is a misconfiguration. | |
 | 19 | `02-phase-networking-and-linux.md:1152` | 2. **Then permissions** (task 2), because they are the foundation of Linux security thinking. Create two users, put them in a group, create a file, and try to read it as the wrong user. Read `/etc/passwd` and find the UID field. Being denied access is the less … | |
 | 20 | `02-phase-networking-and-linux.md:1153` | 3. **Then SSH** (task 3), which turns your VM into a remote system you can work with comfortably. Set up keys, not just passwords, and read `/etc/ssh/sshd_config` while you are there. | |
 | 21 | `02-phase-networking-and-linux.md:1244` | **Why:** Service accounts exist to run processes, not to be logged into, so the expected value is `/usr/sbin/nologin`. An interactive shell on one is a finding because it is an account an attacker can actually log in as, and service accounts are frequently wea … | |
-| 22 | `02-phase-networking-and-linux.md:1325` | **Why:** `-u sshd` matches a systemd unit by that exact name, and on some distributions the unit is `ssh.service` rather than `sshd.service`, so the filter matches nothing. Separately, not every distribution routes SSH into the journal — Debian and Ubuntu fami … | |
+| 22 | `02-phase-networking-and-linux.md:1325` | **Why:** `-u sshd` matches a systemd unit by that exact name, and on some distributions the unit is `ssh.service` rather than `sshd.service`, so the filter matches nothing. Separately, not every distribution routes SSH into the journal — Debian and Ubuntu fami … | **OK** — systemd: `journalctl -u` matches by unit name, and on Debian/Ubuntu the unit is `ssh.service` rather than `sshd.service`. |
 | 23 | `03-phase-security-fundamentals.md:302` | In Linux the equivalent evidence lives where Phase 2 showed you: `/var/log/auth.log` or `/var/log/secure`, read through `journalctl -u sshd`. | |
 | 24 | `03-phase-security-fundamentals.md:393` | \| `C:\Windows\System32\svchost.exe` \| The real one \| | |
 | | | <sub>↑ \|---\|---\|<br>↓ \| `C:\Users\Public\svchost.exe` \| Not the real one \|</sub> | |
@@ -114,7 +114,7 @@ For each row, replace the empty last column with exactly one of:
 | 39 | `10-phase-detection-engineering.md:1113` | \| auditd \| Linux syscall and file auditing \| Free/open-source \| https://man7.org/linux/man-pages/man8/auditd.8.html \| Write file watches for `/etc/passwd` and `/etc/cron.d` \| journald with targeted filters \| | |
 | 40 | `11-phase-incident-response.md:456` | \| **Prefetch** \| `C:\Windows\Prefetch` \| Which programs ran, when, and how often \| | |
 | | | <sub>↑ \| **USN Journal** \| `$Extend\$UsnJrnl` \| What changed, in order, with reasons — created, written, renamed, deleted \|<br>↓ \| **ShimCache** \| Registry `AppCompatCache` \| Which executables existed on the system, even if deleted \|</sub> | |
-| 41 | `11-phase-incident-response.md:458` | \| **AmCache** \| `C:\Windows\AppCompat\Programs\Amcache.hve` \| Program execution with SHA-1 hashes and install paths \| | |
+| 41 | `11-phase-incident-response.md:458` | \| **AmCache** \| `C:\Windows\AppCompat\Programs\Amcache.hve` \| Program execution with SHA-1 hashes and install paths \| | **OK** — Forensics documentation: Amcache.hve in C:\Windows\AppCompat\Programs stores path, size, compile time and SHA-1 hash. |
 | 42 | `11-phase-incident-response.md:462` | \| **Event logs** \| `C:\Windows\System32\winevt\Logs` \| Security, System, Application, and Sysmon records \| | |
 | 43 | `11-phase-incident-response.md:512` | \| 09:11:40 \| LNK / Jump list \| `Invoice_4421.docm` opened from `C:\Users\jsantos\Downloads` \| | |
 | | | <sub>↑ \| 09:04:12 \| Security 4624 type 2 \| User `LAB\jsantos` logs on interactively \|<br>↓ \| 09:11:44 \| Sysmon 11 \| `C:\Users\jsantos\AppData\Local\Temp\kx8f.tmp` created \|</sub> | |

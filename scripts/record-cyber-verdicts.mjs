@@ -154,7 +154,89 @@ const V = {
   "11-phase-incident-response.md:991": ["UNVERIFIABLE", "scenario description"],
   "12-phase-scripting-automation.md:1240": ["OK", "Python 3.10 is a specific release; “3.10 or newer” is a valid version requirement."],
   "13-phase-grc-compliance.md:164": ["UNVERIFIABLE", "definition plus example"],
+
+  // ---- Command and cmdlet usage (60) ----
+  "02-phase-networking-and-linux.md:53": ["UNVERIFIABLE", "curriculum topic outline"],
+  "02-phase-networking-and-linux.md:54": ["OK", "systemd: `systemctl` is the control interface for the systemd system and service manager."],
+  "02-phase-networking-and-linux.md:56": ["OK", "POSIX/GNU man pages: grep searches text, awk processes fields, sort orders lines, uniq collapses duplicates, zgrep searches compressed files."],
+  "02-phase-networking-and-linux.md:57": ["OK", "iproute2/BIND/curl: `ip a` shows addresses, `ip route` routing, `ss -tulpn` listening sockets, `dig` DNS lookups, `curl` transfers data."],
+  "02-phase-networking-and-linux.md:58": ["OK", "POSIX: grep, awk and sed are standard text-processing utilities."],
+  "02-phase-networking-and-linux.md:115": ["OK", "OpenSSH: `ssh user@host` is the standard login syntax."],
+  "02-phase-networking-and-linux.md:405": ["OK", "RFC 792: ICMP defines Echo Request (Type 8), Echo Reply (Type 0), Destination Unreachable (Type 3) and Time Exceeded (Type 11)."],
+  "02-phase-networking-and-linux.md:436": ["OK", "Set-Cookie (RFC 6265), Content-Security-Policy (W3C CSP) and Authorization (RFC 7235) are real HTTP headers."],
+  "02-phase-networking-and-linux.md:439": ["OK", "curl: `-I` sends a HEAD request and prints response headers."],
+  "02-phase-networking-and-linux.md:575": ["OK", "chmod: mode 755 is rwxr-xr-x."],
+  "02-phase-networking-and-linux.md:576": ["OK", "chmod: mode 600 is rw-------, which is what SSH requires for a private key."],
+  "02-phase-networking-and-linux.md:577": ["OK", "chmod: mode 644 is rw-r--r--."],
+  "02-phase-networking-and-linux.md:579": ["OK", "chown: `chown user:group file` changes ownership; only root may give a file away."],
+  "02-phase-networking-and-linux.md:607": ["OK", "POSIX umask: “The umask utility shall set the file mode creation mask… affects the initial value of the file permission bits of subsequently created files.”"],
+  "02-phase-networking-and-linux.md:609": ["OK", "POSIX umask: a permissive mask yields more permissive permissions on files created afterwards."],
+  "02-phase-networking-and-linux.md:661": ["OK", "OpenSSH: sshd is the SSH daemon, configured in /etc/ssh/sshd_config, listening on port 22 by default."],
+  "02-phase-networking-and-linux.md:683": ["OK", "Microsoft: the Windows OpenSSH client does not include `ssh-copy-id`."],
+  "02-phase-networking-and-linux.md:702": ["OK", "systemd is the system and service manager on modern Linux, controlled through systemctl."],
+  "02-phase-networking-and-linux.md:730": ["OK", "systemd: `systemctl list-units --type=service` lists service units; `-t`/`--type` filters by unit type."],
+  "02-phase-networking-and-linux.md:757": ["OK", "grep searches file contents; /var/log/auth.log is the standard authentication log on Debian/Ubuntu."],
+  "02-phase-networking-and-linux.md:796": ["OK", "grep searches for patterns in files."],
+  "02-phase-networking-and-linux.md:797": ["OK", "**Verified by execution.** awk: NF is the field count, so `$(NF-3)` is the fourth from the end. Ran it against the corpus's own example lines: NF=9 → $6, NF=11 → $8, NF=8 → $5, and every one returns 203.0.113.45. It also returns 2001:db8::1 correctly on an IPv6 line — which is why the corpus teaches NF-relative indexing instead of a fixed $6."],
+  "02-phase-networking-and-linux.md:813": ["OK", "GNU grep: `--line-buffered` flushes output line by line rather than block-buffering when writing to a pipe."],
+  "02-phase-networking-and-linux.md:847": ["OK", "GNU sed: “An address range can be specified by specifying two addresses separated by a comma… matches lines starting from where the first address matches, and continues until the second address matches (inclusively).”"],
+  "02-phase-networking-and-linux.md:849": ["UNVERIFIABLE", "pedagogical advice about building pipelines incrementally"],
+  "02-phase-networking-and-linux.md:927": ["OK", "grep searches for patterns in files."],
+  "02-phase-networking-and-linux.md:928": ["OK", "grep: `-o` outputs only the matched part; `-E` enables extended regular expressions."],
+  "02-phase-networking-and-linux.md:929": ["OK", "awk: `{print $2}` extracts the second whitespace-separated field."],
+  "02-phase-networking-and-linux.md:935": ["OK", "awk: `{print $N}` extracts the Nth whitespace-separated field."],
+  "02-phase-networking-and-linux.md:937": ["OK", "The source address sits at a different field index depending on whether the user is valid or invalid — `invalid user` adds two fields. Verified against the corpus's own examples: field 6 for the valid-root line, field 8 for the invalid-user line."],
+  "02-phase-networking-and-linux.md:981": ["OK", "`dig` performs DNS lookups; `curl -I` fetches HTTP headers."],
+  "02-phase-networking-and-linux.md:1087": ["OK", "iproute2: `ip a` shows interface addresses; `ping` tests connectivity."],
+  "02-phase-networking-and-linux.md:1105": ["UNVERIFIABLE", "description of the OverTheWire Bandit game, not a flag or syntax claim"],
+  // The verdict text contains pipes (`grep | awk | sort | ...`). A raw pipe inside a
+  // Markdown table cell ENDS the cell, so this would split the row into eight cells
+  // and break every reader downstream -- including audit-claim-drift.mjs, which
+  // would then compare a truncated claim against the corpus and report drift that
+  // does not exist. Escape them, and assert below that no verdict introduced a raw
+  // pipe into the table.
+  "02-phase-networking-and-linux.md:1142": ["OK", "POSIX: `grep \\| awk \\| sort \\| uniq -c \\| sort -rn \\| head` is the standard count-and-rank pipeline."],
+  "02-phase-networking-and-linux.md:1166": ["OK", "OpenSSH: key-based auth uses authorized_keys; `PasswordAuthentication no` in sshd_config disables password login."],
+  "02-phase-networking-and-linux.md:1196": ["OK", "BIND dig: supports query types including A, AAAA, MX and TXT."],
+  "02-phase-networking-and-linux.md:1204": ["OK", "OpenSSH: key-based auth uses authorized_keys; `PasswordAuthentication no` disables password login."],
+  "02-phase-networking-and-linux.md:1298": ["OK", "OpenSSH refuses a private key readable by others, which is the `permissions are too open` error."],
+  "02-phase-networking-and-linux.md:1325": ["OK", "systemd: `journalctl -u` matches by unit name, and on Debian/Ubuntu the unit is `ssh.service` rather than `sshd.service`."],
+  "03-phase-security-fundamentals.md:429": ["OK", "Microsoft/LOLBAS: powershell.exe, cmd.exe, wmic, certutil, bitsadmin, rundll32 and mshta are legitimate signed Windows binaries frequently abused."],
+  "03-phase-security-fundamentals.md:685": ["OK", "curl: `-I` fetches HTTP headers."],
+  "04-phase-hands-on-labs.md:239": ["OK", "Microsoft: `netstat -ano` shows all connections and listening ports with numeric addresses and owning PIDs."],
+  "04-phase-hands-on-labs.md:275": ["OK", "Microsoft: `Get-PSDrive` reports used and free space per drive."],
+  "04-phase-hands-on-labs.md:447": ["OK", "Microsoft: `Get-PSDrive` shows disk usage."],
+  "04-phase-hands-on-labs.md:455": ["OK", "curl: `-I` tests HTTP connectivity."],
+  "04-phase-hands-on-labs.md:484": ["OK", "Wazuh ships decoders for Windows events and sshd logs."],
+  "04-phase-hands-on-labs.md:543": ["OK", "OpenSSH: `ssh fakeuser@localhost` attempts a login as a non-existent user."],
+  "04-phase-hands-on-labs.md:662": ["OK", "grep searches; `tail -3` shows the last three lines."],
+  "08-phase-job-application.md:294": ["OK", "nslookup: `nslookup name server` queries the specified server, so `nslookup example.com 8.8.8.8` uses Google's resolver."],
+  "08-phase-job-application.md:308": ["OK", "chmod: mode 777 is rwxrwxrwx — all permissions for all users."],
+  "09-phase-cloud-and-identity.md:268": ["UNVERIFIABLE", "curriculum narrative about one command's context"],
+  "11-phase-incident-response.md:516": ["OK", "Microsoft: `schtasks.exe /create /tn <name> /tr <command>` creates a scheduled task."],
+  "11-phase-incident-response.md:1065": ["OK", "winpmem_mini_x64.exe acquires memory; netstat -ano, arp -a and route print show network state; Get-Process lists processes; FTK Imager and dc3dd.exe acquire disk images."],
+  "12-phase-scripting-automation.md:27": ["OK", "Microsoft: Get-WinEvent, Get-Process and Get-NetTCPConnection are standard PowerShell cmdlets."],
+  "12-phase-scripting-automation.md:46": ["OK", "Microsoft: Get-WinEvent, Get-Process, Get-NetTCPConnection and Get-Service are standard cmdlets."],
+  "12-phase-scripting-automation.md:49": ["OK", "Python hashlib computes hashes; PowerShell `Get-FileHash` computes file hashes with -Algorithm (SHA1/SHA256/SHA384/SHA512/MD5)."],
+  "12-phase-scripting-automation.md:743": ["OK", "Microsoft: `Get-WinEvent -FilterHashtable` filters at the source and is markedly faster than piping to Where-Object."],
+  "12-phase-scripting-automation.md:852": ["OK", "Microsoft: Get-NetTCPConnection exposes `OwningProcess`, the PID of the process owning the connection."],
+  "12-phase-scripting-automation.md:1396": ["OK", "Microsoft: “将对象沿管道下发到 Where-Object 命令，效率将较低” — piping to Where-Object is less efficient than -FilterHashtable."],
+  "12-phase-scripting-automation.md:1397": ["OK", "Microsoft: Get-NetTCPConnection exposes `OwningProcess`."],
 };
+
+// A raw pipe in a verdict would terminate the table cell, splitting the row and
+// silently truncating the claim for every downstream reader -- including
+// audit-claim-drift.mjs, which would then report drift that does not exist. This
+// actually happened: one verdict quoting `grep | awk | sort` produced a phantom
+// GONE finding against content that was present and byte-identical at the cited
+// line. Refuse rather than repair silently.
+const rawPipe = Object.entries(V).filter(([, v]) => v[1].includes("|") && !v[1].includes("\\|"));
+if (rawPipe.length) {
+  console.error("REFUSING TO WRITE: these verdicts contain an unescaped '|', which would");
+  console.error("split the table row. Escape it as \\| :\n");
+  for (const [k, v] of rawPipe) console.error(`  ${k}: ${v[1].slice(0, 80)}`);
+  process.exit(1);
+}
 
 const src = fs.readFileSync(DOC, "utf8");
 const lines = src.split("\n");

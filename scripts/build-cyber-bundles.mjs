@@ -24,28 +24,27 @@ const ROOT = path.join(HERE, "..");
 const SRC = path.join(ROOT, "docs", "claims-to-verify-cyber");
 const OUT = path.join(ROOT, "docs", "claims-to-verify-cyber", "bundles");
 
-// The FIVE packs still outstanding, in the order they should be SENT.
+// The FOUR packs still outstanding, in the order they should be SENT.
 //
-// Four of the original nine are GONE from this list because they are verified:
-// standards/frameworks (105 rows), CVE (4), cryptography (5) and product versions
-// (9) completed on 2026-09-17 with zero WRONG verdicts. They are withheld by
-// `split-claims.mjs` via `done: true`, so they never reach this script -- which is
-// the fix for the confusion that made a reader re-verify finished work. If one of
-// them reappears in this folder, the splitter's WANTED_BY_TRACK list has been
-// edited and this script will pick it up and send it again.
+// Five of the original nine are GONE from this list because they are verified:
+// standards/frameworks (105 rows), CVE (4), cryptography (5), product versions (9)
+// and command/cmdlet usage (60) -- **185 rows cleared with zero WRONG verdicts**.
+// They are withheld by `split-claims.mjs` via `done: true`, so they never reach
+// this script. That is the fix for the confusion that made a reader re-verify
+// finished work. If one reappears in this folder, the splitter's WANTED_BY_TRACK
+// list has been edited and this script will pick it up and send it again.
 //
-// Ordering principle: highest expected yield first, then the mechanical tail.
-// Command/cmdlet usage leads because that class produced 3 of 3 real defects on
-// the IT pass, every one of them "right name, broken invocation" -- a shape no
-// guard can see and only a man page settles.
+// Ordering principle: highest expected yield first. Command/cmdlet usage led the
+// previous plan and has now been done -- it produced no defects, but the class it
+// was grouped with on the IT pass, tool commands and flags, is the same
+// "right name, broken invocation" shape and is the largest remaining.
 //
 // `rows` is NOT declared here. It is read from the pack at build time, because a
 // hard-coded count silently disagrees with the table beside it the moment the
-// corpus moves -- the exact defect fixed in extract-claims.mjs the same day,
-// where "216 claims" was IT's figure printed into every track.
+// corpus moves -- the exact defect fixed in extract-claims.mjs, where "216 claims"
+// was IT's figure printed into every track.
 const PLAN = [
-  { file: "05-command-and-cmdlet-usage.md", why: "Produced 3 of 3 real defects on the IT pass, all 'right name, broken invocation'. Highest expected yield." },
-  { file: "02-security-tool-commands-and-flags.md", why: "Tool man pages settle each one. The same broken-invocation shape at larger scale." },
+  { file: "02-security-tool-commands-and-flags.md", why: "Tool man pages settle each one. The same broken-invocation shape that produced real defects on the IT pass, at larger scale." },
   { file: "01-mitre-att-ck-technique-identifiers.md", why: "ATT&CK IDs and technique names, checked against attack.mitre.org." },
   { file: "03-protocol-and-standard-behaviour.md", why: "RFC-settled, mechanical, unambiguous." },
   { file: "04-registry-paths-file-paths-and-filenames.md", why: "Microsoft Learn or the OS itself. Mechanical." },

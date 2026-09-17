@@ -75,7 +75,7 @@ const WANTED_BY_TRACK = {
     { title: "Protocol and standard behaviour" },
     { title: "Registry paths, file paths and filenames" },
     { title: "Product versions and editions", done: true, doneThrough: 9 },
-    { title: "Command and cmdlet usage" },
+    { title: "Command and cmdlet usage", done: true, doneThrough: 60 },
   ],
 };
 const WANTED = WANTED_BY_TRACK[TRACK_KEY];

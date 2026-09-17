@@ -1,16 +1,16 @@
 # Cybersecurity track — technical claim verification
 
-**Status: verification in progress — 123 of 761 extracted claims settled, 284 outstanding.**
+**Status: verification in progress — 183 of 761 extracted claims settled, 224 outstanding.**
 
-Four of the nine claim classes are complete and are **no longer emitted as worklists**:
-standards/frameworks (105 rows), CVE identifiers (4), cryptography (5) and product versions (9),
-all verified **2026-09-17 with zero `WRONG` verdicts**. Five classes remain — ATT&CK identifiers,
-tool commands, protocol behaviour, registry/paths, and command/cmdlet usage — bundled as three
+Five of the nine claim classes are complete and are **no longer emitted as worklists**:
+standards/frameworks (105 rows), CVE identifiers (4), cryptography (5), product versions (9) and
+command/cmdlet usage (60) — **185 rows cleared, zero `WRONG` verdicts.** Four classes remain —
+ATT&CK identifiers, tool commands, protocol behaviour, registry/paths — bundled as two
 self-contained messages in [`claims-to-verify-cyber/bundles/`](claims-to-verify-cyber/bundles/).
 
 Every verdict column below is otherwise empty. This is still a worklist, not a result.
 
-## Result of the first completed pass (2026-09-17)
+## Result of the completed passes (2026-09-17)
 
 | Class | Rows | `OK` | `WRONG` | `UNVERIFIABLE` |
 |---|---:|---:|---:|---:|
@@ -18,25 +18,39 @@ Every verdict column below is otherwise empty. This is still a worklist, not a r
 | CVE identifiers and vulnerability claims | 4 | 4 | **0** | 0 |
 | Cryptography algorithm claims | 5 | 3 | **0** | 2 |
 | Product versions and editions | 9 | 2 | **0** | 7 |
-| **Total** | **123** | **75** | **0** | **48** |
+| Command and cmdlet usage | 60 | 56 | **0** | 4 |
+| **Total** | **183** | **131** | **0** | **52** |
 
-**Zero `WRONG` verdicts in 123 rows, and the 39% `UNVERIFIABLE` rate is the honest part.** Almost
+**Zero `WRONG` verdicts in 183 rows, and the 28% `UNVERIFIABLE` rate is the honest part.** Almost
 every row marked unverifiable is a curriculum instruction, a deliverable description, or a
 worked example in a scenario — *"Read OWASP Top 10 and summarize each risk in 2–3 sentences"* is
-not a factual claim and marking it `OK` would be theatre. The rate is higher than the IT pass
-(21%) because this batch is dominated by the standards class, whose rows are largely pedagogy
-*about* frameworks rather than assertions about them — and the pack's own rules say not to invent
-a verdict to fill a column.
+not a factual claim and marking it `OK` would be theatre. The rate is highest in the standards
+class (37%), whose rows are largely pedagogy *about* frameworks rather than assertions about
+them, and lowest in command/cmdlet usage (8%), where a line either names a real flag or does not.
+The pack's own rules say not to invent a verdict to fill a column.
+
+**The command/cmdlet class was predicted to be the highest-yield and returned no defects.** That is
+worth recording as a result rather than a non-event: on the IT pass, 3 of 3 real defects were
+"right name, broken invocation" — a real command carrying a flag that does not exist — and this
+class is the same shape. It came back clean. **A class predicted to fail that does not is evidence
+the prediction described the shape of the risk, not this content.**
+
+**One claim was settled by execution rather than by reading** — `02-phase-networking-and-linux.md:797`,
+which teaches `awk '{print $(NF-3)}'` to pull the source IP out of an sshd log. Run against the
+corpus's own example lines it returns the address every time (NF=9 → `$6`, NF=11 → `$8`, NF=8 → `$5`),
+**and it also returns `2001:db8::1` correctly on an IPv6 line** — which is exactly why the corpus
+teaches NF-relative indexing rather than the fixed `$6` its own prose warns against. Reading a man
+page confirms the syntax; only running it confirms the claim. This is the class where a
+plausible-looking invocation is worth executing.
 
 > **These figures are counted from the rows below, not typed.** The first two versions of this
-> table were hand-written and both were wrong (83/40, then 70/53) — in a document whose entire
-> purpose is to be the trustworthy record of what was checked. `record-cyber-verdicts.mjs` writes
-> the rows; the count is derived from them.
+> table were hand-written and both were wrong (83/40, then 70/53). `audit-verdict-counts.mjs`
+> derives the figure from the rows and CI fails if the table disagrees.
 
-**Verdicts are recorded per row below, keyed by location.** Four locations legitimately appear in
+**Verdicts are recorded per row below, keyed by location.** A location can legitimately appear in
 more than one class — `02-phase-networking-and-linux.md:683` (*"Windows has no `ssh-copy-id`"*) is a
-product-version claim, a command-usage claim and a tool-flag claim at once — so **123 distinct
-locations fill 127 rows.** No row carries a verdict that was not explicitly supplied, and
+product-version claim, a command-usage claim and a tool-flag claim at once — so **182 distinct
+locations fill 183 rows.** No row carries a verdict that was not explicitly supplied, and
 `record-cyber-verdicts.mjs` fails rather than dropping one it cannot place.
 
 **Two claims were re-checked against the primary source before this result was recorded**, because
@@ -213,83 +227,83 @@ doubt it; do not re-check these by hand.
 
 | # | Location | Text as written | Verdict |
 |---|---|---|---|
-| 1 | `02-phase-networking-and-linux.md:53` | - SSH keys and `sshd` | |
+| 1 | `02-phase-networking-and-linux.md:53` | - SSH keys and `sshd` | **UNVERIFIABLE** — curriculum topic outline |
 | | | <sub>↑ - Users/groups/sudo<br>↓ - Services with `systemctl`</sub> | |
-| 2 | `02-phase-networking-and-linux.md:54` | - Services with `systemctl` | |
+| 2 | `02-phase-networking-and-linux.md:54` | - Services with `systemctl` | **OK** — systemd: `systemctl` is the control interface for the systemd system and service manager. |
 | | | <sub>↑ - SSH keys and `sshd`<br>↓ - Logs with `journalctl`, `/var/log/auth.log`, `/var/log/syslog`</sub> | |
-| 3 | `02-phase-networking-and-linux.md:56` | - Reading logs as evidence: `grep`, `awk`, `sort`, `uniq`, and `zgrep` pipelines that answer a question rather than dumping a file | |
-| 4 | `02-phase-networking-and-linux.md:57` | - Networking: `ip a`, `ip route`, `ss -tulpn`, `dig`, `curl` | |
+| 3 | `02-phase-networking-and-linux.md:56` | - Reading logs as evidence: `grep`, `awk`, `sort`, `uniq`, and `zgrep` pipelines that answer a question rather than dumping a file | **OK** — POSIX/GNU man pages: grep searches text, awk processes fields, sort orders lines, uniq collapses duplicates, zgrep searches compressed files. |
+| 4 | `02-phase-networking-and-linux.md:57` | - Networking: `ip a`, `ip route`, `ss -tulpn`, `dig`, `curl` | **OK** — iproute2/BIND/curl: `ip a` shows addresses, `ip route` routing, `ss -tulpn` listening sockets, `dig` DNS lookups, `curl` transfers data. |
 | | | <sub>↑ - Reading logs as evidence: `grep`, `awk`, `sort`, `uniq`, and `zgrep` pipelines that answer a question rather than dumping a file<br>↓ - Text processing: `grep`, `awk` basics, `sed` basics, pipes/redirection</sub> | |
-| 5 | `02-phase-networking-and-linux.md:58` | - Text processing: `grep`, `awk` basics, `sed` basics, pipes/redirection | |
+| 5 | `02-phase-networking-and-linux.md:58` | - Text processing: `grep`, `awk` basics, `sed` basics, pipes/redirection | **OK** — POSIX: grep, awk and sed are standard text-processing utilities. |
 | | | <sub>↑ - Networking: `ip a`, `ip route`, `ss -tulpn`, `dig`, `curl`</sub> | |
-| 6 | `02-phase-networking-and-linux.md:115` | \| `ssh user@your-vm` \| Learning \| Unauthorised access \| | |
+| 6 | `02-phase-networking-and-linux.md:115` | \| `ssh user@your-vm` \| Learning \| Unauthorised access \| | **OK** — OpenSSH: `ssh user@host` is the standard login syntax. |
 | | | <sub>↑ \| `tcpdump` on your own interface \| Learning \| Potentially unlawful interception \|</sub> | |
-| 7 | `02-phase-networking-and-linux.md:405` | **ICMP** is the diagnostic protocol behind `ping` (echo request / echo reply) and the “destination unreachable” and “time exceeded” messages. | |
-| 8 | `02-phase-networking-and-linux.md:436` | \| **Headers** \| Metadata about the request or response \| `Set-Cookie` (and whether it has `HttpOnly` and `Secure` flags), `Content-Security-Policy`, `Server` (leaks software versions, useful to an attacker), `Authorization` \| | |
-| 9 | `02-phase-networking-and-linux.md:439` | You can read all of this with `curl`, which is phase task 7's companion. `curl -I https://example.com` printing real response headers is worth more than any description. | |
-| 10 | `02-phase-networking-and-linux.md:575` | \| `chmod 755 script.sh` \| Owner full rights; everyone else read-and-execute \| A script other people need to run \| | |
-| 11 | `02-phase-networking-and-linux.md:576` | \| `chmod 600 id_rsa` \| Only the owner may read and write \| Exactly what SSH requires for a private key — and the reason you will see “permissions are too open” errors when you get it wrong \| | |
-| 12 | `02-phase-networking-and-linux.md:577` | \| `chmod 644 file.txt` \| Owner reads and writes; everyone else reads \| The ordinary setting for a non-executable file \| | |
-| 13 | `02-phase-networking-and-linux.md:579` | Ownership changes with `chown user:group file`. Only root can give a file away to another user, which is a deliberate restriction. | |
-| 14 | `02-phase-networking-and-linux.md:607` | The `chmod 600 id_rsa` habit above protects one file after the fact. **A umask protects every file you are about to create**, including the ones you forget about. That is the difference between fixing a problem and preventing a class of them, and it is the rea … | |
-| 15 | `02-phase-networking-and-linux.md:609` | **Where this becomes a finding.** A service account or an automated job running with a permissive umask writes world-readable files without anyone choosing to. When you find credentials, tokens, or logs readable by every user on the box, the root cause is ofte … | |
-| 16 | `02-phase-networking-and-linux.md:661` | **SSH** gives you an encrypted shell on a remote machine. The server is `sshd` — the SSH *daemon*, where a daemon is a background service. It is configured in `/etc/ssh/sshd_config`, and it listens on port 22 by default. | |
+| 7 | `02-phase-networking-and-linux.md:405` | **ICMP** is the diagnostic protocol behind `ping` (echo request / echo reply) and the “destination unreachable” and “time exceeded” messages. | **OK** — RFC 792: ICMP defines Echo Request (Type 8), Echo Reply (Type 0), Destination Unreachable (Type 3) and Time Exceeded (Type 11). |
+| 8 | `02-phase-networking-and-linux.md:436` | \| **Headers** \| Metadata about the request or response \| `Set-Cookie` (and whether it has `HttpOnly` and `Secure` flags), `Content-Security-Policy`, `Server` (leaks software versions, useful to an attacker), `Authorization` \| | **OK** — Set-Cookie (RFC 6265), Content-Security-Policy (W3C CSP) and Authorization (RFC 7235) are real HTTP headers. |
+| 9 | `02-phase-networking-and-linux.md:439` | You can read all of this with `curl`, which is phase task 7's companion. `curl -I https://example.com` printing real response headers is worth more than any description. | **OK** — curl: `-I` sends a HEAD request and prints response headers. |
+| 10 | `02-phase-networking-and-linux.md:575` | \| `chmod 755 script.sh` \| Owner full rights; everyone else read-and-execute \| A script other people need to run \| | **OK** — chmod: mode 755 is rwxr-xr-x. |
+| 11 | `02-phase-networking-and-linux.md:576` | \| `chmod 600 id_rsa` \| Only the owner may read and write \| Exactly what SSH requires for a private key — and the reason you will see “permissions are too open” errors when you get it wrong \| | **OK** — chmod: mode 600 is rw-------, which is what SSH requires for a private key. |
+| 12 | `02-phase-networking-and-linux.md:577` | \| `chmod 644 file.txt` \| Owner reads and writes; everyone else reads \| The ordinary setting for a non-executable file \| | **OK** — chmod: mode 644 is rw-r--r--. |
+| 13 | `02-phase-networking-and-linux.md:579` | Ownership changes with `chown user:group file`. Only root can give a file away to another user, which is a deliberate restriction. | **OK** — chown: `chown user:group file` changes ownership; only root may give a file away. |
+| 14 | `02-phase-networking-and-linux.md:607` | The `chmod 600 id_rsa` habit above protects one file after the fact. **A umask protects every file you are about to create**, including the ones you forget about. That is the difference between fixing a problem and preventing a class of them, and it is the rea … | **OK** — POSIX umask: “The umask utility shall set the file mode creation mask… affects the initial value of the file permission bits of subsequently created files.” |
+| 15 | `02-phase-networking-and-linux.md:609` | **Where this becomes a finding.** A service account or an automated job running with a permissive umask writes world-readable files without anyone choosing to. When you find credentials, tokens, or logs readable by every user on the box, the root cause is ofte … | **OK** — POSIX umask: a permissive mask yields more permissive permissions on files created afterwards. |
+| 16 | `02-phase-networking-and-linux.md:661` | **SSH** gives you an encrypted shell on a remote machine. The server is `sshd` — the SSH *daemon*, where a daemon is a background service. It is configured in `/etc/ssh/sshd_config`, and it listens on port 22 by default. | **OK** — OpenSSH: sshd is the SSH daemon, configured in /etc/ssh/sshd_config, listening on port 22 by default. |
 | 17 | `02-phase-networking-and-linux.md:683` | **Windows has no `ssh-copy-id`.** The OpenSSH client ships with Windows 10 and 11, but the key-install helper does not. Append the key yourself instead — from PowerShell: | **OK** — Microsoft: the Windows OpenSSH client does not include `ssh-copy-id`. |
-| 18 | `02-phase-networking-and-linux.md:702` | Modern Linux uses **systemd** to manage services, through `systemctl`: | |
-| 19 | `02-phase-networking-and-linux.md:730` | The security relevance of this command is direct: **you cannot defend a host whose services you cannot enumerate.** Asking “what is running, and should it be?” is the first question of host hardening, and `systemctl list-units --type=service` answers it. | |
-| 20 | `02-phase-networking-and-linux.md:757` | Watch the failures appear. Then use `grep` to pull the failed attempts out of `/var/log/auth.log`. | |
-| 21 | `02-phase-networking-and-linux.md:796` | \| `grep "Failed password"` \| Keep only the failure lines \| | |
+| 18 | `02-phase-networking-and-linux.md:702` | Modern Linux uses **systemd** to manage services, through `systemctl`: | **OK** — systemd is the system and service manager on modern Linux, controlled through systemctl. |
+| 19 | `02-phase-networking-and-linux.md:730` | The security relevance of this command is direct: **you cannot defend a host whose services you cannot enumerate.** Asking “what is running, and should it be?” is the first question of host hardening, and `systemctl list-units --type=service` answers it. | **OK** — systemd: `systemctl list-units --type=service` lists service units; `-t`/`--type` filters by unit type. |
+| 20 | `02-phase-networking-and-linux.md:757` | Watch the failures appear. Then use `grep` to pull the failed attempts out of `/var/log/auth.log`. | **OK** — grep searches file contents; /var/log/auth.log is the standard authentication log on Debian/Ubuntu. |
+| 21 | `02-phase-networking-and-linux.md:796` | \| `grep "Failed password"` \| Keep only the failure lines \| | **OK** — grep searches for patterns in files. |
 | | | <sub>↑ \|---\|---\|<br>↓ \| `awk '{print $(NF-3)}'` \| Print the fourth field **from the end** — which is the source IP in this log format \|</sub> | |
-| 22 | `02-phase-networking-and-linux.md:797` | \| `awk '{print $(NF-3)}'` \| Print the fourth field **from the end** — which is the source IP in this log format \| | |
-| 23 | `02-phase-networking-and-linux.md:813` | The `--line-buffered` matters and is easy to miss. Without it, `grep` buffers its output when writing to a pipe, so the lines appear in bursts rather than as they happen. You will think the log is broken. | |
-| 24 | `02-phase-networking-and-linux.md:847` | This is `sed`'s range form: print from the line matching the first pattern to the line matching the second. It is the fastest way to reduce a day of logs to the hour that matters. | |
-| 25 | `02-phase-networking-and-linux.md:849` | **One safety habit, learned from breaking things.** Write the pipeline in pieces and run each stage before adding the next. `grep ... \| head` first — confirm you are matching the right lines. *Then* add the `awk`. A pipeline that returns nothing is ambiguous: … | |
-| 26 | `02-phase-networking-and-linux.md:927` | \| `grep "Failed password" /var/log/auth.log` \| Find the failed-password lines \| | |
+| 22 | `02-phase-networking-and-linux.md:797` | \| `awk '{print $(NF-3)}'` \| Print the fourth field **from the end** — which is the source IP in this log format \| | **OK** — **Verified by execution.** awk: NF is the field count, so `$(NF-3)` is the fourth from the end. Ran it against the corpus's own example lines: NF=9 → $6, NF=11 → $8, NF=8 → $5, and every one returns 203.0.113.45. It also returns 2001:db8::1 correctly on an IPv6 line — which is why the corpus teaches NF-relative indexing instead of a fixed $6. |
+| 23 | `02-phase-networking-and-linux.md:813` | The `--line-buffered` matters and is easy to miss. Without it, `grep` buffers its output when writing to a pipe, so the lines appear in bursts rather than as they happen. You will think the log is broken. | **OK** — GNU grep: `--line-buffered` flushes output line by line rather than block-buffering when writing to a pipe. |
+| 24 | `02-phase-networking-and-linux.md:847` | This is `sed`'s range form: print from the line matching the first pattern to the line matching the second. It is the fastest way to reduce a day of logs to the hour that matters. | **OK** — GNU sed: “An address range can be specified by specifying two addresses separated by a comma… matches lines starting from where the first address matches, and continues until the second address matches (inclusively).” |
+| 25 | `02-phase-networking-and-linux.md:849` | **One safety habit, learned from breaking things.** Write the pipeline in pieces and run each stage before adding the next. `grep ... \| head` first — confirm you are matching the right lines. *Then* add the `awk`. A pipeline that returns nothing is ambiguous: … | **UNVERIFIABLE** — pedagogical advice about building pipelines incrementally |
+| 26 | `02-phase-networking-and-linux.md:927` | \| `grep "Failed password" /var/log/auth.log` \| Find the failed-password lines \| | **OK** — grep searches for patterns in files. |
 | | | <sub>↑ \|---\|---\|<br>↓ \| `grep -oE 'from [0-9.]+'` \| Keep only the `from <address>` fragment \|</sub> | |
-| 27 | `02-phase-networking-and-linux.md:928` | \| `grep -oE 'from [0-9.]+'` \| Keep only the `from <address>` fragment \| | |
+| 27 | `02-phase-networking-and-linux.md:928` | \| `grep -oE 'from [0-9.]+'` \| Keep only the `from <address>` fragment \| | **OK** — grep: `-o` outputs only the matched part; `-E` enables extended regular expressions. |
 | | | <sub>↑ \| `grep "Failed password" /var/log/auth.log` \| Find the failed-password lines \|<br>↓ \| `awk '{print $2}'` \| Extract the address — field 2 of `from 203.0.113.45` \|</sub> | |
-| 28 | `02-phase-networking-and-linux.md:929` | \| `awk '{print $2}'` \| Extract the address — field 2 of `from 203.0.113.45` \| | |
+| 28 | `02-phase-networking-and-linux.md:929` | \| `awk '{print $2}'` \| Extract the address — field 2 of `from 203.0.113.45` \| | **OK** — awk: `{print $2}` extracts the second whitespace-separated field. |
 | | | <sub>↑ \| `grep -oE 'from [0-9.]+'` \| Keep only the `from <address>` fragment \|<br>↓ \| `sort` \| Order them so identical addresses are adjacent \|</sub> | |
-| 29 | `02-phase-networking-and-linux.md:935` | That is a real investigation query, built from small pieces, and it is the shape of most log analysis you will do. **`awk '{print $N}'` extracts the Nth whitespace-separated field** — that is the 90% of awk you need at this stage. | |
-| 30 | `02-phase-networking-and-linux.md:937` | **Why not just `awk '{print $6}'`?** Because the field number moves. In `Failed password for root from 203.0.113.45 ...` the address is field 6, but in `Failed password for invalid user admin from 203.0.113.45 ...` the words `invalid user` push it to field 8.  … | |
-| 31 | `02-phase-networking-and-linux.md:981` | \| 2 \| In another terminal, run `dig example.com` and `curl -I https://example.com` \| | |
+| 29 | `02-phase-networking-and-linux.md:935` | That is a real investigation query, built from small pieces, and it is the shape of most log analysis you will do. **`awk '{print $N}'` extracts the Nth whitespace-separated field** — that is the 90% of awk you need at this stage. | **OK** — awk: `{print $N}` extracts the Nth whitespace-separated field. |
+| 30 | `02-phase-networking-and-linux.md:937` | **Why not just `awk '{print $6}'`?** Because the field number moves. In `Failed password for root from 203.0.113.45 ...` the address is field 6, but in `Failed password for invalid user admin from 203.0.113.45 ...` the words `invalid user` push it to field 8.  … | **OK** — The source address sits at a different field index depending on whether the user is valid or invalid — `invalid user` adds two fields. Verified against the corpus's own examples: field 6 for the valid-root line, field 8 for the invalid-user line. |
+| 31 | `02-phase-networking-and-linux.md:981` | \| 2 \| In another terminal, run `dig example.com` and `curl -I https://example.com` \| | **OK** — `dig` performs DNS lookups; `curl -I` fetches HTTP headers. |
 | | | <sub>↑ \| 1 \| Start the capture in Wireshark or tcpdump \|<br>↓ \| 3 \| Stop the capture \|</sub> | |
-| 32 | `02-phase-networking-and-linux.md:1087` | For this phase's scanning and SSH tasks, **Host-only** or **Bridged** is usually what you want, because you need your host and the VM to reach each other. Check the VM's address with `ip a` inside it, and verify connectivity with `ping` before concluding anyth … | |
-| 33 | `02-phase-networking-and-linux.md:1105` | Each level is an SSH login to a server where the password for the next level is hidden somewhere. Finding it requires exactly the skills this phase covers: reading files, permissions, `grep`, pipes, and later `find` and encoding. | |
-| 34 | `02-phase-networking-and-linux.md:1142` | - **Pipes build small tools into real investigations.** `grep \| awk \| sort \| uniq -c \| sort -rn \| head` is a genuine top-talkers query, not a toy example. | |
-| 35 | `02-phase-networking-and-linux.md:1166` | 13. **Prove key-only SSH** (task 13). Generate a keypair, install the public key in `authorized_keys`, disable password authentication in `sshd_config`, and demonstrate that a password login now fails. "Demonstrate the failure" is the checklist item — anyone c … | |
-| 36 | `02-phase-networking-and-linux.md:1196` | 5. Use `dig` or `nslookup` to inspect A, AAAA, MX, TXT records. <!-- id: cyber-02-t05 band: quick energy: low --> | |
-| 37 | `02-phase-networking-and-linux.md:1204` | 13. Generate a keypair, place the public key in `authorized_keys`, disable password authentication in `sshd_config`, and prove a password login now fails. <!-- id: cyber-02-t13 band: focused energy: high --> | |
-| 38 | `02-phase-networking-and-linux.md:1298` | **Why:** Two things happen at once. Anyone who can read the private key can use it, which is a full impersonation. And SSH itself refuses a private key that is readable by others, so the mistake announces itself as a `permissions are too open` error rather tha … | |
-| 39 | `02-phase-networking-and-linux.md:1325` | **Why:** `-u sshd` matches a systemd unit by that exact name, and on some distributions the unit is `ssh.service` rather than `sshd.service`, so the filter matches nothing. Separately, not every distribution routes SSH into the journal — Debian and Ubuntu fami … | |
-| 40 | `03-phase-security-fundamentals.md:429` | \| **Living off the land** \| Using legitimate built-in tools for malicious purposes: `powershell.exe`, `cmd.exe`, `wmic`, `certutil`, `bitsadmin`, `rundll32`, `mshta` \| Suspicious not because they are malicious but because they are frequently *abused*, and s … | |
-| 41 | `03-phase-security-fundamentals.md:685` | You can check any site's headers with `curl -I`, which is a small, satisfying thing to do on a site you own. | |
-| 42 | `04-phase-hands-on-labs.md:239` | \| Windows VM \| `netstat -ano` \| | |
+| 32 | `02-phase-networking-and-linux.md:1087` | For this phase's scanning and SSH tasks, **Host-only** or **Bridged** is usually what you want, because you need your host and the VM to reach each other. Check the VM's address with `ip a` inside it, and verify connectivity with `ping` before concluding anyth … | **OK** — iproute2: `ip a` shows interface addresses; `ping` tests connectivity. |
+| 33 | `02-phase-networking-and-linux.md:1105` | Each level is an SSH login to a server where the password for the next level is hidden somewhere. Finding it requires exactly the skills this phase covers: reading files, permissions, `grep`, pipes, and later `find` and encoding. | **UNVERIFIABLE** — description of the OverTheWire Bandit game, not a flag or syntax claim |
+| 34 | `02-phase-networking-and-linux.md:1142` | - **Pipes build small tools into real investigations.** `grep \| awk \| sort \| uniq -c \| sort -rn \| head` is a genuine top-talkers query, not a toy example. | **OK** — POSIX: `grep \| awk \| sort \| uniq -c \| sort -rn \| head` is the standard count-and-rank pipeline. |
+| 35 | `02-phase-networking-and-linux.md:1166` | 13. **Prove key-only SSH** (task 13). Generate a keypair, install the public key in `authorized_keys`, disable password authentication in `sshd_config`, and demonstrate that a password login now fails. "Demonstrate the failure" is the checklist item — anyone c … | **OK** — OpenSSH: key-based auth uses authorized_keys; `PasswordAuthentication no` in sshd_config disables password login. |
+| 36 | `02-phase-networking-and-linux.md:1196` | 5. Use `dig` or `nslookup` to inspect A, AAAA, MX, TXT records. <!-- id: cyber-02-t05 band: quick energy: low --> | **OK** — BIND dig: supports query types including A, AAAA, MX and TXT. |
+| 37 | `02-phase-networking-and-linux.md:1204` | 13. Generate a keypair, place the public key in `authorized_keys`, disable password authentication in `sshd_config`, and prove a password login now fails. <!-- id: cyber-02-t13 band: focused energy: high --> | **OK** — OpenSSH: key-based auth uses authorized_keys; `PasswordAuthentication no` disables password login. |
+| 38 | `02-phase-networking-and-linux.md:1298` | **Why:** Two things happen at once. Anyone who can read the private key can use it, which is a full impersonation. And SSH itself refuses a private key that is readable by others, so the mistake announces itself as a `permissions are too open` error rather tha … | **OK** — OpenSSH refuses a private key readable by others, which is the `permissions are too open` error. |
+| 39 | `02-phase-networking-and-linux.md:1325` | **Why:** `-u sshd` matches a systemd unit by that exact name, and on some distributions the unit is `ssh.service` rather than `sshd.service`, so the filter matches nothing. Separately, not every distribution routes SSH into the journal — Debian and Ubuntu fami … | **OK** — systemd: `journalctl -u` matches by unit name, and on Debian/Ubuntu the unit is `ssh.service` rather than `sshd.service`. |
+| 40 | `03-phase-security-fundamentals.md:429` | \| **Living off the land** \| Using legitimate built-in tools for malicious purposes: `powershell.exe`, `cmd.exe`, `wmic`, `certutil`, `bitsadmin`, `rundll32`, `mshta` \| Suspicious not because they are malicious but because they are frequently *abused*, and s … | **OK** — Microsoft/LOLBAS: powershell.exe, cmd.exe, wmic, certutil, bitsadmin, rundll32 and mshta are legitimate signed Windows binaries frequently abused. |
+| 41 | `03-phase-security-fundamentals.md:685` | You can check any site's headers with `curl -I`, which is a small, satisfying thing to do on a site you own. | **OK** — curl: `-I` fetches HTTP headers. |
+| 42 | `04-phase-hands-on-labs.md:239` | \| Windows VM \| `netstat -ano` \| | **OK** — Microsoft: `netstat -ano` shows all connections and listening ports with numeric addresses and owning PIDs. |
 | | | <sub>↑ \| Linux VM \| `ss -tulpn` \|</sub> | |
-| 43 | `04-phase-hands-on-labs.md:275` | \| **Enough free disk space** \| `Get-PSDrive C` in PowerShell \| Guests grow, and a full host disk corrupts running VMs \| | |
-| 44 | `04-phase-hands-on-labs.md:447` | \| **The host disk is full** \| Snapshot deltas, or dynamically allocated disks that grew \| `Get-PSDrive C` on the host; check the VM folder's size \| Delete finished snapshots, delete unused VMs, move the VM folder to a larger drive \| | |
-| 45 | `04-phase-hands-on-labs.md:455` | \| **`apt` or Windows Update fails inside the guest** \| No route out, or a corporate VPN on the host \| `curl -I https://archive.ubuntu.com` inside the guest \| Detach the VPN, or verify the NAT adapter is present and enabled \| | |
-| 46 | `04-phase-hands-on-labs.md:484` | it can understand Windows events and `sshd` logs out of the box. | |
+| 43 | `04-phase-hands-on-labs.md:275` | \| **Enough free disk space** \| `Get-PSDrive C` in PowerShell \| Guests grow, and a full host disk corrupts running VMs \| | **OK** — Microsoft: `Get-PSDrive` reports used and free space per drive. |
+| 44 | `04-phase-hands-on-labs.md:447` | \| **The host disk is full** \| Snapshot deltas, or dynamically allocated disks that grew \| `Get-PSDrive C` on the host; check the VM folder's size \| Delete finished snapshots, delete unused VMs, move the VM folder to a larger drive \| | **OK** — Microsoft: `Get-PSDrive` shows disk usage. |
+| 45 | `04-phase-hands-on-labs.md:455` | \| **`apt` or Windows Update fails inside the guest** \| No route out, or a corporate VPN on the host \| `curl -I https://archive.ubuntu.com` inside the guest \| Detach the VPN, or verify the NAT adapter is present and enabled \| | **OK** — curl: `-I` tests HTTP connectivity. |
+| 46 | `04-phase-hands-on-labs.md:484` | it can understand Windows events and `sshd` logs out of the box. | **OK** — Wazuh ships decoders for Windows events and sshd logs. |
 | | | <sub>↑ it. Wazuh ships with hundreds of decoders for common log formats — which is why</sub> | |
-| 47 | `04-phase-hands-on-labs.md:543` | \| 1 \| **Generate one event** on the victim VM — for example, an SSH login attempt as a user that does not exist (`ssh fakeuser@localhost` and fail it) \| You need a known event to trace \| | |
-| 48 | `04-phase-hands-on-labs.md:662` ▶ | `grep "Failed password" /var/log/auth.log \| tail -3` | |
+| 47 | `04-phase-hands-on-labs.md:543` | \| 1 \| **Generate one event** on the victim VM — for example, an SSH login attempt as a user that does not exist (`ssh fakeuser@localhost` and fail it) \| You need a known event to trace \| | **OK** — OpenSSH: `ssh fakeuser@localhost` attempts a login as a non-existent user. |
+| 48 | `04-phase-hands-on-labs.md:662` ▶ | `grep "Failed password" /var/log/auth.log \| tail -3` | **OK** — grep searches; `tail -3` shows the last three lines. |
 | | | <sub>↑ - Raw excerpt from /var/log/auth.log, three of the six lines, captured with<br>↓ - Wazuh alert for rule 100001, level 10, timestamped 14:32:11 UTC</sub> | |
-| 49 | `08-phase-job-application.md:294` | *I'd test resolution directly: `nslookup example.com` tells me whether the name resolves and which server answered. If it fails, I'd try a public resolver like `nslookup example.com 8.8.8.8`. If that works, the problem is our internal DNS server or its forward … | |
-| 50 | `08-phase-job-application.md:308` | **Linux permissions — "What does `chmod 777` do, and why is it a finding in a security review?"** | |
-| 51 | `09-phase-cloud-and-identity.md:268` | Two details in that third command are worth naming, because both are the kind of thing that makes an audit script quietly wrong. The version id has to be fetched rather than assumed, and the `grep` pattern is written loosely enough to catch the several shapes  … | |
-| 52 | `11-phase-incident-response.md:516` | \| 09:12:03 \| Sysmon 1 \| `schtasks.exe /create /tn Updater /tr ...` \| | |
+| 49 | `08-phase-job-application.md:294` | *I'd test resolution directly: `nslookup example.com` tells me whether the name resolves and which server answered. If it fails, I'd try a public resolver like `nslookup example.com 8.8.8.8`. If that works, the problem is our internal DNS server or its forward … | **OK** — nslookup: `nslookup name server` queries the specified server, so `nslookup example.com 8.8.8.8` uses Google's resolver. |
+| 50 | `08-phase-job-application.md:308` | **Linux permissions — "What does `chmod 777` do, and why is it a finding in a security review?"** | **OK** — chmod: mode 777 is rwxrwxrwx — all permissions for all users. |
+| 51 | `09-phase-cloud-and-identity.md:268` | Two details in that third command are worth naming, because both are the kind of thing that makes an audit script quietly wrong. The version id has to be fetched rather than assumed, and the `grep` pattern is written loosely enough to catch the several shapes  … | **UNVERIFIABLE** — curriculum narrative about one command's context |
+| 52 | `11-phase-incident-response.md:516` | \| 09:12:03 \| Sysmon 1 \| `schtasks.exe /create /tn Updater /tr ...` \| | **OK** — Microsoft: `schtasks.exe /create /tn <name> /tr <command>` creates a scheduled task. |
 | | | <sub>↑ \| 09:11:52 \| Sysmon 3 \| Outbound HTTPS from `powershell.exe` to `203.0.113.44:443` \|<br>↓ \| 09:12:20 \| Security 4698 \| Scheduled task `Updater` created \|</sub> | |
-| 53 | `11-phase-incident-response.md:1065` | **On the Windows host this scenario actually describes, the same four steps are:** `winpmem_mini_x64.exe` for memory; `netstat -ano`, `arp -a`, and `route print` for network state; `Get-Process` for processes; and FTK Imager or `dc3dd.exe` for the disk image.  … | |
-| 54 | `12-phase-scripting-automation.md:27` | - Use PowerShell to triage a Windows host with `Get-WinEvent`, `Get-Process`, and `Get-NetTCPConnection`. | |
+| 53 | `11-phase-incident-response.md:1065` | **On the Windows host this scenario actually describes, the same four steps are:** `winpmem_mini_x64.exe` for memory; `netstat -ano`, `arp -a`, and `route print` for network state; `Get-Process` for processes; and FTK Imager or `dc3dd.exe` for the disk image.  … | **OK** — winpmem_mini_x64.exe acquires memory; netstat -ano, arp -a and route print show network state; Get-Process lists processes; FTK Imager and dc3dd.exe acquire disk images. |
+| 54 | `12-phase-scripting-automation.md:27` | - Use PowerShell to triage a Windows host with `Get-WinEvent`, `Get-Process`, and `Get-NetTCPConnection`. | **OK** — Microsoft: Get-WinEvent, Get-Process and Get-NetTCPConnection are standard PowerShell cmdlets. |
 | | | <sub>↑ - Read and write Python well enough to parse logs, call APIs, and produce a report.<br>↓ - Make authenticated HTTP requests to a real API and handle the responses and errors properly.</sub> | |
-| 55 | `12-phase-scripting-automation.md:46` | - PowerShell for triage: `Get-WinEvent`, `Get-Process`, `Get-NetTCPConnection`, `Get-Service` | |
+| 55 | `12-phase-scripting-automation.md:46` | - PowerShell for triage: `Get-WinEvent`, `Get-Process`, `Get-NetTCPConnection`, `Get-Service` | **OK** — Microsoft: Get-WinEvent, Get-Process, Get-NetTCPConnection and Get-Service are standard cmdlets. |
 | | | <sub>↑ - Secrets management: environment variables, `.env` files, and `.gitignore`<br>↓ - PowerShell objects and pipes, and why `Select-Object` beats text parsing</sub> | |
-| 56 | `12-phase-scripting-automation.md:49` | - Hash computation with `hashlib` and `Get-FileHash` for IOC matching | |
+| 56 | `12-phase-scripting-automation.md:49` | - Hash computation with `hashlib` and `Get-FileHash` for IOC matching | **OK** — Python hashlib computes hashes; PowerShell `Get-FileHash` computes file hashes with -Algorithm (SHA1/SHA256/SHA384/SHA512/MD5). |
 | | | <sub>↑ - Calling REST APIs from PowerShell with `Invoke-RestMethod`<br>↓ - Defanging indicators so they are safe to paste into reports</sub> | |
-| 57 | `12-phase-scripting-automation.md:743` | `Get-WinEvent` is the workhorse, and its filtering syntax is worth learning properly because the difference between a good and a bad filter is minutes versus hours. | |
-| 58 | `12-phase-scripting-automation.md:852` | The third command is the one to know best. **`Get-NetTCPConnection` joined to the owning process answers "what is this machine talking to, and what program is doing it"** — which is the first question in almost every host investigation. | |
-| 59 | `12-phase-scripting-automation.md:1396` | - **`Get-WinEvent -FilterHashtable` is dramatically faster than piping to `Where-Object`**, and positional property indexes are found by inspection rather than memory. | |
-| 60 | `12-phase-scripting-automation.md:1397` | - **`Get-NetTCPConnection` joined to the owning process answers the first question of almost every host investigation.** | |
+| 57 | `12-phase-scripting-automation.md:743` | `Get-WinEvent` is the workhorse, and its filtering syntax is worth learning properly because the difference between a good and a bad filter is minutes versus hours. | **OK** — Microsoft: `Get-WinEvent -FilterHashtable` filters at the source and is markedly faster than piping to Where-Object. |
+| 58 | `12-phase-scripting-automation.md:852` | The third command is the one to know best. **`Get-NetTCPConnection` joined to the owning process answers "what is this machine talking to, and what program is doing it"** — which is the first question in almost every host investigation. | **OK** — Microsoft: Get-NetTCPConnection exposes `OwningProcess`, the PID of the process owning the connection. |
+| 59 | `12-phase-scripting-automation.md:1396` | - **`Get-WinEvent -FilterHashtable` is dramatically faster than piping to `Where-Object`**, and positional property indexes are found by inspection rather than memory. | **OK** — Microsoft: “将对象沿管道下发到 Where-Object 命令，效率将较低” — piping to Where-Object is less efficient than -FilterHashtable. |
+| 60 | `12-phase-scripting-automation.md:1397` | - **`Get-NetTCPConnection` joined to the owning process answers the first question of almost every host investigation.** | **OK** — Microsoft: Get-NetTCPConnection exposes `OwningProcess`. |
 
 _▶ marks a line inside a code block — executable, so a wrong flag or path is worse than a wrong sentence._
 
@@ -309,7 +323,7 @@ _▶ marks a line inside a code block — executable, so a wrong flag or path is
 | | | <sub>↑ - IPv4 addressing, subnet masks, and CIDR — including working out the network, broadcast, and usable range for any prefix by hand<br>↓ - DNS: A, AAAA, CNAME, MX, TXT, NS, recursive resolver, authoritative server</sub> | |
 | 2 | `02-phase-networking-and-linux.md:312` | You can inspect all of this from a terminal, and the phase's task 5 asks you to. `dig example.com MX` returns the mail records, and `dig example.com TXT` shows the anti-spoofing policy. Reading a real TXT record for a domain you care about is a small revelatio … | |
 | 3 | `02-phase-networking-and-linux.md:1155` | 5. **Then DNS** (task 5). Run `dig` for A, AAAA, MX, TXT, and NS on a domain you care about, and read the TXT record to see the anti-spoofing policy. This connects the abstract record table to something real. | |
-| 4 | `02-phase-networking-and-linux.md:1196` | 5. Use `dig` or `nslookup` to inspect A, AAAA, MX, TXT records. <!-- id: cyber-02-t05 band: quick energy: low --> | |
+| 4 | `02-phase-networking-and-linux.md:1196` | 5. Use `dig` or `nslookup` to inspect A, AAAA, MX, TXT records. <!-- id: cyber-02-t05 band: quick energy: low --> | **OK** — BIND dig: supports query types including A, AAAA, MX and TXT. |
 
 ---
 
@@ -441,7 +455,7 @@ _▶ marks a line inside a code block — executable, so a wrong flag or path is
 | 7 | `02-phase-networking-and-linux.md:625` | Every `sudo` invocation is logged, which is why it also serves the **accounting** part of AAA. Reading `/etc/sudoers` shows who has been granted what — and a common finding in security reviews is that far too many users are in the sudo group. | |
 | 8 | `02-phase-networking-and-linux.md:645` | Reading `/etc/passwd` carefully is a genuinely useful skill. Two fields carry the security meaning. | |
 | 9 | `02-phase-networking-and-linux.md:652` | \| **Login shell** \| `/usr/sbin/nologin` \| The account exists but cannot log in interactively — how service accounts are locked down \| | |
-| 10 | `02-phase-networking-and-linux.md:661` | **SSH** gives you an encrypted shell on a remote machine. The server is `sshd` — the SSH *daemon*, where a daemon is a background service. It is configured in `/etc/ssh/sshd_config`, and it listens on port 22 by default. | |
+| 10 | `02-phase-networking-and-linux.md:661` | **SSH** gives you an encrypted shell on a remote machine. The server is `sshd` — the SSH *daemon*, where a daemon is a background service. It is configured in `/etc/ssh/sshd_config`, and it listens on port 22 by default. | **OK** — OpenSSH: sshd is the SSH daemon, configured in /etc/ssh/sshd_config, listening on port 22 by default. |
 | 11 | `02-phase-networking-and-linux.md:738` | \| `/var/log/auth.log` \| Authentication: logins, `sudo` use, SSH attempts (Debian/Ubuntu) \| | |
 | | | <sub>↑ \|---\|---\|<br>↓ \| `/var/log/secure` \| The same role on RHEL/CentOS family \|</sub> | |
 | 12 | `02-phase-networking-and-linux.md:739` | \| `/var/log/secure` \| The same role on RHEL/CentOS family \| | |
@@ -452,13 +466,13 @@ _▶ marks a line inside a code block — executable, so a wrong flag or path is
 | | | <sub>↑ \| `/var/log/syslog` \| General system messages (Debian/Ubuntu) \|<br>↓ \| `/var/log/apache2/`, `/var/log/nginx/` \| Web server access and error logs \|</sub> | |
 | 15 | `02-phase-networking-and-linux.md:742` | \| `/var/log/apache2/`, `/var/log/nginx/` \| Web server access and error logs \| | |
 | | | <sub>↑ \| `/var/log/messages` \| General system messages (RHEL/CentOS) \|</sub> | |
-| 16 | `02-phase-networking-and-linux.md:757` | Watch the failures appear. Then use `grep` to pull the failed attempts out of `/var/log/auth.log`. | |
+| 16 | `02-phase-networking-and-linux.md:757` | Watch the failures appear. Then use `grep` to pull the failed attempts out of `/var/log/auth.log`. | **OK** — grep searches file contents; /var/log/auth.log is the standard authentication log on Debian/Ubuntu. |
 | 17 | `02-phase-networking-and-linux.md:839` | `zgrep` searches compressed logs too. On a system that has been running a while, `/var/log/auth.log` is only the most recent slice, and the earlier evidence is in `auth.log.1.gz`, `auth.log.2.gz` and so on. `auth.log*` catches all of them. | |
 | 18 | `02-phase-networking-and-linux.md:1140` | - **`/etc/passwd` UID 0 is root, and nothing else should be.** A non-root account with UID 0 is a backdoor; a service account with `/bin/bash` where `nologin` belongs is a misconfiguration. | |
 | 19 | `02-phase-networking-and-linux.md:1152` | 2. **Then permissions** (task 2), because they are the foundation of Linux security thinking. Create two users, put them in a group, create a file, and try to read it as the wrong user. Read `/etc/passwd` and find the UID field. Being denied access is the less … | |
 | 20 | `02-phase-networking-and-linux.md:1153` | 3. **Then SSH** (task 3), which turns your VM into a remote system you can work with comfortably. Set up keys, not just passwords, and read `/etc/ssh/sshd_config` while you are there. | |
 | 21 | `02-phase-networking-and-linux.md:1244` | **Why:** Service accounts exist to run processes, not to be logged into, so the expected value is `/usr/sbin/nologin`. An interactive shell on one is a finding because it is an account an attacker can actually log in as, and service accounts are frequently wea … | |
-| 22 | `02-phase-networking-and-linux.md:1325` | **Why:** `-u sshd` matches a systemd unit by that exact name, and on some distributions the unit is `ssh.service` rather than `sshd.service`, so the filter matches nothing. Separately, not every distribution routes SSH into the journal — Debian and Ubuntu fami … | |
+| 22 | `02-phase-networking-and-linux.md:1325` | **Why:** `-u sshd` matches a systemd unit by that exact name, and on some distributions the unit is `ssh.service` rather than `sshd.service`, so the filter matches nothing. Separately, not every distribution routes SSH into the journal — Debian and Ubuntu fami … | **OK** — systemd: `journalctl -u` matches by unit name, and on Debian/Ubuntu the unit is `ssh.service` rather than `sshd.service`. |
 | 23 | `03-phase-security-fundamentals.md:302` | In Linux the equivalent evidence lives where Phase 2 showed you: `/var/log/auth.log` or `/var/log/secure`, read through `journalctl -u sshd`. | |
 | 24 | `03-phase-security-fundamentals.md:393` | \| `C:\Windows\System32\svchost.exe` \| The real one \| | |
 | | | <sub>↑ \|---\|---\|<br>↓ \| `C:\Users\Public\svchost.exe` \| Not the real one \|</sub> | |
@@ -753,51 +767,51 @@ _▶ marks a line inside a code block — executable, so a wrong flag or path is
 
 | # | Location | Text as written | Verdict |
 |---|---|---|---|
-| 1 | `02-phase-networking-and-linux.md:53` | - SSH keys and `sshd` | |
+| 1 | `02-phase-networking-and-linux.md:53` | - SSH keys and `sshd` | **UNVERIFIABLE** — curriculum topic outline |
 | | | <sub>↑ - Users/groups/sudo<br>↓ - Services with `systemctl`</sub> | |
-| 2 | `02-phase-networking-and-linux.md:54` | - Services with `systemctl` | |
+| 2 | `02-phase-networking-and-linux.md:54` | - Services with `systemctl` | **OK** — systemd: `systemctl` is the control interface for the systemd system and service manager. |
 | | | <sub>↑ - SSH keys and `sshd`<br>↓ - Logs with `journalctl`, `/var/log/auth.log`, `/var/log/syslog`</sub> | |
 | 3 | `02-phase-networking-and-linux.md:55` | - Logs with `journalctl`, `/var/log/auth.log`, `/var/log/syslog` | |
 | | | <sub>↑ - Services with `systemctl`<br>↓ - Reading logs as evidence: `grep`, `awk`, `sort`, `uniq`, and `zgrep` pipelines that answer a question rather than dumping a file</sub> | |
-| 4 | `02-phase-networking-and-linux.md:56` | - Reading logs as evidence: `grep`, `awk`, `sort`, `uniq`, and `zgrep` pipelines that answer a question rather than dumping a file | |
-| 5 | `02-phase-networking-and-linux.md:57` | - Networking: `ip a`, `ip route`, `ss -tulpn`, `dig`, `curl` | |
+| 4 | `02-phase-networking-and-linux.md:56` | - Reading logs as evidence: `grep`, `awk`, `sort`, `uniq`, and `zgrep` pipelines that answer a question rather than dumping a file | **OK** — POSIX/GNU man pages: grep searches text, awk processes fields, sort orders lines, uniq collapses duplicates, zgrep searches compressed files. |
+| 5 | `02-phase-networking-and-linux.md:57` | - Networking: `ip a`, `ip route`, `ss -tulpn`, `dig`, `curl` | **OK** — iproute2/BIND/curl: `ip a` shows addresses, `ip route` routing, `ss -tulpn` listening sockets, `dig` DNS lookups, `curl` transfers data. |
 | | | <sub>↑ - Reading logs as evidence: `grep`, `awk`, `sort`, `uniq`, and `zgrep` pipelines that answer a question rather than dumping a file<br>↓ - Text processing: `grep`, `awk` basics, `sed` basics, pipes/redirection</sub> | |
-| 6 | `02-phase-networking-and-linux.md:58` | - Text processing: `grep`, `awk` basics, `sed` basics, pipes/redirection | |
+| 6 | `02-phase-networking-and-linux.md:58` | - Text processing: `grep`, `awk` basics, `sed` basics, pipes/redirection | **OK** — POSIX: grep, awk and sed are standard text-processing utilities. |
 | | | <sub>↑ - Networking: `ip a`, `ip route`, `ss -tulpn`, `dig`, `curl`</sub> | |
 | 7 | `02-phase-networking-and-linux.md:89` | On Windows, network configuration is buried in GUI dialogs, and logging is abstracted away. On Linux, you type `ip a` and see your interfaces. You type `ss -tulpn` and see every listening service with the process that owns it. You read `/var/log/auth.log` to w … | |
 | 8 | `02-phase-networking-and-linux.md:113` | \| `nmap -sV` \| Learning \| Unauthorised access \| | |
 | | | <sub>↑ \|---\|---\|---\|<br>↓ \| `tcpdump` on your own interface \| Learning \| Potentially unlawful interception \|</sub> | |
 | 9 | `02-phase-networking-and-linux.md:114` | \| `tcpdump` on your own interface \| Learning \| Potentially unlawful interception \| | |
 | | | <sub>↑ \| `nmap -sV` \| Learning \| Unauthorised access \|<br>↓ \| `ssh user@your-vm` \| Learning \| Unauthorised access \|</sub> | |
-| 10 | `02-phase-networking-and-linux.md:115` | \| `ssh user@your-vm` \| Learning \| Unauthorised access \| | |
+| 10 | `02-phase-networking-and-linux.md:115` | \| `ssh user@your-vm` \| Learning \| Unauthorised access \| | **OK** — OpenSSH: `ssh user@host` is the standard login syntax. |
 | | | <sub>↑ \| `tcpdump` on your own interface \| Learning \| Potentially unlawful interception \|</sub> | |
-| 11 | `02-phase-networking-and-linux.md:436` | \| **Headers** \| Metadata about the request or response \| `Set-Cookie` (and whether it has `HttpOnly` and `Secure` flags), `Content-Security-Policy`, `Server` (leaks software versions, useful to an attacker), `Authorization` \| | |
-| 12 | `02-phase-networking-and-linux.md:439` | You can read all of this with `curl`, which is phase task 7's companion. `curl -I https://example.com` printing real response headers is worth more than any description. | |
-| 13 | `02-phase-networking-and-linux.md:661` | **SSH** gives you an encrypted shell on a remote machine. The server is `sshd` — the SSH *daemon*, where a daemon is a background service. It is configured in `/etc/ssh/sshd_config`, and it listens on port 22 by default. | |
+| 11 | `02-phase-networking-and-linux.md:436` | \| **Headers** \| Metadata about the request or response \| `Set-Cookie` (and whether it has `HttpOnly` and `Secure` flags), `Content-Security-Policy`, `Server` (leaks software versions, useful to an attacker), `Authorization` \| | **OK** — Set-Cookie (RFC 6265), Content-Security-Policy (W3C CSP) and Authorization (RFC 7235) are real HTTP headers. |
+| 12 | `02-phase-networking-and-linux.md:439` | You can read all of this with `curl`, which is phase task 7's companion. `curl -I https://example.com` printing real response headers is worth more than any description. | **OK** — curl: `-I` sends a HEAD request and prints response headers. |
+| 13 | `02-phase-networking-and-linux.md:661` | **SSH** gives you an encrypted shell on a remote machine. The server is `sshd` — the SSH *daemon*, where a daemon is a background service. It is configured in `/etc/ssh/sshd_config`, and it listens on port 22 by default. | **OK** — OpenSSH: sshd is the SSH daemon, configured in /etc/ssh/sshd_config, listening on port 22 by default. |
 | 14 | `02-phase-networking-and-linux.md:683` | **Windows has no `ssh-copy-id`.** The OpenSSH client ships with Windows 10 and 11, but the key-install helper does not. Append the key yourself instead — from PowerShell: | **OK** — Microsoft: the Windows OpenSSH client does not include `ssh-copy-id`. |
-| 15 | `02-phase-networking-and-linux.md:702` | Modern Linux uses **systemd** to manage services, through `systemctl`: | |
-| 16 | `02-phase-networking-and-linux.md:730` | The security relevance of this command is direct: **you cannot defend a host whose services you cannot enumerate.** Asking “what is running, and should it be?” is the first question of host hardening, and `systemctl list-units --type=service` answers it. | |
+| 15 | `02-phase-networking-and-linux.md:702` | Modern Linux uses **systemd** to manage services, through `systemctl`: | **OK** — systemd is the system and service manager on modern Linux, controlled through systemctl. |
+| 16 | `02-phase-networking-and-linux.md:730` | The security relevance of this command is direct: **you cannot defend a host whose services you cannot enumerate.** Asking “what is running, and should it be?” is the first question of host hardening, and `systemctl list-units --type=service` answers it. | **OK** — systemd: `systemctl list-units --type=service` lists service units; `-t`/`--type` filters by unit type. |
 | 17 | `02-phase-networking-and-linux.md:744` | `journalctl` queries the systemd journal, which on many distributions is where logs now primarily live: | |
 | 18 | `02-phase-networking-and-linux.md:755` | A workflow worth adopting now. Open one terminal running `journalctl -u sshd -f` on your VM. Try to SSH in from your host with the wrong username, and then with the wrong password. | |
-| 19 | `02-phase-networking-and-linux.md:757` | Watch the failures appear. Then use `grep` to pull the failed attempts out of `/var/log/auth.log`. | |
-| 20 | `02-phase-networking-and-linux.md:796` | \| `grep "Failed password"` \| Keep only the failure lines \| | |
+| 19 | `02-phase-networking-and-linux.md:757` | Watch the failures appear. Then use `grep` to pull the failed attempts out of `/var/log/auth.log`. | **OK** — grep searches file contents; /var/log/auth.log is the standard authentication log on Debian/Ubuntu. |
+| 20 | `02-phase-networking-and-linux.md:796` | \| `grep "Failed password"` \| Keep only the failure lines \| | **OK** — grep searches for patterns in files. |
 | | | <sub>↑ \|---\|---\|<br>↓ \| `awk '{print $(NF-3)}'` \| Print the fourth field **from the end** — which is the source IP in this log format \|</sub> | |
-| 21 | `02-phase-networking-and-linux.md:797` | \| `awk '{print $(NF-3)}'` \| Print the fourth field **from the end** — which is the source IP in this log format \| | |
+| 21 | `02-phase-networking-and-linux.md:797` | \| `awk '{print $(NF-3)}'` \| Print the fourth field **from the end** — which is the source IP in this log format \| | **OK** — **Verified by execution.** awk: NF is the field count, so `$(NF-3)` is the fourth from the end. Ran it against the corpus's own example lines: NF=9 → $6, NF=11 → $8, NF=8 → $5, and every one returns 203.0.113.45. It also returns 2001:db8::1 correctly on an IPv6 line — which is why the corpus teaches NF-relative indexing instead of a fixed $6. |
 | 22 | `02-phase-networking-and-linux.md:798` | \| `sort` \| Group identical addresses together, because `uniq` only collapses *adjacent* duplicates \| | |
 | | | <sub>↑ \| `awk '{print $(NF-3)}'` \| Print the fourth field **from the end** — which is the source IP in this log format \|<br>↓ \| `uniq -c` \| Replace each run with a count \|</sub> | |
 | 23 | `02-phase-networking-and-linux.md:799` | \| `uniq -c` \| Replace each run with a count \| | |
 | | | <sub>↑ \| `sort` \| Group identical addresses together, because `uniq` only collapses *adjacent* duplicates \|<br>↓ \| `sort -rn` \| Sort numerically, highest first \|</sub> | |
 | 24 | `02-phase-networking-and-linux.md:800` | \| `sort -rn` \| Sort numerically, highest first \| | |
 | | | <sub>↑ \| `uniq -c` \| Replace each run with a count \|<br>↓ \| `head` \| Show the top ten, because you never want the whole list \|</sub> | |
-| 25 | `02-phase-networking-and-linux.md:813` | The `--line-buffered` matters and is easy to miss. Without it, `grep` buffers its output when writing to a pipe, so the lines appear in bursts rather than as they happen. You will think the log is broken. | |
-| 26 | `02-phase-networking-and-linux.md:847` | This is `sed`'s range form: print from the line matching the first pattern to the line matching the second. It is the fastest way to reduce a day of logs to the hour that matters. | |
-| 27 | `02-phase-networking-and-linux.md:849` | **One safety habit, learned from breaking things.** Write the pipeline in pieces and run each stage before adding the next. `grep ... \| head` first — confirm you are matching the right lines. *Then* add the `awk`. A pipeline that returns nothing is ambiguous: … | |
+| 25 | `02-phase-networking-and-linux.md:813` | The `--line-buffered` matters and is easy to miss. Without it, `grep` buffers its output when writing to a pipe, so the lines appear in bursts rather than as they happen. You will think the log is broken. | **OK** — GNU grep: `--line-buffered` flushes output line by line rather than block-buffering when writing to a pipe. |
+| 26 | `02-phase-networking-and-linux.md:847` | This is `sed`'s range form: print from the line matching the first pattern to the line matching the second. It is the fastest way to reduce a day of logs to the hour that matters. | **OK** — GNU sed: “An address range can be specified by specifying two addresses separated by a comma… matches lines starting from where the first address matches, and continues until the second address matches (inclusively).” |
+| 27 | `02-phase-networking-and-linux.md:849` | **One safety habit, learned from breaking things.** Write the pipeline in pieces and run each stage before adding the next. `grep ... \| head` first — confirm you are matching the right lines. *Then* add the `awk`. A pipeline that returns nothing is ambiguous: … | **UNVERIFIABLE** — pedagogical advice about building pipelines incrementally |
 | 28 | `02-phase-networking-and-linux.md:871` | `ss -tulpn` is the Linux equivalent of a port scan against your own machine. Phase task 4 asks you to run it and identify every listening service. Run it with `sudo`: the `p` flag needs root to read the owning process for sockets that belong to other users, an … | |
-| 29 | `02-phase-networking-and-linux.md:927` | \| `grep "Failed password" /var/log/auth.log` \| Find the failed-password lines \| | |
+| 29 | `02-phase-networking-and-linux.md:927` | \| `grep "Failed password" /var/log/auth.log` \| Find the failed-password lines \| | **OK** — grep searches for patterns in files. |
 | | | <sub>↑ \|---\|---\|<br>↓ \| `grep -oE 'from [0-9.]+'` \| Keep only the `from <address>` fragment \|</sub> | |
-| 30 | `02-phase-networking-and-linux.md:928` | \| `grep -oE 'from [0-9.]+'` \| Keep only the `from <address>` fragment \| | |
+| 30 | `02-phase-networking-and-linux.md:928` | \| `grep -oE 'from [0-9.]+'` \| Keep only the `from <address>` fragment \| | **OK** — grep: `-o` outputs only the matched part; `-E` enables extended regular expressions. |
 | | | <sub>↑ \| `grep "Failed password" /var/log/auth.log` \| Find the failed-password lines \|<br>↓ \| `awk '{print $2}'` \| Extract the address — field 2 of `from 203.0.113.45` \|</sub> | |
-| 31 | `02-phase-networking-and-linux.md:929` | \| `awk '{print $2}'` \| Extract the address — field 2 of `from 203.0.113.45` \| | |
+| 31 | `02-phase-networking-and-linux.md:929` | \| `awk '{print $2}'` \| Extract the address — field 2 of `from 203.0.113.45` \| | **OK** — awk: `{print $2}` extracts the second whitespace-separated field. |
 | | | <sub>↑ \| `grep -oE 'from [0-9.]+'` \| Keep only the `from <address>` fragment \|<br>↓ \| `sort` \| Order them so identical addresses are adjacent \|</sub> | |
 | 32 | `02-phase-networking-and-linux.md:930` | \| `sort` \| Order them so identical addresses are adjacent \| | |
 | | | <sub>↑ \| `awk '{print $2}'` \| Extract the address — field 2 of `from 203.0.113.45` \|<br>↓ \| `uniq -c` \| Collapse duplicates and count each \|</sub> | |
@@ -805,43 +819,43 @@ _▶ marks a line inside a code block — executable, so a wrong flag or path is
 | | | <sub>↑ \| `sort` \| Order them so identical addresses are adjacent \|<br>↓ \| `sort -rn` \| Sort by count, descending \|</sub> | |
 | 34 | `02-phase-networking-and-linux.md:932` | \| `sort -rn` \| Sort by count, descending \| | |
 | | | <sub>↑ \| `uniq -c` \| Collapse duplicates and count each \|<br>↓ \| `head` \| Show the top ten \|</sub> | |
-| 35 | `02-phase-networking-and-linux.md:935` | That is a real investigation query, built from small pieces, and it is the shape of most log analysis you will do. **`awk '{print $N}'` extracts the Nth whitespace-separated field** — that is the 90% of awk you need at this stage. | |
-| 36 | `02-phase-networking-and-linux.md:937` | **Why not just `awk '{print $6}'`?** Because the field number moves. In `Failed password for root from 203.0.113.45 ...` the address is field 6, but in `Failed password for invalid user admin from 203.0.113.45 ...` the words `invalid user` push it to field 8.  … | |
-| 37 | `02-phase-networking-and-linux.md:981` | \| 2 \| In another terminal, run `dig example.com` and `curl -I https://example.com` \| | |
+| 35 | `02-phase-networking-and-linux.md:935` | That is a real investigation query, built from small pieces, and it is the shape of most log analysis you will do. **`awk '{print $N}'` extracts the Nth whitespace-separated field** — that is the 90% of awk you need at this stage. | **OK** — awk: `{print $N}` extracts the Nth whitespace-separated field. |
+| 36 | `02-phase-networking-and-linux.md:937` | **Why not just `awk '{print $6}'`?** Because the field number moves. In `Failed password for root from 203.0.113.45 ...` the address is field 6, but in `Failed password for invalid user admin from 203.0.113.45 ...` the words `invalid user` push it to field 8.  … | **OK** — The source address sits at a different field index depending on whether the user is valid or invalid — `invalid user` adds two fields. Verified against the corpus's own examples: field 6 for the valid-root line, field 8 for the invalid-user line. |
+| 37 | `02-phase-networking-and-linux.md:981` | \| 2 \| In another terminal, run `dig example.com` and `curl -I https://example.com` \| | **OK** — `dig` performs DNS lookups; `curl -I` fetches HTTP headers. |
 | | | <sub>↑ \| 1 \| Start the capture in Wireshark or tcpdump \|<br>↓ \| 3 \| Stop the capture \|</sub> | |
-| 38 | `02-phase-networking-and-linux.md:1105` | Each level is an SSH login to a server where the password for the next level is hidden somewhere. Finding it requires exactly the skills this phase covers: reading files, permissions, `grep`, pipes, and later `find` and encoding. | |
+| 38 | `02-phase-networking-and-linux.md:1105` | Each level is an SSH login to a server where the password for the next level is hidden somewhere. Finding it requires exactly the skills this phase covers: reading files, permissions, `grep`, pipes, and later `find` and encoding. | **UNVERIFIABLE** — description of the OverTheWire Bandit game, not a flag or syntax claim |
 | 39 | `02-phase-networking-and-linux.md:1139` | - **`ss -tulpn` is a self-scan, and `0.0.0.0` versus `127.0.0.1` is the finding.** A service bound to all interfaces is reachable from the network; one bound to localhost is not. | |
-| 40 | `02-phase-networking-and-linux.md:1142` | - **Pipes build small tools into real investigations.** `grep \| awk \| sort \| uniq -c \| sort -rn \| head` is a genuine top-talkers query, not a toy example. | |
+| 40 | `02-phase-networking-and-linux.md:1142` | - **Pipes build small tools into real investigations.** `grep \| awk \| sort \| uniq -c \| sort -rn \| head` is a genuine top-talkers query, not a toy example. | **OK** — POSIX: `grep \| awk \| sort \| uniq -c \| sort -rn \| head` is the standard count-and-rank pipeline. |
 | 41 | `02-phase-networking-and-linux.md:1154` | 4. **Run `ss -tulpn` and identify every listener** (task 4). For each one, decide whether it *should* be listening and whether it is bound to all interfaces. This is host hardening in miniature. | |
-| 42 | `02-phase-networking-and-linux.md:1166` | 13. **Prove key-only SSH** (task 13). Generate a keypair, install the public key in `authorized_keys`, disable password authentication in `sshd_config`, and demonstrate that a password login now fails. "Demonstrate the failure" is the checklist item — anyone c … | |
+| 42 | `02-phase-networking-and-linux.md:1166` | 13. **Prove key-only SSH** (task 13). Generate a keypair, install the public key in `authorized_keys`, disable password authentication in `sshd_config`, and demonstrate that a password login now fails. "Demonstrate the failure" is the checklist item — anyone c … | **OK** — OpenSSH: key-based auth uses authorized_keys; `PasswordAuthentication no` in sshd_config disables password login. |
 | 43 | `02-phase-networking-and-linux.md:1167` | 14. **Capture and filter with `tcpdump`** (task 14). Save to a `.pcap`, open it in Wireshark, and filter to a single protocol. This is the command-line half of the packet work, and it is what you would actually have on a server with no GUI. | |
 | 44 | `02-phase-networking-and-linux.md:1198` | 7. Run `nmap -sV` against your own VM IP only. <!-- id: cyber-02-t07 band: quick energy: normal --> | |
 | | | <sub>↑ 6. Capture DNS and HTTP traffic with Wireshark. <!-- id: cyber-02-t06 band: focused energy: normal --><br>↓ 8. Complete OverTheWire Bandit levels 0–10. <!-- id: cyber-02-t08 band: deep energy: high --></sub> | |
-| 45 | `02-phase-networking-and-linux.md:1204` | 13. Generate a keypair, place the public key in `authorized_keys`, disable password authentication in `sshd_config`, and prove a password login now fails. <!-- id: cyber-02-t13 band: focused energy: high --> | |
+| 45 | `02-phase-networking-and-linux.md:1204` | 13. Generate a keypair, place the public key in `authorized_keys`, disable password authentication in `sshd_config`, and prove a password login now fails. <!-- id: cyber-02-t13 band: focused energy: high --> | **OK** — OpenSSH: key-based auth uses authorized_keys; `PasswordAuthentication no` disables password login. |
 | 46 | `02-phase-networking-and-linux.md:1205` | 14. Use `tcpdump` to capture traffic on your VM's interface, save it to a `.pcap`, then open it in Wireshark and filter to a single protocol. <!-- id: cyber-02-t14 band: focused energy: normal --> | |
-| 47 | `02-phase-networking-and-linux.md:1325` | **Why:** `-u sshd` matches a systemd unit by that exact name, and on some distributions the unit is `ssh.service` rather than `sshd.service`, so the filter matches nothing. Separately, not every distribution routes SSH into the journal — Debian and Ubuntu fami … | |
+| 47 | `02-phase-networking-and-linux.md:1325` | **Why:** `-u sshd` matches a systemd unit by that exact name, and on some distributions the unit is `ssh.service` rather than `sshd.service`, so the filter matches nothing. Separately, not every distribution routes SSH into the journal — Debian and Ubuntu fami … | **OK** — systemd: `journalctl -u` matches by unit name, and on Debian/Ubuntu the unit is `ssh.service` rather than `sshd.service`. |
 | 48 | `03-phase-security-fundamentals.md:302` | In Linux the equivalent evidence lives where Phase 2 showed you: `/var/log/auth.log` or `/var/log/secure`, read through `journalctl -u sshd`. | |
-| 49 | `03-phase-security-fundamentals.md:429` | \| **Living off the land** \| Using legitimate built-in tools for malicious purposes: `powershell.exe`, `cmd.exe`, `wmic`, `certutil`, `bitsadmin`, `rundll32`, `mshta` \| Suspicious not because they are malicious but because they are frequently *abused*, and s … | |
-| 50 | `03-phase-security-fundamentals.md:685` | You can check any site's headers with `curl -I`, which is a small, satisfying thing to do on a site you own. | |
+| 49 | `03-phase-security-fundamentals.md:429` | \| **Living off the land** \| Using legitimate built-in tools for malicious purposes: `powershell.exe`, `cmd.exe`, `wmic`, `certutil`, `bitsadmin`, `rundll32`, `mshta` \| Suspicious not because they are malicious but because they are frequently *abused*, and s … | **OK** — Microsoft/LOLBAS: powershell.exe, cmd.exe, wmic, certutil, bitsadmin, rundll32 and mshta are legitimate signed Windows binaries frequently abused. |
+| 50 | `03-phase-security-fundamentals.md:685` | You can check any site's headers with `curl -I`, which is a small, satisfying thing to do on a site you own. | **OK** — curl: `-I` fetches HTTP headers. |
 | 51 | `03-phase-security-fundamentals.md:1037` | Take five findings — from the `nmap -sV` scan you ran against your own VM in Phase 2, from a Nessus/OpenVAS scan of your own lab, or from the CVE exercise in Phase 1 — and score them. | |
 | 52 | `04-phase-hands-on-labs.md:238` | \| Linux VM \| `ss -tulpn` \| | |
 | | | <sub>↑ \|---\|---\|<br>↓ \| Windows VM \| `netstat -ano` \|</sub> | |
-| 53 | `04-phase-hands-on-labs.md:239` | \| Windows VM \| `netstat -ano` \| | |
+| 53 | `04-phase-hands-on-labs.md:239` | \| Windows VM \| `netstat -ano` \| | **OK** — Microsoft: `netstat -ano` shows all connections and listening ports with numeric addresses and owning PIDs. |
 | | | <sub>↑ \| Linux VM \| `ss -tulpn` \|</sub> | |
-| 54 | `04-phase-hands-on-labs.md:275` | \| **Enough free disk space** \| `Get-PSDrive C` in PowerShell \| Guests grow, and a full host disk corrupts running VMs \| | |
-| 55 | `04-phase-hands-on-labs.md:447` | \| **The host disk is full** \| Snapshot deltas, or dynamically allocated disks that grew \| `Get-PSDrive C` on the host; check the VM folder's size \| Delete finished snapshots, delete unused VMs, move the VM folder to a larger drive \| | |
-| 56 | `04-phase-hands-on-labs.md:455` | \| **`apt` or Windows Update fails inside the guest** \| No route out, or a corporate VPN on the host \| `curl -I https://archive.ubuntu.com` inside the guest \| Detach the VPN, or verify the NAT adapter is present and enabled \| | |
-| 57 | `04-phase-hands-on-labs.md:484` | it can understand Windows events and `sshd` logs out of the box. | |
+| 54 | `04-phase-hands-on-labs.md:275` | \| **Enough free disk space** \| `Get-PSDrive C` in PowerShell \| Guests grow, and a full host disk corrupts running VMs \| | **OK** — Microsoft: `Get-PSDrive` reports used and free space per drive. |
+| 55 | `04-phase-hands-on-labs.md:447` | \| **The host disk is full** \| Snapshot deltas, or dynamically allocated disks that grew \| `Get-PSDrive C` on the host; check the VM folder's size \| Delete finished snapshots, delete unused VMs, move the VM folder to a larger drive \| | **OK** — Microsoft: `Get-PSDrive` shows disk usage. |
+| 56 | `04-phase-hands-on-labs.md:455` | \| **`apt` or Windows Update fails inside the guest** \| No route out, or a corporate VPN on the host \| `curl -I https://archive.ubuntu.com` inside the guest \| Detach the VPN, or verify the NAT adapter is present and enabled \| | **OK** — curl: `-I` tests HTTP connectivity. |
+| 57 | `04-phase-hands-on-labs.md:484` | it can understand Windows events and `sshd` logs out of the box. | **OK** — Wazuh ships decoders for Windows events and sshd logs. |
 | | | <sub>↑ it. Wazuh ships with hundreds of decoders for common log formats — which is why</sub> | |
-| 58 | `04-phase-hands-on-labs.md:543` | \| 1 \| **Generate one event** on the victim VM — for example, an SSH login attempt as a user that does not exist (`ssh fakeuser@localhost` and fail it) \| You need a known event to trace \| | |
-| 59 | `04-phase-hands-on-labs.md:662` ▶ | `grep "Failed password" /var/log/auth.log \| tail -3` | |
+| 58 | `04-phase-hands-on-labs.md:543` | \| 1 \| **Generate one event** on the victim VM — for example, an SSH login attempt as a user that does not exist (`ssh fakeuser@localhost` and fail it) \| You need a known event to trace \| | **OK** — OpenSSH: `ssh fakeuser@localhost` attempts a login as a non-existent user. |
+| 59 | `04-phase-hands-on-labs.md:662` ▶ | `grep "Failed password" /var/log/auth.log \| tail -3` | **OK** — grep searches; `tail -3` shows the last three lines. |
 | | | <sub>↑ - Raw excerpt from /var/log/auth.log, three of the six lines, captured with<br>↓ - Wazuh alert for rule 100001, level 10, timestamped 14:32:11 UTC</sub> | |
 | 60 | `04-phase-hands-on-labs.md:831` ▶ | **Observed:** `ossec.log` shows `Unable to connect to manager`. `ss -tulpn` | |
 | | | <sub>↑ **Did:** Installed the agent, set MANAGER_IP to 192.168.56.10, restarted.<br>↓ on the manager shows nothing listening on 1514.</sub> | |
 | 61 | `06-phase-portfolio-projects.md:1020` | \| 14:09 \| Generated test traffic \| `nmap -sS 192.168.56.10` \| 3 open ports found \| `02-scan.png` \| | |
 | | | <sub>↑ \| 14:02 \| Started lab VM \| VirtualBox → `lab-ubuntu` → Start \| VM booted, IP 192.168.56.10 \| `01-vm-boot.png` \|<br>↓ \| 14:15 \| Confirmed alert fired \| Wazuh dashboard \| Rule 5710 triggered \| `03-alert.png` \|</sub> | |
 | 62 | `09-phase-cloud-and-identity.md:235` | **Before any of this works you need the AWS CLI**: install it, then run `aws configure` once with the IAM user's access key, secret, and a default region. Every command below reads those stored credentials, so a bare `aws` command with no configuration fails i … | |
-| 63 | `09-phase-cloud-and-identity.md:268` | Two details in that third command are worth naming, because both are the kind of thing that makes an audit script quietly wrong. The version id has to be fetched rather than assumed, and the `grep` pattern is written loosely enough to catch the several shapes  … | |
+| 63 | `09-phase-cloud-and-identity.md:268` | Two details in that third command are worth naming, because both are the kind of thing that makes an audit script quietly wrong. The version id has to be fetched rather than assumed, and the `grep` pattern is written loosely enough to catch the several shapes  … | **UNVERIFIABLE** — curriculum narrative about one command's context |
 | 64 | `09-phase-cloud-and-identity.md:536` | \| `userAgent` \| What client made the call \| `aws-cli` at 3 a.m. from a service account is worth a look \| | |
 | | | <sub>↑ \| `sourceIPAddress` \| Where the call came from \| A known office range versus an unfamiliar address \|<br>↓ \| `requestParameters` \| The details of the request \| This is where you see *what* was granted — `AdministratorAccess` here \|</sub> | |
 | 65 | `09-phase-cloud-and-identity.md:581` | \| Was it a human or automation? \| `userAgent` of `aws-cli` plus the pattern suggests scripted activity, possibly a human at a terminal \| | |
@@ -851,24 +865,24 @@ _▶ marks a line inside a code block — executable, so a wrong flag or path is
 | | | <sub>↑ \| `auditd` with `auditctl` rules \| Syscalls and file watches, configurable in detail \| `ausearch` and `aureport` \|<br>↓ \| `/var/log/syslog` or `/var/log/messages` \| General system messages \| Plain text \|</sub> | |
 | 69 | `10-phase-detection-engineering.md:356` | **This half needs a Linux host.** The Windows telemetry above runs on your own PC; auditd does not. If you do not have a Linux machine yet, do this section after Phase 11, which walks you through building one in VirtualBox — or on WSL2, which is enough for `au … | |
 | 70 | `10-phase-detection-engineering.md:358` | The auditd rules worth writing first, because they cover the persistence and privilege-escalation behaviours that matter. Put them in `/etc/audit/rules.d/10-lab.rules`, load them with `augenrules --load`, and confirm they are live with `auditctl -l` — a rule t … | |
-| 71 | `11-phase-incident-response.md:516` | \| 09:12:03 \| Sysmon 1 \| `schtasks.exe /create /tn Updater /tr ...` \| | |
+| 71 | `11-phase-incident-response.md:516` | \| 09:12:03 \| Sysmon 1 \| `schtasks.exe /create /tn Updater /tr ...` \| | **OK** — Microsoft: `schtasks.exe /create /tn <name> /tr <command>` creates a scheduled task. |
 | | | <sub>↑ \| 09:11:52 \| Sysmon 3 \| Outbound HTTPS from `powershell.exe` to `203.0.113.44:443` \|<br>↓ \| 09:12:20 \| Security 4698 \| Scheduled task `Updater` created \|</sub> | |
-| 72 | `11-phase-incident-response.md:1065` | **On the Windows host this scenario actually describes, the same four steps are:** `winpmem_mini_x64.exe` for memory; `netstat -ano`, `arp -a`, and `route print` for network state; `Get-Process` for processes; and FTK Imager or `dc3dd.exe` for the disk image.  … | |
-| 73 | `12-phase-scripting-automation.md:27` | - Use PowerShell to triage a Windows host with `Get-WinEvent`, `Get-Process`, and `Get-NetTCPConnection`. | |
+| 72 | `11-phase-incident-response.md:1065` | **On the Windows host this scenario actually describes, the same four steps are:** `winpmem_mini_x64.exe` for memory; `netstat -ano`, `arp -a`, and `route print` for network state; `Get-Process` for processes; and FTK Imager or `dc3dd.exe` for the disk image.  … | **OK** — winpmem_mini_x64.exe acquires memory; netstat -ano, arp -a and route print show network state; Get-Process lists processes; FTK Imager and dc3dd.exe acquire disk images. |
+| 73 | `12-phase-scripting-automation.md:27` | - Use PowerShell to triage a Windows host with `Get-WinEvent`, `Get-Process`, and `Get-NetTCPConnection`. | **OK** — Microsoft: Get-WinEvent, Get-Process and Get-NetTCPConnection are standard PowerShell cmdlets. |
 | | | <sub>↑ - Read and write Python well enough to parse logs, call APIs, and produce a report.<br>↓ - Make authenticated HTTP requests to a real API and handle the responses and errors properly.</sub> | |
-| 74 | `12-phase-scripting-automation.md:46` | - PowerShell for triage: `Get-WinEvent`, `Get-Process`, `Get-NetTCPConnection`, `Get-Service` | |
+| 74 | `12-phase-scripting-automation.md:46` | - PowerShell for triage: `Get-WinEvent`, `Get-Process`, `Get-NetTCPConnection`, `Get-Service` | **OK** — Microsoft: Get-WinEvent, Get-Process, Get-NetTCPConnection and Get-Service are standard cmdlets. |
 | | | <sub>↑ - Secrets management: environment variables, `.env` files, and `.gitignore`<br>↓ - PowerShell objects and pipes, and why `Select-Object` beats text parsing</sub> | |
 | 75 | `12-phase-scripting-automation.md:47` | - PowerShell objects and pipes, and why `Select-Object` beats text parsing | |
 | | | <sub>↑ - PowerShell for triage: `Get-WinEvent`, `Get-Process`, `Get-NetTCPConnection`, `Get-Service`<br>↓ - Calling REST APIs from PowerShell with `Invoke-RestMethod`</sub> | |
 | 76 | `12-phase-scripting-automation.md:48` | - Calling REST APIs from PowerShell with `Invoke-RestMethod` | |
 | | | <sub>↑ - PowerShell objects and pipes, and why `Select-Object` beats text parsing<br>↓ - Hash computation with `hashlib` and `Get-FileHash` for IOC matching</sub> | |
-| 77 | `12-phase-scripting-automation.md:49` | - Hash computation with `hashlib` and `Get-FileHash` for IOC matching | |
+| 77 | `12-phase-scripting-automation.md:49` | - Hash computation with `hashlib` and `Get-FileHash` for IOC matching | **OK** — Python hashlib computes hashes; PowerShell `Get-FileHash` computes file hashes with -Algorithm (SHA1/SHA256/SHA384/SHA512/MD5). |
 | | | <sub>↑ - Calling REST APIs from PowerShell with `Invoke-RestMethod`<br>↓ - Defanging indicators so they are safe to paste into reports</sub> | |
 | 78 | `12-phase-scripting-automation.md:739` | That `Export-Csv` line is a complete deliverable. Compare it with the text-parsing approach, which requires fixed-width column offsets that change between Windows versions. | |
-| 79 | `12-phase-scripting-automation.md:743` | `Get-WinEvent` is the workhorse, and its filtering syntax is worth learning properly because the difference between a good and a bad filter is minutes versus hours. | |
-| 80 | `12-phase-scripting-automation.md:852` | The third command is the one to know best. **`Get-NetTCPConnection` joined to the owning process answers "what is this machine talking to, and what program is doing it"** — which is the first question in almost every host investigation. | |
-| 81 | `12-phase-scripting-automation.md:1396` | - **`Get-WinEvent -FilterHashtable` is dramatically faster than piping to `Where-Object`**, and positional property indexes are found by inspection rather than memory. | |
-| 82 | `12-phase-scripting-automation.md:1397` | - **`Get-NetTCPConnection` joined to the owning process answers the first question of almost every host investigation.** | |
+| 79 | `12-phase-scripting-automation.md:743` | `Get-WinEvent` is the workhorse, and its filtering syntax is worth learning properly because the difference between a good and a bad filter is minutes versus hours. | **OK** — Microsoft: `Get-WinEvent -FilterHashtable` filters at the source and is markedly faster than piping to Where-Object. |
+| 80 | `12-phase-scripting-automation.md:852` | The third command is the one to know best. **`Get-NetTCPConnection` joined to the owning process answers "what is this machine talking to, and what program is doing it"** — which is the first question in almost every host investigation. | **OK** — Microsoft: Get-NetTCPConnection exposes `OwningProcess`, the PID of the process owning the connection. |
+| 81 | `12-phase-scripting-automation.md:1396` | - **`Get-WinEvent -FilterHashtable` is dramatically faster than piping to `Where-Object`**, and positional property indexes are found by inspection rather than memory. | **OK** — Microsoft: “将对象沿管道下发到 Where-Object 命令，效率将较低” — piping to Where-Object is less efficient than -FilterHashtable. |
+| 82 | `12-phase-scripting-automation.md:1397` | - **`Get-NetTCPConnection` joined to the owning process answers the first question of almost every host investigation.** | **OK** — Microsoft: Get-NetTCPConnection exposes `OwningProcess`. |
 | 83 | `12-phase-scripting-automation.md:1434` | \| CyberChef \| Decoding and transformation \| Free/open-source \| https://gchq.github.io/CyberChef/ \| Decode a base64 command line by hand before scripting it \| Python `base64` and `codecs` \| | |
 | 84 | `14-phase-web-app-security.md:52` | - SQL injection testing with manual payloads and `sqlmap` on authorised targets | |
 | | | <sub>↑ - Burp Suite Community and OWASP ZAP: proxy, intercept, repeater, and scanning<br>↓ - Content Security Policy and the other security response headers</sub> | |
