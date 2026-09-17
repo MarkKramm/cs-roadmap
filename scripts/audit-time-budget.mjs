@@ -17,7 +17,7 @@
 //   IT 03 said "20-30 hours across the phase - the scheduled four weeks at
 //     5-8 hours a week", and 4 x 8 = 32, not 30.
 //
-// Four classes are checked, all arithmetic on the text rather than judgement:
+// Five classes are checked, all arithmetic on the text rather than judgement:
 //
 //   1. A budget table whose parts must sum to the total it prints, either as a
 //      "Total" row (cyber 01-03) or as an intro claim above the table
@@ -27,6 +27,17 @@
 //      lead of the phase's own "Estimated time" line.
 //   4. A track overview table listing a different week count than the phase
 //      file it points at.
+//   5. Two hour-claims for the SAME phase that do not overlap each other.
+//
+// Class 5 was added on 2026-09-17 after a comprehension pass found advance 02
+// stating "Roughly 40-55 hours" in `## Estimated time` (line 22) and "Roughly
+// 41-58 hours" above its breakdown table (line 94) - the table, and the track
+// overview, both agreeing with 41-58. Classes 1-4 all passed, correctly: the
+// table DID sum to the claim directly above it. The defect was that a phase
+// may state its budget in more than one place, and nothing compared those
+// places to each other. This is the same shape as the corpus-vs-file blind
+// spot this repository has recorded before: every check compared a claim to
+// its own parts, and none compared two claims to one another.
 //
 // Class 1 is scoped by the table's own `Hours` column header, not by proximity
 // to a heading. A schedule table (Weeks / study % / hands-on %) has time-ish
@@ -175,6 +186,79 @@ function checkInvertedRanges(rel, lines) {
   });
 }
 
+// Class 5 - two hour-claims for the same phase that do not overlap.
+//
+// Scoped hard, because a phase file mentions hours for many reasons that are
+// not budgets ("2 hours, ingest team" inside a ticket note, "1.58 FTE"). Only
+// two positions count as a statement of the phase's own total:
+//   - the bold lead of `## Estimated time`
+//   - a bold lead ending in a colon that introduces a breakdown table
+// Both are the places a reader plans from, and a disagreement between them is
+// always a defect. Ranges are compared by overlap, so "41-58" and "40-55"
+// conflict (they share 41-55 only partially and neither contains the other's
+// bound) while a rounding like "about 40-56" against "40-56" does not.
+function checkConsistentClaims(rel, lines) {
+  const claims = [];
+  // A budget claim lives in one of exactly two shapes the corpus actually uses:
+  //   A. the prose of `## Estimated time` — `**5 weeks** at about 8–11 focused
+  //      hours a week. Roughly 41–58 hours, and the write-up is a real part...`
+  //   B. a bold lead introducing a breakdown table — `**Roughly 41–58 hours over
+  //      5 weeks:**`
+  // The first version of this rule scanned only bold spans, which found B and
+  // missed A entirely (A's only bold span is the week count), so it passed the
+  // very defect it was written for. Anchor on the SECTION for shape A.
+  const estIdx = lines.findIndex((l) => /^## Estimated time\s*$/.test(l));
+  if (estIdx !== -1) {
+    // The claim is in the first paragraph of prose after the heading.
+    for (let j = estIdx + 1; j < Math.min(estIdx + 8, lines.length); j++) {
+      const line = lines[j];
+      if (!line.trim()) continue;
+      // Skip an inverted-hours range trap: "8–11 focused hours a week" is a rate.
+      const hrs = hoursIn(line.replace(/\d+\s*[–-]\s*\d+\s*focused hours a week/gi, ''));
+      if (hrs) { claims.push({ line: j + 1, text: line.trim(), range: hrs, shape: 'Estimated time prose' }); }
+      break;
+    }
+  }
+  // Shape B: a bold span that is itself a bare hour total leading a table.
+  const boldRe = /\*\*([^*]+)\*\*/g;
+  lines.forEach((line, i) => {
+    let m;
+    boldRe.lastIndex = 0;
+    while ((m = boldRe.exec(line)) !== null) {
+      const span = m[1].trim();
+      if (!/hours?/i.test(span)) continue;
+      if (/a week|per week|\/\s*week/i.test(span)) continue;
+      const hrs = hoursIn(span);
+      if (!hrs) continue;
+      if (!/^(roughly|about|approximately|~)?\s*\d/i.test(span)) continue;
+      claims.push({ line: i + 1, text: span, range: hrs, shape: 'bold lead' });
+    }
+  });
+  if (claims.length < 2) return;
+  // Two claims for one budget must be the SAME range, not merely overlapping.
+  // The first version used `overlaps()`, which accepted 40-55 against 41-58
+  // because they share 41-55 — so it passed the exact defect it was written
+  // for. A partial overlap between two statements of one figure is a
+  // contradiction: a reader who budgets from the low end is short by an hour
+  // and one who plans to the high end is short by three.
+  //
+  // Two exclusions, both learned from real output:
+  //   - the same line twice. IT 06 line 968 says "about **6.1 hours**. Answer:
+  //     **roughly 6 hours**" — one figure rounded in the same sentence.
+  //   - a difference of an hour or less at every bound, which is rounding.
+  for (let a = 0; a < claims.length; a++) {
+    for (let b = a + 1; b < claims.length; b++) {
+      const A = claims[a], B = claims[b];
+      if (A.line === B.line) continue;
+      if (same(A.range, B.range)) continue;
+      const drLo = Math.abs(A.range[0] - B.range[0]);
+      const drHi = Math.abs(A.range[1] - B.range[1]);
+      if (drLo <= 1 && drHi <= 1) continue; // rounding, not a contradiction
+      note(rel, B.line, `states ${B.range[0]}-${B.range[1]} hours but line ${A.line} states ${A.range[0]}-${A.range[1]} — two totals for one phase`);
+    }
+  }
+}
+
 // Classes 3 and 4.
 const phaseWeeks = new Map(); // "track/phaseNumber" -> week range from frontmatter
 
@@ -189,6 +273,7 @@ for (const { track, file } of phases) {
 
   checkBudgetTables(file, rel, lines);
   checkInvertedRanges(rel, lines);
+  checkConsistentClaims(rel, lines);
 
   // Class 3 - frontmatter duration vs duration_weeks.
   const durWeeks = weeksIn(fm.duration ?? '');
