@@ -1146,7 +1146,7 @@ If Phase 4 feels overwhelming when you reach it, the usual cause is a rushed Pha
 
 ### Practice this next
 
-The nine tasks are ordered roughly as a progression, and this is the reasoning behind that order:
+The fourteen tasks are ordered roughly as a progression, and this is the reasoning behind the first nine — the five that follow them are the drill tasks, and they are what turn the reading into a skill:
 
 1. **Build the lab first** (task 1), because nothing else is possible without it. Get Ubuntu Server running in VirtualBox, confirm you can log in, run `ip a` and note the address. If networking is fiddly, fix it now rather than during the scanning tasks.
 2. **Then permissions** (task 2), because they are the foundation of Linux security thinking. Create two users, put them in a group, create a file, and try to read it as the wrong user. Read `/etc/passwd` and find the UID field. Being denied access is the lesson.
@@ -1157,6 +1157,14 @@ The nine tasks are ordered roughly as a progression, and this is the reasoning b
 7. **Nmap against your own VM** (task 7), and then do the part the task does not spell out: **write down what each open port means and which one you would flag**. `-sV` and plain scan, and narrate the result the way the worked example in Part 4 does.
 8. **Bandit 0–10 throughout the phase** (task 8), not in one sitting. It is deliberately the task that spans the whole six weeks — start it in week two and let it run in parallel. Record notes as you go, but never the passwords.
 9. **Write the TCP handshake mini-report last** (task 9), once the capture work has given you the material. Follow the deliverable's structure and keep it short. If you can explain the handshake from your own capture — including why the packets are in that order and what each one proves — the exit criteria are met and Phase 3 will make sense.
+
+**Tasks 10–14 are the drills, and four of them are the only proof of a checklist item.** Do not skip them because the walkthrough above stopped at nine:
+
+10. **Subnet by hand** (task 10). Work out the network address, broadcast address and usable range for `172.16.4.77/26` and `192.168.10.200/27` on paper *before* you touch a calculator, then check both with `ipcalc`. The phase checklist asks you to subnet a `/26` and a `/27` unaided — this task is where that is proved, and reading Part 3 is not the same as doing it.
+11. **Build the failed-login pipeline** (task 11). Count failures per source address, find the first and last sighting of each, and check whether anything was ever `Accepted`. This is the checklist item on reading authentication logs, and it is also the closest thing in this phase to real detection work.
+12. **Prove the umask** (task 12). Set `umask 077`, create a file, confirm it lands as `600`, then go and find a file on the system that is world-readable and explain why that is acceptable *or* not. The second half is the part that teaches the judgement.
+13. **Prove key-only SSH** (task 13). Generate a keypair, install the public key in `authorized_keys`, disable password authentication in `sshd_config`, and demonstrate that a password login now fails. "Demonstrate the failure" is the checklist item — anyone can edit a config file.
+14. **Capture and filter with `tcpdump`** (task 14). Save to a `.pcap`, open it in Wireshark, and filter to a single protocol. This is the command-line half of the packet work, and it is what you would actually have on a server with no GUI.
 
 ## Tools for This Phase
 

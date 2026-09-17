@@ -636,7 +636,7 @@ DeviceProcessEvents
 </group>
 ```
 
-The four follow the same shape — select the image, select the flags, exclude the known-benign parents — though the flag list is not identical in every version: Sigma and SPL match three (`-enc`, `-encodedcommand`, `-e`), while the KQL and Wazuh examples below match two.
+The four follow the same shape — select the image, select the flags, exclude the known-benign parents — though the flag list is not identical in every version: Sigma and SPL match three (`-enc`, `-encodedcommand`, `-e`), while the KQL and Wazuh examples above match two.
 
 The Wazuh version needs `negate="yes"` on that last field, because Wazuh treats a plain `<field>` as a positive match — without it the rule fires when the parent *is* the management tool, the exact inverse of the Sigma and SPL versions.
 

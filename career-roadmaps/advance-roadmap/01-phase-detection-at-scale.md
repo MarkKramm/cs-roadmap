@@ -563,7 +563,7 @@ The budget is not evenly spent. A handful of rules usually consume most of it.
 
 | Rule | Alerts/month | Minutes each | Hours/month | Share of capacity |
 |---|---|---|---|---|
-| DET-014 Encoded PowerShell | 1,240 | 12 | 253.0 | 40% |
+| DET-014 Encoded PowerShell | 1,240 | 12 | 248.0 | 40% |
 | DET-002 Multiple Failed Logons | 690 | 8 | 92.0 | 15% |
 | DET-031 Admin Group Change | 410 | 15 | 102.5 | 17% |
 | DET-007 Outbound to New Domain | 300 | 20 | 100.0 | 16% |

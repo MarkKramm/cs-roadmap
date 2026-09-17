@@ -401,7 +401,7 @@ Compare this to Windows Event Viewer. Both record the same kinds of events; Linu
 
 Everything so far has been Windows and Linux. That is a real gap, and it is worth closing deliberately rather than hoping it does not come up — because **remote work skews heavily toward Macs.** Startups, design agencies, and most US-based software companies issue MacBooks, and "can you support Macs?" is a question asked in the screening call, before anyone has seen your technical work. Answering "I only know Windows" costs you the interview. Answering "I support Macs at first-line level, and here is the mapping" keeps you in it.
 
-The honest framing is this: **macOS is a Unix system with a friendly face.** Underneath, it is close enough to Linux that your Phase 4 skills transfer almost directly. What you need is the vocabulary to move between the three systems, and that is a table, not a course.
+The honest framing is this: **macOS is a Unix system with a friendly face.** Underneath, it is close enough to Linux that the Linux skills in Part 4 transfer almost directly. What you need is the vocabulary to move between the three systems, and that is a table, not a course.
 
 | Idea | Windows | Linux | macOS |
 |---|---|---|---|
