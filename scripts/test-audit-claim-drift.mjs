@@ -151,6 +151,63 @@ try {
   ok(/text MOVED:\s+[1-9]/.test(b.out), "control B: reported as MOVED", b.out.match(/text MOVED:.*/)?.[0]);
   ok(!/text GONE:\s+[1-9]/.test(b.out), "control B: does NOT report GONE for intact text", b.out.match(/text GONE:.*/)?.[0]);
   ok(/is now line \d+/.test(b.out), "control B: says which line the text moved to");
+
+  // --- D: a claim that IS a corpus table row containing an escaped pipe.
+  //
+  // This is the shape that produced a FALSE GONE on IT row 30
+  // (`02-phase-operating-systems.md:531`, "Machine is slow"), whose text was sitting
+  // on the stated line byte-for-byte the whole time.
+  //
+  // The mechanism: the corpus line contains `\|` (an escaped pipe inside its own
+  // table). extract-claims.mjs escapes pipes again, so the pack holds `\\|` -- one
+  // more level than the corpus. The old norm() unescaped exactly once, leaving `\|`
+  // against the corpus's `|`, and the comparison failed. Nothing was wrong with the
+  // corpus or the pack; only with the comparison.
+  //
+  // A false GONE is the most expensive wrong answer this guard can give, because its
+  // printed remedy is "re-run the pipeline" -- tempting a reader to regenerate a
+  // perfectly good worklist, and a stale worklist is what invented four false WRONG
+  // verdicts earlier in this project.
+  //
+  // The fixture quotes a line that genuinely contains an escaped pipe, so this
+  // control fails if the doubled-escaping handling ever regresses.
+  fs.writeFileSync(CORPUS, original, "utf8");
+  {
+    // Search the WHOLE cyber corpus, not just the anchor file: escaped pipes are
+    // rare and may not occur in `01-phase-foundations.md` at all.
+    const dir = path.join(ROOT, "career-roadmaps", "cybersec-roadmap");
+    let hit = null;
+    for (const f of fs.readdirSync(dir).filter((x) => x.endsWith(".md")).sort()) {
+      const ls = fs.readFileSync(path.join(dir, f), "utf8").split("\n");
+      const i = ls.findIndex((l) => l.includes("\\|") && l.trim().startsWith("|"));
+      if (i !== -1) {
+        hit = { file: f, line: i + 1, text: ls[i].trim() };
+        break;
+      }
+    }
+    ok(hit !== null, "control D: found a corpus table row containing an escaped pipe");
+    if (hit) {
+      // Reproduce the extractor's escaping EXACTLY: replace | with \|
+      const escaped = hit.text.replace(/\|/g, "\\|");
+      fs.writeFileSync(
+        FIXTURE,
+        [
+          "# Drift control fixture (escaped-pipe shape)",
+          "",
+          "Written and deleted by `scripts/test-audit-claim-drift.mjs`.",
+          "",
+          "| # | Location | Text as written | Verdict |",
+          "|---|---|---|---|",
+          `| 1 | \`${hit.file}:${hit.line}\` | ${escaped} | |`,
+          "",
+        ].join("\n"),
+        "utf8",
+      );
+      const d = run();
+      ok(d.code === 0, "control D: a corpus table row with an escaped pipe is NOT drift", `exit=${d.code} @ ${hit.file}:${hit.line}`);
+      ok(!/text GONE:\s+[1-9]/.test(d.out), "control D: not reported as GONE", d.out.match(/text GONE:.*/)?.[0]);
+    }
+  }
 } finally {
   fs.writeFileSync(CORPUS, original, "utf8");
   if (fs.existsSync(FIXTURE)) fs.rmSync(FIXTURE);
@@ -174,4 +231,5 @@ if (failures.length) {
   process.exit(1);
 }
 console.log(`\nclaim-drift controls pass: ${checks} checks, 0 failures.`);
-console.log("Branches proven: GONE on content change, MOVED on line shift, clean when in sync.");
+console.log("Branches proven: GONE on content change, MOVED on line shift, clean when in sync,");
+console.log("and NOT GONE for a corpus table row whose pipes are escaped twice.");

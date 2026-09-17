@@ -153,12 +153,29 @@ jobs:
       # without re-counting 123 rows. Twice during the cyber pass that table was
       # hand-written and wrong (83/40, then 70/53) against a real 75/48. This
       # derives the count from the rows and fails if the table disagrees.
+      #
+      # It ALSO fails on any row in the document whose verdict column is still
+      # empty, whether or not that class appears in the summary. That check exists
+      # because "DNS record types" was marked done in the splitter with a row count
+      # carried over from the IT track, its three cyber rows were never sent to a
+      # verifier, and because the class was marked done it was omitted from the
+      # totals -- so five completed passes reported clean while a class sat
+      # unverified. Counting the classes you remembered cannot find the one you
+      # forgot; this counts the rows instead.
       - name: Verdict counts match the recorded rows
         run: node scripts/audit-verdict-counts.mjs
-      - name: Cyber bundles match their generator
+      - name: Test verdict-count controls
+        run: node scripts/test-audit-verdict-counts.mjs
+      # Both tracks, because the bundler is now track-generic and the IT track has
+      # real outstanding work again: its verification pass ran but its verdicts were
+      # never written into its document, so all 225 of its rows are empty.
+      - name: Claim packs match the corpus (IT)
+        run: node scripts/audit-claim-drift.mjs --track it
+      - name: Verification bundles match their generator (both tracks)
         run: |
-          node scripts/build-cyber-bundles.mjs
-          git diff --exit-code -- docs/claims-to-verify-cyber/bundles/
+          node scripts/build-cyber-bundles.mjs --track cybersec
+          node scripts/build-cyber-bundles.mjs --track it
+          git diff --exit-code -- docs/claims-to-verify-cyber/bundles/ docs/claims-to-verify/bundles/
       # A versioned external standard gets summarised, the summary is accurate
       # when written, the standard is revised, and the summary silently becomes
       # false. Every other guard checks the text against ITSELF -- a document

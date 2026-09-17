@@ -78,25 +78,59 @@ function parseRow(line) {
   // A claim that is itself a corpus table row contains REAL pipes in the pack
   // (only the corpus's own pipes are escaped as `\|`, and the pack's cell
   // separators are not), so it occupies several cells. The verdict is always the
-  // LAST non-empty cell before the trailing empty one, and the claim is
-  // everything between the location and that. Taking `cells[3]` alone works for
-  // prose and silently truncates table claims to their first column; taking a
-  // slice through `length-1` appends the verdict separator and matches nothing.
+  // LAST cell before the trailing empty one, and the claim is everything between
+  // the location and that.
+  //
+  // THE EMPTY-VERDICT CASE IS THE ONE THAT BITES. In a fresh pack the verdict cell
+  // is empty, so the row ends `... | ` + `|` and splitting yields
+  // ['', n, loc, claim..., '', '']: the verdict cell and the closing pipe are BOTH
+  // empty strings. Popping trailing empties first therefore eats the verdict cell
+  // too, and the claim is then read as one cell too many -- which appends a stray
+  // "|" and makes a claim that IS present verbatim report as GONE.
+  //
+  // That produced a false drift failure on IT row 30
+  // (`02-phase-operating-systems.md:531`, "Machine is slow"), whose text is
+  // byte-identical in the corpus. A false GONE is worse than a missed one: the
+  // printed remedy is "re-run the pipeline", so it invites regenerating a
+  // perfectly good worklist -- and on a verification pass a stale worklist is
+  // exactly what invented four false WRONG verdicts before.
+  //
+  // The fix is to reason from the row's own shape: a pack row ALWAYS ends with
+  // `|` and ALWAYS has a verdict cell. So drop exactly one trailing empty field
+  // (the artifact of the closing pipe), then treat the new last field as the
+  // verdict and discard it, whatever it contains.
   const tail = cells.slice(3);
-  // Drop the trailing empty field(s) that follow the closing pipe.
-  while (tail.length && tail[tail.length - 1].trim() === "") tail.pop();
-  // Now the last element is the verdict cell (empty in an unworked pack).
-  const claimCells = tail.length > 1 ? tail.slice(0, -1) : tail;
+  if (tail.length && tail[tail.length - 1].trim() === "") tail.pop();
+  const claimCells = tail.slice(0, -1);
   const claim = claimCells.join("|").trim();
   return { n: num, file: m[1], ln: Number(m[2]), text: claim };
 }
 
 // The pack escapes pipes and backticks inside table cells, and truncates long
 // rows with an ellipsis. Normalise both sides the same way before comparing.
+//
+// THE ESCAPING IS DOUBLED, AND ONLY ON THE PACK SIDE. `extract-claims.mjs` does
+// `s.replace(/\|/g, "\\|")`, which is correct -- but when the claim is ITSELF a
+// corpus table row, the corpus text already contains `\|` (an escaped pipe inside
+// its own table). Escaping that again gives `\\|`, so the pack holds one more
+// level of escaping than the corpus line it came from.
+//
+// Unescaping once is therefore not enough: `\\|` -> `\|` still does not equal the
+// corpus's `|`. The old code unescaped once and compared, so every claim that was
+// a corpus table row containing an escaped pipe reported GONE while sitting on the
+// stated line byte-for-byte. That is what flagged IT row 30
+// (`02-phase-operating-systems.md:531`, "Machine is slow"), and it is a false
+// positive with a dangerous remedy attached: the printed fix is "re-run the
+// pipeline", which invites regenerating a good worklist -- and a stale worklist is
+// precisely what invented four false WRONG verdicts earlier in this project.
+//
+// Normalise by collapsing ALL backslash-escapes of pipes and backticks on both
+// sides, so the comparison is about the text, not about how many times someone
+// escaped it. `\\+` before a pipe or backtick becomes that character.
 const norm = (s) =>
   s
-    .replace(/\\\|/g, "|")
-    .replace(/\\`/g, "`")
+    .replace(/\\+\|/g, "|")
+    .replace(/\\+`/g, "`")
     .replace(/\\+$/, "")
     .replace(/….*$/, "")
     .replace(/\s+/g, " ")

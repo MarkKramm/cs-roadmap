@@ -1,189 +1,54 @@
-# IT track — technical claim verification
+You are verifying technical claims from a training curriculum against
+**primary sources** — Microsoft Learn, IANA, RFCs, POSIX man pages, and vendor
+documentation.
 
-**Status: NOT verified — 225 rows outstanding.** This file is the method. The result is
-incomplete and, until 2026-09-18, this line said otherwise.
+The table below is complete and self-contained. Every row you need is here.
 
-> **Corrected 2026-09-18.** This header previously read *"Status: verified — 224 claims,
-> 0 `WRONG`"* while **all 225 rows below carried an empty verdict column** and the class
-> table further down still said *"needs checking"* for five of them. The pass itself did
-> happen — commit `858206b` records three real defects it found, all of the "right name,
-> broken invocation" shape — but **the verdicts were never written into this document.**
-> Only the conclusion was. A verification result that cannot be reproduced row by row is
-> not a result, so the claim is withdrawn and the rows are re-emitted as work.
->
-> The class table below is the accurate record of what has actually been checked.
+## What to do
 
-Nothing in this repository has ever tested whether its content is technically *true*. Every
-guard tests internal consistency — does the parser lose content, do cross-references resolve,
-does a table sum to the number the prose claims. The comprehension passes test whether a
-beginner can *follow* the text. Both are blind to a sentence that is perfectly consistent,
-perfectly clear, and factually wrong.
+For each row, replace the empty last column with exactly one of:
 
-The one error of that class found so far (`modbus.func_code >= 15`, which also matches function
-code 43 and every exception response) was caught by a reader who happened to know Modbus. That
-is not a method. This file is the method: every checkable claim, in one place, with its
-location, so the checking is finite work instead of a re-read of 160,000 words.
-
-## How to verify
-
-For each claim below, fetch the source named for its class and compare. Then fill in the
-verdict line. Three outcomes, and the third is the important one:
-
-| Verdict | Meaning |
+| Verdict | Format |
 |---|---|
-| `OK` | The claim matches the source. Quote the source line that settles it. |
-| `WRONG` | The claim contradicts the source. Give the correct value **and** the source. |
-| `UNVERIFIABLE` | The claim is a judgement, an analogy, or a simplification rather than a fact. |
+| `OK` | `OK` — then the **URL** that settles it, and a short quote from it |
+| `WRONG` | `WRONG` — the correct value, **and** the URL that proves it |
+| `UNVERIFIABLE` | `UNVERIFIABLE` — say briefly why (judgement, analogy, or simplification) |
 
-**`UNVERIFIABLE` is a real result, not a failure to try.** A phase may say a `/26` is "the point
-where most beginners close the tab" — that is pedagogy, not a fact, and marking it OK would be
-laundering an opinion into a verified column. Sorting those out honestly is what makes the
-`OK` column mean anything.
+## Rules
 
-## Already verified, without needing a source
+1. **Every `OK` and every `WRONG` must carry a source URL, and a quote from
+   it that settles the claim.** The quote is not decoration: a URL alone says
+   only that a page exists. If you cannot quote the line that decides the
+   claim, the verdict is `UNVERIFIABLE`. A recollection is not a source.
+2. **Prefer the authority over a page that agrees with it.** Rank sources:
+   the standard itself (RFC, POSIX, FHS, IANA registry) > the vendor's own
+   reference documentation > a vendor tutorial or blog > a forum answer or a
+   third-party article. Use the highest rank you can reach, and **name the
+   source type** in the verdict. A claim sourced to a forum post or a
+   third-party tutorial is weaker evidence than the same claim sourced to the
+   spec, and the reader needs to know which they are getting.
+3. **Never cite a page you could not open or whose text you could not read.**
+   If a source is paywalled, login-gated, blocked, or empty, it does not count
+   as a source. Say so.
+4. **Cite in the language you read.** If the only page you can reach is a
+   localised version of the vendor's documentation, say that explicitly, and
+   prefer finding the English original.
+5. **Do not guess to fill a row.** An honest `UNVERIFIABLE` is a useful
+   result; an invented URL is worse than no answer, because it will be acted on.
+6. **Output the complete table, every row, in order.** Do not summarise, do not
+   sample, do not stop early. If you run low on room, stop at a row boundary
+   and say which row number to continue from.
+7. **If any part of a row is unclear, say so in the verdict** (`UNVERIFIABLE —
+   text truncated`) rather than inferring the claim. Never reconstruct a claim
+   you cannot read.
+8. Some short rows are followed by a small grey line showing the text above and
+   below them. **That context is part of the claim** — use it.
+9. `UNVERIFIABLE` is expected to be common and is not a failure. A great deal
+   of this curriculum is teaching method, diagnostic reasoning, and worked
+   examples, none of which is a fact about the world.
 
-**Three classes are settled without an external source.** They need no document to settle, so
-they are checked by **recomputation** and against the registry that *assigns* the values — the
-strongest tier available, because it does not depend on trusting anyone's documentation:
+# Command and cmdlet usage
 
-| Script | What it settles | Result | In CI? |
-|---|---|---|---|
-| `scripts/verify-cidr.mjs` | Every CIDR table row, every mask-to-prefix equivalence, and each RFC 1918 range's actual span | 42 checks, 0 wrong (IT) | yes |
-| `scripts/verify-metrics.mjs` | The stated service-desk metrics, recomputed from their own ticket table | 15 checks, 0 wrong (IT 06) | yes |
-| `scripts/verify-ports.mjs` | Every port number in the IT track against the **IANA Service Name and Transport Protocol Port Number Registry** — the authority that assigns them | 19 checks, 0 wrong (IT) | no (needs network; run by hand) |
-
-Run all three before trusting this section. If any ever fails, the claims below it are stale.
-
-**So the settled classes are already recomputed and are NOT listed for verification:**
-
-- **IP addressing and subnetting** — 80 claims, recomputed by `verify-cidr.mjs`.
-- **Port numbers** — 154 claims. Those appearing in a phase's own port table were checked
-  against the IANA registry. The remainder appear inside worked examples
-  (`Test-NetConnection … -Port 445`), which are illustrative rather than assertions —
-  a reader loses nothing if an example used a different port to demonstrate the syntax.
-- **Stated counts and arithmetic** — 177 claims, recomputed from the documents' own numbers.
-  Most are inventory figures ("a 10-device practice asset inventory") that are **illustrative
-  examples rather than claims about the world**, so they are unverifiable by construction.
-
-## Result of the verification passes
-
-**All five classes are now verified. Zero claims were wrong.** The tables were worked through
-against primary sources, and every citation I spot-checked held *verbatim* against the document
-it named:
-
-| Table | Rows | `OK` | `UNVERIFIABLE` | `WRONG` |
-|---|---|---|---|---|
-| Command and cmdlet usage | 160 | 142 | 18 | **0** |
-| Protocol and standard behaviour | 26 | 15 | 11 | **0** |
-| Product versions and editions | 17 | 6 | 11 | **0** |
-| Registry and file paths | 17 | 9 | 8 | **0** |
-| DNS record types | 4 | 4 | 0 | **0** |
-| **Total** | **224** | **176** | **48** | **0** |
-
-Quotes checked against the source and found exact: RFC 768 ("delivery and duplicate protection
-are not guaranteed"), RFC 9293 ("A 3WHS is necessary because sequence numbers are not tied to a
-global clock"), RFC 3596 §2.1 (the AAAA definition), the OpenSSH manual ("Port to connect to on
-the remote host"), FHS 3.0 §5.10.1 for `/var/log`, and Microsoft's `MSFT_PhysicalDisk` reference
-for the `HealthStatus` values.
-
-## Two claims were wrong, and both were already fixed
-
-These came from an *earlier* pass, before this file's classes were settled. They are kept because
-the **shape** of each is more useful than the fix — and because the same shapes recur:
-
-| Claim | What was wrong | Why no guard could see it |
-|---|---|---|
-| IT 01, `Get-PhysicalDisk` | The phase told the reader to watch for `Caution` or `Bad` from `HealthStatus`. Those are **CrystalDiskInfo's** ratings — the cmdlet returns `Healthy` / `Warning` / `Unhealthy` / `Unknown`. | Every word was spelled correctly and the sentence was internally consistent. The phase's own sample output four lines earlier printed `Healthy`, so it even contradicted itself without any check noticing. |
-| IT 02, `DISM` | A summary table said `` `DISM /RestoreHealth` ``, which **throws when run**. The full form appears 300 lines earlier in the same file. | The command *name* was right. Nothing was inconsistent. A table cell invites shortening, and the abbreviation silently became a different, broken command. |
-
-**Both are now covered by `scripts/audit-commands.mjs`**, which checks the exact string a reader
-would copy rather than the command name — and which was itself proved able to fail by
-re-injecting the original IT 02 defect, because a guard that has never failed is a comment.
-
-## The `UNVERIFIABLE` column is the honest part
-
-48 rows came back unverifiable, and they fall on exactly what should: teaching method, diagnostic
-heuristics, resume phrasing, case-study narrative, and lab instructions. **A phase saying `/26` is
-"the point where most beginners close the tab" is pedagogy, not fact**, and stamping it OK would
-have made the whole OK column meaningless.
-
-## What a clean result does NOT mean
-
-**This is not a verdict on the curriculum.** It means the classes above were checked against
-sources. The extractor cannot see a bad analogy, a misleading emphasis, or outdated practice that
-reads as current — and those are the errors most likely to actually mislead a beginner. That
-layer has only ever been tested by the comprehension passes, and it remains the largest
-unexamined risk in the repository.
-
-**One sourcing weakness is worth recording.** Several citations rested on a third-party tutorial
-(`labex.io`) that returns **HTTP 403**, or on a localised manpage, rather than on the standard
-itself. The *verdicts* were right — I rechecked those rows against FHS 3.0, `man7.org`, and the
-OpenSSH manual and all held — but the citations were weaker evidence than they appeared. The
-prompt now requires a quote and a source ranking for exactly this reason.
-
-## What this file does NOT claim
-
-- **It is not exhaustive of the content.** It finds claims of the classes above. Prose that is
-  wrong in a way no pattern catches — a bad analogy, a misleading emphasis, an outdated practice
-  — is invisible here and always will be.
-- **It is not a comprehension check.** Whether a beginner can follow the text is a different
-  question, answered by [`COMPREHENSION-AUDIT.md`](COMPREHENSION-AUDIT.md).
-- **A clean result does not mean the phase is correct.** It means these classes were checked.
-
-**Claims extracted: 636** across 9 phases and 8 classes.
-
-Three classes are settled by recomputation or by the assigning registry (**411 claims**),
-leaving **225 claims** that genuinely need a source. Those are the ones listed below.
-
-| Class | Claims | Source | Status |
-|---|---|---|---|
-| IP addressing and subnetting | 80 | RFC 1918 (private ranges), RFC 6890 (special-purpose), or by recomputation | **settled** |
-| Port numbers | 154 | IANA port registry, or Microsoft/vendor docs for the Windows-specific ones | **settled** |
-| Command and cmdlet usage | 161 | Microsoft Learn for cmdlets, man pages for POSIX tools | needs checking |
-| DNS record types | 4 | RFC 1035 and the IANA DNS parameters registry | needs checking |
-| Protocol and standard behaviour | 26 | The RFC or standard that defines the protocol; vendor docs for proprietary ones | needs checking |
-| Product versions and editions | 17 | Vendor documentation, checked against the current release | needs checking |
-| Registry paths, file paths and filenames | 17 | Microsoft documentation, or the OS itself | needs checking |
-| Stated counts, sizes and arithmetic | 177 | Recomputation from the document's own numbers | **settled** |
-
----
-
-## IP addressing and subnetting
-
-*Every value is arithmetic or is fixed by RFC 1918 / RFC 6890. Highest-risk class: a wrong mask teaches a wrong mental model that persists.*
-
-**Source to check against:** RFC 1918 (private ranges), RFC 6890 (special-purpose), or by recomputation
-
-**80 claim(s) — already verified by recomputation, not listed.**
-
-See "Already verified, without needing a source" above. Re-run the verifying script if you
-doubt it; do not re-check these by hand.
-
----
-
-## Port numbers
-
-*Fixed by the IANA Service Name and Transport Protocol Port Number Registry. A wrong port number is unrecoverable from context.*
-
-**Source to check against:** IANA port registry, or Microsoft/vendor docs for the Windows-specific ones
-
-**154 claim(s) — already verified by recomputation, not listed.**
-
-See "Already verified, without needing a source" above. Re-run the verifying script if you
-doubt it; do not re-check these by hand.
-
----
-
-## Command and cmdlet usage
-
-*Flags, parameters and syntax are fixed by the tool's own documentation. A wrong flag in a worked example is executable code that silently cannot run.*
-
-**Source to check against:** Microsoft Learn for cmdlets, man pages for POSIX tools
-
-161 claim(s).
-
-| # | Location | Text as written | Verdict |
-|---|---|---|---|
 | 1 | `01-phase-computer-fundamentals.md:277` | - File system errors, and `chkdsk` reporting bad sectors. | |
 | | | <sub>↓ - "Windows detected a hard disk problem" notifications.</sub> | |
 | 2 | `01-phase-computer-fundamentals.md:284` | 2. **Read the drive health.** Open CrystalDiskInfo, or run `Get-PhysicalDisk \| Select FriendlyName, HealthStatus`. The two tools use different words, so read the right one: CrystalDiskInfo says **Good**, **Caution**, or **Bad**, while PowerShell's `HealthStat … | |
@@ -384,181 +249,3 @@ doubt it; do not re-check these by hand.
 | | | <sub>↑ Reading the error literally would have saved 40 minutes.<br>↓ problem — it distinguishes "not running" from "running but refusing".</sub> | |
 | 160 | `08-phase-portfolio-and-resume.md:1067` | \| 2 \| PowerShell 7, `Get-CimInstance` for OS and disk, `Get-Service` filtered to `Running`, `Export-Csv` for the output. \| | |
 | 161 | `09-phase-job-application-plan.md:719` | - Strong: "A user said the internet was down. I pinged `8.8.8.8` first — that worked, so routing and upstream were fine. `ping google.com` failed, so it was name resolution. `nslookup` against the local resolver got no answer, while `nslookup google.com 8.8.8. … | |
-
-_▶ marks a line inside a code block — executable, so a wrong flag or path is worse than a wrong sentence._
-
----
-
-## DNS record types
-
-*Defined by RFC 1035 and successors. Small set, easy to get subtly wrong.*
-
-**Source to check against:** RFC 1035 and the IANA DNS parameters registry
-
-4 claim(s).
-
-| # | Location | Text as written | Verdict |
-|---|---|---|---|
-| 1 | `03-phase-networking-basics.md:54` | - DNS: A, AAAA, CNAME, MX, TXT, NS records | |
-| | | <sub>↓ - DHCP: Discover, Offer, Request, Acknowledge at a beginner level</sub> | |
-| 2 | `03-phase-networking-basics.md:180` | 2. **`AAAA` records are the DNS counterpart to IPv4's `A` records.** If a name resolves over IPv4 but not IPv6, an `AAAA` lookup tells you. | |
-| 3 | `03-phase-networking-basics.md:231` ▶ | nslookup google.com # the A record | |
-| | | <sub>↑ ```powershell<br>↓ nslookup -type=mx gmail.com # mail servers</sub> | |
-| 4 | `03-phase-networking-basics.md:233` ▶ | nslookup -type=txt google.com # TXT records | |
-| | | <sub>↑ nslookup -type=mx gmail.com # mail servers<br>↓ nslookup google.com 8.8.8.8 # ask a SPECIFIC server</sub> | |
-
-_▶ marks a line inside a code block — executable, so a wrong flag or path is worse than a wrong sentence._
-
----
-
-## Protocol and standard behaviour
-
-*Fixed by the defining spec. Includes handshake sequences, header fields, status codes and OSI layer assignments.*
-
-**Source to check against:** The RFC or standard that defines the protocol; vendor docs for proprietary ones
-
-26 claim(s).
-
-| # | Location | Text as written | Verdict |
-|---|---|---|---|
-| 1 | `03-phase-networking-basics.md:27` | - Understand IPv4, IPv6 basics, subnet mask, gateway, DNS, DHCP, NAT, TCP, UDP, ICMP, ports, and Wi-Fi. | |
-| | | <sub>↑ - Explain LAN, WAN, internet, router, switch, firewall, modem, access point, and ISP.<br>↓ - Use `ping`, `tracert/traceroute`, `ipconfig/ifconfig/ip`, `nslookup`, `arp -a`, `route print`, and Wireshark.</sub> | |
-| 2 | `03-phase-networking-basics.md:76` | The good news is that the foundation is small. You need to understand addresses, subnets, gateways, DNS, DHCP, ports, and the difference between TCP and UDP. That is genuinely most of it. | |
-| 3 | `03-phase-networking-basics.md:185` | **DHCP (Dynamic Host Configuration Protocol)** hands out addresses automatically. The four-step exchange is called **DORA**, and it is worth memorising because it tells you what to check when it fails: | |
-| 4 | `03-phase-networking-basics.md:284` | - **TCP** is connection-oriented and reliable. It establishes a connection with a **three-way handshake** — `SYN`, `SYN-ACK`, `ACK` — numbers every byte, acknowledges receipt, and retransmits anything lost. It is used when correctness matters: web browsing, fi … | |
-| 5 | `03-phase-networking-basics.md:285` | - **UDP** is connectionless and best-effort. It sends packets with no handshake and no guarantee. It is used when speed matters more than perfection: video streaming, voice calls, DNS queries, games. | |
-| 6 | `03-phase-networking-basics.md:289` | You can see the handshake on your own machine. In Wireshark, filter on `tcp` and open any website. You will see the three packets at the start of every connection: `SYN`, then `SYN, ACK`, then `ACK`. Watching that once, with your own eyes, does more for your u … | |
-| 7 | `03-phase-networking-basics.md:293` | **TLS (Transport Layer Security)** wraps a connection in encryption and proves the server's identity with a **certificate**. **HTTPS** is simply HTTP carried inside TLS, on port 443. | |
-| 8 | `03-phase-networking-basics.md:772` | - **TcpTestSucceeded** is the answer. `True` means the TCP handshake completed: the server accepted your connection on that port. | |
-| 9 | `03-phase-networking-basics.md:857` | \| Every packet timed out \| The host is unreachable, or it blocks ICMP \| Follow the ladder; also test a port with `Test-NetConnection` \| | |
-| 10 | `03-phase-networking-basics.md:864` | **Second, and more importantly: “ping works but the app does not” is a different problem class.** Ping uses **ICMP**, a completely different protocol from TCP. A host can cheerfully answer ICMP while a specific TCP port is blocked by a firewall, or while the s … | |
-| 11 | `03-phase-networking-basics.md:890` ▶ | Authentication : WPA2-Personal | |
-| | | <sub>↑ Radio type : 802.11ax<br>↓ Cipher : CCMP</sub> | |
-| 12 | `03-phase-networking-basics.md:1158` | **For the TCP handshake:** start a new capture, then load a website in your browser while it runs. Stop it and filter on: | |
-| 13 | `03-phase-networking-basics.md:1161` ▶ | tcp.flags.syn==1 | |
-| | | <sub>↑ ```text<br>↓ ```</sub> | |
-| 14 | `03-phase-networking-basics.md:1164` | That filter shows packets with the **SYN** flag set — the packets that begin a connection. Find one connection and look at the three packets at its start: | |
-| 15 | `03-phase-networking-basics.md:1166` | 1. **SYN** — your machine to the server: “I would like to open a connection, here is my starting sequence number.” | |
-| 16 | `03-phase-networking-basics.md:1167` | 2. **SYN, ACK** — server to your machine: “Agreed, and here is mine.” | |
-| | | <sub>↑ 1. **SYN** — your machine to the server: “I would like to open a connection, here is my starting sequence number.”<br>↓ 3. **ACK** — your machine to the server: “Acknowledged. Connection open.”</sub> | |
-| 17 | `03-phase-networking-basics.md:1172` | Two practical notes. If the capture looks overwhelming, remember Wireshark is showing *everything* on your adapter; the filter is what makes it readable. And if you see your own traffic in encrypted form, that is TLS doing its job — you will see the handshake  … | |
-| 18 | `03-phase-networking-basics.md:1644` | - **TCP** is reliable and connection-oriented; **UDP** is fast and best-effort. | |
-| | | <sub>↑ - **Ports** route traffic to the right service. Know the common ones; respect the dangerous ones.<br>↓ - `Test-NetConnection` and `nslookup` are your two best everyday tools.</sub> | |
-| 19 | `03-phase-networking-basics.md:1655` | - **The diagnostic ladder is link, IP, gateway, DNS, port, application — in that order, stopping at the first failure.** The order is the skill; the commands are just the tools. | |
-| 20 | `03-phase-networking-basics.md:1686` | \| Wireshark \| Packet capture/analysis \| Free \| https://www.wireshark.org/ \| Capture DNS lookup and TCP handshake \| tcpdump on Linux \| | |
-| 21 | `03-phase-networking-basics.md:1711` | 6. Capture a TCP handshake in Wireshark. Filter on `tcp`, find a handshake between your device and a server, and explain the three-way handshake. <!-- id: it-03-t06 band: focused energy: normal --> | |
-| 22 | `03-phase-networking-basics.md:1792` | **Why:** TCP is connection-oriented and reliable — it opens with the `SYN`, `SYN-ACK`, `ACK` handshake and retransmits what is lost. UDP is best-effort by design; ICMP carries diagnostics; ARP maps IP to MAC. | |
-| 23 | `07-phase-soft-skills.md:520` | > The machine is failing to complete the DHCP handshake on the corporate VLAN. It gets an APIPA address, so it is not reaching the scope. I have ruled out the cable and the switch port. Suspect the scope is exhausted or the reservation is stale — checking the  … | |
-| 24 | `08-phase-portfolio-and-resume.md:97` | \| **Action** \| "Learned about DHCP" \| "Configured a DHCP scope, then captured the DORA exchange in Wireshark to confirm it" \| | |
-| 25 | `08-phase-portfolio-and-resume.md:276` ▶ | confirm the DORA sequence; intentionally broke the gateway setting on | |
-| | | <sub>↑ tracert across subnets; captured the DHCP exchange in Wireshark to<br>↓ one client to see how the failure presents.</sub> | |
-| 26 | `08-phase-portfolio-and-resume.md:279` ▶ | the portfolio. I can now explain the DORA sequence from the packets | |
-| | | <sub>↑ Result : A working routed lab, a network diagram, and packet-capture notes in<br>↓ rather than from memory, and I recognise a wrong-gateway symptom</sub> | |
-
-_▶ marks a line inside a code block — executable, so a wrong flag or path is worse than a wrong sentence._
-
----
-
-## Product versions and editions
-
-*The class most likely to ROT. A claim that is true today may be false after a release, so these carry a shelf life the others do not.*
-
-**Source to check against:** Vendor documentation, checked against the current release
-
-17 claim(s).
-
-| # | Location | Text as written | Verdict |
-|---|---|---|---|
-| 1 | `01-phase-computer-fundamentals.md:112` | The same information is available without a terminal: press **Ctrl+Shift+Esc** for Task Manager, click the **Performance** tab, and select **CPU**. You will see the model name, the core count, the current speed, and a live graph. For a fuller report, search th … | |
-| 2 | `01-phase-computer-fundamentals.md:449` | 2. **Let Windows Update handle it when it can.** On modern Windows 10 and 11, most drivers install automatically and correctly. Manually chasing the newest driver is rarely necessary and occasionally harmful. | |
-| 3 | `06-phase-tools-and-ticketing.md:248` | 4. **Check the version and date.** A guide written for Windows 10 may be subtly wrong on Windows 11. A page about an old admin portal may describe buttons that no longer exist. | |
-| 4 | `06-phase-tools-and-ticketing.md:1066` ▶ | Service : Microsoft 365 Outlook desktop, Windows 11, version 2401 build 17231 | |
-| | | <sub>↑ Category : Email (client)<br>↓ Repro : 1. Launch Outlook from Start. 2. Splash screen appears.</sub> | |
-| 5 | `08-phase-portfolio-and-resume.md:320` ▶ | Operating systems : Windows 10/11 (user and group management, NTFS permissions, services, | |
-| | | <sub>↑ TECHNICAL SKILLS<br>↓ Event Viewer), Ubuntu Server (users, systemd, permissions, log review)</sub> | |
-| 6 | `08-phase-portfolio-and-resume.md:701` ▶ | Install Ubuntu Server 24.04 in a VirtualBox VM and prove I can do four | |
-| | | <sub>↓ things from the command line without a GUI: create a user, put them in a</sub> | |
-| 7 | `08-phase-portfolio-and-resume.md:709` ▶ | \| Host \| Windows 11, 8 GB RAM \| | |
-| | | <sub>↑ \|---\|---\|<br>↓ \| Virtualisation \| Enabled in BIOS (see "What went wrong") \|</sub> | |
-| 8 | `08-phase-portfolio-and-resume.md:712` ▶ | \| Guest \| Ubuntu Server 24.04 LTS, 2 GB RAM, 20 GB disk \| | |
-| | | <sub>↑ \| VirtualBox \| 7.0.14 \|<br>↓ \| Network \| NAT, with a port forward `2222 → 22` so the host can reach SSH \|</sub> | |
-| 9 | `08-phase-portfolio-and-resume.md:885` ▶ | Operating systems : [Windows 10/11: users, groups, NTFS permissions, services, Event Viewer] | |
-| | | <sub>↑ TECHNICAL SKILLS<br>↓ [Ubuntu Server: users, systemd, permissions, /var/log review]</sub> | |
-| 10 | `08-phase-portfolio-and-resume.md:996` | \| After \| Created local users and groups in Windows 11 and demonstrated how inherited and explicit NTFS permissions combine with share permissions to determine effective access. \| | |
-| 11 | `08-phase-portfolio-and-resume.md:1035` | \| Name the tool or system \| VirtualBox, Windows 11, osTicket, pfSense \| | |
-| | | <sub>↑ \|---\|---\|<br>↓ \| Name the action \| Built, configured, diagnosed, created, verified \|</sub> | |
-| 12 | `08-phase-portfolio-and-resume.md:1067` | \| 2 \| PowerShell 7, `Get-CimInstance` for OS and disk, `Get-Service` filtered to `Running`, `Export-Csv` for the output. \| | |
-| 13 | `08-phase-portfolio-and-resume.md:1098` | \| 1 \| I studied how Active Directory organises users, groups, and organisational units, and I read about Group Policy. I practised the equivalent concepts — local users, local groups, permissions — on a standalone Windows 11 machine. \| | |
-| 14 | `08-phase-portfolio-and-resume.md:1099` | \| 2 \| Windows 11 local users and groups. I have not installed or administered a domain controller. \| | |
-| | | <sub>↑ \| 1 \| I studied how Active Directory organises users, groups, and organisational units, and I read about Group Policy. I practised the equivalent co …<br>↓ \| 3 \| Nothing went wrong, because I did not do it. I followed a tutorial's screenshots rather than running my own domain. \|</sub> | |
-| 15 | `08-phase-portfolio-and-resume.md:1108` | \| Experienced with Active Directory and Windows Server administration. \| Studied Active Directory concepts and practised user and group management, permissions, and least privilege on a standalone Windows 11 machine; a Windows Server domain controller lab is … | |
-| 16 | `09-phase-job-application-plan.md:535` ▶ | accounts; manage M365 users; troubleshoot Windows 10/11, printers, | |
-| | | <sub>↑ Do: triage tickets by email/chat/phone; reset passwords and unlock<br>↓ and VPN; document every ticket in our PSA (professional services automation — the ticketing and billing system MSPs run; here, ConnectWise); escalate</sub> | |
-| 17 | `09-phase-job-application-plan.md:578` ▶ | What I can do now: Windows 10/11 troubleshooting, M365 user and | |
-| | | <sub>↓ group administration, password resets and account unlocks, TCP/IP</sub> | |
-
-_▶ marks a line inside a code block — executable, so a wrong flag or path is worse than a wrong sentence._
-
----
-
-## Registry paths, file paths and filenames
-
-*Verbatim strings that must match the OS exactly. A transposed path sends a reader somewhere that does not exist.*
-
-**Source to check against:** Microsoft documentation, or the OS itself
-
-17 claim(s).
-
-| # | Location | Text as written | Verdict |
-|---|---|---|---|
-| 1 | `01-phase-computer-fundamentals.md:71` | - **File Paths:** Location of files (e.g., `C:\Users\YourName\Documents\file.txt`). | |
-| | | <sub>↑ - **Extensions:** File type indicators (e.g., `.pdf`, `.jpg`).</sub> | |
-| 2 | `01-phase-computer-fundamentals.md:440` | Also worth knowing: minidump files land in `C:\Windows\Minidump`. You do not analyse these at Phase 1, but their **timestamps** tell you exactly when each crash happened, which lets you correlate crashes against what the user was doing. | |
-| 3 | `02-phase-operating-systems.md:61` | - Filesystem hierarchy: `/`, `/home`, `/etc`, `/var/log`, `/tmp` | |
-| | | <sub>↓ - Users and groups: `adduser`, `passwd`, `groups`, `usermod`</sub> | |
-| 4 | `02-phase-operating-systems.md:66` | - Logs: `/var/log/auth.log`, `/var/log/syslog`, `journalctl` | |
-| | | <sub>↑ - Processes and services: `ps`, `top`, `systemctl`<br>↓ - Core navigation commands: `pwd`, `ls`, `cd`, `cat`, `less`, `cp`, `mv`, `rm`, `mkdir`, `grep`, `find`</sub> | |
-| 5 | `02-phase-operating-systems.md:415` | \| Where apps live \| `C:\Program Files` \| `/usr/bin`, `/opt` \| **`/Applications`** \| | |
-| | | <sub>↑ \| File manager \| File Explorer \| (the shell) \| **Finder** \|<br>↓ \| Settings \| Control Panel / Settings \| config files in `/etc` \| **System Settings** \|</sub> | |
-| 6 | `02-phase-operating-systems.md:514` | Expected: your username, your **UID** (user ID — the number Linux uses internally for your account) and groups, kernel and distribution details, uptime, a list of login-capable accounts, disk and memory usage, any failed logins, and recent errors. On a desktop … | |
-| 7 | `02-phase-operating-systems.md:522` | 1. In Windows, open `C:\Windows\System32\winevt\Logs` in File Explorer. Windows stores logs as binary `.evtx` files that you must open with Event Viewer. | |
-| 8 | `02-phase-operating-systems.md:622` | A loaded profile whose path ends in something like `C:\Users\TEMP` or `C:\Users\TEMP.DOMAIN.001` is the temporary profile. That is your diagnosis, and everything else follows from it. | |
-| 9 | `02-phase-operating-systems.md:636` | 2. **Copy the data out** from `C:\Users\<broken-profile>` to a location outside it — their Desktop, Documents, Pictures, and Downloads folders, plus any application data they need. | |
-| 10 | `02-phase-operating-systems.md:872` | \| Why did an update fail? \| `Get-WindowsUpdateLog` to build a readable log, plus Setup log under `C:\Windows\Logs` \| | |
-| 11 | `02-phase-operating-systems.md:1385` | - **Log analysis:** What you found in `/var/log/auth.log` and `/var/log/syslog`, and how you used `journalctl` to read system logs. | |
-| 12 | `06-phase-tools-and-ticketing.md:357` | `C:\Windows\Temp` at 18.41 GB is the answer, and it is not user data. Something has been writing temporary files and never cleaning them up. | |
-| 13 | `06-phase-tools-and-ticketing.md:397` | > **Investigated:** `Get-PSDrive` confirmed only `C:` affected; `D:` has 255.6 GB free, so the data volume is healthy and this is not user-data growth. Largest-directory scan showed `C:\Windows\Temp` at 18.41 GB, of which the largest files were `sql_dump_*.tmp … | |
-| 14 | `06-phase-tools-and-ticketing.md:398` | > **Cause:** A nightly job outside the service desk's ownership is writing ~5 GB of temporary dump files to `C:\Windows\Temp` and never removing them. Under four days of accumulation took the volume to the alert threshold, so this will recur within the week un … | |
-| 15 | `06-phase-tools-and-ticketing.md:399` | > **Action:** Cleared `C:\Windows\Temp` dump files after confirming their identity and daily pattern. Did **not** delete unfamiliar files. Raised a problem record so the owning team fixes the cleanup, because the files regenerate nightly. | |
-| 16 | `06-phase-tools-and-ticketing.md:401` | > **For the next agent:** If this alert fires again, check `C:\Windows\Temp` first and look for `sql_dump_*.tmp`. The root cause is not fixed — the nightly job is with the application team. Growth is ~5 GB per day, so the volume has roughly four days of headro … | |
-| 17 | `08-phase-portfolio-and-resume.md:114` | \| "Know Linux." \| "Installed and administered Ubuntu Server in a VM: user and group management, `systemctl` service control, permissions with `chmod` and `chown`, log review in `/var/log`." \| | |
-
----
-
-## Stated counts, sizes and arithmetic
-
-*Checkable by RECOMPUTATION, which needs no source at all — the strongest tier of verification available.*
-
-**Source to check against:** Recomputation from the document's own numbers
-
-**177 claim(s) — already verified by recomputation, not listed.**
-
-See "Already verified, without needing a source" above. Re-run the verifying script if you
-doubt it; do not re-check these by hand.
-
----
-
-## Claims per phase
-
-| Phase | cidr | port | command | record | protocol | version | registry | number | total |
-|---|---|---|---|---|---|---|---|---|---|
-| 01 computer-fundamentals |  | 14 | 12 |  |  | 2 | 2 | 52 | **82** |
-| 02 operating-systems |  | 9 | 36 |  |  |  | 9 | 23 | **77** |
-| 03 networking-basics | 78 | 33 | 58 | 4 | 22 |  |  | 17 | **212** |
-| 04 helpdesk-skills | 2 | 17 | 26 |  |  |  |  | 12 | **57** |
-| 05 sysadmin-basics |  | 24 | 18 |  |  |  |  | 9 | **51** |
-| 06 tools-and-ticketing |  | 50 | 2 |  |  | 2 | 5 | 40 | **99** |
-| 07 soft-skills |  | 5 |  |  | 1 |  |  | 2 | **8** |
-| 08 portfolio-and-resume |  | 1 | 8 |  | 3 | 11 | 1 | 14 | **38** |
-| 09 job-application-plan |  | 1 | 1 |  |  | 2 |  | 8 | **12** |
-

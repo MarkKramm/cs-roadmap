@@ -58,22 +58,37 @@ const OUT = path.join(ROOT, "docs", TRACKS[TRACK_KEY].out);
 // The `settled` classes (cidr, port, number) are ABSENT by design: they are
 // recomputed by scripts/verify-*.mjs, and sending them would invite a model to
 // "verify" arithmetic it cannot check.
+// WHY THE IT TRACK IS NOT MARKED DONE, EVEN THOUGH A PASS WAS RUN.
+//
+// The IT verification pass genuinely happened -- commit 858206b records three real
+// defects it found, all of the "right name, broken invocation" shape. But its
+// VERDICTS were never written into docs/IT-CLAIM-VERIFICATION.md: all 225 rows in
+// that document carry an empty verdict column, the document's own class table still
+// says "needs checking" for five of them, and the header nonetheless reads
+// "Status: verified -- 224 claims, 0 WRONG".
+//
+// So the result is known but UNREPRODUCIBLE, which for a verification record is the
+// same as unknown. Marking these done again would repeat the exact mistake that lost
+// the cyber DNS class: a class that looks finished, yields no worklist, and cannot be
+// told from one that was actually checked. The rows are re-emitted until verdicts
+// exist for them, row by row, in the document.
 const WANTED_BY_TRACK = {
   it: [
-    { title: "Command and cmdlet usage", done: true, doneThrough: 160 },
-    { title: "DNS record types", done: true, doneThrough: 4 },
-    { title: "Protocol and standard behaviour", done: true, doneThrough: 26 },
-    { title: "Product versions and editions", done: true, doneThrough: 17 },
-    { title: "Registry paths, file paths and filenames", done: true, doneThrough: 17 },
+    { title: "Command and cmdlet usage" },
+    { title: "DNS record types" },
+    { title: "Protocol and standard behaviour" },
+    { title: "Product versions and editions" },
+    { title: "Registry paths, file paths and filenames" },
   ],
   cybersec: [
-    { title: "MITRE ATT&CK technique identifiers" },
+    { title: "MITRE ATT&CK technique identifiers", done: true, doneThrough: 34 },
+    { title: "DNS record types" },
     { title: "CVE identifiers and vulnerability claims", done: true, doneThrough: 4 },
     { title: "Cryptography algorithm claims", done: true, doneThrough: 5 },
     { title: "Standards, frameworks and control identifiers", done: true, doneThrough: 105 },
     { title: "Security tool commands and flags", done: true, doneThrough: 99 },
-    { title: "Protocol and standard behaviour" },
-    { title: "Registry paths, file paths and filenames" },
+    { title: "Protocol and standard behaviour", done: true, doneThrough: 44 },
+    { title: "Registry paths, file paths and filenames", done: true, doneThrough: 47 },
     { title: "Product versions and editions", done: true, doneThrough: 9 },
     { title: "Command and cmdlet usage", done: true, doneThrough: 60 },
   ],
@@ -198,24 +213,38 @@ for (const spec of WANTED) {
 
   // Rows already verified are dropped, so the file on disk is only what is
   // left. `--from <n>` can still override this by hand.
+  //
+  // TWO mechanisms, because one is not enough:
+  //
+  //  * `cut` (`doneThrough`) drops a contiguous PREFIX. That is how every
+  //    completed class shrank as its rows came back in order.
+  //  * the row-level filter below drops ANY row that already carries a verdict,
+  //    wherever it sits. `cut` cannot express "rows 1-3 outstanding, row 4 done",
+  //    and that is not hypothetical: the cyber "DNS record types" class had
+  //    exactly that shape, and re-sending row 4 would have asked a verifier to
+  //    redo settled work -- D-038's failure mode, a worklist that cannot tell
+  //    done from outstanding. A row with a verdict is done; do not send it.
+  //
+  // The row-level filter is deliberately independent of `cut`, so a class with no
+  // `doneThrough` at all (never partially cut) still cannot re-send answered rows.
   const cut = FROM || (spec.doneThrough ? spec.doneThrough + 1 : null);
-  let outLines = kept;
+  const answered = (line) => /\|\s*\*\*(OK|WRONG|UNVERIFIABLE)\*\*/.test(line);
   let suffix = "";
-  if (cut && cut > 1) {
-    outLines = [];
+  let outLines = [];
+  {
     let keepCtx = false;
     for (const line of kept) {
       const m = /^\| (\d+) \|/.exec(line);
       if (m) {
-        keepCtx = Number(m[1]) >= cut;
+        keepCtx = (!cut || Number(m[1]) >= cut) && !answered(line);
         if (keepCtx) outLines.push(line);
         continue;
       }
       // A context row belongs to the claim directly above it.
       if (keepCtx && /^\| \| \| <sub>/.test(line)) outLines.push(line);
     }
-    suffix = `-from-${cut}`;
   }
+  if (cut && cut > 1) suffix = `-from-${cut}`;
 
   const file = path.join(OUT, `${String(n).padStart(2, "0")}-${slug}${suffix}.md`);
   const rows = outLines.filter((l) => /^\| \d+ \|/.test(l)).length;

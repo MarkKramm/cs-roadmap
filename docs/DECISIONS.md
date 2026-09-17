@@ -2,6 +2,31 @@
 
 A lightweight decision log (ADR-style). Newest first.
 
+## D-056 — Counting the things you remembered cannot find the thing you forgot
+
+- **Date:** 2026-09-18
+- **Status:** Accepted
+- **Context:** A final sweep of the cyber verification document counted rows whose verdict column was **empty** — and found an entire class, **"DNS record types" (3 rows), that had never been sent to a verifier** through five completed passes that all reported clean and a guard suite that never failed. The class was added to `split-claims.mjs` already marked `done: true` with `doneThrough: 4`, a figure **carried over from the IT track**, whose version of that class genuinely has 4 rows. The cyber version has 3 different rows. Marked done, it emitted no worklist; and because `audit-verdict-counts.mjs` summed only the classes in its own `DONE` list, the missing class was **absent from the total by construction**. The published figure was self-consistent and wrong.
+- **Decision:** **A completeness check must enumerate the substrate, not a list of what is expected.** Where a guard verifies "everything is accounted for", it iterates the **document** (every `## ` section, listed or not) and fails on anything unaccounted for — never a hand-maintained list of the things someone believed were there. **An entry missing from the list of verified classes cannot be found by summing the list of verified classes.**
+- **This is D-038's failure mode, in the one place I had claimed to have fixed it** — a record that cannot distinguish done from outstanding. The earlier fixes were all *within* the list (a folder cleared of stale bundles, a `doneThrough` per class, a summary derived rather than typed). Every one of them assumed the list was complete. **The list was the bug.**
+- **The same defect was then found in the IT track at 225-row scale**, and it is worse there because it is not a missing entry but a **false claim**: `IT-CLAIM-VERIFICATION.md` read *"Status: verified — 224 claims, 0 `WRONG`"* while **all 225 of its rows carried empty verdicts** and its own class table still said *"needs checking"*. The pass really happened and its three defects were fixed (`858206b`); only the *verdicts* were never written down. **The conclusion was recorded and the evidence was not** — which is indistinguishable, to any later reader or auditor, from a verification that never happened. Withdrawn and reopened.
+- **Consequences:**
+  - `audit-verdict-counts.mjs` scans every section and fails on an empty verdict column. An empty column is not automatically a bug — a class legitimately in flight must pass, or the guard would be useless exactly when it is needed — so it distinguishes **tracked-outstanding** (listed in the splitter, emits a pack) from **marked-done-but-empty** (unreachable work, fails). The distinction is read from `split-claims.mjs` rather than a second hand-kept list, because a second list is how the class was lost.
+  - **Five controls, including one that reproduces the bug exactly as it shipped**, and one asserting the in-flight state still passes. A control that cannot tell "the guard is wrong" from "my fixture is wrong" is worse than none: an early version of control 3 used a regex that no longer matched, mutated nothing, and reported a failure against working code.
+  - **The fix for the class boundary was itself the same shape.** `split-claims.mjs` could drop a contiguous prefix of verified rows (`doneThrough`) but could not express *"rows 1–3 outstanding, row 4 done"* — the DNS class's actual shape. Re-emitting it would have re-sent settled work. Answered rows are now dropped **individually**, independent of any prefix cut.
+
+## D-055 — A verification pass that is not written down has not happened
+
+- **Date:** 2026-09-18
+- **Status:** Accepted
+- **Context:** The IT track's 224-claim pass was run on 2026-09-16, found three real defects, and those defects were fixed. The **counts were reported** — in `CHECKPOINT.md`, `ROADMAP.md`, `SESSION-LOG.md` and the `CHANGELOG` — but the per-row verdicts were never recorded in `IT-CLAIM-VERIFICATION.md`, which was left as an empty worklist while its header claimed success. Sixteen days of documentation carried the numbers as though they were established.
+- **Decision:** **A verification result exists only as per-row evidence. The summary is a derived view of that evidence, never a substitute for it.** A pass whose verdicts are not recorded is treated as **not run**, however confidently its totals were reported and however real the work was. Re-run it.
+- **Why the totals are not enough.** A figure like "176 `OK`, 48 `UNVERIFIABLE`, 0 `WRONG`" cannot be **spot-checked** (which rows?), cannot be **re-derived** (from what?), and cannot be **audited** (by whom?). When a later pass disagrees with it there is no evidence to adjudicate with. It is also unfalsifiable in the direction that matters: a total is exactly what you would report if you had not done the work, so a record that holds only totals cannot distinguish the two cases — **including to the person who did it.**
+- **Consequences:**
+  - The IT classes are re-emitted as work; the splitter no longer marks them `done`. Their rows are the source of truth and conclusions are recomputed from them.
+  - **The historical entries are annotated, not rewritten.** `ROADMAP.md`, `SESSION-LOG.md` and `CHECKPOINT.md` keep their original figures with a correction note, because they accurately record what was done that day; silently editing them would destroy the very history that makes the mistake legible.
+  - **CI now runs the drift guard on both tracks**, not just cyber — the IT packs had never been gated against the corpus at all, so nothing would have caught them describing stale text.
+
 ## D-054 — A record's own summary is a claim, and gets counted rather than typed
 
 - **Date:** 2026-09-17

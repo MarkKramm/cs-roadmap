@@ -77,6 +77,14 @@ So no vendor or standards source documents this artefact at all. The claim is co
 
 ## 2026-09-16 (earlier) — The IT track's technical claims, verified: 224 checked, zero wrong
 
+> **⚠️ Corrected 2026-09-18. The pass happened; the record did not.** These figures were
+> reported at the time and the three defects it found were fixed (commit `858206b`), but the
+> **verdicts were never written into `IT-CLAIM-VERIFICATION.md`** — all 225 rows there have an
+> empty verdict column and its class table still says "needs checking". The counts below are
+> therefore a **contemporaneous report, not a reproducible result**, and the class has been
+> reopened and re-emitted as work. The entry is left as written because it accurately records
+> what was done that day; this note is here so it is not mistaken for evidence.
+
 **The result.** All five classes came back from external verification: **176 `OK`, 48 `UNVERIFIABLE`, 0 `WRONG`.** Commands (160 rows), protocol (26), versions (17), paths (17), DNS records (4).
 
 **I spot-checked the citations rather than accepting them**, because a verdict is only as good as the document behind it. Every one held **verbatim**:

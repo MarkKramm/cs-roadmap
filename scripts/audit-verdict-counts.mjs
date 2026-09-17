@@ -23,6 +23,9 @@ const DONE = [
   "Product versions and editions",
   "Command and cmdlet usage",
   "Security tool commands and flags",
+  "MITRE ATT&CK technique identifiers",
+  "Protocol and standard behaviour",
+  "Registry paths, file paths and filenames",
 ];
 
 let cls = "";
@@ -56,6 +59,76 @@ console.log("");
 
 const doc = fs.readFileSync("docs/CYBER-CLAIM-VERIFICATION.md", "utf8");
 const problems = [];
+
+// --- 0. NO class may hold a row with an empty verdict column unless it is
+//        genuinely TRACKED as outstanding work.
+//
+// This is the check that was missing, and its absence let a whole class sit
+// unverified while every other guard passed. "DNS record types" was marked
+// `done: true` in split-claims.mjs with `doneThrough: 4` -- a figure carried over
+// from the IT track, whose version of that class genuinely has 4 rows. The cyber
+// version has 3 different rows, so they were never sent to anyone, were never
+// counted in the DONE list below, and were never missed. The verifier reported
+// "all 125 rows completed" and the totals stayed clean, because **an unverified
+// class is simply absent from a list of verified classes.**
+//
+// That is D-038's failure mode: a record that cannot tell done from outstanding.
+// Counting only the classes you remembered to list cannot catch a class you forgot.
+//
+// THE DISTINCTION THAT MATTERS. An empty verdict column is not automatically a
+// bug. A class can be legitimately in flight -- its pack is on disk, waiting for a
+// verifier -- and failing on that would make the guard useless during exactly the
+// period it is needed. What must never happen is a class that is BOTH unverified
+// AND marked finished. So the guard reads the splitter's own `done` flags:
+//
+//   * empty rows + `done: true`  -> FAIL. This is the bug. It is unreachable work.
+//   * empty rows + not done      -> PASS, and report it as outstanding.
+//   * no empty rows + `done`     -> PASS.
+//
+// Deriving "outstanding" from split-claims.mjs rather than from a list here is
+// deliberate: a second hand-maintained list would drift from the first, which is
+// how the class was lost in the first place.
+let outstandingSections = new Set();
+try {
+  const sp = fs.readFileSync("scripts/split-claims.mjs", "utf8");
+  const cyber = /cybersec:\s*\[([\s\S]*?)\n\s*\],/.exec(sp);
+  if (!cyber) {
+    problems.push("could not read the cybersec class list from scripts/split-claims.mjs");
+  } else {
+    for (const m of cyber[1].matchAll(/\{\s*title:\s*"([^"]+)"([^}]*)\}/g)) {
+      if (!/done:\s*true/.test(m[2])) outstandingSections.add(m[1]);
+    }
+  }
+} catch (e) {
+  problems.push(`could not read scripts/split-claims.mjs: ${e.message}`);
+}
+
+{
+  const bySection = new Map();
+  let s = "";
+  for (const l of lines) {
+    const h = /^## (.+)/.exec(l);
+    if (h) s = h[1].replace(/\s+$/, "");
+    if (!ROW.test(l)) continue;
+    if (!/\*\*(OK|WRONG|UNVERIFIABLE)\*\*/.test(l)) {
+      if (!bySection.has(s)) bySection.set(s, []);
+      bySection.get(s).push(l.trim().slice(0, 110));
+    }
+  }
+  for (const [section, rs] of bySection) {
+    const tracked = outstandingSections.has(section);
+    if (tracked && !DONE.includes(section)) {
+      console.log(`  OUTSTANDING (tracked, not a failure): "${section}" — ${rs.length} row(s) awaiting a verdict`);
+      continue;
+    }
+    problems.push(
+      `section "${section}" has ${rs.length} row(s) with an EMPTY verdict column` +
+        (DONE.includes(section) ? " (and it is listed as done!)" : "") +
+        (tracked ? "" : " and is not tracked as outstanding in split-claims.mjs") +
+        `\n      first: ${rs[0]}`,
+    );
+  }
+}
 
 // --- 1. every class row in the summary table
 for (const r of rows) {

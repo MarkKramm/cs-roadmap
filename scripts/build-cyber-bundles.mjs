@@ -1,9 +1,9 @@
-// Build the cyber verification bundles.
+// Build the verification bundles for a track.
 //
 // WHY THIS EXISTS
-// The nine packs in claims-to-verify-cyber/ are the right unit for a *sitting* and
-// the wrong unit for a *paste*. Two ways to get this wrong, and D-038 records both
-// already being made once on the IT pass:
+// The packs in claims-to-verify-*/ are the right unit for a *sitting* and the wrong
+// unit for a *paste*. Two ways to get this wrong, and D-038 records both already
+// being made once on the IT pass:
 //   1. One paste of everything (369 rows, ~30k tokens in) demands 2-3x that back out,
 //      because every OK row must carry a URL and a quote. The IT pass's 160-row table
 //      came back verified through row 152 and stopped. Truncation is not a maybe.
@@ -13,7 +13,15 @@
 // So this emits bundles sized to survive a reply, numbered, each self-contained, plus
 // a manifest that says what is in each and in what order to send them.
 //
-// Run: node scripts/build-cyber-bundles.mjs
+// THE PLAN IS DERIVED, NOT DECLARED. This script used to carry a hand-written PLAN
+// listing which packs to send, and that list had to be edited by hand every time a
+// class was verified. Four separate failures came out of that arrangement, including
+// a 99-row stale bundle that survived a rebuild and looked like outstanding work.
+// The packs on disk already say what is outstanding -- split-claims.mjs writes them
+// and deletes them when a class is done -- so the plan is simply "every pack present,
+// in filename order", which the splitter numbers to express send order.
+//
+// Run: node scripts/build-cyber-bundles.mjs [--track it|cybersec]
 
 import fs from "node:fs";
 import path from "node:path";
@@ -21,8 +29,20 @@ import { fileURLToPath } from "node:url";
 
 const HERE = path.dirname(fileURLToPath(import.meta.url));
 const ROOT = path.join(HERE, "..");
-const SRC = path.join(ROOT, "docs", "claims-to-verify-cyber");
-const OUT = path.join(ROOT, "docs", "claims-to-verify-cyber", "bundles");
+
+const TRACKS = {
+  it: "claims-to-verify",
+  cybersec: "claims-to-verify-cyber",
+};
+const argv = process.argv.slice(2);
+const tArg = argv.indexOf("--track");
+const TRACK_KEY = tArg !== -1 ? argv[tArg + 1] : "cybersec";
+if (!TRACKS[TRACK_KEY]) {
+  console.error(`unknown track "${TRACK_KEY}" — expected one of: ${Object.keys(TRACKS).join(", ")}`);
+  process.exit(2);
+}
+const SRC = path.join(ROOT, "docs", TRACKS[TRACK_KEY]);
+const OUT = path.join(SRC, "bundles");
 
 // The packs still outstanding, in the order they should be SENT.
 //
@@ -34,32 +54,23 @@ const OUT = path.join(ROOT, "docs", "claims-to-verify-cyber", "bundles");
 // that made a reader re-verify finished work; if one reappears in this folder, the
 // splitter's WANTED_BY_TRACK list has been edited.
 //
-// Ordering principle: highest expected yield first. Both command-shaped classes are
-// now done and both came back clean, which is itself the finding -- see
-// CYBER-CLAIM-VERIFICATION.md.
+// `rows` is NOT declared anywhere. It is read from the pack at build time, because a
+// hard-coded count silently disagrees with the table beside it the moment the corpus
+// moves -- the exact defect fixed in extract-claims.mjs, where "216 claims" was IT's
+// figure printed into every track.
 //
-// `MAX_ROWS` below is what decides how many bundles exist. At 125 remaining rows all
-// three classes fit in ONE bundle, so this plan produces one. That is the point of
-// computing bundle boundaries rather than hard-coding them: the plan shrinks as work
-// is completed, and a hard-coded "four bundles" would have kept sending verified
-// rows forever.
-//
-// `rows` is NOT declared here. It is read from the pack at build time, because a
-// hard-coded count silently disagrees with the table beside it the moment the
-// corpus moves -- the exact defect fixed in extract-claims.mjs, where "216 claims"
-// was IT's figure printed into every track.
-const PLAN = [
-  { file: "01-mitre-att-ck-technique-identifiers.md", why: "ATT&CK IDs and technique names, checked against attack.mitre.org." },
-  { file: "02-protocol-and-standard-behaviour.md", why: "RFC-settled, mechanical, unambiguous." },
-  { file: "03-registry-paths-file-paths-and-filenames.md", why: "Microsoft Learn or the OS itself. Mechanical." },
-];
+// Send order is the splitter's filename numbering (01-, 02-, ...), which it assigns
+// from its own class list. Nothing here decides priority.
+const PLAN = fs.existsSync(SRC)
+  ? fs
+      .readdirSync(SRC)
+      .filter((f) => /^\d+-.*\.md$/.test(f))
+      .sort()
+      .map((file) => ({ file, rows: countRows(file) }))
+  : [];
 
-// Count the data rows in a pack, so the plan above never carries a stale number.
-const countRows = (file) =>
-  (fs.readFileSync(path.join(SRC, file), "utf8").match(/^\|\s*\d+\s*\|/gm) || []).length;
-
-for (const item of PLAN) {
-  item.rows = countRows(item.file);
+function countRows(file) {
+  return (fs.readFileSync(path.join(SRC, file), "utf8").match(/^\|\s*\d+\s*\|/gm) || []).length;
 }
 
 // Stale bundles must not survive a rebuild.
@@ -88,6 +99,21 @@ fs.mkdirSync(OUT, { recursive: true });
 // one reply); ~200 has not been tested and is not the place to find out.
 const MAX_ROWS = 130;
 const WORDS = ["zero", "one", "two", "three", "four", "five", "six", "seven", "eight"];
+
+// The finished state, stated as such. Without this branch an empty plan falls
+// through to a "0 bundles, 0 rows" summary and looks identical to a generator that
+// silently failed to find its inputs.
+if (PLAN.length === 0) {
+  const before = fs.existsSync(OUT) ? fs.readdirSync(OUT).filter((f) => /^\d+-bundle\.md$/.test(f)) : [];
+  for (const f of before) fs.rmSync(path.join(OUT, f));
+  console.log("");
+  console.log(`  Every ${TRACK_KEY} claim class is fully verified -- there is nothing left to bundle.`);
+  console.log("  This is the FINISHED state, not a failure: the plan in build-cyber-bundles.mjs is empty");
+  console.log("  because split-claims.mjs withholds all nine classes via `done: true`.");
+  if (before.length) console.log(`  Cleared ${before.length} stale bundle(s): ${before.join(", ")}`);
+  console.log(`  See docs/${TRACK_KEY === "it" ? "IT" : "CYBER"}-CLAIM-VERIFICATION.md for the results.`);
+  process.exit(0);
+}
 
 const bundles = [];
 let current = null;
@@ -164,12 +190,12 @@ fs.writeFileSync(
     "# Cyber claim verification — send these in order",
     "",
     "Generated by `scripts/build-cyber-bundles.mjs`. **Do not hand-edit**: re-run the",
-    "script, which regenerates from `docs/claims-to-verify-cyber/*.md`.",
+    "script, which regenerates from `docs/" + TRACKS[TRACK_KEY] + "/*.md`.",
     "",
     "## Why bundles and not one paste",
     "",
     `${manifest.reduce((a, m) => a + m.rows, 0)} rows need a verdict, a source URL and a quote each.`,
-    "That reply is roughly 2.5× the prompt, so one paste asks for far more back than a",
+    "That reply is roughly 2.5Ã— the prompt, so one paste asks for far more back than a",
     "reply reliably completes — and **it will truncate.** The IT pass's 160-row command",
     "table came back verified through row 152 and stopped there. Nine separate pastes fix",
     "the truncation and reintroduce the other failure D-038 records: a folder where nothing",
@@ -198,7 +224,7 @@ fs.writeFileSync(
     "",
     "Paste the returned tables back into the conversation with me. I will:",
     "",
-    "1. record the verdicts into `docs/CYBER-CLAIM-VERIFICATION.md` and the pack files,",
+    "1. record the verdicts into the track's CLAIM-VERIFICATION.md and the pack files,",
     "2. mark `doneThrough` in `scripts/split-claims.mjs` so the pack stops regenerating,",
     "3. **verify every `WRONG` against the primary source myself before changing any content** —",
     "   D-038: *\"a model's answer remains not a source.\"* This is what caught that three",
@@ -222,5 +248,5 @@ for (const m of manifest) {
 }
 console.log(
   `\n  ${manifest.length} bundle${manifest.length === 1 ? "" : "s"}, ` +
-    `${manifest.reduce((a, m) => a + m.rows, 0)} rows -> docs/claims-to-verify-cyber/bundles/`,
+    `${manifest.reduce((a, m) => a + m.rows, 0)} rows -> docs/${TRACKS[TRACK_KEY]}/bundles/`,
 );

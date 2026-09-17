@@ -47,23 +47,12 @@ For each row, replace the empty last column with exactly one of:
    of this curriculum is teaching method, diagnostic reasoning, and worked
    examples, none of which is a fact about the world.
 
----
-
-# This bundle covers 1 claim class, 3 rows total.
-
-**Answer every row in every table below, in order, and output the tables complete.**
-Do not summarise and do not sample. If you run low on room, stop at a row boundary
-and say which table and row number to continue from — a continuation is cheap and
-an incomplete table is not.
-
----
-
-<!-- 01-dns-record-types.md — 3 rows -->
-
 # DNS record types
 
-| 1 | `02-phase-networking-and-linux.md:38` | - IPv6 basics: link-local, global unicast, AAAA records, why NAT is less central | |
-| | | <sub>↑ - IPv4 addressing, subnet masks, and CIDR — including working out the network, broadcast, and usable range for any prefix by hand<br>↓ - DNS: A, AAAA, CNAME, MX, TXT, NS, recursive resolver, authoritative server</sub> | |
-| 2 | `02-phase-networking-and-linux.md:312` | You can inspect all of this from a terminal, and the phase's task 5 asks you to. `dig example.com MX` returns the mail records, and `dig example.com TXT` shows the anti-spoofing policy. Reading a real TXT record for a domain you care about is a small revelatio … | |
-| 3 | `02-phase-networking-and-linux.md:1155` | 5. **Then DNS** (task 5). Run `dig` for A, AAAA, MX, TXT, and NS on a domain you care about, and read the TXT record to see the anti-spoofing policy. This connects the abstract record table to something real. | |
-
+| 1 | `03-phase-networking-basics.md:54` | - DNS: A, AAAA, CNAME, MX, TXT, NS records | |
+| | | <sub>↓ - DHCP: Discover, Offer, Request, Acknowledge at a beginner level</sub> | |
+| 2 | `03-phase-networking-basics.md:180` | 2. **`AAAA` records are the DNS counterpart to IPv4's `A` records.** If a name resolves over IPv4 but not IPv6, an `AAAA` lookup tells you. | |
+| 3 | `03-phase-networking-basics.md:231` ▶ | nslookup google.com # the A record | |
+| | | <sub>↑ ```powershell<br>↓ nslookup -type=mx gmail.com # mail servers</sub> | |
+| 4 | `03-phase-networking-basics.md:233` ▶ | nslookup -type=txt google.com # TXT records | |
+| | | <sub>↑ nslookup -type=mx gmail.com # mail servers<br>↓ nslookup google.com 8.8.8.8 # ask a SPECIFIC server</sub> | |
