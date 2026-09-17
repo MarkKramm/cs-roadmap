@@ -1237,3 +1237,89 @@ contains the population — so the next pass does not repeat the attempt.
 **The corollary.** *"Nobody has checked this"* and *"this cannot be checked from here"* are
 different states and should not share a checkbox. The first is a backlog item; the second is a
 finding about the claim's reachability.
+
+## D-070 — "It has a suite" and "a reader can open it" are different claims
+
+**Date:** 2026-09-18
+**Status:** Active
+
+`browser-check.mjs` was written because six views had never been rendered in a browser. Its
+own header said so. That paragraph was **true and incomplete**, and the incompleteness cost
+five more views.
+
+**The sidebar offers ten views. The browser check exercised five.** Dashboard (the default),
+Shared, Your work, Where you've been, and Certifications. Never opened: **Schedule, Search,
+Tools, Portfolio, Applications** — which is most of what a reader uses to find work.
+
+**Why they hid.** Each one *has a suite*, and that is exactly what made the gap invisible:
+
+| View | What was claimed to cover it | What that suite actually does |
+|---|---|---|
+| Search | `test-search.mjs` — 41 checks | Tests the **query engine** as a module. Never mounts the page. |
+| Tools | `smoke-render.mjs` — 235 renders | Renders **components** with real data. Never mounts them inside `App`. |
+| Schedule | `test-today.mjs` | Tests the pace maths. Never renders a row. |
+| Portfolio | `test-work.mjs` | Tests ordering and id matching. Never renders the page. |
+| Applications | `test-data.mjs` | Tests export and merge. Never renders the page. |
+
+**Every one of those claims was true.** The suite existed, it passed, and it tested the logic
+it says it tests. The unasked question was the different one: *has anything ever put this page
+on a screen with the props the shell passes it?* `onOpenPhase`, the track data and the
+reader's stored state are only simultaneously live inside `App`.
+
+**Decision.** **Coverage is claimed per surface, not per module.** A component with a unit
+suite is not a page that has been opened, and the honest count is the number of surfaces
+reached — ten sidebar views — not the number of suites that mention the word.
+
+**Scenario 16 now opens all five, and asserts three things each:** the sidebar link exists and
+the click lands, the view renders its own content (275 tool cards, 9 schedule rows, a focusable
+input), and **the heading matches the view**.
+
+**That last assertion exists because the first version of it was wrong, and a mutation caught
+it.** The original checked `heading.length > 0`. Planting `<h1>Dashboard</h1>` on the Portfolio
+page kept **every check green** — a page rendering the wrong view, which is precisely the
+failure the scenario was written for, waved through by an assertion that only proved *some*
+heading existed. It now compares against a named expectation per view, and the same mutation
+fails with `heading="Dashboard" expected="Portfolio"`.
+
+**Both mutations are recorded because only one of them was in the app.** The first — making
+Search render no results while keeping its input — was caught immediately by the check written
+for it. The second was a hole in the check itself, and it was found only because the mutation
+was attempted at all. **A new assertion is a hypothesis about what can go wrong; writing it is
+not the same as testing it.**
+
+---
+
+## D-071 — A detail string is printed on pass or fail, so it must describe what was seen
+
+**Date:** 2026-09-18
+**Status:** Active
+
+`check(name, ok, detail)` prints `detail` **unconditionally** — it is a description of what
+the run observed, not an error message shown on failure. Writing it as a failure message
+produces output that contradicts itself:
+
+```text
+OK  schedule: reachable from the sidebar — no link matched the label
+OK  quiz: the quiz section is headed — the quiz rendered without its heading
+```
+
+Both lines say **OK** and then state that the thing did not happen. A reader skimming a green
+run learns the opposite of the truth, and a reader who has learned that green lines say "OK"
+has no reason to read the detail at all — which is how a real failure's detail gets missed.
+
+**Decision.** **A `detail` describes the observation in every case**, phrased so it reads
+correctly under both verdicts: `link found=true`, `heading present=true`,
+`12 question(s)`. The five new checks were written correctly and the two pre-existing ones
+were corrected in the same pass. **Exactly two other call sites still phrase their detail as a
+failure message** — the quiz *Start over* check (around line 1225, `"the quiz did not return to
+its unanswered state"`) and the quiz *writes it to storage* check (around line 1303, `"nothing
+was stored after answering"`). They are **named here rather than silently rewritten**, because
+changing diagnostic text on checks that are currently passing is its own kind of unrequested
+change. (Line numbers, not a count, because a grep for the phrasing found three matches and one
+of them — `budget: never offers ongoing` — is a check *name*, where negated phrasing is
+correct. **The count is two, and it was checked rather than assumed.**)
+
+**The general form:** *diagnostic output is read by two audiences — someone debugging a
+failure and someone confirming a pass — and text written for only one of them misleads the
+other.* This is the same family as D-063, where a console that misrendered correct UTF-8
+nearly caused a correct file to be "repaired".

@@ -8,6 +8,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### Added
 
+- **`browser-check.mjs` now opens every view the sidebar offers.** Five — Schedule, Search,
+  Tools, Portfolio and Applications — had never been rendered in a browser, and were invisible
+  precisely because each *has* a suite that tests its logic. It went from **122 to 138 checks**
+  across eleven scenarios, and `MIN_CHECKS` moved 118 → 133. Two mutations were run against
+  the new assertions to prove they can fail. **D-070**.
+
 - **`scripts/audit-band-plausibility.mjs` and its seven controls** — rejects a duration
   band the UI cannot reach, or one attached to a task with no content. It explicitly does
   **not** claim the bands are accurate, because nobody has timed them, and it prints that
@@ -375,7 +381,15 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 s are
   present (`dependent services` at `02-phase-operating-systems.md:76`, NTFS versus share
   permissions at `:547`, update rollback at `:75`). **The sentence supplied a reason to keep
-  reading the item as open**, which is D-064's shape in the done/outstanding class rather than
+  reading the item as open**, which is D-064's shape in the done/outstanding class rather tha
+- **An assertion in `browser-check.mjs` that could not fail.** The "mounted its own view"
+  check tested `heading.length > 0`, so planting `<h1>Dashboard</h1>` on the Portfolio page
+  kept every check green. It now compares against a named heading per view; the same mutation
+  fails with `heading="Dashboard" expected="Portfolio"`. **D-070**.
+- **Two `check()` detail strings that contradicted their own verdict.** `detail` prints on
+  pass *and* fail, so `OK … — the quiz rendered without its heading` told a reader skimming a
+  green run that the quiz had no heading. Rephrased to describe the observation. **D-071**.
+n
   the numeric one. The item now says what is genuinely outstanding: the market claim.
 ed to the Views list that actually exists; the three M2 pages no longer described as forthcoming.
 - `docs/ROADMAP.md` — M2 moved to Done; the render smoke test recorded as a completed item.

@@ -10,6 +10,18 @@
 // print media. Both defects this project previously found in that class were
 // found by reading the CSS by hand, which does not scale and does not repeat.
 //
+// IT NOW OPENS EVERY VIEW THE SIDEBAR OFFERS, AND THAT TOOK A SECOND PASS TO SEE
+// The paragraph above was true and also incomplete. After it was written, five
+// MORE views were still never opened in a browser — Schedule, Search, Tools,
+// Portfolio and Applications — and they hid behind the same reasoning: each has
+// a suite, so each felt covered. `test-search.mjs` tests the query engine;
+// `smoke-render.mjs` renders every component with real data. Neither mounts the
+// page inside App with the props the shell actually passes, which is the only
+// way `onOpenPhase`, the track data and the reader's stored state are all live at
+// once. **"It has a suite" and "a reader can open it" are different claims**, and
+// the sidebar had ten views while this file exercised five. Scenario 16 closes
+// that, and both of its mutations are recorded in docs/DECISIONS.md → D-070.
+//
 // IT RUNS IN CI
 // This comment previously said the opposite, on the belief that GitHub's ubuntu
 // runner had no browser at any path this script looks in. That belief was wrong:
@@ -301,12 +313,13 @@ window.__type = function (el, text) {
 // because the page it measured was an error page.
 const STRICT = process.env.BROWSER_CHECK_STRICT === '1';
 // Raised from 40 to 70 as the suite grew to 92 checks across nine areas, and to
-// 100 as the quiz checks took it past 105 across ten. The floor exists to catch
-// a run that connected to an error page and asserted almost nothing, so it has
-// to sit near the real count: a floor far below it stops being a floor. It is
-// deliberately not AT the real count, so adding or removing a check does not
-// require editing this line.
-const MIN_CHECKS = 118;
+// 100 as the quiz checks took it past 105 across ten, and to 133 when the five
+// views nothing had ever opened took it to 138 across eleven. The floor exists
+// to catch a run that connected to an error page and asserted almost nothing, so
+// it has to sit near the real count: a floor far below it stops being a floor.
+// It is deliberately not AT the real count, so adding or removing a check does
+// not require editing this line.
+const MIN_CHECKS = 133;
 
 async function main() {
   const found = findBrowser();
@@ -1527,11 +1540,164 @@ async function main() {
     check(
       'quiz: the quiz section is headed',
       quizShape.heading,
-      'the quiz rendered without its heading',
+      `heading present=${!!quizShape.heading}`,
     );
 
     // ---------------------------------------------------------------------
-    // 10. Console cleanliness across the whole run
+    // 10. The five views nothing had ever opened
+    //
+    // WHY THIS EXISTS
+    // The sidebar offers ten views. Before this scenario, five of them were
+    // never reached in a browser: Schedule, Search, Tools, Portfolio and
+    // Applications. Their LOGIC was tested -- test-search.mjs covers the query
+    // engine, smoke-render.mjs renders every component with real data -- and
+    // that is exactly why the gap survived. "It has a suite" and "a reader can
+    // open it" are different claims, and only the second one needs a browser.
+    //
+    // The failure this catches is the one smoke-render was written for and
+    // cannot cover: a page that compiles, whose component renders in isolation,
+    // and which still throws when mounted inside the real app with the real
+    // props the shell passes it. `onOpenPhase`, `onOpenLesson` and the track
+    // data are only wired at the App level.
+    //
+    // Each view is asserted on something it alone provides, so a page that
+    // renders an empty shell or the wrong page fails rather than passes.
+    // ---------------------------------------------------------------------
+
+    // One helper, because this exact snippet was copy-pasted twelve times
+    // already. Clicking by label is how a reader navigates; asserting the click
+    // landed is what stops a renamed view from silently skipping its checks.
+    const goToView = async (label) => {
+      const clicked = await cdp.eval(`(() => {
+        const b = [...document.querySelectorAll('.sidebar__link')]
+          .find(x => x.textContent.trim() === ${JSON.stringify(label)});
+        if (b) b.click();
+        return !!b;
+      })()`);
+      await sleep(500);
+      return clicked;
+    };
+
+    const VIEW_CASES = [
+      {
+        label: 'Schedule',
+        selector: '.schedule',
+        // The pace maths is the only place the app turns progress into a date.
+        assert: (d) => d.rows > 0 && d.bodyLength > 400,
+        describe: (d) => `${d.rows} row(s), ${d.bodyLength} chars`,
+        why: 'the schedule renders its pace rows',
+      },
+      {
+        label: 'Search',
+        selector: '#search-input, .search',
+        // A search box that cannot be typed into is the whole feature missing.
+        assert: (d) => d.hasInput && d.inputCount >= 1,
+        describe: (d) => `input=${d.hasInput} count=${d.inputCount}`,
+        why: 'search renders a focusable input rather than an empty shell',
+      },
+      {
+        label: 'Tools',
+        selector: '.tool-card, .tools, .tool-grid',
+        // 275 tools exist; a filter that removes all of them is a defect the
+        // render test cannot see, because it never applies a filter.
+        assert: (d) => d.cards > 0,
+        describe: (d) => `${d.cards} tool card(s)`,
+        why: 'the tools library lists real tools',
+      },
+      {
+        label: 'Portfolio',
+        selector: '.portfolio, .empty-state',
+        // Portfolio legitimately starts empty, so the assertion is that it says
+        // so rather than rendering nothing at all.
+        assert: (d) => d.bodyLength > 200,
+        describe: (d) => `${d.bodyLength} chars, emptyState=${d.emptyState}`,
+        why: 'portfolio says it is empty instead of rendering a blank page',
+      },
+      {
+        label: 'Applications',
+        selector: '.applications, .empty-state',
+        assert: (d) => d.bodyLength > 200,
+        describe: (d) => `${d.bodyLength} chars, emptyState=${d.emptyState}`,
+        why: 'applications says it is empty instead of rendering a blank page',
+      },
+    ];
+
+    // The heading each view must show. Asserting "a heading exists" was NOT
+    // enough, and a mutation proved it: planting `<h1>Dashboard</h1>` on the
+    // Portfolio page kept every check green, because the assertion only tested
+    // `heading.length > 0`. A page rendering the wrong view is exactly what this
+    // scenario is for, so the expected text is named per view.
+    // NOTE: "Tools" renders the heading "Tools library", which is why this is a
+    // map and not `label === heading`.
+    const VIEW_HEADINGS = {
+      Schedule: 'Schedule',
+      Search: 'Search',
+      Tools: 'Tools library',
+      Portfolio: 'Portfolio',
+      Applications: 'Applications',
+    };
+
+    for (const v of VIEW_CASES) {
+      const clicked = await goToView(v.label);
+      check(
+        `${v.label.toLowerCase()}: reachable from the sidebar`,
+        clicked,
+        `link found=${clicked}`,
+      );
+      if (!clicked) continue;
+
+      const probe = await cdp.eval(`(() => {
+        const body = document.body.innerText;
+        return {
+          bodyLength: body.length,
+          emptyState: !!document.querySelector('.empty-state'),
+          cards: document.querySelectorAll('.tool-card').length,
+          rows: document.querySelectorAll('.schedule tbody tr, .schedule__row').length,
+          inputCount: document.querySelectorAll('input[type="search"], input[type="text"], input').length,
+          hasInput: !!document.querySelector('#search-input, input[type="search"], input[type="text"]'),
+          // The heading is the cheapest proof the RIGHT view mounted.
+          heading: (document.querySelector('h1, h2') || {}).textContent || '',
+        };
+      })()`);
+
+      check(`${v.label.toLowerCase()}: ${v.why}`, v.assert(probe), v.describe(probe));
+      const want = VIEW_HEADINGS[v.label];
+      check(
+        `${v.label.toLowerCase()}: mounted its own view, not a fallback`,
+        probe.heading.trim() === want,
+        `heading=${JSON.stringify(probe.heading.trim().slice(0, 40))} expected=${JSON.stringify(want)}`,
+      );
+    }
+
+    // Search is the one view with a real interaction behind it: typing must
+    // actually filter, and the result must link somewhere. This is the check
+    // that distinguishes "the input rendered" from "search works in the app".
+    await goToView('Search');
+    const typed = await cdp.eval(`(() => {
+      const i = document.querySelector('#search-input') || document.querySelector('input');
+      if (!i) return { ok: false };
+      const setter = Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, 'value').set;
+      setter.call(i, 'permission');
+      i.dispatchEvent(new Event('input', { bubbles: true }));
+      return { ok: true };
+    })()`);
+    await sleep(700);
+    const searched = await cdp.eval(`(() => {
+      const body = document.body.innerText;
+      return {
+        length: body.length,
+        // The engine's own output, not the placeholder text.
+        mentionsPermission: /permission/i.test(body),
+      };
+    })()`);
+    check(
+      'search: typing into the box produces results in the live app',
+      typed.ok && searched.mentionsPermission,
+      `typed=${typed.ok} results mention the query=${searched.mentionsPermission}`,
+    );
+
+    // ---------------------------------------------------------------------
+    // 11. Console cleanliness across the whole run
     // ---------------------------------------------------------------------
     const errs = cdp.consoleErrors.filter((e) => e && e.trim() !== '');
     check(
