@@ -36,13 +36,42 @@ function run(cwd) {
 // repo. To test it against synthetic input we therefore call the guard's logic
 // indirectly: write the bad file into the real docs/ tree, run, then remove.
 // That is the only way to exercise the code path the corpus actually takes.
+//
+// The probe is removed in a `finally` so an exception cannot leave it behind, and it is
+// registered for removal on exit as well -- a crashed run that strands a mojibake probe
+// in docs/ would be caught by the guard itself on the next run, but it would look like a
+// real finding in a real document. See D-058: a test suite must not be able to write into
+// the artifact it validates.
 const probe = path.join(ROOT, "docs", "__encoding-probe.md");
+// A script-shaped probe too: the guard now scans .mjs, and the whole reason it does is
+// that split-claims.mjs carried eleven corrupted lines while the guard reported OK.
+const scriptProbe = path.join(ROOT, "scripts", "__encoding-probe.mjs");
+const PROBES = [probe, scriptProbe];
+const cleanup = () => {
+  for (const p of PROBES) {
+    try {
+      if (fs.existsSync(p)) fs.unlinkSync(p);
+    } catch {
+      /* best effort */
+    }
+  }
+};
+process.on("exit", cleanup);
+process.on("uncaughtException", (e) => {
+  cleanup();
+  throw e;
+});
 const results = [];
 
-function control(name, bytes, expectFail) {
-  fs.writeFileSync(probe, bytes);
-  const r = run(ROOT);
-  fs.unlinkSync(probe);
+function control(name, bytes, expectFail, target = probe) {
+  cleanup();
+  fs.writeFileSync(target, bytes);
+  let r;
+  try {
+    r = run(ROOT);
+  } finally {
+    cleanup();
+  }
   const failed = r.code !== 0;
   const ok = failed === expectFail;
   results.push({ name, expectFail, failed, ok, out: r.out.trim().split("\n").slice(-1)[0] || "" });
@@ -97,6 +126,32 @@ control("Command syntax with a spaced double hyphen", enc("Run `git checkout -- 
 // that would mean the guard complains about the very file warning readers.
 control("Mojibake quoted inside a code span — must pass", enc("# Title\n\nThe bytes were `\u00e2\u20ac\u201d` in the file.\n"), false);
 control("Empty file", Buffer.alloc(0), false);
+
+// --- the scope the guard used to miss --------------------------------------
+//
+// These exercise the .mjs scan added after split-claims.mjs was found carrying eleven
+// corrupted lines while the guard reported ENCODING OK. Without them the widened scope
+// is a claim in a comment: nothing would fail if someone narrowed the extension list
+// back again, and a corrupted script is worse than a corrupted document because it
+// GENERATES documents.
+control(
+  "Mojibake inside a SCRIPT, not a document (must fail)",
+  enc("// 25% \u00c2\u00b1 1 would fail honest quizzes.\nexport const x = 1;\n"),
+  true,
+  scriptProbe,
+);
+control(
+  "Em-dash mojibake inside a SCRIPT          (must fail)",
+  enc("// a comment with \u00e2\u20ac\u201d an em dash gone wrong\nexport const y = 2;\n"),
+  true,
+  scriptProbe,
+);
+control(
+  "Clean script with real typography        (must pass)",
+  enc("// 25% \u00b1 1 — an em dash and a plus-minus\nexport const z = 3;\n"),
+  false,
+  scriptProbe,
+);
 
 console.log("");
 console.log("Encoding-guard controls");

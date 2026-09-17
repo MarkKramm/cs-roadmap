@@ -2,6 +2,32 @@
 
 A lightweight decision log (ADR-style). Newest first.
 
+## D-058 — A test suite may not be able to write into the record it tests
+
+- **Date:** 2026-09-18
+- **Status:** Accepted
+- **Context:** The controls for `audit-verdict-counts.mjs` mutated the **real** verification documents, ran the guard against them, and restored the files at the end. One fixture left `**UNVERIFIABLE** — control fixture` written into **three rows of `docs/CYBER-CLAIM-VERIFICATION.md`**. The restore did not put them back. The corruption then sat in the working tree looking exactly like recorded verification — same shape, same bold marker, same position — and was found only by accident, while I was debugging why a *different* control was failing.
+- **Decision:** **A test suite must never write to the artifact it validates.** Fixtures run against a **copy** of the tree in a temp directory. The suite additionally **asserts that the real files are byte-identical** when it finishes, so a fixture that reaches the real tree fails the run rather than silently editing it.
+- **Why this is the same defect as D-057, with the blame moved.** D-057 was me typing verdicts that no verifier produced. This was machinery doing it, unattended, and it is worse for three reasons: it happens **without a person deciding to do it**, it lands in **the one document whose entire value is provenance**, and the text it writes — `**UNVERIFIABLE** — control fixture` — is *shaped exactly like a real verdict*, so no structural check can flag it. Only comparing against a known-good copy finds it.
+- **The deeper lesson about mutation testing.** A fixture that mutates state has side effects on every check that reads that state, and the resulting red light is **more often the fixture than the guard**. Four separate failures in this suite were fixtures: a regex that matched the wrong track, an expectation asserted backwards, a hard-coded total that was wrong, and a no-op mutation. Every one of them looked like "the guard is broken". **The first hypothesis when a control fails must be that the fixture is wrong**, and the fix is to make the fixture *prove* it mutated — never to weaken the assertion.
+- **Consequences:**
+  - `test-audit-verdict-counts.mjs` builds a temp tree, copies in both documents, the splitter and the guard, and runs everything with `cwd` set there. Nothing in the repository is opened for writing.
+  - The suite ends with an explicit **"real repository files untouched by every fixture: true"** line. It fails the run if false. This is the check whose absence caused the corruption, and like D-056 its point is that the guarantee must be *verified*, not intended.
+  - **A reconciliation loop that repairs state can erase the defect under test.** The loop added to stop row-mutating fixtures tripping the arithmetic check rewrote the published totals until a deliberately-broken document *satisfied* the guard, and the control reported `expected FAIL, got PASS` against working code. It now stops at the first non-arithmetic complaint, and controls expecting failure skip reconciliation entirely — **a fixture must not repair the defect it just installed.**
+
+## D-059 — A guard must scan the generator, not only the artifact
+
+- **Date:** 2026-09-18
+- **Status:** Accepted
+- **Context:** `audit-encoding.mjs` walked `docs/` and `career-roadmaps/` and matched only `.md` and `.txt`. **Every script in the repository was outside its scope** — including `split-claims.mjs`, which *writes* the verification packs. That script was carrying **eleven corrupted lines**: `â€"` where an em dash belonged, the fingerprint of a PowerShell `Set-Content` round trip I had run to restore the file. The guard reported `ENCODING OK — 66 files checked, no BOM, no C1 controls, no lost bytes` the entire time, while every pack the script generated came out corrupted, and the corruption was eventually found **downstream, in the generated packs**, looking exactly like a defect in the packs.
+- **Decision:** **An encoding guard scans the code that produces the corpus, not just the corpus.** `scripts/`, `learning-site/src/` and `learning-site/scripts/` are in scope, and the extension list covers source and config files (`.mjs`, `.js`, `.jsx`, `.css`, `.html`, `.json`, `.yml`, `.yaml`) as well as `.md` and `.txt`. BOM and invalid-UTF-8 checks apply to **every** file; only the mojibake test is exempted, by explicit reviewable filename, for the two files that quote corrupted bytes on purpose.
+- **Why this is D-056 again, one level up.** D-056 was "counting the things you remembered cannot find the thing you forgot". This is its encoding form: a guard that scans the **output** will always find the damage too late to name the cause, because by then the damaged bytes are in a generated artifact and the template that produced them is not even being read. **The artifact is the symptom; the generator is the source.** A guard aimed at the symptom reports a defect in the wrong file.
+- **Evidence the widening was not cosmetic.** Coverage went from **66 files to 227**, and the first run found a **second real corruption** that had been in the repository unnoticed — `Â±` at `scripts/audit-quiz.mjs:42`. Both were repaired. Three new controls exercise the script path, including a *negative* control (clean script with real typography) so the widened scope cannot pass by simply flagging all source files.
+- **Consequences:**
+  - `SCAN` now includes the script and site-source trees; `MOJIBAKE_EXEMPT` names the two exemption files explicitly rather than by pattern, so widening the exemption is a visible edit.
+  - **A guard scope that lives only in a comment is not a scope.** Nothing would have failed if the extension list were quietly narrowed back, so the scope itself is now covered by controls — the same reasoning as D-053, applied to a guard's reach rather than to a worklist.
+  - `test-audit-encoding.mjs` gained a `finally`/`exit`-registered cleanup. It writes probes into the **real** `docs/` and `scripts/` trees to exercise the guard's actual code path, which is the D-058 hazard; the cleanup is now unconditional so a crash cannot strand a mojibake probe where it would read as a finding in a real document.
+
 ## D-057 — A verdict may only be transcribed, never authored
 
 - **Date:** 2026-09-18

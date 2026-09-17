@@ -164,6 +164,11 @@ jobs:
       # forgot; this counts the rows instead.
       - name: Verdict counts match the recorded rows
         run: node scripts/audit-verdict-counts.mjs
+      # The IT document carried a false "verified" header for sixteen days and nothing
+      # checked it, because this guard only ever read the cyber document. Both tracks
+      # now publish figures, so both are re-derived.
+      - name: Verdict counts match the recorded rows (IT)
+        run: node scripts/audit-verdict-counts.mjs --track it
       - name: Test verdict-count controls
         run: node scripts/test-audit-verdict-counts.mjs
       # Both tracks, because the bundler is now track-generic and the IT track has

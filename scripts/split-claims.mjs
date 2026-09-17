@@ -74,17 +74,18 @@ const OUT = path.join(ROOT, "docs", TRACKS[TRACK_KEY].out);
 // exist for them, row by row, in the document.
 const WANTED_BY_TRACK = {
   it: [
-    // Only command/cmdlet usage is genuinely verified -- 161 of 161 rows, recorded
-    // by scripts/record-it-verdicts.mjs from the 2026-09-18 re-run. The other four
-    // classes are still outstanding (59 rows) and stay in the worklist.
+    // All five classes verified as of 2026-09-18: 225 rows, 208 OK, 0 WRONG,
+    // 17 UNVERIFIABLE. Recorded row by row by record-it-verdicts.mjs (the command
+    // class) and record-it-verdicts-2.mjs (the other four). IT emits no worklist.
     { title: "Command and cmdlet usage", done: true, doneThrough: 161 },
-    { title: "DNS record types" },
-    { title: "Protocol and standard behaviour" },
-    { title: "Product versions and editions" },
-    { title: "Registry paths, file paths and filenames" },
+    { title: "DNS record types", done: true, doneThrough: 4 },
+    { title: "Protocol and standard behaviour", done: true, doneThrough: 26 },
+    { title: "Product versions and editions", done: true, doneThrough: 17 },
+    { title: "Registry paths, file paths and filenames", done: true, doneThrough: 17 },
   ],
   cybersec: [
     { title: "MITRE ATT&CK technique identifiers", done: true, doneThrough: 34 },
+    // NOT done: 3 rows still await a verdict. Do not add `done: true` here.
     { title: "DNS record types" },
     { title: "CVE identifiers and vulnerability claims", done: true, doneThrough: 4 },
     { title: "Cryptography algorithm claims", done: true, doneThrough: 5 },

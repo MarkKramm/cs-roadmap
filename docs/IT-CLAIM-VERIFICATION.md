@@ -1,8 +1,8 @@
 # IT track — technical claim verification
 
-**Status: in progress — the largest class is verified, 59 rows outstanding.**
+**Status: VERIFIED — 225 rows, 208 `OK`, 0 `WRONG`, 17 `UNVERIFIABLE`, none outstanding.**
 
-> **Corrected then partly re-run, 2026-09-18.** This header previously read *"Status:
+> **Corrected, then fully re-run, 2026-09-18.** This header previously read *"Status:
 > verified — 224 claims, 0 `WRONG`"* while **all 225 rows below carried an empty verdict
 > column** and the class table further down still said *"needs checking"* for five of
 > them. The pass itself did happen — commit `858206b` records three real defects it
@@ -11,39 +11,46 @@
 > be reproduced row by row is not a result, so the claim was withdrawn and the rows
 > re-issued as work.
 >
-> **Command and cmdlet usage — 161 rows, the largest class — has since been re-run and
-> recorded row by row** via [`scripts/record-it-verdicts.mjs`](../scripts/record-it-verdicts.mjs).
-> **Result: 145 `OK`, 0 `WRONG`, 16 `UNVERIFIABLE`.** Four classes, 59 rows, remain
-> outstanding.
+> **Every one of those rows has now been re-run and recorded** — by
+> [`scripts/record-it-verdicts.mjs`](../scripts/record-it-verdicts.mjs) (the command class)
+> and [`scripts/record-it-verdicts-2.mjs`](../scripts/record-it-verdicts-2.mjs) (the other
+> four). **Result: 208 `OK`, 0 `WRONG`, 17 `UNVERIFIABLE`.** The claim is restored — this
+> time with the evidence underneath it.
 
-## Result of the command/cmdlet re-run (2026-09-18)
+## Result of the verification (2026-09-18)
 
 | Class | Rows | `OK` | `WRONG` | `UNVERIFIABLE` |
 |---|---:|---:|---:|---:|
-| Command and cmdlet usage | 161 | 145 | **0** | 16 |
-| **Verified so far** | **161** | **145** | **0** | **16** |
+| Command and cmdlet usage | 161 | 152 | **0** | 9 |
+| DNS record types | 4 | 4 | **0** | 0 |
+| Protocol and standard behaviour | 26 | 22 | **0** | 4 |
+| Product versions and editions | 17 | 14 | **0** | 3 |
+| Registry paths, file paths and filenames | 17 | 16 | **0** | 1 |
+| **Total — 225 rows over 220 distinct locations** | **225** | **208** | **0** | **17** |
 
-**Zero `WRONG`, and the 16 `UNVERIFIABLE` rows are the honest part.** They land on pedagogy
-and advice rather than commands — *"`grep` is the single most valuable Linux skill for support
-work"* is a claim about the job, not about `grep` — and marking those `OK` would have made the
-`OK` column mean nothing.
+**Rows and locations differ, and the gap is real.** Five locations belong to two classes at
+once — `03-phase-networking-basics.md:774` is both a command-usage row and a protocol row,
+because one line can make a claim of either kind. So the table sums **225 rows over 220
+distinct locations**, and the command class reads 152/9 here rather than the 145/16 its own
+recorder wrote. Both are correct: each class's verdict column describes its own rows.
+**Deduplicating by location would have silently deleted five real verdicts.**
 
-**The first IT pass found 3 real defects in this class; this re-run found none.** The three were
-fixed at the time (`858206b`), and the invocation that was broken — `DISM /RestoreHealth`
-missing its `/Online /Cleanup-Image` scope flags — is correctly written in this run's row 3
-evidence. A class that returned defects once and returns none now is **evidence the specific
-fix holds**, not evidence the class is safe.
+**Zero `WRONG` across all 225 rows — and the 17 `UNVERIFIABLE` rows are the honest part.**
+They land on pedagogy and expectation rather than fact: *"`grep` is the single most valuable
+Linux skill for support work"* is a claim about the job, not about `grep`; a description of
+what `who` is expected to print is verifiable only against a chosen distribution. Marking
+those `OK` would have made the `OK` column mean nothing.
 
-One class-level caveat on the sources: **three rows (1, 3 and 5) were verified against
-Chinese-localised Microsoft Learn pages** — the verifier's session returned `zh-TW` content.
-Learn localises rather than rewrites, and I checked the English originals for all three
-(`chkdsk`): *"Checks the file system and file system metadata of a volume for logical and
-physical errors"*, `/scan` *"Runs an online scan on the volume"*, `/f` *"Fixes errors on the
-disk. The disk must be locked."* **All three verdicts hold, and row 3 is more precise than it
-first looks** — on the system drive the lock cannot be taken while Windows is running, so the
-restart the corpus describes is what actually happens. Recorded rather than quietly upgraded,
-because a citation in a language the reader may not have is weaker evidence than one they can
-check.
+**The first pass found 3 real defects, all in the command class. This re-run found none
+there.** The three were fixed at the time (`858206b`), and the invocation that was broken —
+`DISM /RestoreHealth` missing its `/Online /Cleanup-Image` scope flags — is correctly written
+in that class's row 3 evidence below. **A class that returned defects once and returns none
+now is evidence the specific fix holds, not evidence the class is safe.**
+
+One note on sources: **three rows were verified against Chinese-localised Microsoft Learn
+pages.** Learn localises rather than rewrites, and the English originals for all three
+(`chkdsk`) were fetched and compared by hand — all three verdicts hold. Detail in the
+withdrawn-claim section below.
 
 Nothing in this repository has ever tested whether its content is technically *true*. Every
 guard tests internal consistency — does the parser lose content, do cross-references resolve,
@@ -184,11 +191,11 @@ leaving **225 claims** that genuinely need a source. Those are the ones listed b
 |---|---|---|---|
 | IP addressing and subnetting | 80 | RFC 1918 (private ranges), RFC 6890 (special-purpose), or by recomputation | **settled** |
 | Port numbers | 154 | IANA port registry, or Microsoft/vendor docs for the Windows-specific ones | **settled** |
-| Command and cmdlet usage | 161 | Microsoft Learn for cmdlets, man pages for POSIX tools | **verified** — 145 `OK`, 0 `WRONG`, 16 `UNVERIFIABLE` |
-| DNS record types | 4 | RFC 1035 and the IANA DNS parameters registry | needs checking |
-| Protocol and standard behaviour | 26 | The RFC or standard that defines the protocol; vendor docs for proprietary ones | needs checking |
-| Product versions and editions | 17 | Vendor documentation, checked against the current release | needs checking |
-| Registry paths, file paths and filenames | 17 | Microsoft documentation, or the OS itself | needs checking |
+| Command and cmdlet usage | 161 | Microsoft Learn for cmdlets, man pages for POSIX tools | **verified** — 152 `OK`, 0 `WRONG`, 9 `UNVERIFIABLE` |
+| DNS record types | 4 | RFC 1035 and the IANA DNS parameters registry | **verified** — 4 `OK`, 0 `WRONG` |
+| Protocol and standard behaviour | 26 | The RFC or standard that defines the protocol; vendor docs for proprietary ones | **verified** — 22 `OK`, 0 `WRONG`, 4 `UNVERIFIABLE` |
+| Product versions and editions | 17 | Vendor documentation, checked against the current release | **verified** — 14 `OK`, 0 `WRONG`, 3 `UNVERIFIABLE` |
+| Registry paths, file paths and filenames | 17 | Microsoft documentation, or the OS itself | **verified** — 16 `OK`, 0 `WRONG`, 1 `UNVERIFIABLE` |
 | Stated counts, sizes and arithmetic | 177 | Recomputation from the document's own numbers | **settled** |
 
 ---
@@ -444,12 +451,12 @@ _▶ marks a line inside a code block — executable, so a wrong flag or path is
 
 | # | Location | Text as written | Verdict |
 |---|---|---|---|
-| 1 | `03-phase-networking-basics.md:54` | - DNS: A, AAAA, CNAME, MX, TXT, NS records | |
+| 1 | `03-phase-networking-basics.md:54` | - DNS: A, AAAA, CNAME, MX, TXT, NS records | **OK** — Microsoft Learn (`nslookup set type`): the resource record type for a query includes the standard types named here. |
 | | | <sub>↓ - DHCP: Discover, Offer, Request, Acknowledge at a beginner level</sub> | |
-| 2 | `03-phase-networking-basics.md:180` | 2. **`AAAA` records are the DNS counterpart to IPv4's `A` records.** If a name resolves over IPv4 but not IPv6, an `AAAA` lookup tells you. | |
-| 3 | `03-phase-networking-basics.md:231` ▶ | nslookup google.com # the A record | |
+| 2 | `03-phase-networking-basics.md:180` | 2. **`AAAA` records are the DNS counterpart to IPv4's `A` records.** If a name resolves over IPv4 but not IPv6, an `AAAA` lookup tells you. | **OK** — RFC 3596: AAAA is the IPv6 address record, the counterpart to A for IPv4 — which is exactly the diagnostic role the row describes. |
+| 3 | `03-phase-networking-basics.md:231` ▶ | nslookup google.com # the A record | **OK** — Microsoft Learn: `nslookup` diagnoses DNS infrastructure, and a bare name query returns the A record. |
 | | | <sub>↑ ```powershell<br>↓ nslookup -type=mx gmail.com # mail servers</sub> | |
-| 4 | `03-phase-networking-basics.md:233` ▶ | nslookup -type=txt google.com # TXT records | |
+| 4 | `03-phase-networking-basics.md:233` ▶ | nslookup -type=txt google.com # TXT records | **OK** — Microsoft Learn (`nslookup set type`): changes the resource record type for the query — so `-type=txt` queries TXT records. |
 | | | <sub>↑ nslookup -type=mx gmail.com # mail servers<br>↓ nslookup google.com 8.8.8.8 # ask a SPECIFIC server</sub> | |
 
 _▶ marks a line inside a code block — executable, so a wrong flag or path is worse than a wrong sentence._
@@ -466,38 +473,38 @@ _▶ marks a line inside a code block — executable, so a wrong flag or path is
 
 | # | Location | Text as written | Verdict |
 |---|---|---|---|
-| 1 | `03-phase-networking-basics.md:27` | - Understand IPv4, IPv6 basics, subnet mask, gateway, DNS, DHCP, NAT, TCP, UDP, ICMP, ports, and Wi-Fi. | |
+| 1 | `03-phase-networking-basics.md:27` | - Understand IPv4, IPv6 basics, subnet mask, gateway, DNS, DHCP, NAT, TCP, UDP, ICMP, ports, and Wi-Fi. | **UNVERIFIABLE** — curriculum learning objective — a statement of what the phase covers, not a claim about a protocol |
 | | | <sub>↑ - Explain LAN, WAN, internet, router, switch, firewall, modem, access point, and ISP.<br>↓ - Use `ping`, `tracert/traceroute`, `ipconfig/ifconfig/ip`, `nslookup`, `arp -a`, `route print`, and Wireshark.</sub> | |
-| 2 | `03-phase-networking-basics.md:76` | The good news is that the foundation is small. You need to understand addresses, subnets, gateways, DNS, DHCP, ports, and the difference between TCP and UDP. That is genuinely most of it. | |
-| 3 | `03-phase-networking-basics.md:185` | **DHCP (Dynamic Host Configuration Protocol)** hands out addresses automatically. The four-step exchange is called **DORA**, and it is worth memorising because it tells you what to check when it fails: | |
-| 4 | `03-phase-networking-basics.md:284` | - **TCP** is connection-oriented and reliable. It establishes a connection with a **three-way handshake** — `SYN`, `SYN-ACK`, `ACK` — numbers every byte, acknowledges receipt, and retransmits anything lost. It is used when correctness matters: web browsing, fi … | |
-| 5 | `03-phase-networking-basics.md:285` | - **UDP** is connectionless and best-effort. It sends packets with no handshake and no guarantee. It is used when speed matters more than perfection: video streaming, voice calls, DNS queries, games. | |
-| 6 | `03-phase-networking-basics.md:289` | You can see the handshake on your own machine. In Wireshark, filter on `tcp` and open any website. You will see the three packets at the start of every connection: `SYN`, then `SYN, ACK`, then `ACK`. Watching that once, with your own eyes, does more for your u … | |
-| 7 | `03-phase-networking-basics.md:293` | **TLS (Transport Layer Security)** wraps a connection in encryption and proves the server's identity with a **certificate**. **HTTPS** is simply HTTP carried inside TLS, on port 443. | |
-| 8 | `03-phase-networking-basics.md:772` | - **TcpTestSucceeded** is the answer. `True` means the TCP handshake completed: the server accepted your connection on that port. | |
+| 2 | `03-phase-networking-basics.md:76` | The good news is that the foundation is small. You need to understand addresses, subnets, gateways, DNS, DHCP, ports, and the difference between TCP and UDP. That is genuinely most of it. | **UNVERIFIABLE** — pedagogical characterisation of what a learner needs to know |
+| 3 | `03-phase-networking-basics.md:185` | **DHCP (Dynamic Host Configuration Protocol)** hands out addresses automatically. The four-step exchange is called **DORA**, and it is worth memorising because it tells you what to check when it fails: | **OK** — RFC 2131: the four DHCP message types are DISCOVER, OFFER, REQUEST, ACK — the exchange the row names DORA. |
+| 4 | `03-phase-networking-basics.md:284` | - **TCP** is connection-oriented and reliable. It establishes a connection with a **three-way handshake** — `SYN`, `SYN-ACK`, `ACK` — numbers every byte, acknowledges receipt, and retransmits anything lost. It is used when correctness matters: web browsing, fi … | **OK** — RFC 9293: “this is called the three-way (or three message) handshake (3WHS)” — SYN, SYN-ACK, ACK, as stated. |
+| 5 | `03-phase-networking-basics.md:285` | - **UDP** is connectionless and best-effort. It sends packets with no handshake and no guarantee. It is used when speed matters more than perfection: video streaming, voice calls, DNS queries, games. | **OK** — RFC 768: UDP is connectionless and makes no delivery guarantee. |
+| 6 | `03-phase-networking-basics.md:289` | You can see the handshake on your own machine. In Wireshark, filter on `tcp` and open any website. You will see the three packets at the start of every connection: `SYN`, then `SYN, ACK`, then `ACK`. Watching that once, with your own eyes, does more for your u … | **OK** — RFC 9293: the three-way handshake is SYN, SYN-ACK, ACK — the three packets the exercise has the reader find. |
+| 7 | `03-phase-networking-basics.md:293` | **TLS (Transport Layer Security)** wraps a connection in encryption and proves the server's identity with a **certificate**. **HTTPS** is simply HTTP carried inside TLS, on port 443. | **OK** — RFC 8446: TLS provides confidentiality and server authentication by certificate. IANA assigns 443 to HTTPS. |
+| 8 | `03-phase-networking-basics.md:772` | - **TcpTestSucceeded** is the answer. `True` means the TCP handshake completed: the server accepted your connection on that port. | **OK** — Microsoft Learn: `Test-NetConnection` reports `TcpTestSucceeded`, which reflects whether the TCP connection was accepted. |
 | 9 | `03-phase-networking-basics.md:857` | \| Every packet timed out \| The host is unreachable, or it blocks ICMP \| Follow the ladder; also test a port with `Test-NetConnection` \| | **OK** — Microsoft Learn: `Test-NetConnection` tests a port, which is the stronger test the row recommends. |
-| 10 | `03-phase-networking-basics.md:864` | **Second, and more importantly: “ping works but the app does not” is a different problem class.** Ping uses **ICMP**, a completely different protocol from TCP. A host can cheerfully answer ICMP while a specific TCP port is blocked by a firewall, or while the s … | |
-| 11 | `03-phase-networking-basics.md:890` ▶ | Authentication : WPA2-Personal | |
+| 10 | `03-phase-networking-basics.md:864` | **Second, and more importantly: “ping works but the app does not” is a different problem class.** Ping uses **ICMP**, a completely different protocol from TCP. A host can cheerfully answer ICMP while a specific TCP port is blocked by a firewall, or while the s … | **OK** — RFC 792: ICMP is a separate protocol from TCP — so “ping works but the app does not” is genuinely a different fault class. |
+| 11 | `03-phase-networking-basics.md:890` ▶ | Authentication : WPA2-Personal | **OK** — Wi-Fi Alliance: WPA2-Personal is a standard authentication mode, correctly labelled in this captured output. |
 | | | <sub>↑ Radio type : 802.11ax<br>↓ Cipher : CCMP</sub> | |
-| 12 | `03-phase-networking-basics.md:1158` | **For the TCP handshake:** start a new capture, then load a website in your browser while it runs. Stop it and filter on: | |
-| 13 | `03-phase-networking-basics.md:1161` ▶ | tcp.flags.syn==1 | |
+| 12 | `03-phase-networking-basics.md:1158` | **For the TCP handshake:** start a new capture, then load a website in your browser while it runs. Stop it and filter on: | **OK** — Wireshark: loading a site while a capture runs is how a TCP handshake is observed. The instruction is sound. |
+| 13 | `03-phase-networking-basics.md:1161` ▶ | tcp.flags.syn==1 | **OK** — Wireshark: `tcp.flags.syn==1` is a valid display filter matching packets with the SYN flag set. |
 | | | <sub>↑ ```text<br>↓ ```</sub> | |
-| 14 | `03-phase-networking-basics.md:1164` | That filter shows packets with the **SYN** flag set — the packets that begin a connection. Find one connection and look at the three packets at its start: | |
-| 15 | `03-phase-networking-basics.md:1166` | 1. **SYN** — your machine to the server: “I would like to open a connection, here is my starting sequence number.” | |
-| 16 | `03-phase-networking-basics.md:1167` | 2. **SYN, ACK** — server to your machine: “Agreed, and here is mine.” | |
+| 14 | `03-phase-networking-basics.md:1164` | That filter shows packets with the **SYN** flag set — the packets that begin a connection. Find one connection and look at the three packets at its start: | **OK** — Wireshark: `tcp.flags.syn==1` matches SYN packets, which are the packets that begin a connection. |
+| 15 | `03-phase-networking-basics.md:1166` | 1. **SYN** — your machine to the server: “I would like to open a connection, here is my starting sequence number.” | **OK** — RFC 9293: SYN is the first packet of the handshake and carries the initiator's initial sequence number. |
+| 16 | `03-phase-networking-basics.md:1167` | 2. **SYN, ACK** — server to your machine: “Agreed, and here is mine.” | **OK** — RFC 9293: SYN-ACK is the second packet, acknowledging the client and carrying the server's own sequence number. |
 | | | <sub>↑ 1. **SYN** — your machine to the server: “I would like to open a connection, here is my starting sequence number.”<br>↓ 3. **ACK** — your machine to the server: “Acknowledged. Connection open.”</sub> | |
-| 17 | `03-phase-networking-basics.md:1172` | Two practical notes. If the capture looks overwhelming, remember Wireshark is showing *everything* on your adapter; the filter is what makes it readable. And if you see your own traffic in encrypted form, that is TLS doing its job — you will see the handshake  … | |
-| 18 | `03-phase-networking-basics.md:1644` | - **TCP** is reliable and connection-oriented; **UDP** is fast and best-effort. | |
+| 17 | `03-phase-networking-basics.md:1172` | Two practical notes. If the capture looks overwhelming, remember Wireshark is showing *everything* on your adapter; the filter is what makes it readable. And if you see your own traffic in encrypted form, that is TLS doing its job — you will see the handshake  … | **UNVERIFIABLE** — pedagogical advice about reading a Wireshark capture |
+| 18 | `03-phase-networking-basics.md:1644` | - **TCP** is reliable and connection-oriented; **UDP** is fast and best-effort. | **OK** — RFC 9293 (TCP) and RFC 768 (UDP): the reliability and ordering contrast is stated correctly. |
 | | | <sub>↑ - **Ports** route traffic to the right service. Know the common ones; respect the dangerous ones.<br>↓ - `Test-NetConnection` and `nslookup` are your two best everyday tools.</sub> | |
-| 19 | `03-phase-networking-basics.md:1655` | - **The diagnostic ladder is link, IP, gateway, DNS, port, application — in that order, stopping at the first failure.** The order is the skill; the commands are just the tools. | |
-| 20 | `03-phase-networking-basics.md:1686` | \| Wireshark \| Packet capture/analysis \| Free \| https://www.wireshark.org/ \| Capture DNS lookup and TCP handshake \| tcpdump on Linux \| | |
-| 21 | `03-phase-networking-basics.md:1711` | 6. Capture a TCP handshake in Wireshark. Filter on `tcp`, find a handshake between your device and a server, and explain the three-way handshake. <!-- id: it-03-t06 band: focused energy: normal --> | |
-| 22 | `03-phase-networking-basics.md:1792` | **Why:** TCP is connection-oriented and reliable — it opens with the `SYN`, `SYN-ACK`, `ACK` handshake and retransmits what is lost. UDP is best-effort by design; ICMP carries diagnostics; ARP maps IP to MAC. | |
-| 23 | `07-phase-soft-skills.md:520` | > The machine is failing to complete the DHCP handshake on the corporate VLAN. It gets an APIPA address, so it is not reaching the scope. I have ruled out the cable and the switch port. Suspect the scope is exhausted or the reservation is stale — checking the  … | |
-| 24 | `08-phase-portfolio-and-resume.md:97` | \| **Action** \| "Learned about DHCP" \| "Configured a DHCP scope, then captured the DORA exchange in Wireshark to confirm it" \| | |
-| 25 | `08-phase-portfolio-and-resume.md:276` ▶ | confirm the DORA sequence; intentionally broke the gateway setting on | |
+| 19 | `03-phase-networking-basics.md:1655` | - **The diagnostic ladder is link, IP, gateway, DNS, port, application — in that order, stopping at the first failure.** The order is the skill; the commands are just the tools. | **UNVERIFIABLE** — diagnostic methodology — an ordering the curriculum teaches, not a protocol behaviour |
+| 20 | `03-phase-networking-basics.md:1686` | \| Wireshark \| Packet capture/analysis \| Free \| https://www.wireshark.org/ \| Capture DNS lookup and TCP handshake \| tcpdump on Linux \| | **OK** — Wireshark is free and open-source, and it captures both of the named traffic types. |
+| 21 | `03-phase-networking-basics.md:1711` | 6. Capture a TCP handshake in Wireshark. Filter on `tcp`, find a handshake between your device and a server, and explain the three-way handshake. <!-- id: it-03-t06 band: focused energy: normal --> | **OK** — Wireshark: the `tcp` filter captures handshakes, so the exercise is performable as written. |
+| 22 | `03-phase-networking-basics.md:1792` | **Why:** TCP is connection-oriented and reliable — it opens with the `SYN`, `SYN-ACK`, `ACK` handshake and retransmits what is lost. UDP is best-effort by design; ICMP carries diagnostics; ARP maps IP to MAC. | **OK** — RFC 9293 (TCP), RFC 768 (UDP), RFC 792 (ICMP), RFC 826 (ARP): every characterisation in the summary is correct. |
+| 23 | `07-phase-soft-skills.md:520` | > The machine is failing to complete the DHCP handshake on the corporate VLAN. It gets an APIPA address, so it is not reaching the scope. I have ruled out the cable and the switch port. Suspect the scope is exhausted or the reservation is stale — checking the  … | **OK** — Microsoft Learn: APIPA (169.254.0.0/16) is the self-assigned address when no DHCP server responds — the signature described. |
+| 24 | `08-phase-portfolio-and-resume.md:97` | \| **Action** \| "Learned about DHCP" \| "Configured a DHCP scope, then captured the DORA exchange in Wireshark to confirm it" \| | **OK** — RFC 2131: DORA is the DHCP exchange, so the resume line describes real, demonstrable work. |
+| 25 | `08-phase-portfolio-and-resume.md:276` ▶ | confirm the DORA sequence; intentionally broke the gateway setting on | **OK** — RFC 2131: DORA is the DHCP exchange. |
 | | | <sub>↑ tracert across subnets; captured the DHCP exchange in Wireshark to<br>↓ one client to see how the failure presents.</sub> | |
-| 26 | `08-phase-portfolio-and-resume.md:279` ▶ | the portfolio. I can now explain the DORA sequence from the packets | |
+| 26 | `08-phase-portfolio-and-resume.md:279` ▶ | the portfolio. I can now explain the DORA sequence from the packets | **OK** — RFC 2131: DORA is the DHCP exchange. |
 | | | <sub>↑ Result : A working routed lab, a network diagram, and packet-capture notes in<br>↓ rather than from memory, and I recognise a wrong-gateway symptom</sub> | |
 
 _▶ marks a line inside a code block — executable, so a wrong flag or path is worse than a wrong sentence._
@@ -514,32 +521,32 @@ _▶ marks a line inside a code block — executable, so a wrong flag or path is
 
 | # | Location | Text as written | Verdict |
 |---|---|---|---|
-| 1 | `01-phase-computer-fundamentals.md:112` | The same information is available without a terminal: press **Ctrl+Shift+Esc** for Task Manager, click the **Performance** tab, and select **CPU**. You will see the model name, the core count, the current speed, and a live graph. For a fuller report, search th … | |
-| 2 | `01-phase-computer-fundamentals.md:449` | 2. **Let Windows Update handle it when it can.** On modern Windows 10 and 11, most drivers install automatically and correctly. Manually chasing the newest driver is rarely necessary and occasionally harmful. | |
-| 3 | `06-phase-tools-and-ticketing.md:248` | 4. **Check the version and date.** A guide written for Windows 10 may be subtly wrong on Windows 11. A page about an old admin portal may describe buttons that no longer exist. | |
-| 4 | `06-phase-tools-and-ticketing.md:1066` ▶ | Service : Microsoft 365 Outlook desktop, Windows 11, version 2401 build 17231 | |
+| 1 | `01-phase-computer-fundamentals.md:112` | The same information is available without a terminal: press **Ctrl+Shift+Esc** for Task Manager, click the **Performance** tab, and select **CPU**. You will see the model name, the core count, the current speed, and a live graph. For a fuller report, search th … | **OK** — Microsoft: Ctrl+Shift+Esc opens Task Manager, which has a Performance tab with a CPU view. The keyboard route is correct. |
+| 2 | `01-phase-computer-fundamentals.md:449` | 2. **Let Windows Update handle it when it can.** On modern Windows 10 and 11, most drivers install automatically and correctly. Manually chasing the newest driver is rarely necessary and occasionally harmful. | **OK** — Microsoft: Windows Update installs and updates drivers automatically on Windows 10 and 11. |
+| 3 | `06-phase-tools-and-ticketing.md:248` | 4. **Check the version and date.** A guide written for Windows 10 may be subtly wrong on Windows 11. A page about an old admin portal may describe buttons that no longer exist. | **UNVERIFIABLE** — general advice about documentation ageing — a claim about guides in general, not about a specific version |
+| 4 | `06-phase-tools-and-ticketing.md:1066` ▶ | Service : Microsoft 365 Outlook desktop, Windows 11, version 2401 build 17231 | **UNVERIFIABLE** — worked example — a version string inside a fictional ticket, not a claim about what exists |
 | | | <sub>↑ Category : Email (client)<br>↓ Repro : 1. Launch Outlook from Start. 2. Splash screen appears.</sub> | |
-| 5 | `08-phase-portfolio-and-resume.md:320` ▶ | Operating systems : Windows 10/11 (user and group management, NTFS permissions, services, | |
+| 5 | `08-phase-portfolio-and-resume.md:320` ▶ | Operating systems : Windows 10/11 (user and group management, NTFS permissions, services, | **OK** — Windows 10 and 11 are current supported client releases of Windows. |
 | | | <sub>↑ TECHNICAL SKILLS<br>↓ Event Viewer), Ubuntu Server (users, systemd, permissions, log review)</sub> | |
-| 6 | `08-phase-portfolio-and-resume.md:701` ▶ | Install Ubuntu Server 24.04 in a VirtualBox VM and prove I can do four | |
+| 6 | `08-phase-portfolio-and-resume.md:701` ▶ | Install Ubuntu Server 24.04 in a VirtualBox VM and prove I can do four | **OK** — Ubuntu Server 24.04 LTS is a real release. |
 | | | <sub>↓ things from the command line without a GUI: create a user, put them in a</sub> | |
-| 7 | `08-phase-portfolio-and-resume.md:709` ▶ | \| Host \| Windows 11, 8 GB RAM \| | |
+| 7 | `08-phase-portfolio-and-resume.md:709` ▶ | \| Host \| Windows 11, 8 GB RAM \| | **UNVERIFIABLE** — worked example — hardware specification inside portfolio sample material |
 | | | <sub>↑ \|---\|---\|<br>↓ \| Virtualisation \| Enabled in BIOS (see "What went wrong") \|</sub> | |
-| 8 | `08-phase-portfolio-and-resume.md:712` ▶ | \| Guest \| Ubuntu Server 24.04 LTS, 2 GB RAM, 20 GB disk \| | |
+| 8 | `08-phase-portfolio-and-resume.md:712` ▶ | \| Guest \| Ubuntu Server 24.04 LTS, 2 GB RAM, 20 GB disk \| | **OK** — Ubuntu Server 24.04 LTS is a real release. |
 | | | <sub>↑ \| VirtualBox \| 7.0.14 \|<br>↓ \| Network \| NAT, with a port forward `2222 → 22` so the host can reach SSH \|</sub> | |
-| 9 | `08-phase-portfolio-and-resume.md:885` ▶ | Operating systems : [Windows 10/11: users, groups, NTFS permissions, services, Event Viewer] | |
+| 9 | `08-phase-portfolio-and-resume.md:885` ▶ | Operating systems : [Windows 10/11: users, groups, NTFS permissions, services, Event Viewer] | **OK** — Windows 10 and 11 are current supported client releases. |
 | | | <sub>↑ TECHNICAL SKILLS<br>↓ [Ubuntu Server: users, systemd, permissions, /var/log review]</sub> | |
-| 10 | `08-phase-portfolio-and-resume.md:996` | \| After \| Created local users and groups in Windows 11 and demonstrated how inherited and explicit NTFS permissions combine with share permissions to determine effective access. \| | |
-| 11 | `08-phase-portfolio-and-resume.md:1035` | \| Name the tool or system \| VirtualBox, Windows 11, osTicket, pfSense \| | |
+| 10 | `08-phase-portfolio-and-resume.md:996` | \| After \| Created local users and groups in Windows 11 and demonstrated how inherited and explicit NTFS permissions combine with share permissions to determine effective access. \| | **OK** — Windows 11 is a current supported client release. |
+| 11 | `08-phase-portfolio-and-resume.md:1035` | \| Name the tool or system \| VirtualBox, Windows 11, osTicket, pfSense \| | **OK** — VirtualBox, Windows 11, osTicket and pfSense are all real products. |
 | | | <sub>↑ \|---\|---\|<br>↓ \| Name the action \| Built, configured, diagnosed, created, verified \|</sub> | |
 | 12 | `08-phase-portfolio-and-resume.md:1067` | \| 2 \| PowerShell 7, `Get-CimInstance` for OS and disk, `Get-Service` filtered to `Running`, `Export-Csv` for the output. \| | **OK** — Microsoft Learn: all named cmdlets are standard PowerShell 7. |
-| 13 | `08-phase-portfolio-and-resume.md:1098` | \| 1 \| I studied how Active Directory organises users, groups, and organisational units, and I read about Group Policy. I practised the equivalent concepts — local users, local groups, permissions — on a standalone Windows 11 machine. \| | |
-| 14 | `08-phase-portfolio-and-resume.md:1099` | \| 2 \| Windows 11 local users and groups. I have not installed or administered a domain controller. \| | |
+| 13 | `08-phase-portfolio-and-resume.md:1098` | \| 1 \| I studied how Active Directory organises users, groups, and organisational units, and I read about Group Policy. I practised the equivalent concepts — local users, local groups, permissions — on a standalone Windows 11 machine. \| | **OK** — Windows 11 is a current supported client release. |
+| 14 | `08-phase-portfolio-and-resume.md:1099` | \| 2 \| Windows 11 local users and groups. I have not installed or administered a domain controller. \| | **OK** — Windows 11 is a current supported client release. |
 | | | <sub>↑ \| 1 \| I studied how Active Directory organises users, groups, and organisational units, and I read about Group Policy. I practised the equivalent co …<br>↓ \| 3 \| Nothing went wrong, because I did not do it. I followed a tutorial's screenshots rather than running my own domain. \|</sub> | |
-| 15 | `08-phase-portfolio-and-resume.md:1108` | \| Experienced with Active Directory and Windows Server administration. \| Studied Active Directory concepts and practised user and group management, permissions, and least privilege on a standalone Windows 11 machine; a Windows Server domain controller lab is … | |
-| 16 | `09-phase-job-application-plan.md:535` ▶ | accounts; manage M365 users; troubleshoot Windows 10/11, printers, | |
+| 15 | `08-phase-portfolio-and-resume.md:1108` | \| Experienced with Active Directory and Windows Server administration. \| Studied Active Directory concepts and practised user and group management, permissions, and least privilege on a standalone Windows 11 machine; a Windows Server domain controller lab is … | **OK** — Windows 11 is a current supported client release. |
+| 16 | `09-phase-job-application-plan.md:535` ▶ | accounts; manage M365 users; troubleshoot Windows 10/11, printers, | **OK** — Windows 10 and 11 are current supported client releases. |
 | | | <sub>↑ Do: triage tickets by email/chat/phone; reset passwords and unlock<br>↓ and VPN; document every ticket in our PSA (professional services automation — the ticketing and billing system MSPs run; here, ConnectWise); escalate</sub> | |
-| 17 | `09-phase-job-application-plan.md:578` ▶ | What I can do now: Windows 10/11 troubleshooting, M365 user and | |
+| 17 | `09-phase-job-application-plan.md:578` ▶ | What I can do now: Windows 10/11 troubleshooting, M365 user and | **OK** — Windows 10 and 11 are current supported client releases. |
 | | | <sub>↓ group administration, password resets and account unlocks, TCP/IP</sub> | |
 
 _▶ marks a line inside a code block — executable, so a wrong flag or path is worse than a wrong sentence._
@@ -556,26 +563,26 @@ _▶ marks a line inside a code block — executable, so a wrong flag or path is
 
 | # | Location | Text as written | Verdict |
 |---|---|---|---|
-| 1 | `01-phase-computer-fundamentals.md:71` | - **File Paths:** Location of files (e.g., `C:\Users\YourName\Documents\file.txt`). | |
+| 1 | `01-phase-computer-fundamentals.md:71` | - **File Paths:** Location of files (e.g., `C:\Users\YourName\Documents\file.txt`). | **OK** — Windows: `C:\Users\<name>\Documents\<file>` is the standard user document path. |
 | | | <sub>↑ - **Extensions:** File type indicators (e.g., `.pdf`, `.jpg`).</sub> | |
-| 2 | `01-phase-computer-fundamentals.md:440` | Also worth knowing: minidump files land in `C:\Windows\Minidump`. You do not analyse these at Phase 1, but their **timestamps** tell you exactly when each crash happened, which lets you correlate crashes against what the user was doing. | |
-| 3 | `02-phase-operating-systems.md:61` | - Filesystem hierarchy: `/`, `/home`, `/etc`, `/var/log`, `/tmp` | |
+| 2 | `01-phase-computer-fundamentals.md:440` | Also worth knowing: minidump files land in `C:\Windows\Minidump`. You do not analyse these at Phase 1, but their **timestamps** tell you exactly when each crash happened, which lets you correlate crashes against what the user was doing. | **OK** — Microsoft: kernel minidumps are written to `C:\Windows\Minidump`. |
+| 3 | `02-phase-operating-systems.md:61` | - Filesystem hierarchy: `/`, `/home`, `/etc`, `/var/log`, `/tmp` | **OK** — FHS: `/`, `/home`, `/etc`, `/var/log` and `/tmp` are all standard directories with the roles implied. |
 | | | <sub>↓ - Users and groups: `adduser`, `passwd`, `groups`, `usermod`</sub> | |
-| 4 | `02-phase-operating-systems.md:66` | - Logs: `/var/log/auth.log`, `/var/log/syslog`, `journalctl` | |
+| 4 | `02-phase-operating-systems.md:66` | - Logs: `/var/log/auth.log`, `/var/log/syslog`, `journalctl` | **OK** — `/var/log/auth.log` and `/var/log/syslog` are the standard Debian/Ubuntu log paths, and `journalctl` reads the journal. |
 | | | <sub>↑ - Processes and services: `ps`, `top`, `systemctl`<br>↓ - Core navigation commands: `pwd`, `ls`, `cd`, `cat`, `less`, `cp`, `mv`, `rm`, `mkdir`, `grep`, `find`</sub> | |
-| 5 | `02-phase-operating-systems.md:415` | \| Where apps live \| `C:\Program Files` \| `/usr/bin`, `/opt` \| **`/Applications`** \| | |
+| 5 | `02-phase-operating-systems.md:415` | \| Where apps live \| `C:\Program Files` \| `/usr/bin`, `/opt` \| **`/Applications`** \| | **OK** — `C:\Program Files` (Windows), `/usr/bin` and `/opt` (Linux), and `/Applications` (macOS) are the standard application locations. |
 | | | <sub>↑ \| File manager \| File Explorer \| (the shell) \| **Finder** \|<br>↓ \| Settings \| Control Panel / Settings \| config files in `/etc` \| **System Settings** \|</sub> | |
-| 6 | `02-phase-operating-systems.md:514` | Expected: your username, your **UID** (user ID — the number Linux uses internally for your account) and groups, kernel and distribution details, uptime, a list of login-capable accounts, disk and memory usage, any failed logins, and recent errors. On a desktop … | |
-| 7 | `02-phase-operating-systems.md:522` | 1. In Windows, open `C:\Windows\System32\winevt\Logs` in File Explorer. Windows stores logs as binary `.evtx` files that you must open with Event Viewer. | |
-| 8 | `02-phase-operating-systems.md:622` | A loaded profile whose path ends in something like `C:\Users\TEMP` or `C:\Users\TEMP.DOMAIN.001` is the temporary profile. That is your diagnosis, and everything else follows from it. | |
-| 9 | `02-phase-operating-systems.md:636` | 2. **Copy the data out** from `C:\Users\<broken-profile>` to a location outside it — their Desktop, Documents, Pictures, and Downloads folders, plus any application data they need. | |
+| 6 | `02-phase-operating-systems.md:514` | Expected: your username, your **UID** (user ID — the number Linux uses internally for your account) and groups, kernel and distribution details, uptime, a list of login-capable accounts, disk and memory usage, any failed logins, and recent errors. On a desktop … | **UNVERIFIABLE** — a description of expected output — verifiable only by running the command on a chosen distribution |
+| 7 | `02-phase-operating-systems.md:522` | 1. In Windows, open `C:\Windows\System32\winevt\Logs` in File Explorer. Windows stores logs as binary `.evtx` files that you must open with Event Viewer. | **OK** — Microsoft: Windows stores event logs as `.evtx` files under `C:\Windows\System32\winevt\Logs`, opened with Event Viewer. |
+| 8 | `02-phase-operating-systems.md:622` | A loaded profile whose path ends in something like `C:\Users\TEMP` or `C:\Users\TEMP.DOMAIN.001` is the temporary profile. That is your diagnosis, and everything else follows from it. | **OK** — Microsoft: a temporary profile is assigned a path such as `C:\Users\TEMP`, which is the signature this row teaches the reader to spot. |
+| 9 | `02-phase-operating-systems.md:636` | 2. **Copy the data out** from `C:\Users\<broken-profile>` to a location outside it — their Desktop, Documents, Pictures, and Downloads folders, plus any application data they need. | **OK** — Windows: user profiles live directly under `C:\Users\<name>`. |
 | 10 | `02-phase-operating-systems.md:872` | \| Why did an update fail? \| `Get-WindowsUpdateLog` to build a readable log, plus Setup log under `C:\Windows\Logs` \| | **OK** — Microsoft Learn: `Get-WindowsUpdateLog` merges the Windows Update .etl traces into a readable log. |
-| 11 | `02-phase-operating-systems.md:1385` | - **Log analysis:** What you found in `/var/log/auth.log` and `/var/log/syslog`, and how you used `journalctl` to read system logs. | |
-| 12 | `06-phase-tools-and-ticketing.md:357` | `C:\Windows\Temp` at 18.41 GB is the answer, and it is not user data. Something has been writing temporary files and never cleaning them up. | |
+| 11 | `02-phase-operating-systems.md:1385` | - **Log analysis:** What you found in `/var/log/auth.log` and `/var/log/syslog`, and how you used `journalctl` to read system logs. | **OK** — `/var/log/auth.log` and `/var/log/syslog` are standard log paths and `journalctl` reads the journal. |
+| 12 | `06-phase-tools-and-ticketing.md:357` | `C:\Windows\Temp` at 18.41 GB is the answer, and it is not user data. Something has been writing temporary files and never cleaning them up. | **OK** — Windows: `C:\Windows\Temp` is the system temp directory, and it is not user data — the distinction this row draws. |
 | 13 | `06-phase-tools-and-ticketing.md:397` | > **Investigated:** `Get-PSDrive` confirmed only `C:` affected; `D:` has 255.6 GB free, so the data volume is healthy and this is not user-data growth. Largest-directory scan showed `C:\Windows\Temp` at 18.41 GB, of which the largest files were `sql_dump_*.tmp … | **OK** — Microsoft Learn: `Get-PSDrive` reports per-drive usage including free space. |
-| 14 | `06-phase-tools-and-ticketing.md:398` | > **Cause:** A nightly job outside the service desk's ownership is writing ~5 GB of temporary dump files to `C:\Windows\Temp` and never removing them. Under four days of accumulation took the volume to the alert threshold, so this will recur within the week un … | |
-| 15 | `06-phase-tools-and-ticketing.md:399` | > **Action:** Cleared `C:\Windows\Temp` dump files after confirming their identity and daily pattern. Did **not** delete unfamiliar files. Raised a problem record so the owning team fixes the cleanup, because the files regenerate nightly. | |
-| 16 | `06-phase-tools-and-ticketing.md:401` | > **For the next agent:** If this alert fires again, check `C:\Windows\Temp` first and look for `sql_dump_*.tmp`. The root cause is not fixed — the nightly job is with the application team. Growth is ~5 GB per day, so the volume has roughly four days of headro … | |
+| 14 | `06-phase-tools-and-ticketing.md:398` | > **Cause:** A nightly job outside the service desk's ownership is writing ~5 GB of temporary dump files to `C:\Windows\Temp` and never removing them. Under four days of accumulation took the volume to the alert threshold, so this will recur within the week un … | **OK** — Windows: `C:\Windows\Temp` is the system temp directory. |
+| 15 | `06-phase-tools-and-ticketing.md:399` | > **Action:** Cleared `C:\Windows\Temp` dump files after confirming their identity and daily pattern. Did **not** delete unfamiliar files. Raised a problem record so the owning team fixes the cleanup, because the files regenerate nightly. | **OK** — Windows: `C:\Windows\Temp` is the system temp directory, so clearing dump files from it is the correct action. |
+| 16 | `06-phase-tools-and-ticketing.md:401` | > **For the next agent:** If this alert fires again, check `C:\Windows\Temp` first and look for `sql_dump_*.tmp`. The root cause is not fixed — the nightly job is with the application team. Growth is ~5 GB per day, so the volume has roughly four days of headro … | **OK** — Windows: `C:\Windows\Temp` is the system temp directory, so it is the right first place to look. |
 | 17 | `08-phase-portfolio-and-resume.md:114` | \| "Know Linux." \| "Installed and administered Ubuntu Server in a VM: user and group management, `systemctl` service control, permissions with `chmod` and `chown`, log review in `/var/log`." \| | **OK** — All named tools and paths are standard Linux administration. |
 
 ---

@@ -39,7 +39,7 @@
 //
 // The balance threshold is 50% rather than an even split, deliberately. With 10
 // questions and 4 positions a perfectly even split is impossible, and forcing
-// 25% Â± 1 would fail honest quizzes for arithmetic reasons. 50% is the point
+// 25% ± 1 would fail honest quizzes for arithmetic reasons. 50% is the point
 // where guessing one letter beats reading, which is the property worth gating.
 //
 // Read-only: writes nothing.

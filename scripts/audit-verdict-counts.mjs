@@ -1,5 +1,5 @@
 // Derive the completed-class totals from the recorded rows and check EVERY figure
-// the document prints about them.
+// the document prints about them -- for BOTH tracks.
 //
 // WHY THIS IS A GUARD AND NOT A ONE-OFF
 // The summary table was hand-written and wrong twice (83/40, then 70/53, against a
@@ -11,22 +11,48 @@
 // **The problem was never the arithmetic. It was that a human was doing it.** So the
 // guard re-derives every published figure, including the ones in prose, and fails on
 // any disagreement.
+//
+// WHY IT NOW COVERS THE IT TRACK TOO
+// The IT document carried a false "verified" header for sixteen days and NOTHING
+// CHECKED IT, because this guard only ever read the cyber document. The IT track is
+// now genuinely verified with 225 recorded rows and published figures of its own, so
+// it needs the same protection -- a figure nothing verifies is the defect this file
+// exists to prevent. `--track` selects which document; running both is done in CI.
 import fs from "node:fs";
 
-const lines = fs.readFileSync("docs/CYBER-CLAIM-VERIFICATION.md", "utf8").split("\n");
+const track = (() => {
+  const i = process.argv.indexOf("--track");
+  const t = i === -1 ? "cybersec" : process.argv[i + 1];
+  if (!["it", "cybersec"].includes(t)) {
+    console.error(`usage: node audit-verdict-counts.mjs [--track it|cybersec]`);
+    process.exit(2);
+  }
+  return t;
+})();
+
+const DOC = track === "it" ? "docs/IT-CLAIM-VERIFICATION.md" : "docs/CYBER-CLAIM-VERIFICATION.md";
+const rows_src = fs.readFileSync(DOC, "utf8");
+const lines = rows_src.split("\n");
+const doc = rows_src;
 const ROW = /^\|\s*(\d+)\s*\|\s*`([^`]+?):(\d+)`\s*▶?\s*\|/;
 
-const DONE = [
-  "Standards, frameworks and control identifiers",
-  "CVE identifiers and vulnerability claims",
-  "Cryptography algorithm claims",
-  "Product versions and editions",
-  "Command and cmdlet usage",
-  "Security tool commands and flags",
-  "MITRE ATT&CK technique identifiers",
-  "Protocol and standard behaviour",
-  "Registry paths, file paths and filenames",
-];
+// Read the completed classes straight out of split-claims.mjs. A second hand-kept list
+// here is how the DNS class was lost in the first place: the guard summed only the
+// classes it knew about, so a class missing from the list was missing from the total.
+let DONE = [];
+let outstandingSections = new Set();
+{
+  const sp = fs.readFileSync("scripts/split-claims.mjs", "utf8");
+  const block = new RegExp(`${track}:\\s*\\[([\\s\\S]*?)\\n\\s*\\],`).exec(sp);
+  if (!block) {
+    console.error(`could not read the ${track} class list from scripts/split-claims.mjs`);
+    process.exit(1);
+  }
+  for (const m of block[1].matchAll(/\{\s*title:\s*"([^"]+)"([^}]*)\}/g)) {
+    if (/done:\s*true/.test(m[2])) DONE.push(m[1]);
+    else outstandingSections.add(m[1]);
+  }
+}
 
 let cls = "";
 const per = new Map();
@@ -50,6 +76,7 @@ for (const name of DONE) {
 }
 const total = T.OK + T.UNV + T.WRONG + T.empty;
 
+console.log(`TRACK: ${track}  (${DOC})`);
 console.log("DERIVED from the rows:");
 for (const r of rows) {
   console.log(`  | ${r.name} | ${r.n} | ${r.OK} | **${r.WRONG}** | ${r.UNV} |`);
@@ -57,7 +84,6 @@ for (const r of rows) {
 console.log(`  | **Total** | **${total}** | **${T.OK}** | **${T.WRONG}** | **${T.UNV}** |`);
 console.log("");
 
-const doc = fs.readFileSync("docs/CYBER-CLAIM-VERIFICATION.md", "utf8");
 const problems = [];
 
 // --- 0. NO class may hold a row with an empty verdict column unless it is
@@ -84,25 +110,6 @@ const problems = [];
 //   * empty rows + `done: true`  -> FAIL. This is the bug. It is unreachable work.
 //   * empty rows + not done      -> PASS, and report it as outstanding.
 //   * no empty rows + `done`     -> PASS.
-//
-// Deriving "outstanding" from split-claims.mjs rather than from a list here is
-// deliberate: a second hand-maintained list would drift from the first, which is
-// how the class was lost in the first place.
-let outstandingSections = new Set();
-try {
-  const sp = fs.readFileSync("scripts/split-claims.mjs", "utf8");
-  const cyber = /cybersec:\s*\[([\s\S]*?)\n\s*\],/.exec(sp);
-  if (!cyber) {
-    problems.push("could not read the cybersec class list from scripts/split-claims.mjs");
-  } else {
-    for (const m of cyber[1].matchAll(/\{\s*title:\s*"([^"]+)"([^}]*)\}/g)) {
-      if (!/done:\s*true/.test(m[2])) outstandingSections.add(m[1]);
-    }
-  }
-} catch (e) {
-  problems.push(`could not read scripts/split-claims.mjs: ${e.message}`);
-}
-
 {
   const bySection = new Map();
   let s = "";
@@ -130,6 +137,56 @@ try {
   }
 }
 
+// --- 0b. EVERY section in the document must appear in the splitter's class list.
+//
+// This closes the hole through which the DNS class was lost the FIRST time, and
+// through which I lost it AGAIN while writing this very guard.
+//
+// The failure is specific and it is not the empty-column case above. If a class is
+// deleted from `split-claims.mjs` while its rows still hold verdicts, then:
+//   * it has no empty column, so check 0 sees nothing wrong;
+//   * it is not in DONE, so it is left out of every total;
+//   * the splitter emits no pack for it, so nothing is ever sent to anyone.
+// A class in that state is invisible to every other check in this file -- and it is
+// WORSE than an unverified class, because an unverified class is at least counted as
+// outstanding. This exact thing happened: an edit to the IT block also removed the
+// cyber `{ title: "DNS record types" }` entry, which silently deleted the last
+// outstanding cyber work while the guard went on printing it as tracked.
+//
+// The document is the substrate. A section that exists there and is not known to the
+// splitter is a class the pipeline has forgotten, whichever way it went missing.
+{
+  const known = new Set([...DONE, ...outstandingSections]);
+  const sections = new Set();
+  for (const l of lines) {
+    const h = /^## (.+)/.exec(l);
+    if (h) sections.add(h[1].replace(/\s+$/, ""));
+  }
+  for (const s of sections) {
+    if (known.has(s)) continue;
+    // A section with no claim rows at all is prose (method, results, withdrawn
+    // claims) and is not a class. Only flag sections that actually carry rows.
+    const carriesRows = lines.some((l) => {
+      const h = /^## (.+)/.exec(l);
+      return h && h[1].replace(/\s+$/, "") === s;
+    }) && (() => {
+      let cur = "";
+      for (const l of lines) {
+        const h = /^## (.+)/.exec(l);
+        if (h) cur = h[1].replace(/\s+$/, "");
+        if (cur === s && ROW.test(l)) return true;
+      }
+      return false;
+    })();
+    if (!carriesRows) continue;
+    problems.push(
+      `section "${s}" holds claim rows but is ABSENT from the ${track} class list in ` +
+        `split-claims.mjs.\n      A class the splitter does not know about emits no pack, ` +
+        `is excluded from every total, and can never be verified.`,
+    );
+  }
+}
+
 // --- 1. every class row in the summary table
 for (const r of rows) {
   const re = new RegExp(
@@ -149,7 +206,7 @@ for (const r of rows) {
 }
 
 // --- 2. the summary Total row
-const m = /\| \*\*Total\*\* \| \*\*(\d+)\*\* \| \*\*(\d+)\*\* \| \*\*(\d+)\*\* \| \*\*(\d+)\*\* \|/.exec(doc);
+const m = /\| \*\*Total(?:[^|]*)\*\* \| \*\*(\d+)\*\* \| \*\*(\d+)\*\* \| \*\*(\d+)\*\* \| \*\*(\d+)\*\* \|/.exec(doc);
 if (!m) {
   problems.push("could not find the summary Total row");
 } else {
@@ -161,14 +218,6 @@ if (!m) {
 
 // --- 3. the distinct-location figures, which live in PROSE and were wrong twice.
 // A location can be cited by more than one class, so rows >= locations always.
-const distinct = new Set();
-for (const l of doc.split("\n")) {
-  const rm = /^\|\s*(\d+)\s*\|\s*`([^`]+?):(\d+)`\s*▶?\s*\|/.exec(l);
-  if (!rm || !/\*\*(OK|UNVERIFIABLE|WRONG)\*\*/.test(l)) continue;
-  // Only count rows inside a completed class.
-  distinct.add(`${rm[2]}:${rm[3]}`);
-}
-// Count only completed-class rows for the distinct figure.
 let doneCls = "";
 const distinctDone = new Set();
 for (const l of doc.split("\n")) {
@@ -179,16 +228,34 @@ for (const l of doc.split("\n")) {
   if (!rm || !/\*\*(OK|UNVERIFIABLE|WRONG)\*\*/.test(l)) continue;
   distinctDone.add(`${rm[2]}:${rm[3]}`);
 }
-const pm = /\*\*(\d+) distinct\s+locations fill (\d+) rows\.\*\*/.exec(doc);
-if (!pm) {
-  problems.push("could not find the distinct-locations sentence");
+
+if (track === "cybersec") {
+  const pm = /\*\*(\d+) distinct\s+locations fill (\d+) rows\.\*\*/.exec(doc);
+  if (!pm) {
+    problems.push("could not find the distinct-locations sentence");
+  } else {
+    const dLoc = Number(pm[1]);
+    const dRow = Number(pm[2]);
+    if (dLoc !== distinctDone.size || dRow !== total) {
+      problems.push(
+        `distinct-locations prose says ${dLoc} locations / ${dRow} rows, derived ${distinctDone.size} / ${total}`,
+      );
+    }
+  }
 } else {
-  const dLoc = Number(pm[1]);
-  const dRow = Number(pm[2]);
-  if (dLoc !== distinctDone.size || dRow !== total) {
-    problems.push(
-      `distinct-locations prose says ${dLoc} locations / ${dRow} rows, derived ${distinctDone.size} / ${total}`,
-    );
+  // The IT document states the pair in its table label. Same fact, different phrasing,
+  // so it is checked rather than skipped -- an unchecked figure is the whole problem.
+  const pm = /\*\*Total — (\d+) rows over (\d+) distinct locations\*\*/.exec(doc);
+  if (!pm) {
+    problems.push("could not find the distinct-locations label in the IT summary table");
+  } else {
+    const dRow = Number(pm[1]);
+    const dLoc = Number(pm[2]);
+    if (dLoc !== distinctDone.size || dRow !== total) {
+      problems.push(
+        `distinct-locations label says ${dRow} rows / ${dLoc} locations, derived ${total} / ${distinctDone.size}`,
+      );
+    }
   }
 }
 

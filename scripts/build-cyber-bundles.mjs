@@ -108,8 +108,8 @@ if (PLAN.length === 0) {
   for (const f of before) fs.rmSync(path.join(OUT, f));
   console.log("");
   console.log(`  Every ${TRACK_KEY} claim class is fully verified -- there is nothing left to bundle.`);
-  console.log("  This is the FINISHED state, not a failure: the plan in build-cyber-bundles.mjs is empty");
-  console.log("  because split-claims.mjs withholds all nine classes via `done: true`.");
+  console.log("  This is the FINISHED state, not a failure: the plan is empty because");
+  console.log("  split-claims.mjs withholds every class for this track via `done: true`.");
   if (before.length) console.log(`  Cleared ${before.length} stale bundle(s): ${before.join(", ")}`);
   console.log(`  See docs/${TRACK_KEY === "it" ? "IT" : "CYBER"}-CLAIM-VERIFICATION.md for the results.`);
   process.exit(0);

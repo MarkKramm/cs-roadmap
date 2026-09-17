@@ -25,15 +25,32 @@ import fs from "node:fs";
 import path from "node:path";
 
 const ROOT = path.resolve(import.meta.dirname, "..");
-const SCAN = ["docs", "career-roadmaps"];
+// WHY THE SOURCE FILES ARE SCANNED TOO.
+//
+// This guard only looked at .md and .txt, so every script was invisible to it -- and a
+// script full of mojibake is WORSE than a document full of mojibake, because it
+// GENERATES documents. `split-claims.mjs` had eleven corrupted lines ("â€"" where an
+// em dash belonged) after a PowerShell round trip. The guard reported ENCODING OK the
+// whole time, while every pack the script wrote came out corrupted, and the corruption
+// was then caught downstream in the generated packs as though they were the cause.
+//
+// The generated artifact is the symptom; the template is the source. Scan both.
+const SCAN = ["docs", "career-roadmaps", "scripts", "learning-site/src", "learning-site/scripts"];
 const SKIP_DIRS = new Set(["node_modules", ".git", ".cache", "dist", "build"]);
+// The guard's own controls and comments discuss mojibake deliberately, and this file
+// documents it by example, so those are exempt by explicit, reviewable name rather than
+// by a pattern that could quietly widen.
+const MOJIBAKE_EXEMPT = new Set([
+  "scripts/audit-encoding.mjs",
+  "scripts/test-audit-encoding.mjs",
+]);
 
 function walk(dir, out = []) {
   for (const e of fs.readdirSync(dir, { withFileTypes: true })) {
     if (SKIP_DIRS.has(e.name)) continue;
     const p = path.join(dir, e.name);
     if (e.isDirectory()) walk(p, out);
-    else if (/\.(md|txt)$/i.test(e.name)) out.push(p);
+    else if (/\.(md|txt|mjs|js|jsx|css|html|json|yml|yaml)$/i.test(e.name)) out.push(p);
   }
   return out;
 }
@@ -45,8 +62,12 @@ for (const base of SCAN) {
   const root = path.join(ROOT, base);
   if (!fs.existsSync(root)) continue;
   for (const file of walk(root)) {
+    const rel = path.relative(ROOT, file).replace(/\\/g, "/");
+    // BOM and invalid UTF-8 are checked for EVERY file, including the exempt ones --
+    // those two are never deliberate. Only the mojibake test is skipped, because the
+    // guard and its own controls quote corrupted sequences on purpose.
+    const exemptFromMojibake = MOJIBAKE_EXEMPT.has(rel);
     checked++;
-    const rel = path.relative(ROOT, file);
     const buf = fs.readFileSync(file);
 
     // 1. BOM. Almost always the fingerprint of a Windows shell write.
@@ -65,11 +86,13 @@ for (const base of SCAN) {
 
     // 2. C1 control characters. The decidable test for a lossy round trip.
     const c1 = [];
-    for (let i = 0; i < text.length; i++) {
-      const c = text.charCodeAt(i);
-      if (c >= 0x80 && c <= 0x9f) {
-        const line = text.slice(0, i).split("\n").length;
-        c1.push(`line ${line}: U+${c.toString(16).toUpperCase().padStart(4, "0")}`);
+    if (!exemptFromMojibake) {
+      for (let i = 0; i < text.length; i++) {
+        const c = text.charCodeAt(i);
+        if (c >= 0x80 && c <= 0x9f) {
+          const line = text.slice(0, i).split("\n").length;
+          c1.push(`line ${line}: U+${c.toString(16).toUpperCase().padStart(4, "0")}`);
+        }
       }
     }
     if (c1.length) {
