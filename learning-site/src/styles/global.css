@@ -206,7 +206,7 @@ a:hover {
 
 .btn {
   background: var(--accent);
-  color: #0d1017;
+  color: var(--text-on-accent);
   border: none;
   font: inherit;
   font-weight: 600;
@@ -889,7 +889,7 @@ a:hover {
     position: fixed;
     inset: 0;
     z-index: 30;
-    background: rgb(0 0 0 / 55%);
+    background: var(--overlay);
     border: none;
     padding: 0;
     cursor: pointer;
@@ -1228,7 +1228,11 @@ a:hover {
   border: 1px dashed var(--danger);
   border-radius: var(--space-1);
   padding: var(--space-3);
-  color: var(--danger);
+  /* --danger directly on --bg-subtle is 4.30:1, under the 4.5:1 AA floor for
+     14px body text. The BORDER keeps --danger (it is the accent stripe, not
+     text, and 3:1 is the applicable bar for a non-text boundary), while the
+     text uses a lightened variant that reaches 6.1:1 on the same surface. */
+  color: var(--danger-text);
   font-size: var(--text-sm);
 }
 
@@ -1303,9 +1307,18 @@ p em {
   transition: border-color var(--transition-fast);
 }
 
+/* The border tint is an ADDITION to the ring, never a replacement for it.
+   This rule used to carry `outline: none`, the only such suppression in the
+   file — and because `.search__input:focus` (0,2,0) outranks the global
+   `:focus-visible` (0,1,0), it removed the keyboard focus ring from a
+   `type="search"` input, not merely the mouse-click ring. A 1px border colour
+   change is not a focus affordance on its own. */
 .search__input:focus {
-  outline: none;
   border-color: var(--accent);
+}
+.search__input:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
 }
 
 .search__input::placeholder {
@@ -1801,10 +1814,8 @@ p em {
   margin: var(--space-2) 0 var(--space-4);
 }
 
-.progress__note {
-  font-size: var(--text-sm);
-  margin: var(--space-3) 0 0;
-}
+/* .progress__note was deleted 2026-09-17: no reference in any component, page,
+   or hook. Its live siblings (.progress__label / __track / __fill) remain. */
 
 .track-card__weeks {
   font-size: var(--text-xs);
@@ -1934,7 +1945,7 @@ p em {
 }
 
 .phase-transfer__message.is-error {
-  color: var(--danger);
+  color: var(--danger-text);
 }
 
 /* Off-screen but reachable by assistive tech and by `.click()`. A file input
@@ -2335,7 +2346,7 @@ p em {
   position: fixed;
   inset: 0;
   z-index: 60;
-  background: rgb(0 0 0 / 55%);
+  background: var(--overlay);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -2459,7 +2470,7 @@ p em {
 }
 
 .data-transfer__file:focus-visible + .data-transfer__pick {
-  outline: 2px solid var(--focus, var(--text));
+  outline: 2px solid var(--focus);
   outline-offset: 2px;
 }
 
@@ -2783,7 +2794,7 @@ p em {
 }
 
 .lesson-find__snippet mark {
-  background: var(--accent-soft, rgba(120, 160, 255, 0.28));
+  background: var(--accent-soft);
   color: inherit;
   border-radius: 2px;
   padding: 0 1px;
@@ -3352,7 +3363,7 @@ p em {
 }
 
 .quiz__badge--wrong {
-  color: var(--danger);
+  color: var(--danger-text);
 }
 
 .quiz__why {
