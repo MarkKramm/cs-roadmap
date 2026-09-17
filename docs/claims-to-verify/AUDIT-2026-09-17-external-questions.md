@@ -11,6 +11,66 @@ burned once by a citation that rested on a third-party tutorial returning 403.
 
 ---
 
+## Verdicts — both answered 2026-09-17
+
+### Q1 → **RESOLVED, and the audit's premise was the error.** Content corrected in six places.
+
+Broadcom did **not** remove the free tier — it **widened** it. Effective
+**November 2024, VMware Workstation Pro is free for all users** (commercial,
+educational, personal), the paid subscription model was retired, and the
+separate cut-down **Player** product was discontinued because Pro absorbed it.
+Primary source: VMware's own announcement on the Broadcom-hosted VMware blog —
+*"Starting November 11, 2024, these powerful desktop hypervisor products will
+be available for free to everyone—commercial, educational, and personal users
+alike"* — and Broadcom's KB confirming downloads now sit behind a free support
+account.
+
+**So the licensing claim was more true than when written; only the product name
+was wrong.** Six sites offered "Workstation Player personal use" for a product
+that no longer exists. Corrected. The one genuinely *false* claim was `it 02`'s
+*"Paid VM tools like VMware Workstation Pro offer advanced features"*, which
+asserted a paid tier that had been retired.
+
+**VirtualBox was confirmed unchanged:** base package GPLv3, Extension Pack free
+for personal use under the PUEL but paid commercially. Host-only networking and
+snapshots are in the free GPL core, so the $0 rule holds.
+
+**The lesson is about the audit, not about VMware:** a second-hand report of a
+change was adopted as a premise and nobody checked the change's *direction*. The
+item nearly caused six files to be "fixed" in the wrong direction.
+
+### Q2 → **UNVERIFIABLE without live job-board access. Claim softened; item stays open.**
+
+The model correctly declined to answer from training data — *"Any answer I gave
+about what postings say would be an impression from training data, not
+evidence."* It could not retrieve postings from Indeed or LinkedIn, which block
+automated access.
+
+**Its structural criticism was accepted.** The text carried three components at
+different evidentiary burdens:
+
+| Component | Was | Status |
+|---|---|---|
+| A | "Remote work skews heavily toward Macs" | **Overreached** — universal quantifier, no sample |
+| B | "most US-based software companies issue MacBooks" | **Overreached** — empirical, unsupported |
+| C | "Answering 'I only know Windows' costs you the interview" | **Overreached** — asserts a screening *outcome* |
+
+**Acted on (D-048):** IT 02's macOS section and IT 05's MDM section now state
+the weaker, defensible version and **name their own limits in the text** — *"a
+reasonable read of the remote job market, not a measured one"*. The argument is
+now the **cost asymmetry** (an afternoon to learn the mapping, versus a
+conversation you never got to have), which is defensible without a sample. IT 02
+also gained a paragraph on where macOS matters **less** (on-premises
+Windows-heavy environments), so the section no longer reads as a universal
+requirement.
+
+**Still open:** the 15–20 posting sample is the only thing that turns this from
+a reasonable read into a number. **"Twelve of eighteen postings named macOS" is
+checkable; "macOS is expected" is not.** The question below is unchanged and
+still usable.
+
+---
+
 ## Q1 — Is VMware Workstation Player still free for personal use?
 
 **Why this matters:** the curriculum is deliberately $0-budget, and it offers
