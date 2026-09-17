@@ -206,8 +206,11 @@ that already exists, and it did so for a version of this file's whole lifetime.
 
 - **Icon set.** None. Components use text labels and a single check glyph.
 - **Animation library.** None. Transitions are CSS-only and under 150ms, per the anti-patterns above. A `prefers-reduced-motion` block zeroes the duration for readers who ask the system for less motion.
-- **A glossary.** The curriculum defines 272 domain acronyms and a guard
+- **A glossary.** The curriculum defines **274** domain acronyms and a guard
   (`scripts/audit-terms.mjs`) verifies each is explained **where it is used**, but
   there is no way to look one up on its own. Closing this is more than a page: the
   guard checks explanations in context and never extracts them, so it needs new
-  build tooling to produce the data first.
+  build tooling to produce the data first. **The count here read 272 and was stale** —
+  the guard prints 274, and `CHECKPOINT.md` said 274, so two documents in this
+  repository carried different totals for one number. It is checked by
+  `audit-doc-figures.mjs` now, which is why it can no longer drift.

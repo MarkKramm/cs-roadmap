@@ -2,6 +2,20 @@
 
 A lightweight decision log (ADR-style). Newest first.
 
+**Every record here is a dated snapshot, not a status page.** A record states what was true
+when it was written: the counts, the phase totals, the state of the guards. Those figures go
+stale by design as the repository grows, and **correcting them would destroy the record** —
+what a decision was made against is part of the decision. Read a number in a record as *"this
+is what it was"*, and read the record's **Date:** line for when.
+
+Two consequences, since this has caused real confusion:
+
+- **The current figures live in [`CHECKPOINT.md`](CHECKPOINT.md), and the ones a command can
+  print are checked on every commit by `audit-doc-figures.mjs`.** Nothing in `DECISIONS.md` is
+  guarded, deliberately — a guard over an archive would force the archive to be rewritten.
+- **A phrase like "Current state:" inside a record means the state at that record's date.** It
+  is not a claim about today, and D-024's instance (29 phases) has been overtaken twice since.
+
 ## D-060 — A total that nothing recomputes is a guess with a citation
 
 - **Date:** 2026-09-18
@@ -977,3 +991,119 @@ which is precisely how real mojibake gets introduced. The repository's own note 
 said the damage "is invisible in a terminal that renders it as plausible text" — the
 converse is also true, and this pass is the instance: **a terminal can make correct text
 look damaged, and acting on that is how a correct file gets destroyed.**
+
+## D-064 — A stale rationale is more dangerous than a stale number
+
+**Date:** 2026-09-18
+**Status:** Active
+
+The claim sweep that produced D-061 guarded the figures in `CHECKPOINT.md` — ten of them —
+and stopped there. Extending it across every document found **eight more wrong figures**,
+and one of them was a different kind of wrong.
+
+`docs/CONTENT-SCHEMA.md` said the quiz section was *"currently present in **10 of 31
+phases**"*, and then explained why: *"Phase 1 of IT has no quiz because it is orientation
+rather than technique."* **All 31 phases have a quiz, including IT 01.** `audit-quiz.mjs`
+reports `phases with a quiz: 31 of 31` and has done since the pass recorded at
+`CHECKPOINT.md` item 24.
+
+**The count was wrong, and the reason was worse.** A reader who sees *"10 of 31"* may
+re-count. A reader who sees *"10 of 31, and Phase 1 is orientation so it has none"* has been
+given a **rationale**, and a rationale is not something a reader checks — it is something
+they adopt. That sentence did not merely misstate the corpus; it converted an absence into
+a deliberate design decision, which is the one form of wrong claim that discourages the
+verification that would catch it.
+
+**Decision.** When correcting a stale figure, **check for an attached reason and correct
+both.** A number carries its own invitation to be recounted; a reason does not, and an
+uncorrected reason will keep the wrong number alive after the number itself is fixed. When
+the sweep reviews a figure, the question is not only *"is this right?"* but *"does this
+sentence explain why, and is that explanation still true?"*
+
+**The corollary, which the same sweep demonstrated.** Four figures were stale in
+`CONTENT-SCHEMA.md` — the band/energy output quoted as `252` (real: 283), *"all 29
+lessons"* twice (real: 31), *"all 23 phase files"* (real: 31) — and every one of them was
+**attached to a claim that was still true**. "Every practice task carries a band" held;
+"front-matter is on every phase file" held; "the AST reports zero loss" held. **The
+proposition stayed correct while its arithmetic rotted**, which is exactly why nobody
+re-read it: the sentence was, in every sense its author was checking, still accurate. That
+is the case a guard is for and a reader is not.
+
+---
+
+## D-065 — A fixture that breaks the pattern under test tests nothing
+
+**Date:** 2026-09-18
+**Status:** Active
+
+Writing controls for the expanded figure guard, the quiz-coverage fixture was written as:
+
+```js
+t.replace(/currently present in all (\d+) phases/, (m, n) => `currently present in ${n - 21} phases`)
+```
+
+It removed the word **"all"**. The guard's pattern is `/currently present in all (\d+)
+phases/`, so the mutated document **no longer matched the guard's regex at all** — the guard
+saw nothing, exited 0, and the control reported *"expected FAIL, got PASS"*.
+
+**The control failure looked exactly like a broken guard.** It was reported against working
+code, and the honest first reading — "the guard is not catching this" — was wrong. The
+fixture had edited the sentence out of the shape the guard searches for.
+
+This is the fifth instance of the same pattern in this repository: **a control whose fixture
+is wrong, reported as a defect in the thing under test.** The previous four are recorded in
+D-049, D-058 and the verdict-count suite's own history (an expectation asserted backwards, a
+reconciliation loop that erased the defect, a fixture that stopped mutating when the corpus
+changed, and a control that assumed `validate-ci` was unwired when it was not).
+
+**Decision.** A fixture that expects a guard to FAIL must assert two things, not one:
+
+1. the document **changed**, and
+2. **the guard's own pattern still matches the changed text**, with a different number.
+
+The second is the one that was missing, and it is the one that distinguishes "the guard is
+blind" from "the fixture moved the target". Every failure-expecting fixture in
+`test-audit-doc-figures.mjs` now goes through a single `driftNumber` helper that enforces
+both, so the check cannot be forgotten in a new control.
+
+**The general form:** *a control must prove it changed the thing the guard looks at, not
+merely that it changed the file.* A mutation test whose mutation lands outside the guard's
+field of view reports a false negative and blames the code.
+
+---
+
+## D-066 — Guard the figure in the document that has one, not the document you were editing
+
+**Date:** 2026-09-18
+**Status:** Active
+
+D-061's guard read **one file**. The reasoning was not unreasonable — `CHECKPOINT.md` is
+where the repository's current figures live — but the effect was a guard whose name
+(`audit-doc-figures.mjs`) promised more than it did, and the sweep then found:
+
+| Document | Said | Real |
+|---|---|---|
+| `DESIGN-SYSTEM.md` | "defines **272** domain acronyms" | **274** |
+| `CONTENT-SCHEMA.md` | build output quoted as `252 banded` | **283** |
+| `CONTENT-SCHEMA.md` | "all **29** lessons" (twice) | **31** |
+| `CONTENT-SCHEMA.md` | "all **23** phase files" | **31** |
+| `ROADMAP.md` | "`Your work` … across all **29** phases" | **31** |
+| `COMPREHENSION-AUDIT.md` | "A read of all **23** phases" | 31 today |
+| `learning-site/src/lib/yourWork.js` | "On a **23-phase** curriculum" | 31 |
+| `learning-site/src/pages/YourWork.jsx` | "gathered from all **23** phases" | 31 |
+
+**Eight wrong figures across five files, every one outside the guarded document.** Two were
+in **source code comments**, which no documentation guard would ever look at. (Counting
+*sites* rather than rows it is nine — "all 29 lessons" appears twice in `CONTENT-SCHEMA.md`,
+in two sentences making the same stale claim. The row count is the honest one and the
+discrepancy is stated rather than smoothed.)
+
+**Decision.** **A figure is guarded where it appears, not where it is most convenient to
+check it.** The guard now reads four documents and asserts 25 figures, and the controls
+include one whose whole purpose is to mutate a *second* document and prove the guard notices.
+
+**Two things this record is careful not to claim.** The comment fixes in `learning-site/`
+are **not** guarded — there is no guard over prose in source files, and building one raises
+the question of what a comment is allowed to say. They were corrected by hand and the next
+stale one will be found by a sweep, not by CI. That limitation is stated in `CHECKPOINT.md`
+rather than left implied.

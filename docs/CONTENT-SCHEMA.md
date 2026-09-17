@@ -85,9 +85,13 @@ The comment carries three fields, and the **field order is fixed**: `id`, then `
 **Positional minting is now a fallback, not the normal path.** The build still mints `<phase-id>-tNN` from position for any task line that carries no `<!-- id: … -->` comment, so a partially migrated file cannot fail the build — but it **reports the count**, because a silently minted id is the one thing that would let an answer follow a position rather than a question. The build prints both numbers on every run:
 
 ```text
-task bands:  252 banded, 0 authored without a band, 0 still minted from position
-task energy: 252 of 252 practice task(s) carry an energy value
+task bands:  283 banded, 0 authored without a band, 0 still minted from position
+task energy: 283 of 283 practice task(s) carry an energy value
 ```
+
+**These two lines read `252` and were stale** — the build prints 283, which `CHECKPOINT.md`
+also said. The block is quoted output, so it goes stale every time a task is added; it is now
+checked against `build-content.mjs` by `audit-doc-figures.mjs` rather than maintained by hand.
 
 The minted-from-position count is currently **0**. A future edit that adds a task without its comment raises that number instead of passing quietly, which is the signal to author the comment rather than to accept the mint.
 
@@ -115,7 +119,9 @@ Optional headings (`## Specific topics to learn`, `## Quiz`, `## Lab setup optio
 
 ### The quiz section
 
-`## Quiz` is optional and currently present in **10 of 31 phases**. The whole IT on-ramp (02–09) is covered, plus one phase in each of the other two tracks. Phase 1 of IT has no quiz because it is orientation rather than technique. The build reports coverage on every run rather than assuming it, because silent partial coverage reads as "every phase is quizzed" to anyone who only sees the build succeed.
+`## Quiz` is optional in the schema and **currently present in all 31 phases**. The build reports coverage on every run rather than assuming it, because silent partial coverage reads as "every phase is quizzed" to anyone who only sees the build succeed.
+
+**This paragraph said "currently present in 10 of 31 phases", and "Phase 1 of IT has no quiz because it is orientation rather than technique". Both were true when written and both are now false** — every phase gained a quiz in the pass recorded at `CHECKPOINT.md` item 24, including IT 01. It is the most misleading stale figure the sweep found, because it does not merely misstate a count: **it gives a reason, so a reader treats the absence as deliberate design and does not go looking.** A stale number invites a re-count; a stale rationale does not. The coverage line is now checked against `audit-quiz.mjs` by `audit-doc-figures.mjs`.
 
 The format reuses **Markdown task-list syntax**: `- [x]` marks the correct option. That choice is load-bearing rather than cosmetic — the print stylesheet exists so a phase can be studied offline, and a quiz encoded as HTML or JSON would be the one section that vanished on paper. Authored this way, the quiz reads correctly on GitHub, in a text editor, and in print, with no new vocabulary to learn.
 
@@ -219,7 +225,7 @@ Two rules the parser keeps:
 - **Nothing is dropped.** A line that matches no block becomes a paragraph, and any construct the parser does not recognise is recorded in `unknown`, which **fails the build**. Content that cannot be rendered must be a loud error, not a silently missing paragraph.
 - **Heading IDs are unique.** Duplicates get a numeric suffix so a table of contents never links two entries to the same anchor.
 
-`node scripts/audit-lesson-ast.mjs` verifies both across every phase by comparing the AST's characters against the source with markup stripped. It currently reports zero loss on all 29 lessons. **Run it after any change to the parser.**
+`node scripts/audit-lesson-ast.mjs` verifies both across every phase by comparing the AST's characters against the source with markup stripped. It currently reports zero loss on all 31 lessons. **Run it after any change to the parser.**
 
 ## Output: generated JSON
 
@@ -268,7 +274,7 @@ The lesson bodies total roughly 2.5 MB of JSON. Inlining them into the track ind
 
 ### `search.json` — the full-text index
 
-Search needs to find a phrase across all 29 lessons without loading all of them. This file holds an inverted index — term to segment id — and **no prose**, so it does not duplicate the lesson files. See [`DECISIONS.md`](DECISIONS.md) → D-013 for the measurements behind that choice; storing segment text came to 473 KB gzipped against 180 KB for this.
+Search needs to find a phrase across all 31 lessons without loading all of them. (This line said 29 — the count when the index was designed, stale since the corpus reached 31; `audit-doc-figures.mjs` checks it now.) This file holds an inverted index — term to segment id — and **no prose**, so it does not duplicate the lesson files. See [`DECISIONS.md`](DECISIONS.md) → D-013 for the measurements behind that choice; storing segment text came to 473 KB gzipped against 180 KB for this.
 
 ```json
 {
@@ -358,4 +364,4 @@ Failures are reported with file path and line number.
 
 ## Migration path
 
-Completed. Front-matter, checklist IDs and practice-task IDs are on all 23 phase files, and every practice task additionally carries a duration band and an energy value. There is no pending migration; the contract above describes the files as they are.
+Completed. Front-matter, checklist IDs and practice-task IDs are on all 31 phase files, and every practice task additionally carries a duration band and an energy value. There is no pending migration; the contract above describes the files as they are. **(This said "all 23 phase files" — the count when the migration finished; it went to 29 and then 31. The property it asserts — every phase file is migrated — was true throughout, which is why the stale number survived: the claim was right and only its arithmetic was old.)**

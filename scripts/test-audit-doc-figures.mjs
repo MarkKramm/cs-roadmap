@@ -20,7 +20,6 @@ const GUARD = "scripts/audit-doc-figures.mjs";
 // reads, and restore it unconditionally.
 const TARGET = path.join(ROOT, "docs", "CHECKPOINT.md");
 const ROADMAP = path.join(ROOT, "docs", "ROADMAP.md");
-
 // THE RESTORE TARGET IS THE WORKING TREE AS IT WAS AT STARTUP, RE-READ FROM DISK.
 //
 // The first version kept `original` in a variable from module load and restored that.
@@ -104,55 +103,130 @@ const control = (name, mutate, expectFail, allowNoop = false) => {
   const failed = r.code !== 0;
   results.push({ name, ok: failed === expectFail, out: r.out });
 };
+/**
+ * Mutate the NUMBER in a figure while leaving the sentence intact.
+ *
+ * Every failure-expecting fixture goes through this, because the obvious hand-written
+ * version is easy to get wrong in a way that looks like the guard is broken: rewriting the
+ * sentence so it no longer matches the guard's regex means the guard cannot see the drift,
+ * so it passes and the control reports FAIL. That happened to the quiz-coverage control.
+ *
+ * This asserts the property directly -- after the edit, the guard's own pattern must still
+ * match, and must see a different number.
+ *
+ * @param {string} text the document
+ * @param {RegExp} re  the guard's pattern, with group 1 = the number
+ * @param {number} delta added to the number (negative to shrink)
+ * @param {string} label for the error message
+ */
+const driftNumber = (text, re, delta, label) => {
+  // The regex must not be global/sticky: `exec` on such a regex advances lastIndex, so a
+  // later call starts where the previous stopped. The first version of this helper used a
+  // global regex and threw on every control.
+  if (re.global || re.sticky) throw new Error(`driftNumber needs a non-global regex (label: ${label})`);
+
+  const before = re.exec(text);
+  if (!before) throw new Error(`fixture for "${label}" found no match to drift`);
+
+  // Work out WHERE the number is inside the match, then splice the replacement into that
+  // exact offset. This avoids string-replacing a digit sequence that also appears in group 1
+  // (for example a version number in the surrounding words), which produces text the guard
+  // no longer recognises -- the failure this helper exists to prevent.
+  // Find the numeric group. The guard's patterns are not uniform: some put the number in
+  // group 1 (`all (\d+) lessons`), some in group 2 with a prefix captured first
+  // (`` (`scripts/audit-*.mjs` is **)(\d+)(**) ``). Assuming group 1 threw on the latter.
+  const numIdx = before.slice(1).findIndex((g) => g !== undefined && /^\d+$/.test(g)) + 1;
+  if (numIdx < 1) throw new Error(`fixture for "${label}": no numeric capture group in the pattern`);
+  const numText = before[numIdx];
+  const at = before.index + before[0].indexOf(numText);
+
+  const out = text.slice(0, at) + String(Number(numText) + delta) + text.slice(at + numText.length);
+
+  const after = re.exec(out);
+  if (!after) throw new Error(`fixture for "${label}" broke the pattern the guard matches -- it would test nothing`);
+  if (Number(after[numIdx]) === Number(before[numIdx])) {
+    throw new Error(`fixture for "${label}" left the number unchanged -- it would test nothing`);
+  }
+  return out;
+};
 
 // 1. Negative: the real documentation must pass.
 control("the real documentation -> must PASS", (t) => t, false, true);
-
 // 2. The exact defect class: a figure that was right once and drifted.
-control(
-  "guard count drifts -> must FAIL",
-  (t) => {
-    const out = t.replace(/(`scripts\/audit-\*\.mjs` is \*\*)(\d+)(\*\*)/, (m, a, n, c) => a + (Number(n) + 4) + c);
-    if (out === t) throw new Error("control 2 fixture did not find the guard-count figure");
-    return out;
-  },
-  true,
-);
+control("guard count drifts -> must FAIL", (t) => driftNumber(t, /(`scripts\/audit-\*\.mjs` is \*\*)(\d+)(\*\*)/, +4, "control 2"), true);
 
 // 3. The figure that was actually wrong for several passes. Fixtures nudge whatever the
 //    document currently says rather than hard-coding a number, so they cannot rot when a
 //    count legitimately changes -- the failure mode that broke six controls in the
 //    verdict-count suite when the DNS class closed.
-control(
-  "site suite count drifts -> must FAIL",
-  (t) => {
-    const out = t.replace(/(`learning-site\/scripts\/\*\.mjs` is \*\*)(\d+)(\*\*)/, (m, a, n, c) => a + Math.max(0, Number(n) - 1) + c);
-    if (out === t) throw new Error("control 3 fixture did not find the site-suite figure");
-    return out;
-  },
-  true,
-);
+control("site suite count drifts -> must FAIL", (t) => driftNumber(t, /(`learning-site\/scripts\/\*\.mjs` is \*\*)(\d+)(\*\*)/, -1, "control 3"), true);
 
 // 4. A curriculum figure, not a tooling figure.
-control(
-  "lesson count drifts -> must FAIL",
-  (t) => {
-    const out = t.replace(/all (\d+) lessons parse/, (m, n) => `all ${Number(n) - 1} lessons parse`);
-    if (out === t) throw new Error("control 4 fixture did not find the lesson count");
-    return out;
-  },
-  true,
-);
+control("lesson count drifts -> must FAIL", (t) => driftNumber(t, /all (\d+) lessons parse/, -1, "control 4"), true);
 
 // 5. The task-id figure the 410-class failure belongs to.
-control(
-  "phase task id count drifts -> must FAIL",
-  (t) => {
-    const out = t.replace(/(\*\*)(\d+)(\*\* total phase task IDs)/, (m, a, n, c) => a + (Number(n) - 6) + c);
-    if (out === t) throw new Error("control 5 fixture did not find the task-id figure");
-    return out;
-  },
-  true,
+control("phase task id count drifts -> must FAIL", (t) => driftNumber(t, /(\*\*)(\d+)(\*\* total phase task IDs)/, -6, "control 5"), true);
+
+// 5b. A per-track phase count. This one needs its OWN fixture because the measurement is
+//     per-track: a guard that compared every track against one shared total would pass
+//     whenever the error in one track cancelled the error in another.
+control("a single track's phase count drifts -> must FAIL", (t) => driftNumber(t, /(it-roadmap\/\s+\()(\d+)( phases)/, -1, "control 5b"), true);
+
+/**
+ * Drift a figure in some OTHER document, run the guard, restore, and record the result.
+ *
+ * Fixtures that write a file other than CHECKPOINT.md need their own restore, and every one
+ * of them was repeating the same six lines with the same two chances to get it wrong (forget
+ * the `finally`, forget the `snapshot`). One helper means the restore cannot be forgotten.
+ */
+const driftInFile = (label, file, re, delta, expectFail = true) => {
+  const orig = snapshot(file);
+  const mutated = driftNumber(orig, re, delta, label);
+  fs.writeFileSync(file, mutated, "utf8");
+  let r;
+  try {
+    r = run();
+  } finally {
+    fs.writeFileSync(file, orig, "utf8");
+  }
+  const failed = r.code !== 0;
+  results.push({ name: label, ok: failed === expectFail, out: r.out });
+};
+
+// 5c. A figure in a DIFFERENT document. The first sweep guarded CHECKPOINT.md only, which
+//     is exactly how DESIGN-SYSTEM.md carried 272 domain terms against CHECKPOINT's 274.
+//     This control runs against DESIGN-SYSTEM.md to prove the guard reads more than one file.
+driftInFile(
+  "a figure in a second document drifts -> must FAIL",
+  path.join(ROOT, "docs", "DESIGN-SYSTEM.md"),
+  /(defines \*\*)(\d+)(\*\* domain acronyms)/,
+  +3,
+);
+
+// 5d. The most misleading stale figure the sweep found: quiz coverage. It said "10 of 31"
+//     AND explained why IT 01 had none. The count was stale, but the RATIONALE is what made
+//     it dangerous -- a reader treats a reasoned absence as deliberate design and does not
+//     re-count. This control exists to keep that specific claim wired.
+//
+//     Its first version rewrote the sentence to "10 phases", which no longer matched the
+//     guard's regex -- the guard could not see the drift, passed, and the control reported
+//     FAIL. **A fixture that breaks the pattern under test tests nothing**, and it fails in
+//     the direction that makes working code look broken. `driftNumber` now asserts the
+//     pattern survives, which is why every fixture here goes through it.
+driftInFile(
+  "quiz-coverage figure drifts -> must FAIL",
+  path.join(ROOT, "docs", "CONTENT-SCHEMA.md"),
+  /(currently present in all )(\d+)( phases)/,
+  -21,
+);
+
+// 5e. A figure inside a QUOTED COMMAND'S OUTPUT. The worst place for a stale number, because
+//     a fenced block of build output reads as something the machine said.
+driftInFile(
+  "a figure quoted as command output drifts -> must FAIL",
+  path.join(ROOT, "docs", "CONTENT-SCHEMA.md"),
+  /(task bands:\s+)(\d+)( banded)/,
+  -31,
 );
 
 // 6. A HISTORICAL figure must NOT be flagged. The summary table records what a past pass
@@ -203,16 +277,23 @@ control(
 
 // The real tree must end exactly as it started -- the check whose absence let a fixture
 // write "all 30 lessons" into the actual document (D-058).
-const untouched = fs.readFileSync(TARGET, "utf8") === original;
-const roadmapUntouched = fs.readFileSync(ROADMAP, "utf8") === pristine(ROADMAP);
+//
+// The list is DERIVED from the snapshot map rather than typed out, so adding a fixture that
+// writes a new file cannot silently escape it. A hand-maintained list here would be the same
+// defect as the hand-maintained figures this whole guard exists to replace.
+const SNAPSHOT_FILES = [...SNAPSHOT.entries()].map(([file, want]) => ({
+  name: path.relative(ROOT, file).replace(/\\/g, "/"),
+  ok: fs.readFileSync(file, "utf8") === want,
+}));
+
 console.log("");
 for (const r of results) console.log(`  ${r.ok ? "pass" : "FAIL"}  ${r.name}`);
 console.log("");
-console.log(`  CHECKPOINT.md restored byte-identical: ${untouched}`);
-console.log(`  ROADMAP.md    restored byte-identical: ${roadmapUntouched}`);
-if (!untouched || !roadmapUntouched) {
+for (const s of SNAPSHOT_FILES) console.log(`  ${s.name.padEnd(22)} restored byte-identical: ${s.ok}`);
+const untouched = SNAPSHOT_FILES.every((s) => s.ok);
+if (!untouched) {
   console.log("  !! A fixture wrote to the REAL tree. Fixtures must restore via `pristine`.");
 }
-const allClean = results.every((r) => r.ok) && untouched && roadmapUntouched;
+const allClean = results.every((r) => r.ok) && untouched;
 console.log(allClean ? "ALL CONTROLS PASS" : `${results.filter((r) => !r.ok).length} CONTROL(S) FAILED`);
 process.exit(allClean ? 0 : 1);

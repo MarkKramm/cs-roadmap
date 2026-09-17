@@ -47,6 +47,7 @@ const runCapture = (key, args, re) => {
 
 runCapture("lessons", ["scripts/audit-lesson-ast.mjs"], /all (\d+) lessons/);
 runCapture("quizQuestions", ["scripts/audit-quiz.mjs"], /questions checked:\s*(\d+)/);
+runCapture("quizPhases", ["scripts/audit-quiz.mjs"], /phases with a quiz:\s*(\d+) of/);
 runCapture("terms", ["scripts/audit-terms.mjs"], /domain terms:\s*(\d+)/);
 runCapture("lintFiles", ["scripts/lint-content.mjs"], /(\d+) files checked/);
 
@@ -111,8 +112,23 @@ const ASSERTIONS = [
   },
   {
     key: "lessons",
-    claims: [DOC("docs/CHECKPOINT.md", /all (\d+) lessons parse/, "lesson count")],
+    claims: [
+      DOC("docs/CHECKPOINT.md", /all (\d+) lessons parse/, "lesson count"),
+      // The sweep found "all 29 lessons" twice in CONTENT-SCHEMA.md and "all 23 phases"
+      // in its closing line -- three stale counts in one document, none ever checked.
+      DOC("docs/CONTENT-SCHEMA.md", /currently reports zero loss on all (\d+) lessons/, "lesson count"),
+      DOC("docs/CONTENT-SCHEMA.md", /across all (\d+) lessons without loading/, "lesson count"),
+    ],
     why: "lessons the AST parser reads",
+  },
+  {
+    key: "quizPhases",
+    claims: [
+      // Said "10 of 31" and explained WHY IT 01 had none. The reason was the dangerous part:
+      // it made a stale absence look like deliberate design.
+      DOC("docs/CONTENT-SCHEMA.md", /currently present in all (\d+) phases/, "quizzed phase count"),
+    ],
+    why: "phases carrying a quiz, per audit-quiz",
   },
   {
     key: "quizQuestions",
@@ -124,7 +140,12 @@ const ASSERTIONS = [
   },
   {
     key: "terms",
-    claims: [DOC("docs/CHECKPOINT.md", /emits \*\*(\d+) domain terms\*\*/, "term count")],
+    claims: [
+      DOC("docs/CHECKPOINT.md", /emits \*\*(\d+) domain terms\*\*/, "term count"),
+      // Found stale by the claim sweep: this said 272 while CHECKPOINT said 274.
+      // Two documents, one number, two different values, nothing comparing them.
+      DOC("docs/DESIGN-SYSTEM.md", /defines \*\*(\d+)\*\* domain acronyms/, "term count"),
+    ],
     why: "domain terms the detector emits",
   },
   {
@@ -132,8 +153,22 @@ const ASSERTIONS = [
     claims: [
       DOC("docs/CHECKPOINT.md", /build `(\d+) banded/, "banded count"),
       DOC("docs/CHECKPOINT.md", /`build-content\.mjs` — \*\*(\d+) practice tasks banded/, "banded count"),
+      DOC("docs/CHECKPOINT.md", /\*\*(\d+) practice tasks\*\* carry authored/, "banded count"),
+      DOC("docs/ROADMAP.md", /\*\*(\d+)\*\* practice tasks carry authored/, "banded count"),
+      // Quoted build output that said 252 -- stale in a code block, which is the worst
+      // place for it because a quoted command's output reads as authoritative.
+      DOC("docs/CONTENT-SCHEMA.md", /task bands:\s+(\d+) banded/, "banded count"),
+      DOC("docs/CONTENT-SCHEMA.md", /task energy:\s+(\d+) of \d+ practice/, "banded count"),
     ],
     why: "practice tasks the build bands",
+  },
+  {
+    key: "phases",
+    claims: [
+      DOC("docs/CONTENT-SCHEMA.md", /present on all (\d+) phase files/, "phase count (total)"),
+      DOC("docs/CONTENT-SCHEMA.md", /practice-task IDs are on all (\d+) phase files/, "phase count (total)"),
+    ],
+    why: "phase files in career-roadmaps",
   },
   {
     key: "taskIds",
@@ -145,7 +180,34 @@ const ASSERTIONS = [
     claims: [DOC("docs/CHECKPOINT.md", /shared documents `(\d+)`/, "shared document count")],
     why: "shared documents the build writes",
   },
+  {
+    key: "phases",
+    // The structure block near the top of CHECKPOINT.md states the track sizes. Those are
+    // the figures a reader uses to understand the repository's shape, and nothing counted
+    // them — the sweep found "all 23 phases" and "all 29 phases" in docs and site comments
+    // long after the corpus reached 31.
+    claims: [
+      DOC("docs/CHECKPOINT.md", /it-roadmap\/\s+\((\d+) phases/, "IT phase count"),
+      DOC("docs/CHECKPOINT.md", /cybersec-roadmap\/\s+\((\d+) phases/, "cyber phase count"),
+      DOC("docs/CHECKPOINT.md", /advance-roadmap\/\s+\((\d+) phases/, "advance phase count"),
+    ],
+    why: "phase files in career-roadmaps",
+  },
 ];
+
+// The per-track measurements the structure block needs. Kept separate from `captured`
+// because each track is its own assertion rather than one scalar.
+const phaseFiles = (dir) =>
+  fs.readdirSync(path.join(ROOT, "career-roadmaps", dir)).filter((f) => /^\d{2}-phase.*\.md$/.test(f)).length;
+captured.itPhases = phaseFiles("it-roadmap");
+captured.cyberPhases = phaseFiles("cybersec-roadmap");
+captured.advancePhases = phaseFiles("advance-roadmap");
+// The total, for claims that state "all N phase files" with no track named.
+captured.phases = captured.itPhases + captured.cyberPhases + captured.advancePhases;
+
+// The claim regexes above name a track, so each must be compared against ITS OWN count,
+// not one shared scalar. Map claim -> the key that measures it.
+const TRACK_KEYS = { "IT phase count": "itPhases", "cyber phase count": "cyberPhases", "advance phase count": "advancePhases" };
 
 console.log("Measured from commands and from disk:");
 for (const [k, v] of Object.entries(captured)) console.log(`  ${k.padEnd(16)} ${v}`);
@@ -155,11 +217,22 @@ const findings = [];
 let checked = 0;
 for (const a of ASSERTIONS) {
   const actual = captured[a.key];
-  if (typeof actual !== "number" || Number.isNaN(actual)) {
+  // An assertion may mix claims resolved by the assertion's own key (the total) and claims
+  // resolved per-track through TRACK_KEYS. It is only an error when NO claim resolves.
+  const anyResolvable = a.claims.some((c) =>
+    TRACK_KEYS[c.what] ? typeof captured[TRACK_KEYS[c.what]] === "number" : typeof actual === "number",
+  );
+  if (!anyResolvable) {
     findings.push({ a, stated: "?", actual, note: "the measurement itself failed" });
     continue;
   }
   for (const c of a.claims) {
+    // A per-track claim is measured by its own track's count, not by the assertion's key.
+    const actualForClaim = TRACK_KEYS[c.what] ? captured[TRACK_KEYS[c.what]] : actual;
+    if (typeof actualForClaim !== "number" || Number.isNaN(actualForClaim)) {
+      findings.push({ a, c, stated: "?", actual: actualForClaim, note: "the measurement itself failed" });
+      continue;
+    }
     const full = path.join(ROOT, c.file);
     if (!fs.existsSync(full)) continue;
     fs.readFileSync(full, "utf8")
@@ -169,8 +242,8 @@ for (const a of ASSERTIONS) {
         if (!m) return;
         checked++;
         const stated = Number(m[1]);
-        if (stated !== actual) {
-          findings.push({ a, c, stated, actual, line: i + 1, text: line.trim().slice(0, 120) });
+        if (stated !== actualForClaim) {
+          findings.push({ a, c, stated, actual: actualForClaim, line: i + 1, text: line.trim().slice(0, 120) });
         }
       });
   }

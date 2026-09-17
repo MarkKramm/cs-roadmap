@@ -1,5 +1,8 @@
 // Read back everything the reader has written: one note per phase plus one
-// answer per practice task, gathered from all 23 phases into one page.
+// answer per practice task, gathered from every phase into one page. The page
+// takes its phases from the generated data, so it has never carried a count of
+// its own — earlier comments here said "all 23 phases", which was true when the
+// curriculum had 23 and was stale by the time it had 31.
 //
 // WHY THIS EXISTS
 // D-019 shipped the writing side and, deliberately, no reading side: a note was

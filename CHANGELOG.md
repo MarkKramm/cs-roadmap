@@ -8,6 +8,14 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### Added
 
+- **The figure guard now reads four documents instead of one, and checks 25 figures
+  instead of 13.** Extending it past `CHECKPOINT.md` found **eight more wrong figures across
+  five files** — including two in source-code comments and one quoted block of build output
+  that read as something the machine had said. See **D-066**.
+- **`driftNumber` — a shared fixture helper that refuses to test nothing.** Every
+  failure-expecting control now goes through it, and it asserts that the mutation kept the
+  guard's own pattern matching, with a different number. See **D-065**.
+
 - **A guard for the documentation's own figures** — `scripts/audit-doc-figures.mjs`, with
   seven controls in `scripts/test-audit-doc-figures.mjs`. It runs the command that prints
   each figure and fails if a document disagrees, and it is wired into CI. Six wrong numbers
@@ -344,6 +352,27 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - `learning-site/README.md` — removed a duplicated `## Layout` section; documented the new pages, hooks, and commands; status brought up to M2.
 
 ### Fixed
+
+- **Eight stale figures in documents the first sweep never opened.** Every one was
+  attached to a claim that was *still true* — "every practice task carries a band" held,
+  "front-matter is on every phase file" held — which is why nobody re-read the arithmetic:
+  the sentence was, in every sense its author checked, still accurate. See **D-066**:
+  - `DESIGN-SYSTEM.md` — "defines **272** domain acronyms" against `audit-terms`'s **274**.
+  - `CONTENT-SCHEMA.md` — build output quoted as `task bands: 252 banded` / `252 of 252`
+    against the build's **283 of 283**.
+  - `CONTENT-SCHEMA.md` — "all **29** lessons" (twice) and "all **23** phase files"; the
+    corpus has **31** of each.
+  - `ROADMAP.md` — the `Your work` page described as gathering "across all **29** phases"
+    when it is data-driven and has no count of its own.
+  - `learning-site/src/lib/yourWork.js` and `pages/YourWork.jsx` — comments describing a
+    "23-phase curriculum". **Not guarded**: no guard covers prose in source files, and that
+    limitation is now stated in `CHECKPOINT.md` rather than left implied.
+- **The most misleading stale claim found so far.** `CONTENT-SCHEMA.md` said the quiz
+  section was "currently present in **10 of 31 phases**" and explained that *"Phase 1 of IT
+  has no quiz because it is orientation rather than technique."* **All 31 phases have one,
+  IT 01 included.** The count was wrong; the **reason** was worse — a stale number invites a
+  re-count, a stale rationale does not, because it converts an absence into a deliberate
+  design decision. See **D-064**.
 
 - **Three wrong figures in `docs/CHECKPOINT.md`, all stated as current, none ever checked.**
   The summary row said **"23 content guards, 14 site suites"** — the real counts are **19**

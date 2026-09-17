@@ -1,7 +1,14 @@
 # Beginner-comprehension audit — findings
 
-A read of all 23 phases asking one question the existing guards structurally cannot:
+A read of all 23 entry-level phases asking one question the existing guards structurally cannot:
 **where does a motivated beginner with no IT background stop reading, and why?**
+
+**That figure is the count the first two passes covered, not the repository's phase count.** The
+repository now holds **31 phases** (IT 9, cyber 15, advance 7). This file's scope grew in three
+steps — 23 entry-level, then the six advance phases, then two phases and five sections no pass had
+read — and the opening line above stated 23 with no qualifier for several passes, which read as a
+claim about the corpus rather than about the audit's coverage. The paragraph below says what was
+actually covered, and when.
 
 All three passes together cover every phase that existed when each ran. The first two cover
 the 23 entry-level phases; a third, added later, covers the six advance phases — so this file

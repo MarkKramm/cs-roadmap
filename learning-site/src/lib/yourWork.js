@@ -10,14 +10,16 @@
 // WHY IT EXISTS AT ALL
 // D-019 gave the reader somewhere to write and, deliberately, nowhere to read it
 // back. A note was reachable only by navigating to the phase that owned it. On a
-// 23-phase curriculum that means writing goes in and never comes out, which is a
-// silo rather than a workspace. This module is the read side.
+// curriculum of this size — 31 phases — writing goes in and never comes out, which
+// is a silo rather than a workspace. This module is the read side.
 //
 // IT IS NOT A SCOREBOARD
 // Nothing here produces a completion measure. `summariseWork` returns raw
 // counts of what EXISTS, with no denominator — "4 phases have writing" is a
-// statement about location, not about progress, and there is no "4 of 23".
-// See docs/DECISIONS.md → D-019 and D-020.
+// statement about location, not about progress, and there is no "4 of 31".
+// The figures in this comment are read from the corpus, not maintained by hand:
+// nothing in this module depends on how many phases there are, because every
+// phase arrives as a parameter. See docs/DECISIONS.md → D-019 and D-020.
 
 /**
  * Order the reader's writing by track and phase.
