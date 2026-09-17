@@ -152,7 +152,9 @@ You will not have paid access to these services in this phase. You will read the
 
 #### Device management: how a laptop configures itself
 
-Conditional access decides *whether* a device may connect. Something else decides *what is on it* — and that is **mobile device management**, or MDM. This section exists because it is the single biggest blind spot in most beginner IT material, and because for remote work it is not optional: when the laptop ships to your home, nobody is there to set it up, so it configures itself.
+Conditional access decides *whether* a device may connect. Something else decides *what is on it* — and that is **mobile device management**, or MDM. This section exists because it is the single biggest blind spot in most beginner IT material, and because remote work is where it becomes concrete: when the laptop ships to someone's home, nobody is there to set it up by hand, so it configures itself.
+
+You do not need MDM to pass an interview, but you should be able to say what it is and why a remote-first company depends on it — and "the laptop configures itself when it arrives" is the sentence that shows you have understood the problem it solves.
 
 **The idea in one sentence.** MDM is a service that a device enrols into, and once enrolled the organisation can push settings to it, require conditions of it, and — if it is lost or stolen — wipe it remotely.
 

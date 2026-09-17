@@ -247,17 +247,22 @@ test event, you will be able to say precisely what changed.
 
 A **hypervisor** is the software that runs virtual machines. It pretends to be a complete computer so that a guest operating system can run inside it, believing it is on real hardware.
 
-The phase's tools table names VirtualBox, with VMware Player as the free alternative. Both are genuinely free, and both will complete this phase.
+The phase's tools table names VirtualBox, with VMware Workstation Pro as the alternative. Both are genuinely free, and both will complete this phase.
 
-| | VirtualBox | VMware Workstation Player |
+**A note on the VMware name, because it changed while this phase was being written.** There used to be a cut-down **VMware Workstation Player** that was free only for personal, non-commercial use, and the full **Workstation Pro** that you paid for. That is no longer how it works.
+
+In **November 2024 Broadcom made Workstation Pro free for everyone — commercial, educational and personal users alike** — and discontinued the separate Player product. So the distinction this phase used to draw between the two no longer exists: it is one free product now, and its name is **Workstation Pro**. If you find older tutorials talking about Player, or about a paid Pro licence, they are describing the pre-2024 model. The download is behind a free Broadcom account rather than a direct link, which is the one genuine friction.
+
+| | VirtualBox | VMware Workstation Pro |
 |---|---|---|
-| **Cost** | Free, open-source core | Free for personal use |
-| **Licence** | GPL — no personal-use caveat | Free *only* for non-commercial personal use |
+| **Cost** | Free, open-source core | Free for all users since November 2024 |
+| **Licence** | GPLv3 for the base package; the Extension Pack is free for personal use but paid for commercial | Free for commercial, educational and personal use alike — the paid subscription model was retired |
 | **Guest additions** | A separate download per guest OS family | Bundled, and generally smoother |
-| **Snapshots** | Unlimited, with a snapshot manager | The free Player build restricts them |
+| **Snapshots** | Unlimited, with a snapshot manager | Unlimited — the old restriction belonged to the discontinued Player build |
 | **Which to pick** | **Default recommendation** | A fine substitute if VirtualBox fights your machine |
+| **One friction** | Direct download | Requires registering a free Broadcom support account |
 
-**Use VirtualBox for this phase.** Its free tier has no licence ambiguity, its snapshot support is unlimited, and virtually every free tutorial uses its menu names verbatim.
+**Use VirtualBox for this phase.** Its licence has no registration step, its snapshot support is unlimited, and virtually every free tutorial uses its menu names verbatim.
 
 #### Host preparation: four checks before you install
 
@@ -881,7 +886,7 @@ Then assemble `portfolio/cyber/04-hands-on-labs.md` against the deliverable chec
 | Tool | What it does | Cost | Official link | Mini-task | Free alternative |
 |---|---|---|---|---|---|
 | Wazuh | Free SIEM/XDR | Free/open-source | https://wazuh.com/ | Install Wazuh, forward logs from a VM, write 3 detection rules | Elastic/Splunk free tier |
-| VirtualBox | VM platform | Free | https://www.virtualbox.org/ | Run Windows/Linux lab VMs | VMware Player personal use |
+| VirtualBox | VM platform | Free | https://www.virtualbox.org/ | Run Windows/Linux lab VMs | VMware Workstation Pro (free since Nov 2024) |
 | Sysmon | Windows telemetry | Free | https://learn.microsoft.com/sysinternals/downloads/sysmon | Send process logs to Wazuh | Windows logs only |
 | Security Onion | Blue-team monitoring distro | Free/open-source | https://securityonionsolutions.com/software/ | Optional: review docs or install if hardware allows | Wazuh + Wireshark |
 | TryHackMe | Guided cyber labs | Free/freemium | https://tryhackme.com/ | Finish free Pre Security/Cyber Security 101 rooms | PortSwigger/CyberDefenders free |

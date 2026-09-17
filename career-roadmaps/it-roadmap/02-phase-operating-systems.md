@@ -399,7 +399,13 @@ Compare this to Windows Event Viewer. Both record the same kinds of events; Linu
 
 #### macOS: the third system, and why you cannot skip it
 
-Everything so far has been Windows and Linux. That is a real gap, and it is worth closing deliberately rather than hoping it does not come up — because **remote work skews heavily toward Macs.** Startups, design agencies, and most US-based software companies issue MacBooks, and "can you support Macs?" is a question asked in the screening call, before anyone has seen your technical work. Answering "I only know Windows" costs you the interview. Answering "I support Macs at first-line level, and here is the mapping" keeps you in it.
+Everything so far has been Windows and Linux. That is a real gap, and it is worth closing deliberately rather than hoping it does not come up — because **a meaningful share of remote roles expect macOS support, and you cannot tell from the job title which ones do.** Startups, design agencies and cloud-first software companies commonly issue MacBooks, and "can you support Macs?" is a question that comes up in a screening call, before anyone has seen your technical work.
+
+If your answer is "I only know Windows", you have narrowed your options for no good reason. If it is "I support Macs at first-line level, and here is the mapping", that question stops being a problem.
+
+**Be honest about the limits of that claim.** It is a reasonable read of the remote job market, not a measured one — nobody has sampled the postings to put a number on how many roles actually require macOS. What is certain is the *cost asymmetry*: learning the mapping table costs you an afternoon, and not having it can cost you a conversation you never got to have. That is the whole argument for the next five minutes of reading, and it does not need the stronger claim.
+
+**Where this matters less:** if you are targeting on-premises, Windows-heavy environments — a hospital, a manufacturer, a local government — macOS may barely come up. The material below is cheap insurance rather than a universal requirement, and you should read it that way.
 
 The honest framing is this: **macOS is a Unix system with a friendly face.** Underneath, it is close enough to Linux that the Linux skills in Part 4 transfer almost directly. What you need is the vocabulary to move between the three systems, and that is a table, not a course.
 
@@ -1333,7 +1339,7 @@ The lesson is the reasoning; the tasks below are the doing.
 
 | Tool | What it does | Cost | Official link | Mini-task | Free alternative |
 |---|---|---|---|---|---|
-| VirtualBox | Runs virtual machines | Free | https://www.virtualbox.org/ | Install Ubuntu VM | VMware Workstation Player personal use |
+| VirtualBox | Runs virtual machines | Free | https://www.virtualbox.org/ | Install Ubuntu VM | VMware Workstation Pro (free since Nov 2024) |
 | Ubuntu Desktop/Server | Linux operating system | Free | https://ubuntu.com/download | Create user, install package, inspect logs | Debian |
 | Windows Event Viewer | Reads Windows logs | Free, built-in | https://learn.microsoft.com/windows | Find last error/warning and summarize it | PowerShell Get-EventLog |
 | PowerShell | Windows automation shell | Free, built-in | https://learn.microsoft.com/powershell/ | List services and export to text | Command Prompt |
@@ -1520,7 +1526,9 @@ VirtualBox, Ubuntu, Windows built-in tools, PowerShell, and Microsoft/Linux docs
 
 ### What's paid and why you'd upgrade
 
-Paid VM tools like VMware Workstation Pro offer advanced features, but they are unnecessary here.
+Almost nothing here is paid, and **VMware Workstation Pro is no longer an example of something that is** — Broadcom made it free for all users in November 2024, retiring the paid subscription and folding the old cut-down Player product into it. The one paid item worth naming is VirtualBox's **Extension Pack**, which is free for personal use and paid for commercial use; this phase does not need it, because host-only networking and snapshots are in the free GPL base package.
+
+So the honest answer for this phase is: there is a free option for everything, and the choice between VirtualBox and Workstation Pro is about which fights your machine less, not about cost.
 
 ### When it's worth paying
 

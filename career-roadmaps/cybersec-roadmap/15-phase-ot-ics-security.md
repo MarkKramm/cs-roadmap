@@ -1129,7 +1129,7 @@ Then open `portfolio/cyber/15-ot-ics-security.md` and assemble the deliverables.
 | pymodbus | Python library for Modbus clients and servers | Free/open-source | https://pymodbus.readthedocs.io/ | Write a script that reads and writes a register in your lab | `libmodbus`, or Scapy |
 | Wazuh | Free SIEM for collecting and alerting on logs | Free/open-source | https://wazuh.com/ | Ship Zeek logs into it and build one alert | Elastic Stack, or Splunk Free |
 | Shodan | Search engine for internet-exposed devices | Freemium | https://www.shodan.io/ | Read public documentation on exposed industrial services | Censys free tier, or reading published research instead |
-| VirtualBox | Run the lab VMs for a simulated plant | Free | https://www.virtualbox.org/ | Build a host-only network with three VMs | Hyper-V, KVM, or VMware Workstation Player |
+| VirtualBox | Run the lab VMs for a simulated plant | Free | https://www.virtualbox.org/ | Build a host-only network with three VMs | Hyper-V, KVM, or VMware Workstation Pro (free) |
 
 ## Free/cheap resources
 
