@@ -21,12 +21,30 @@ export default function NotesPanel({ phaseId, note, hasAnswers, onChange, onClea
   const [confirming, setConfirming] = useState(false);
 
   const written = note && note.trim() !== "";
+  // The Clear button deletes the phase's whole entry — the note AND every answer
+  // to its practice tasks (useNotes.clearPhase deletes `notes[phaseId]`). So it
+  // must be offered when EITHER exists, not only when the note does.
+  //
+  // It used to be gated on `written` alone, which failed both ways: a reader with
+  // six answers and no note got no button and no way to clear them, and a reader
+  // who typed one character into an otherwise-empty note got a button that wiped
+  // six answers — with a confirm dialog that did at least say so. The destructive
+  // control was gated on the wrong half of the data it destroys.
+  const hasContent = Boolean(written || hasAnswers);
 
   function handleClear() {
     onClear(phaseId);
     setConfirming(false);
     setOpen(false);
   }
+
+  // Name what will actually be lost, so the reader is confirming the real thing
+  // rather than a generic phrase that happens to be accurate for some readers.
+  const lossLabel = written && hasAnswers
+    ? "this phase's note and all your answers to it"
+    : written
+      ? "this phase's note"
+      : "all your answers to this phase";
 
   return (
     <section className={"card notes" + (open ? " notes--open" : "")}>
@@ -42,7 +60,7 @@ export default function NotesPanel({ phaseId, note, hasAnswers, onChange, onClea
             setConfirming(false);
           }}
         >
-          {open ? "Hide notes" : written ? "Your notes" : "Add a note"}
+          {open ? "Hide notes" : written ? "Your notes" : hasAnswers ? "Your answers" : "Add a note"}
         </button>
       </div>
 
@@ -74,12 +92,12 @@ export default function NotesPanel({ phaseId, note, hasAnswers, onChange, onClea
             <strong>Back up &amp; restore</strong>.
           </p>
 
-          {written && (
+          {hasContent && (
             <div className="notes__actions">
               {confirming ? (
                 <>
                   <span className="muted">
-                    Delete this phase&rsquo;s note and all your answers to it?
+                    Delete <strong>{lossLabel}</strong>? This cannot be undone.
                   </span>
                   <button type="button" className="btn btn--small" onClick={handleClear}>
                     Yes, delete
@@ -98,7 +116,7 @@ export default function NotesPanel({ phaseId, note, hasAnswers, onChange, onClea
                   className="btn btn--ghost btn--small"
                   onClick={() => setConfirming(true)}
                 >
-                  Clear this phase&rsquo;s notes
+                  {written ? "Clear this phase's notes" : "Clear this phase's answers"}
                 </button>
               )}
             </div>
