@@ -24,28 +24,31 @@ const ROOT = path.join(HERE, "..");
 const SRC = path.join(ROOT, "docs", "claims-to-verify-cyber");
 const OUT = path.join(ROOT, "docs", "claims-to-verify-cyber", "bundles");
 
-// The nine packs, in the order they should be SENT — not alphabetical order.
+// The FIVE packs still outstanding, in the order they should be SENT.
 //
-// Ordering principle: biggest payoff first, then cheapest-to-check, then the heavy
-// mechanical tail. Pack 04 leads because it is both the largest single class and
-// the one most likely to have rotted: D-038 calls a versioned standard summarised
-// in a beginner curriculum "a time bomb with a long fuse", and the OWASP A09 and
-// NIST CSF 5-vs-6 defects already found in this repo were both that class.
+// Four of the original nine are GONE from this list because they are verified:
+// standards/frameworks (105 rows), CVE (4), cryptography (5) and product versions
+// (9) completed on 2026-09-17 with zero WRONG verdicts. They are withheld by
+// `split-claims.mjs` via `done: true`, so they never reach this script -- which is
+// the fix for the confusion that made a reader re-verify finished work. If one of
+// them reappears in this folder, the splitter's WANTED_BY_TRACK list has been
+// edited and this script will pick it up and send it again.
+//
+// Ordering principle: highest expected yield first, then the mechanical tail.
+// Command/cmdlet usage leads because that class produced 3 of 3 real defects on
+// the IT pass, every one of them "right name, broken invocation" -- a shape no
+// guard can see and only a man page settles.
 //
 // `rows` is NOT declared here. It is read from the pack at build time, because a
-// hard-coded count is a number that silently disagrees with the table beside it
-// the moment the corpus changes -- the exact defect fixed in extract-claims.mjs on
-// the same day, where "216 claims" was IT's figure printed into every track.
+// hard-coded count silently disagrees with the table beside it the moment the
+// corpus moves -- the exact defect fixed in extract-claims.mjs the same day,
+// where "216 claims" was IT's figure printed into every track.
 const PLAN = [
-  { file: "04-standards-frameworks-and-control-identifiers.md", why: "Largest single class, and the most rot-prone. NIST CSF 5-vs-6 and OWASP A09 were this class." },
-  { file: "02-cve-identifiers-and-vulnerability-claims.md", why: "Tiny, and an ID paired with the wrong product is a fabrication that reads as authoritative." },
-  { file: "03-cryptography-algorithm-claims.md", why: "Tiny, and FIPS/RFC settle each one outright." },
-  { file: "08-product-versions-and-editions.md", why: "Version claims rot fastest of any class." },
-  { file: "01-mitre-att-ck-technique-identifiers.md", why: "MITRE ATT&CK IDs; the pack still carries the rows verified clean on the first pass." },
-  { file: "06-protocol-and-standard-behaviour.md", why: "RFC-settled, mechanical, unambiguous." },
-  { file: "07-registry-paths-file-paths-and-filenames.md", why: "Microsoft Learn or the OS itself. Mechanical." },
-  { file: "09-command-and-cmdlet-usage.md", why: "The class that produced 3 real defects on the IT pass. Highest expected yield." },
-  { file: "05-security-tool-commands-and-flags.md", why: "Tool man pages. Largest mechanical class; the same 'right name, broken invocation' shape." },
+  { file: "05-command-and-cmdlet-usage.md", why: "Produced 3 of 3 real defects on the IT pass, all 'right name, broken invocation'. Highest expected yield." },
+  { file: "02-security-tool-commands-and-flags.md", why: "Tool man pages settle each one. The same broken-invocation shape at larger scale." },
+  { file: "01-mitre-att-ck-technique-identifiers.md", why: "ATT&CK IDs and technique names, checked against attack.mitre.org." },
+  { file: "03-protocol-and-standard-behaviour.md", why: "RFC-settled, mechanical, unambiguous." },
+  { file: "04-registry-paths-file-paths-and-filenames.md", why: "Microsoft Learn or the OS itself. Mechanical." },
 ];
 
 // Count the data rows in a pack, so the plan above never carries a stale number.
@@ -56,6 +59,22 @@ for (const item of PLAN) {
   item.rows = countRows(item.file);
 }
 
+// Stale bundles must not survive a rebuild.
+//
+// The first version of this script wrote bundle N without removing bundle N+1 from
+// a previous, larger plan. After four classes were verified the plan shrank from
+// four bundles to three, and `04-bundle.md` -- 99 rows of already-verified work --
+// was left sitting in the folder looking exactly like outstanding work. That is
+// the failure D-038 records verbatim: a folder where nothing distinguishes done
+// from outstanding, so the obvious move is to redo finished work.
+//
+// Wipe the generated bundles before writing, and let the folder be the source of
+// truth about what is left.
+if (fs.existsSync(OUT)) {
+  for (const f of fs.readdirSync(OUT)) {
+    if (/^\d+-bundle\.md$/.test(f)) fs.rmSync(path.join(OUT, f));
+  }
+}
 fs.mkdirSync(OUT, { recursive: true });
 
 // Group packs into bundles that stay under a size a reply can actually answer.

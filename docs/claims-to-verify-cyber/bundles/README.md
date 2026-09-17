@@ -5,14 +5,14 @@ script, which regenerates from `docs/claims-to-verify-cyber/*.md`.
 
 ## Why bundles and not one paste
 
-407 rows need a verdict, a source URL and a quote each.
+284 rows need a verdict, a source URL and a quote each.
 That reply is roughly 2.5× the prompt, so one paste asks for far more back than a
 reply reliably completes — and **it will truncate.** The IT pass's 160-row command
 table came back verified through row 152 and stopped there. Nine separate pastes fix
 the truncation and reintroduce the other failure D-038 records: a folder where nothing
 says which packs are done.
 
-So: **four bundles, numbered, in the order below.** Send one, paste the answer back,
+So: **three bundles, numbered, in the order below.** Send one, paste the answer back,
 then send the next. Each is self-contained — the rules travel with every one, per
 D-038 ("no placeholders, ever").
 
@@ -20,35 +20,27 @@ D-038 ("no placeholders, ever").
 
 | # | Bundle | Rows | Classes |
 |---|---|---|---|
-| 01 | `01-bundle.md` | 123 | standards-frameworks-and-control-identifiers, cve-identifiers-and-vulnerability-claims, cryptography-algorithm-claims, product-versions-and-editions |
-| 02 | `02-bundle.md` | 125 | mitre-att-ck-technique-identifiers, protocol-and-standard-behaviour, registry-paths-file-paths-and-filenames |
-| 03 | `03-bundle.md` | 60 | command-and-cmdlet-usage |
-| 04 | `04-bundle.md` | 99 | security-tool-commands-and-flags |
+| 01 | `01-bundle.md` | 60 | command-and-cmdlet-usage |
+| 02 | `02-bundle.md` | 99 | security-tool-commands-and-flags |
+| 03 | `03-bundle.md` | 125 | mitre-att-ck-technique-identifiers, protocol-and-standard-behaviour, registry-paths-file-paths-and-filenames |
 
-**Total: 407 rows across 4 bundles.**
+**Total: 284 rows across 3 bundles.**
 
 ## Order and reasoning
 
-### Bundle 01 — 123 rows
+### Bundle 01 — 60 rows
 
-- `04-standards-frameworks-and-control-identifiers.md` (105 rows) — Largest single class, and the most rot-prone. NIST CSF 5-vs-6 and OWASP A09 were this class.
-- `02-cve-identifiers-and-vulnerability-claims.md` (4 rows) — Tiny, and an ID paired with the wrong product is a fabrication that reads as authoritative.
-- `03-cryptography-algorithm-claims.md` (5 rows) — Tiny, and FIPS/RFC settle each one outright.
-- `08-product-versions-and-editions.md` (9 rows) — Version claims rot fastest of any class.
+- `05-command-and-cmdlet-usage.md` (60 rows) — Produced 3 of 3 real defects on the IT pass, all 'right name, broken invocation'. Highest expected yield.
 
-### Bundle 02 — 125 rows
+### Bundle 02 — 99 rows
 
-- `01-mitre-att-ck-technique-identifiers.md` (34 rows) — MITRE ATT&CK IDs; the pack still carries the rows verified clean on the first pass.
-- `06-protocol-and-standard-behaviour.md` (44 rows) — RFC-settled, mechanical, unambiguous.
-- `07-registry-paths-file-paths-and-filenames.md` (47 rows) — Microsoft Learn or the OS itself. Mechanical.
+- `02-security-tool-commands-and-flags.md` (99 rows) — Tool man pages settle each one. The same broken-invocation shape at larger scale.
 
-### Bundle 03 — 60 rows
+### Bundle 03 — 125 rows
 
-- `09-command-and-cmdlet-usage.md` (60 rows) — The class that produced 3 real defects on the IT pass. Highest expected yield.
-
-### Bundle 04 — 99 rows
-
-- `05-security-tool-commands-and-flags.md` (99 rows) — Tool man pages. Largest mechanical class; the same 'right name, broken invocation' shape.
+- `01-mitre-att-ck-technique-identifiers.md` (34 rows) — ATT&CK IDs and technique names, checked against attack.mitre.org.
+- `03-protocol-and-standard-behaviour.md` (44 rows) — RFC-settled, mechanical, unambiguous.
+- `04-registry-paths-file-paths-and-filenames.md` (47 rows) — Microsoft Learn or the OS itself. Mechanical.
 
 ## After each reply
 

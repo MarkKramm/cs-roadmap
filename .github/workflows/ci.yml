@@ -149,6 +149,12 @@ jobs:
         run: node scripts/audit-claim-drift.mjs --track cybersec
       - name: Test claim-drift controls
         run: node scripts/test-audit-claim-drift.mjs
+      # A summary table in a verification record is the number a reader trusts
+      # without re-counting 123 rows. Twice during the cyber pass that table was
+      # hand-written and wrong (83/40, then 70/53) against a real 75/48. This
+      # derives the count from the rows and fails if the table disagrees.
+      - name: Verdict counts match the recorded rows
+        run: node scripts/audit-verdict-counts.mjs
       - name: Cyber bundles match their generator
         run: |
           node scripts/build-cyber-bundles.mjs

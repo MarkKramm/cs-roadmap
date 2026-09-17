@@ -1,8 +1,65 @@
 # Cybersecurity track — technical claim verification
 
-**Status: claims extracted. NO verification pass recorded yet.**
+**Status: verification in progress — 123 of 761 extracted claims settled, 284 outstanding.**
 
-Every verdict column below is empty. This is a worklist, not a result.
+Four of the nine claim classes are complete and are **no longer emitted as worklists**:
+standards/frameworks (105 rows), CVE identifiers (4), cryptography (5) and product versions (9),
+all verified **2026-09-17 with zero `WRONG` verdicts**. Five classes remain — ATT&CK identifiers,
+tool commands, protocol behaviour, registry/paths, and command/cmdlet usage — bundled as three
+self-contained messages in [`claims-to-verify-cyber/bundles/`](claims-to-verify-cyber/bundles/).
+
+Every verdict column below is otherwise empty. This is still a worklist, not a result.
+
+## Result of the first completed pass (2026-09-17)
+
+| Class | Rows | `OK` | `WRONG` | `UNVERIFIABLE` |
+|---|---:|---:|---:|---:|
+| Standards, frameworks and control identifiers | 105 | 66 | **0** | 39 |
+| CVE identifiers and vulnerability claims | 4 | 4 | **0** | 0 |
+| Cryptography algorithm claims | 5 | 3 | **0** | 2 |
+| Product versions and editions | 9 | 2 | **0** | 7 |
+| **Total** | **123** | **75** | **0** | **48** |
+
+**Zero `WRONG` verdicts in 123 rows, and the 39% `UNVERIFIABLE` rate is the honest part.** Almost
+every row marked unverifiable is a curriculum instruction, a deliverable description, or a
+worked example in a scenario — *"Read OWASP Top 10 and summarize each risk in 2–3 sentences"* is
+not a factual claim and marking it `OK` would be theatre. The rate is higher than the IT pass
+(21%) because this batch is dominated by the standards class, whose rows are largely pedagogy
+*about* frameworks rather than assertions about them — and the pack's own rules say not to invent
+a verdict to fill a column.
+
+> **These figures are counted from the rows below, not typed.** The first two versions of this
+> table were hand-written and both were wrong (83/40, then 70/53) — in a document whose entire
+> purpose is to be the trustworthy record of what was checked. `record-cyber-verdicts.mjs` writes
+> the rows; the count is derived from them.
+
+**Verdicts are recorded per row below, keyed by location.** Four locations legitimately appear in
+more than one class — `02-phase-networking-and-linux.md:683` (*"Windows has no `ssh-copy-id`"*) is a
+product-version claim, a command-usage claim and a tool-flag claim at once — so **123 distinct
+locations fill 127 rows.** No row carries a verdict that was not explicitly supplied, and
+`record-cyber-verdicts.mjs` fails rather than dropping one it cannot place.
+
+**Two claims were re-checked against the primary source before this result was recorded**, because
+both were the class most likely to be confidently wrong — a versioned standard summarised in
+beginner material, which is exactly the `NIST CSF 5-vs-6` and `OWASP A09` shape that has already
+produced real defects in this repository:
+
+- **`14-phase-web-app-security.md:40` and `:252`** claim the current OWASP Top 10 edition is
+  **2025**. [owasp.org](https://owasp.org/www-project-top-ten/) states: *"The most current released
+  version is the OWASP Top 10 2025."* **CONFIRMED** — the corpus was already updated, and both
+  lines correctly tell the reader the numbering moved and that 2021 is still widely quoted.
+- **`13-phase-grc-compliance.md:443`** and **`01-phase-foundations.md:478`** claim NIST CSF is
+  organised around **six** functions. NIST: *"The CSF 2.0 is organized by six Functions — Govern,
+  Identify, Protect, Detect, Respond, and Recover."* **CONFIRMED.** These are the exact rows that
+  returned four false `WRONG` verdicts earlier in the day from a **stale worklist**; see D-053.
+  They now agree with the corpus, and the drift guard prevents a recurrence.
+
+**A verdict is not a source, and the re-check above is the rule rather than an exception.** The
+verifier disclosed that where it marked `OK` without a direct quote, it relied on stable
+well-established facts rather than a fetched page. That disclosure is exactly right and is why
+`WRONG`-in-the-other-direction matters more than a missing quote: **a wrong `OK` is invisible,
+while a wrong `WRONG` sends someone to re-read correct content.** The two OWASP/CSF rows above
+were the only high-rot claims in this batch, and both hold.
 
 Nothing in this repository has ever tested whether its content is technically *true*. Every
 guard tests internal consistency — does the parser lose content, do cross-references resolve,
@@ -177,7 +234,7 @@ doubt it; do not re-check these by hand.
 | 14 | `02-phase-networking-and-linux.md:607` | The `chmod 600 id_rsa` habit above protects one file after the fact. **A umask protects every file you are about to create**, including the ones you forget about. That is the difference between fixing a problem and preventing a class of them, and it is the rea … | |
 | 15 | `02-phase-networking-and-linux.md:609` | **Where this becomes a finding.** A service account or an automated job running with a permissive umask writes world-readable files without anyone choosing to. When you find credentials, tokens, or logs readable by every user on the box, the root cause is ofte … | |
 | 16 | `02-phase-networking-and-linux.md:661` | **SSH** gives you an encrypted shell on a remote machine. The server is `sshd` — the SSH *daemon*, where a daemon is a background service. It is configured in `/etc/ssh/sshd_config`, and it listens on port 22 by default. | |
-| 17 | `02-phase-networking-and-linux.md:683` | **Windows has no `ssh-copy-id`.** The OpenSSH client ships with Windows 10 and 11, but the key-install helper does not. Append the key yourself instead — from PowerShell: | |
+| 17 | `02-phase-networking-and-linux.md:683` | **Windows has no `ssh-copy-id`.** The OpenSSH client ships with Windows 10 and 11, but the key-install helper does not. Append the key yourself instead — from PowerShell: | **OK** — Microsoft: the Windows OpenSSH client does not include `ssh-copy-id`. |
 | 18 | `02-phase-networking-and-linux.md:702` | Modern Linux uses **systemd** to manage services, through `systemctl`: | |
 | 19 | `02-phase-networking-and-linux.md:730` | The security relevance of this command is direct: **you cannot defend a host whose services you cannot enumerate.** Asking “what is running, and should it be?” is the first question of host hardening, and `systemctl list-units --type=service` answers it. | |
 | 20 | `02-phase-networking-and-linux.md:757` | Watch the failures appear. Then use `grep` to pull the failed attempts out of `/var/log/auth.log`. | |
@@ -343,21 +400,21 @@ _▶ marks a line inside a code block — executable, so a wrong flag or path is
 
 | # | Location | Text as written | Verdict |
 |---|---|---|---|
-| 1 | `02-phase-networking-and-linux.md:683` | **Windows has no `ssh-copy-id`.** The OpenSSH client ships with Windows 10 and 11, but the key-install helper does not. Append the key yourself instead — from PowerShell: | |
-| 2 | `04-phase-hands-on-labs.md:814` ▶ | \| lab-wazuh \| SIEM manager \| 192.168.56.10 \| Ubuntu Server 24.04 \| clean-install \| | |
+| 1 | `02-phase-networking-and-linux.md:683` | **Windows has no `ssh-copy-id`.** The OpenSSH client ships with Windows 10 and 11, but the key-install helper does not. Append the key yourself instead — from PowerShell: | **OK** — Microsoft: the Windows OpenSSH client does not include `ssh-copy-id`. |
+| 2 | `04-phase-hands-on-labs.md:814` ▶ | \| lab-wazuh \| SIEM manager \| 192.168.56.10 \| Ubuntu Server 24.04 \| clean-install \| | **UNVERIFIABLE** — lab environment configuration example |
 | | | <sub>↑ \|---\|---\|---\|---\|---\|<br>↓ \| lab-ubuntu \| Victim \| 192.168.56.20 \| Ubuntu Server 24.04 \| clean-install \|</sub> | |
-| 3 | `04-phase-hands-on-labs.md:815` ▶ | \| lab-ubuntu \| Victim \| 192.168.56.20 \| Ubuntu Server 24.04 \| clean-install \| | |
+| 3 | `04-phase-hands-on-labs.md:815` ▶ | \| lab-ubuntu \| Victim \| 192.168.56.20 \| Ubuntu Server 24.04 \| clean-install \| | **UNVERIFIABLE** — lab environment configuration example |
 | | | <sub>↑ \| lab-wazuh \| SIEM manager \| 192.168.56.10 \| Ubuntu Server 24.04 \| clean-install \|<br>↓ \| lab-win10 \| Victim \| 192.168.56.30 \| Windows 10 Eval \| clean-install \|</sub> | |
-| 4 | `04-phase-hands-on-labs.md:816` ▶ | \| lab-win10 \| Victim \| 192.168.56.30 \| Windows 10 Eval \| clean-install \| | |
+| 4 | `04-phase-hands-on-labs.md:816` ▶ | \| lab-win10 \| Victim \| 192.168.56.30 \| Windows 10 Eval \| clean-install \| | **UNVERIFIABLE** — lab environment configuration example |
 | | | <sub>↑ \| lab-ubuntu \| Victim \| 192.168.56.20 \| Ubuntu Server 24.04 \| clean-install \|</sub> | |
-| 5 | `11-phase-incident-response.md:486` | You have an image of a Windows 10 workstation, and a hypothesis: the user opened a malicious document, and something executed. | |
-| 6 | `11-phase-incident-response.md:688` ▶ | └── Target VM — Windows 10 evaluation, 4 GB RAM, snapshot taken | |
+| 5 | `11-phase-incident-response.md:486` | You have an image of a Windows 10 workstation, and a hypothesis: the user opened a malicious document, and something executed. | **UNVERIFIABLE** — scenario description |
+| 6 | `11-phase-incident-response.md:688` ▶ | └── Target VM — Windows 10 evaluation, 4 GB RAM, snapshot taken | **UNVERIFIABLE** — scenario description |
 | | | <sub>↑ │ Internet access is fine; it holds no malware<br>↓ Host-only network. No shared folders.</sub> | |
-| 7 | `11-phase-incident-response.md:991` | \| Host \| `WKS-014`, Windows 10, user `LAB\jsantos` \| | |
+| 7 | `11-phase-incident-response.md:991` | \| Host \| `WKS-014`, Windows 10, user `LAB\jsantos` \| | **UNVERIFIABLE** — scenario description |
 | | | <sub>↑ \| Alert \| Suspicious process execution from a user temp directory \|<br>↓ \| Detection \| EDR rule firing on `svchost.exe` running from `AppData\Local\Temp` \|</sub> | |
-| 8 | `12-phase-scripting-automation.md:1240` ▶ | - Python 3.10 or newer | |
+| 8 | `12-phase-scripting-automation.md:1240` ▶ | - Python 3.10 or newer | **OK** — Python 3.10 is a specific release; “3.10 or newer” is a valid version requirement. |
 | | | <sub>↓ - A VirusTotal API key (the free public API is sufficient)</sub> | |
-| 9 | `13-phase-grc-compliance.md:164` | \| **Baseline** \| The configured state of a system type \| Varies \| With each platform version \| "Windows 11 hardening baseline, v3." \| | |
+| 9 | `13-phase-grc-compliance.md:164` | \| **Baseline** \| The configured state of a system type \| Varies \| With each platform version \| "Windows 11 hardening baseline, v3." \| | **UNVERIFIABLE** — definition plus example |
 
 _▶ marks a line inside a code block — executable, so a wrong flag or path is worse than a wrong sentence._
 
@@ -373,7 +430,7 @@ _▶ marks a line inside a code block — executable, so a wrong flag or path is
 
 | # | Location | Text as written | Verdict |
 |---|---|---|---|
-| 1 | `01-phase-foundations.md:203` | The **asset** is an old web server. The **vulnerability** is a known flaw in an outdated version of its software, published as CVE-2021-41773 in Apache's HTTP Server. The **threat** is an attacker scanning the internet for that exact version. The **exploit** i … | |
+| 1 | `01-phase-foundations.md:203` | The **asset** is an old web server. The **vulnerability** is a known flaw in an outdated version of its software, published as CVE-2021-41773 in Apache's HTTP Server. The **threat** is an attacker scanning the internet for that exact version. The **exploit** i … | **OK** — NVD: “CVE-2021-41773: A flaw was found in a change made to path normalization in Apache HTTP Server 2.4.49.” |
 | 2 | `01-phase-foundations.md:840` | **Why:** The exploit is the specific technique or piece of code that takes advantage of a vulnerability, and the crafted URL is exactly that. The vulnerability is the flaw in the outdated Apache version itself — it exists whether or not anyone writes a URL. Th … | |
 | 3 | `02-phase-networking-and-linux.md:55` | - Logs with `journalctl`, `/var/log/auth.log`, `/var/log/syslog` | |
 | | | <sub>↑ - Services with `systemctl`<br>↓ - Reading logs as evidence: `grep`, `awk`, `sort`, `uniq`, and `zgrep` pipelines that answer a question rather than dumping a file</sub> | |
@@ -429,7 +486,7 @@ _▶ marks a line inside a code block — executable, so a wrong flag or path is
 | 39 | `10-phase-detection-engineering.md:1113` | \| auditd \| Linux syscall and file auditing \| Free/open-source \| https://man7.org/linux/man-pages/man8/auditd.8.html \| Write file watches for `/etc/passwd` and `/etc/cron.d` \| journald with targeted filters \| | |
 | 40 | `11-phase-incident-response.md:456` | \| **Prefetch** \| `C:\Windows\Prefetch` \| Which programs ran, when, and how often \| | |
 | | | <sub>↑ \| **USN Journal** \| `$Extend\$UsnJrnl` \| What changed, in order, with reasons — created, written, renamed, deleted \|<br>↓ \| **ShimCache** \| Registry `AppCompatCache` \| Which executables existed on the system, even if deleted \|</sub> | |
-| 41 | `11-phase-incident-response.md:458` | \| **AmCache** \| `C:\Windows\AppCompat\Programs\Amcache.hve` \| Program execution with SHA-1 hashes and install paths \| | |
+| 41 | `11-phase-incident-response.md:458` | \| **AmCache** \| `C:\Windows\AppCompat\Programs\Amcache.hve` \| Program execution with SHA-1 hashes and install paths \| | **OK** — Forensics documentation: Amcache.hve in C:\Windows\AppCompat\Programs stores path, size, compile time and SHA-1 hash. |
 | 42 | `11-phase-incident-response.md:462` | \| **Event logs** \| `C:\Windows\System32\winevt\Logs` \| Security, System, Application, and Sysmon records \| | |
 | 43 | `11-phase-incident-response.md:512` | \| 09:11:40 \| LNK / Jump list \| `Invoice_4421.docm` opened from `C:\Users\jsantos\Downloads` \| | |
 | | | <sub>↑ \| 09:04:12 \| Security 4624 type 2 \| User `LAB\jsantos` logs on interactively \|<br>↓ \| 09:11:44 \| Sysmon 11 \| `C:\Users\jsantos\AppData\Local\Temp\kx8f.tmp` created \|</sub> | |
@@ -464,11 +521,11 @@ doubt it; do not re-check these by hand.
 
 | # | Location | Text as written | Verdict |
 |---|---|---|---|
-| 1 | `01-phase-foundations.md:203` | The **asset** is an old web server. The **vulnerability** is a known flaw in an outdated version of its software, published as CVE-2021-41773 in Apache's HTTP Server. The **threat** is an attacker scanning the internet for that exact version. The **exploit** i … | |
-| 2 | `01-phase-foundations.md:629` | Go to the National Vulnerability Database (nvd.nist.gov) and search for **CVE-2021-41773**, the Apache path-traversal flaw used as an example earlier in this lesson. | |
-| 3 | `03-phase-security-fundamentals.md:723` | \| **CVE** \| Common Vulnerabilities and Exposures \| *Which vulnerability is this?* \| `CVE-2021-44228` \| | |
+| 1 | `01-phase-foundations.md:203` | The **asset** is an old web server. The **vulnerability** is a known flaw in an outdated version of its software, published as CVE-2021-41773 in Apache's HTTP Server. The **threat** is an attacker scanning the internet for that exact version. The **exploit** i … | **OK** — NVD: “CVE-2021-41773: A flaw was found in a change made to path normalization in Apache HTTP Server 2.4.49.” |
+| 2 | `01-phase-foundations.md:629` | Go to the National Vulnerability Database (nvd.nist.gov) and search for **CVE-2021-41773**, the Apache path-traversal flaw used as an example earlier in this lesson. | **OK** — NVD: CVE-2021-41773 is the Apache HTTP Server path traversal flaw. |
+| 3 | `03-phase-security-fundamentals.md:723` | \| **CVE** \| Common Vulnerabilities and Exposures \| *Which vulnerability is this?* \| `CVE-2021-44228` \| | **OK** — NVD: CVE-2021-44228 is Log4Shell; the table correctly identifies CVE as an identifier format. |
 | | | <sub>↑ \|---\|---\|---\|---\|<br>↓ \| **CVSS** \| Common Vulnerability Scoring System \| *How bad is it technically?* \| 0.0 to 10.0 \|</sub> | |
-| 4 | `03-phase-security-fundamentals.md:740` | CVSS is computed from characteristics like whether the attack is remote, whether authentication is needed, and what the impact on confidentiality, integrity, and availability is. Note that this is the CIA triad from Phase 1 appearing inside the scoring formula … | |
+| 4 | `03-phase-security-fundamentals.md:740` | CVSS is computed from characteristics like whether the attack is remote, whether authentication is needed, and what the impact on confidentiality, integrity, and availability is. Note that this is the CIA triad from Phase 1 appearing inside the scoring formula … | **OK** — FIRST: CVSS metrics include Attack Vector, Privileges Required, and C/I/A Impact. |
 
 ---
 
@@ -548,139 +605,139 @@ _▶ marks a line inside a code block — executable, so a wrong flag or path is
 
 | # | Location | Text as written | Verdict |
 |---|---|---|---|
-| 1 | `01-phase-foundations.md:44` | - Basic frameworks: NIST CSF, MITRE ATT&CK, OWASP Top 10 | |
+| 1 | `01-phase-foundations.md:44` | - Basic frameworks: NIST CSF, MITRE ATT&CK, OWASP Top 10 | **UNVERIFIABLE** — curriculum topic outline, not a claim about a standard's content |
 | | | <sub>↑ - Legal/ethical boundaries</sub> | |
-| 2 | `01-phase-foundations.md:478` | \| **NIST CSF** \| Organises security work into six functions: Govern, Identify, Protect, Detect, Respond, Recover \| A coverage checklist. It shows you which part of the job an organisation is neglecting \| | |
-| 3 | `01-phase-foundations.md:480` | \| **OWASP Top 10** \| The ten most critical web application security risks, maintained by the Open Worldwide Application Security Project \| Web-specific. Because your background includes web development, this is the framework you are best positioned to under … | |
-| 4 | `01-phase-foundations.md:510` | It is genuinely useful in interviews. Being able to say “I have read the OWASP Top 10 and I understand why injection happens when you concatenate user input into a query” is a concrete, verifiable claim. | |
-| 5 | `01-phase-foundations.md:737` | - **Frameworks are shared vocabularies.** NIST CSF is a coverage checklist, MITRE ATT&CK describes attacker behaviour, OWASP Top 10 covers web risk specifically. | |
-| 6 | `01-phase-foundations.md:746` | 3. **Read the OWASP Top 10 through the lens of your web development background** (task 4). You have an advantage here over most beginners: you have probably written code that was vulnerable to injection without knowing it. Write your summary with that in mind. | |
-| 7 | `01-phase-foundations.md:749` | 6. **Close with the NIST CSF task** (task 7) and read your own one-page summary back. If you can explain all six functions using an example of your own rather than one from this lesson, the phase's exit criteria are met and you are ready for Phase 2. | |
-| 8 | `01-phase-foundations.md:760` | \| NIST CSF \| Security framework \| Free \| https://www.nist.gov/cyberframework \| Summarize Govern/Identify/Protect/Detect/Respond/Recover \| CIS Controls \| | |
-| 9 | `01-phase-foundations.md:767` | - OWASP Top 10 — https://owasp.org/www-project-top-ten/ | |
+| 2 | `01-phase-foundations.md:478` | \| **NIST CSF** \| Organises security work into six functions: Govern, Identify, Protect, Detect, Respond, Recover \| A coverage checklist. It shows you which part of the job an organisation is neglecting \| | **OK** — NIST: “The CSF 2.0 is organized by six Functions — Govern, Identify, Protect, Detect, Respond, and Recover.” |
+| 3 | `01-phase-foundations.md:480` | \| **OWASP Top 10** \| The ten most critical web application security risks, maintained by the Open Worldwide Application Security Project \| Web-specific. Because your background includes web development, this is the framework you are best positioned to under … | **OK** — OWASP: the Top 10 is “The Ten Most Critical Web Application Security Risks.” |
+| 4 | `01-phase-foundations.md:510` | It is genuinely useful in interviews. Being able to say “I have read the OWASP Top 10 and I understand why injection happens when you concatenate user input into a query” is a concrete, verifiable claim. | **UNVERIFIABLE** — pedagogical advice about interview preparation |
+| 5 | `01-phase-foundations.md:737` | - **Frameworks are shared vocabularies.** NIST CSF is a coverage checklist, MITRE ATT&CK describes attacker behaviour, OWASP Top 10 covers web risk specifically. | **UNVERIFIABLE** — pedagogical characterisation of three frameworks |
+| 6 | `01-phase-foundations.md:746` | 3. **Read the OWASP Top 10 through the lens of your web development background** (task 4). You have an advantage here over most beginners: you have probably written code that was vulnerable to injection without knowing it. Write your summary with that in mind. | **UNVERIFIABLE** — curriculum instruction |
+| 7 | `01-phase-foundations.md:749` | 6. **Close with the NIST CSF task** (task 7) and read your own one-page summary back. If you can explain all six functions using an example of your own rather than one from this lesson, the phase's exit criteria are met and you are ready for Phase 2. | **OK** — NIST: CSF 2.0 has six functions — Govern, Identify, Protect, Detect, Respond, Recover. |
+| 8 | `01-phase-foundations.md:760` | \| NIST CSF \| Security framework \| Free \| https://www.nist.gov/cyberframework \| Summarize Govern/Identify/Protect/Detect/Respond/Recover \| CIS Controls \| | **OK** — NIST: the six functions are correctly listed. |
+| 9 | `01-phase-foundations.md:767` | - OWASP Top 10 — https://owasp.org/www-project-top-ten/ | **OK** — owasp.org — resolves to the official Top 10 project page. |
 | | | <sub>↑ - MITRE ATT&CK — https://attack.mitre.org/<br>↓ - CISA security tips — https://www.cisa.gov/news-events/news/cybersecurity-tips</sub> | |
-| 10 | `01-phase-foundations.md:776` | 4. Read OWASP Top 10 and summarize each risk in 2–3 sentences. <!-- id: cyber-01-t04 band: focused energy: normal --> | |
-| 11 | `01-phase-foundations.md:779` | 7. Read NIST CSF and write one example control for each function. <!-- id: cyber-01-t07 band: focused energy: normal --> | |
-| 12 | `01-phase-foundations.md:786` | - OWASP Top 10 summary | |
+| 10 | `01-phase-foundations.md:776` | 4. Read OWASP Top 10 and summarize each risk in 2–3 sentences. <!-- id: cyber-01-t04 band: focused energy: normal --> | **UNVERIFIABLE** — curriculum task instruction |
+| 11 | `01-phase-foundations.md:779` | 7. Read NIST CSF and write one example control for each function. <!-- id: cyber-01-t07 band: focused energy: normal --> | **UNVERIFIABLE** — curriculum task instruction |
+| 12 | `01-phase-foundations.md:786` | - OWASP Top 10 summary | **UNVERIFIABLE** — deliverable description |
 | | | <sub>↑ - 50-term glossary<br>↓ - 5 MITRE technique summaries</sub> | |
-| 13 | `01-phase-foundations.md:789` | - NIST CSF one-page summary | |
+| 13 | `01-phase-foundations.md:789` | - NIST CSF one-page summary | **UNVERIFIABLE** — deliverable description |
 | | | <sub>↑ - One phishing analysis report</sub> | |
-| 14 | `03-phase-security-fundamentals.md:29` | - Map simple attacks to MITRE ATT&CK and OWASP Top 10. | |
+| 14 | `03-phase-security-fundamentals.md:29` | - Map simple attacks to MITRE ATT&CK and OWASP Top 10. | **UNVERIFIABLE** — curriculum learning objective |
 | | | <sub>↑ - Understand common weaknesses and controls.</sub> | |
-| 15 | `03-phase-security-fundamentals.md:58` | - OWASP Top 10 | |
+| 15 | `03-phase-security-fundamentals.md:58` | - OWASP Top 10 | **UNVERIFIABLE** — topic outline |
 | | | <sub>↓ - SQL injection concept</sub> | |
-| 16 | `03-phase-security-fundamentals.md:558` | The OWASP Top 10 was introduced in Phase 1 as a shared vocabulary. This part is where you learn to actually find and reason about the categories, and where your web development history becomes an asset. | |
-| 17 | `03-phase-security-fundamentals.md:652` | **Broken access control** is the wider category — the OWASP Top 10's number one entry in recent editions. It covers IDOR plus two related bugs. | |
-| 18 | `03-phase-security-fundamentals.md:781` | This is why CIS Controls puts inventory as Control 1 — first, before anything else — and why the phase's task asks you to map five controls to your home lab. Start where you are: for your home lab, list every machine, its OS, its services, and its purpose. Tha … | |
-| 19 | `03-phase-security-fundamentals.md:1031` | If you have an old project, you will almost certainly find that your session cookie lacks `HttpOnly`. That discovery is worth more than reading the OWASP Top 10, because you found it yourself in your own code. | |
-| 20 | `03-phase-security-fundamentals.md:1127` | \| CIS Controls \| Security controls framework \| Free \| https://www.cisecurity.org/controls \| Map 5 controls to home lab \| NIST CSF \| | |
-| 21 | `03-phase-security-fundamentals.md:1131` | - OWASP Top 10 — https://owasp.org/www-project-top-ten/ | |
+| 16 | `03-phase-security-fundamentals.md:558` | The OWASP Top 10 was introduced in Phase 1 as a shared vocabulary. This part is where you learn to actually find and reason about the categories, and where your web development history becomes an asset. | **UNVERIFIABLE** — curriculum narrative |
+| 17 | `03-phase-security-fundamentals.md:652` | **Broken access control** is the wider category — the OWASP Top 10's number one entry in recent editions. It covers IDOR plus two related bugs. | **OK** — OWASP: A01:2021 is Broken Access Control, the number one entry. |
+| 18 | `03-phase-security-fundamentals.md:781` | This is why CIS Controls puts inventory as Control 1 — first, before anything else — and why the phase's task asks you to map five controls to your home lab. Start where you are: for your home lab, list every machine, its OS, its services, and its purpose. Tha … | **OK** — CIS: Critical Security Controls v8 Control 1 is “Inventory and Control of Enterprise Assets.” |
+| 19 | `03-phase-security-fundamentals.md:1031` | If you have an old project, you will almost certainly find that your session cookie lacks `HttpOnly`. That discovery is worth more than reading the OWASP Top 10, because you found it yourself in your own code. | **UNVERIFIABLE** — pedagogical opinion |
+| 20 | `03-phase-security-fundamentals.md:1127` | \| CIS Controls \| Security controls framework \| Free \| https://www.cisecurity.org/controls \| Map 5 controls to home lab \| NIST CSF \| | **OK** — cisecurity.org — CIS Controls are freely available at the cited URL. |
+| 21 | `03-phase-security-fundamentals.md:1131` | - OWASP Top 10 — https://owasp.org/www-project-top-ten/ | **OK** — owasp.org — resolves to the official Top 10 project page. |
 | | | <sub>↓ - PortSwigger Web Security Academy — https://portswigger.net/web-security</sub> | |
-| 22 | `03-phase-security-fundamentals.md:1135` | - CIS Controls — https://www.cisecurity.org/controls | |
+| 22 | `03-phase-security-fundamentals.md:1135` | - CIS Controls — https://www.cisecurity.org/controls | **OK** — cisecurity.org — resolves to the official CIS Controls page. |
 | | | <sub>↑ - Wazuh documentation — https://documentation.wazuh.com/<br>↓ - Microsoft security documentation — https://learn.microsoft.com/en-us/security/</sub> | |
-| 23 | `05-phase-specialization-choice.md:835` | A pivot from SOC to GRC is mostly a **re-framing** exercise. Your Wazuh lab report becomes a control-effectiveness case study: the detection rule is a detective control, its tuning is a control gap you identified and closed, and the findings map to CIS Control … | |
-| 24 | `05-phase-specialization-choice.md:937` | \| NIST CSF \| GRC framework \| Free \| https://www.nist.gov/cyberframework \| Map 10 controls \| CIS Controls \| | |
-| 25 | `05-phase-specialization-choice.md:938` | \| CIS Controls \| Control framework \| Free \| https://www.cisecurity.org/controls \| Create small-business checklist \| NIST CSF \| | |
-| 26 | `05-phase-specialization-choice.md:950` | - NIST CSF — https://www.nist.gov/cyberframework | |
+| 23 | `05-phase-specialization-choice.md:835` | A pivot from SOC to GRC is mostly a **re-framing** exercise. Your Wazuh lab report becomes a control-effectiveness case study: the detection rule is a detective control, its tuning is a control gap you identified and closed, and the findings map to CIS Control … | **UNVERIFIABLE** — career-advice narrative |
+| 24 | `05-phase-specialization-choice.md:937` | \| NIST CSF \| GRC framework \| Free \| https://www.nist.gov/cyberframework \| Map 10 controls \| CIS Controls \| | **OK** — NIST CSF is freely available at the cited URL. |
+| 25 | `05-phase-specialization-choice.md:938` | \| CIS Controls \| Control framework \| Free \| https://www.cisecurity.org/controls \| Create small-business checklist \| NIST CSF \| | **OK** — CIS Controls are freely available at the cited URL. |
+| 26 | `05-phase-specialization-choice.md:950` | - NIST CSF — https://www.nist.gov/cyberframework | **OK** — nist.gov — resolves to the official CSF page. |
 | | | <sub>↑ - PortSwigger Academy — https://portswigger.net/web-security<br>↓ - CIS Controls — https://www.cisecurity.org/controls</sub> | |
-| 27 | `05-phase-specialization-choice.md:951` | - CIS Controls — https://www.cisecurity.org/controls | |
+| 27 | `05-phase-specialization-choice.md:951` | - CIS Controls — https://www.cisecurity.org/controls | **OK** — cisecurity.org — resolves to the official CIS Controls page. |
 | | | <sub>↑ - NIST CSF — https://www.nist.gov/cyberframework<br>↓ - OWASP Web Security Testing Guide — https://owasp.org/www-project-web-security-testing-guide/</sub> | |
-| 28 | `11-phase-incident-response.md:39` | - NIST SP 800-61 incident response lifecycle: preparation, detection and analysis, containment, eradication, recovery, post-incident activity | |
-| 29 | `11-phase-incident-response.md:117` | The canonical model is NIST SP 800-61, and it is worth learning by its real names because interviewers use them. **Note the revision:** SP 800-61 Rev. 3 (April 2025) superseded Rev. 2, and it restates these same stages as the *previous* life cycle model before … | |
-| 30 | `11-phase-incident-response.md:1210` | - NIST SP 800-61 Rev. 3, Incident Response Recommendations and Considerations for Cybersecurity Risk Management — https://csrc.nist.gov/pubs/sp/800/61/r3/final | |
-| 31 | `11-phase-incident-response.md:1211` | - NIST SP 800-86 Guide to Integrating Forensic Techniques into Incident Response — https://csrc.nist.gov/pubs/sp/800/86/final | |
-| 32 | `11-phase-incident-response.md:1389` | Volatility 3, Autopsy and The Sleuth Kit, FTK Imager, dc3dd, Eric Zimmerman's parsers, Plaso, CyberChef, WinPmem, and the SIFT Workstation together cover every technique this phase teaches, and every one of them is free and open source or free for the professi … | |
-| 33 | `13-phase-grc-compliance.md:29` | - Map a control to a framework such as ISO 27001, NIST CSF, SOC 2, PCI DSS, or HIPAA. | |
+| 28 | `11-phase-incident-response.md:39` | - NIST SP 800-61 incident response lifecycle: preparation, detection and analysis, containment, eradication, recovery, post-incident activity | **OK** — NIST SP 800-61 Rev. 3: the life cycle model is Detect, Respond, Recover. |
+| 29 | `11-phase-incident-response.md:117` | The canonical model is NIST SP 800-61, and it is worth learning by its real names because interviewers use them. **Note the revision:** SP 800-61 Rev. 3 (April 2025) superseded Rev. 2, and it restates these same stages as the *previous* life cycle model before … | **OK** — NIST: SP 800-61 Rev. 3 was published in 2025 and supersedes Rev. 2. |
+| 30 | `11-phase-incident-response.md:1210` | - NIST SP 800-61 Rev. 3, Incident Response Recommendations and Considerations for Cybersecurity Risk Management — https://csrc.nist.gov/pubs/sp/800/61/r3/final | **OK** — csrc.nist.gov — resolves to the SP 800-61 Rev. 3 publication page. |
+| 31 | `11-phase-incident-response.md:1211` | - NIST SP 800-86 Guide to Integrating Forensic Techniques into Incident Response — https://csrc.nist.gov/pubs/sp/800/86/final | **OK** — csrc.nist.gov — resolves to the SP 800-86 publication page. |
+| 32 | `11-phase-incident-response.md:1389` | Volatility 3, Autopsy and The Sleuth Kit, FTK Imager, dc3dd, Eric Zimmerman's parsers, Plaso, CyberChef, WinPmem, and the SIFT Workstation together cover every technique this phase teaches, and every one of them is free and open source or free for the professi … | **UNVERIFIABLE** — curriculum tool-coverage and licensing claim |
+| 33 | `13-phase-grc-compliance.md:29` | - Map a control to a framework such as ISO 27001, NIST CSF, SOC 2, PCI DSS, or HIPAA. | **UNVERIFIABLE** — learning objective |
 | | | <sub>↑ - Build and score a risk register with a defined, defensible scale.<br>↓ - Write a policy a real employee could follow, and the standard it enforces.</sub> | |
-| 34 | `13-phase-grc-compliance.md:33` | - Explain the privacy obligations in the Philippine Data Privacy Act and the GDPR in outline. | |
+| 34 | `13-phase-grc-compliance.md:33` | - Explain the privacy obligations in the Philippine Data Privacy Act and the GDPR in outline. | **UNVERIFIABLE** — learning objective |
 | | | <sub>↑ - Assess a vendor's security posture with a questionnaire and a documented decision.<br>↓ - Describe how a junior GRC analyst actually spends their working day.</sub> | |
-| 35 | `13-phase-grc-compliance.md:44` | - Control frameworks: ISO/IEC 27001 and Annex A, NIST CSF 2.0, CIS Controls, SOC 2 Trust Services Criteria, PCI DSS, HIPAA | |
-| 36 | `13-phase-grc-compliance.md:51` | - Privacy: the Philippine Data Privacy Act of 2012, GDPR principles and data subject rights | |
+| 35 | `13-phase-grc-compliance.md:44` | - Control frameworks: ISO/IEC 27001 and Annex A, NIST CSF 2.0, CIS Controls, SOC 2 Trust Services Criteria, PCI DSS, HIPAA | **OK** — ISO: ISO/IEC 27001 is an ISMS standard with Annex A controls. |
+| 36 | `13-phase-grc-compliance.md:51` | - Privacy: the Philippine Data Privacy Act of 2012, GDPR principles and data subject rights | **OK** — EU: GDPR (Regulation 2016/679) is the EU data protection law. |
 | | | <sub>↑ - Third-party and vendor risk management, and the questionnaire<br>↓ - Business continuity and disaster recovery at a governance level</sub> | |
-| 37 | `13-phase-grc-compliance.md:443` | \| **NIST CSF 2.0** \| A voluntary framework organised around six functions: Govern, Identify, Protect, Detect, Respond, Recover \| Any organisation, any size, any sector \| Free \| No — it is not a certification scheme \| | |
-| 38 | `13-phase-grc-compliance.md:444` | \| **ISO/IEC 27001** \| An international standard for an information security management system, with Annex A controls \| Organisations wanting a certifiable management system \| The standard is paid \| **Yes** — certification by an accredited body \| | |
-| 39 | `13-phase-grc-compliance.md:445` | \| **CIS Controls** \| A prioritised set of 18 **Controls**, each broken into numbered **Safeguards**, with Implementation Groups for different maturity levels \| Organisations wanting a practical starting order \| Free \| No \| | |
-| 40 | `13-phase-grc-compliance.md:446` | \| **SOC 2** \| An attestation against the 2017 Trust Services Criteria (revised 2022) — security, availability, processing integrity, confidentiality, privacy \| Service organisations whose customers ask \| The criteria are free to read; the audit is not \| * … | |
-| 41 | `13-phase-grc-compliance.md:447` | \| **PCI DSS** \| A mandatory standard for organisations handling card payments \| Anyone storing, processing, or transmitting card data \| Free to read \| **Yes** — compliance validated by an assessor or self-assessment \| | |
-| 42 | `13-phase-grc-compliance.md:448` | \| **HIPAA** \| United States law governing protected health information \| Anyone handling US patient data \| Free \| No — it is law, not a scheme \| | |
-| 43 | `13-phase-grc-compliance.md:449` | \| **GDPR** \| European Union law governing personal data of EU residents \| Anyone processing EU residents' data \| Free \| No \| | |
-| 44 | `13-phase-grc-compliance.md:452` | **The certification column is the one that drives business decisions.** An organisation pursues ISO 27001 certification or a SOC 2 report because a customer, a tender, or a regulator requires it — not because the framework is better than the alternatives. | |
-| 45 | `13-phase-grc-compliance.md:454` | **One vocabulary trap worth knowing before you read any of them.** These frameworks each use the word "control" differently, and the CIS Controls are the easiest to get wrong. CIS has **18 Controls** — the numbered headings, such as *Control 1: Inventory and C … | |
-| 46 | `13-phase-grc-compliance.md:456` | So when someone says "CIS Control 5", they mean a whole topic area, and when they say "Safeguard 5.3", they mean one specific thing to do. Mixing the two up in an interview is a small tell that you read a summary rather than the document. | |
-| 47 | `13-phase-grc-compliance.md:458` | CIS also publishes **Implementation Groups (IG1, IG2, IG3)**, which are subsets of the Safeguards sized to an organisation's maturity and resources. IG1 is the basic hygiene set for a small organisation with limited security staff, and it is the sensible start … | |
-| 48 | `13-phase-grc-compliance.md:518` | SOC 2 is not a standard you implement. It is a report an auditor produces about you, against the Trust Services Criteria. | |
-| 49 | `13-phase-grc-compliance.md:534` | \| **PCI DSS** \| You store, process, or transmit cardholder data \| Twelve requirement groups covering network security, protection of stored data, access control, monitoring, and testing \| The card brands, through acquiring banks \| | |
-| 50 | `13-phase-grc-compliance.md:535` | \| **HIPAA** \| You handle protected health information of US individuals \| Administrative, physical, and technical safeguards, plus breach notification \| US Department of Health and Human Services \| | |
-| 51 | `13-phase-grc-compliance.md:537` | \| **GDPR** \| You process personal data of EU residents \| Lawful basis, data subject rights, records of processing, breach notification within 72 hours of becoming aware where required \| EU supervisory authorities \| | |
-| 52 | `13-phase-grc-compliance.md:539` | **On PCI DSS versions:** the current standard is v4.0.1, a limited revision of v4.0 that adds clarifications but no new or deleted requirements. v3.2.1 retired on 31 March 2024. The **future-dated** requirements inside v4 — the ones that were best practice at  … | |
-| 53 | `13-phase-grc-compliance.md:541` | **One control satisfies several frameworks**, and this is the observation that makes control mapping efficient rather than exhausting. Note how the first row is worded: **wherever card data is reachable**, not "on remote access". PCI DSS v4.0 requires MFA for  … | |
-| 54 | `13-phase-grc-compliance.md:543` | The identifiers in the right-hand column are framework-specific. `PR.AA`, `DE.CM` and `PR.AT` are NIST CSF categories; `CC1`–`CC9` are the SOC 2 Common Criteria (CC6 is logical access, CC7 is system operations, CC1 and CC2 cover the control environment and com … | |
-| 55 | `13-phase-grc-compliance.md:547` | \| Multi-factor authentication wherever card data is reachable \| NIST CSF PR.AA; ISO 27001 access control; PCI DSS requirement 8; SOC 2 CC6; a Data Privacy Act security measure \| | |
-| 56 | `13-phase-grc-compliance.md:548` | \| Centralised log collection with alerting \| NIST CSF DE.CM; ISO 27001 logging; PCI DSS requirement 10; SOC 2 CC7 \| | |
-| 57 | `13-phase-grc-compliance.md:549` | \| Annual security awareness training with records \| NIST CSF PR.AT; ISO 27001 competence and awareness; PCI DSS requirement 12; SOC 2 CC1 and CC2 \| | |
-| 58 | `13-phase-grc-compliance.md:638` | **The customer audit is the one that surprises people in a BPO or SaaS role**, and it is the reason SOC 2 exists. A large client will send a questionnaire, ask for evidence, and sometimes send an assessor. Answering those questionnaires accurately is a substan … | |
-| 59 | `13-phase-grc-compliance.md:807` | \| **Payment processor** \| Card data and regulatory scope \| PCI DSS attestation of compliance \| | |
+| 37 | `13-phase-grc-compliance.md:443` | \| **NIST CSF 2.0** \| A voluntary framework organised around six functions: Govern, Identify, Protect, Detect, Respond, Recover \| Any organisation, any size, any sector \| Free \| No — it is not a certification scheme \| | **OK** — NIST: “The CSF 2.0 is organized by six Functions — Govern, Identify, Protect, Detect, Respond, and Recover.” |
+| 38 | `13-phase-grc-compliance.md:444` | \| **ISO/IEC 27001** \| An international standard for an information security management system, with Annex A controls \| Organisations wanting a certifiable management system \| The standard is paid \| **Yes** — certification by an accredited body \| | **OK** — ISO: “ISO/IEC 27001 is the world's best-known standard for information security management systems (ISMS).” |
+| 39 | `13-phase-grc-compliance.md:445` | \| **CIS Controls** \| A prioritised set of 18 **Controls**, each broken into numbered **Safeguards**, with Implementation Groups for different maturity levels \| Organisations wanting a practical starting order \| Free \| No \| | **OK** — CIS: Controls v8 has 18 Controls with numbered Safeguards and Implementation Groups IG1–IG3. |
+| 40 | `13-phase-grc-compliance.md:446` | \| **SOC 2** \| An attestation against the 2017 Trust Services Criteria (revised 2022) — security, availability, processing integrity, confidentiality, privacy \| Service organisations whose customers ask \| The criteria are free to read; the audit is not \| * … | **OK** — AICPA: SOC 2 examinations are against the Trust Services Criteria. |
+| 41 | `13-phase-grc-compliance.md:447` | \| **PCI DSS** \| A mandatory standard for organisations handling card payments \| Anyone storing, processing, or transmitting card data \| Free to read \| **Yes** — compliance validated by an assessor or self-assessment \| | **OK** — PCI SSC: PCI DSS applies to all entities that store, process or transmit cardholder data. |
+| 42 | `13-phase-grc-compliance.md:448` | \| **HIPAA** \| United States law governing protected health information \| Anyone handling US patient data \| Free \| No — it is law, not a scheme \| | **OK** — HHS: HIPAA is US law governing protected health information. |
+| 43 | `13-phase-grc-compliance.md:449` | \| **GDPR** \| European Union law governing personal data of EU residents \| Anyone processing EU residents' data \| Free \| No \| | **OK** — EU: GDPR governs processing of EU residents' personal data. |
+| 44 | `13-phase-grc-compliance.md:452` | **The certification column is the one that drives business decisions.** An organisation pursues ISO 27001 certification or a SOC 2 report because a customer, a tender, or a regulator requires it — not because the framework is better than the alternatives. | **UNVERIFIABLE** — business claim about organisational motivation |
+| 45 | `13-phase-grc-compliance.md:454` | **One vocabulary trap worth knowing before you read any of them.** These frameworks each use the word "control" differently, and the CIS Controls are the easiest to get wrong. CIS has **18 Controls** — the numbered headings, such as *Control 1: Inventory and C … | **OK** — CIS: v8 has 18 Controls, each broken into Safeguards. |
+| 46 | `13-phase-grc-compliance.md:456` | So when someone says "CIS Control 5", they mean a whole topic area, and when they say "Safeguard 5.3", they mean one specific thing to do. Mixing the two up in an interview is a small tell that you read a summary rather than the document. | **OK** — CIS: “Controls” names the 18 top-level categories; “Safeguards” the numbered items. |
+| 47 | `13-phase-grc-compliance.md:458` | CIS also publishes **Implementation Groups (IG1, IG2, IG3)**, which are subsets of the Safeguards sized to an organisation's maturity and resources. IG1 is the basic hygiene set for a small organisation with limited security staff, and it is the sensible start … | **OK** — CIS: v8 defines three Implementation Groups as subsets of safeguards. |
+| 48 | `13-phase-grc-compliance.md:518` | SOC 2 is not a standard you implement. It is a report an auditor produces about you, against the Trust Services Criteria. | **OK** — AICPA: SOC 2 is an attestation report produced by a CPA. |
+| 49 | `13-phase-grc-compliance.md:534` | \| **PCI DSS** \| You store, process, or transmit cardholder data \| Twelve requirement groups covering network security, protection of stored data, access control, monitoring, and testing \| The card brands, through acquiring banks \| | **OK** — PCI SSC: PCI DSS has 12 core requirement groups. |
+| 50 | `13-phase-grc-compliance.md:535` | \| **HIPAA** \| You handle protected health information of US individuals \| Administrative, physical, and technical safeguards, plus breach notification \| US Department of Health and Human Services \| | **OK** — HHS: the HIPAA Security Rule requires administrative, physical and technical safeguards. |
+| 51 | `13-phase-grc-compliance.md:537` | \| **GDPR** \| You process personal data of EU residents \| Lawful basis, data subject rights, records of processing, breach notification within 72 hours of becoming aware where required \| EU supervisory authorities \| | **OK** — EU: GDPR Article 33 requires notification within 72 hours. |
+| 52 | `13-phase-grc-compliance.md:539` | **On PCI DSS versions:** the current standard is v4.0.1, a limited revision of v4.0 that adds clarifications but no new or deleted requirements. v3.2.1 retired on 31 March 2024. The **future-dated** requirements inside v4 — the ones that were best practice at  … | **OK** — PCI SSC: v4.0.1 was published June 2024 as a limited revision of v4.0. |
+| 53 | `13-phase-grc-compliance.md:541` | **One control satisfies several frameworks**, and this is the observation that makes control mapping efficient rather than exhausting. Note how the first row is worded: **wherever card data is reachable**, not "on remote access". PCI DSS v4.0 requires MFA for  … | **OK** — PCI SSC: v4.0 Requirement 8.5.1 requires MFA for all access into the CDE. |
+| 54 | `13-phase-grc-compliance.md:543` | The identifiers in the right-hand column are framework-specific. `PR.AA`, `DE.CM` and `PR.AT` are NIST CSF categories; `CC1`–`CC9` are the SOC 2 Common Criteria (CC6 is logical access, CC7 is system operations, CC1 and CC2 cover the control environment and com … | **OK** — NIST CSF 2.0 includes PR.AA, DE.CM, PR.AT; SOC 2 Common Criteria are CC1–CC9. |
+| 55 | `13-phase-grc-compliance.md:547` | \| Multi-factor authentication wherever card data is reachable \| NIST CSF PR.AA; ISO 27001 access control; PCI DSS requirement 8; SOC 2 CC6; a Data Privacy Act security measure \| | **OK** — PCI DSS Requirement 8 addresses MFA; NIST CSF PR.AA covers access control. |
+| 56 | `13-phase-grc-compliance.md:548` | \| Centralised log collection with alerting \| NIST CSF DE.CM; ISO 27001 logging; PCI DSS requirement 10; SOC 2 CC7 \| | **OK** — PCI DSS Requirement 10 is “Log and monitor all access.” |
+| 57 | `13-phase-grc-compliance.md:549` | \| Annual security awareness training with records \| NIST CSF PR.AT; ISO 27001 competence and awareness; PCI DSS requirement 12; SOC 2 CC1 and CC2 \| | **OK** — NIST CSF PR.AT covers “Awareness and Training.” |
+| 58 | `13-phase-grc-compliance.md:638` | **The customer audit is the one that surprises people in a BPO or SaaS role**, and it is the reason SOC 2 exists. A large client will send a questionnaire, ask for evidence, and sometimes send an assessor. Answering those questionnaires accurately is a substan … | **UNVERIFIABLE** — career-advice narrative |
+| 59 | `13-phase-grc-compliance.md:807` | \| **Payment processor** \| Card data and regulatory scope \| PCI DSS attestation of compliance \| | **OK** — PCI SSC: the Attestation of Compliance is the formal PCI DSS validation document. |
 | | | <sub>↑ \| **Software vendor** \| Supply chain compromise \| Dependency scanning, patch process, vendor notification terms \|<br>↓ \| **Offshore BPO partner** \| Data protection and jurisdiction \| Data processing agreement, privacy assessment, audit rights \|</sub> | |
-| 60 | `13-phase-grc-compliance.md:822` | \| **Certifications** \| Do you hold ISO 27001, SOC 2 Type II, or equivalent? \| "We follow industry best practice" \| | |
-| 61 | `13-phase-grc-compliance.md:842` ▶ | SOC 2 Type II Yes — report dated 2025-11, no exceptions | |
+| 60 | `13-phase-grc-compliance.md:822` | \| **Certifications** \| Do you hold ISO 27001, SOC 2 Type II, or equivalent? \| "We follow industry best practice" \| | **UNVERIFIABLE** — vendor questionnaire guidance |
+| 61 | `13-phase-grc-compliance.md:842` ▶ | SOC 2 Type II Yes — report dated 2025-11, no exceptions | **UNVERIFIABLE** — worked example in curriculum material |
 | | | <sub>↑ Encryption at rest Yes — AES-256, stated<br>↓ Sub-processors disclosed Yes — three listed, one in a different jurisdiction</sub> | |
-| 62 | `13-phase-grc-compliance.md:899` | If your employer serves European customers, GDPR applies to the personal data of EU residents regardless of where your organisation is. | |
-| 63 | `13-phase-grc-compliance.md:912` | \| Alignment between GDPR and the Philippine law \| Effect on your work \| | |
+| 62 | `13-phase-grc-compliance.md:899` | If your employer serves European customers, GDPR applies to the personal data of EU residents regardless of where your organisation is. | **OK** — EU: GDPR applies to data subjects in the Union regardless of the controller's location. |
+| 63 | `13-phase-grc-compliance.md:912` | \| Alignment between GDPR and the Philippine law \| Effect on your work \| | **UNVERIFIABLE** — table header |
 | | | <sub>↓ \|---\|---\|</sub> | |
-| 64 | `13-phase-grc-compliance.md:992` ▶ | 14:00 Vendor assessment: a new analytics tool. Read the SOC 2 report, | |
+| 64 | `13-phase-grc-compliance.md:992` ▶ | 14:00 Vendor assessment: a new analytics tool. Read the SOC 2 report, | **UNVERIFIABLE** — worked example |
 | | | <sub>↑ Chase two people who have not replied.<br>↓ note the sub-processors, and draft the decision record.</sub> | |
-| 65 | `13-phase-grc-compliance.md:1019` ▶ | 15:00 Read the new NIST CSF mapping the auditor sent and check it | |
+| 65 | `13-phase-grc-compliance.md:1019` ▶ | 15:00 Read the new NIST CSF mapping the auditor sent and check it | **UNVERIFIABLE** — worked example |
 | | | <sub>↑ 13:00 Write up the workshop and update the register.<br>↓ against your control matrix.</sub> | |
-| 66 | `13-phase-grc-compliance.md:1048` | \| Sharing a vendor's SOC 2 report \| Almost always restricted by the vendor's terms; check before circulating \| | |
-| 67 | `13-phase-grc-compliance.md:1094` | \| **Control matrix** \| Map ten controls to NIST CSF 2.0 subcategories, plus a second column showing the ISO 27001 or PCI DSS requirement each also satisfies \| | |
-| 68 | `13-phase-grc-compliance.md:1121` | \| "Which framework would you use?" \| "It depends on what the business needs to demonstrate" — then name the trigger: a customer asking for SOC 2, a tender requiring ISO 27001, card payments requiring PCI DSS \| | |
-| 69 | `13-phase-grc-compliance.md:1198` | Ten controls mapped to NIST CSF 2.0, plus the second framework each also satisfies. Note that three rows are not "pass". | |
-| 70 | `13-phase-grc-compliance.md:1273` | \| Independent assurance? \| SOC 2 report from 2023 \| Acceptable with **condition** — request the current report at renewal \| | |
-| 71 | `13-phase-grc-compliance.md:1277` | **Residual risk accepted:** the 2023 SOC 2 report does not cover the current year. Accepted by the Compliance Manager, recorded in the risk register as R-05, with re-review at contract renewal. | |
-| 72 | `13-phase-grc-compliance.md:1296` | - **Learn NIST CSF 2.0 first.** It is free, sector-neutral, and its six functions are the vocabulary the field actually uses. | |
-| 73 | `13-phase-grc-compliance.md:1298` | - **SOC 2 Type II tests operating effectiveness over a period**; Type I tests design at a point in time, and customers ask for Type II. | |
-| 74 | `13-phase-grc-compliance.md:1316` | 4. **Read one framework properly** (task 4) — NIST CSF 2.0 is the right choice — and write down ten subcategory identifiers with your own paraphrase of each. Do not attempt to learn all of them; learn how the structure works. | |
-| 75 | `13-phase-grc-compliance.md:1329` | \| NIST Cybersecurity Framework 2.0 \| Voluntary risk framework \| Free \| https://www.nist.gov/cyberframework \| Write your own paraphrase of ten subcategories \| CIS Controls \| | |
-| 76 | `13-phase-grc-compliance.md:1330` | \| CIS Controls \| Prioritised safeguard list \| Free \| https://www.cisecurity.org/controls \| Map five of your controls to CIS safeguards \| NIST CSF \| | |
-| 77 | `13-phase-grc-compliance.md:1331` | \| ISO/IEC 27001 \| Certifiable management system standard \| Paid \| https://www.iso.org/standard/27001 \| Read the public overview and list the Annex A themes \| NIST CSF, which is free and covers similar ground \| | |
-| 78 | `13-phase-grc-compliance.md:1332` | \| SOC 2 Trust Services Criteria \| Attestation criteria \| Free \| https://www.aicpa-cima.com/topic/audit-assurance/audit-and-assurance-greater-than-soc-2 \| Read the security criteria and note three you could map to \| ISO 27001 Annex A, or NIST CSF \| | |
-| 79 | `13-phase-grc-compliance.md:1333` | \| PCI DSS \| Card payment standard \| Free \| https://www.pcisecuritystandards.org/ \| Read the twelve requirement groups and summarise each in a line \| PCI SSC document library, free with registration \| | |
-| 80 | `13-phase-grc-compliance.md:1334` | \| HHS HIPAA resources \| US health data rules \| Free \| https://www.hhs.gov/hipaa/index.html \| Read the Security Rule safeguards summary \| NIST SP 800-66, free \| | |
-| 81 | `13-phase-grc-compliance.md:1335` | \| National Privacy Commission \| Philippine data privacy regulator \| Free \| https://privacy.gov.ph/ \| Read the breach notification guidance and note who decides \| GDPR guidance from the EDPB \| | |
-| 82 | `13-phase-grc-compliance.md:1336` | \| NIST SP 800-30 \| Risk assessment guide \| Free \| https://csrc.nist.gov/pubs/sp/800/30/r1/final \| Use its likelihood and impact language in your scale \| ISO 31000 overview material \| | |
-| 83 | `13-phase-grc-compliance.md:1345` | - NIST SP 800-30 risk assessment guide — https://csrc.nist.gov/pubs/sp/800/30/r1/final | |
+| 66 | `13-phase-grc-compliance.md:1048` | \| Sharing a vendor's SOC 2 report \| Almost always restricted by the vendor's terms; check before circulating \| | **UNVERIFIABLE** — practical advice |
+| 67 | `13-phase-grc-compliance.md:1094` | \| **Control matrix** \| Map ten controls to NIST CSF 2.0 subcategories, plus a second column showing the ISO 27001 or PCI DSS requirement each also satisfies \| | **UNVERIFIABLE** — deliverable description |
+| 68 | `13-phase-grc-compliance.md:1121` | \| "Which framework would you use?" \| "It depends on what the business needs to demonstrate" — then name the trigger: a customer asking for SOC 2, a tender requiring ISO 27001, card payments requiring PCI DSS \| | **UNVERIFIABLE** — interview advice |
+| 69 | `13-phase-grc-compliance.md:1198` | Ten controls mapped to NIST CSF 2.0, plus the second framework each also satisfies. Note that three rows are not "pass". | **UNVERIFIABLE** — deliverable description |
+| 70 | `13-phase-grc-compliance.md:1273` | \| Independent assurance? \| SOC 2 report from 2023 \| Acceptable with **condition** — request the current report at renewal \| | **UNVERIFIABLE** — worked example |
+| 71 | `13-phase-grc-compliance.md:1277` | **Residual risk accepted:** the 2023 SOC 2 report does not cover the current year. Accepted by the Compliance Manager, recorded in the risk register as R-05, with re-review at contract renewal. | **UNVERIFIABLE** — worked example |
+| 72 | `13-phase-grc-compliance.md:1296` | - **Learn NIST CSF 2.0 first.** It is free, sector-neutral, and its six functions are the vocabulary the field actually uses. | **OK** — NIST: CSF 2.0 is freely available and organised by six functions. |
+| 73 | `13-phase-grc-compliance.md:1298` | - **SOC 2 Type II tests operating effectiveness over a period**; Type I tests design at a point in time, and customers ask for Type II. | **OK** — AICPA: SOC 2 Type II tests operating effectiveness over a period. |
+| 74 | `13-phase-grc-compliance.md:1316` | 4. **Read one framework properly** (task 4) — NIST CSF 2.0 is the right choice — and write down ten subcategory identifiers with your own paraphrase of each. Do not attempt to learn all of them; learn how the structure works. | **UNVERIFIABLE** — curriculum advice |
+| 75 | `13-phase-grc-compliance.md:1329` | \| NIST Cybersecurity Framework 2.0 \| Voluntary risk framework \| Free \| https://www.nist.gov/cyberframework \| Write your own paraphrase of ten subcategories \| CIS Controls \| | **OK** — NIST: CSF 2.0 is voluntary and freely available at the cited URL. |
+| 76 | `13-phase-grc-compliance.md:1330` | \| CIS Controls \| Prioritised safeguard list \| Free \| https://www.cisecurity.org/controls \| Map five of your controls to CIS safeguards \| NIST CSF \| | **OK** — CIS Controls are freely available at the cited URL. |
+| 77 | `13-phase-grc-compliance.md:1331` | \| ISO/IEC 27001 \| Certifiable management system standard \| Paid \| https://www.iso.org/standard/27001 \| Read the public overview and list the Annex A themes \| NIST CSF, which is free and covers similar ground \| | **OK** — ISO: ISO/IEC 27001 is certifiable and the standard document is paid. |
+| 78 | `13-phase-grc-compliance.md:1332` | \| SOC 2 Trust Services Criteria \| Attestation criteria \| Free \| https://www.aicpa-cima.com/topic/audit-assurance/audit-and-assurance-greater-than-soc-2 \| Read the security criteria and note three you could map to \| ISO 27001 Annex A, or NIST CSF \| | **OK** — AICPA: the Trust Services Criteria are freely available. |
+| 79 | `13-phase-grc-compliance.md:1333` | \| PCI DSS \| Card payment standard \| Free \| https://www.pcisecuritystandards.org/ \| Read the twelve requirement groups and summarise each in a line \| PCI SSC document library, free with registration \| | **OK** — PCI SSC: PCI DSS has 12 requirement groups; the document library is free. |
+| 80 | `13-phase-grc-compliance.md:1334` | \| HHS HIPAA resources \| US health data rules \| Free \| https://www.hhs.gov/hipaa/index.html \| Read the Security Rule safeguards summary \| NIST SP 800-66, free \| | **OK** — HHS: HIPAA resources are freely available. |
+| 81 | `13-phase-grc-compliance.md:1335` | \| National Privacy Commission \| Philippine data privacy regulator \| Free \| https://privacy.gov.ph/ \| Read the breach notification guidance and note who decides \| GDPR guidance from the EDPB \| | **OK** — Philippine government: the National Privacy Commission is the data privacy regulator. |
+| 82 | `13-phase-grc-compliance.md:1336` | \| NIST SP 800-30 \| Risk assessment guide \| Free \| https://csrc.nist.gov/pubs/sp/800/30/r1/final \| Use its likelihood and impact language in your scale \| ISO 31000 overview material \| | **OK** — NIST: SP 800-30 Rev. 1 is the Guide for Conducting Risk Assessments, free at the cited URL. |
+| 83 | `13-phase-grc-compliance.md:1345` | - NIST SP 800-30 risk assessment guide — https://csrc.nist.gov/pubs/sp/800/30/r1/final | **OK** — csrc.nist.gov — resolves to the SP 800-30 Rev. 1 publication page. |
 | | | <sub>↑ - NIST Cybersecurity Framework 2.0 — https://www.nist.gov/cyberframework<br>↓ - NIST SP 800-53 control catalogue — https://csrc.nist.gov/pubs/sp/800/53/r5/upd1/final</sub> | |
-| 84 | `13-phase-grc-compliance.md:1346` | - NIST SP 800-53 control catalogue — https://csrc.nist.gov/pubs/sp/800/53/r5/upd1/final | |
+| 84 | `13-phase-grc-compliance.md:1346` | - NIST SP 800-53 control catalogue — https://csrc.nist.gov/pubs/sp/800/53/r5/upd1/final | **OK** — csrc.nist.gov — resolves to the SP 800-53 Rev. 5 publication page. |
 | | | <sub>↑ - NIST SP 800-30 risk assessment guide — https://csrc.nist.gov/pubs/sp/800/30/r1/final<br>↓ - CIS Controls — https://www.cisecurity.org/controls</sub> | |
-| 85 | `13-phase-grc-compliance.md:1347` | - CIS Controls — https://www.cisecurity.org/controls | |
+| 85 | `13-phase-grc-compliance.md:1347` | - CIS Controls — https://www.cisecurity.org/controls | **OK** — cisecurity.org — resolves to the official CIS Controls page. |
 | | | <sub>↑ - NIST SP 800-53 control catalogue — https://csrc.nist.gov/pubs/sp/800/53/r5/upd1/final<br>↓ - CIS Benchmarks — https://www.cisecurity.org/cis-benchmarks</sub> | |
-| 86 | `13-phase-grc-compliance.md:1348` | - CIS Benchmarks — https://www.cisecurity.org/cis-benchmarks | |
+| 86 | `13-phase-grc-compliance.md:1348` | - CIS Benchmarks — https://www.cisecurity.org/cis-benchmarks | **OK** — cisecurity.org — resolves to the official CIS Benchmarks page. |
 | | | <sub>↑ - CIS Controls — https://www.cisecurity.org/controls<br>↓ - AICPA SOC 2 overview — https://www.aicpa-cima.com/topic/audit-assurance/audit-and-assurance-greater-than-soc-2</sub> | |
-| 87 | `13-phase-grc-compliance.md:1349` | - AICPA SOC 2 overview — https://www.aicpa-cima.com/topic/audit-assurance/audit-and-assurance-greater-than-soc-2 | |
-| 88 | `13-phase-grc-compliance.md:1351` | - ISO/IEC 27001 overview — https://www.iso.org/standard/27001 | |
+| 87 | `13-phase-grc-compliance.md:1349` | - AICPA SOC 2 overview — https://www.aicpa-cima.com/topic/audit-assurance/audit-and-assurance-greater-than-soc-2 | **OK** — aicpa-cima.com — resolves to the official AICPA SOC 2 page. |
+| 88 | `13-phase-grc-compliance.md:1351` | - ISO/IEC 27001 overview — https://www.iso.org/standard/27001 | **OK** — iso.org — resolves to the official ISO/IEC 27001 page. |
 | | | <sub>↑ - PCI Security Standards Council — https://www.pcisecuritystandards.org/<br>↓ - HHS HIPAA Security Rule — https://www.hhs.gov/hipaa/for-professionals/security/index.html</sub> | |
-| 89 | `13-phase-grc-compliance.md:1352` | - HHS HIPAA Security Rule — https://www.hhs.gov/hipaa/for-professionals/security/index.html | |
+| 89 | `13-phase-grc-compliance.md:1352` | - HHS HIPAA Security Rule — https://www.hhs.gov/hipaa/for-professionals/security/index.html | **OK** — hhs.gov — resolves to the official HIPAA Security Rule page. |
 | | | <sub>↑ - ISO/IEC 27001 overview — https://www.iso.org/standard/27001<br>↓ - National Privacy Commission of the Philippines — https://privacy.gov.ph/</sub> | |
-| 90 | `13-phase-grc-compliance.md:1355` | - GDPR official text — https://eur-lex.europa.eu/eli/reg/2016/679/oj | |
+| 90 | `13-phase-grc-compliance.md:1355` | - GDPR official text — https://eur-lex.europa.eu/eli/reg/2016/679/oj | **OK** — eur-lex.europa.eu — resolves to the official GDPR text. |
 | | | <sub>↑ - Philippine Data Privacy Act of 2012 — https://lawphil.net/statutes/repacts/ra2012/ra_10173_2012.html<br>↓ - EDPB guidelines and recommendations — https://www.edpb.europa.eu/our-work-tools/general-guidance/guidelines-recommendations-best-practices_en</sub> | |
-| 91 | `13-phase-grc-compliance.md:1363` | 4. Read NIST CSF 2.0 and write your own paraphrase of ten subcategories with their identifiers. <!-- id: cyber-13-t04 band: focused energy: normal --> | |
-| 92 | `13-phase-grc-compliance.md:1378` | - A ten-row control matrix mapping to NIST CSF 2.0 and a second framework, including Partial, Fail, and Not-tested rows | |
-| 93 | `13-phase-grc-compliance.md:1493` | **Why:** The phase asks for the privacy obligations in outline — the DPA and the GDPR principles and rights — not an exhaustive legal reading. Assuming the Act stops at cloud-hosted data is the trap, because where the data is stored does not decide whether the … | |
-| 94 | `13-phase-grc-compliance.md:1523` | NIST CSF 2.0, the CIS Controls and Benchmarks, NIST SP 800-30 and SP 800-53, the AICPA's published SOC 2 criteria, the PCI DSS document library, the HHS HIPAA guidance, the National Privacy Commission's guidance, and the GDPR text are all free and together the … | |
-| 95 | `13-phase-grc-compliance.md:1527` | The ISO/IEC 27001 standard itself is a paid document, and certification requires an accredited certification body, an audit, and annual surveillance — a five-figure commitment for a small organisation. GRC platforms such as ServiceNow GRC, Archer, and Vanta au … | |
-| 96 | `13-phase-grc-compliance.md:1531` | Pay when a customer or a tender requires a certification you do not hold, or when the manual evidence collection has grown past what a person can maintain — and at that point the employer pays, not you. For a learner, the honest position is that this phase cos … | |
-| 97 | `14-phase-web-app-security.md:27` | - Identify which OWASP Top 10 category a flaw belongs to, and explain why. | |
+| 91 | `13-phase-grc-compliance.md:1363` | 4. Read NIST CSF 2.0 and write your own paraphrase of ten subcategories with their identifiers. <!-- id: cyber-13-t04 band: focused energy: normal --> | **UNVERIFIABLE** — curriculum task instruction |
+| 92 | `13-phase-grc-compliance.md:1378` | - A ten-row control matrix mapping to NIST CSF 2.0 and a second framework, including Partial, Fail, and Not-tested rows | **UNVERIFIABLE** — deliverable description |
+| 93 | `13-phase-grc-compliance.md:1493` | **Why:** The phase asks for the privacy obligations in outline — the DPA and the GDPR principles and rights — not an exhaustive legal reading. Assuming the Act stops at cloud-hosted data is the trap, because where the data is stored does not decide whether the … | **UNVERIFIABLE** — pedagogical guidance |
+| 94 | `13-phase-grc-compliance.md:1523` | NIST CSF 2.0, the CIS Controls and Benchmarks, NIST SP 800-30 and SP 800-53, the AICPA's published SOC 2 criteria, the PCI DSS document library, the HHS HIPAA guidance, the National Privacy Commission's guidance, and the GDPR text are all free and together the … | **OK** — All cited documents are freely available from their issuing authorities. |
+| 95 | `13-phase-grc-compliance.md:1527` | The ISO/IEC 27001 standard itself is a paid document, and certification requires an accredited certification body, an audit, and annual surveillance — a five-figure commitment for a small organisation. GRC platforms such as ServiceNow GRC, Archer, and Vanta au … | **OK** — ISO: ISO/IEC 27001 is a paid document; certification requires an accredited body. |
+| 96 | `13-phase-grc-compliance.md:1531` | Pay when a customer or a tender requires a certification you do not hold, or when the manual evidence collection has grown past what a person can maintain — and at that point the employer pays, not you. For a learner, the honest position is that this phase cos … | **UNVERIFIABLE** — career-advice narrative |
+| 97 | `14-phase-web-app-security.md:27` | - Identify which OWASP Top 10 category a flaw belongs to, and explain why. | **UNVERIFIABLE** — learning objective |
 | | | <sub>↑ - Read an HTTP request and response in full, including headers that carry security meaning.<br>↓ - Test for injection, cross-site scripting, CSRF, IDOR, and SSRF on an authorised target.</sub> | |
-| 98 | `14-phase-web-app-security.md:40` | - OWASP Top 10 in depth: all ten categories, taught by name rather than by number because the numbering moves between editions (the current edition is **2025**; 2021 is still widely quoted) | |
-| 99 | `14-phase-web-app-security.md:63` | Most people arriving at web application security have to learn two things at once: how the web works, and how it breaks. You already know the first. You know what a POST request is, and you know what a session cookie does. You have almost certainly written cod … | |
-| 100 | `14-phase-web-app-security.md:252` | **Read this before the sections below, because the numbering has moved.** The current edition is **OWASP Top 10:2025**, and it reordered six of the ten categories relative to 2021. The sections below are ordered and named to match **2025**. Learn the categorie … | |
-| 101 | `14-phase-web-app-security.md:924` ▶ | **OWASP Top 10:** A01 Broken Access Control | |
+| 98 | `14-phase-web-app-security.md:40` | - OWASP Top 10 in depth: all ten categories, taught by name rather than by number because the numbering moves between editions (the current edition is **2025**; 2021 is still widely quoted) | **OK** — owasp.org: “The most current released version is the OWASP Top 10 2025.” |
+| 99 | `14-phase-web-app-security.md:63` | Most people arriving at web application security have to learn two things at once: how the web works, and how it breaks. You already know the first. You know what a POST request is, and you know what a session cookie does. You have almost certainly written cod … | **UNVERIFIABLE** — pedagogical narrative |
+| 100 | `14-phase-web-app-security.md:252` | **Read this before the sections below, because the numbering has moved.** The current edition is **OWASP Top 10:2025**, and it reordered six of the ten categories relative to 2021. The sections below are ordered and named to match **2025**. Learn the categorie … | **OK** — owasp.org: “The most current released version is the OWASP Top 10 2025.” |
+| 101 | `14-phase-web-app-security.md:924` ▶ | **OWASP Top 10:** A01 Broken Access Control | **OK** — OWASP: A01 is Broken Access Control. |
 | | | <sub>↑ **CVSS 3.1:** 6.5 — AV:N/AC:L/PR:L/UI:N/S:U/C:H/I:N/A:N<br>↓ **CWE:** CWE-639 — Authorization Bypass Through User-Controlled Key (CWE is the Common Weakness Enumeration, the shared catalogue of flaw types; the n …</sub> | |
-| 102 | `14-phase-web-app-security.md:1271` | \| Work the OWASP Top 10 as a checklist \| Prioritise findings against a real threat model and a real deadline \| | |
-| 103 | `14-phase-web-app-security.md:1332` | - OWASP Top 10 — https://owasp.org/www-project-top-ten/ | |
+| 102 | `14-phase-web-app-security.md:1271` | \| Work the OWASP Top 10 as a checklist \| Prioritise findings against a real threat model and a real deadline \| | **UNVERIFIABLE** — comparison of two approaches |
+| 103 | `14-phase-web-app-security.md:1332` | - OWASP Top 10 — https://owasp.org/www-project-top-ten/ | **OK** — owasp.org — resolves to the official Top 10 project page. |
 | | | <sub>↓ - OWASP Web Security Testing Guide — https://owasp.org/www-project-web-security-testing-guide/</sub> | |
-| 104 | `14-phase-web-app-security.md:1505` | You can read a web application's request and response, identify which OWASP Top 10 category a flaw belongs to, demonstrate it safely against an authorised lab target with Burp Suite, and write a finding with reproduction steps and a specific remediation. | |
-| 105 | `14-phase-web-app-security.md:1511` | PortSwigger Web Security Academy is free and is the best structured web security training that exists, covering every OWASP category from Apprentice to Expert. OWASP Juice Shop, DVWA, WebGoat, and bWAPP are free and you run them locally. Burp Suite Community a … | |
+| 104 | `14-phase-web-app-security.md:1505` | You can read a web application's request and response, identify which OWASP Top 10 category a flaw belongs to, demonstrate it safely against an authorised lab target with Burp Suite, and write a finding with reproduction steps and a specific remediation. | **UNVERIFIABLE** — learning outcome description |
+| 105 | `14-phase-web-app-security.md:1511` | PortSwigger Web Security Academy is free and is the best structured web security training that exists, covering every OWASP category from Apprentice to Expert. OWASP Juice Shop, DVWA, WebGoat, and bWAPP are free and you run them locally. Burp Suite Community a … | **UNVERIFIABLE** — “best structured web security training that exists” is a subjective superlative |
 
 _▶ marks a line inside a code block — executable, so a wrong flag or path is worse than a wrong sentence._
 
@@ -717,7 +774,7 @@ _▶ marks a line inside a code block — executable, so a wrong flag or path is
 | 11 | `02-phase-networking-and-linux.md:436` | \| **Headers** \| Metadata about the request or response \| `Set-Cookie` (and whether it has `HttpOnly` and `Secure` flags), `Content-Security-Policy`, `Server` (leaks software versions, useful to an attacker), `Authorization` \| | |
 | 12 | `02-phase-networking-and-linux.md:439` | You can read all of this with `curl`, which is phase task 7's companion. `curl -I https://example.com` printing real response headers is worth more than any description. | |
 | 13 | `02-phase-networking-and-linux.md:661` | **SSH** gives you an encrypted shell on a remote machine. The server is `sshd` — the SSH *daemon*, where a daemon is a background service. It is configured in `/etc/ssh/sshd_config`, and it listens on port 22 by default. | |
-| 14 | `02-phase-networking-and-linux.md:683` | **Windows has no `ssh-copy-id`.** The OpenSSH client ships with Windows 10 and 11, but the key-install helper does not. Append the key yourself instead — from PowerShell: | |
+| 14 | `02-phase-networking-and-linux.md:683` | **Windows has no `ssh-copy-id`.** The OpenSSH client ships with Windows 10 and 11, but the key-install helper does not. Append the key yourself instead — from PowerShell: | **OK** — Microsoft: the Windows OpenSSH client does not include `ssh-copy-id`. |
 | 15 | `02-phase-networking-and-linux.md:702` | Modern Linux uses **systemd** to manage services, through `systemctl`: | |
 | 16 | `02-phase-networking-and-linux.md:730` | The security relevance of this command is direct: **you cannot defend a host whose services you cannot enumerate.** Asking “what is running, and should it be?” is the first question of host hardening, and `systemctl list-units --type=service` answers it. | |
 | 17 | `02-phase-networking-and-linux.md:744` | `journalctl` queries the systemd journal, which on many distributions is where logs now primarily live: | |
@@ -815,7 +872,7 @@ _▶ marks a line inside a code block — executable, so a wrong flag or path is
 | 83 | `12-phase-scripting-automation.md:1434` | \| CyberChef \| Decoding and transformation \| Free/open-source \| https://gchq.github.io/CyberChef/ \| Decode a base64 command line by hand before scripting it \| Python `base64` and `codecs` \| | |
 | 84 | `14-phase-web-app-security.md:52` | - SQL injection testing with manual payloads and `sqlmap` on authorised targets | |
 | | | <sub>↑ - Burp Suite Community and OWASP ZAP: proxy, intercept, repeater, and scanning<br>↓ - Content Security Policy and the other security response headers</sub> | |
-| 85 | `14-phase-web-app-security.md:392` | **The password-storage rule is the one to know precisely.** Passwords are stored with a slow, salted, memory-hard hash: `bcrypt`, `scrypt`, or `Argon2`. Not SHA-256, and never MD5 or SHA-1. The reason is speed. A modern GPU computes billions of SHA-256 hashes  … | |
+| 85 | `14-phase-web-app-security.md:392` | **The password-storage rule is the one to know precisely.** Passwords are stored with a slow, salted, memory-hard hash: `bcrypt`, `scrypt`, or `Argon2`. Not SHA-256, and never MD5 or SHA-1. The reason is speed. A modern GPU computes billions of SHA-256 hashes  … | **OK** — OWASP Password Storage Cheat Sheet recommends Argon2id and scrypt, and warns against fast hashes such as MD5 and SHA-1. |
 | 86 | `14-phase-web-app-security.md:841` | **On Windows, Docker needs WSL2.** Docker Desktop offers to install it on first run, which needs administrator rights and a reboot; if you cannot get either, run Juice Shop inside your Phase 2 Linux VM instead, where the same `docker run` line works. Git Bash  … | |
 | 87 | `14-phase-web-app-security.md:865` | **Two cautions about `sqlmap` that matter more than the command.** It sends a large volume of requests, so it will be detected and rate-limited. On a fragile application it can also disrupt service. And running it against anything other than a target you own o … | |
 | 88 | `14-phase-web-app-security.md:1092` | \| `script-src` \| Where JavaScript may be loaded from \| | |
@@ -848,13 +905,13 @@ _▶ marks a line inside a code block — executable, so a wrong flag or path is
 
 | # | Location | Text as written | Verdict |
 |---|---|---|---|
-| 1 | `02-phase-networking-and-linux.md:677` ▶ | ssh-keygen -t ed25519 -C "lab key" # generate a keypair | |
+| 1 | `02-phase-networking-and-linux.md:677` ▶ | ssh-keygen -t ed25519 -C "lab key" # generate a keypair | **OK** — OpenSSH: `-t ed25519` generates an Ed25519 keypair. |
 | | | <sub>↑ ```bash<br>↓ ssh-copy-id user@192.168.1.50 # install the public key (Linux/macOS)</sub> | |
-| 2 | `11-phase-incident-response.md:458` | \| **AmCache** \| `C:\Windows\AppCompat\Programs\Amcache.hve` \| Program execution with SHA-1 hashes and install paths \| | |
-| 3 | `11-phase-incident-response.md:466` | **AmCache is the single most under-used artefact by beginners.** It records executables with their SHA-1 hashes, which means you can take a hash you found in AmCache and check it against a public reputation service without ever having the file. | |
-| 4 | `11-phase-incident-response.md:1244` | - A memory acquisition record with tool, time, and SHA-256 hash | |
+| 2 | `11-phase-incident-response.md:458` | \| **AmCache** \| `C:\Windows\AppCompat\Programs\Amcache.hve` \| Program execution with SHA-1 hashes and install paths \| | **OK** — Forensics documentation: Amcache.hve in C:\Windows\AppCompat\Programs stores path, size, compile time and SHA-1 hash. |
+| 3 | `11-phase-incident-response.md:466` | **AmCache is the single most under-used artefact by beginners.** It records executables with their SHA-1 hashes, which means you can take a hash you found in AmCache and check it against a public reputation service without ever having the file. | **UNVERIFIABLE** — “single most under-used artefact by beginners” is a subjective judgement; the SHA-1 component is verified at row 2 |
+| 4 | `11-phase-incident-response.md:1244` | - A memory acquisition record with tool, time, and SHA-256 hash | **UNVERIFIABLE** — instruction about what a learner should record |
 | | | <sub>↑ - Triage records for ten alerts with severity and escalation reasoning<br>↓ - A disk image hash verification and a timeline table built from at least three sources</sub> | |
-| 5 | `14-phase-web-app-security.md:392` | **The password-storage rule is the one to know precisely.** Passwords are stored with a slow, salted, memory-hard hash: `bcrypt`, `scrypt`, or `Argon2`. Not SHA-256, and never MD5 or SHA-1. The reason is speed. A modern GPU computes billions of SHA-256 hashes  … | |
+| 5 | `14-phase-web-app-security.md:392` | **The password-storage rule is the one to know precisely.** Passwords are stored with a slow, salted, memory-hard hash: `bcrypt`, `scrypt`, or `Argon2`. Not SHA-256, and never MD5 or SHA-1. The reason is speed. A modern GPU computes billions of SHA-256 hashes  … | **OK** — OWASP Password Storage Cheat Sheet recommends Argon2id and scrypt, and warns against fast hashes such as MD5 and SHA-1. |
 
 _▶ marks a line inside a code block — executable, so a wrong flag or path is worse than a wrong sentence._
 

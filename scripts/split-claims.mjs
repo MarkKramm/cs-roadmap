@@ -68,13 +68,13 @@ const WANTED_BY_TRACK = {
   ],
   cybersec: [
     { title: "MITRE ATT&CK technique identifiers" },
-    { title: "CVE identifiers and vulnerability claims" },
-    { title: "Cryptography algorithm claims" },
-    { title: "Standards, frameworks and control identifiers" },
+    { title: "CVE identifiers and vulnerability claims", done: true, doneThrough: 4 },
+    { title: "Cryptography algorithm claims", done: true, doneThrough: 5 },
+    { title: "Standards, frameworks and control identifiers", done: true, doneThrough: 105 },
     { title: "Security tool commands and flags" },
     { title: "Protocol and standard behaviour" },
     { title: "Registry paths, file paths and filenames" },
-    { title: "Product versions and editions" },
+    { title: "Product versions and editions", done: true, doneThrough: 9 },
     { title: "Command and cmdlet usage" },
   ],
 };

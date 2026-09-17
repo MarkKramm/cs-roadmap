@@ -2,6 +2,18 @@
 
 A lightweight decision log (ADR-style). Newest first.
 
+## D-054 — A record's own summary is a claim, and gets counted rather than typed
+
+- **Date:** 2026-09-17
+- **Status:** Accepted
+- **Context:** Recording the first completed cyber verification pass, the summary table at the top of `CYBER-CLAIM-VERIFICATION.md` was hand-written. It was wrong **twice** — `83 OK / 40 UNVERIFIABLE`, then `70 / 53` — against a real **`75 / 48`**, derived from 123 recorded rows. The second attempt was written *after* deliberately re-counting, which is the point: **a hand-counted figure beside 123 rows is a guess with a decimal point.** The document's entire purpose is to be the trustworthy record of what has and has not been checked, and its most-read line was unverified arithmetic.
+- **Decision:** **Any figure printed beside the data it summarises is derived from that data in code, and a guard fails when the two disagree.** `audit-verdict-counts.mjs` recounts the verdict rows and compares them to the summary table; it runs in CI.
+- **This is the fourth occurrence of one failure in a single repository**, which is why it is a decision rather than another fix: the corpus-balance rule that was dead code twice (D-049), the readability claim that went stale beside a green check, `"216 claims need a source"` hard-coded as IT's figure for every track, and now a results table. **The number next to the artefact is not the artefact** — and it is the number a reader trusts *because* re-deriving it is work they came to the document to avoid.
+- **Consequences:**
+  - The verdicts themselves are written by `record-cyber-verdicts.mjs` from a keyed table, keyed by `file:line`, so **transcription is not a step a human performs.** Two bugs in that script were caught by running it rather than reading it: an optional `▶` marker in some rows meant it matched **10 of 123** and silently dropped the rest, and its cross-run check double-counted and reported a **false mismatch on a correct second run.** It now fails loudly rather than letting an unplaceable verdict vanish — **a dropped verdict is indistinguishable from one that was never supplied**, which is the same asymmetry that makes a wrong `OK` invisible and a wrong `WRONG` merely expensive.
+  - **`UNVERIFIABLE` at 39% is recorded as a result, not a gap.** The temptation in a summary table is to shrink that column; the value of the record depends on not doing so.
+  - **Four locations are counted in more than one class** and this is correct, not double-counting: a line asserting *"Windows has no `ssh-copy-id`"* is simultaneously a product-version claim, a command-usage claim and a tool-flag claim. The totals distinguish **123 distinct locations from 127 rows** for exactly this reason.
+
 ## D-053 — A worklist is a snapshot, so it must be gated against the thing it describes
 
 - **Date:** 2026-09-17
