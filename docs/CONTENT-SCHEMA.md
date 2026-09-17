@@ -144,7 +144,19 @@ The format reuses **Markdown task-list syntax**: `- [x]` marks the correct optio
 
 **The set is validated separately**, in `scripts/audit-quiz.mjs`, because a per-question check cannot see a defect of the collection. The first quiz written for this repository put **seven of its ten correct answers in position C**: every question was individually valid and the build was green, yet a reader answering "C" every time scored 70% without reading. The guard gates position skew above 50%, unused positions, and erratic option counts.
 
-**The same defect exists one level above the guard, and nothing checks it yet.** When the IT on-ramp was written as a batch of seven quizzes, every phase passed the guard individually — but the *corpus* had drifted to **A=17.2% against C=35.2%**, and three phases were sitting exactly on the 50% line, passing by a hair. A reader working through the track in order would notice the pattern across phases and gain an advantage no per-quiz check can see. Rebalancing nineteen answers brought the corpus to **A=25.0% B=25.0% C=27.3% D=22.7%**. A corpus-level balance check is the obvious next guard, and the numbers above are what it would assert.
+**The same defect exists one level above the guard, and nothing checked it — until 2026-09-17.** When the IT on-ramp was written as a batch of seven quizzes, every phase passed the guard individually — but the *corpus* had drifted to **A=17.2% against C=35.2%**, and three phases were sitting exactly on the 50% line, passing by a hair. A reader working through the track in order would notice the pattern across phases and gain an advantage no per-quiz check can see. Rebalancing nineteen answers brought the corpus to **A=25.0% B=25.0% C=27.3% D=22.7%**. A corpus-level balance check is the obvious next guard, and the numbers above are what it would assert.
+
+**It is now built**, as class 3 of `scripts/audit-quiz.mjs`, with controls in `scripts/test-audit-quiz-corpus.mjs`. The figures above were the *historical* argument; the gate is looser than they imply, deliberately:
+
+| Bound | Value | Why |
+| --- | --- | --- |
+| Ceiling | **35%** | The point at which one letter becomes a strategy worth learning. An even split is not the goal — a four-position corpus of ~380 questions averages 25%, and honest authoring will not land on 25.0. |
+| Floor | **15%** | The mirror failure: a position so rare that a reader who has learned to ignore it is being helped rather than tested. |
+| Position availability | **≥5% of questions** | A position is only required to carry answers if a meaningful share of questions offer it. The corpus contains exactly **one** five-option question (`advance-07-q04`), so demanding an answer in E would be the guard inventing a defect. |
+
+Current corpus: **A=90 B=97 C=98 D=97** across 382 questions (23.6% / 25.4% / 25.7% / 25.4%) — comfortably inside both bounds, which is what control A asserts on every run.
+
+**The rule was wrong twice before its controls passed, and both failures looked green.** The floor was first gated on the count of *non-empty* positions, so abandoning a position — the one defect it exists to catch — switched it off. The availability map was then built by iterating a `Map` with `for…of` and reading a property off the `[key, value]` pair, which left it empty and the floor dead. In both cases the guard still exited non-zero in the probe scenario, for an unrelated per-phase reason, so a control that checked only the exit code would have recorded a pass. **Every control therefore asserts which branch fired, not merely that the exit code was non-zero.** See D-049.
 
 ### Sections deliberately NOT extracted
 

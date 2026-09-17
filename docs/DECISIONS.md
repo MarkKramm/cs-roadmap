@@ -2,6 +2,25 @@
 
 A lightweight decision log (ADR-style). Newest first.
 
+## D-049 — A control must assert which branch fired, because an exit code is not evidence
+
+- **Date:** 2026-09-17
+- **Status:** Accepted
+- **Context:** The corpus-level quiz balance guard had been specified in `CONTENT-SCHEMA.md` for several passes and never built. Its absence had been argued as harmless — *"the per-phase rule is the one that matters, a reader answers one phase at a time"* — and that reasoning was right about the reader and wrong about the drift. The item recorded its own counter-example: it quoted the corpus figures as `A=90 B=97 C=97 D=96` while the guard printed `A=90 B=97 C=98 D=97`, and three of the four places quoting that total had the same stale pair. **A number printed on every run and never asserted still went wrong in the documentation**, which is the argument for the gate the item itself had described as a refinement.
+- **Decision:** Build class 3 into `scripts/audit-quiz.mjs` — a corpus-level spread gate — and require every control to assert **which branch fired**, not merely that the process exited non-zero.
+- **The rule as built:** a **35% ceiling** and a **15% floor** on each position's share of the 382 corpus answers, with a position required to carry answers only when **at least 5% of questions offer it**. Current spread is **A=90 B=97 C=98 D=97** — 23.6% / 25.4% / 25.7% / 25.4%.
+  - **Why the bounds are loose.** An even split is not the goal. A four-position corpus of ~380 questions averages 25%, honest authoring will not land on 25.0, and a tight band would fail healthy quizzes for arithmetic reasons — the same mistake the per-phase 50% threshold was chosen to avoid. 35% is where one letter becomes a strategy worth learning; 15% is where a position becomes an advantage to ignore.
+  - **Why the 5% availability bound exists.** The corpus contains exactly **one** five-option question (`advance-07-q04`). Deriving "positions the corpus uses" from the widest question shape therefore demanded an answer in E out of 382 questions and **failed the healthy corpus**. One question offering a fifth slot does not make E a position in use; requiring an answer there is the guard inventing a defect, which is the failure this same file already warns about one level down.
+- **The finding that matters: the rule was dead code twice, and both times the guard still exited non-zero.**
+  1. **The floor was gated on the count of *non-empty* positions.** Abandoning a position removes it from that count, so the check switched itself off in the one scenario it exists to detect — abandoning a position was the single way to guarantee the rule could not see it.
+  2. **The availability map was built by iterating a `Map` with `for…of`.** A `Map` yields `[key, value]` pairs, so `shape.options` was `undefined`, the map stayed empty, and the floor never executed once.
+  - **Both times, the probe scenario produced 32 per-phase findings, so the exit code was 1 for an unrelated reason.** The gate looked like it worked. **A control that checked only `code !== 0` would have recorded PASS on both.** This is the same defect the audit had already found twice in `audit-content.mjs` — a rule that cannot fail, indistinguishable from a rule that passes — arriving this time in code written *while* documenting that lesson.
+  - **The controls also caught a control passing for the wrong reason.** The first floor probe moved all 97 D-answers to a single other position, which tripped the **ceiling** instead, leaving the floor branch unexercised while the control reported success. It now rotates the answers across three positions so the ceiling stays clear and the floor is the only branch that can fire. **A control is a claim about the guard and needs the same scepticism as the guard itself.**
+- **Consequences:**
+  - `scripts/test-audit-quiz-corpus.mjs` holds three controls, each asserting a named branch: the real corpus passes; a corpus collapsed onto one position fails **on the ceiling**; an abandoned position fails **on the floor, not the ceiling**. Wired into CI beside `audit-quiz`. The suite is now **25 guards, 0 failing**.
+  - **The general rule, which is the reason this entry is long:** *a non-zero exit is not evidence that the branch you just wrote is the branch that ran.* A guard suite with several independent rules inside one file can fail for reasons unrelated to the rule under test, and the failure looks exactly like success. Controls must therefore assert on **output**, and name the branch.
+  - **This is the third guard in one audit found not to check what it claimed** — after `DUPLICATE_PART` and `PART_GAP`, which had been dead since the commit that created them. The two here were caught within minutes of being written, which is the only difference. Nothing about the authoring process prevented them; only the controls did.
+
 ## D-048 — A verification can change what a claim is allowed to say, and a second-hand report of a change is not a premise
 
 - **Date:** 2026-09-17
