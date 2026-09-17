@@ -1323,3 +1323,186 @@ correct. **The count is two, and it was checked rather than assumed.**)
 failure and someone confirming a pass — and text written for only one of them misleads the
 other.* This is the same family as D-063, where a console that misrendered correct UTF-8
 nearly caused a correct file to be "repaired".
+
+## D-072 — In a practice paper, the defect a reader cannot see is the one worth guarding
+
+**Date:** 2026-09-18
+**Status:** Active
+
+`career-roadmaps/exams/` holds seven practice papers — A+ Core 1, A+ Core 2, Network+,
+Security+, SC-900, AZ-900 and ISC2 CC — each written to the vendor's published objectives and
+proportioned to its official domain weights. `scripts/audit-exams.mjs` guards them.
+
+**Why these papers need a guard more than the rest of the corpus does.** Everywhere else in
+this repository, a structural defect in a document makes the document look wrong. A practice
+paper is the exception, in three specific ways:
+
+- **A question with two marked answers reads perfectly well.** Nothing on the page signals
+  that the author meant only one of them. Nothing signals *which* one.
+- **A question with no `**Why:**` looks exactly like a question.** It is simply a question the
+  reader cannot learn from — and a lucky guess and real understanding score identically.
+- **A paper whose domains no longer match the vendor's blueprint still looks like a paper.**
+  Every heading is present, every question is answerable. The only thing wrong is invisible: the
+  reader studying it is over-prepared in one domain and under-prepared in the largest one.
+
+The third is the reason this guard exists rather than a paragraph in a README. It compares the
+weights a paper **claims** in its own table against the questions **actually present** in the
+file, and fails when they disagree. The reader is using the paper to decide whether to spend
+between £150 and £400 on a real exam; a silent proportion error spends their money on the wrong
+preparation.
+
+**Decision.** The guard checks, per paper: front matter completeness (including the date the
+blueprint was checked); exactly one marked answer per question; a `**Why:**` per question; at
+least three options; contiguous unique numbering; the declared question count against reality;
+every question inside a `## Domain N` section; and every claimed domain weight against the
+questions present.
+
+**The guard found five real defects in the papers it was written to check — three of them mine.**
+It then missed a sixth entirely, and that one is the most instructive.
+
+| Defect | Claimed | Actual |
+|---|---|---|
+| A+ Core 1 Hardware / Troubleshooting | 10 / 11 | **11 / 10** (transposed) |
+| AZ-900 architecture / governance | 15 / 14 | **19 / 10** |
+| Security+ pass-mark table | 33 = pass line, 34–36 = pass | **self-contradictory**; 33 is a fail |
+| A+ Core 1 after a question insertion | — | **two questions numbered Q37** |
+| Virtualization domain share | 11% | 12% (a real rounding, not an error) |
+| **Curriculum paths in five papers** | 52 paths | **36 pointed at files that do not exist** |
+
+The two transpositions are the ones worth naming. In both cases the **plan** in the paper's own
+weight table and the **questions actually written** diverged, and nothing about the resulting
+document looked wrong: the headings are all present and every question is answerable. The reader
+quietly over-prepares one domain and under-prepares the largest. The fix was to move questions —
+**never to edit the claim to match the error**, which would have made the guard agree with the
+defect it exists to find.
+
+**The sixth was invisible to the guard because the guard was not looking at it.** Every paper
+ends with a table mapping its domains to the phases that teach them — for a reader who scored
+badly, the most actionable line in the document. Thirty-six of the 52 paths were **invented**:
+`cybersec-roadmap/04-phase-soc-operations.md`, `advance-roadmap/03-phase-cloud-fundamentals.md`
+and others extrapolated from the domain names. Each rendered as an ordinary backticked path in
+an ordinary table. The guard passed all seven papers six times while every one of those paths
+was broken, because it was checking answers, explanations and weights — the things it had been
+designed to check.
+
+They were found by resolving all 52 against the filesystem by hand, and the guard now resolves
+curriculum paths and relative links as well.
+
+**The general form of that failure is worth stating separately from the fix:** *a guard written
+against one failure mode does not see the next one, and passing it is not the same as having
+been checked.* Six green runs said nothing about the tables. The papers were not verified; one
+aspect of them was.
+
+**The README was a second hole of the same shape.** Control 12 planted a broken link in
+`README.md` and the guard **passed** — because the guard skipped `README.md`, which is not a
+paper: it has no questions and no domains. But the README is the only file that links to all
+seven, so it was the file where a broken link costs the most. This is D-070's failure mode in a
+new place: *"it has a guard" is not "the guard reads it."* The guard now checks the index's
+links and additionally asserts that every paper is reachable from the index — a paper nobody
+links to is a paper nobody reads.
+
+**Decision.** The guard checks, per paper: front matter completeness (including the date the
+blueprint was checked); exactly one marked answer per question; a `**Why:**` per question; at
+least three options; contiguous unique numbering; the declared question count against reality;
+every question inside a `## Domain N` section; every claimed domain weight against the questions
+present; every curriculum path and relative link resolving; and, for the README, that its links
+resolve and that it links to every paper.
+
+**The controls test the invisible ones.** `test-audit-exams.mjs` runs thirteen controls, each
+planting a defect and requiring a non-zero exit: two marked answers, none marked, no
+explanation, a weight the questions do not support, a drifting question count, a numbering gap,
+a question outside any domain, missing front matter, an invented curriculum path, a broken
+link — plus three **negative** controls asserting that a three-option question passes, an
+external URL is not resolved as a local path, and therefore that the guard cannot fight
+legitimate authoring.
+
+**Three of the thirteen controls were wrong before they were useful, and every time the guard
+was correct and the fixture was wrong.**
+
+- The three-option control first removed **two** options, leaving a two-option question the
+  guard rightly rejects — a coin flip. The control's own name says "three-option".
+- The external-URL control first replaced a URL in **front matter**, where it is a plain
+  `source:` string and not a markdown link, so the regex never saw the line. The isolated
+  mutation proved the guard handled the real case correctly.
+- The same control then passed `expectFail: true` for a control named "must PASS".
+
+**A control that does not test what its name says is the same class of defect as the guard it
+is checking for** (D-065). The pattern is now five occurrences in this repository, and it has
+never once been the guard that was wrong.
+
+**The general form:** *a guard earns its place where a defect is invisible to the person the
+document is for.* Elsewhere a reader notices. Here they cannot, and they act on the document
+anyway — with their money.
+
+**A 40-question paper cannot reproduce a 90-question blueprint, and the guard was corrected
+rather than the papers.** 11% of 40 is 4.4 questions. The first version compared a paper's
+actual share against the **official** weight and so failed A+ Core 1 for being honest about its
+own arithmetic — the guard was wrong, not the paper. It now distinguishes two table shapes: when
+a paper publishes both its official weight and its own share as a second percentage column, the
+**share** is what must match the questions present. Tolerance is one point, which absorbs
+rounding and nothing else.
+
+**The controls test the invisible ones.** `test-audit-exams.mjs` runs ten controls, each planting
+a defect and requiring a non-zero exit: two marked answers, none marked, no explanation, a weight
+the questions do not support, a drifting question count, a numbering gap, a question outside any
+domain, missing front matter — plus one **negative** control asserting a three-option question
+still passes, so the guard cannot fight legitimate authoring.
+
+**That negative control failed first, and the fixture was wrong, not the guard.** The first draft
+removed two options and left a *two*-option question; the guard rejected it, correctly — a
+two-option question is a coin flip and the `>= 3` floor is right. The control claimed to test
+"a legitimate three-option question" and did not. **A control that does not test what its name
+says is the same class of defect as the guard it is checking for** (see D-065).
+
+**The general form:** *a guard earns its place where a defect is invisible to the person the
+document is for.* Elsewhere a reader notices. Here they cannot, and they act on the document
+anyway — with their money.
+
+## D-073 — A blueprint is a fact with an expiry date, so every paper carries the date it was checked
+
+**Date:** 2026-09-18
+**Status:** Active
+
+Exam blueprints change. Domains are renamed, weights shift, exam codes are retired and
+replaced. Every figure in `career-roadmaps/exams/` — the code, the question count, the time
+limit, the pass mark and the domain weights — was true when it was written and none of it is
+guaranteed to stay true.
+
+**This was not hypothetical, and it was caught during the work rather than after it.** The ISC2
+CC paper was planned against the **four-domain** structure, which is what the majority of
+third-party study material still teaches. The current official outline — effective
+**1 September 2026** — has **five** domains, and the previously-taught combined *"Business
+Continuity, Disaster Recovery and Incident Response Concepts"* domain **is not in it at all**.
+The domain is gone, not renamed.
+
+A paper written from the old structure would have looked completely normal, cited a real ISC2
+URL, and taught a structure the exam no longer uses. The reader would have had no way to tell.
+
+**Decision.** Three things, together:
+
+1. **Every paper records `blueprint_checked` in its front matter**, and the guard fails if the
+   field is absent. The date is on the page a reader is studying from, not only in a commit log.
+2. **Every paper names its source URL and says the details will drift.** The wording is explicit
+   that a reader booking an exam should confirm with the vendor rather than trusting the paper.
+3. **Where a blueprint has recently changed, the paper says so and names the obsolete version.**
+   The CC paper explains the five-domain structure and warns that older material teaches four;
+   the README repeats the warning at the point where a reader chooses a paper.
+
+**The stale blueprint is the one failure this guard cannot catch.** `audit-exams.mjs` verifies a
+paper is internally consistent and that its claimed weights match its questions. It cannot know
+whether the weights still match the vendor — that requires fetching the vendor's page, which
+`scripts/show-blueprints.mjs` does for a human to read. **A paper can be perfectly
+self-consistent and completely out of date**, which is exactly why the date is published rather
+than trusted.
+
+**And the fetch tool has a hole worth stating.** The ISC2 page returns **HTTP 200** and renders
+nothing a naive text extractor can read, so `show-blueprints.mjs` prints an empty section for CC
+even when the page is fine. The script now says so in a comment, because **a blank result there
+is not evidence the weights changed** — a future reader finding an empty section needs to know
+that before concluding the blueprint has vanished.
+
+**The general form:** *a document that describes an external thing must record when it looked,
+because the thing can change while the document stays still.* This is the same failure as D-066,
+one step further out: D-066 says guard a figure where it appears. This says that some figures
+cannot be guarded at all — only dated, and the date published.
+

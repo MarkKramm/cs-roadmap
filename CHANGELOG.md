@@ -8,6 +8,36 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### Added
 
+- **Seven practice exam papers in `career-roadmaps/exams/`, with a guard that keeps them
+  honest.** A+ Core 1 (220-1201), A+ Core 2 (220-1202), Network+ (N10-009), Security+ (SY0-701),
+  SC-900, AZ-900 and ISC2 CC — **40 questions each, 280 in total**, every question tagged to a
+  published domain and proportioned to the vendor's official weights. Each paper carries the
+  pass mark, the pace to sit it at, a scoring table stating the boundary in whole questions, and
+  the date its blueprint was checked. **`scripts/audit-exams.mjs`** checks what a reader cannot
+  see: exactly one marked answer per question, a `**Why:**` per question, unique numbering, and —
+  the one that matters — that the domain weights a paper *claims* match the questions actually
+  present. **D-072**, **D-073**.
+  - **The guard found five real defects in the papers it was written to check.** A+ Core 1
+    claimed 10 Hardware and 11 Troubleshooting questions while containing **11 and 10**; AZ-900
+    claimed 15/14 across its two largest domains while containing **19 and 10**. Both were authoring
+    drifting from the stated plan, which is invisible in the rendered document: the reader
+    over-prepares one domain and under-prepares the largest. Fixed by moving questions, never by
+    editing the claim.
+  - **The Security+ scoring table contradicted itself on one screen** — it labelled 33/40 the pass
+    line while listing 34–36 as the passing band. 750/900 is 83.3%, which is **33.3 questions**, so
+    **33 is a fail and 34 is a pass**. Every paper now states its boundary in whole questions,
+    because two of them fall between questions and the "looks like a pass" case is called out.
+  - **The ISC2 CC blueprint changed under this work.** The paper was planned against the
+    four-domain structure most study material still teaches; the current official outline —
+    effective **1 September 2026** — has **five**, and the old combined business continuity,
+    disaster recovery and incident response domain is **gone, not renamed**. The paper follows the
+    current structure and warns that older material does not. **A blueprint is a fact with an
+    expiry date**, which is why every paper publishes the date it was checked.
+  - **`scripts/test-audit-exams.mjs`** — ten controls, each planting a defect and requiring a
+    non-zero exit, plus a negative control asserting a three-option question still passes. That
+    negative control **failed first and the fixture was wrong, not the guard**: it removed two
+    options, leaving a two-option question the guard correctly rejects.
+
 - **`browser-check.mjs` now opens every view the sidebar offers.** Five — Schedule, Search,
   Tools, Portfolio and Applications — had never been rendered in a browser, and were invisible
   precisely because each *has* a suite that tests its logic. It went from **122 to 138 checks**

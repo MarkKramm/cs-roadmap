@@ -216,6 +216,15 @@ jobs:
         run: node scripts/audit-band-plausibility.mjs
       - name: Band guard controls
         run: node scripts/test-audit-band-plausibility.mjs
+      # A practice paper is the one content type where a structural fault is invisible to the
+      # reader: a question with two marked answers reads fine, a missing explanation looks like
+      # a question, and a paper whose domains no longer match the vendor's published weights
+      # still looks like a paper. The reader uses these to decide whether to spend money on a
+      # real exam, so the weights are checked against the questions actually present.
+      - name: Practice papers are internally consistent
+        run: node scripts/audit-exams.mjs
+      - name: Exam guard controls
+        run: node scripts/test-audit-exams.mjs
       - name: Verification bundles match their generator (both tracks)
         run: |
           node scripts/build-cyber-bundles.mjs --track cybersec
