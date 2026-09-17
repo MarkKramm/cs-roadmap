@@ -31,9 +31,11 @@ that no longer exists. Corrected. The one genuinely *false* claim was `it 02`'s
 *"Paid VM tools like VMware Workstation Pro offer advanced features"*, which
 asserted a paid tier that had been retired.
 
-**VirtualBox was confirmed unchanged:** base package GPLv3, Extension Pack free
-for personal use under the PUEL but paid commercially. Host-only networking and
-snapshots are in the free GPL core, so the $0 rule holds.
+**VirtualBox was confirmed unchanged:** base package **GPLv3**; the **Extension Pack** is free for personal and educational use under the **PUEL** but needs a paid Enterprise licence for commercial use. **Host-only networking and snapshots are in the free GPL core**, not behind the Extension Pack — which is the specific fact that makes the $0 rule hold, and it was checked rather than assumed.
+
+**The reply's own framing of the lesson, which is sharper than the audit's:** *"a second-hand report of a change was adopted as a premise, and nobody checked the change's direction."* The item nearly caused six files to be "fixed" in the wrong direction — and the six files it named are exactly the six that needed the *other* edit.
+
+**Verification of the six sites** (`git grep "Workstation Player"` over `career-roadmaps/` returns **zero** stale rows). Every surviving occurrence is either a historical record in `docs/`/`CHANGELOG.md` or the deliberate explanatory note at `cybersec 04:252`, which now teaches the rename because a beginner will meet the old name in every tutorial written before November 2024.
 
 **The lesson is about the audit, not about VMware:** a second-hand report of a
 change was adopted as a premise and nobody checked the change's *direction*. The
@@ -64,10 +66,49 @@ also gained a paragraph on where macOS matters **less** (on-premises
 Windows-heavy environments), so the section no longer reads as a universal
 requirement.
 
+**The strongest sentence in the MDM section was replaced, not reworded**, which
+is worth recording because it is the kind of edit that is easy to only
+half-make. The load-bearing claim *"for remote work it is not optional"* is
+**gone**; `it 05:157` now reads *"You do not need MDM to pass an interview, but
+you should be able to say what it is and why a remote-first company depends on
+it."* That is a **weaker** claim, and it is the one the text can keep. Verified
+by `git grep "not optional"` over `career-roadmaps/`: the nine surviving hits
+are all about unrelated things (authorisation, cleanup steps, portfolio
+sections, IP masks), **none about MDM or macOS.**
+
 **Still open:** the 15–20 posting sample is the only thing that turns this from
 a reasonable read into a number. **"Twelve of eighteen postings named macOS" is
 checkable; "macOS is expected" is not.** The question below is unchanged and
 still usable.
+
+**Incidental findings from the search, recorded with their sample size attached
+because that is the entire point.** The reply returned **two** postings, not
+fifteen, and said so:
+
+- A remote **L1 Help Desk** role at an **Apple-centric MSP** requiring macOS
+  support and MDM navigation, with Windows "in the mix".
+- A **first-level IT support** role requiring *"proven hands-on support
+  experience for both macOS and Windows environments, including hardware
+  diagnostics and OS-level troubleshooting"* and *"direct experience managing
+  devices through an MDM platform (such as Jamf, Mosyle, Kandji, or Intune)"*.
+
+**Both are consistent with the softened claim and neither proves it.** Two
+postings selected by a search for macOS are not a sample of the market — they
+are a sample of the search. **Two is not fifteen**, and the reply's own line is
+the correct summary: *"Two is not a sample."*
+
+**Countervailing market data, which is the more useful half.** Enterprise client
+share still runs **Windows 72–85%**, with Windows 10 alone on a substantial
+slice of enterprise PCs. This is *why* the added paragraph on where macOS
+matters **less** is the right shape for the section: on-premises Windows-heavy
+environments remain the majority of enterprise IT, so a universal framing was
+wrong in both directions.
+
+**The A/B/C table above is the durable output here, not the count.** Each
+component failed for a *different* reason — a universal quantifier (A), an
+unsupported empirical claim (B), and an asserted screening *outcome* rather than
+a preference (C) — which is why softening needed three separate edits rather
+than one. **The claim was never one claim.**
 
 ---
 
@@ -111,17 +152,31 @@ software they cannot legally use for free.
 > those before. If you cannot find a primary source, say so explicitly rather
 > than giving me a plausible answer.
 
-### What to do with the answer
+### What to do with the answer — **CLOSED, and this block was wrong**
 
-- If the free tier still exists → close this item, no content change.
-- If it ended → **five files need editing**, and the fix differs per site:
-  - `career-roadmaps/it-roadmap/02-phase-operating-systems.md` line 1336 — tools table row ("VMware Workstation Player personal use")
-  - `career-roadmaps/it-roadmap/02-phase-operating-systems.md` line 1523 — prose saying paid VMware tools are "unnecessary here"
-  - `career-roadmaps/cybersec-roadmap/04-phase-hands-on-labs.md` line 250 — **the strongest claim**: "Both are genuinely free, and both will complete this phase"
-  - `career-roadmaps/cybersec-roadmap/04-phase-hands-on-labs.md` line 252 — a comparison table
-  - `career-roadmaps/cybersec-roadmap/04-phase-hands-on-labs.md` line 884 — tools table row
-  - `career-roadmaps/cybersec-roadmap/15-phase-ot-ics-security.md` line 1132 — tools table row
-- After editing, run: `node scripts/lint-content.mjs && node scripts/audit-content.mjs`
+Kept rather than deleted, because it is the artefact of the error. It framed the
+outcome as a binary — free tier exists (no change) or it ended (five files) —
+and **both branches were wrong**:
+
+- The premise "reports say the free tier was discontinued" was itself the defect.
+  There was no third branch for *"the report was wrong in the direction that
+  matters"*, which is the one that occurred.
+- It names **five** files; the real edit touched **six**, and the one it missed
+  was the only genuinely false statement in the set (`it 02`'s *"Paid VM tools
+  like VMware Workstation Pro offer advanced features"*, asserting a retired paid
+  tier).
+- Its first file, `it 02:1336`, was listed for a *licensing* fix. The licensing
+  there was fine; only the product **name** was wrong.
+- `cybersec 04:250` is annotated here as **"the strongest claim"**. It was — and
+  it was **already true**, needing only the product rename. **The site flagged as
+  most exposed was the least wrong**, which is worth keeping in view: the audit's
+  confidence ranking of its own findings was not correlated with their accuracy.
+
+**The two guards named on the last line are necessary and not sufficient.** They
+passed before the fix and after it, because a product name is not something a
+structural guard can see (D-036). The check that actually settles this is
+`git grep "Workstation Player"` over `career-roadmaps/`, which must return zero
+stale rows.
 
 ---
 
