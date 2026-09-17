@@ -264,7 +264,9 @@ Second, **a request being sent is different from a response being read**. Many t
 | A09 | Security logging and alerting failures | was A09, renamed |
 | A10 | Mishandling of exceptional conditions | **new in 2025** |
 
-**Two things changed shape, not just position.** **Server-side request forgery is no longer a separate Top 10 entry** — it was folded into A01 Broken access control, because the underlying failure is an access control decision about where the server may reach. That does not make SSRF less dangerous, and this phase still teaches it in full a few sections below, but do not cite it as "A10" any more; that was 2021. And **A09 was renamed** from "logging and monitoring failures" to "logging and **alerting** failures", which sharpens the point: collecting logs you never alert on is the failure.
+**Two things changed shape, not just position.** **Server-side request forgery is no longer a separate Top 10 entry** — it was folded into A01 Broken access control, because the underlying failure is an access control decision about where the server may reach. That does not make SSRF less dangerous, and this phase still teaches it in full a few sections below, but do not cite it as "A10" any more; that was 2021.
+
+And **A09 is no longer called "logging and monitoring failures"** — the 2025 edition renamed it to "logging and **alerting** failures", which sharpens the point: collecting logs you never alert on is the failure.
 
 #### A01 — Broken access control
 

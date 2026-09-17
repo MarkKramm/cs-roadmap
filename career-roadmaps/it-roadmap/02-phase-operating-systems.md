@@ -646,7 +646,9 @@ This is the ticket that turns a five-minute job into a data-loss incident, and i
 
 **What the encryption is, and why it exists.** On most business laptops the entire disk is encrypted with **BitLocker**, built into Windows. The point is physical theft: if the laptop is stolen, an encrypted disk is unreadable without the key, so the thief gets hardware and not the company's data. A technician does not need to configure BitLocker to meet this ticket, but must know what it is, because **every instruction you give from here depends on whether the drive is encrypted.**
 
-**The part that makes it work, and the part that makes it break.** BitLocker seals its key to the machine's **TPM** — a small chip on the motherboard that holds the key material and can prove the machine has not been tampered with. When the boot environment changes enough that the TPM will not release the key, Windows falls back to asking a human for the recovery key. That is the whole story behind the blue screen: *something about the machine changed, so the chip stopped vouching for it.* Common triggers, in rough order of frequency:
+**The part that makes it work, and the part that makes it break.** BitLocker seals its key to the machine's **TPM** — a small chip on the motherboard that holds the key material and can prove the machine has not been tampered with. When the boot environment changes enough that the TPM will not release the key, Windows falls back to asking a human for the recovery key.
+
+That is the whole story behind the blue screen: *something about the machine changed, so the chip stopped vouching for it.* Common triggers, in rough order of frequency:
 
 1. **A firmware or UEFI update**, including one pushed automatically by the manufacturer.
 2. **A TPM firmware update, or clearing the TPM** — often done by a well-meaning "reset the security chip" step.
@@ -661,9 +663,13 @@ This is the ticket that turns a five-minute job into a data-loss incident, and i
 Get-BitLockerVolume | Select-Object MountPoint, VolumeStatus, ProtectionStatus, EncryptionPercentage
 ```
 
-Read it carefully, because the two status columns answer different questions. `VolumeStatus` of `FullyEncrypted` says the data on the disk is encrypted. `ProtectionStatus` of `On` says the key is currently being protected by the TPM. A drive can be `FullyEncrypted` with protection `Off` — that is a **suspended** drive, and it is the state you deliberately put one in before a firmware update, precisely so this prompt does not appear. If you find protection `Off` on a laptop that should be protected, that is a finding worth reporting, not a detail to skip past.
+Read it carefully, because the two status columns answer different questions. `VolumeStatus` of `FullyEncrypted` says the data on the disk is encrypted. `ProtectionStatus` of `On` says the key is currently being protected by the TPM.
 
-**Where the key lives, and the rule that follows from it.** The recovery key is not on the laptop, because a key stored beside the lock is not a lock. In a managed environment it is **escrowed** — backed up to a directory the technician can reach: **Microsoft Entra ID** (the device's BitLocker keys, visible to an administrator), **Intune**, on-premises **Active Directory**, or in some organisations a printed copy in a safe. For a personal machine it may be in the user's Microsoft account at `account.microsoft.com/devices/recoverykey`, which is the first place to send a home user.
+A drive can be `FullyEncrypted` with protection `Off` — that is a **suspended** drive, and it is the state you deliberately put one in before a firmware update, precisely so this prompt does not appear. If you find protection `Off` on a laptop that should be protected, that is a finding worth reporting, not a detail to skip past.
+
+**Where the key lives, and the rule that follows from it.** The recovery key is not on the laptop, because a key stored beside the lock is not a lock. In a managed environment it is **escrowed** — backed up to a directory the technician can reach: **Microsoft Entra ID** (the device's BitLocker keys, visible to an administrator), **Intune**, on-premises **Active Directory**, or in some organisations a printed copy in a safe.
+
+For a personal machine it may be in the user's Microsoft account at `account.microsoft.com/devices/recoverykey`, which is the first place to send a home user.
 
 The rule follows directly: **escrow is checked before encryption is relied upon.** A laptop with BitLocker on and no escrowed key is one firmware update away from an unrecoverable disk. If you are ever asked to enable encryption on a machine, confirm where the key will be stored *first*, and say plainly that a recovery key with no backup is a liability rather than a protection.
 
