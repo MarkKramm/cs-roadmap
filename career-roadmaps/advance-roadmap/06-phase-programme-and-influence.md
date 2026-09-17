@@ -19,7 +19,7 @@ Learn to own a piece of the security programme rather than a piece of the toolin
 
 ## Estimated time
 
-**5 weeks** at about 7–10 focused hours a week. Roughly 38–52 hours, and most of it is spent writing artefacts rather than reading.
+**5 weeks** at about 7–10 focused hours a week. Roughly 40–52 hours, and most of it is spent writing artefacts rather than reading.
 
 ## Skills you'll gain
 

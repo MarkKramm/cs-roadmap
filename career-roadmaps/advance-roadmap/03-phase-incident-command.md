@@ -19,7 +19,7 @@ Learn to run an incident rather than work one: to stand at the front of a respon
 
 ## Estimated time
 
-**5 weeks** at about 8–11 focused hours a week. Roughly 42–56 hours, and the exercise write-ups are most of it.
+**5 weeks** at about 8–11 focused hours a week. Roughly 45–58 hours, and the exercise write-ups are most of it.
 
 ## Skills you'll gain
 

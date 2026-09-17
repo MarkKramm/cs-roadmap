@@ -19,7 +19,7 @@ Learn to go looking for activity nobody wrote a rule for: state a hypothesis, wo
 
 ## Estimated time
 
-**5 weeks** at about 8–11 focused hours a week. Roughly 40–55 hours, and the write-up is a real part of it.
+**5 weeks** at about 8–11 focused hours a week. Roughly 41–58 hours, and the write-up is a real part of it.
 
 ## Skills you'll gain
 

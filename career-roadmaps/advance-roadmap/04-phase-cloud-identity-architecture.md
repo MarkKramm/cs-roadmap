@@ -19,7 +19,7 @@ Learn to design the controls rather than operate them: the account and subscript
 
 ## Estimated time
 
-**6 weeks** at about 8–11 focused hours a week. Roughly 48–66 hours, and most of it is spent writing and testing policy rather than reading.
+**6 weeks** at about 8–11 focused hours a week. Roughly 50–65 hours, and most of it is spent writing and testing policy rather than reading.
 
 ## Skills you'll gain
 
