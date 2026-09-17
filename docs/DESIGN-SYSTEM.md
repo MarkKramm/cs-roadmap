@@ -34,11 +34,22 @@ Dark-first. Names are semantic; concrete hex values land at implementation.
 | `--text-muted` | Secondary text, metadata |
 | `--accent` | Primary actions, active nav |
 | `--accent-hover` | Accent hover state |
+| `--accent-soft` | Washed accent for texture that must not compete with text — selected rows, lesson highlights |
 | `--success` | Completed checklist items, positive progress |
 | `--warning` | Buffer weeks, "consider pausing" hints |
-| `--danger` | Errors, blockers only |
+| `--danger` | Error **borders and fills**, blockers only |
+| `--danger-text` | Error **text**. Lighter than `--danger` because `--danger` is a 4.30:1 pairing on `--bg-subtle`, under the 4.5:1 AA floor for body text; this is 6.14:1 there and 6.86:1 on `--bg-elevated` |
+| `--focus` | Focus-ring colour where the ring must sit on an accent surface, where an accent ring would vanish |
+| `--overlay` | The backdrop scrim behind a modal or the mobile drawer |
+| `--text-on-accent` | Text that sits on an accent fill (primary buttons) |
 
 Rule: never rely on color alone to convey state. Completed items also get a strikethrough or a check glyph.
+
+**Contrast, verified 2026-09-17.** Every foreground × surface pairing was computed against the WCAG 2.x relative-luminance formula rather than eyeballed. All pass the 4.5:1 AA floor for body text except the one that motivated `--danger-text` above. The pairing that *looked* most at risk — `--text-muted` on `--bg-subtle` — is clean at **5.84:1**. Other reference values: `--text` 15.15 / 13.85 / 12.39, `--accent` 5.82 / 5.32 / 4.76, `--success` 8.38 / 7.66 / 6.85, `--warning` 8.19 / 7.48 / 6.69, across `--bg` / `--bg-elevated` / `--bg-subtle`. (`--accent` and `--danger` against `--border` measure 3.96:1 and 3.58:1, but `--border` is never used as a background, so those are not real text pairings.)
+
+**Focus rings.** There is one global `:focus-visible` rule giving every focusable element a 2px accent ring. Components add their own ring only where they need a different offset or colour, and always with `:focus-visible` rather than `:focus` — a `:focus` rule of equal-or-higher specificity suppresses the ring for keyboard users too. There is now **no `outline: none` anywhere in the stylesheet**; the last one was on the search input and was removed on 2026-09-17.
+
+**Modality.** A surface that declares `aria-modal="true"` must actually own the tab order, via `useFocusTrap` (`learning-site/src/hooks/useFocusTrap.js`). `body { overflow: hidden }` freezes the scrollbar and does nothing to the tab order, so it is not a substitute. The hook handles the trap, focus restore, and scroll lock together, because three overlays had each implemented roughly one of the three and two were asserting modality they did not enforce.
 
 ## Spacing scale
 
