@@ -30,12 +30,12 @@ jobs:
       # that does not exist at all. Those are arithmetic on the text, so a script
       # holds the line where a prose scan could not. The one judgement class it
       # computes (a forward phase cited as prior knowledge) is printed but does
-      # not gate — see the comment in the script.
+      # not gate â€” see the comment in the script.
       - name: Audit cross-references
         run: node scripts/audit-refs.mjs
       # The second pass of the comprehension audit found the same defect class it
       # always finds: a total stated in one place that disagrees with its own
-      # breakdown table elsewhere — a phase claiming 60-80 hours over parts
+      # breakdown table elsewhere â€” a phase claiming 60-80 hours over parts
       # summing to 40-56, a header calling itself the heaviest when a later phase
       # budgets three times as much, a track overview listing 4 weeks while every
       # phase file it points at says 6. Every instance came from an edit that
@@ -45,8 +45,8 @@ jobs:
         run: node scripts/audit-time-budget.mjs
       # The same structural defect appeared three times and nothing ever failed
       # because of it. Keep a Changelog permits ONE of each section heading per
-      # release; `[Unreleased]` accumulated eleven — four `Fixed`, four `Changed`,
-      # three `Added` — over at least four commits, so a reader had to read four
+      # release; `[Unreleased]` accumulated eleven â€” four `Fixed`, four `Changed`,
+      # three `Added` â€” over at least four commits, so a reader had to read four
       # separate `Fixed` lists to find what changed. They were merged mechanically
       # in b9f6133, and the shape returned twice more on 2026-09-16, each time
       # because an entry was appended above an existing section of the same name
@@ -55,8 +55,8 @@ jobs:
       # This gates where the topic-list guard could not (D-033): "does this
       # heading appear twice" is arithmetic on the document, so a failing result
       # is distinguishable from a passing one BY THE CHECK ITSELF. The guard
-      # found a real fourth defect on its first run — `[0.1.0]` listed `Fixed`
-      # before `Changed` — which is the evidence that it is capable of failing.
+      # found a real fourth defect on its first run â€” `[0.1.0]` listed `Fixed`
+      # before `Changed` â€” which is the evidence that it is capable of failing.
       - name: Audit CHANGELOG structure
         run: node scripts/audit-changelog.mjs
       # And the guard's own controls, because a check whose pass path looks like
@@ -67,7 +67,7 @@ jobs:
       # anything would print the same green line as a healthy corpus.
       - name: Audit CHANGELOG guard (self-test)
         run: node scripts/test-audit-changelog.mjs
-      # The build fails on a malformed question — no marked answer, two marked
+      # The build fails on a malformed question â€” no marked answer, two marked
       # answers, a missing **Why:**, a duplicate id. What it CANNOT see is a
       # defect of the SET: the first quiz written for this repository put seven
       # of its ten correct answers in position C. Every question was
@@ -91,11 +91,11 @@ jobs:
       # fail to start, which reads as "no CI ran" rather than "CI is broken".
       # This verifies each step is well-formed, that no line uses a tab, and that
       # every `node scripts/...` and `npm run ...` the workflow names actually
-      # exists — the failure mode where a guard is renamed and its CI step
+      # exists â€” the failure mode where a guard is renamed and its CI step
       # silently points at nothing.
       - name: Validate CI workflow
         run: node scripts/validate-ci.mjs
-      # Every other guard in this repository tests INTERNAL CONSISTENCY — does
+      # Every other guard in this repository tests INTERNAL CONSISTENCY â€” does
       # the parser lose content, do cross-references resolve, does a table sum
       # to the number the prose claims. The comprehension passes test whether a
       # beginner can FOLLOW the text. Both are blind to a sentence that is
@@ -105,7 +105,7 @@ jobs:
       # subnet arithmetic (RFC 1918 fixes the ranges; the rest is maths) and the
       # worked service-desk metrics in IT 06. Both are the strongest tier of
       # verification available, because they depend on trusting nobody's
-      # documentation — not the author's, not a model's.
+      # documentation â€” not the author's, not a model's.
       - name: Verify subnetting arithmetic
         run: node scripts/verify-cidr.mjs
       - name: Verify worked metrics
@@ -113,15 +113,15 @@ jobs:
       # A claim-extraction pattern is a claim about the corpus, and it can be
       # wrong in both directions. The DNS-record pattern matched "A record of
       # what was done" (ordinary English) and MISSED "nslookup google.com # the
-      # A record" (a real DNS claim) — and tightening it for the first fault
+      # A record" (a real DNS claim) â€” and tightening it for the first fault
       # caused the second. An output count cannot tell you which way it is
       # wrong; a truth table can. This asserts all twelve known cases.
       - name: Test claim-extraction patterns
         run: node scripts/test-record-pattern.mjs
       # AGENTS.md rule 2 requires UTF-8 without BOM and real typographic
       # characters, and nothing checked it. A `Set-Content -Encoding utf8` wrote
-      # a BOM plus mojibake into IT 02 and into SESSION-LOG.md — the second
-      # inside a sentence *describing* mojibake — and both were caught by luck
+      # a BOM plus mojibake into IT 02 and into SESSION-LOG.md â€” the second
+      # inside a sentence *describing* mojibake â€” and both were caught by luck
       # (a 198-line diff on a one-line change) rather than by a guard. The
       # detector checks the decidable property: a well-formed text file has no
       # BOM, no C1 control characters, and no U+FFFD. That catches
@@ -137,6 +137,18 @@ jobs:
       # stale. This regenerates into the real path and fails on any diff, so the
       # committed bundles are provably the ones the script produces. Check-only:
       # CI regenerates and compares, and never commits (D-008).
+      # A claim pack is a SNAPSHOT of the corpus. When content changes afterwards
+      # the pack goes on describing a sentence that no longer exists, and a
+      # verifier handed that row correctly reports that the corpus contradicts
+      # the source -- producing a WRONG verdict for text the corpus does not
+      # contain. That happened for real: four of the first verdicts returned from
+      # a verification pass flagged NIST CSF as teaching five functions when the
+      # corpus had already been corrected to six. The extractor and splitter are
+      # manual steps, so nothing compared their output to the corpus.
+      - name: Claim packs match the corpus
+        run: node scripts/audit-claim-drift.mjs --track cybersec
+      - name: Test claim-drift controls
+        run: node scripts/test-audit-claim-drift.mjs
       - name: Cyber bundles match their generator
         run: |
           node scripts/build-cyber-bundles.mjs
@@ -185,7 +197,7 @@ jobs:
         run: node scripts/test-audit-quiz-sourcing.mjs
       # A command can be named correctly and written wrongly. IT 02 stated DISM
       # in full at one place and abbreviated it to `DISM /RestoreHealth` in a
-      # summary table 300 lines later — a form that throws if a beginner types
+      # summary table 300 lines later â€” a form that throws if a beginner types
       # it. Nothing was inconsistent and nobody lied; a table cell invites
       # shortening, and the abbreviation silently became a broken command.
       # This checks the exact string a reader would copy, not the command name.
@@ -195,7 +207,7 @@ jobs:
       # a reader can decode "SSID" without help is a judgement about the reader,
       # not a claim about the text agreeing with itself, so by D-022 it is a
       # measurement and not a gate. Its DETECTOR, though, is a claim about the
-      # text, and that part was silently broken — emphasis-wrapped definitions
+      # text, and that part was silently broken â€” emphasis-wrapped definitions
       # (`**SPF** (Sender Policy Framework)`), a noun between term and gloss
       # (`CIDR notation (Classless Inter-Domain Routing)`), table-cell
       # expansions, and an em-dash inside a gloss were all reported as "never
@@ -203,14 +215,14 @@ jobs:
       #
       # So `--self-test` gates the instrument and nothing else: 16 controls, a
       # failure stops the run before any finding prints. Deliberately NOT
-      # `node scripts/audit-terms.mjs` — that form always exits 0, and wiring it
+      # `node scripts/audit-terms.mjs` â€” that form always exits 0, and wiring it
       # here would add a check whose pass path is indistinguishable from never
       # having run.
       - name: Audit acronym detector (self-test)
         run: node scripts/audit-terms.mjs --self-test
       # cyber-restructure-check.mjs is deliberately NOT run here. It compares the
       # cyber phases against a "before" snapshot captured at the start of the
-      # 2026 restructure pass, and reads it from process.env.TEMP — a
+      # 2026 restructure pass, and reads it from process.env.TEMP â€” a
       # machine-local file that is not in the repository. It therefore cannot
       # pass on a fresh clone, and running it in CI would only ever fail. It is
       # a one-off migration tool, not a standing guard. The perpetual guarantee
@@ -247,8 +259,8 @@ jobs:
         run: npm run test:highlight
       # renderInline is the site's whole inline-Markdown story and it had a real
       # bug: emphasis and code were matched in one alternation, so a code span
-      # whose content contained an asterisk — the curriculum's quoted `"*"` in a
-      # key policy — shredded both spans and leaked a literal backtick into the
+      # whose content contained an asterisk â€” the curriculum's quoted `"*"` in a
+      # key policy â€” shredded both spans and leaked a literal backtick into the
       # page. smoke-render caught it on the one lesson that wrote that shape.
       # This holds the RULE instead of the corpus, so the next lesson to write it
       # is covered before anyone runs a full render.
@@ -256,9 +268,9 @@ jobs:
         run: npm run test:render-inline
       # The rest of the suite. Every one of these is a plain node run against a
       # module with no React and no DOM, so they cost seconds and need no extra
-      # install. They were written because their failure modes are silent — a
+      # install. They were written because their failure modes are silent â€” a
       # band table that offers a 90-minute task to someone with 30 minutes, an
-      # answer attached to the wrong task, a merge that drops a record — and a
+      # answer attached to the wrong task, a merge that drops a record â€” and a
       # silent failure that only a local run can catch is a failure that ships.
       - name: UI logic
         run: npm run test:ui
@@ -281,14 +293,14 @@ jobs:
       # "Where you've been" is the page most able to become a completion-scold,
       # which the design system forbids. Its rows carry no `remaining` or
       # `percent` field at all, so the no-denominator rule is a property of the
-      # data rather than of the rendering — asserted here so a rewrite cannot
+      # data rather than of the rendering â€” asserted here so a rewrite cannot
       # quietly reintroduce a score.
       - name: Path order
         run: npm run test:path-order
       # The quiz's scoring maths, under plain Node. Its failure modes are all
       # quiet: a question marked correct against the wrong option, an
       # unanswered question counted as wrong, or the "which to reread" numbers
-      # off by one — none of which throw, and each of which makes a broken quiz
+      # off by one â€” none of which throw, and each of which makes a broken quiz
       # look exactly like a working one.
       - name: Quiz scoring
         run: npm run test:quiz
@@ -304,7 +316,7 @@ jobs:
 
   # The only job that needs a real browser engine. Everything in `site` renders to
   # a string and asserts on markup, which cannot see layout, computed CSS, focus
-  # survival or a media query — the six views this covers (notes panel, dashboard
+  # survival or a media query â€” the six views this covers (notes panel, dashboard
   # rail, print stylesheet, Shared, Your work, time budget) were verified
   # structurally for their whole life until this job existed.
   #
@@ -315,7 +327,7 @@ jobs:
   # "With the end of the CDP support, WebDriver BiDi is the only available
   # protocol, and the preference was removed in Firefox 141." `--remote-debugging-port`
   # therefore no longer exposes a CDP endpoint that `Browser.getVersion` can talk to,
-  # so driving Firefox requires WebDriver BiDi — a different protocol with different
+  # so driving Firefox requires WebDriver BiDi â€” a different protocol with different
   # framing, not a flag change.
   #
   # **The leg was removed rather than left failing or quietly made optional.** A
@@ -328,7 +340,7 @@ jobs:
   # still exercised: `BROWSER_ENGINE` names an engine, and a named engine that
   # cannot be found FAILS rather than falling through to the other one. That guard
   # was written for the Firefox leg and is what made this failure legible instead
-  # of silent — it reported "no browser found" and exited 1, rather than measuring
+  # of silent â€” it reported "no browser found" and exited 1, rather than measuring
   # Chromium and calling it Firefox. It remains the contract any future leg must
   # satisfy, whether that leg arrives as BiDi or as a WebKit runner.
   browser:
@@ -350,7 +362,7 @@ jobs:
         run: npm run build
       # ubuntu-latest ships Chrome preinstalled, but not necessarily at a path the
       # script looks in, and a runner image change could move it. Installing it
-      # makes the precondition explicit rather than inherited — and the script
+      # makes the precondition explicit rather than inherited â€” and the script
       # still fails loudly if the engine is not where it should be, so this cannot
       # paper over a missing browser either.
       - name: Ensure chromium is present

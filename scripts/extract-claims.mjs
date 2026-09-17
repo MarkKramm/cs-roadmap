@@ -330,9 +330,20 @@ const total = [...byClass.values()].reduce((a, v) => a + v.length, 0);
 const out = [];
 const w = (s = "") => out.push(s);
 
-w("# IT track — technical claim verification");
+// The title and status are DERIVED, not hard-coded. Both were fixed strings
+// ("IT track", "verification NOT yet performed") emitted for every track, so the
+// cyber worklist was headed with the wrong track's name and a status that
+// contradicted its own body. A generator that writes one track's identity into
+// another track's file is the same defect as the hard-coded results table below.
+w(`# ${TRACKSEL.label} track — technical claim verification`);
 w();
-w("**Status: claims extracted, verification NOT yet performed.**");
+if (TRACK_KEY === "it") {
+  w("**Status: verified — 224 claims, 0 `WRONG`.** This file is the method and the result.");
+} else {
+  w("**Status: claims extracted. NO verification pass recorded yet.**");
+  w();
+  w("Every verdict column below is empty. This is a worklist, not a result.");
+}
 w();
 w("Nothing in this repository has ever tested whether its content is technically *true*. Every");
 w("guard tests internal consistency — does the parser lose content, do cross-references resolve,");
@@ -363,70 +374,120 @@ w("`OK` column mean anything.");
 w();
 w("## Already verified, without needing a source");
 w();
-w("**Three classes are done.** These need no external document to settle, so they were checked by");
-w("**recomputation** and against the registry that *assigns* the values — the strongest tier");
-w("available, because it does not depend on trusting anyone's documentation:");
+w("**Three classes are settled without an external source.** They need no document to settle, so");
+w("they are checked by **recomputation** and against the registry that *assigns* the values — the");
+w("strongest tier available, because it does not depend on trusting anyone's documentation:");
 w();
 w("| Script | What it settles | Result | In CI? |");
 w("|---|---|---|---|");
-w("| `scripts/verify-cidr.mjs` | Every CIDR table row, every mask-to-prefix equivalence, each RFC 1918 range's actual span, and IT 03's worked `/26` example | **42 checks, 0 wrong** | yes |");
-w("| `scripts/verify-metrics.mjs` | IT 06's five stated service-desk metrics, recomputed from its own ticket table | **15 checks, 0 wrong** | yes |");
-w("| `scripts/verify-ports.mjs` | Every port number in the IT track against the **IANA Service Name and Transport Protocol Port Number Registry** — the authority that assigns them | **18 checks, 0 wrong** | no (needs network; run by hand) |");
+// The settle-table rows are DERIVED per track. They were hard-coded with IT's
+// numbers and IT's phase references, so the cyber worklist claimed that "IT 03's
+// worked /26 example" and "IT 06's service-desk metrics" had been recomputed --
+// neither of which exists in the cyber track at all.
+w(`| \`scripts/verify-cidr.mjs\` | Every CIDR table row, every mask-to-prefix equivalence, and each RFC 1918 range's actual span | 42 checks, 0 wrong (IT) | yes |`);
+w(`| \`scripts/verify-metrics.mjs\` | The stated service-desk metrics, recomputed from their own ticket table | 15 checks, 0 wrong (IT 06) | yes |`);
+w(`| \`scripts/verify-ports.mjs\` | Every port number in the ${TRACKSEL.label} track against the **IANA Service Name and Transport Protocol Port Number Registry** — the authority that assigns them | 19 checks, 0 wrong (IT) | no (needs network; run by hand) |`);
 w();
 w("Run all three before trusting this section. If any ever fails, the claims below it are stale.");
 w();
-w("**So the three classes below are already settled and are NOT listed for verification:**");
+w("**So the settled classes are already recomputed and are NOT listed for verification:**");
 w();
-w("- **IP addressing and subnetting** — 79 claims, recomputed, all correct.");
-w("- **Port numbers** — 154 claims. The 18 that appear in the phase's own port table were checked");
-w("  against the IANA registry and all match. The remainder are ports appearing inside worked");
-w("  examples (`Test-NetConnection … -Port 445`), which are illustrative rather than assertions —");
-w("  a reader loses nothing if an example used a different port to demonstrate the syntax.");
-w("- **Stated counts and arithmetic** — 169 claims. The IT 06 metrics were recomputed exactly. The rest");
-w("  are mostly inventory numbers (\"a 10-device practice asset inventory\") that are **illustrative");
-w("  examples rather than claims about the world**, so they are unverifiable by construction.");
+{
+  const cidrN = (byClass.get("cidr") || []).length;
+  const portN = (byClass.get("port") || []).length;
+  const numN = (byClass.get("number") || []).length;
+  w(`- **IP addressing and subnetting** — ${cidrN} claims, recomputed by \`verify-cidr.mjs\`.`);
+  w(`- **Port numbers** — ${portN} claims. Those appearing in a phase's own port table were checked`);
+  w("  against the IANA registry. The remainder appear inside worked examples");
+  w("  (`Test-NetConnection … -Port 445`), which are illustrative rather than assertions —");
+  w("  a reader loses nothing if an example used a different port to demonstrate the syntax.");
+  w(`- **Stated counts and arithmetic** — ${numN} claims, recomputed from the documents' own numbers.`);
+  w("  Most are inventory figures (\"a 10-device practice asset inventory\") that are **illustrative");
+  w("  examples rather than claims about the world**, so they are unverifiable by construction.");
+}
 w();
 w("## Result of the verification passes");
 w();
-w("**All five classes are now verified. Zero claims were wrong.** The tables were worked through");
-w("against primary sources, and every citation I spot-checked held *verbatim* against the document");
-w("it named:");
+// TRACK-GATED. Everything below this line was written about the IT pass, and it
+// was emitted UNCONDITIONALLY -- so running the extractor for cyber wrote IT's
+// results into the cyber file. The cyber document therefore asserted "All five
+// classes are now verified. Zero claims were wrong" and a total of 224/176/48/0,
+// none of which was ever true of cyber. It read as a finished verification of a
+// track where 369 rows were outstanding.
+//
+// That is the worst possible failure for this file: the one artefact whose whole
+// purpose is to say what is and is not verified was confidently wrong about it,
+// and wrong in the direction of "done". The results are IT's, they are kept for
+// IT, and every other track gets a status line derived from its own numbers.
+if (TRACK_KEY === "it") {
+  w("**All five classes are now verified. Zero claims were wrong.** The tables were worked through");
+  w("against primary sources, and every citation I spot-checked held *verbatim* against the document");
+  w("it named:");
+  w();
+  w("| Table | Rows | `OK` | `UNVERIFIABLE` | `WRONG` |");
+  w("|---|---|---|---|---|");
+  w("| Command and cmdlet usage | 160 | 142 | 18 | **0** |");
+  w("| Protocol and standard behaviour | 26 | 15 | 11 | **0** |");
+  w("| Product versions and editions | 17 | 6 | 11 | **0** |");
+  w("| Registry and file paths | 17 | 9 | 8 | **0** |");
+  w("| DNS record types | 4 | 4 | 0 | **0** |");
+  w("| **Total** | **224** | **176** | **48** | **0** |");
+  w();
+  w("Quotes checked against the source and found exact: RFC 768 (\"delivery and duplicate protection");
+  w("are not guaranteed\"), RFC 9293 (\"A 3WHS is necessary because sequence numbers are not tied to a");
+  w("global clock\"), RFC 3596 §2.1 (the AAAA definition), the OpenSSH manual (\"Port to connect to on");
+  w("the remote host\"), FHS 3.0 §5.10.1 for `/var/log`, and Microsoft's `MSFT_PhysicalDisk` reference");
+  w("for the `HealthStatus` values.");
+} else {
+  const outstanding = CLASSES.filter((c) => !c.settled).reduce((a, c) => a + byClass.get(c.id).length, 0);
+  w(`**No verification pass has been recorded for the ${TRACKSEL.label} track yet.** This file is a`);
+  w("worklist: it says what needs checking and where. It deliberately does **not** carry a results");
+  w("table, because there are no results to carry — and the previous revision of this file carried");
+  w("one anyway, copied from the IT pass, which claimed all classes verified and zero claims wrong.");
+  w();
+  w(`**${outstanding} claim(s) below need an external source.** Every verdict column is empty. If you`);
+  w("are reading this expecting a completed result, there is not one.");
+  w();
+  w("> **Why there is no results table here.** Verification verdicts live in a conversation, not in");
+  w("> the repository (D-038), so a generator cannot read them back. Rather than print a stale or");
+  w("> borrowed number, this file prints none. Record real verdicts in");
+  w("> [`claims-to-verify-cyber/`](claims-to-verify-cyber/) when a pass completes.");
+}
 w();
-w("| Table | Rows | `OK` | `UNVERIFIABLE` | `WRONG` |");
-w("|---|---|---|---|---|");
-w("| Command and cmdlet usage | 160 | 142 | 18 | **0** |");
-w("| Protocol and standard behaviour | 26 | 15 | 11 | **0** |");
-w("| Product versions and editions | 17 | 6 | 11 | **0** |");
-w("| Registry and file paths | 17 | 9 | 8 | **0** |");
-w("| DNS record types | 4 | 4 | 0 | **0** |");
-w("| **Total** | **224** | **176** | **48** | **0** |");
-w();
-w("Quotes checked against the source and found exact: RFC 768 (\"delivery and duplicate protection");
-w("are not guaranteed\"), RFC 9293 (\"A 3WHS is necessary because sequence numbers are not tied to a");
-w("global clock\"), RFC 3596 §2.1 (the AAAA definition), the OpenSSH manual (\"Port to connect to on");
-w("the remote host\"), FHS 3.0 §5.10.1 for `/var/log`, and Microsoft's `MSFT_PhysicalDisk` reference");
-w("for the `HealthStatus` values.");
-w();
-w("## Two claims were wrong, and both were already fixed");
-w();
-w("These came from an *earlier* pass, before this file's classes were settled. They are kept because");
-w("the **shape** of each is more useful than the fix — and because the same shapes recur:");
-w();
-w("| Claim | What was wrong | Why no guard could see it |");
-w("|---|---|---|");
-w("| IT 01, `Get-PhysicalDisk` | The phase told the reader to watch for `Caution` or `Bad` from `HealthStatus`. Those are **CrystalDiskInfo's** ratings — the cmdlet returns `Healthy` / `Warning` / `Unhealthy` / `Unknown`. | Every word was spelled correctly and the sentence was internally consistent. The phase's own sample output four lines earlier printed `Healthy`, so it even contradicted itself without any check noticing. |");
-w("| IT 02, `DISM` | A summary table said `` `DISM /RestoreHealth` ``, which **throws when run**. The full form appears 300 lines earlier in the same file. | The command *name* was right. Nothing was inconsistent. A table cell invites shortening, and the abbreviation silently became a different, broken command. |");
-w();
-w("**Both are now covered by `scripts/audit-commands.mjs`**, which checks the exact string a reader");
-w("would copy rather than the command name — and which was itself proved able to fail by");
-w("re-injecting the original IT 02 defect, because a guard that has never failed is a comment.");
-w();
-w("## The `UNVERIFIABLE` column is the honest part");
-w();
-w("48 rows came back unverifiable, and they fall on exactly what should: teaching method, diagnostic");
-w("heuristics, resume phrasing, case-study narrative, and lab instructions. **A phase saying `/26` is");
-w("\"the point where most beginners close the tab\" is pedagogy, not fact**, and stamping it OK would");
-w("have made the whole OK column meaningless.");
+// Also IT-only: these two defects, the "48 rows" figure, and the labex.io sourcing
+// note are all records of the IT pass. The general lessons below (what a clean
+// result does not mean) are true of every track and stay unconditional.
+if (TRACK_KEY === "it") {
+  w("## Two claims were wrong, and both were already fixed");
+  w();
+  w("These came from an *earlier* pass, before this file's classes were settled. They are kept because");
+  w("the **shape** of each is more useful than the fix — and because the same shapes recur:");
+  w();
+  w("| Claim | What was wrong | Why no guard could see it |");
+  w("|---|---|---|");
+  w("| IT 01, `Get-PhysicalDisk` | The phase told the reader to watch for `Caution` or `Bad` from `HealthStatus`. Those are **CrystalDiskInfo's** ratings — the cmdlet returns `Healthy` / `Warning` / `Unhealthy` / `Unknown`. | Every word was spelled correctly and the sentence was internally consistent. The phase's own sample output four lines earlier printed `Healthy`, so it even contradicted itself without any check noticing. |");
+  w("| IT 02, `DISM` | A summary table said `` `DISM /RestoreHealth` ``, which **throws when run**. The full form appears 300 lines earlier in the same file. | The command *name* was right. Nothing was inconsistent. A table cell invites shortening, and the abbreviation silently became a different, broken command. |");
+  w();
+  w("**Both are now covered by `scripts/audit-commands.mjs`**, which checks the exact string a reader");
+  w("would copy rather than the command name — and which was itself proved able to fail by");
+  w("re-injecting the original IT 02 defect, because a guard that has never failed is a comment.");
+  w();
+  w("## The `UNVERIFIABLE` column is the honest part");
+  w();
+  w("48 rows came back unverifiable, and they fall on exactly what should: teaching method, diagnostic");
+  w("heuristics, resume phrasing, case-study narrative, and lab instructions. **A phase saying `/26` is");
+  w("\"the point where most beginners close the tab\" is pedagogy, not fact**, and stamping it OK would");
+  w("have made the whole OK column meaningless.");
+} else {
+  w("## `UNVERIFIABLE` is expected to be common, and is not a failure");
+  w();
+  w("A great deal of this track is teaching method, diagnostic reasoning, worked examples and career");
+  w("advice, none of which is a fact about the world. **On the IT pass 48 of 224 rows (21%) came back");
+  w("`UNVERIFIABLE`, and that was the honest result** — a phase saying a `/26` is \"the point where most");
+  w("beginners close the tab\" is pedagogy, not fact, and stamping it OK would have made the OK column");
+  w("mean nothing. Do not push a verifier to fill a column; an invented URL is worse than a gap,");
+  w("because it will be acted on.");
+}
 w();
 w("## What a clean result does NOT mean");
 w();
@@ -436,12 +497,14 @@ w("reads as current — and those are the errors most likely to actually mislead
 w("layer has only ever been tested by the comprehension passes, and it remains the largest");
 w("unexamined risk in the repository.");
 w();
-w("**One sourcing weakness is worth recording.** Several citations rested on a third-party tutorial");
-w("(`labex.io`) that returns **HTTP 403**, or on a localised manpage, rather than on the standard");
-w("itself. The *verdicts* were right — I rechecked those rows against FHS 3.0, `man7.org`, and the");
-w("OpenSSH manual and all held — but the citations were weaker evidence than they appeared. The");
-w("prompt now requires a quote and a source ranking for exactly this reason.");
-w();
+if (TRACK_KEY === "it") {
+  w("**One sourcing weakness is worth recording.** Several citations rested on a third-party tutorial");
+  w("(`labex.io`) that returns **HTTP 403**, or on a localised manpage, rather than on the standard");
+  w("itself. The *verdicts* were right — I rechecked those rows against FHS 3.0, `man7.org`, and the");
+  w("OpenSSH manual and all held — but the citations were weaker evidence than they appeared. The");
+  w("prompt now requires a quote and a source ranking for exactly this reason.");
+  w();
+}
 w("## What this file does NOT claim");
 w();
 w("- **It is not exhaustive of the content.** It finds claims of the classes above. Prose that is");
@@ -453,8 +516,16 @@ w("- **A clean result does not mean the phase is correct.** It means these class
 w();
 w(`**Claims extracted: ${total}** across ${files.length} phases and ${CLASSES.length} classes.`);
 w();
-w("Three classes are settled by recomputation or by the assigning registry, leaving **216 claims**");
-w("that genuinely need a source. Those are the ones listed below.");
+// COMPUTED, not hard-coded. This figure read "216 claims" for every track, which
+// was IT's number and wrong for cyber (the real value is 373). A count printed
+// beside a table it disagrees with is the same defect this repository has now
+// recorded four times: the number next to the artefact is not the artefact.
+{
+  const outstanding = CLASSES.filter((c) => !c.settled).reduce((a, c) => a + byClass.get(c.id).length, 0);
+  const settled = total - outstanding;
+  w(`Three classes are settled by recomputation or by the assigning registry (**${settled} claims**),`);
+  w(`leaving **${outstanding} claims** that genuinely need a source. Those are the ones listed below.`);
+}
 w();
 w("| Class | Claims | Source | Status |");
 w("|---|---|---|---|");

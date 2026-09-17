@@ -238,6 +238,6 @@ for (const spec of WANTED) {
 }
 
 console.log("");
-console.log(`Wrote ${written} self-contained message(s) to docs/claims-to-verify/.`);
+console.log(`Wrote ${written} self-contained message(s) to docs/${TRACKS[TRACK_KEY].out}/.`);
 console.log("Each file is a COMPLETE message: instructions, then the whole table.");
 console.log("Nothing needs to be added -- paste the file's contents and send.");

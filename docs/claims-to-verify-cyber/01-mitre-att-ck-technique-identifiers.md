@@ -58,16 +58,16 @@ For each row, replace the empty last column with exactly one of:
 
 | # | Location | Text as written | Verdict |
 |---|---|---|---|
-| 1 | `01-phase-foundations.md:499` | \| **Technique** \| A specific way of achieving that goal \| **T1566 Phishing** under the Initial Access tactic \| | |
-| 2 | `01-phase-foundations.md:501` | When you see a phishing email, mapping it to T1566 joins your observation to a global, consistent vocabulary. That is why one of this phase's practice tasks is to pick five techniques and explain them. | |
-| 3 | `01-phase-foundations.md:673` | \| Initial Access \| Phishing (T1566) \| Get a foothold by convincing a user to act \| Mail filters, user reports, suspicious sender domains \| | |
+| 1 | `01-phase-foundations.md:502` | \| **Technique** \| A specific way of achieving that goal \| **T1566 Phishing** under the Initial Access tactic \| | |
+| 2 | `01-phase-foundations.md:504` | When you see a phishing email, mapping it to T1566 joins your observation to a global, consistent vocabulary. That is why one of this phase's practice tasks is to pick five techniques and explain them. | |
+| 3 | `01-phase-foundations.md:676` | \| Initial Access \| Phishing (T1566) \| Get a foothold by convincing a user to act \| Mail filters, user reports, suspicious sender domains \| | |
 | 4 | `03-phase-security-fundamentals.md:387` | That last row introduces **masquerading** — naming a malicious file after a legitimate system process to blend in. It is a MITRE ATT&CK technique (T1036). | |
 | 5 | `03-phase-security-fundamentals.md:875` | \| 02:14:03 \| Phishing email delivered to `j.dela+cruz@example.com` \| Mail gateway log \| Initial access attempt (ATT&CK T1566) \| | |
 | 6 | `03-phase-security-fundamentals.md:890` | \| ATT&CK T1566 mapping \| Phase 1 \| | |
 | | | <sub>↑ \|---\|---\|<br>↓ \| Event IDs 4624 and 4688, logon types 3 and 10 \| Part 1 \|</sub> | |
-| 7 | `04-phase-hands-on-labs.md:489` ▶ | <id>T1110</id> | |
+| 7 | `04-phase-hands-on-labs.md:494` ▶ | <id>T1110</id> | |
 | | | <sub>↑ <mitre><br>↓ </mitre></sub> | |
-| 8 | `04-phase-hands-on-labs.md:501` | - **`mitre`** — maps the detection to **T1110, Brute Force** in MITRE ATT&CK. Phase 1 introduced ATT&CK as a shared vocabulary; this is what using it looks like in practice. It means an analyst who sees this alert immediately knows what class of behaviour it r … | |
+| 8 | `04-phase-hands-on-labs.md:506` | - **`mitre`** — maps the detection to **T1110, Brute Force** in MITRE ATT&CK. Phase 1 introduced ATT&CK as a shared vocabulary; this is what using it looks like in practice. It means an analyst who sees this alert immediately knows what class of behaviour it r … | |
 | 9 | `10-phase-detection-engineering.md:152` | **T1059.001 — Command and Scripting Interpreter: PowerShell.** | |
 | 10 | `10-phase-detection-engineering.md:508` | **ATT&CK T1543.003 — Create or Modify System Process: Windows Service.** | |
 | 11 | `10-phase-detection-engineering.md:553` ▶ | - https://attack.mitre.org/techniques/T1059/001/ | |

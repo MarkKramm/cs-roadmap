@@ -27,21 +27,34 @@ const OUT = path.join(ROOT, "docs", "claims-to-verify-cyber", "bundles");
 // The nine packs, in the order they should be SENT — not alphabetical order.
 //
 // Ordering principle: biggest payoff first, then cheapest-to-check, then the heavy
-// mechanical tail. Pack 04 leads because it is both the largest single class (98)
-// and the one most likely to have rotted: D-038 calls a versioned standard
-// summarised in a beginner curriculum "a time bomb with a long fuse", and the OWASP
-// A09 defect already found in this repo was exactly that class.
+// mechanical tail. Pack 04 leads because it is both the largest single class and
+// the one most likely to have rotted: D-038 calls a versioned standard summarised
+// in a beginner curriculum "a time bomb with a long fuse", and the OWASP A09 and
+// NIST CSF 5-vs-6 defects already found in this repo were both that class.
+//
+// `rows` is NOT declared here. It is read from the pack at build time, because a
+// hard-coded count is a number that silently disagrees with the table beside it
+// the moment the corpus changes -- the exact defect fixed in extract-claims.mjs on
+// the same day, where "216 claims" was IT's figure printed into every track.
 const PLAN = [
-  { file: "04-standards-frameworks-and-control-identifiers.md", rows: 98, why: "Largest single class, and the most rot-prone (D-038). OWASP A09 was this class." },
-  { file: "02-cve-identifiers-and-vulnerability-claims.md", rows: 4, why: "Only 4 rows. An ID paired with the wrong product is a fabrication that reads as authoritative." },
-  { file: "03-cryptography-algorithm-claims.md", rows: 5, why: "Only 5 rows, and FIPS/RFC settle each one outright." },
-  { file: "08-product-versions-and-editions.md", rows: 9, why: "9 rows. Version claims rot fastest of any class." },
-  { file: "01-mitre-att-ck-technique-identifiers.md", rows: 34, why: "ATT&CK 34/34 already verified clean, but the pack still carries them; cheap confirmation." },
-  { file: "06-protocol-and-standard-behaviour.md", rows: 43, why: "RFC-settled, mechanical, unambiguous." },
-  { file: "07-registry-paths-file-paths-and-filenames.md", rows: 43, why: "Microsoft Learn or the OS itself. Mechanical." },
-  { file: "09-command-and-cmdlet-usage.md", rows: 48, why: "The class that produced 3 real defects on the IT pass. Highest expected yield." },
-  { file: "05-security-tool-commands-and-flags.md", rows: 85, why: "Tool man pages. Largest mechanical class; the same 'right name, broken invocation' shape." },
+  { file: "04-standards-frameworks-and-control-identifiers.md", why: "Largest single class, and the most rot-prone. NIST CSF 5-vs-6 and OWASP A09 were this class." },
+  { file: "02-cve-identifiers-and-vulnerability-claims.md", why: "Tiny, and an ID paired with the wrong product is a fabrication that reads as authoritative." },
+  { file: "03-cryptography-algorithm-claims.md", why: "Tiny, and FIPS/RFC settle each one outright." },
+  { file: "08-product-versions-and-editions.md", why: "Version claims rot fastest of any class." },
+  { file: "01-mitre-att-ck-technique-identifiers.md", why: "MITRE ATT&CK IDs; the pack still carries the rows verified clean on the first pass." },
+  { file: "06-protocol-and-standard-behaviour.md", why: "RFC-settled, mechanical, unambiguous." },
+  { file: "07-registry-paths-file-paths-and-filenames.md", why: "Microsoft Learn or the OS itself. Mechanical." },
+  { file: "09-command-and-cmdlet-usage.md", why: "The class that produced 3 real defects on the IT pass. Highest expected yield." },
+  { file: "05-security-tool-commands-and-flags.md", why: "Tool man pages. Largest mechanical class; the same 'right name, broken invocation' shape." },
 ];
+
+// Count the data rows in a pack, so the plan above never carries a stale number.
+const countRows = (file) =>
+  (fs.readFileSync(path.join(SRC, file), "utf8").match(/^\|\s*\d+\s*\|/gm) || []).length;
+
+for (const item of PLAN) {
+  item.rows = countRows(item.file);
+}
 
 fs.mkdirSync(OUT, { recursive: true });
 
@@ -52,6 +65,7 @@ fs.mkdirSync(OUT, { recursive: true });
 // ~120-row bundle has come back complete before (the IT pass verified 152 of 160 in
 // one reply); ~200 has not been tested and is not the place to find out.
 const MAX_ROWS = 130;
+const WORDS = ["zero", "one", "two", "three", "four", "five", "six", "seven", "eight"];
 
 const bundles = [];
 let current = null;
@@ -132,13 +146,14 @@ fs.writeFileSync(
     "",
     "## Why bundles and not one paste",
     "",
-    "369 rows need a verdict, a source URL and a quote each. That reply is roughly 2.5×",
-    "the prompt, so one paste asks for ~75k tokens back and **will** truncate — the IT",
-    "pass's 160-row table already stopped at row 152. Nine separate pastes fix the",
-    "truncation and reintroduce the other failure D-038 records: a folder where nothing",
+    `${manifest.reduce((a, m) => a + m.rows, 0)} rows need a verdict, a source URL and a quote each.`,
+    "That reply is roughly 2.5× the prompt, so one paste asks for far more back than a",
+    "reply reliably completes — and **it will truncate.** The IT pass's 160-row command",
+    "table came back verified through row 152 and stopped there. Nine separate pastes fix",
+    "the truncation and reintroduce the other failure D-038 records: a folder where nothing",
     "says which packs are done.",
     "",
-    "So: **four bundles, numbered, in the order below.** Send one, paste the answer back,",
+    `So: **${WORDS[manifest.length] || manifest.length} bundles, numbered, in the order below.** Send one, paste the answer back,`,
     "then send the next. Each is self-contained — the rules travel with every one, per",
     "D-038 (\"no placeholders, ever\").",
     "",
@@ -157,8 +172,7 @@ fs.writeFileSync(
       "",
       ...m.classes.map((c) => `- \`${c.file}\` (${c.rows} rows) — ${c.why}`),
       "",
-    ]),
-    "## After each reply",
+    ]),    "## After each reply",
     "",
     "Paste the returned tables back into the conversation with me. I will:",
     "",

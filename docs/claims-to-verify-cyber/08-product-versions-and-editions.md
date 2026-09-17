@@ -58,17 +58,17 @@ For each row, replace the empty last column with exactly one of:
 
 | # | Location | Text as written | Verdict |
 |---|---|---|---|
-| 1 | `02-phase-networking-and-linux.md:591` | **Windows has no `ssh-copy-id`.** The OpenSSH client ships with Windows 10 and 11, but the key-install helper does not. Append the key yourself instead — from PowerShell: | |
-| 2 | `04-phase-hands-on-labs.md:809` ▶ | \| lab-wazuh \| SIEM manager \| 192.168.56.10 \| Ubuntu Server 24.04 \| clean-install \| | |
+| 1 | `02-phase-networking-and-linux.md:683` | **Windows has no `ssh-copy-id`.** The OpenSSH client ships with Windows 10 and 11, but the key-install helper does not. Append the key yourself instead — from PowerShell: | |
+| 2 | `04-phase-hands-on-labs.md:814` ▶ | \| lab-wazuh \| SIEM manager \| 192.168.56.10 \| Ubuntu Server 24.04 \| clean-install \| | |
 | | | <sub>↑ \|---\|---\|---\|---\|---\|<br>↓ \| lab-ubuntu \| Victim \| 192.168.56.20 \| Ubuntu Server 24.04 \| clean-install \|</sub> | |
-| 3 | `04-phase-hands-on-labs.md:810` ▶ | \| lab-ubuntu \| Victim \| 192.168.56.20 \| Ubuntu Server 24.04 \| clean-install \| | |
+| 3 | `04-phase-hands-on-labs.md:815` ▶ | \| lab-ubuntu \| Victim \| 192.168.56.20 \| Ubuntu Server 24.04 \| clean-install \| | |
 | | | <sub>↑ \| lab-wazuh \| SIEM manager \| 192.168.56.10 \| Ubuntu Server 24.04 \| clean-install \|<br>↓ \| lab-win10 \| Victim \| 192.168.56.30 \| Windows 10 Eval \| clean-install \|</sub> | |
-| 4 | `04-phase-hands-on-labs.md:811` ▶ | \| lab-win10 \| Victim \| 192.168.56.30 \| Windows 10 Eval \| clean-install \| | |
+| 4 | `04-phase-hands-on-labs.md:816` ▶ | \| lab-win10 \| Victim \| 192.168.56.30 \| Windows 10 Eval \| clean-install \| | |
 | | | <sub>↑ \| lab-ubuntu \| Victim \| 192.168.56.20 \| Ubuntu Server 24.04 \| clean-install \|</sub> | |
-| 5 | `11-phase-incident-response.md:484` | You have an image of a Windows 10 workstation, and a hypothesis: the user opened a malicious document, and something executed. | |
-| 6 | `11-phase-incident-response.md:686` ▶ | └── Target VM — Windows 10 evaluation, 4 GB RAM, snapshot taken | |
+| 5 | `11-phase-incident-response.md:486` | You have an image of a Windows 10 workstation, and a hypothesis: the user opened a malicious document, and something executed. | |
+| 6 | `11-phase-incident-response.md:688` ▶ | └── Target VM — Windows 10 evaluation, 4 GB RAM, snapshot taken | |
 | | | <sub>↑ │ Internet access is fine; it holds no malware<br>↓ Host-only network. No shared folders.</sub> | |
-| 7 | `11-phase-incident-response.md:989` | \| Host \| `WKS-014`, Windows 10, user `LAB\jsantos` \| | |
+| 7 | `11-phase-incident-response.md:991` | \| Host \| `WKS-014`, Windows 10, user `LAB\jsantos` \| | |
 | | | <sub>↑ \| Alert \| Suspicious process execution from a user temp directory \|<br>↓ \| Detection \| EDR rule firing on `svchost.exe` running from `AppData\Local\Temp` \|</sub> | |
 | 8 | `12-phase-scripting-automation.md:1240` ▶ | - Python 3.10 or newer | |
 | | | <sub>↓ - A VirusTotal API key (the free public API is sufficient)</sub> | |

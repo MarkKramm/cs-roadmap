@@ -58,12 +58,12 @@ For each row, replace the empty last column with exactly one of:
 
 | # | Location | Text as written | Verdict |
 |---|---|---|---|
-| 1 | `02-phase-networking-and-linux.md:585` ▶ | ssh-keygen -t ed25519 -C "lab key" # generate a keypair | |
+| 1 | `02-phase-networking-and-linux.md:677` ▶ | ssh-keygen -t ed25519 -C "lab key" # generate a keypair | |
 | | | <sub>↑ ```bash<br>↓ ssh-copy-id user@192.168.1.50 # install the public key (Linux/macOS)</sub> | |
-| 2 | `11-phase-incident-response.md:456` | \| **AmCache** \| `C:\Windows\AppCompat\Programs\Amcache.hve` \| Program execution with SHA-1 hashes and install paths \| | |
-| 3 | `11-phase-incident-response.md:464` | **AmCache is the single most under-used artefact by beginners.** It records executables with their SHA-1 hashes, which means you can take a hash you found in AmCache and check it against a public reputation service without ever having the file. | |
-| 4 | `11-phase-incident-response.md:1242` | - A memory acquisition record with tool, time, and SHA-256 hash | |
+| 2 | `11-phase-incident-response.md:458` | \| **AmCache** \| `C:\Windows\AppCompat\Programs\Amcache.hve` \| Program execution with SHA-1 hashes and install paths \| | |
+| 3 | `11-phase-incident-response.md:466` | **AmCache is the single most under-used artefact by beginners.** It records executables with their SHA-1 hashes, which means you can take a hash you found in AmCache and check it against a public reputation service without ever having the file. | |
+| 4 | `11-phase-incident-response.md:1244` | - A memory acquisition record with tool, time, and SHA-256 hash | |
 | | | <sub>↑ - Triage records for ten alerts with severity and escalation reasoning<br>↓ - A disk image hash verification and a timeline table built from at least three sources</sub> | |
-| 5 | `14-phase-web-app-security.md:307` | **The password-storage rule is the one to know precisely.** Passwords are stored with a slow, salted, memory-hard hash: `bcrypt`, `scrypt`, or `Argon2`. Not SHA-256, and never MD5 or SHA-1. The reason is speed. A modern GPU computes billions of SHA-256 hashes  … | |
+| 5 | `14-phase-web-app-security.md:392` | **The password-storage rule is the one to know precisely.** Passwords are stored with a slow, salted, memory-hard hash: `bcrypt`, `scrypt`, or `Argon2`. Not SHA-256, and never MD5 or SHA-1. The reason is speed. A modern GPU computes billions of SHA-256 hashes  … | |
 
 _▶ marks a line inside a code block — executable, so a wrong flag or path is worse than a wrong sentence._
