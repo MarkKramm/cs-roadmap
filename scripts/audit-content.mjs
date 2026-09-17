@@ -171,7 +171,14 @@ for (const { track, file } of files) {
   });
 
   // --- duplicate part numbers ---
-  const parts = headings.filter((h) => /^### Part \d+/.test(h.text)).map((h) => h.text.match(/^### Part (\d+)/)[1]);
+  // `headings[].text` has its `#` prefix stripped at collection time (see the
+  // heading regex above), so these patterns must NOT include the `### ` marker.
+  // They did until 2026-09-17, which meant both DUPLICATE_PART and PART_GAP
+  // filtered an empty array and could never fire — a rule that printed nothing
+  // and was read as green, exactly the failure class this file's sibling guards
+  // each record once. Found by mutation-testing this guard: planting a genuine
+  // duplicate `### Part 1` heading exited 0.
+  const parts = headings.filter((h) => /^Part \d+/.test(h.text)).map((h) => h.text.match(/^Part (\d+)/)[1]);
   const seen = new Set();
   for (const p of parts) {
     if (seen.has(p)) add('DUPLICATE_PART', rel, `Part ${p} appears more than once`);
