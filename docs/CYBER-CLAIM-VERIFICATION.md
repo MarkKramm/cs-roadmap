@@ -1,6 +1,16 @@
-# IT track — technical claim verification
+# Cyber track — technical claim verification
 
-**Status: claims extracted, verification NOT yet performed.**
+**Status: claims extracted. 43 of 373 rows verified (all `OK`, 0 `WRONG`); 369 outstanding.**
+**Nine paste-ready packs are generated in [`claims-to-verify-cyber/`](claims-to-verify-cyber/).**
+
+> **This header was corrected on 2026-09-17.** It had read *"IT track — technical claim
+> verification"* and *"verification NOT yet performed"*, both stale: the file was **copied from
+> [`IT-CLAIM-VERIFICATION.md`](IT-CLAIM-VERIFICATION.md)** and generalised to cyber, and the title
+> and status line came along unchanged. The status was false in the *dangerous* direction for a
+> worklist — it read as "nothing done, nothing to trust" while the docbody recorded 43 verified
+> rows and a result table. A worklist whose header disagrees with its own body is a handover
+> defect of exactly the kind **D-038** exists to prevent. The stale *"216 claims need a source"*
+> figure further down was corrected to **373** at the same time.
 
 Nothing in this repository has ever tested whether its content is technically *true*. Every
 guard tests internal consistency — does the parser lose content, do cross-references resolve,
@@ -121,8 +131,12 @@ prompt now requires a quote and a source ranking for exactly this reason.
 
 **Claims extracted: 698** across 15 phases and 13 classes.
 
-Three classes are settled by recomputation or by the assigning registry, leaving **216 claims**
-that genuinely need a source. Those are the ones listed below.
+Three classes are settled by recomputation or by the assigning registry, leaving **373 claims**
+that genuinely need a source. Those are the ones listed below, and **369 of them are still open** —
+43 rows were verified in the first passes (ATT&CK 34/34, CVE 4/4, crypto 5) with **0 `WRONG`**, and
+`split-claims.mjs --track cybersec` has not yet been told about them, so the packs still carry
+those rows. **Re-verifying 43 known-clean rows is cheap; the marked state is hand-maintained by
+design (D-038) and guessing it would fail in the direction of silently skipping unverified rows.**
 
 | Class | Claims | Source | Status |
 |---|---|---|---|

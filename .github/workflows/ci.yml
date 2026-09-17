@@ -130,6 +130,17 @@ jobs:
         run: node scripts/audit-encoding.mjs
       - name: Test encoding-guard controls
         run: node scripts/test-audit-encoding.mjs
+      # The cyber verification bundles are GENERATED from the per-class packs.
+      # A generated artefact that has drifted from its source is worse than one
+      # that was never generated, because the worklist is the thing a human
+      # pastes into a chat and acts on -- and nothing about a stale bundle looks
+      # stale. This regenerates into the real path and fails on any diff, so the
+      # committed bundles are provably the ones the script produces. Check-only:
+      # CI regenerates and compares, and never commits (D-008).
+      - name: Cyber bundles match their generator
+        run: |
+          node scripts/build-cyber-bundles.mjs
+          git diff --exit-code -- docs/claims-to-verify-cyber/bundles/
       # A versioned external standard gets summarised, the summary is accurate
       # when written, the standard is revised, and the summary silently becomes
       # false. Every other guard checks the text against ITSELF -- a document
