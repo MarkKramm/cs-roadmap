@@ -366,7 +366,16 @@ export default function Certifications() {
                       <button
                         type="button"
                         className="btn btn--ghost"
-                        onClick={() => remove(e.id)}
+                        onClick={() => {
+                          // A certification is the longest-lived commitment in
+                          // the curriculum — a target date and an exam — so
+                          // removing one is confirmed, like every other
+                          // destructive action here (Portfolio, Applications,
+                          // reset progress). It was the one single-click delete.
+                          if (window.confirm(`Remove ${e.name}? This cannot be undone.`)) {
+                            remove(e.id);
+                          }
+                        }}
                         aria-label={"Remove " + e.name}
                       >
                         Remove

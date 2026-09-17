@@ -306,7 +306,7 @@ const STRICT = process.env.BROWSER_CHECK_STRICT === '1';
 // to sit near the real count: a floor far below it stops being a floor. It is
 // deliberately not AT the real count, so adding or removing a check does not
 // require editing this line.
-const MIN_CHECKS = 100;
+const MIN_CHECKS = 118;
 
 async function main() {
   const found = findBrowser();
@@ -694,6 +694,75 @@ async function main() {
       noteKey !== null && noteKey.includes('AB'),
       noteKey ? noteKey.slice(0, 120) : 'null',
     );
+
+    // ---------------------------------------------------------------------
+    // 3b. The destructive control is gated on the RIGHT state
+    // ---------------------------------------------------------------------
+    //
+    // WHY THIS IS HERE AND NOT IN test-notes.mjs
+    // That suite exercises the pure helpers under plain Node; this bug lived in
+    // the component's render condition, which only a real DOM can see.
+    //
+    // THE DEFECT IT PINS DOWN (found 2026-09-17)
+    // `NotesPanel` showed its "Clear this phase's notes" button when `written`
+    // was true — a test of the NOTE ONLY — while `clearPhase` deletes the whole
+    // phase entry, note AND every task answer. So a reader with six answers and
+    // no note had no way to clear them, and a reader who typed one character
+    // into an otherwise-empty note got a button that silently wiped all six.
+    // The confirm dialog did at least say "and all your answers to it", so the
+    // copy was honest about a button that should not have been there.
+    //
+    // The assertion is on the LABEL, because that is what the reader reads
+    // before clicking: it must name what is actually at risk.
+    {
+      const clearState = await cdp.eval(`(() => {
+        const panel = document.querySelector('.notes');
+        const btn = [...panel.querySelectorAll('button')]
+          .find(b => /^Clear this phase/.test(b.textContent.trim()));
+        return {
+          present: !!btn,
+          label: btn ? btn.textContent.trim() : null,
+          // The note currently holds "AB" from the test above, so the button
+          // must exist and must mention the note.
+        };
+      })()`);
+      check('notes: clear control appears when a note exists', clearState.present, String(clearState.label));
+      check(
+        'notes: clear control names what it deletes (the note)',
+        /note/i.test(String(clearState.label)),
+        String(clearState.label),
+      );
+
+      // Now the half that was broken: empty the note and check the control is
+      // no longer offered as a note-only action. It must either disappear or
+      // switch to naming the answers, since those are what it destroys.
+      await cdp.eval(`(() => {
+        const ta = document.querySelector('.notes textarea');
+        window.__type(ta, '');
+        return true;
+      })()`);
+      await sleep(300);
+      const emptied = await cdp.eval(`(() => {
+        const panel = document.querySelector('.notes');
+        const btn = [...panel.querySelectorAll('button')]
+          .find(b => /^Clear this phase/.test(b.textContent.trim()));
+        return { noteValue: document.querySelector('.notes textarea').value, present: !!btn, label: btn ? btn.textContent.trim() : null };
+      })()`);
+      check('notes: emptying the note removes the note-only control', !emptied.present || /answer/i.test(String(emptied.label)), JSON.stringify(emptied));
+
+      // RESTORE the note. A later check ("your work: shows the note written in
+      // the browser") reads this value back, so emptying it here broke a
+      // downstream assertion — a test that mutates shared state has to put it
+      // back. Caught by running the whole suite rather than just this block.
+      await cdp.eval(`(() => {
+        const ta = document.querySelector('.notes textarea');
+        window.__type(ta, 'AB');
+        return true;
+      })()`);
+      await sleep(300);
+      const restoredNote = await cdp.eval(`document.querySelector('.notes textarea').value`);
+      check('notes: note restored for downstream checks', restoredNote === 'AB', JSON.stringify(restoredNote));
+    }
 
     // ---------------------------------------------------------------------
     // 4. Print stylesheet — the one view that is a media query, not a route

@@ -80,7 +80,7 @@ export default function ToolsLibrary({ onOpenPhase }) {
               value={trackId}
               onChange={(e) => setTrackId(e.target.value)}
             >
-              <option value="all">Both tracks</option>
+              <option value="all">All tracks</option>
               {tracks.map((t) => (
                 <option key={t.id} value={t.id}>
                   {t.label}
