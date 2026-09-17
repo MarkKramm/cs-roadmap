@@ -202,6 +202,13 @@ jobs:
         run: node scripts/audit-doc-figures.mjs
       - name: Doc-figure guard controls
         run: node scripts/test-audit-doc-figures.mjs
+      # An open item whose own text says the work is done. Two real defects had this shape,
+      # and both stayed open for passes because the sentence explained why it was open --
+      # a stale reason is harder to catch than a stale number (D-064).
+      - name: Open items do not contradict themselves
+        run: node scripts/audit-open-items.mjs
+      - name: Open-item guard controls
+        run: node scripts/test-audit-open-items.mjs
       - name: Verification bundles match their generator (both tracks)
         run: |
           node scripts/build-cyber-bundles.mjs --track cybersec

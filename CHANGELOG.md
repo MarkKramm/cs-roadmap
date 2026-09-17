@@ -8,6 +8,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### Added
 
+- **A guard for open items that contradict themselves** — `scripts/audit-open-items.mjs`
+  and six controls in `scripts/test-audit-open-items.mjs`, wired into CI. It fails when an
+  unchecked box both denies and asserts its own completion, which is the shape two real
+  defects had. See **D-067** for the exemption bug its own controls caught.
+
 - **The figure guard now reads four documents instead of one, and checks 25 figures
   instead of 13.** Extending it past `CHECKPOINT.md` found **eight more wrong figures across
   five files** — including two in source-code comments and one quoted block of build output
@@ -347,7 +352,15 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - `docs/CONTENT-SCHEMA.md`, `docs/DESIGN-SYSTEM.md` — marked as implemented and pointed at the code that implements them, replacing the earlier "planned" and "design intent" status lines.
 - `docs/CHECKPOINT.md` — refreshed to the current commit, file count, and checks.
 - `learning-site/src/App.jsx` — navigation is now a single `view` string covering Dashboard, Tools, Portfolio, and Applications, replacing the phase-open boolean. See D-007.
-- `docs/DESIGN-SYSTEM.md` — sidebar contents updated to the Views list that actually exists; the three M2 pages no longer described as forthcoming.
+- `docs/DESIGN-SYSTEM.md` — sidebar contents updat
+- **A stale item that explained why it was open.** `CHECKPOINT.md`'s IT-gaps item said
+  *"the audit that found them is not fully re-verified"* and then, in its next sentence, said
+  the re-verification *"has now happened"*. Re-checked against the corpus: all nine topics are
+  present (`dependent services` at `02-phase-operating-systems.md:76`, NTFS versus share
+  permissions at `:547`, update rollback at `:75`). **The sentence supplied a reason to keep
+  reading the item as open**, which is D-064's shape in the done/outstanding class rather than
+  the numeric one. The item now says what is genuinely outstanding: the market claim.
+ed to the Views list that actually exists; the three M2 pages no longer described as forthcoming.
 - `docs/ROADMAP.md` — M2 moved to Done; the render smoke test recorded as a completed item.
 - `learning-site/README.md` — removed a duplicated `## Layout` section; documented the new pages, hooks, and commands; status brought up to M2.
 

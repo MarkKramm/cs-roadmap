@@ -1107,3 +1107,51 @@ are **not** guarded — there is no guard over prose in source files, and buildi
 the question of what a comment is allowed to say. They were corrected by hand and the next
 stale one will be found by a sweep, not by CI. That limitation is stated in `CHECKPOINT.md`
 rather than left implied.
+
+## D-067 — An exemption that matches anywhere will swallow the defect it exempts
+
+**Date:** 2026-09-18
+**Status:** Active
+
+`audit-open-items.mjs` flags an unchecked item whose own prose says the work is done. It
+needs exemptions, because two real open items legitimately read that way:
+
+- `CHECKPOINT.md:265` is open — *"The acronym corpus report still needs a human"* — while
+  reporting that the tool **"now emits 274 domain terms"**. The 274 is the tool's output,
+  not the item's completion.
+- An item may correctly say *"X is closed; what remains open is Y."*
+
+The first draft wrote those as bare regexes tested against the whole line:
+
+```js
+const EXEMPT = [/what remains open is/i, /it now (?:emits|reports|prints|shows)/i];
+```
+
+**A control caught the consequence within minutes.** Its fixture appended an unrelated
+clause containing "it now emits" to a genuinely self-contradicting item, and the guard
+**stayed silent** — the exemption matched somewhere in 500 characters of prose and excused a
+defect it had no business excusing. The escape hatch swallowed the thing it was meant to let
+through.
+
+**Decision.** **An exemption must be anchored to the position that establishes its subject.**
+Both rules now anchor to the start of the item and bound how far they may reach:
+
+```js
+/^\s*-\s*\[ \]\s*(?:\*\*)?[^.]{0,120}?what remains open is/i
+/^\s*-\s*\[ \]\s*(?:\*\*)?[^.]{0,160}?\b(?:the (?:guard|report|tool|script)|it) now (?:emits|reports|prints|shows)\b/i
+```
+
+**The general form:** *a negative filter is part of the guard, and it needs the same
+adversarial testing as the positive rule.* Every other guard in this repository is tested by
+proving it fires; an exemption is only tested by proving it does **not** fire when the
+defect is real but shares a word with a legitimate case. Three of the six controls in this
+suite are negative for exactly that reason, and the one that failed was the one that
+mattered.
+
+**A second, smaller instance of the same lesson from the same suite.** Two fixtures had to be
+rewritten because they "did not find the pattern" they were written against — one because the
+text had legitimately changed, one because the fixture itself produced a malformed line. Both
+failures were reported against **working code**, and both were the fixture's fault. That is
+now the sixth occurrence of this shape here (D-049, D-058, D-065), which is why
+`driftNumber` exists and why every fixture in the new suite asserts that it changed what it
+intended to change.
