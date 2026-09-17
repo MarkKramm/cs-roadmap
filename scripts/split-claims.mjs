@@ -85,8 +85,11 @@ const WANTED_BY_TRACK = {
   ],
   cybersec: [
     { title: "MITRE ATT&CK technique identifiers", done: true, doneThrough: 34 },
-    // NOT done: 3 rows still await a verdict. Do not add `done: true` here.
-    { title: "DNS record types" },
+    // DONE as of 2026-09-18. All four rows carry a verdict: rows 1-3 were recorded by
+    // record-cyber-verdicts-dns.mjs, and row 4 arrived already answered because it
+    // shares its location (`02-phase-networking-and-linux.md:1196`) with a command-class
+    // row -- one line making a claim of two kinds. That is why the pack emitted three.
+    { title: "DNS record types", done: true, doneThrough: 4 },
     { title: "CVE identifiers and vulnerability claims", done: true, doneThrough: 4 },
     { title: "Cryptography algorithm claims", done: true, doneThrough: 5 },
     { title: "Standards, frameworks and control identifiers", done: true, doneThrough: 105 },

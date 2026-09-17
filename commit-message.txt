@@ -1,0 +1,45 @@
+feat(claims): both tracks fully verified -- 636 rows, zero WRONG
+
+Cyber closes at 411 rows / 341 OK / 0 WRONG / 70 UNVERIFIABLE over 351 distinct
+locations; the last class, DNS record types, came back 4 OK. IT stands at 225 /
+208 / 0 / 17. Every row was transcribed from a returned verdict by a recorder
+(D-057) and every total is re-derived from the rows by a guard.
+
+THE CLAIM COUNT WAS PUBLISHED AS 410 AND IT IS 411.
+
+The wrong figure sat in the cyber document's status line, in its prose ("348
+locations fill 407 rows") and in CHECKPOINT.md -- three places, all agreeing,
+all copies of one remembered number. They agreed because nothing measured them,
+and the redundancy that should have caught it instead made it convincing. The
+verdict-count guard found it within seconds of the last rows landing, because it
+recomputes every class total from the rows. A total that nothing recomputes is a
+guess with a citation. D-060.
+
+THREE OF THE FOUR VERDICT RECORDERS WERE NOT RUN BY CI.
+
+The "Recorded verdicts still place" step invoked two of the four. The other two
+ran when a human typed them and by nobody otherwise -- a set of verdicts that
+nothing re-checks, failing silently, because every other guard checks the rows
+that ARE there and none asks whether they are still reproducible. This is D-056
+pointed at the gating path: counting the recorders I remembered could not find
+the ones I forgot, so audit-recorders-wired.mjs enumerates the files on disk and
+requires each to appear in the workflow. It ships with three controls, one of
+which removes a line and requires the guard to name the recorder it lost.
+
+A CONTROL THAT DEPENDS ON REAL UNFINISHED WORK HAS AN EXPIRY DATE.
+
+Six of the ten verdict-count controls used the cyber DNS class as their fixture
+while it was genuinely outstanding. Closing the class broke all six at once:
+"control 1 fixture did not mutate split-claims.mjs" fired against good code,
+because the fixtures' premise had evaporated. They now graft a SYNTHETIC class
+into the document and the splitter, constructing the state they need. A fixture
+should depend on the structure it tests, never on a particular instance of it --
+an instance changes for legitimate reasons and the control cannot tell that from
+the code breaking.
+
+Also: the class table, status line and prose in the cyber document were still
+describing a worklist. They now describe the result, with every per-class figure
+taken from the guard's derivation rather than typed.
+
+Guards: 33 CI steps 0 failing; 15 site suites 0 failing; encoding 228 files
+clean; 10 verdict controls and 3 recorder-wiring controls pass.

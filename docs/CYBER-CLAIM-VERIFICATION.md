@@ -1,15 +1,13 @@
 # Cybersecurity track — technical claim verification
 
-**Status: verification in progress — 407 of 410 extracted claims settled, 3 outstanding.**
+**Status: VERIFIED — 411 rows, 341 `OK`, 0 `WRONG`, 70 `UNVERIFIABLE`, none outstanding.**
 
-Nine of the ten claim classes are complete and are **no longer emitted as worklists**:
+All ten claim classes are complete and **none is emitted as a worklist**:
 standards/frameworks (105 rows), CVE identifiers (4), cryptography (5), product versions (9),
 command/cmdlet usage (60), security tool commands and flags (99), ATT&CK identifiers (34),
-protocol behaviour (44) and registry/paths (47) — **407 rows cleared, zero `WRONG` verdicts.**
-One class remains — DNS record types, 3 rows — at
-[`claims-to-verify-cyber/01-dns-record-types.md`](claims-to-verify-cyber/01-dns-record-types.md).
-
-Every verdict column below is otherwise empty. This is still a worklist, not a result.
+protocol behaviour (44), registry/paths (47) and DNS record types (4) — **411 rows cleared, zero
+`WRONG` verdicts.** `docs/claims-to-verify-cyber/` holds no packs because there is nothing left
+to send; that is the finished state, not a dropped one.
 
 ## Result of the completed passes (2026-09-18)
 
@@ -24,9 +22,16 @@ Every verdict column below is otherwise empty. This is still a worklist, not a r
 | MITRE ATT&CK technique identifiers | 34 | 34 | **0** | 0 |
 | Protocol and standard behaviour | 44 | 34 | **0** | 10 |
 | Registry paths, file paths and filenames | 47 | 45 | **0** | 2 |
-| **Total** | **407** | **337** | **0** | **70** |
+| DNS record types | 4 | 4 | **0** | 0 |
+| **Total** | **411** | **341** | **0** | **70** |
 
-**Zero `WRONG` verdicts in 407 rows, and the 17% `UNVERIFIABLE` rate is the honest part.** Almost
+**This header said "407 of 410" until the DNS class closed, and both numbers were wrong.** The
+class has **411 rows over 351 distinct locations**, not 410 — the figure had been carried in prose
+and in a status line without anything deriving it, and the verdict-count guard caught the
+discrepancy the moment the last rows landed. A total that nothing recomputes is a remembered
+number, and this file's own history is the proof.
+
+**Zero `WRONG` verdicts in 411 rows, and the 17% `UNVERIFIABLE` rate is the honest part.** Almost
 every row marked unverifiable is a curriculum instruction, a deliverable description, or a
 worked example in a scenario — *"Read OWASP Top 10 and summarize each risk in 2–3 sentences"* is
 not a factual claim and marking it `OK` would be theatre. The rate is highest in the standards
@@ -79,8 +84,8 @@ alternative was changing two rows to match nine others and losing the plainer En
 
 **Verdicts are recorded per row below, keyed by location.** A location can legitimately appear in
 more than one class — `02-phase-networking-and-linux.md:683` (*"Windows has no `ssh-copy-id`"*) is a
-product-version claim, a command-usage claim and a tool-flag claim at once — so **348 distinct
-locations fill 407 rows.** No row carries a verdict that was not explicitly supplied, and
+product-version claim, a command-usage claim and a tool-flag claim at once — so **351 distinct
+locations fill 411 rows.** No row carries a verdict that was not explicitly supplied, and
 `record-cyber-verdicts.mjs` fails rather than dropping one it cannot place.
 
 ### One class was missed, and the record could not see it
@@ -181,18 +186,22 @@ Run all three before trusting this section. If any ever fails, the claims below 
 
 ## Result of the verification passes
 
-**No verification pass has been recorded for the Cybersecurity track yet.** This file is a
-worklist: it says what needs checking and where. It deliberately does **not** carry a results
-table, because there are no results to carry — and the previous revision of this file carried
-one anyway, copied from the IT pass, which claimed all classes verified and zero claims wrong.
+**The pass is complete.** This file began as a worklist — it said what needed checking and where,
+and deliberately carried no results table, because there were none to carry. A previous revision
+carried one anyway, copied from the IT pass, claiming all classes verified and zero claims wrong;
+that claim was withdrawn.
 
-**411 claim(s) below need an external source.** Every verdict column is empty. If you
-are reading this expecting a completed result, there is not one.
+**The 411 claim rows below now each carry a verdict**, recorded row by row rather than as a
+conclusion. The per-class figures are in the table at the top, and `scripts/audit-verdict-counts.mjs`
+**re-derives every one of them from the rows themselves** and fails if the two disagree. That
+matters more than it sounds: the figure "410" was stated in this file's status line for several
+passes and was simply wrong — the class has 411 rows — and nothing could catch it until the guard
+was pointed at the totals.
 
-> **Why there is no results table here.** Verification verdicts live in a conversation, not in
-> the repository (D-038), so a generator cannot read them back. Rather than print a stale or
-> borrowed number, this file prints none. Record real verdicts in
-> [`claims-to-verify-cyber/`](claims-to-verify-cyber/) when a pass completes.
+> **Why the results table is at the top and not here.** Verification verdicts arrive in a
+> conversation, not in the repository (D-038), so a generator cannot read them back; they are
+> transcribed by `record-cyber-verdicts.mjs` and checked by the guard. The rows are the result.
+> The table is a derived view of them, which is why it is regenerated rather than edited (D-055).
 
 ## `UNVERIFIABLE` is expected to be common, and is not a failure
 
@@ -223,23 +232,24 @@ unexamined risk in the repository.
 **Claims extracted: 761** across 15 phases and 13 classes.
 
 Three classes are settled by recomputation or by the assigning registry (**350 claims**),
-leaving **411 claims** that genuinely need a source. Those are the ones listed below.
+leaving **411 claims** that genuinely need a source. Those are the ones listed below, and
+**every one of them is now verified** — the class table state reflects the rows, not a plan.
 
 | Class | Claims | Source | Status |
 |---|---|---|---|
 | IP addressing and subnetting | 27 | RFC 1918 (private ranges), RFC 6890 (special-purpose), or by recomputation | **settled** |
 | Port numbers | 185 | IANA port registry, or Microsoft/vendor docs for the Windows-specific ones | **settled** |
-| Command and cmdlet usage | 60 | Microsoft Learn for cmdlets, man pages for POSIX tools | needs checking |
-| DNS record types | 4 | RFC 1035 and the IANA DNS parameters registry | needs checking |
-| Protocol and standard behaviour | 44 | The RFC or standard that defines the protocol; vendor docs for proprietary ones | needs checking |
-| Product versions and editions | 9 | Vendor documentation, checked against the current release | needs checking |
-| Registry paths, file paths and filenames | 47 | Microsoft documentation, or the OS itself | needs checking |
+| Command and cmdlet usage | 60 | Microsoft Learn for cmdlets, man pages for POSIX tools | **verified** — 56 `OK`, 4 `UNVERIFIABLE` |
+| DNS record types | 4 | RFC 1035 and the IANA DNS parameters registry | **verified** — 4 `OK` |
+| Protocol and standard behaviour | 44 | The RFC or standard that defines the protocol; vendor docs for proprietary ones | **verified** — 34 `OK`, 10 `UNVERIFIABLE` |
+| Product versions and editions | 9 | Vendor documentation, checked against the current release | **verified** — 2 `OK`, 7 `UNVERIFIABLE` |
+| Registry paths, file paths and filenames | 47 | Microsoft documentation, or the OS itself | **verified** — 45 `OK`, 2 `UNVERIFIABLE` |
 | Stated counts, sizes and arithmetic | 138 | Recomputation from the document's own numbers | **settled** |
-| CVE identifiers and vulnerability claims | 4 | The NVD or the vendor advisory for that CVE | needs checking |
-| MITRE ATT&CK technique identifiers | 34 | The MITRE ATT&CK matrix for the named technique ID | needs checking |
-| Standards, frameworks and control identifiers | 105 | The published standard itself (NIST CSRC, ISO, PCI SSC, OWASP) | needs checking |
-| Security tool commands and flags | 99 | The tool's own man page or vendor documentation | needs checking |
-| Cryptography algorithm claims | 5 | The defining standard (NIST FIPS), or the IETF RFC for the protocol | needs checking |
+| CVE identifiers and vulnerability claims | 4 | The NVD or the vendor advisory for that CVE | **verified** — 4 `OK` |
+| MITRE ATT&CK technique identifiers | 34 | The MITRE ATT&CK matrix for the named technique ID | **verified** — 34 `OK` |
+| Standards, frameworks and control identifiers | 105 | The published standard itself (NIST CSRC, ISO, PCI SSC, OWASP) | **verified** — 66 `OK`, 39 `UNVERIFIABLE` |
+| Security tool commands and flags | 99 | The tool's own man page or vendor documentation | **verified** — 93 `OK`, 6 `UNVERIFIABLE` |
+| Cryptography algorithm claims | 5 | The defining standard (NIST FIPS), or the IETF RFC for the protocol | **verified** — 3 `OK`, 2 `UNVERIFIABLE` |
 
 ---
 
@@ -367,14 +377,25 @@ _▶ marks a line inside a code block — executable, so a wrong flag or path is
 
 **Source to check against:** RFC 1035 and the IANA DNS parameters registry
 
+| Class | Rows | `OK` | `WRONG` | `UNVERIFIABLE` |
+|---|---:|---:|---:|---:|
+| DNS record types | 4 | 4 | **0** | 0 |
+
+**This class is why the verdict-count guard now inspects the splitter's class list.** It was added
+to `split-claims.mjs` already marked `done: true`, so it emitted no worklist, counted toward no
+total, and could never be verified — while the guard went on reporting it as tracked-outstanding,
+because the guard read the *document* and the document listed it. See "One class was missed" above.
+The check that catches it is **0b**: a section holding claim rows but absent from the splitter's
+class list is a failure.
+
 4 claim(s).
 
 | # | Location | Text as written | Verdict |
 |---|---|---|---|
-| 1 | `02-phase-networking-and-linux.md:38` | - IPv6 basics: link-local, global unicast, AAAA records, why NAT is less central | |
+| 1 | `02-phase-networking-and-linux.md:38` | - IPv6 basics: link-local, global unicast, AAAA records, why NAT is less central | **OK** — IETF RFC 3596 (primary source) defines the AAAA record type for IPv6 addresses. IPv6 expands the address field to 128 bits, which RFC/vendor authorities describe as eliminating the need for NAT in most deployments. Global unicast addresses begin with `2000::/3`; link-local addresses use `fe80::/10` (RFC 4291 / RIPE documentation). |
 | | | <sub>↑ - IPv4 addressing, subnet masks, and CIDR — including working out the network, broadcast, and usable range for any prefix by hand<br>↓ - DNS: A, AAAA, CNAME, MX, TXT, NS, recursive resolver, authoritative server</sub> | |
-| 2 | `02-phase-networking-and-linux.md:312` | You can inspect all of this from a terminal, and the phase's task 5 asks you to. `dig example.com MX` returns the mail records, and `dig example.com TXT` shows the anti-spoofing policy. Reading a real TXT record for a domain you care about is a small revelatio … | |
-| 3 | `02-phase-networking-and-linux.md:1155` | 5. **Then DNS** (task 5). Run `dig` for A, AAAA, MX, TXT, and NS on a domain you care about, and read the TXT record to see the anti-spoofing policy. This connects the abstract record table to something real. | |
+| 2 | `02-phase-networking-and-linux.md:312` | You can inspect all of this from a terminal, and the phase's task 5 asks you to. `dig example.com MX` returns the mail records, and `dig example.com TXT` shows the anti-spoofing policy. Reading a real TXT record for a domain you care about is a small revelatio … | **OK** — Oracle Help Center (vendor documentation): `dig` accepts a `query-type` argument, where `mx` is the "mail exchanger for the domain" and `txt` is "arbitrary number of strings". Linux Command Library confirms `dig example.com MX` queries mail exchange records and `dig example.com TXT` queries text records. |
+| 3 | `02-phase-networking-and-linux.md:1155` | 5. **Then DNS** (task 5). Run `dig` for A, AAAA, MX, TXT, and NS on a domain you care about, and read the TXT record to see the anti-spoofing policy. This connects the abstract record table to something real. | **OK** — Linux Command Library (vendor documentation): `dig` supports record types including A, AAAA, MX, NS and TXT. Oracle documentation confirms `dig` recognises `a`, `mx`, `ns` and `txt` as valid query types. |
 | 4 | `02-phase-networking-and-linux.md:1196` | 5. Use `dig` or `nslookup` to inspect A, AAAA, MX, TXT records. <!-- id: cyber-02-t05 band: quick energy: low --> | **OK** — BIND dig: supports query types including A, AAAA, MX and TXT. |
 
 ---

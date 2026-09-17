@@ -2,6 +2,19 @@
 
 A lightweight decision log (ADR-style). Newest first.
 
+## D-060 — A total that nothing recomputes is a guess with a citation
+
+- **Date:** 2026-09-18
+- **Status:** Accepted
+- **Context:** The cybersecurity track's claim count was stated as **410** in `docs/CYBER-CLAIM-VERIFICATION.md`'s status line, and as **407 rows over 348 locations** in its prose, and again in `docs/CHECKPOINT.md`. **All three agreed. All three were wrong** — the track has **411 rows over 351 locations**. They agreed because they were copies of one number, not because anything measured it. It was caught within seconds of the DNS class closing, by `audit-verdict-counts.mjs`, which re-derives every class total and the grand total from the rows; the arithmetic failed as soon as DNS had a summary row to check.
+- **Decision:** **Every published total must be recomputed from the substrate it summarises, and a guard must fail when the two disagree.** Derived figures live in one place and the guard derives them; hand-written prose totals either link to that derivation or are checked against it. The guard's failure message is explicit: *"correct the document, or correct the rows. Never edit the guard to agree."*
+- **Why three agreeing documents is worse than one.** A single wrong number looks like a mistake. **Three documents stating the same wrong number looks like corroboration** — a reader has no way to tell a measured figure from a copied one, and the redundancy that should have caught it instead made it convincing. This is D-051's shape ("ask again is not verify") applied to documentation: repeating a figure is not checking it, and a figure that appears in three files may have been verified exactly zero times.
+- **What made the difference.** The close of the DNS class was a *state change*, not a new opinion — the substrate moved, and a guard that recomputes noticed immediately. **A stale total is invisible while nothing changes and is caught the instant something does**, which is why the guard must run on every commit rather than when someone suspects a number.
+- **Consequences:**
+  - `audit-verdict-counts.mjs` checks, per track: every class summary row against its rows, the grand total against the sum of classes, and the distinct-locations label against the locations actually present. All three were violated by the 410 figure.
+  - **The 411 figure is now stated with its date and its derivation** in the verification document, rather than as a bare number, because the value of the number comes from the fact that something can refute it.
+  - This is the third instance in this repository of a **self-claim that nothing could refute** — after the false "verified" header and the hand-maintained expected-results tally in `CHECKPOINT.md`. The pattern is the same each time and worth naming: **documentation that counts things is code that has never been run.**
+
 ## D-058 — A test suite may not be able to write into the record it tests
 
 - **Date:** 2026-09-18

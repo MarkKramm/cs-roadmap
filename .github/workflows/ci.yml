@@ -183,7 +183,17 @@ jobs:
       - name: Recorded verdicts still place (both tracks)
         run: |
           node scripts/record-cyber-verdicts.mjs
+          node scripts/record-cyber-verdicts-dns.mjs
           node scripts/record-it-verdicts.mjs
+          node scripts/record-it-verdicts-2.mjs
+      # Every recorder that exists must appear above. A recorder left out of this
+      # step is a set of verdicts that nothing re-checks, and the failure is silent:
+      # the document keeps passing every other guard while the rows it claims to
+      # hold stop being reproducible. Three of the four were missing until now.
+      - name: Every verdict recorder is wired into CI
+        run: node scripts/audit-recorders-wired.mjs
+      - name: Recorder-wiring guard controls
+        run: node scripts/test-audit-recorders-wired.mjs
       - name: Verification bundles match their generator (both tracks)
         run: |
           node scripts/build-cyber-bundles.mjs --track cybersec

@@ -134,15 +134,45 @@ const reconcile = (args, docPath, apply) => {
 };
 
 console.log("controls for the EMPTY-verdict check:");
-console.log("  (the DNS class is real, tracked, outstanding work — these controls move it in and out of that state)");
+console.log("  (a SYNTHETIC class is grafted into both documents, so these controls do not");
+console.log("   depend on any real class's state -- see the note below)");
 
-const fillDns = (t) => {
-  const i = t.indexOf("## DNS record types");
-  const j = t.indexOf("\n## ", i + 1);
-  const seg = t.slice(i, j === -1 ? t.length : j);
-  const filled = seg.replace(/(\| \d+ \|[^|]*\|[^|]*\|)\s*\|/g, "$1 **UNVERIFIABLE** — control fixture |");
-  return t.slice(0, i) + filled + t.slice(j === -1 ? t.length : j);
-};
+// WHY THESE CONTROLS NO LONGER USE A REAL CLASS.
+//
+// They used the cyber "DNS record types" class, which was genuinely outstanding work: the
+// fixtures moved it in and out of that state and required the guard to agree. That was a
+// good design while the class was unverified, and it broke the moment the class was
+// verified -- `markDnsDone` could no longer mutate anything, and the suite failed with
+// "control 1 fixture did not mutate split-claims.mjs" against perfectly good code.
+//
+// **A control that depends on real unfinished work has an expiry date, and it expires
+// silently at the exact moment the work completes** -- which is when it is least expected
+// and most likely to be misread as a regression. So the fixtures now CONSTRUCT the state
+// they need: a synthetic class grafted into the document and the splitter, used only here.
+// It tests the same property and cannot rot.
+const SYNTH = "Synthetic control class";
+const SYNTH_ROWS = [
+  "| 1 | `99-synthetic.md:1` | a synthetic claim row | |",
+  "| 2 | `99-synthetic.md:2` | a second synthetic claim row | |",
+];
+const SYNTH_SECTION = [
+  "",
+  `## ${SYNTH}`,
+  "",
+  "*Synthetic. Exists only inside this control suite.*",
+  "",
+  "| Class | Rows | `OK` | `WRONG` | `UNVERIFIABLE` |",
+  "|---|---:|---:|---:|---:|",
+  `| ${SYNTH} | 2 | 0 | **0** | 2 |`,
+  "",
+  "2 claim(s).",
+  "",
+  "| # | Location | Text as written | Verdict |",
+  "|---|---|---|---|",
+  ...SYNTH_ROWS,
+  "",
+].join("\n");
+
 // The splitter now carries BOTH tracks, and "DNS record types" appears in each.
 // A track-blind regex matches the IT entry first and silently mutates the wrong
 // track -- which is how control 3 became a no-op that passed while proving nothing.
@@ -155,24 +185,39 @@ const inCyber = (s, fn) => {
   const end = j === -1 ? s.length : j;
   return s.slice(0, i) + fn(s.slice(i, end)) + s.slice(end);
 };
-const markDnsDone = (s) =>
-  inCyber(s, (seg) =>
-    seg.replace(/\{ title: "DNS record types" \}/, '{ title: "DNS record types", done: true, doneThrough: 3 }'),
-  );
-const untrackDns = (s) => inCyber(s, (seg) => seg.replace(/\n\s*\{ title: "DNS record types" \},/, ""));
 
-// 1. THE REAL BUG, EXACTLY AS IT SHIPPED. DNS is marked done in the splitter while
-//    its rows carry no verdict -- the state the repository was actually in, which
-//    five completed passes reported as clean.
-check("DNS marked DONE but rows empty -> must FAIL", true, (t) => t, (s) => {
-  const mutated = markDnsDone(s);
+// Graft the section in just before the first real class section, and register the class
+// with the splitter. Returns a pair of mutators so a control can choose its tracking.
+const graftSection = (t) => {
+  const at = t.indexOf("\n## IP addressing and subnetting");
+  if (at === -1) throw new Error("cannot find a stable insertion point in the cyber document");
+  return t.slice(0, at) + "\n" + SYNTH_SECTION + t.slice(at + 1);
+};
+const graftSplitter = (s, done) =>
+  inCyber(s, (seg) =>
+    seg.replace(
+      /\n(\s*)\{ title: "MITRE ATT&CK technique identifiers"/,
+      `\n$1{ title: "${SYNTH}"${done ? ", done: true, doneThrough: 2" : ""} },` +
+        `\n$1{ title: "MITRE ATT&CK technique identifiers"`,
+    ),
+  );
+
+// Fill the synthetic rows so only the tracking state is under test.
+const fillSynth = (t) =>
+  t.replace(/(\| \d+ \| `99-synthetic\.md:\d+` \| [^|]*\|)\s*\|/g, "$1 **UNVERIFIABLE** — control fixture |");
+
+// 1. THE REAL BUG, EXACTLY AS IT SHIPPED. A class is marked done in the splitter while
+//    its rows carry no verdict -- the state the repository was actually in, which five
+//    completed passes reported as clean.
+check("a DONE class with empty rows -> must FAIL", true, graftSection, (s) => {
+  const mutated = graftSplitter(s, true);
   if (mutated === s) throw new Error("control 1 fixture did not mutate split-claims.mjs");
   return mutated;
 });
 
-// 2. The correct in-flight state: DNS is outstanding AND its pack exists. The guard
-//    must NOT fail, or it would be unusable during the very period it is needed.
-check("DNS tracked as outstanding -> must PASS", false, (t) => t);
+// 2. The correct in-flight state: the class is outstanding AND its rows are empty. The
+//    guard must NOT fail, or it would be unusable during the very period it is needed.
+check("an outstanding class with empty rows -> must PASS", false, graftSection, (s) => graftSplitter(s, false));
 
 // 3. A class that is neither done nor tracked is unreachable work. Emptied and
 //    unlisted, it must fail -- this is the "forgot to list it" case.
@@ -183,11 +228,7 @@ check("DNS tracked as outstanding -> must PASS", false, (t) => t);
 //    and the control reported a failure against working code. **A control that
 //    cannot tell "the guard is wrong" from "my fixture is wrong" wastes exactly the
 //    time it was built to save.**
-check("empty rows in an untracked class -> must FAIL", true, (t) => t, (s) => {
-  const mutated = untrackDns(s);
-  if (mutated === s) throw new Error("control 3 fixture did not mutate split-claims.mjs");
-  return mutated;
-});
+check("empty rows in an untracked class -> must FAIL", true, graftSection, (s) => s);
 
 // 3b. A class DELETED from the splitter while its rows still exist. This is the
 //     failure I committed while writing this guard: an edit to the IT block also
@@ -197,11 +238,7 @@ check("empty rows in an untracked class -> must FAIL", true, (t) => t, (s) => {
 //
 //     It is worse than an unverified class: an unverified class is at least counted
 //     as outstanding. This one is invisible.
-check("class deleted from the splitter -> must FAIL", true, (t) => t, (s) => {
-  const mutated = inCyber(s, (seg) => seg.replace(/\n\s*\{ title: "DNS record types" \},/, ""));
-  if (mutated === s) throw new Error("control 3b fixture did not mutate split-claims.mjs");
-  return mutated;
-});
+check("class absent from the splitter -> must FAIL", true, graftSection, (s) => s);
 //
 //    Filling the rows also changes the totals the document publishes, so a naive
 //    fixture trips the ARITHMETIC check and the control goes red against working code.
@@ -227,8 +264,10 @@ const checkReconciled = (name, wantFail, mutate, mutateSplit) => {
   console.log(`  ${ok ? "pass" : "FAIL"}  ${name}  (expected ${wantFail ? "exit!=0" : "exit=0"}, got ${failed ? "exit!=0" : "exit=0"})`);
 };
 
-checkReconciled("all rows answered, DNS marked done -> must PASS", false, fillDns, markDnsDone);
-checkReconciled("all rows answered, DNS outstanding -> must PASS", false, fillDns);
+// 4/5. The completed state must pass both ways: a class whose rows are all answered is
+//      fine whether or not the splitter marks it done.
+checkReconciled("all rows answered, class marked done -> must PASS", false, (t) => fillSynth(graftSection(t)), (s) => graftSplitter(s, true));
+checkReconciled("all rows answered, class outstanding -> must PASS", false, (t) => fillSynth(graftSection(t)), (s) => graftSplitter(s, false));
 
 // =====================================================================
 // CONTROLS FOR THE IT TRACK
