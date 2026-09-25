@@ -2,7 +2,44 @@
 
 A chronological record of working sessions. Newest first.
 
-## 2026-09-25 (latest) — The advance track gets the diagnostic it never had, and four wrong fixtures in a row
+## 2026-09-26 (latest) — The exam corpus becomes track-complete, and the guard gap a failing control exposed
+
+**Goal:** extend diagnostic coverage to every phase that lacked it.
+
+**Done:** four new curriculum papers close the last nine uncovered phases, and the corpus is now **31 of 31 phases covered, 16 papers / 461 questions**.
+- `career-roadmaps/exams/curriculum-it-career.md` — **CS-IT-CAREER**, IT Phases 7–8 (soft skills, portfolio and resume).
+- `career-roadmaps/exams/curriculum-cyber-career.md` — **CS-CYBER-CAREER**, Cyber Phases 5–8 (specialisation, portfolio projects, certifications, job search).
+- `career-roadmaps/exams/curriculum-grc-and-ot.md` — **CS-GRC-OT**, Cyber Phases 13 and 15 (GRC and risk, OT/ICS security).
+- `career-roadmaps/exams/curriculum-cloud-identity.md` — **CS-CLOUD-IDENTITY**, Advance Phase 4 (cloud and identity architecture).
+
+**The gap was measured, not assumed.** Coverage was derived from the built `exams.json` and the phase files on disk: **22 of 31 phases were reachable from a diagnostic and nine were not**. The README had described the corpus as complete for the three tracks; it was not, and only deriving the set found it.
+
+**Advance 4 was excluded on purpose, and the new paper is that exclusion filled in.** The advance paper's own scope note says Phase 4 is outside it because its subject is design and policy rather than the measurement, command and lifecycle decisions the other six share. That was an argument about which questions belong in *that* paper, not about whether the phase could carry twenty of its own.
+
+**Two papers over career phases, written under a constraint worth recording.** A twenty-question paper over non-technical material has two failure modes, and both were avoided explicitly rather than by luck:
+1. **Testing a position as though it were a fact.** Several strong claims in those six phases are the curriculum's reasoning — acknowledge before you diagnose, delete the "fast learner" line, the resume screen is a filter not a judge, delaying a certification is a *successful* phase completion. Every stem that turns on one asks *what the phase says*, and the explanation names it as a position.
+2. **Inventing a position to test.** **Cyber Phase 8 never mentions cover letters** (one occurrence, as a *wrong* quiz option) and says almost nothing about following up; **Cyber Phase 5 addresses salary only as an expectation to calibrate, never as a basis for choosing**. No question asks about any of them. A plausible-sounding wrong answer there would be the exam's invention rather than the phase's, which is a worse defect than an uncovered topic.
+
+**Both traps were flagged independently by two extraction passes, and both claims were verified against the text before being trusted** — `Select-String` for `cover letter` across Phase 8 returns exactly one line, and Phase 5's salary mentions are all about expectation rather than decision method.
+
+**A real gap in `audit-exams.mjs`, found because a control failed for the right reason.** The guard verifies domain weights from a *weight table* (`| 4. Name | 28% | 11 |`), which the seven certification papers have. Curriculum papers state theirs in the **heading** — `## Domain 3 — OT fundamentals and the safety boundary (6 questions)` — so the table check never saw them. **Control 20 mutated a heading's count and the guard exited 0**, which is a control failing correctly rather than a fixture error: the mutation landed, and nothing checked it. The heading form is now verified for curriculum papers and scoped away from the certification papers, which legitimately use percentage headings. A heading with **no** count is now a failure in its own right.
+
+**The smoke render gained the assertion this pass exists for.** Every roadmap phase must be reachable from a curriculum diagnostic, derived from the phase files on disk. **Proven falsifiable** by repointing the cloud-identity paper's questions at `advance-01` and watching it report `phases with no diagnostic: advance-04-cloud-identity-architecture`, then restoring byte-identical.
+
+**Two of my own errors are worth recording, because both were invisible to the check that was supposed to catch them.**
+- **A rebalancing script inverted its own scoring and made the balance far worse** — every paper came out **A=17 with a 16-question run of A**, up from C-heavy but varied. Caught by verifying against a snapshot rather than by reading the output.
+- **The verification script that caught it was itself silently broken.** It used `\z` as an end-of-string anchor, which is PCRE and **not valid in JavaScript**, so its capture group matched lazily and compared only **5–9 of 20 questions** per file while reporting OK. The fixed version asserts it parsed all 20, so the check cannot pass vacuously. The corrected rotation produced per-paper distributions of A=2–5, B=3–6, C=5–9, D=3–7 with longest runs of 1–4, and content verified identical (stems, option sets, correct-answer text and explanations unchanged).
+
+**Verified:** **22/22 content guards**, **14/14 control suites** (exam suite now **21 controls**, all restoring every touched file byte-identical), **all 15 site suites**, smoke render **236 renders, 0 failures**, `audit-encoding` clean across **258 files**, and LF/no-BOM confirmed on all four new papers.
+
+**An independent adversarial read of all 80 answer keys then found four things every guard had passed, and the guards were not wrong to pass them.** This is the part worth carrying forward: a guard checks *form*, and all four were claims about *content*.
+- **Two self-contradicting claims in `curriculum-cyber-career.md`.** It said Phase 8 "says nothing about cover letters" while its own scope note elsewhere said "mentions them exactly once, as a wrong quiz option" — the second was true, the first was false. It also claimed three questions were material "each phase's own quiz does not test," and **Phase 8's quiz Q2 tests one of them directly** and Q5 tests another. **That second one is the instructive failure**: a specific, checkable assertion of rigour, which read as diligence precisely because it was checkable, and which nobody had checked. Both are now stated accurately, and where questions do overlap the phase quizzes the paper says so and explains why they are kept — the phase quiz tests recall, this paper tests decisions — instead of claiming an exclusivity it does not have.
+- **`curriculum-cloud-identity.md` Q9 tested an ordinal the phase itself gets wrong.** The phase's break-glass table says "the **second and fifth** rows are the ones organisations get wrong," then explains that pairing using the offline-credential row and **the rehearsal** — the **sixth** row. The paper had followed the explanation while citing the ordinal, so a learner checking the source would find a contradiction and no way to tell which half to trust. The question now tests the phase's reasoning and says so explicitly, and **the phase's own inconsistency is left in place and flagged rather than silently renumbered** — that is the curriculum's text, not the exam's, and quietly editing someone else's table would hide a real defect in the source.
+- **`curriculum-grc-and-ot.md` Q6 had two defensible answers.** It marked *Complete* for a patch-dashboard screenshot offered as access-review evidence, but the phase files that same screenshot as its weak-evidence example for **patching** and defines **Relevant** as "shows the specific control, not something adjacent" — so *Relevant* was arguably first. Split into two unambiguous questions: one on the phase's access-review rule, one on what the phase's own table does with that example. **That makes this paper 21 questions rather than 20, and the corpus 461.** The count moved because honest coverage needed it; a paper padded or trimmed to hit a round number would be the wrong repair.
+
+**A fifth correction came from the same read:** `docs/CHECKPOINT.md` and `career-roadmaps/exams/README.md` still carried corpus and coverage figures this pass had already replaced in other files — including a README row whose stated scope (`Cyber Phases 3 and 14`) disagreed with that paper's own front matter (`Cyber Phase 14, reinforced by Phase 3 security fundamentals`). Both fixed. **A count stated in five files is five chances for four of them to be right.**
+
+## 2026-09-25 — The advance track gets the diagnostic it never had, and four wrong fixtures in a row
 
 **Goal:** continue the interrupted exams work by closing the largest coverage gap in the exams directory.
 

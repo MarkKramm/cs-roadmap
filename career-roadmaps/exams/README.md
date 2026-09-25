@@ -20,7 +20,7 @@ might be **"spend nothing"**, and names the failure mode directly:
 > skills or projects.
 
 That warning is about *buying*. This directory now contains two distinct kinds of practice:
-seven certification-aligned papers and five curriculum-level integration papers. The first
+seven certification-aligned papers and nine curriculum-level diagnostics. The first
 kind helps a learner review a vendor blueprint before considering an exam fee. The second
 kind revisits the curriculum's own scenarios across several phases. Neither predicts hiring
 outcomes or replaces hands-on work.
@@ -53,10 +53,10 @@ published domains, but do not reproduce full exam length or every question forma
 
 ## Curriculum integration diagnostics
 
-These five 20-question papers combine applied scenarios across phases. They use the same
-four-option format for convenient self-review, but have **no pass mark, pass/fail verdict, or
-readiness threshold**. Treat the score only as a prompt to revisit the mapped lessons.
-
+These **nine** curriculum diagnostics combine applied scenarios across phases — **eight of them
+20 questions, and the GRC/OT paper 21** — and use the same four-option format for convenient
+self-review, but have **no pass mark, pass/fail verdict, or readiness threshold**. Treat the score
+only as a prompt to revisit the mapped lessons.
 They are intentionally shorter than the certification papers and focus on decisions learners
 can make from this curriculum: observe and scope, choose a safe next step, preserve evidence,
 communicate or escalate, and explain why. The questions are scenario-based multiple choice, not
@@ -67,8 +67,12 @@ performance-based lab tasks.
 | [IT Support Triage & Ticketing](curriculum-it-foundations.md) | CS-IT-FOUNDATIONS | IT Phases 1–6 and 9 | 20 |
 | [Cyber Foundations and Incident Triage](curriculum-cyber-core.md) | CS-CYBER-CORE | Cyber Phases 1–4, 9, and 11 | 20 |
 | [SOC Detection and Response](curriculum-cyber-depth.md) | CS-CYBER-DEPTH | Cyber Phases 10–12 | 20 |
-| [Web Application Security Assessment](curriculum-web-app-security.md) | CS-WEB-APP-SECURITY | Cyber Phases 3 and 14 | 20 |
+| [Web Application Security Assessment](curriculum-web-app-security.md) | CS-WEB-APP-SECURITY | Cyber Phase 14, reinforced by Phase 3 | 20 |
 | [Security Ownership and Command](curriculum-advance-ownership.md) | CS-ADVANCE-OWNERSHIP | Advance Phases 1, 2, 3, 5, 6 and 7 | 20 |
+| [IT Support Communication and Evidence](curriculum-it-career.md) | CS-IT-CAREER | IT Phases 7 and 8 | 20 |
+| [Specialisation, Portfolio, Certification and Search](curriculum-cyber-career.md) | CS-CYBER-CAREER | Cyber Phases 5, 6, 7 and 8 | 20 |
+| [GRC, Risk and OT Security](curriculum-grc-and-ot.md) | CS-GRC-OT | Cyber Phases 13 and 15 | 21 |
+| [Cloud and Identity Architecture](curriculum-cloud-identity.md) | CS-CLOUD-IDENTITY | Advance Phase 4 | 20 |
 
 **The advance-track paper asks a different kind of question, and that is deliberate.** The four
 entry-level diagnostics ask what a learner should *do* with a scenario. The advance paper asks
@@ -78,6 +82,35 @@ because the advance track is the one whose work product is a document somebody e
 **Advance Phase 4 (Cloud and Identity Architecture) is outside its scope**, because its subject
 is design and policy rather than the measurement, command and lifecycle decisions the other six
 phases share; reaching into it with twenty questions would test vocabulary rather than judgement.
+It has a paper of its own instead, added later with the other coverage gaps.
+
+**The corpus now covers every phase in all three tracks — 31 of 31.** Nine phases were still
+without a diagnostic — IT 7 and 8, Cyber 5 through 8, Cyber 13, Cyber 15, and Advance 4 — and the
+four papers added to close them are the last four rows of the table above. Coverage is asserted
+mechanically rather than described here: the smoke render derives the phase list from the phase
+files on disk and fails if any phase is unreachable from a diagnostic.
+
+**Two of those papers cover phases that are not technical, and they are written differently.**
+IT 7 and 8 (soft skills, portfolio and resume) and Cyber 5 to 8 (specialisation, portfolio
+projects, certifications, job search) teach judgement about communication and about a learner's
+own situation rather than facts about systems. A twenty-question paper over that material has two
+failure modes, and both are avoided explicitly:
+
+- **Testing a position as though it were a fact.** Several of the strongest claims in those six
+  phases are the curriculum's reasoning, not established truth — that you acknowledge a user
+  before you diagnose, that a "fast learner" resume line should be deleted rather than improved,
+  that the resume screen is a filter rather than a judge, that deciding to delay a certification
+  is a *successful* completion of that phase. The stems ask **what the phase says**, and the
+  explanations name which answers are positions the phase holds.
+- **Inventing a position to test.** Cyber Phase 8 never mentions cover letters, and says almost
+  nothing about following up on applications beyond a tracker column; Cyber Phase 5 addresses
+  salary only as an expectation to calibrate, never as a basis for choosing. **No question in
+  these papers asks about any of those**, because the curriculum has no stated position to test
+  and a plausible-sounding wrong answer would be the exam's invention, not the phase's.
+
+**Three numeric thresholds look interchangeable across Cyber Phases 5, 7 and 8 and are not:**
+**20** counted job postings, **30** postings in the certification test, and **50** targeted
+applications. The career paper names the phase in every question that uses one.
 
 **For certification-aligned papers, read the scoring table rather than assuming a percentage.** The vendor pass marks differ
 substantially, and two papers have a boundary that falls between whole questions: Security+ needs

@@ -8,6 +8,42 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### Added
 
+- **Four curriculum diagnostics that close the last nine uncovered phases, making the exam corpus
+  track-complete at 31 of 31 phases** (`career-roadmaps/exams/curriculum-it-career.md`,
+  `curriculum-cyber-career.md`, `curriculum-grc-and-ot.md`, `curriculum-cloud-identity.md`).
+  **The gap was measured rather than assumed:** coverage was derived from the built `exams.json`
+  against the phase files on disk, and it showed **22 of 31 phases reachable and nine not** — IT 7
+  and 8, Cyber 5 through 8, Cyber 13, Cyber 15, and Advance 4. The README had described the corpus
+  as track-complete; it was not, and only deriving the set found it.
+  - **CS-IT-CAREER** covers IT Phases 7–8 (soft skills, portfolio and resume), **CS-CYBER-CAREER**
+    covers Cyber Phases 5–8 (specialisation, portfolio projects, certifications, job search),
+    **CS-GRC-OT** covers Cyber Phases 13 and 15 (GRC and risk, OT/ICS security), and
+    **CS-CLOUD-IDENTITY** covers Advance Phase 4 (cloud and identity architecture). Corpus is now
+    **16 papers / 461 questions** — the GRC/OT paper carries **21** rather than 20, because its two
+    heaviest domains could not be covered honestly in the count the other papers use (see below).
+  - **Advance 4 was excluded from the advance paper on purpose, and this is that exclusion filled
+    in rather than reversed.** The advance paper's scope note says Phase 4 sits outside it because
+    its subject is design and policy rather than the measurement and command decisions the other
+    six phases share. That was an argument about which questions belong in *that* paper, not about
+    whether the phase could carry twenty of its own.
+  - **Two of the papers cover non-technical phases, and writing them surfaced a constraint worth
+    stating.** A twenty-question paper over career material has two failure modes, and both are
+    avoided explicitly:
+    - **Testing a position as though it were a fact.** Several of the strongest claims in those six
+      phases are the curriculum's reasoning, not established truth — acknowledge before you
+      diagnose, delete the "fast learner" line, the resume screen is a filter rather than a judge,
+      deciding to delay a certification is a *successful* completion of that phase. Every stem that
+      turns on one asks **what the phase says**, and the explanation names it as a position.
+    - **Inventing a position to test.** **Cyber Phase 8 never mentions cover letters** — one
+      occurrence, as a *wrong* quiz option — and says almost nothing about following up; **Cyber
+      Phase 5 addresses salary only as an expectation to calibrate, never as a basis for choosing.**
+      **No question asks about any of them**, because a plausible-sounding wrong answer there would
+      be the exam's invention rather than the phase's, which is a worse defect than an uncovered
+      topic.
+  - **Both traps were flagged independently by two extraction passes and then verified against the
+    text before being trusted** — `cover letter` returns exactly one line across Phase 8, and every
+    salary mention in Phase 5 is about expectation rather than decision method.
+
 - **A fifth curriculum diagnostic — the advance track's first, and the only one written for a
   reader who already has the job** (`career-roadmaps/exams/curriculum-advance-ownership.md`,
   **CS-ADVANCE-OWNERSHIP**, 20 questions across 5 domains). It covers advance Phases 1, 2, 3, 5,
@@ -465,6 +501,69 @@ ed to the Views list that actually exists; the three M2 pages no longer describe
 - `learning-site/README.md` — removed a duplicated `## Layout` section; documented the new pages, hooks, and commands; status brought up to M2.
 
 ### Fixed
+
+- **Two of the four new papers asserted things about their source phases that were not true, and
+  one inherited a defect from the phase it tests** (found by an independent adversarial read of all
+  80 questions against the exact phase text, after the guards were already green — **no guard could
+  have caught any of the three**, because a guard checks form and these were all claims about
+  content).
+  - **`curriculum-cyber-career.md` claimed Phase 8 "says nothing about cover letters."** It says
+    something — one occurrence, as a distractor in the phase's own quiz. The paper's *other*
+    statement of the same fact ("mentions them exactly once, as a wrong quiz option") was correct,
+    so the file contradicted itself and the weaker phrasing was the false one. Now stated once,
+    accurately.
+  - **The same paper claimed three questions "each phase's own quiz does not test."** **Phase 8's
+    quiz Q2 tests the four-screens-but-one-technical diagnosis directly**, and its Q5 tests the
+    referral sequence. The claim was wrong for both, and it was the kind of wrong that reads as
+    rigour — a specific, checkable assertion that nobody had checked. **Replaced with the accurate
+    position**: four questions overlap the phase quizzes, they are kept deliberately, and the
+    difference is that the phase quiz tests recall while this paper tests decisions.
+  - **`curriculum-cloud-identity.md` Q9 asked about an ordinal that the phase itself gets wrong.**
+    The phase's break-glass table says "the **second and fifth** rows are the ones organisations get
+    wrong," then explains that pairing using the offline-credential row and **the rehearsal** —
+    which is the **sixth** row. The paper had silently followed the explanation and cited the
+    ordinal, so a reader checking it against the phase would find a contradiction and not know which
+    to trust. **The question now tests the phase's stated reasoning rather than its ordinal**, and
+    says so in the explanation so a learner who notices the discrepancy is not left thinking they
+    misread it. **The phase's own inconsistency is left in place and flagged** — it is the
+    curriculum's text, not the exam's, and silently renumbering someone else's table is not a fix.
+  - **`curriculum-grc-and-ot.md` Q6 was genuinely ambiguous.** It asked which evidence property
+    fails first when a patch-dashboard screenshot is offered for an access review, marking
+    *Complete* — but the phase files that same screenshot as its weak-evidence example for
+    **patching** and defines **Relevant** as "shows the specific control, not something adjacent,"
+    so *Relevant* was defensibly correct. **Split into two unambiguous questions**: one on the
+    phase's access-review rule (a policy claiming quarterly reviews with no record is a finding,
+    because the evidence is the record and not the intention), and one on what the phase's own table
+    does with the patch-dashboard example. **The paper is therefore 21 questions rather than 20**,
+    which is the honest count for these two phases.
+
+- **`audit-exams.mjs` never checked the question count a curriculum paper states in its domain
+  headings, so a heading could claim anything** (`scripts/audit-exams.mjs`). The guard verified
+  domain weights from a *weight table* — `| 4. Name | **28%** | 11 |` — which is how the seven
+  certification papers state theirs. **Curriculum papers state theirs in the heading instead** —
+  `## Domain 3 — OT fundamentals and the safety boundary (6 questions)` — so the table check never
+  saw them. **Found by a control failing for the right reason rather than a fixture error:** the
+  mutation landed, the guard exited 0, and nothing had checked the heading. Editing a heading's
+  count, or adding a question without updating it, changed what the paper claims to test while
+  every other check still passed — and the heading is the reader's only summary of the section.
+  The heading form is now verified, **scoped to curriculum papers** because the certification
+  papers legitimately use percentage headings, and **a domain heading with no count at all is now
+  a failure in its own right**. The headings must also sum to the declared total, so a question
+  placed outside any domain cannot hide from the arithmetic.
+
+- **The smoke render had no way to notice that a phase was unreachable from any diagnostic**
+  (`learning-site/scripts/smoke-render.mjs`). The per-paper loop asserts that whatever
+  `exams.json` contains renders correctly — so **removing a paper made the corpus smaller and every
+  remaining assertion still passed**, which is the same blind spot the cyber shared-documents block
+  already guards. This is the assertion the four new papers exist to satisfy: **every roadmap phase
+  must be reachable from a curriculum diagnostic**, derived from the phase files on disk rather
+  than from a number written down. It fails on a phase with no diagnostic and on a paper whose
+  questions no longer map to the phase they claim. **Proven falsifiable** by repointing the
+  cloud-identity paper's questions at `advance-01` and watching it report `phases with no
+  diagnostic: advance-04-cloud-identity-architecture`, then restoring byte-identical. The nine
+  curriculum papers are also now named explicitly rather than counted, after the sibling
+  `browser-check.mjs` proved that a hardcoded total is a claim about the corpus living in a file
+  that does not own it.
 
 - **An unrecognised `kind` in an exam paper was silently filed as a certification paper, in the
   build *and* in the guard, and no control could have caught it** (`scripts/exam-content.mjs`,

@@ -177,6 +177,34 @@ controlIn(path.join(ROOT, "career-roadmaps", "exams", "curriculum-advance-owners
 //     outcome than the bug it replaced.
 control("omitting `kind` entirely -> must PASS", (t) => t, false, true);
 
+// 18. Each of the four papers added to close the coverage gaps must be exercised by this
+//     guard, not merely present. A guard that never opens a file cannot fail on it, so a
+//     paper added without a control is a paper whose domain weights, question count, phase
+//     mappings and answer marks are all unverified -- while the suite reports success.
+//
+//     The defect each control targets is chosen to be INVISIBLE to the other checks:
+//     - a drift between the declared question count and the questions present is the
+//       single most likely edit to make when extending a paper by hand;
+//     - a phase mapping that points at a phase the paper never declared is the mistake
+//       that silently narrows or widens what a diagnostic claims to test;
+//     - a domain heading whose stated question count no longer matches the questions
+//       beneath it is the defect a reader cannot see.
+controlIn(path.join(ROOT, "career-roadmaps", "exams", "curriculum-it-career.md"),
+  "the IT career paper's declared question count drifting -> must FAIL", (t) =>
+    t.replace("questions: 20", "questions: 19"), true);
+
+controlIn(path.join(ROOT, "career-roadmaps", "exams", "curriculum-cyber-career.md"),
+  "the cyber career paper mapping to a phase outside its declared scope -> must FAIL", (t) =>
+    t.replace("<!-- phases: cyber-06-portfolio-projects -->", "<!-- phases: cyber-06-portfolio-projects, cyber-13-grc-compliance -->"), true);
+
+controlIn(path.join(ROOT, "career-roadmaps", "exams", "curriculum-grc-and-ot.md"),
+  "the GRC/OT paper's domain weight drifting from its questions -> must FAIL", (t) =>
+    t.replace("## Domain 3 — OT fundamentals and the safety boundary (6 questions)", "## Domain 3 — OT fundamentals and the safety boundary (7 questions)"), true);
+
+controlIn(path.join(ROOT, "career-roadmaps", "exams", "curriculum-cloud-identity.md"),
+  "the cloud identity paper losing a marked answer -> must FAIL", (t) =>
+    t.replace("- [x] **Because inherit-on-creation is what makes a hierarchy a control rather than a filing system**", "- [ ] Because inherit-on-creation is what makes a hierarchy a control rather than a filing system"), true);
+
 const restored = [...SNAPSHOT.entries()].every(([f, before]) => fs.readFileSync(f, "utf8") === before);
 console.log("");
 for (const r of results) console.log(`  ${r.ok ? "pass" : "FAIL"}  ${r.name}`);

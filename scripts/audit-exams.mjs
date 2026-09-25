@@ -237,13 +237,51 @@ for (const file of PAPERS) {
     });
   });
 
+  // --- the question count a domain HEADING claims ---------------------------------------
+  // Curriculum papers state their weighting in the heading itself -- "## Domain 3 — OT
+  // fundamentals and the safety boundary (6 questions)" -- rather than in a weight table, so
+  // the table check below never sees it. That left a real gap: editing a heading's count, or
+  // adding a question without updating the heading, changed what the paper claims to test
+  // while every other check still passed. The heading is the reader's only summary of the
+  // section, which is exactly why it has to be true.
+  //
+  // The `N questions` form is read strictly so that a heading phrased differently produces a
+  // named failure rather than silently being skipped. A heading with no count at all is a
+  // defect in its own right, because every domain in every curriculum paper carries one.
+  const headingCounts = new Map();
+  lines.forEach((line) => {
+    const h = line.match(/^## Domain (\d+)\s+—\s+(.*?)\s*\((?:(\d+)\s+questions?)\)\s*$/);
+    if (!h) return;
+    headingCounts.set(Number(h[1]), { name: h[2].trim(), qs: Number(h[3]) });
+  });
+  // The percentage-heading convention belongs to the certification papers, which state their
+  // official domain weights rather than question counts. Only curriculum papers are expected
+  // to carry "(N questions)" in the heading, so the check is scoped to them.
+  if (curriculumPaper) {
+    const bareDomainHeadings = lines.filter((l) => /^## Domain \d+/.test(l) && !/\(\d+\s+questions?\)\s*$/.test(l));
+    if (bareDomainHeadings.length) {
+      fail(file, 0, `a domain heading does not state its question count: "${bareDomainHeadings[0].trim()}"`);
+    }
+    for (const [n, h] of headingCounts) {
+      const actual = domainCounts.get(n) ?? 0;
+      if (actual !== h.qs) {
+        fail(file, 0, `domain ${n} (${h.name}) heading claims ${h.qs} questions but ${actual} are present`);
+      }
+    }
+    // The headings must account for every question, so a question placed outside any domain --
+    // or inside a domain whose heading was deleted -- cannot hide from the totals.
+    const headingTotal = [...headingCounts.values()].reduce((a, h) => a + h.qs, 0);
+    if (headingCounts.size && declared && headingTotal !== declared) {
+      fail(file, 0, `domain headings sum to ${headingTotal} questions but the paper declares ${declared}`);
+    }
+  }
+
   if (declared && claimed.size) {
     for (const [n, c] of claimed) {
       const actual = domainCounts.get(n) ?? 0;
       if (actual !== c.qs) {
         fail(file, 0, `domain ${n} (${c.name}) claims ${c.qs} questions but ${actual} are present`);
-      }
-      const actualPct = Math.round((actual / declared) * 100);
+      }      const actualPct = Math.round((actual / declared) * 100);
       // Compare against the paper's own share when it publishes one; otherwise the official
       // weight is the only claim on the page. Tolerance of 1 point absorbs rounding.
       const target = c.checkShare ? c.share : c.official;

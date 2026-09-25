@@ -21,7 +21,7 @@
 import { createServer } from "vite";
 import { createElement } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
-import { readFileSync, existsSync } from "node:fs";
+import { readFileSync, existsSync, readdirSync } from "node:fs";
 import { join, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -1054,18 +1054,65 @@ try {
       assert("Exams: curriculum papers are labeled diagnostic only", html.includes("diagnostic only"), "diagnostic label missing");
       assert("Exams: certification papers are labeled unofficial", html.includes("Unofficial certification practice"), "certification disclaimer missing");
 
-      // The advance-track diagnostic is named explicitly, for the same reason the
+      // Every curriculum diagnostic is named explicitly, for the same reason the
       // cyber-track shared documents below are: the loop above covers whatever
-      // `exams.json` happens to contain, so deleting this paper makes the corpus
-      // smaller and every remaining assertion still passes. The advance track is
-      // the only track whose paper would leave no hole in the entry-level loop —
-      // it maps six phases and none of the other four papers reach it.
+      // `exams.json` happens to contain, so deleting a paper makes the corpus
+      // smaller and every remaining assertion still passes.
+      //
+      // WHY THIS IS A LIST AND NOT A COUNT. An earlier version of a sibling check
+      // (browser-check.mjs) asserted the paper split with a hardcoded total, and adding
+      // the fifth curriculum paper turned CI red on a correct change. A count is a claim
+      // about the corpus living in a file that does not own it. Naming the papers means
+      // removing one fails here, while adding one does not -- which is the behaviour a
+      // guard should have.
+      // NOTE: these are front-matter ids, not filenames, and the two differ for one paper:
+      // `curriculum-it-foundations.md` carries `id: curriculum-it-triage`. Keying on the
+      // filename here produces a false "missing paper" failure, which is exactly the bug
+      // this list is written to avoid.
+      const CURRICULUM_PAPERS = [
+        "curriculum-it-triage",
+        "curriculum-it-career",
+        "curriculum-cyber-core",
+        "curriculum-cyber-depth",
+        "curriculum-web-app-security",
+        "curriculum-cyber-career",
+        "curriculum-grc-and-ot",
+        "curriculum-advance-ownership",
+        "curriculum-cloud-identity",
+      ];
+      for (const id of CURRICULUM_PAPERS) {
+        const paper = examsData.papers.find((p) => p.id === id);
+        assert(
+          "Exams: curriculum diagnostic " + id + " is present",
+          Boolean(paper),
+          "the paper is missing from exams.json"
+        );
+        if (!paper) continue;
+        assert(
+          "Exams: " + id + " is classified as curriculum practice",
+          paper.kind === "curriculum-practice",
+          "paper is not classified as curriculum-practice"
+        );
+        // Every question must map to at least one real phase. A curriculum paper whose
+        // questions map nowhere cannot be used to find what to review.
+        assert(
+          "Exams: " + id + " maps every question to a phase",
+          paper.questions.every((q) => Array.isArray(q.phases) && q.phases.length > 0),
+          "a question maps to no phase"
+        );
+        // Track identity, derived from the paper's own declared phases rather than from
+        // its filename, so a paper filed under the wrong track fails here.
+        const tracks = new Set(paper.questions.flatMap((q) => q.phases.map((p) => p.split("-")[0])));
+        assert(
+          "Exams: " + id + " maps within a single track",
+          tracks.size === 1,
+          "questions map across more than one track: " + [...tracks].join(", ")
+        );
+      }
+
+      // The advance diagnostic maps only advance phases, and the cloud-identity paper is
+      // the only other advance paper, so the two together must cover the whole track.
       const advancePaper = examsData.papers.find((p) => p.id === "curriculum-advance-ownership");
-      assert(
-        "Exams: the advance-track diagnostic is present",
-        Boolean(advancePaper),
-        "the advance-track paper is missing from exams.json"
-      );
       if (advancePaper) {
         assert(
           "Exams: the advance diagnostic maps only advance phases",
@@ -1075,6 +1122,40 @@ try {
           "an advance diagnostic question maps outside the advance track"
         );
       }
+
+      // EVERY PHASE IN EVERY TRACK MUST BE REACHABLE FROM A DIAGNOSTIC.
+      //
+      // This is the assertion that makes the corpus track-complete rather than merely
+      // large, and it is the one that would have caught the nine-phase gap this work
+      // closed. It is derived from the phase files on disk, so adding a new phase
+      // without a diagnostic fails here -- which is the check the exam corpus
+      // previously had no way to make.
+      const TRACK_DIRS = { "it-roadmap": "it", "cybersec-roadmap": "cyber", "advance-roadmap": "advance" };
+      const allPhases = [];
+      for (const [dir, track] of Object.entries(TRACK_DIRS)) {
+        const abs = join(ROOT, "..", "career-roadmaps", dir);
+        if (!existsSync(abs)) continue;
+        for (const f of readdirSync(abs).filter((n) => /^\d\d-phase/.test(n)).sort()) {
+          const m = f.match(/^(\d\d)-phase-(.*)\.md$/);
+          if (m) allPhases.push(track + "-" + m[1] + "-" + m[2]);
+        }
+      }
+      assert(
+        "Exams: the phase list is non-empty",
+        allPhases.length > 0,
+        "no phase files were found, so the coverage check below cannot fail"
+      );
+      const covered = new Set(
+        examsData.papers
+          .filter((p) => p.kind === "curriculum-practice")
+          .flatMap((p) => p.questions.flatMap((q) => q.phases))
+      );
+      const uncovered = allPhases.filter((id) => !covered.has(id));
+      assert(
+        "Exams: every roadmap phase is covered by a diagnostic",
+        uncovered.length === 0,
+        "phases with no diagnostic: " + uncovered.join(", ")
+      );
     }
   }
 
