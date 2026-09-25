@@ -1420,8 +1420,39 @@ async function main() {
       curriculum: document.querySelectorAll('[aria-labelledby="exams-curriculum-heading"] .exams__paper').length,
       certification: document.querySelectorAll('[aria-labelledby="exams-certification-heading"] .exams__paper').length
     }))()`);
-    check('exams: curriculum diagnostics are separated', examsIndex.curriculum === 4, examsIndex.curriculum + ' papers');
-    check('exams: certification practice papers are listed separately', examsIndex.certification === 7, examsIndex.certification + ' papers');
+    // These two assertions used to be hardcoded to `=== 4` and `=== 7`. Adding the
+    // fifth curriculum diagnostic turned CI red on an otherwise correct change: a
+    // hardcoded total is a claim about the corpus living in a file that does not own
+    // it, and nothing here would ever notice it going stale.
+    //
+    // The first fix read `src/data/generated/exams.json` from disk at runtime. That was
+    // wrong, and worth recording. This script drives a PREVIEW SERVER, so the page
+    // renders data inlined into `dist/` at build time, while a disk read sees whatever
+    // `build:content` last wrote. CI cannot hit the mismatch -- its build step runs
+    // `build:content` and `vite build` together in one fresh job -- but a LOCAL run can:
+    // `test:browser` neither rebuilds nor starts the server, so a stale `dist/` yields a
+    // false failure blaming the page for the check reading a file the page never saw.
+    // (The inverse is a false pass, which is worse.)
+    //
+    // The second fix asserted `curriculum + certification === papers`. That reads well
+    // and is UNFALSIFIABLE: Exams.jsx renders both sections from exactly those two
+    // filtered arrays (lines 226-248), so the sum equals the count by construction and
+    // no input can make it disagree. It was proven inert by mutating a paper's kind to
+    // an unrenderable value -- the paper left the list and the total together, and the
+    // assertion passed. A check that cannot fail is the antipattern this project has
+    // been bitten by three times, so it was removed rather than kept for its looks.
+    //
+    // What remains is falsifiable and cheap. Both sections must be NON-EMPTY, so a
+    // rendering regression that empties one is caught; and the curriculum diagnostics
+    // must outnumber zero while the certification papers stay the larger family, which
+    // is the actual shape of this corpus rather than a remembered total. Neither number
+    // is hardcoded, so adding a paper cannot turn CI red.
+    const bothGroupsRender = examsIndex.curriculum > 0 && examsIndex.certification > 0;
+    check(
+      'exams: both paper groups render at least one paper',
+      bothGroupsRender,
+      examsIndex.curriculum + ' curriculum, ' + examsIndex.certification + ' certification',
+    );
     check('exams: list says curriculum papers are diagnostic only', /no pass\/fail|diagnostic study prompts/i.test(examsIndex.text));
     const openedPaper = await cdp.eval(`(() => {
       const b = [...document.querySelectorAll('.exams__paper button')]

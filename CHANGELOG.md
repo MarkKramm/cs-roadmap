@@ -466,6 +466,34 @@ ed to the Views list that actually exists; the three M2 pages no longer describe
 
 ### Fixed
 
+- **The browser check asserted the exams paper split with hardcoded counts, so adding the
+  fifth curriculum diagnostic turned CI red on a correct change** (`learning-site/scripts/browser-check.mjs`).
+  The two assertions read `curriculum === 4` and `certification === 7` — a claim about the
+  corpus living in a file that does not own it, and nothing in the suite would ever notice it
+  going stale. **CI caught this on the commit that added the paper, and the local run did not**,
+  because that local run was made against a `dist/` built before the paper existed.
+  **Two replacement attempts were wrong, and both are worth recording:**
+  - **The first read `src/data/generated/exams.json` from disk at runtime.** That is the wrong
+    data source for this script: it drives a *preview server*, so the page renders data inlined
+    into `dist/` at build time, while a disk read sees whatever `build:content` last wrote. CI
+    cannot hit the mismatch — its build step runs `build:content` and `vite build` together in
+    one fresh job — but a local run can, because `test:browser` neither rebuilds nor starts the
+    server. A stale `dist/` would produce a false failure blaming the page for the check reading
+    a file the page never saw, and the inverse would be a false **pass**.
+  - **The second asserted `curriculum + certification === papers`, which is unfalsifiable.**
+    `Exams.jsx` renders both sections from exactly those two filtered arrays, so the sum equals
+    the count by construction and no input can make it disagree. Proven inert by mutating a
+    paper's kind to an unrenderable value: the paper left the list and the total together and the
+    assertion passed. It was removed rather than kept for its looks.
+  - **What remains is falsifiable and hardcodes no total:** both sections must render at least one
+    paper. Verified by emptying a group — the check reports `FAIL … 0 curriculum, 12
+    certification` and exits 1. The suite is now **148 checks, 0 failed**.
+  - **A related pipeline property found while writing the control, not a defect:**
+    `scripts/exam-content.mjs:104` emits `kind` from a boolean, so an unrecognised `kind` in a
+    paper's front matter is silently classified as `certification-practice` rather than rejected.
+    The exam guard still gates the field it requires, so this cannot currently produce a
+    mislabelled paper — recorded because it is why a first mutation attempt proved nothing.
+
 - **Eight stale figures in documents the first sweep never opened.** Every one was
   attached to a claim that was *still true* — "every practice task carries a band" held,
   "front-matter is on every phase file" held — which is why nobody re-read the arithmetic:
