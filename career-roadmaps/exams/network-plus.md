@@ -110,8 +110,7 @@ all. This "what still works" reasoning is the core of troubleshooting questions.
 - [ ] Firewall
 
 **Why:** A switch is a Layer 2 device that learns MAC addresses and forwards frames only to the
-port where the destination lives. A **hub** is also Layer 2 in a loose sense but broadcasts
-every frame to every port — it forwards no more intelligently than a repeater. A router works at
+port where the destination lives. A **hub** is a Layer 1 repeater: it copies incoming bits to every port and does not inspect MAC addresses. A router works at
 Layer 3 and a firewall can inspect far higher layers. The switch-versus-hub distinction is the
 common trap.
 

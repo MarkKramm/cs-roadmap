@@ -728,7 +728,7 @@ A trust policy that lets a partner account assume a role, constrained by an exte
 }
 ```
 
-The external ID is not a secret and it is not authentication. It exists to solve the **confused deputy problem**: a situation where a trusted service is tricked into using its own authority on behalf of the wrong party. Without an external ID, any customer of that partner could point the partner at your role ARN. With it, the partner must supply the value only your account knows.
+The external ID is not a secret and it is not authentication. It exists to solve the **confused deputy problem**: a situation where a trusted service is tricked into using its own authority on behalf of the wrong party. Without an external ID, any customer of that partner could point the partner at your role ARN. With it, the partner must supply a unique customer-specific value that both your account and the partner associate with this relationship.
 
 The same role assumed by a human through federation is a different trust policy, and it is where the useful constraints live.
 
@@ -787,27 +787,27 @@ So a trust policy for a federated role that requires `aws:MultiFactorAuthPresent
 
 ```json
 {
-  "Sid": "BreakGlassAssumeRequiresFreshMFAAndCarriesSourceIdentity",
-  "Effect": "Allow",
-  "Principal": {
-    "Federated": "arn:aws:iam::444455556666:saml-provider/ContosoEntraID"
-  },
-  "Action": "sts:AssumeRoleWithSAML",
-  "Condition": {
-    "StringEquals": {
-      "SAML:aud": "https://signin.aws.amazon.com/saml"
+  "Version": "2012-10-17",
+  "Statement": [{
+    "Sid": "BreakGlassAssumeRequiresFreshMFA",
+    "Effect": "Allow",
+    "Principal": {
+      "AWS": "arn:aws:iam::444455556666:root"
     },
-    "Bool": {
-      "aws:MultiFactorAuthPresent": "true"
-    },
-    "NumericLessThan": {
-      "aws:MultiFactorAuthAge": "900"
+    "Action": "sts:AssumeRole",
+    "Condition": {
+      "Bool": {
+        "aws:MultiFactorAuthPresent": "true"
+      },
+      "NumericLessThan": {
+        "aws:MultiFactorAuthAge": "900"
+      }
     }
-  }
+  }]
 }
 ```
 
-Read that policy as a shape rather than as a drop-in for the federated role it names. The `Sid` and the assertion in `Principal` describe a SAML federation, and the two MFA conditions are the ones that do not apply to it — which makes it a useful thing to have looked at, because it is exactly the mistake this section exists to prevent. What the shape *is* correct for is a role assumed through `sts:AssumeRole` by a principal that authenticated to AWS directly.
+This is a direct `sts:AssumeRole` trust policy for principals in the named AWS account; callers also need an identity-based policy that permits assuming the role. Here the AWS MFA condition keys apply to the caller's temporary credentials. Do not copy these conditions into the SAML trust policy above: SAML-authenticated MFA must be enforced by the identity provider, as described below.
 
 **The federated version is enforced on the other side of the boundary.** For `sts:AssumeRoleWithSAML`, fresh MFA belongs in the identity provider's policy — a Conditional Access rule requiring an authentication strength for the group assigned to that role.
 
@@ -1424,16 +1424,11 @@ resource "aws_iam_role" "break_glass" {
         StringEquals = {
           "SAML:aud" = "https://signin.aws.amazon.com/saml"
         }
-        Bool = {
-          "aws:MultiFactorAuthPresent" = "true"
-        }
-        NumericLessThan = {
-          "aws:MultiFactorAuthAge" = "900"
-        }
       }
     }]
   })
 
+  # MFA freshness is enforced by the identity provider, not these AWS keys.
   # One hour. Break-glass is a session, not a state.
   max_session_duration = 3600
 
@@ -1549,7 +1544,7 @@ The fourth property is a decision that has to be made before an incident and def
 
 **Regions you do not use is the detail worth internalising.** An attacker with credentials will attempt to create resources in a region the organisation does not monitor, because the guardrails and the alerts are attached to the regions people use. An SCP that denies every action outside an approved region list removes that option entirely, and it costs nothing.
 
-The shape is one `Deny` statement with a `StringNotEquals` condition on `aws:RequestedRegion` against the approved list, and the part that needs care is the escape hatch rather than the denial: the same policy has to leave the break-glass and security-tooling principals able to work in the regions they are pinned to, or the guardrail that stops an attacker also stops the response. That is the pattern this phase applies again in Part 9.
+The shape is one `Deny` statement with a `StringNotEquals` condition on `aws:RequestedRegion` against the approved list. The escape hatch needs care: break-glass and security-tooling principals must still be able to work in their approved regions, or the guardrail that stops an attacker also stops the response. The design in Part 9 addresses a different problem—a bounded administrator role with a separate recovery path.
 
 ### Part 9 — The worked design decision: a permission boundary and break-glass path for an administrator role
 
@@ -1715,16 +1710,11 @@ resource "aws_iam_role" "platform_admin" {
         StringEquals = {
           "SAML:aud" = "https://signin.aws.amazon.com/saml"
         }
-        Bool = {
-          "aws:MultiFactorAuthPresent" = "true"
-        }
-        NumericLessThan = {
-          "aws:MultiFactorAuthAge" = "3600"
-        }
       }
     }]
   })
 
+  # MFA freshness is enforced by the identity provider, not these AWS keys.
   # Eight hours, because the team is on call and a shorter session would
   # simply mean more re-authentication during an incident.
   max_session_duration = 28800
@@ -1775,16 +1765,11 @@ resource "aws_iam_role" "break_glass" {
         StringEquals = {
           "SAML:aud" = "https://signin.aws.amazon.com/saml"
         }
-        Bool = {
-          "aws:MultiFactorAuthPresent" = "true"
-        }
-        NumericLessThan = {
-          "aws:MultiFactorAuthAge" = "900"
-        }
       }
     }]
   })
 
+  # MFA freshness is enforced by the identity provider, not these AWS keys.
   max_session_duration = 3600
 
   tags = {

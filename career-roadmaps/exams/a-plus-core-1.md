@@ -146,10 +146,10 @@ gives no image or a corrupted one, not a uniformly dim one.
 exam: RDP exposed to the internet is one of the most heavily attacked services there is, and
 recognising 3389 in a firewall rule or a log is a practical skill, not trivia.
 
-### Q7. A user needs to connect a laptop to a wired network, but the laptop has no Ethernet port. What is the correct solution?
+### Q7. A user needs to connect a laptop to a wired network, but the laptop has no Ethernet port. Which option provides the connection while also restoring display and power connections at a desk?
 
-- [ ] A USB-to-Ethernet adapter
-- [x] **A USB-to-Ethernet adapter or a docking station with one**
+- [ ] A USB-to-Ethernet adapter alone
+- [x] **A docking station with an Ethernet port**
 - [ ] A wireless card
 - [ ] A different router
 
@@ -178,10 +178,11 @@ field but still appears on exams. A rollover cable is Cisco console.
 - [ ] A MAC address
 - [ ] A default password
 
-**Why:** DHCP supplies the whole **IP configuration**, not just an address — which is why a
-client with a valid IP but no gateway (Q10) has a DHCP problem, not an addressing one. A MAC
-address is burned into the network card by the manufacturer and is not assigned. This is one of
-the most commonly tested facts in A+.
+**Why:** DHCP supplies the whole **IP configuration**, not just an address: an address, subnet
+mask, default gateway and DNS servers. If a client has an address but lacks a gateway, inspect its
+DHCP lease and local configuration; either can explain the missing setting. Q10 is a separate
+case: its `169.254.x.x` address indicates the client could not reach DHCP and self-assigned an
+address. A MAC address is built into or configured on the network interface; DHCP does not assign it.
 
 ### Q10. A computer has an IP address of 169.254.10.5. What does this indicate?
 
@@ -427,26 +428,27 @@ it, and it is one BIOS setting.
 - [ ] Virtual machines cannot be backed up
 - [ ] VMs cannot be networked
 
-**Why:** Consolidation concentrates **risk** as well as hardware — this is the trade-off in Q26
-stated directly. The answer to it is redundancy and clustering, and knowing the risk exists is
-what makes the mitigation make sense. The other options are all false: VMs are backed up and
-networked routinely.
+**Why:** Consolidation concentrates **risk** as well as hardware: Q25 describes the benefit
+of running several VMs on one host, while this question asks what happens when that shared host
+fails. Redundancy and clustering can reduce the impact, but they do not make the shared-failure
+risk disappear. The other options are all false: VMs can be backed up and networked routinely.
 
 ---
 
 ## Domain 5 — Hardware and network troubleshooting (28%)
 
-### Q30. A user's computer runs slowly, and Task Manager shows memory near 100% with disk activity near zero. What is the most likely cause?
+### Q30. A user's computer runs slowly. Task Manager shows memory near 100%, sustained disk activity, and Resource Monitor shows repeated page-file reads and writes. What is the most likely cause?
 
 - [ ] A failing hard drive
-- [x] **Insufficient RAM, causing paging**
+- [x] **Insufficient RAM causing sustained paging**
 - [ ] A failing CPU
 - [ ] A virus
 
-**Why:** Memory pinned at the ceiling with an **idle** disk is the RAM-exhaustion signature —
-there is nothing to read because the data is already in the page file being thrashed. A failing
-disk would show high disk *activity* or errors, and would typically be slow in bursts rather
-than uniformly. The combination is the tell.
+**Why:** Memory pinned near the ceiling together with sustained page-file reads and writes is
+evidence that Windows is paging under memory pressure. The repeated I/O is the distinguishing clue:
+high memory use alone does not prove paging, and a failing disk requires separate evidence such as
+errors or health warnings. Here, the question explicitly provides page-file activity, so insufficient
+RAM causing sustained paging is the best-supported answer.
 
 ### Q31. A workstation has no network connectivity. The link light on the NIC is off. What does this indicate?
 
@@ -619,7 +621,7 @@ series and will eventually be replaced.
 | 2. Networking | `it-roadmap/03-phase-networking-basics.md` |
 | 3. Hardware | `it-roadmap/01-phase-computer-fundamentals.md` |
 | 4. Virtualization and cloud computing | `it-roadmap/05-phase-sysadmin-basics.md`, `cybersec-roadmap/09-phase-cloud-and-identity.md` |
-| 5. Hardware and network troubleshooting | `it-roadmap/04-phase-helpdesk-skills.md`, `06-phase-tools-and-ticketing.md` |
+| 5. Hardware and network troubleshooting | `it-roadmap/04-phase-helpdesk-skills.md`, `it-roadmap/06-phase-tools-and-ticketing.md` |
 
 ---
 

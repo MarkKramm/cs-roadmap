@@ -10,6 +10,7 @@
 // See docs/DESIGN-SYSTEM.md → Anti-patterns.
 
 import { useState, useEffect, useCallback } from "react";
+import { today } from "../lib/pace.js";
 
 const KEY = "cs-roadmap:applications:v1";
 
@@ -73,7 +74,7 @@ export function useApplications() {
       role,
       source: String(fields.source || "").trim(),
       url: String(fields.url || "").trim(),
-      appliedOn: fields.appliedOn || new Date().toISOString().slice(0, 10),
+      appliedOn: fields.appliedOn || today(),
       status: VALID_STATUS.includes(fields.status) ? fields.status : "applied",
       followUpOn: fields.followUpOn || "",
       notes: String(fields.notes || "").trim(),

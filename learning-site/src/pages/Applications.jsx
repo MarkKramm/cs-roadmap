@@ -5,6 +5,7 @@ import {
   STATUSES,
   CLOSED_STATUS,
 } from "../hooks/useApplications.js";
+import { today } from "../lib/pace.js";
 
 // Job applications, in the order they were sent.
 //
@@ -16,10 +17,6 @@ import {
 // reminder, not a failure. See docs/DESIGN-SYSTEM.md → Anti-patterns.
 
 const STATUS_LABELS = Object.fromEntries(STATUSES.map((s) => [s.id, s.label]));
-
-function today() {
-  return new Date().toISOString().slice(0, 10);
-}
 
 const EMPTY_DRAFT = {
   company: "",

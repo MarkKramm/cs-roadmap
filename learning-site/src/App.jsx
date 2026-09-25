@@ -343,7 +343,7 @@ export default function App() {
             onClick={() => {
               if (
                 window.confirm(
-                  "Reset all progress? This cannot be undone."
+                  "Reset checklist progress? Lesson-section ticks and your reading position will be kept. This cannot be undone."
                 )
               ) {
                 reset();

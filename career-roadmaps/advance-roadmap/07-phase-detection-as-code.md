@@ -334,8 +334,8 @@ A good detection PR contains six things, and a reviewer should be able to reject
 | The PR contains | Because |
 |---|---|
 | The rule file | Obviously — but named per convention, not `test-rule-2.yml` |
-| A positive fixture that must match | Proves the rule does something |
-| A negative fixture that must not match | Proves the rule does not do everything |
+| A positive sample, evaluated by a matcher and asserted to match | Tests the intended detection logic |
+| A negative sample, evaluated by a matcher and asserted not to match | Tests that the rule does not overmatch that example |
 | A one-line statement of what benign activity will match | Forces the author to think about precision before review |
 | The ATT&CK tag, with a reason if it is a judgment call | Keeps the coverage map honest |
 | The reason the rule exists — an incident ID or a technique | The fact that justifies its future existence |
@@ -372,16 +372,16 @@ Checks 3, 9, and 12 are the ones a technically correct rule most often fails. **
 
 #### What a test can and cannot prove
 
-Be honest about the scope of testing here, because overclaiming it is its own defect. A fixture test proves that **the rule's logic matches the events you gave it**. It does not prove the rule will catch the technique in your environment, and it does not prove your telemetry actually produces those events.
+Be honest about the scope of testing here, because overclaiming it is its own defect. A fixture's presence proves only that an example event has been saved. A harness that checks parsing, query conversion, and fixture files still does **not** prove that the rule matches those events. It does not prove the rule will catch the technique in your environment or that your telemetry actually produces those events.
 
-| A fixture test proves | A fixture test does not prove |
+| A simple fixture harness can prove | That harness alone does not prove |
 |---|---|
-| The rule parses and its condition is satisfiable | The telemetry source is collected at all |
-| A known-bad event matches | The technique is caught in the real world |
-| A known-good event does not match | The rule's false-positive rate is acceptable |
-| A logic change breaks a test | The field names exist in your index |
+| The rule parses and converts to a query | The telemetry source is collected at all |
+| Positive and negative fixture files exist | A known-bad event matches or a known-good event does not |
+| The positive fixture is non-empty | The field names exist in your index |
+| A rule change still converts | The rule's false-positive rate or real-world detection performance |
 
-**That table is not a disclaimer; it is the reason you need three kinds of test.** Fixtures cover logic. A validation run with `sigma check` covers structure and conventions. A replay against real logs covers volume and field correctness. Only all three together describe a rule that works.
+**That table is not a disclaimer; it is the reason you need three kinds of test.** A simple fixture harness checks that examples are present; a backend validation with `sigma check` covers structure and conventions. To test whether the rule matches positive and negative events, use a matcher that evaluates them or replay them through the converted query in a lab SIEM. A replay against representative real logs then measures volume and field correctness. These checks answer different questions, and the simple harness below does not perform the matching step.
 
 #### Fixtures: the positive, the negative, and the near-miss
 
@@ -425,11 +425,9 @@ Store fixtures as small JSON files, one event each. Three per rule is the workin
 }
 ```
 
-Those three files are the whole test, and the third one is the one people leave out. The first matches. **The second also matches** — it contains both `urlcache` and `http://`, so the rule fires on it, exactly as it should; the ticket it represents is a false positive a human then closes, not a fixture that proves the rule is narrow.
+These three examples illustrate different outcomes; the files alone are not a test. The first is intended to match. **The second also matches** — it contains both `urlcache` and `http://`, so the rule fires on it; the activity may be benign, and an analyst must triage that false positive. The third is a **negative near-miss**: certutil is invoked for a local hash operation, with no URL or `urlcache`, so a matcher should confirm that it does not match.
 
-That is worth being deliberate about, because a fixture that *looks* negative and is not is how a rule acquires a blind spot. The third is the **near-miss**: certutil is invoked, but there is no URL and no `urlcache`, so it must not match. A near-miss fixture is what catches the tuning edit six months from now that quietly broadens the rule.
-
-If you want a genuine negative case for this rule, write a fourth fixture: certutil invoked for a purely local operation with no network indicator at all — for example `certutil.exe -hashfile C:\Users\Public\a.dat SHA256`, which is the third fixture above. That is why the near-miss and the negative are different things, and why a rule needs both.
+Do not describe the second event as a negative fixture: it satisfies the rule's conditions. The third example can serve as both a benign negative and a near-miss, provided the harness evaluates it and asserts the expected non-match. The near-miss label describes how close the event is to the rule; it does not imply a separate test outcome.
 
 #### The test harness
 
@@ -437,7 +435,7 @@ Here is a working pytest harness for Sigma rules. It uses pySigma to parse each 
 
 ```python
 # tests/test_rule_logic.py
-"""Match every rule against its positive, negative, and near-miss fixtures."""
+"""Check fixture files and query conversion; matching is tested separately."""
 from pathlib import Path
 import json
 import pytest
@@ -479,8 +477,8 @@ def test_rule_has_fixtures(rule_path):
 
 
 @pytest.mark.parametrize("rule_path", rule_files(), ids=lambda p: p.stem)
-def test_rule_matches_fixtures(rule_path):
-    """The generated test-backend query is produced, and its fixtures are present.
+def test_rule_converts_with_fixtures_present(rule_path):
+    """The query converts; this test does not evaluate fixture matches.
 
     This does NOT decide whether an event matches. A backend renders a query;
     it does not evaluate one. What this asserts is that the rule converts to
@@ -513,7 +511,7 @@ sigma plugin list
 
 #### Validation and linting, which are not the same as testing
 
-A fixture proves logic. Validation proves the rule is well-formed and follows the conventions. Both are cheap, and both belong in CI.
+A fixture file records an example event; it proves rule logic only when a matcher evaluates it and the test asserts the expected result. Validation proves the rule is well-formed and follows conventions. Both matching tests and validation can belong in CI when the matching backend is available.
 
 ```bash
 # Install the CLI and a validator plugin set.
@@ -1019,7 +1017,7 @@ Keep a flat file next to the rules. It is the thing a manager reads and the thin
 
 ```csv
 rule_id,title,owner,status,deployed,last_reviewed,review_due,precision_30d,attck,notes
-DET-042,Certutil remote download,Your Name,stable,2026-05-14,2026-07-02,2026-10-02,11%,T1105,tuned twice
+DET-042,Certutil remote download,Your Name,stable,2026-05-14,2026-07-02,2026-10-02,31%,T1105,tuned twice
 DET-057,Archive creation in user dirs,Peer Reviewer,stable,2026-06-01,2026-06-01,2026-09-01,34%,T1560,replaced DET-018
 DET-018,Suspicious archive creation,None,retired,2026-02-10,2026-07-15,NA,0.5%,T1560,retired 2026-07-15
 ```

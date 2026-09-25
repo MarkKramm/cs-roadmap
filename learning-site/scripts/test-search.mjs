@@ -15,6 +15,7 @@
 import { readFileSync, existsSync } from "node:fs";
 import { join, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
+import { createServer } from "vite";
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const ROOT = join(HERE, "..");
@@ -241,6 +242,32 @@ for (const q of COMMONLY_TYPED) {
 const commonOnly = search("user");
 ok(commonOnly.hits.length > 0, 'the common word "user" alone returns results',
   "got " + commonOnly.hits.length);
+
+// The independent implementation above protects index encoding/decoding but
+// cannot catch a bug in the production search function itself. Exercise the
+// exported function from the actual hook module with both common-only and mixed
+// common-only inputs (the all-common fallback used to read a nonexistent `ids`).
+const vite = await createServer({
+  root: ".",
+  logLevel: "silent",
+  server: { middlewareMode: true },
+  appType: "custom",
+});
+try {
+  const production = await vite.ssrLoadModule("/src/hooks/useSearch.js");
+  for (const q of ["user", "user data", "data user", "user access"]) {
+    try {
+      const result = production.search(segments, postings, q, common);
+      ok(result.hits.length > 0, `production search resolves common query: "${q}"`,
+        `got ${result.hits.length} hits`);
+      ok(result.ignored.length > 0, `production search reports ignored common terms: "${q}"`);
+    } catch (error) {
+      ok(false, `production search does not throw for common query: "${q}"`, String(error));
+    }
+  }
+} finally {
+  await vite.close();
+}
 
 // The flagged list must be non-empty, or the flagging is not working and this
 // test proves nothing.

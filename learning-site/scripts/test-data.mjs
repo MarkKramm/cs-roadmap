@@ -425,12 +425,24 @@ const POPULATED = {
 }
 
 {
-  // Replace mode is explicit and does overwrite.
-  const target = fakeStorage({ "cs-roadmap:energy-mode:v1": JSON.stringify("low") });
+  // Replace mode must make localStorage match the backup exactly: present keys
+  // overwrite, and registered keys omitted from the file are removed (including
+  // preferences which export omitted because they were never set).
+  const target = fakeStorage({
+    "cs-roadmap:energy-mode:v1": JSON.stringify("low"),
+    "cs-roadmap:applications:v1": JSON.stringify([
+      { id: "a1", company: "Acme", role: "Helpdesk" },
+    ]),
+    "cs-roadmap:time-budget:v1": JSON.stringify("deep"),
+  });
   const source = fakeStorage({ "cs-roadmap:energy-mode:v1": JSON.stringify("high") });
   const payload = exportAll(source, "2026-03-01T12:00:00.000Z").payload;
-  importAll(target, payload, "replace");
+  const res = importAll(target, payload, "replace");
+  ok(res.ok, "replace import: succeeds", res.error);
   eq(JSON.parse(target._raw("cs-roadmap:energy-mode:v1")), "high", "replace import: overwrites the preference");
+  eq(target._raw("cs-roadmap:applications:v1"), undefined, "replace import: removes an omitted applications key");
+  eq(target._raw("cs-roadmap:time-budget:v1"), undefined, "replace import: removes an omitted preference key");
+  ok(res.written.includes("cs-roadmap:applications:v1"), "replace import: reports removed keys among the changes");
 }
 
 // ---- import failure -------------------------------------------------------

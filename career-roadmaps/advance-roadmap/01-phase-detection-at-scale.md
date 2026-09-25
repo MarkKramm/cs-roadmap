@@ -140,7 +140,7 @@ detections/
 
 The `rules/` tree is organised by **telemetry source**, not by threat actor or by severity. This matters more than it looks. When you need to know “what do we detect from cloud audit logs”, you open one folder. When you organise by threat actor, the same question means reading everything.
 
-`tests/samples/` holds the evidence that a rule works: one JSON file that the rule must match, and one that it must not. This is a unit test, and Part 8 covers it properly.
+`tests/samples/` holds example events for review: one intended to match the rule, one intended not to, and optionally a near-miss. Their presence alone is not a unit test—the test harness must evaluate them against the rule or its converted query. Part 8 describes the sample format and test levels.
 
 #### What a rule actually contains
 
@@ -346,7 +346,7 @@ The standard itself belongs in the repository, next to the rules, so it can be c
 # Detection Rule Review Standard
 
 A rule may be promoted to production when all twelve checks in
-`docs/review-checklist.md` pass, or when every failed check carries a
+`docs/review-standard.md` pass, or when every failed check carries a
 dated condition with a named owner.
 
 Minimum bar, regardless of the checks:
@@ -989,7 +989,7 @@ The first two are done by the rule author before review. The third is done after
 
 #### Unit tests
 
-A unit test is two small files: one log event that the rule must match, and one that it must not.
+A basic fixture set is two small files: one log event intended to match the rule, and one intended not to. They become a unit test only when a harness evaluates both against the rule and asserts the expected outcomes.
 
 ```json
 {

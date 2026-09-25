@@ -103,7 +103,10 @@ function seeded() {
     "cs-roadmap:reading:v1": JSON.stringify({
       lastTrackId: "it",
       lastPhaseId: "it-01-computer-fundamentals",
-      lastSection: {},
+      lastSection: {
+        "it-01-computer-fundamentals": { id: "what-is-a-computer", text: "What is a computer?" },
+        "it-02-operating-systems": { id: "kernels", text: "Kernels" },
+      },
     }),
     "cs-roadmap:portfolio:v1": JSON.stringify([
       { id: "p1", title: "A portfolio piece" },
@@ -187,6 +190,11 @@ function seeded() {
   ok(
     "cs-roadmap:reading:v1" in inPhase.payload.data,
     "reading position travels when this phase is the one being read"
+  );
+  eq(
+    Object.keys(inPhase.payload.data["cs-roadmap:reading:v1"].lastSection),
+    [phaseA.id],
+    "reading state in a phase export is narrowed to its named phase"
   );
 
   // The same storage, but the reader is in phase 2. Exporting phase 1 must not
@@ -304,10 +312,42 @@ function seeded() {
   ok(!bad.ok, "a non-backup object is refused");
 
   const wrongVersion = importPhase(
-    { format: FORMAT, version: VERSION + 1, data: { "cs-roadmap:progress:v1": {} } },
+    { format: FORMAT, version: VERSION + 1, kind: PHASE_FORMAT, phase: { id: phaseA.id }, data: { "cs-roadmap:progress:v1": {} } },
     storage
   );
   ok(!wrongVersion.ok, "a version mismatch is refused rather than half-read");
+
+  const fullProfile = {
+    format: FORMAT,
+    version: VERSION,
+    data: {
+      "cs-roadmap:progress:v1": { "it-01-hardware": true },
+      "cs-roadmap:applications:v1": [{ id: "a1", company: "Acme", role: "Helpdesk" }],
+    },
+  };
+  const profileRejected = importPhase(fullProfile, storage);
+  ok(!profileRejected.ok, "the phase importer rejects a full-profile backup without phase kind metadata");
+  eq(storage.getItem("cs-roadmap:progress:v1"), null, "a profile backup was rejected before writing progress");
+
+  const crossPhase = {
+    format: FORMAT,
+    version: VERSION,
+    kind: PHASE_FORMAT,
+    phase: { id: phaseA.id, title: phaseA.title },
+    data: {
+      "cs-roadmap:progress:v1": { "it-01-hardware": true, "it-02-files": true },
+    },
+  };
+  const crossPhaseRejected = importPhase(crossPhase, storage);
+  ok(!crossPhaseRejected.ok, "a phase file carrying another phase's task is rejected");
+  eq(storage.getItem("cs-roadmap:progress:v1"), null, "cross-phase data was rejected before writing");
+
+  const profileKeyRejected = importPhase({
+    ...fullProfile,
+    kind: PHASE_FORMAT,
+    phase: { id: phaseA.id, title: phaseA.title },
+  }, storage);
+  ok(!profileKeyRejected.ok, "a phase-kind file carrying a profile key is rejected");
 
   const invalid = importPhase(
     {

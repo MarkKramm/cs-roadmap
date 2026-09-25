@@ -709,6 +709,28 @@ async function main() {
     );
 
     // ---------------------------------------------------------------------
+    // 3a. Reset copy matches the checklist-only behavior
+    // ---------------------------------------------------------------------
+    const resetCopy = await cdp.eval(`(() => {
+      const button = [...document.querySelectorAll('.sidebar__link')]
+        .find(b => b.textContent.trim() === 'Reset progress');
+      if (!button) return { found: false, message: '' };
+      // Read the native confirmation text without accepting the reset.
+      const oldConfirm = window.confirm;
+      let message = '';
+      window.confirm = (text) => { message = text; return false; };
+      button.click();
+      window.confirm = oldConfirm;
+      return { found: true, message };
+    })()`);
+    check('reset: control is reachable', resetCopy.found);
+    check(
+      'reset: confirmation specifies checklist progress only and preserves section ticks',
+      /checklist progress/i.test(resetCopy.message) && /lesson-section ticks.*kept/i.test(resetCopy.message),
+      resetCopy.message,
+    );
+
+    // ---------------------------------------------------------------------
     // 3b. The destructive control is gated on the RIGHT state
     // ---------------------------------------------------------------------
     //
@@ -1010,7 +1032,7 @@ async function main() {
     check(
       'where youve been: uses no scolding language',
       !path.hasScold,
-      'found a scold word in the rendered text',
+      'scolding language present=' + path.hasScold,
     );
 
     // ---------------------------------------------------------------------

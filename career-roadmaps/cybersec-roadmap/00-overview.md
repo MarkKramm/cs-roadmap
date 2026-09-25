@@ -27,7 +27,7 @@ Cybersecurity is not just hacking. Entry-level cyber hiring usually rewards:
 
 ## Timeline
 
-Phases 1–8 are the core path to employability. Phases 9–15 are a **depth track**: optional, taken after Phase 8 or alongside your job search, depending on which roles you are targeting. They exist because the core path teaches you to be hireable, not to be specialised — cloud, detection engineering, incident response, scripting, GRC, web application security, and operational technology are all listed as target roles in Phase 8 but were previously taught nowhere.
+Phases 1–8 are the core path to employability. Phases 9–15 are a **depth track**: optional, taken after Phase 8 or alongside your job search, depending on which areas you want to develop. They exist because the core path teaches you to be hireable, not to be specialised — cloud, detection engineering, incident response, scripting, GRC, web application security, and operational technology were not covered in depth by the core path.
 
 ### Core path (Phases 1–8)
 

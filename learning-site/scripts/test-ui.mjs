@@ -58,6 +58,18 @@ try {
   );
   ok(daysBetween("", "2026-01-01") === null, "daysBetween: empty input is null");
 
+  const boundaryInstant = new Date("2026-09-18T01:00:00.000Z");
+  ok(
+    today(boundaryInstant, "America/Los_Angeles") === "2026-09-17",
+    "today: uses the local calendar day across UTC midnight",
+    today(boundaryInstant, "America/Los_Angeles")
+  );
+  ok(
+    today(boundaryInstant, "Asia/Manila") === "2026-09-18",
+    "today: respects a positive-offset local calendar day",
+    today(boundaryInstant, "Asia/Manila")
+  );
+
   ok(
     addWeeks("2026-01-01", 2) === "2026-01-15",
     "addWeeks: two weeks",

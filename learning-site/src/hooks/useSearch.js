@@ -152,7 +152,18 @@ export function search(segments, postings, query, common, limit = 30) {
   // the query still returns the best available evidence rather than nothing.
   if (!narrow.length) {
     if (!resolved.length) return { hits: [], ignored, missing };
-    narrow = [resolved.slice().sort((a, b) => a.ids.length - b.ids.length)[0]];
+    // Common terms have no `ids` field: exact and prefix postings are held
+    // separately so they can be acknowledged without narrowing. Rank by their
+    // union cardinality, matching the set used below for the actual search.
+    narrow = [
+      resolved
+        .slice()
+        .sort(
+          (a, b) =>
+            new Set([...a.exact, ...a.loose]).size -
+            new Set([...b.exact, ...b.loose]).size
+        )[0],
+    ];
   }
 
   // Which segments satisfy EVERY term? A segment qualifies on a term if it is

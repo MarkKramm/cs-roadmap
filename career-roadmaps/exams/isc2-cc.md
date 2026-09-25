@@ -225,7 +225,7 @@ risk?
 - [ ] A risk exploits a threat
 - [ ] A vulnerability is always a threat
 
-**Why:** The chain is **threat → exploits → vulnerability → producing → risk**. A vulnerability is
+**Why:** A **threat may exploit a vulnerability, creating a risk of loss**. A vulnerability is
 a weakness; a threat is something that could act on it; risk is the potential loss from that
 combination. This vocabulary is foundational to the whole exam, and ISC2 tests it directly because
 imprecise use of these three words is the most common way security discussions go wrong.
@@ -660,7 +660,7 @@ substitute for the labs, and the curriculum's certification phase makes that arg
 
 | Domain | Curriculum phases |
 |---|---|
-| 1. Security Principles | `cybersec-roadmap/01-phase-foundations.md`, `03-phase-security-fundamentals.md` |
+| 1. Security Principles | `cybersec-roadmap/01-phase-foundations.md`, `cybersec-roadmap/03-phase-security-fundamentals.md` |
 | 2. Security Governance | `cybersec-roadmap/13-phase-grc-compliance.md` |
 | 3. Identity and Access Management | `cybersec-roadmap/03-phase-security-fundamentals.md`, `advance-roadmap/04-phase-cloud-identity-architecture.md` |
 | 4. Networking and Cloud Security | `cybersec-roadmap/02-phase-networking-and-linux.md`, `cybersec-roadmap/09-phase-cloud-and-identity.md` |

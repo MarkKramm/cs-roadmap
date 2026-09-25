@@ -623,7 +623,7 @@ eventually be replaced.
 |---|---|
 | 1. Operating systems | `it-roadmap/02-phase-operating-systems.md` |
 | 2. Security | `it-roadmap/02-phase-operating-systems.md`, `cybersec-roadmap/03-phase-security-fundamentals.md` |
-| 3. Software troubleshooting | `it-roadmap/04-phase-helpdesk-skills.md`, `06-phase-tools-and-ticketing.md` |
+| 3. Software troubleshooting | `it-roadmap/04-phase-helpdesk-skills.md`, `it-roadmap/06-phase-tools-and-ticketing.md` |
 | 4. Operational procedures | `it-roadmap/06-phase-tools-and-ticketing.md`, `it-roadmap/07-phase-soft-skills.md` |
 
 ---

@@ -170,7 +170,7 @@ The **subnet mask** — or its shorthand, the **CIDR** prefix — says where the
 | `192.168.1.1` through `192.168.1.254` | Usable hosts — 254 of them |
 | `192.168.1.255` | Broadcast address — sends to every host on the network at once |
 
-The reason `/24` gives 254 usable rather than 256 is that the first and last addresses are reserved. That “minus two” rule holds for every subnet, and it is worth internalising now.
+For ordinary IPv4 subnets, the network and broadcast addresses are reserved, so usable hosts are total addresses minus two. There are exceptions: on a point-to-point `/31`, RFC 3021 treats both addresses as host addresses, and a `/32` represents a single host route. The “minus two” rule is the right one for the `/24` through `/30` examples in this section.
 
 #### Worked example: doing the math for other prefixes
 
@@ -268,7 +268,7 @@ Seeing `192.168.x.x` in a log tells you it is an internal address. This matters 
 | Thing to know | Detail |
 |---|---|
 | The `::` shorthand | Means “one or more groups of zeros.” The address above is `2001:0db8:0000:0000:0000:0000:0000:0001` |
-| Link-local vs global unicast | **Link-local** (`fe80::/10`) exists automatically on every interface and is how devices on the same segment find each other. **Global unicast** (`2001::/16` range) are internet-routable |
+| Link-local vs global unicast | **Link-local** (`fe80::/10`) exists automatically on every interface and is how devices on the same segment find each other. **Global unicast** addresses are allocated from `2000::/3`; an address in that range is not necessarily assigned or globally reachable |
 | The security-relevant point | IPv6 was designed with enough address space that **NAT is not necessary**, so every device can have a real address |
 
 That last point removes a layer of accidental protection that IPv4 networks enjoy. It is why IPv6 misconfiguration is a recurring security finding.
@@ -331,9 +331,9 @@ Read it left to right.
 |---|---|
 | `v=spf1` | This is an SPF record, version 1 — the list of servers allowed to send mail as this domain |
 | `include:_spf.example.com` | Mail sent through that host is authorised |
-| `-all` | Everything else is a **hard fail**. Any other server claiming to be this domain should be rejected |
+| `-all` | Everything else receives an SPF **fail** result. The receiving mail system decides how to handle the message; rejection is common, but SPF alone does not require it |
 
-That last token is the security decision. A domain ending in `-all` is enforcing its policy strictly. A domain ending in `~all` is only marking it as suspicious, and a domain with no SPF record at all is trivially spoofable.
+That last token controls the SPF result, not the receiver's final mail-handling decision. `-all` marks unauthorized senders as fail; `~all` marks them softfail. The receiver applies its own policy, often considering SPF together with DMARC, DKIM, sender reputation, and other signals. A missing SPF record removes this particular authorization check, but does not by itself make a domain trivially spoofable.
 
 You have just read an anti-spoofing policy straight from public DNS, using one command.
 

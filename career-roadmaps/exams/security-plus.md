@@ -123,10 +123,10 @@ what to fix first.
 - [x] **Smishing**
 - [ ] Whaling
 
-**Why:** The channel is the discriminator, and exam questions rely on you knowing each word
-precisely. **V**ishing is voice (a phone call), **ph**ishing is email, **sm**ishing is SMS
-text, and **wh**aling is phishing aimed at senior executives. Reading "text message" and
-answering "phishing" is the common error — phishing is specifically email here.
+**Why:** The channel distinguishes the terms in this question: **v**ishing uses voice (such as a
+phone call), and **sm**ishing uses SMS. Both are forms of phishing; in everyday usage, “phishing”
+often refers specifically to deceptive email. **Whaling** is phishing that targets senior
+executives. Here, the text message makes “smishing” the most specific answer.
 
 ### Q5. An organisation requires that all administrative access to a server uses a credential that is valid for one hour and cannot be reused. Which concept is this?
 
@@ -566,7 +566,7 @@ controls work; a privacy policy is a statement of intent.
 **Why:** The three wrong options are all **technical** problems with technical fixes. A social
 engineering success against a trained employee is the case where no firewall helps — which is
 why awareness training is a required control in every framework rather than a nice-to-have.
-The scenario is **vishing** (Q4), now applied as a programme question.
+The scenario is **vishing**: the caller uses voice to impersonate IT.
 
 ### Q39. A third-party vendor will process customer data. What should be established before the work begins?
 

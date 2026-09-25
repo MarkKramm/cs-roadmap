@@ -1441,7 +1441,7 @@ Twelve situations. For each, decide **one** next action and write down why you c
 
 #### The twelve situations
 
-For each, your choices are: **resolve it now**, **gather one more piece of evidence**, **set Waiting on User**, or **escalate now**.
+For each, choose one primary action: **resolve it now**, **gather one more piece of evidence**, **set Waiting on User**, or **escalate now**. You may also set an expectation with the user when appropriate; that communication does not replace the primary action.
 
 1. A user reports the shared drive is empty. Their password was changed an hour ago.
 2. A user says "the internet is down". Your `ping` to their gateway succeeds.
@@ -1606,7 +1606,7 @@ Real ones carry the detail that only comes from having been there: the exact err
 3. Write 2 knowledge base articles: one on troubleshooting a no-internet connection (physical checks, IP configuration, DNS), and one on clearing browser cache and cookies in Chrome, Firefox, and Edge. <!-- id: it-04-t03 band: focused energy: normal -->
 4. Practise remote support. Use **RustDesk** or **Chrome Remote Desktop** to connect to a family member's device or a second VM, and fix a simple issue such as display settings or a cache problem. <!-- id: it-04-t04 band: focused energy: normal -->
 5. Write 5 user-friendly replies to common helpdesk issues — email not syncing, VPN not connecting, printer offline, forgotten password, and a slow laptop. Each reply must be clear, polite, and contain actionable steps. <!-- id: it-04-t05 band: focused energy: normal -->
-6. Write 3 escalation notes, each including a detailed description, the troubleshooting already performed, supporting evidence such as error messages or logs, and the reason for escalation. Score each draft against the eight rows of the Part 12 handover table, and rewrite any that scores below six. <!-- id: it-04-t06 band: focused energy: high -->
+6. Write 3 escalation notes, each including a detailed description, the troubleshooting already performed, supporting evidence such as error messages or logs, and the reason for escalation. Score each draft against the eight rows of the Part 10 escalation table, and rewrite any that scores below six. <!-- id: it-04-t06 band: focused energy: high -->
 7. Run every command in the Part 8 command table on your own machine, and write down what each result tells you. Add the output to `portfolio/it/04-healthy-baseline.md` with one sentence describing what would look different if it were broken. <!-- id: it-04-t07 band: focused energy: normal -->
 8. Work Part 9's six tickets on paper before reading the model replies. Write your triage questions, your reply to the user, and the internal note for each. Then compare your reply against the strong example and write two sentences on what you would change. <!-- id: it-04-t08 band: focused energy: high -->
 9. Retake the Part 11 drill a week later, without rereading the answer key first. Anything you get wrong twice is the thing to practise, and the two most commonly missed situations are the ones worth checking first. <!-- id: it-04-t09 band: ongoing energy: normal -->

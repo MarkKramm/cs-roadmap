@@ -80,7 +80,7 @@ The comment carries three fields, and the **field order is fixed**: `id`, then `
   | `ongoing` | **Not a single timed sitting.** Recurring, week-gated, multi-session or hardware-gated work. |
 
   `ongoing` is an exclusion rather than a length: it means *more time would not help*, so a task carrying it is never offered as a time-boxed suggestion (see `DECISIONS.md` → D-021).
-- **`energy`** is one of `low`, `normal`, `high`, matching the checklist's `energy:` hint. All 252 practice tasks carry a value.
+- **`energy`** is one of `low`, `normal`, `high`, matching the checklist's `energy:` hint. All 283 practice tasks carry a value.
 
 **Positional minting is now a fallback, not the normal path.** The build still mints `<phase-id>-tNN` from position for any task line that carries no `<!-- id: … -->` comment, so a partially migrated file cannot fail the build — but it **reports the count**, because a silently minted id is the one thing that would let an answer follow a position rather than a question. The build prints both numbers on every run:
 

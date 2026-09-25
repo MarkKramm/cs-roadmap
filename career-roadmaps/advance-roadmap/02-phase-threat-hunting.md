@@ -960,9 +960,11 @@ Investigation findings:
 | Is the downloaded content still available? | No — the URL now returns 404 |
 | Is there a change record? | No |
 
-**Conclusion: a genuine finding.** The task is a persistence mechanism using a delegated service account, disguised under a Microsoft-looking task path, invoking an encoded-style download cradle one second after the task was registered. Whether the account was compromised or abused, the behaviour is not legitimate.
+**Conclusion: a high-confidence finding requiring containment and follow-up.** The task invokes a PowerShell download cradle one second after registration, under a Microsoft-looking task path and a delegated service account. The command shown is not encoded; its `iwr ... | iex` pattern downloads and executes a script.
 
-Recorded as **incident INC-2026-0412**, scoped to three hosts, with the task removed and the account's credentials reset.
+The timing, unusual task path, newly registered domain, off-hours creation, and lack of a change record strongly indicate unauthorized activity. However, the task content could not be recovered and the process-to-task link was not independently confirmed. Preserve the available evidence, investigate the account's activity on the other hosts, and document that limitation rather than treating timing alone as proof of execution.
+
+Recorded as **incident INC-2026-0412** for follow-up across three hosts. As a precaution, the task was removed and the account's credentials reset; preserve the distinction between those containment actions and the still-unconfirmed task-to-process link.
 
 #### Step 5 — What was NOT found
 

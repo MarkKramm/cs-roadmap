@@ -12,9 +12,26 @@
 // burnout-aware curriculum has to be a readout, not a verdict — see
 // docs/DESIGN-SYSTEM.md → Anti-patterns.
 
-/** ISO date (YYYY-MM-DD) for the start of a track's plan, or "" if unset. */
-export function today() {
-  return new Date().toISOString().slice(0, 10);
+/** Local calendar date (YYYY-MM-DD), or "" if unset. */
+export function today(now = new Date(), timeZone) {
+  const parts = timeZone
+    ? Object.fromEntries(
+        new Intl.DateTimeFormat("en-CA", {
+          timeZone,
+          year: "numeric",
+          month: "2-digit",
+          day: "2-digit",
+        })
+          .formatToParts(now)
+          .filter((part) => part.type !== "literal")
+          .map(({ type, value }) => [type, value])
+      )
+    : {
+        year: String(now.getFullYear()),
+        month: String(now.getMonth() + 1).padStart(2, "0"),
+        day: String(now.getDate()).padStart(2, "0"),
+      };
+  return `${parts.year}-${parts.month}-${parts.day}`;
 }
 
 /**

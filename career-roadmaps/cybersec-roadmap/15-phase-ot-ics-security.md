@@ -312,9 +312,9 @@ A **zone** is a group of assets that share the same security requirements — an
 
 #### The design assumption you have to internalise
 
-Every protocol in this part was designed for a network that was physically isolated, electrically controlled, and reachable only by people who were already inside the fence. Authentication was not omitted because the designers were careless. It was omitted because it was not needed, and adding it would have cost bandwidth and latency that the process could not spare.
+Several of the legacy industrial protocols in this part were designed for networks assumed to be physically isolated, electrically controlled, and reachable only by people already inside the fence. Authentication was often omitted because it was not part of that trust model, and adding it could cost bandwidth and latency. Newer protocols such as OPC UA make different security choices; the protocols in this section should not be treated as one generation or design.
 
-**That assumption is now false, and the protocols have not changed.**
+**The isolation assumption is no longer safe for legacy protocols, and their basic unauthenticated behavior remains.** Newer protocols such as OPC UA have different security capabilities, but those protections still need correct configuration.
 
 | What the designer assumed in 1979 | What is true today |
 |---|---|
@@ -364,7 +364,7 @@ The function codes are where the security meaning lives, and the distinction tha
 | 16 | **Write Multiple Registers** | **Change several values at once** |
 | 43 | Encapsulated interface transport | Used to read device identification |
 
-**Everything above the line is observation. Everything below it is control.** A defender's detection strategy for Modbus reduces to one sentence: know what reads normally look like, and alert on writes that do not fit the pattern.
+**Function codes 1–4 are reads; 5, 6, 15, and 16 are writes. Code 43 reads device-identification information.** A defender's detection strategy for Modbus reduces to one sentence: know what reads normally look like, and alert on writes that do not fit the pattern.
 
 Device identification, reached through function code 43, is worth knowing about because it lets a client ask a device to describe itself. It is a convenient asset-discovery mechanism and a convenient reconnaissance mechanism, depending on who is asking.
 
@@ -693,7 +693,7 @@ These are not guidelines. Treat them as prohibitions.
 | Attempt to read or modify safety logic outside a vendor lab | The logic is the protection, and you would be removing it |
 | Assume a SIS is “just another PLC” | It is a certified device whose behaviour is part of a safety case |
 
-**The reason these rules read as absolute is that the failure mode is not a lost record or a downtime charge.** It is an uncontrolled release, a fire, or a person injured. That is not a rhetorical escalation; it is the definition of what a safety system exists to prevent.
+**The reason these rules read as absolute is that the failure mode is not a lost record or a downtime charge.** It is an uncontrolled release, a fire, or a person being injured. That is not a rhetorical escalation; it is the definition of what a safety system exists to prevent.
 
 #### Where the safety boundary sits in a diagram
 

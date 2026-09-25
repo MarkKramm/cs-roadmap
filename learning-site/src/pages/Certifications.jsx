@@ -1,6 +1,7 @@
 import { useMemo, useState } from "react";
 import EmptyState from "../components/EmptyState.jsx";
 import { useCertifications, CERT_STATUSES } from "../hooks/useCertifications.js";
+import { today } from "../lib/pace.js";
 
 // Certifications the reader is considering, in the order they were written down.
 //
@@ -28,10 +29,6 @@ import { useCertifications, CERT_STATUSES } from "../hooks/useCertifications.js"
 //
 // Upcoming exams are surfaced as a reminder of a date the reader chose and paid
 // for, never as urgency. Same reasoning as `followUpOn` on Applications.
-
-function today() {
-  return new Date().toISOString().slice(0, 10);
-}
 
 const EMPTY_DRAFT = {
   name: "",

@@ -463,6 +463,29 @@ export function importAll(storage, payload, mode = "merge") {
 
   const written = [];
 
+  // Replace means this browser matches the backup, not merely that values
+  // present in it overwrite their counterparts. Export omits absent keys, so
+  // clear those registered values as part of restoring an exact snapshot.
+  if (mode === "replace") {
+    for (const { key } of KEYS) {
+      if (key in verdict.data) continue;
+      try {
+        storage.removeItem(key);
+        written.push(key);
+      } catch {
+        return {
+          ok: false,
+          error:
+            "Storage is unavailable, so the import stopped part-way. Keys already written: " +
+            (written.length ? written.join(", ") : "none") +
+            ".",
+          written,
+          summary: verdict.summary,
+        };
+      }
+    }
+  }
+
   for (const { key } of KEYS) {
     if (!(key in verdict.data)) continue;
     const incoming = verdict.data[key];
@@ -631,7 +654,13 @@ export function exportPhase(storage, phase, now) {
   const reading = readKey(storage, "cs-roadmap:reading:v1");
   if (reading.ok && reading.present && isReadingState(reading.value)) {
     if (reading.value.lastPhaseId === phaseId) {
-      data["cs-roadmap:reading:v1"] = reading.value;
+      // Reading state normally remembers the last visible section for several
+      // phases. A phase export carries only the state owned by this phase.
+      const lastSection = reading.value.lastSection[phaseId];
+      data["cs-roadmap:reading:v1"] = {
+        ...reading.value,
+        lastSection: lastSection ? { [phaseId]: lastSection } : {},
+      };
       counts["cs-roadmap:reading:v1"] = 1;
     }
   }
@@ -663,9 +692,51 @@ export function exportPhase(storage, phase, now) {
  *
  * @returns {{ok: boolean, error?: string, written?: Array<string>, summary?: Array}}
  */
+function phaseTaskPrefix(phaseId) {
+  const match = /^([a-z]+-\d{2})-[a-z0-9-]+$/.exec(phaseId);
+  return match ? match[1] + "-" : null;
+}
+
 export function importPhase(payload, storage) {
+  if (!isPlainObject(payload) || payload.kind !== PHASE_FORMAT) {
+    return {
+      ok: false,
+      error: "This is not a phase backup. Choose a file exported with ‘Carry this phase’."
+    };
+  }
+  if (!isPlainObject(payload.phase) || typeof payload.phase.id !== "string" || !payload.phase.id) {
+    return { ok: false, error: "The phase backup does not identify its phase." };
+  }
+
+  const phaseId = payload.phase.id;
   const verdict = inspect(payload);
   if (!verdict.ok) return verdict;
+
+  // Reject a malformed or hand-edited phase file before touching storage. Each
+  // accepted entry must be restricted to the phase id in the file's metadata.
+  for (const [key, incoming] of Object.entries(verdict.data)) {
+    let valid = true;
+    if (key === "cs-roadmap:progress:v1") {
+      const prefix = phaseTaskPrefix(phaseId);
+      valid = Boolean(prefix) && Object.keys(incoming).every((id) => id.startsWith(prefix));
+    } else if (key === "cs-roadmap:lesson-sections:v1") {
+      valid = Object.keys(incoming).every((id) => id.startsWith(phaseId + "#"));
+    } else if (key === "cs-roadmap:notes:v1") {
+      valid = Object.keys(incoming).every((id) => id === phaseId);
+    } else if (key === "cs-roadmap:reading:v1") {
+      valid = incoming.lastPhaseId === phaseId &&
+        Object.keys(incoming.lastSection).every((id) => id === phaseId);
+    } else {
+      valid = false;
+    }
+    if (!valid) {
+      return {
+        ok: false,
+        error: "The phase backup contains data outside its named phase.",
+        summary: verdict.summary,
+      };
+    }
+  }
 
   const written = [];
 

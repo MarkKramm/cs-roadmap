@@ -197,7 +197,7 @@ Take a programme with these underlying facts: 1,447 production hosts, 1,412 repo
 | Critical findings, p90 age | 74 days | Red > 45 | Vulnerability Lead |
 | Critical findings older than 90 days | 9 | Red if > 0 | Vulnerability Lead |
 | Accounts with standing admin privilege | 214 | Amber on any increase | Identity Lead |
-| Mean time to detect, p50 | 3.4 hours | Green ≤ 4 | SOC Lead |
+| Median time to detect (p50) | 3.4 hours | Green ≤ 4 | SOC Lead |
 
 The two dashboards describe the same organisation. Only the second one has an owner and a threshold on every row, which means only the second one can be acted on in a meeting. **A metric with no threshold cannot be escalated, and a metric with no owner cannot be fixed.**
 
@@ -329,7 +329,7 @@ The first question a manager asks when a number gets worse is not "why is the nu
 ```text
 METRIC MOVEMENT NOTE — KPI-02, Mean time to detect
 
-Metric:            Mean time to detect, p50
+Metric:            Median time to detect (p50)
 Period:            March 2026
 Previous:          41 minutes (February 2026)
 Current:           65 minutes (March 2026)
