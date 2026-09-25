@@ -20,7 +20,7 @@ might be **"spend nothing"**, and names the failure mode directly:
 > skills or projects.
 
 That warning is about *buying*. This directory now contains two distinct kinds of practice:
-seven certification-aligned papers and four curriculum-level integration papers. The first
+seven certification-aligned papers and five curriculum-level integration papers. The first
 kind helps a learner review a vendor blueprint before considering an exam fee. The second
 kind revisits the curriculum's own scenarios across several phases. Neither predicts hiring
 outcomes or replaces hands-on work.
@@ -53,7 +53,7 @@ published domains, but do not reproduce full exam length or every question forma
 
 ## Curriculum integration diagnostics
 
-These four 20-question papers combine applied scenarios across phases. They use the same
+These five 20-question papers combine applied scenarios across phases. They use the same
 four-option format for convenient self-review, but have **no pass mark, pass/fail verdict, or
 readiness threshold**. Treat the score only as a prompt to revisit the mapped lessons.
 
@@ -68,6 +68,16 @@ performance-based lab tasks.
 | [Cyber Foundations and Incident Triage](curriculum-cyber-core.md) | CS-CYBER-CORE | Cyber Phases 1–4, 9, and 11 | 20 |
 | [SOC Detection and Response](curriculum-cyber-depth.md) | CS-CYBER-DEPTH | Cyber Phases 10–12 | 20 |
 | [Web Application Security Assessment](curriculum-web-app-security.md) | CS-WEB-APP-SECURITY | Cyber Phases 3 and 14 | 20 |
+| [Security Ownership and Command](curriculum-advance-ownership.md) | CS-ADVANCE-OWNERSHIP | Advance Phases 1, 2, 3, 5, 6 and 7 | 20 |
+
+**The advance-track paper asks a different kind of question, and that is deliberate.** The four
+entry-level diagnostics ask what a learner should *do* with a scenario. The advance paper asks
+what a practitioner should *write down, measure, or decline to claim* — a detection review, a
+handover pack, a decision log, a gap register, a tuning record, a risk acceptance. That is
+because the advance track is the one whose work product is a document somebody else acts on.
+**Advance Phase 4 (Cloud and Identity Architecture) is outside its scope**, because its subject
+is design and policy rather than the measurement, command and lifecycle decisions the other six
+phases share; reaching into it with twenty questions would test vocabulary rather than judgement.
 
 **For certification-aligned papers, read the scoring table rather than assuming a percentage.** The vendor pass marks differ
 substantially, and two papers have a boundary that falls between whole questions: Security+ needs

@@ -2,6 +2,34 @@
 
 A chronological record of working sessions. Newest first.
 
+## 2026-09-25 (latest) — The advance track gets the diagnostic it never had, and four wrong fixtures in a row
+
+**Goal:** continue the interrupted exams work by closing the largest coverage gap in the exams directory.
+
+**Done:** `career-roadmaps/exams/curriculum-advance-ownership.md` — **CS-ADVANCE-OWNERSHIP**, 20 questions across 5 domains, covering advance Phases 1, 2, 3, 5, 6 and 7. Exams corpus **11 → 12 papers, 360 → 380 questions**.
+
+**Why this and not something else.** All four earlier curriculum papers map into the IT and cyber tracks — IT 1–6/9, cyber 1–4/9/11, cyber 10–12, cyber 3/14. **The seven-phase advance track, 116,214 words and the most senior material in the repository, had no self-check at all.** Content integrity was not the bottleneck: 21 content guards and 15 site suites were already green, 636 claim rows verified, zero `WRONG`. Coverage was.
+
+**The paper asks a different kind of question, deliberately.** The entry-level diagnostics ask what a learner should *do* with a scenario. This one asks what a practitioner should *write down, measure, or decline to claim* — a detection review, a handover pack, a decision log, a gap register, a tuning record, a risk acceptance. That is the shape the advance track's own exit criteria demand, and it is why each question's wrong answers are plausible rather than obviously wrong. Advance Phase 4 is out of scope and the paper says so, because its subject is design and policy and twenty questions there would test vocabulary instead of judgement.
+
+**Two real gaps in the guard, both found by writing controls rather than questions.**
+
+- **Controls 1–13 of `test-audit-exams.mjs` all targeted `security-plus.md`.** The *curriculum* class's phase-mapping resolution therefore had **no control of its own** — and a mapping to a phase file that does not exist is exactly the defect that once shipped **36 invented filenames** across seven papers, every one rendering as an ordinary backticked path. Two new controls target the advance paper: one to a missing phase, one to a real phase **outside the declared scope**, which resolution alone cannot catch precisely because the file exists.
+- **The smoke render's per-paper loop is blind to a shrinking corpus.** It asserts every paper in `exams.json` is named in the list — so deleting a paper makes the corpus smaller and every remaining assertion still passes. This is the same defect shape the cyber shared-documents block already guards, and it is why those three documents are named explicitly. The advance paper is now named explicitly too, plus an assertion that its every phase mapping stays inside the advance track. Renders **235 → 236**.
+
+**Every one of the four controls added for this paper failed first, and all four were the fixture.** Two mutated the paper so badly that `build:content` failed and the assertion under test was never reached; one added the out-of-scope phase to *both* the declared scope list and the question mapping, so the two agreed and the guard was right to pass; one silently matched nothing at all. **The 15-control suite now passes.** That makes **six times** in this repository's recent work that a failing control was a wrong fixture rather than a guard defect (D-065) — and the three distinct fixture failure modes here (broke the build, mutation self-neutralised, mutation never landed) are worth naming, because "the control failed" is not evidence about the guard until the fixture is shown to have landed *and* to have left the pipeline runnable.
+
+**A false alarm worth recording, because the method caught it.** A probe comparing the built `dist/` bundle against paper titles reported the new paper missing *and* an existing one. Two separate probe bugs: `dist/` was stale from before the rebuild, and the "missing" existing paper was keyed on `curriculum-it-foundations` (the *filename*) when its front-matter `id` is `curriculum-it-triage`. **Both would have looked like build defects in a report.** Rebuilt and rechecked: **12/12 paper ids present in the entry chunk.** The lesson is the one this repo keeps relearning — a measurement that disagrees with expectation is a claim about the instrument first.
+
+**Verified:**
+- 21 content guards pass; 14 script-level control suites pass; all 15 site suites pass.
+- Browser check in a real engine: **149 checks, 0 failed**.
+- `audit-exams` **12 papers**, and all **15 controls** pass with every touched file restored byte-identical.
+- `audit-doc-figures` 32 figures OK, `audit-open-items` OK, `audit-changelog` OK, `audit-encoding` 254 files OK.
+- Changed files LF, no BOM, no U+FFFD; the two mojibake matches in `CHANGELOG.md` and `CHECKPOINT.md` are pre-existing and verified identical before and after these edits.
+
+**Next:** the two open items that no pass has moved are still the honest next targets — **283 practice tasks, none ever timed** (needs one human with a stopwatch; a single phase would give the first calibration point) and the **15–20 posting market sample** for the macOS/MDM claim (needs a human reading real postings). Neither can be closed by an agent, which is why they have survived six passes.
+
 ## 2026-09-16 (latest) — Verifying the standards directly found four more defects, including a whole phase taught in the wrong order
 
 **After the NIST CSF find, I verified the versioned standards myself rather than sending more tables to a model.** That was the right call: **four more defects**, and one of them was structural.

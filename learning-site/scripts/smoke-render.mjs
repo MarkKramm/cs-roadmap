@@ -1053,6 +1053,28 @@ try {
       }
       assert("Exams: curriculum papers are labeled diagnostic only", html.includes("diagnostic only"), "diagnostic label missing");
       assert("Exams: certification papers are labeled unofficial", html.includes("Unofficial certification practice"), "certification disclaimer missing");
+
+      // The advance-track diagnostic is named explicitly, for the same reason the
+      // cyber-track shared documents below are: the loop above covers whatever
+      // `exams.json` happens to contain, so deleting this paper makes the corpus
+      // smaller and every remaining assertion still passes. The advance track is
+      // the only track whose paper would leave no hole in the entry-level loop —
+      // it maps six phases and none of the other four papers reach it.
+      const advancePaper = examsData.papers.find((p) => p.id === "curriculum-advance-ownership");
+      assert(
+        "Exams: the advance-track diagnostic is present",
+        Boolean(advancePaper),
+        "the advance-track paper is missing from exams.json"
+      );
+      if (advancePaper) {
+        assert(
+          "Exams: the advance diagnostic maps only advance phases",
+          advancePaper.questions.every(
+            (q) => Array.isArray(q.phases) && q.phases.length > 0 && q.phases.every((id) => id.startsWith("advance-"))
+          ),
+          "an advance diagnostic question maps outside the advance track"
+        );
+      }
     }
   }
 

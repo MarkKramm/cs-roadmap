@@ -130,6 +130,33 @@ control("an external URL is not treated as a local path -> must PASS", (t) =>
   t.replace(/^# CompTIA Security\+ — practice questions$/m,
     "# CompTIA Security+ — practice questions\n\nSource: [CompTIA](https://example.invalid/not-a-local-path)."), false);
 
+// 14. The ADVANCE paper's own class: a question mapped to a phase file that does not exist.
+//     Controls 1-13 all target certification papers, so the advance diagnostic's phase-id
+//     resolution had no control of its own -- and this is the exact defect that shipped in
+//     the first draft of seven papers, where 36 invented filenames rendered as ordinary
+//     backticked paths. A curriculum paper's phase mapping is its most actionable line for a
+//     reader who scored badly, so a mapping to a missing file is the paper lying about where
+//     to go next. The fixture varies the ADVANCE paper rather than the certification target.
+controlIn(path.join(ROOT, "career-roadmaps", "exams", "curriculum-advance-ownership.md"),
+  "an advance paper mapping to a missing phase -> must FAIL", (t) =>
+    t.replace(
+      "<!-- phases: advance-05-adversary-emulation -->",
+      "<!-- phases: advance-05-adversary-emulation, advance-09-does-not-exist -->"), true);
+
+// 15. The same paper mapped to a REAL phase that is outside its declared scope. Distinct from
+//     control 14: the file exists, so resolution passes, and only the scope check can catch it.
+//     A reader following this mapping is sent to a phase the paper never claimed to cover.
+//     NOTE ON THE FIXTURE: the first draft added the phase to BOTH the `phases:` scope list and
+//     the question mapping, so the two agreed and the guard correctly still passed. A scope
+//     check can only fire when the mapping DISAGREES with the declared scope, so the fixture
+//     must touch the mapping alone. (Same shape as controls 10 and 13: the guard was right and
+//     the fixture was wrong.)
+controlIn(path.join(ROOT, "career-roadmaps", "exams", "curriculum-advance-ownership.md"),
+  "an advance paper mapping outside its declared scope -> must FAIL", (t) =>
+    t.replace(
+      "<!-- phases: advance-06-programme-and-influence -->",
+      "<!-- phases: advance-06-programme-and-influence, advance-04-cloud-identity-architecture -->"), true);
+
 const restored = [...SNAPSHOT.entries()].every(([f, before]) => fs.readFileSync(f, "utf8") === before);
 console.log("");
 for (const r of results) console.log(`  ${r.ok ? "pass" : "FAIL"}  ${r.name}`);

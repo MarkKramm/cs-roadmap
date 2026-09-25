@@ -8,6 +8,45 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### Added
 
+- **A fifth curriculum diagnostic — the advance track's first, and the only one written for a
+  reader who already has the job** (`career-roadmaps/exams/curriculum-advance-ownership.md`,
+  **CS-ADVANCE-OWNERSHIP**, 20 questions across 5 domains). It covers advance Phases 1, 2, 3, 5,
+  6 and 7 and closes the largest coverage gap the exams directory had: all four earlier
+  diagnostics map into the IT and cyber tracks, so **the seven-phase advance track — 116,214
+  words, the most senior material in the repository — had no self-check at all.**
+  - **It asks a different kind of question on purpose.** The entry-level diagnostics ask what a
+    learner should *do* with a scenario; this one asks what a practitioner should *write down,
+    measure, or decline to claim* — a detection review, a handover pack, a decision log, a gap
+    register, a tuning record, a risk acceptance. The advance track is the one whose work
+    product is a document somebody else acts on, so a question with a defensible-sounding wrong
+    answer is the shape that tests it.
+  - **Advance Phase 4 is deliberately outside its scope**, and the paper says so rather than
+    quietly omitting it. Its subject is design and policy; reaching into it with twenty
+    questions would test vocabulary rather than judgement.
+  - **The page states what a score cannot mean.** No pass mark, no readiness threshold, and a
+    closing section naming the narrower reading of a miss — most questions turn on producing an
+    artefact, so a cluster of misses points at a habit rather than a fact.
+- **The exam guard now has controls for the curriculum class, not just the certification class.**
+  Controls 1–13 in `scripts/test-audit-exams.mjs` all targeted `security-plus.md`, so a
+  curriculum paper's phase-mapping resolution had **no control of its own** — and a mapping to a
+  missing phase file is the exact defect that once shipped **36 invented filenames** across seven
+  papers. Controls 14 and 15 target the new paper: one maps a question to a phase that does not
+  exist, the other to a real phase **outside the paper's declared scope**, which resolution alone
+  cannot catch. Both were proved to fail for the right reason and every touched file is asserted
+  restored byte-identical.
+  - **Control 15 failed first and the fixture was wrong, not the guard** — the sixth time in this
+    work. Its first version added the out-of-scope phase to *both* the `phases:` list and the
+    question mapping, so the two agreed and the guard correctly still passed. **A scope check can
+    only fire when the mapping disagrees with the declared scope**, and the first four controls
+    added for the advance paper failed for three separate wrong-fixture reasons before they were
+    useful — including two that mutated the paper so badly `build:content` failed, so the
+    assertion under test was never reached.
+- **The smoke render now names the advance paper explicitly**, rather than relying on the loop
+  that covers whatever `exams.json` contains. A shrinking corpus is invisible to a per-paper
+  loop: delete the paper and every remaining assertion still passes. It also asserts the paper's
+  every phase mapping stays inside the advance track. Renders went **235 → 236**, and two
+  mutations were run to prove both new assertions can fail.
+
 - **Seven practice exam papers in `career-roadmaps/exams/`, with a guard that keeps them
   honest.** A+ Core 1 (220-1201), A+ Core 2 (220-1202), Network+ (N10-009), Security+ (SY0-701),
   SC-900, AZ-900 and ISC2 CC — **40 questions each, 280 in total**, every question tagged to a
