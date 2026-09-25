@@ -21,6 +21,7 @@ import ToolsLibrary from "./pages/ToolsLibrary.jsx";
 import Portfolio from "./pages/Portfolio.jsx";
 import Applications from "./pages/Applications.jsx";
 import Certifications from "./pages/Certifications.jsx";
+import Exams from "./pages/Exams.jsx";
 import Search from "./pages/Search.jsx";
 import Schedule from "./pages/Schedule.jsx";
 import Shared from "./pages/Shared.jsx";
@@ -42,6 +43,7 @@ const VIEWS = [
   { id: "portfolio", label: "Portfolio" },
   { id: "applications", label: "Applications" },
   { id: "certifications", label: "Certifications" },
+  { id: "exams", label: "Practice exams" },
 ];
 
 // Given to Search so `/` and Ctrl+K can drop the cursor into the box rather than
@@ -424,6 +426,8 @@ export default function App() {
           <Applications />
         ) : view === "certifications" ? (
           <Certifications />
+        ) : view === "exams" ? (
+          <Exams onOpenPhase={openPhase} />
         ) : (
           <Dashboard
             track={track}

@@ -98,7 +98,7 @@ cd ..; git worktree remove '.head-check' --force
 | Job | What it runs | Working directory |
 |---|---|---|
 | Content integrity | Node-based content lint and structural, readability, reference, quiz, encoding, exam, claim, and documentation audits; the related guard-control suites; and arithmetic and workflow validation. No dependency install. | repository root |
-| Learning site | Node 24, `npm ci`, production build, smoke render, and the 13 `test-*.mjs` site suites defined under `learning-site/scripts/`. | `learning-site/` |
+| Learning site | Node 24, `npm ci`, production build, smoke render, and the 14 `test-*.mjs` site suites defined under `learning-site/scripts/`. | `learning-site/` |
 | Browser check (Chromium) | Node 24, dependency install and build, then the real-browser layout and interaction suite against Chromium. Kept separate because it needs a browser engine. | `learning-site/` |
 
 The workflow runs Node 24 in all three jobs. It is check-only: it does not deploy or publish the site — deployment is handled separately. The workflow file is the source of truth for the exact check list; see [`DECISIONS.md`](DECISIONS.md) → D-008 and [`CHECKPOINT.md`](CHECKPOINT.md) → "How to verify quickly" for local commands.

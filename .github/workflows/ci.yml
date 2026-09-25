@@ -390,6 +390,8 @@ jobs:
       # rule passed while the guard enforcing it was deleted.
       - name: Review queue
         run: npm run test:review
+      - name: Exams view
+        run: npm run test:exams-view
 
   # The only job that needs a real browser engine. Everything in `site` renders to
   # a string and asserts on markup, which cannot see layout, computed CSS, focus

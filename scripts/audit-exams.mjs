@@ -2,13 +2,14 @@
 //
 // WHY THIS EXISTS
 //
-// An exam paper is the one kind of content in this repository where a structural error is
-// invisible to the reader. A quiz question with TWO marked answers still reads perfectly
-// well -- you simply cannot tell whether the author intended the second one. A question with
-// no explanation still looks like a question. A paper whose domains no longer match the
-// vendor's published blueprint still looks like a paper.
+// A practice paper can be malformed in ways the reader cannot see: ambiguous answer keys,
+// missing explanations, inaccurate domain coverage, or scope links that do not resolve. A
+// question with two marked answers still reads perfectly well -- you simply cannot tell which
+// one the author intended. A paper whose domain weights no longer match its questions still
+// looks like a paper.
 //
-// The reader is, by definition, using this to decide whether to spend money on a real exam.
+// Credential papers can inform a learner considering an exam fee; curriculum papers are
+// diagnostic-only integrations and must never imply certification readiness or job readiness.
 // So the checks here are about the things that would silently mislead them:
 //
 //   1. Every question has exactly ONE marked answer. Two is ambiguous; zero is unanswerable.
@@ -21,8 +22,8 @@
 //      claiming 28% Security operations while carrying 10% would send a reader into the
 //      exam under-prepared on its largest domain, and nothing about the page would look
 //      wrong.
-//   5. Front matter carries the exam code, pass mark and the date the blueprint was checked,
-//      so a stale paper can be identified rather than trusted.
+//   5. Certification papers carry the code, pass mark and blueprint-check date; curriculum
+//      papers carry a scope and per-question phase mapping, with no readiness pass threshold.
 import fs from "node:fs";
 import path from "node:path";
 
@@ -59,8 +60,15 @@ for (const file of PAPERS) {
       return m ? [m[1], m[2].replace(/^"|"$/g, "")] : [null, null];
     }).filter(([k]) => k),
   );
-  for (const key of ["id", "exam", "code", "questions", "pass_mark", "pass_scale", "blueprint_checked", "source"]) {
+  const curriculumPaper = fm.kind === "curriculum-practice";
+  const required = curriculumPaper
+    ? ["id", "exam", "code", "questions", "scope", "phases", "source"]
+    : ["id", "exam", "code", "questions", "pass_mark", "pass_scale", "blueprint_checked", "source"];
+  for (const key of required) {
     if (!fm[key]) fail(file, 1, `front matter is missing \`${key}\``);
+  }
+  if (curriculumPaper && /^(?:pass_mark|pass_scale|blueprint_checked):/m.test(lines.slice(1, end).join("\n"))) {
+    fail(file, 1, "curriculum practice metadata must not include certification pass or blueprint fields");
   }
 
   // --- questions ----------------------------------------------------------------------
@@ -68,6 +76,8 @@ for (const file of PAPERS) {
   const domainCounts = new Map();
   const domainOrder = [];
   const seen = new Map();
+  let currentQuestionPhases = [];
+  const questionPhaseMap = new Map();
   let qCount = 0;
   let inQuestion = false;
   let markedHere = 0;
@@ -89,6 +99,10 @@ for (const file of PAPERS) {
       fail(file, qLine, `Q${qNum} has ${optionCount} options; 3 or 4 is expected`);
     }
     optionCounts.push(optionCount);
+    if (curriculumPaper) {
+      if (!currentQuestionPhases.length) fail(file, qLine, `Q${qNum} has no phase mapping`);
+      questionPhaseMap.set(qNum, currentQuestionPhases);
+    }
     inQuestion = false;
   };
 
@@ -119,6 +133,7 @@ for (const file of PAPERS) {
       markedHere = 0;
       whyHere = false;
       optionCount = 0;
+      currentQuestionPhases = [];
       if (seen.has(qNum)) fail(file, i + 1, `Q${qNum} appears more than once (first at line ${seen.get(qNum)})`);
       seen.set(qNum, i + 1);
       if (currentDomain === null) {
@@ -130,6 +145,20 @@ for (const file of PAPERS) {
     }
 
     if (inQuestion) {
+      const phaseMap = line.match(/^<!--\s*phases:\s*(.*?)\s*-->$/);
+      if (phaseMap) {
+        currentQuestionPhases = phaseMap[1].split(/[,\s]+/).filter(Boolean);
+        for (const id of currentQuestionPhases) {
+          if (!/^(?:it|cyber|advance)-\d{2}-[a-z0-9-]+$/.test(id)) {
+            fail(file, i + 1, `Q${qNum} has invalid phase id \`${id}\``);
+          }
+          const trackDir = id.startsWith("it-") ? "it-roadmap" : id.startsWith("cyber-") ? "cybersec-roadmap" : "advance-roadmap";
+          const phaseFile = id.replace(/^(?:it|cyber|advance)-/, "").replace(/^(\d{2})-/, "$1-phase-") + ".md";
+          if (!fs.existsSync(path.join(ROOT, "career-roadmaps", trackDir, phaseFile))) {
+            fail(file, i + 1, `Q${qNum} maps to missing phase \`${id}\``);
+          }
+        }
+      }
       if (/^- \[x\]/.test(line)) markedHere++;
       if (/^- \[ \]/.test(line)) optionCount++;
       if (/^- \[x\]/.test(line)) optionCount++;
@@ -151,6 +180,15 @@ for (const file of PAPERS) {
   const declared = Number(fm.questions);
   if (declared && declared !== qCount) {
     fail(file, 1, `front matter says ${declared} questions; ${qCount} are present`);
+  }
+  if (curriculumPaper) {
+    const allowedPhases = new Set(String(fm.phases || "").split(",").map((id) => id.trim()).filter(Boolean));
+    for (const [number, ids] of questionPhaseMap) {
+      for (const id of ids) {
+        if (!allowedPhases.has(id)) fail(file, seen.get(number), `Q${number} maps to ${id}, which is not in the paper's declared scope`);
+      }
+    }
+    if (!domainCounts.size) fail(file, 1, "curriculum practice paper needs domain sections");
   }
 
   // --- the domain weights the paper claims ---------------------------------------------
@@ -245,6 +283,7 @@ for (const file of PAPERS) {
     domains: domainOrder.length,
     avgOptions: optionCounts.length ? (optionCounts.reduce((a, b) => a + b, 0) / optionCounts.length).toFixed(1) : "0",
     checked: fm.blueprint_checked ?? "?",
+    curriculum: curriculumPaper,
   });
 }
 
@@ -275,7 +314,7 @@ for (const file of PAPERS) {
 
 console.log("Practice papers checked:");
 for (const s of summary) {
-  console.log(`  ${s.file.padEnd(22)} ${s.code.padEnd(10)} ${String(s.questions).padStart(2)} questions, ${s.domains} domains, ${s.avgOptions} options/q, blueprint ${s.checked}`);
+  console.log(`  ${s.file.padEnd(32)} ${s.code.padEnd(18)} ${String(s.questions).padStart(2)} questions, ${s.domains} domains, ${s.avgOptions} options/q, ${s.curriculum ? "curriculum scope" : "blueprint " + s.checked}`);
 }
 console.log("");
 

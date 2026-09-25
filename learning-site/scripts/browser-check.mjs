@@ -1403,6 +1403,52 @@ async function main() {
       return true;
     })()`);
     check('certifications: reachable from the sidebar', openedCerts);
+
+    const openedExams = await cdp.eval(`(() => {
+      const b = [...document.querySelectorAll('.sidebar__link')]
+        .find(x => /Practice exams/.test(x.textContent));
+      if (!b) return false;
+      b.click();
+      return true;
+    })()`);
+    check('exams: reachable from the sidebar', openedExams);
+    await cdp.waitFor(`!!document.querySelector('.exams')`, 'the exams page', 8000);
+    await sleep(300);
+    const examsIndex = await cdp.eval(`(() => ({
+      text: document.querySelector('.exams')?.innerText || '',
+      papers: document.querySelectorAll('.exams__paper').length,
+      curriculum: document.querySelectorAll('[aria-labelledby="exams-curriculum-heading"] .exams__paper').length,
+      certification: document.querySelectorAll('[aria-labelledby="exams-certification-heading"] .exams__paper').length
+    }))()`);
+    check('exams: curriculum diagnostics are separated', examsIndex.curriculum === 4, examsIndex.curriculum + ' papers');
+    check('exams: certification practice papers are listed separately', examsIndex.certification === 7, examsIndex.certification + ' papers');
+    check('exams: list says curriculum papers are diagnostic only', /no pass\/fail|diagnostic study prompts/i.test(examsIndex.text));
+    const openedPaper = await cdp.eval(`(() => {
+      const b = [...document.querySelectorAll('.exams__paper button')]
+        .find(x => /Open paper/.test(x.textContent) && x.closest('.exams__paper')?.textContent.includes('IT Support Triage'));
+      if (!b) return false;
+      b.click();
+      return true;
+    })()`);
+    check('exams: IT curriculum paper opens', openedPaper);
+    await sleep(250);
+    const examQuestion = await cdp.eval(`(() => ({
+      heading: document.querySelector('.exams h1')?.textContent || '',
+      question: document.querySelector('.exams__prompt')?.textContent || '',
+      choices: document.querySelectorAll('.exams__option').length,
+      denominator: /\b\d+\s+of\s+\d+\b|\d+\s*%/.test(document.querySelector('.exams')?.innerText || '')
+    }))()`);
+    check('exams: opens at its first question', examQuestion.heading.includes('IT Support Triage') && !!examQuestion.question);
+    check('exams: shows four answer choices', examQuestion.choices === 4, examQuestion.choices + ' choices');
+    check('exams: curriculum paper has no scored ratio or percent', !examQuestion.denominator);
+
+    const openCertifications = await cdp.eval(`(() => {
+      const b = [...document.querySelectorAll('.sidebar__link')].find(x => /Certifications/.test(x.textContent));
+      if (!b) return false;
+      b.click();
+      return true;
+    })()`);
+    check('certifications: reopened after Exams view', openCertifications);
     await cdp.waitFor(`!!document.querySelector('.certifications')`, 'the certifications page', 8000);
     await sleep(300);
 

@@ -29,7 +29,7 @@ npm run lint:content # text-integrity check over the Markdown (needs ../scripts)
 `audit-lesson-ast`, `audit-readability`) live in `../scripts/` and are run from
 the repository root.
 
-`npm run build:content` generates `src/data/generated/{it,cyber}.json`, the per-phase lesson files, `search.json` and `shared.json` from the Markdown via [`scripts/build-content.mjs`](../scripts/build-content.mjs) and [`scripts/shared-content.mjs`](../scripts/shared-content.mjs). It runs automatically before `dev` and `build`. The generated files are git-ignored — the Markdown is the single source of truth.
+`npm run build:content` generates `src/data/generated/{it,cyber,advance}.json`, the per-phase lesson files, `search.json`, `shared.json`, and the structured `exams.json` collection from the Markdown via [`scripts/build-content.mjs`](../scripts/build-content.mjs), [`scripts/shared-content.mjs`](../scripts/shared-content.mjs), and [`scripts/exam-content.mjs`](../scripts/exam-content.mjs). It runs automatically before `dev` and `build`. The generated files are git-ignored — the Markdown is the single source of truth.
 
 ## Status
 

@@ -19,39 +19,58 @@ might be **"spend nothing"**, and names the failure mode directly:
 > Choose certifications strategically instead of buying certificates as a substitute for
 > skills or projects.
 
-That warning is about *buying*. It is not an argument against being ready, and there is a
-gap it leaves open: a reader can finish every phase, build the portfolio, and still have no
-idea whether they could pass the exam they are about to pay for. A $250–$400 exam fee is
-real money in a $0-budget curriculum.
+That warning is about *buying*. This directory now contains two distinct kinds of practice:
+seven certification-aligned papers and four curriculum-level integration papers. The first
+kind helps a learner review a vendor blueprint before considering an exam fee. The second
+kind revisits the curriculum's own scenarios across several phases. Neither predicts hiring
+outcomes or replaces hands-on work.
 
-**That is the only job these papers do.** They tell you whether you would pass today. They
-are free, they can be retaken as often as you like, and getting a low score here costs
-nothing except the recognition that you are not ready yet — which is the cheapest possible
-time to find out.
+**Curriculum integration papers are diagnostic only.** Their scores have no pass/fail meaning
+and no threshold implies job readiness. They are free opportunities to find topics to review,
+not certification exams or guarantees of competence. The questions are unofficial and written
+for this repository.
 
-**They do not replace the labs, the portfolio, or the phase work.** A practice score is not
-a skill. If you can pass these and cannot describe a ticket you resolved, you have studied
-for the wrong thing — and the certification phase says so at length.
+**Neither kind replaces the labs, portfolio, or phase work.** A practice score is not a skill.
+A useful next step after a missed question is to revisit its mapped phase and practise the
+underlying task.
 
-## The papers
+The learning site has a **Practice exams** view that presents both the certification-aligned papers and these curriculum diagnostics one question at a time. Answers stay in the current session and are not saved as quiz scores.
 
-| Exam | Code | Questions | Time | Pass mark | Blueprint checked |
-|---|---|---|---|---|---|
-| [CompTIA A+ Core 1](a-plus-core-1.md) | 220-1201 | 90 | 90 min | 675 / 900 | 2026-09-18 |
-| [CompTIA A+ Core 2](a-plus-core-2.md) | 220-1202 | 90 | 90 min | 700 / 900 | 2026-09-18 |
-| [CompTIA Network+](network-plus.md) | N10-009 | 90 | 90 min | 720 / 900 | 2026-09-18 |
-| [CompTIA Security+](security-plus.md) | SY0-701 | 90 | 90 min | 750 / 900 | 2026-09-18 |
-| [Microsoft SC-900](sc-900.md) | SC-900 | ~50 | 45 min | 700 / 1000 | 2026-09-18 |
-| [Microsoft AZ-900](az-900.md) | AZ-900 | ~50 | 45 min | 700 / 1000 | 2026-09-18 |
-| [ISC2 Certified in Cybersecurity](isc2-cc.md) | CC | 100–125 | 120 min | 700 / 1000 | 2026-09-18 |
+## Certification-aligned practice papers
 
-Each paper carries **40 questions** in this repository, not the 90 or 125 the real exam asks. That
-is deliberate and it is stated on every paper: these are 40 well-mapped questions per
-blueprint rather than 90 padded ones, and calling them a full simulation would be a lie that
-makes you overconfident.
+| Exam | Code | Questions in paper | Real exam format | Pass mark | Blueprint checked |
+|---|---|---:|---|---|---|
+| [CompTIA A+ Core 1](a-plus-core-1.md) | 220-1201 | 40 | 90 questions, 90 min | 675 / 900 | 2026-09-18 |
+| [CompTIA A+ Core 2](a-plus-core-2.md) | 220-1202 | 40 | 90 questions, 90 min | 700 / 900 | 2026-09-18 |
+| [CompTIA Network+](network-plus.md) | N10-009 | 40 | 90 questions, 90 min | 720 / 900 | 2026-09-18 |
+| [CompTIA Security+](security-plus.md) | SY0-701 | 40 | 90 questions, 90 min | 750 / 900 | 2026-09-18 |
+| [Microsoft SC-900](sc-900.md) | SC-900 | 40 | ~50 questions, 45 min | 700 / 1000 | 2026-09-18 |
+| [Microsoft AZ-900](az-900.md) | AZ-900 | 40 | ~50 questions, 45 min | 700 / 1000 | 2026-09-18 |
+| [ISC2 Certified in Cybersecurity](isc2-cc.md) | CC | 40 | 100–125 questions, 120 min | 700 / 1000 | 2026-09-18 |
 
-**Read each paper's own scoring table rather than assuming a percentage.** The pass marks differ
-substantially, and two of them have a boundary that falls between whole questions: Security+ needs
+These papers are shorter than the real exams and are not full simulations. They map questions to
+published domains, but do not reproduce full exam length or every question format.
+
+## Curriculum integration diagnostics
+
+These four 20-question papers combine applied scenarios across phases. They use the same
+four-option format for convenient self-review, but have **no pass mark, pass/fail verdict, or
+readiness threshold**. Treat the score only as a prompt to revisit the mapped lessons.
+
+They are intentionally shorter than the certification papers and focus on decisions learners
+can make from this curriculum: observe and scope, choose a safe next step, preserve evidence,
+communicate or escalate, and explain why. The questions are scenario-based multiple choice, not
+performance-based lab tasks.
+
+| Paper | Code | Curriculum scope | Questions |
+|---|---|---|---:|
+| [IT Support Triage & Ticketing](curriculum-it-foundations.md) | CS-IT-FOUNDATIONS | IT Phases 1–6 and 9 | 20 |
+| [Cyber Foundations and Incident Triage](curriculum-cyber-core.md) | CS-CYBER-CORE | Cyber Phases 1–4, 9, and 11 | 20 |
+| [SOC Detection and Response](curriculum-cyber-depth.md) | CS-CYBER-DEPTH | Cyber Phases 10–12 | 20 |
+| [Web Application Security Assessment](curriculum-web-app-security.md) | CS-WEB-APP-SECURITY | Cyber Phases 3 and 14 | 20 |
+
+**For certification-aligned papers, read the scoring table rather than assuming a percentage.** The vendor pass marks differ
+substantially, and two papers have a boundary that falls between whole questions: Security+ needs
 **83.3%** (750/900), so **33 out of 40 is a fail** even though it looks like a pass — and AZ-900 and
 SC-900 need **70%**, which is a very different bar. Every paper states its boundary in whole
 questions for exactly this reason.
@@ -64,18 +83,14 @@ environments, drag-and-drop — which no multiple-choice paper represents.
 
 ## How to use one honestly
 
-1. **Sit it closed-book, in one sitting, with a timer.** An open-book practice score measures
-   your search skills, not your recall, and the real exam is closed-book.
+1. **For certification-aligned papers, use the suggested closed-book timing as practice.** Open-book review can help while learning, but do not compare it with a timed vendor-exam simulation.
 2. **Score it against the real pass mark in the table above**, not against "how many I got
    right". A raw 70% is a pass on some of these exams and a comfortable fail on others.
 3. **Read the explanation for every question, including the ones you got right.** The
    `**Why:**` line is the teaching, and a lucky guess and a correct answer look identical in
    a score.
-4. **Re-sit after studying, not after re-reading the answers.** A second attempt inside the
-   hour measures short-term memory.
-5. **If you score close to the pass mark, that is not a pass.** These papers are a sample of
-   40 questions from a much larger objective list, and the real exam draws from all of it.
-   Being one question over here is inside the noise.
+4. **Revisit the mapped lessons and practice tasks before retaking a curriculum diagnostic.** Repeating it immediately may only test memory of the questions.
+5. **Treat certification-paper scores as a rough study signal, not a prediction.** The real vendor exam may be longer, use other formats, and draw from objectives this sample does not cover.
 
 ## Where the blueprints came from
 

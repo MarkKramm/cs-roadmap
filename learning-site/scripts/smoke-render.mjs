@@ -143,6 +143,12 @@ try {
   const TimeBudgetSelector = await load("/src/components/TimeBudgetSelector.jsx");
   const Shared = await load("/src/pages/Shared.jsx");
   const YourWork = await load("/src/pages/YourWork.jsx");
+  const Exams = await load("/src/pages/Exams.jsx");
+  const examsData = await server
+    .ssrLoadModule("/src/data/generated/exams.json")
+    .then((m) => m.default || m)
+    .catch(() => null);
+  if (!examsData) failures.push("exams.json — not present (run the content build)");
   // The shared corpus is a build artifact, imported directly by Shared.jsx. It
   // is loaded here too so the render assertions are checked against the real
   // document count rather than a number copied into this file.
@@ -1035,6 +1041,18 @@ try {
         /estimate/i.test(html),
         "the budget is presented as a measurement"
       );
+    }
+  }
+
+  // --- Practice exams ---
+  if (Exams && examsData && Array.isArray(examsData.papers)) {
+    const html = render("Exams index", createElement(Exams));
+    if (html) {
+      for (const paper of examsData.papers) {
+        assert("Exams: " + paper.id + " is named in the list", html.includes(paper.title), "paper title is unreachable");
+      }
+      assert("Exams: curriculum papers are labeled diagnostic only", html.includes("diagnostic only"), "diagnostic label missing");
+      assert("Exams: certification papers are labeled unofficial", html.includes("Unofficial certification practice"), "certification disclaimer missing");
     }
   }
 

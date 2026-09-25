@@ -1,6 +1,6 @@
 // Build-time content pipeline (M1 step 2c).
-// Reads career-roadmaps/**/NN-phase-*.md and emits
-// learning-site/src/data/generated/{it,cyber}.json.
+// Reads career-roadmaps/**/NN-phase-*.md plus standalone shared/exam papers and emits
+// learning-site/src/data/generated/{it,cyber,advance}.json, search/shared/exams data.
 // Contract: docs/CONTENT-SCHEMA.md. Zero dependencies, fails loudly.
 
 import { readFileSync, writeFileSync, readdirSync, statSync, mkdirSync } from "node:fs";
@@ -9,6 +9,7 @@ import { fileURLToPath } from "node:url";
 import { parseLesson } from "./lesson-ast.mjs";
 import { buildSearchIndex } from "./search-index.mjs";
 import { buildShared } from "./shared-content.mjs";
+import { buildExams } from "./exam-content.mjs";
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
 const CONTENT = join(ROOT, "career-roadmaps");
@@ -540,6 +541,10 @@ for (const track of Object.keys(byTrack)) {
 // and so are invisible to the phase walk above. Each DOCS entry names its own
 // directory. See shared-content.mjs and D-020.
 const shared = buildShared(CONTENT, (m) => fail("shared", m));
+// Exam papers are their own small, structured collection, emitted beside the
+// shared-document payload so the UI can render certification and curriculum
+// diagnostics without bundling source Markdown or duplicating question data.
+const exams = buildExams(CONTENT, (m) => fail("exams", m));
 
 if (errors.length) {
   console.error("CONTENT BUILD FAILED — " + errors.length + " error(s):");
@@ -650,6 +655,9 @@ console.log(
   blockTotal + " block(s), " + resourceTotal + " resource(s) (" +
   Math.round(sharedBytes / 1024) + " KB)"
 );
+const examsText = JSON.stringify(exams, null, 2) + "\n";
+writeFileSync(join(OUT, "exams.json"), examsText, "utf8");
+console.log("wrote exams.json — " + exams.papers.length + " papers, " + exams.papers.reduce((n, p) => n + p.questions.length, 0) + " questions");
 
 // Task-band coverage. During the migration from minted to authored ids this
 // line is the honest state of the corpus, and it is printed rather than
