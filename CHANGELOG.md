@@ -466,6 +466,32 @@ ed to the Views list that actually exists; the three M2 pages no longer describe
 
 ### Fixed
 
+- **An unrecognised `kind` in an exam paper was silently filed as a certification paper, in the
+  build *and* in the guard, and no control could have caught it** (`scripts/exam-content.mjs`,
+  `scripts/audit-exams.mjs`). Both files derived their classification from the same expression —
+  `meta.kind === "curriculum-practice"` — so `kind: curriculum-practise` (one letter),
+  `kind: diagnostic`, or any other typo read as "not curriculum" to *both*, they agreed, and the
+  corpus stayed green. The paper was then rendered under **"Unofficial certification practice"**
+  while carrying none of the curriculum safeguards: no `scope` requirement, no per-question phase
+  mapping, no diagnostic-only labelling. **The page looked entirely normal.** The structural
+  lesson is the point — **a validator that shares its premise with the thing it validates cannot
+  disagree with it**, so adding a control alone would not have helped; the permitted values now
+  have to be declared independently in each file before either can reject one.
+  - **The permitted values are now declared once per file**, and a bad value fails the **build**
+    with the file named — `unknown kind \`curriculum-practise\`; expected one of
+    curriculum-practice, certification-practice (or omit \`kind\` entirely for a certification
+    paper)` — instead of quietly changing what the paper claims to be.
+  - **Omitting `kind` stays legitimate and is asserted as such**, because all seven vendor papers
+    omit it. A validator that rejected the absent-but-valid shape would break the majority of the
+    corpus, which is worse than the defect it replaced. Controls **16** and **17** in
+    `scripts/test-audit-exams.mjs` cover the reject and the accept case; the suite is now **17
+    controls**.
+  - **The fixture for this was wrong first, in a way worth recording:** the initial case used a
+    *trailing space* in the value, which `parseFrontMatter` trims, so `"curriculum-practice "` is
+    the same string as the valid kind and the build was right to accept it. A quoted value is the
+    shape that survives parsing as something different — the third distinct wrong-fixture mode in
+    this work, after "broke the build" and "mutation self-neutralised".
+
 - **The browser check asserted the exams paper split with hardcoded counts, so adding the
   fifth curriculum diagnostic turned CI red on a correct change** (`learning-site/scripts/browser-check.mjs`).
   The two assertions read `curriculum === 4` and `certification === 7` — a claim about the

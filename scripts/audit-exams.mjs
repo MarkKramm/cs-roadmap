@@ -61,6 +61,18 @@ for (const file of PAPERS) {
     }).filter(([k]) => k),
   );
   const curriculumPaper = fm.kind === "curriculum-practice";
+
+  // An unrecognised `kind` must be a failure here in its own right, not silently treated
+  // as "certification paper". This guard used to derive `curriculumPaper` from the same
+  // boolean the build parser used, so a mistyped kind read as "not curriculum" to BOTH --
+  // they agreed, and the paper was filed as certification practice with none of the
+  // curriculum safeguards and no finding. Declaring the permitted values here makes the
+  // guard able to disagree with a bad input instead of inheriting its premise.
+  const KNOWN_KINDS = ["curriculum-practice", "certification-practice"];
+  if (fm.kind !== undefined && fm.kind !== "" && !KNOWN_KINDS.includes(fm.kind)) {
+    fail(file, 1, `unknown kind \`${fm.kind}\`; expected one of ${KNOWN_KINDS.join(", ")}, or no \`kind\` for a certification paper`);
+  }
+
   const required = curriculumPaper
     ? ["id", "exam", "code", "questions", "scope", "phases", "source"]
     : ["id", "exam", "code", "questions", "pass_mark", "pass_scale", "blueprint_checked", "source"];

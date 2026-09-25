@@ -157,6 +157,26 @@ controlIn(path.join(ROOT, "career-roadmaps", "exams", "curriculum-advance-owners
       "<!-- phases: advance-06-programme-and-influence -->",
       "<!-- phases: advance-06-programme-and-influence, advance-04-cloud-identity-architecture -->"), true);
 
+// 16. An unrecognised `kind`. This is the control for a defect that was SILENT BY
+//     CONSTRUCTION and that no control here could have caught, for a structural reason
+//     worth stating: the guard derived `curriculumPaper` from `fm.kind ===
+//     "curriculum-practice"`, and the build parser derived its own boolean from the same
+//     expression. A mistyped kind therefore read as "not curriculum" to BOTH, they agreed,
+//     and the paper was filed as a certification paper -- losing the scope requirement, the
+//     per-question phase mapping, and the diagnostic-only labelling -- with the page looking
+//     entirely normal. **A validator that shares its premise with the thing it validates
+//     cannot disagree with it.** Both files now declare the permitted values independently,
+//     and this control proves the guard can reject one.
+controlIn(path.join(ROOT, "career-roadmaps", "exams", "curriculum-advance-ownership.md"),
+  "an unrecognised kind -> must FAIL", (t) =>
+    t.replace("kind: curriculum-practice", "kind: curriculum-practise"), true);
+
+// 17. NEGATIVE. A certification paper legitimately OMITS `kind` -- all seven vendor papers
+//     do -- so the new validation must not demand the field. A validator that rejected the
+//     absent-but-valid shape would break the majority of the corpus, which is a worse
+//     outcome than the bug it replaced.
+control("omitting `kind` entirely -> must PASS", (t) => t, false, true);
+
 const restored = [...SNAPSHOT.entries()].every(([f, before]) => fs.readFileSync(f, "utf8") === before);
 console.log("");
 for (const r of results) console.log(`  ${r.ok ? "pass" : "FAIL"}  ${r.name}`);

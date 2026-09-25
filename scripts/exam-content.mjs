@@ -22,10 +22,42 @@ function parseFrontMatter(lines, fail, rel) {
   return { data, start: end + 1 };
 }
 
+// The two kinds a paper may declare, and the only ones the site can render.
+// A certification paper is expected to OMIT `kind` entirely -- that is the historical
+// shape of all seven vendor papers -- so absence is legitimate and defaults to
+// certification. Anything else is a typo or a half-finished edit, and it must be
+// rejected rather than coerced.
+const KINDS = ["curriculum-practice", "certification-practice"];
+
 function parsePaper(markdown, file, fail) {
   const lines = markdown.split("\n");
   const rel = "career-roadmaps/exams/" + file;
   const { data: meta, start } = parseFrontMatter(lines, fail, rel);
+
+  // WHY THIS VALIDATION EXISTS
+  //
+  // `kind` used to be derived from a boolean -- `meta.kind === "curriculum-practice"` --
+  // with everything else silently becoming a certification paper. That coercion is
+  // invisible in the worst way: `kind: curriculum-practise` (one letter), a trailing
+  // space, or `kind: diagnostic` all produced a paper filed under "Unofficial
+  // certification practice", carrying none of the curriculum safeguards -- no scope
+  // requirement, no per-question phase mapping, no diagnostic-only labelling -- while
+  // the page looked entirely normal.
+  //
+  // The exam guard could not catch it either, because it asked the SAME boolean
+  // question: an unrecognised kind read as "not curriculum" to both files, so the two
+  // agreed and the corpus stayed green. A validator that shares its premise with the
+  // thing it validates cannot disagree with it.
+  //
+  // Declaring the permitted values once, here, means a bad value fails the BUILD with
+  // the file named, instead of quietly changing what a paper claims to be.
+  if (meta.kind !== undefined && meta.kind !== "" && !KINDS.includes(meta.kind)) {
+    fail(
+      rel + ": unknown kind `" + meta.kind + "`; expected one of " + KINDS.join(", ") +
+      " (or omit `kind` entirely for a certification paper)",
+    );
+  }
+
   const curriculum = meta.kind === "curriculum-practice";
   const title = lines.slice(start).find((line) => /^#\s+/.test(line))?.replace(/^#\s+/, "").trim() || meta.exam || file;
   const questions = [];
