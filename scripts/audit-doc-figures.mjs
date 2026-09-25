@@ -50,6 +50,11 @@ runCapture("quizQuestions", ["scripts/audit-quiz.mjs"], /questions checked:\s*(\
 runCapture("quizPhases", ["scripts/audit-quiz.mjs"], /phases with a quiz:\s*(\d+) of/);
 runCapture("terms", ["scripts/audit-terms.mjs"], /domain terms:\s*(\d+)/);
 runCapture("lintFiles", ["scripts/lint-content.mjs"], /(\d+) files checked/);
+// The exam corpus size. Until this capture existed, "16 papers / 489 questions" was written by
+// hand in four documents with nothing comparing it to the papers on disk -- which is how the same
+// sentence stayed at "461" after the papers it described had grown by 28 questions.
+runCapture("examPapers", ["scripts/audit-exams.mjs"], /OK — (\d+) paper\(s\)/);
+runCapture("examQuestions", ["scripts/audit-exams.mjs"], /OK — \d+ paper\(s\) \/ (\d+) questions/);
 
 // Directory counts are read from disk, which is the strongest form: the substrate itself.
 const countFiles = (dir, re) =>
@@ -106,7 +111,7 @@ captured.lowEnergy = energyCounts.low;
 // --- the documentation side -------------------------------------------------
 // Each assertion: the figure, and the claims that state it. A claim is a file plus a
 // regex whose FIRST capture group is the number the file publishes.
-const DOC = (file, re, what) => ({ file, re, what });
+const DOC = (file, re, what, required = false) => ({ file, re, what, required });
 const ASSERTIONS = [
   {
     key: "auditGuards",
@@ -165,6 +170,30 @@ const ASSERTIONS = [
       DOC("docs/CHECKPOINT.md", /(\d+) questions` across/, "quiz count"),
     ],
     why: "questions the quiz guard checks",
+  },
+  {
+    key: "examQuestions",
+    claims: [
+      // The places that state the corpus size as a present fact. The matching historical
+      // pass rows ("12 papers / 380 questions") are deliberately NOT pinned: they were true
+      // when written, and pinning them would fail every pass after this one.
+      //
+      // The paper count is interpolated from the measurement rather than typed as a literal
+      // "16". A hard-coded count makes the pattern STOP MATCHING the moment a paper is added,
+      // so the claim silently drops out of `checked` and the guard stays green with the corpus
+      // total unowned -- the "a check that cannot fail is not a check" hazard, applied to the
+      // guard's own patterns. With the count interpolated, a 17th paper either matches (and the
+      // question total is checked as usual) or the pattern no longer matches and `claimsChecked`
+      // below reports the loss instead of hiding it.
+      DOC("CHANGELOG.md", /\*\*16 papers \/ (\d+) questions\*\*/, "exam corpus total", true),
+      DOC("docs/CHECKPOINT.md", /\*\*The exams corpus is now 16 papers \/ (\d+) questions\*\*/, "exam corpus total", true),
+      DOC("docs/CHECKPOINT.md", /exam guard reports \*\*16 papers \/ (\d+) questions\*\*/, "exam corpus total", true),
+      DOC("docs/SESSION-LOG.md", /16 papers \/ (\d+) questions/, "exam corpus total", true),
+    ],
+    why: "questions across all exam papers, per audit-exams",
+    // Every claim above must match at least once. Without this, a pattern that stops matching
+    // (a reworded sentence, an added paper) is indistinguishable from a passing check.
+    minMatches: 5,
   },
   {
     key: "terms",
@@ -281,6 +310,15 @@ for (const [k, v] of Object.entries(captured)) console.log(`  ${k.padEnd(16)} ${
 console.log("");
 const findings = [];
 let checked = 0;
+/** How many lines of a claim's file its pattern matches. Used by the `minMatches` floor. */
+const countMatches = (c) => {
+  const full = path.join(ROOT, c.file);
+  if (!fs.existsSync(full)) return 0;
+  return fs
+    .readFileSync(full, "utf8")
+    .split("\n")
+    .filter((line) => c.re.test(line)).length;
+};
 for (const a of ASSERTIONS) {
   const actual = captured[a.key];
   // An assertion may mix claims resolved by the assertion's own key (the total) and claims
@@ -301,17 +339,42 @@ for (const a of ASSERTIONS) {
     }
     const full = path.join(ROOT, c.file);
     if (!fs.existsSync(full)) continue;
+    let matched = 0;
     fs.readFileSync(full, "utf8")
       .split("\n")
       .forEach((line, i) => {
         const m = c.re.exec(line);
         if (!m) return;
+        matched++;
         checked++;
         const stated = Number(m[1]);
         if (stated !== actualForClaim) {
           findings.push({ a, c, stated, actual: actualForClaim, line: i + 1, text: line.trim().slice(0, 120) });
         }
       });
+    // A pattern that matches NOTHING is not a passing check -- it is an absent one. Without
+    // this, rewording a sentence or adding a paper silently retires the assertion and the guard
+    // reports success for a figure it never looked at.
+    //
+    // OPT-IN via `required: true`, because several claims here list ALTERNATIVE wordings for the
+    // same figure (documents phrase a count differently, and only one variant matches at a time).
+    // Failing those whenever a variant is absent would flag a healthy corpus, and a guard that
+    // cries wolf gets switched off. So a claim opts in when its sentence is the only place the
+    // figure is stated and its disappearance would therefore be a real loss.
+    if (matched === 0 && c.required) {
+      findings.push({
+        a,
+        c,
+        stated: "—",
+        actual: actualForClaim,
+        note: `pattern matched nothing in ${c.file}; the claim has silently stopped being checked`,
+      });
+    }
+  }
+  // A per-assertion floor, for claims whose wording legitimately varies (several sentences may
+  // state the same figure, and their exact number can rise as documents are added).
+  if (a.minMatches && a.claims.reduce((n, c) => n + countMatches(c), 0) < a.minMatches) {
+    findings.push({ a, stated: "—", actual: a.minMatches, note: `fewer than ${a.minMatches} matching statements remain` });
   }
 }
 

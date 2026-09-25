@@ -199,7 +199,14 @@ controlIn(path.join(ROOT, "career-roadmaps", "exams", "curriculum-cyber-career.m
 
 controlIn(path.join(ROOT, "career-roadmaps", "exams", "curriculum-grc-and-ot.md"),
   "the GRC/OT paper's domain weight drifting from its questions -> must FAIL", (t) =>
-    t.replace("## Domain 3 — OT fundamentals and the safety boundary (6 questions)", "## Domain 3 — OT fundamentals and the safety boundary (7 questions)"), true);
+    // Target the heading by its stable prefix and drift WHATEVER count is actually there,
+    // rather than a hard-coded number. Two earlier versions of this fixture were pinned to a
+    // literal -- first the full heading text, then `(10 questions)` -- and each became a silent
+    // no-op the moment the paper was legitimately regrouped, throwing "fixture changed nothing"
+    // and aborting the whole suite mid-run. Capturing the number makes the fixture immune to a
+    // regrouping while still testing exactly the property that matters: a heading whose stated
+    // count disagrees with the questions beneath it must fail.
+    t.replace(/^(## Domain 3 — [^(]+)\((\d+) questions\)$/m, (m, head, n) => `${head}(${Number(n) + 1} questions)`), true);
 
 controlIn(path.join(ROOT, "career-roadmaps", "exams", "curriculum-cloud-identity.md"),
   "the cloud identity paper losing a marked answer -> must FAIL", (t) =>

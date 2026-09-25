@@ -369,7 +369,11 @@ for (const s of summary) {
 console.log("");
 
 if (!findings.length) {
-  console.log(`EXAM PAPERS OK — ${PAPERS.length} paper(s), every question has one answer and an explanation, and every claimed domain weight matches the questions present.`);
+  // The total is printed so a figure guard can compare the hand-written counts in the docs
+  // against the papers on disk. Those totals were previously unowned by any script, which is
+  // how the corpus size stayed wrong in four files after the papers it described had changed.
+  const totalQuestions = summary.reduce((n, s) => n + s.questions, 0);
+  console.log(`EXAM PAPERS OK — ${PAPERS.length} paper(s) / ${totalQuestions} questions, every question has one answer and an explanation, and every claimed domain weight matches the questions present.`);
   process.exit(0);
 }
 console.error(`EXAM PAPERS FAILED — ${findings.length} defect(s):`);

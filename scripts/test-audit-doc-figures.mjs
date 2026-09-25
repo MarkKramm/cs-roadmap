@@ -306,6 +306,21 @@ control(
   console.log(`  ROADMAP.md restored byte-identical: ${restored}`);
 }
 
+// 8. THE EXAM CORPUS TOTAL, WHICH HAD NO OWNER.
+//
+// "16 papers / 489 questions" is written by hand in four documents. Nothing compared it to the
+// papers on disk, so when the GRC/OT paper grew from 20 questions to 49, all four kept saying
+// "461" and every guard stayed green. The figure is now captured from `audit-exams.mjs`, and
+// this control proves the wiring can fail. It drifts SESSION-LOG.md, not CHECKPOINT.md, because
+// a figure stated in several files must be checked in more than one of them -- the defect was
+// precisely that the same wrong number sat in four places at once.
+driftInFile(
+  "the exam corpus total drifts -> must FAIL",
+  path.join(ROOT, "docs", "SESSION-LOG.md"),
+  /(16 papers \/ )(\d+)( questions)/,
+  +11,
+);
+
 // The real tree must end exactly as it started -- the check whose absence let a fixture
 // write "all 30 lessons" into the actual document (D-058).
 //

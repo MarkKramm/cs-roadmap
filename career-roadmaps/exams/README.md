@@ -54,10 +54,12 @@ published domains, but do not reproduce full exam length or every question forma
 ## Curriculum integration diagnostics
 
 These **nine** curriculum diagnostics combine applied scenarios across phases — **eight of them
-20 questions, and the GRC/OT paper 21** — and use the same four-option format for convenient
+20 questions, and the GRC/OT paper 49** — and use the same four-option format for convenient
 self-review, but have **no pass mark, pass/fail verdict, or readiness threshold**. Treat the score
 only as a prompt to revisit the mapped lessons.
-They are intentionally shorter than the certification papers and focus on decisions learners
+They are intentionally shorter than the certification papers, with one exception: the GRC/OT
+paper is longer, because it draws on two dense phases and covers each in proportion. All nine
+focus on decisions learners
 can make from this curriculum: observe and scope, choose a safe next step, preserve evidence,
 communicate or escalate, and explain why. The questions are scenario-based multiple choice, not
 performance-based lab tasks.
@@ -71,7 +73,7 @@ performance-based lab tasks.
 | [Security Ownership and Command](curriculum-advance-ownership.md) | CS-ADVANCE-OWNERSHIP | Advance Phases 1, 2, 3, 5, 6 and 7 | 20 |
 | [IT Support Communication and Evidence](curriculum-it-career.md) | CS-IT-CAREER | IT Phases 7 and 8 | 20 |
 | [Specialisation, Portfolio, Certification and Search](curriculum-cyber-career.md) | CS-CYBER-CAREER | Cyber Phases 5, 6, 7 and 8 | 20 |
-| [GRC, Risk and OT Security](curriculum-grc-and-ot.md) | CS-GRC-OT | Cyber Phases 13 and 15 | 21 |
+| [GRC, Risk and OT Security](curriculum-grc-and-ot.md) | CS-GRC-OT | Cyber Phases 13 and 15 | 49 |
 | [Cloud and Identity Architecture](curriculum-cloud-identity.md) | CS-CLOUD-IDENTITY | Advance Phase 4 | 20 |
 
 **The advance-track paper asks a different kind of question, and that is deliberate.** The four

@@ -8,6 +8,33 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### Added
 
+- **The GRC/OT curriculum paper grew from 20 questions to 49, and the corpus total now has a guard
+  that can fail** (`career-roadmaps/exams/curriculum-grc-and-ot.md`). 28 questions were added on the
+  industrial-control phase — Modbus, DNP3 and OPC UA on the wire, the monitoring priority list, the
+  passive Zeek/Suricata stack, and the assessment, disclosure and stop-work boundary — and 8 more on
+  the GRC phase. Every added question was written from a line of the source phase and verified
+  against it; the corpus is now **16 papers / 489 questions**.
+  - **The answer key was badly skewed and nothing was checking it.** The paper had grown by
+    appending, which left **C correct 24 times out of 49 (49%)**, including a run of **seven**
+    consecutive C's — a learner could score about half marks by always picking C. The option blocks
+    were rotated so the key is now **12/12/12/13** with a longest run of **2**, and a mechanical
+    check confirms every question's stem, option set and explanation is byte-identical to before:
+    only the order changed.
+  - **The domain headings no longer describe a dumping ground.** Appending had left Domain 4
+    holding **32 of 49 questions** under the heading "Boundary, legality, and honest limits", a name
+    that fitted five of them. The paper now has **5 domains** grouped by subject — risk (8),
+    frameworks (3), why OT is not IT (12), reading industrial protocols on the wire (9), and
+    assessment, monitoring and the legal boundary (17). Two questions that had been filed under
+    the old fifth heading — the Ukraine-2015 "most dangerous tool is the legitimate one" lesson and
+    the web-versus-OT worst-outcome contrast — were moved into the third, because the first is an
+    incident lesson like its neighbours and the second tests the same fact as an existing question
+    there; leaving them apart made one gap look like two to a learner triaging a bad score.
+  - **A regex bug in the insertion script silently truncated a question.** The script used `\Z` as
+    an end-of-input anchor, which is **PCRE and not valid in JavaScript**, so the lazy body match
+    stopped at the first literal `Z` in the file and Q60 parsed as a 16-character fragment. The same
+    class of bug is recorded against the earlier answer-rotation script in `docs/SESSION-LOG.md`.
+    Fixed with `$(?![\s\S])`, and the script now asserts the parse count.
+
 - **Four curriculum diagnostics that close the last nine uncovered phases, making the exam corpus
   track-complete at 31 of 31 phases** (`career-roadmaps/exams/curriculum-it-career.md`,
   `curriculum-cyber-career.md`, `curriculum-grc-and-ot.md`, `curriculum-cloud-identity.md`).
@@ -19,7 +46,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
     covers Cyber Phases 5–8 (specialisation, portfolio projects, certifications, job search),
     **CS-GRC-OT** covers Cyber Phases 13 and 15 (GRC and risk, OT/ICS security), and
     **CS-CLOUD-IDENTITY** covers Advance Phase 4 (cloud and identity architecture). Corpus is now
-    **16 papers / 461 questions** — the GRC/OT paper carries **21** rather than 20, because its two
+    **16 papers / 489 questions** — the GRC/OT paper carries **49** rather than 20, because its two
     heaviest domains could not be covered honestly in the count the other papers use (see below).
   - **Advance 4 was excluded from the advance paper on purpose, and this is that exclusion filled
     in rather than reversed.** The advance paper's scope note says Phase 4 sits outside it because
@@ -527,21 +554,25 @@ ed to the Views list that actually exists; the three M2 pages no longer describe
     says so in the explanation so a learner who notices the discrepancy is not left thinking they
     misread it. **The phase's own inconsistency is left in place and flagged** — it is the
     curriculum's text, not the exam's, and silently renumbering someone else's table is not a fix.
-  - **`curriculum-grc-and-ot.md` Q6 was genuinely ambiguous.** It asked which evidence property
-    fails first when a patch-dashboard screenshot is offered for an access review, marking
-    *Complete* — but the phase files that same screenshot as its weak-evidence example for
-    **patching** and defines **Relevant** as "shows the specific control, not something adjacent,"
-    so *Relevant* was defensibly correct. **Split into two unambiguous questions**: one on the
-    phase's access-review rule (a policy claiming quarterly reviews with no record is a finding,
-    because the evidence is the record and not the intention), and one on what the phase's own table
-    does with the patch-dashboard example. **The paper is therefore 21 questions rather than 20**,
-    which is the honest count for these two phases.
+  - **`curriculum-grc-and-ot.md` had one genuinely ambiguous question, and splitting it produced
+    the pair now at Q6 and Q7.** The original asked which evidence property fails when a
+    patch-dashboard screenshot is offered for an access review, marking *Complete* — but the phase
+    files that same screenshot as its weak-evidence example for **patching** and defines
+    **Relevant** as "shows the specific control, not something adjacent," so *Relevant* was
+    defensibly correct. **Split into two unambiguous questions**: one on the phase's access-review
+    rule (a policy claiming quarterly reviews with no record is a finding, because the evidence is
+    the record and not the intention), and one on what the phase's own table does with the
+    patch-dashboard example. **The paper is therefore 49 questions rather than 20**, which is the
+    honest count for these two phases. *(This entry originally cited "Q6" for the patch-dashboard
+    half. A later regrouping and renumbering moved it to Q7, leaving Q6 as the access-review rule —
+    so the citation named the half it no longer described. Corrected rather than left, because a
+    wrong question number in a changelog is the same drift the file warns about elsewhere.)*
 
 - **`audit-exams.mjs` never checked the question count a curriculum paper states in its domain
   headings, so a heading could claim anything** (`scripts/audit-exams.mjs`). The guard verified
   domain weights from a *weight table* — `| 4. Name | **28%** | 11 |` — which is how the seven
   certification papers state theirs. **Curriculum papers state theirs in the heading instead** —
-  `## Domain 3 — OT fundamentals and the safety boundary (6 questions)` — so the table check never
+  `## Domain 3 — <name> (<N> questions)` — so the table check never
   saw them. **Found by a control failing for the right reason rather than a fixture error:** the
   mutation landed, the guard exited 0, and nothing had checked the heading. Editing a heading's
   count, or adding a question without updating it, changed what the paper claims to test while
@@ -922,6 +953,34 @@ ed to the Views list that actually exists; the three M2 pages no longer describe
 - `docs/DESIGN-SYSTEM.md` listed sidebar links (Tools / Portfolio / Applications / Settings) that do not exist.
 - `scripts/lint-content.mjs` never scanned `LICENSE`. The file is extensionless, so it missed both the extension allow-list and the `CHECK_NAMES` set, and the repository's own license was the one text file exempt from the text-integrity check. Now matched by name; the lint count went 79 → 80 files.
 - `scripts/build-content.mjs` degraded silently on a malformed resource line. A line that did not match `Name — https://…` produced `{ name, url: null }` and the build passed, so a broken link surfaced later in the UI rather than at the point of the mistake. It now fails with one of two messages — a URL present but the wrong separator, or no URL at all — matching the script's existing promise that a contract violation stops the build. All 92 existing resource lines already satisfy the rule, so no content changed.
+
+
+- **"16 papers / 461 questions" was written in four documents with nothing comparing it to the
+  papers on disk**, so after the GRC/OT paper grew the same stale figure sat in `CHANGELOG.md`,
+  `docs/CHECKPOINT.md` (twice) and `docs/SESSION-LOG.md` while every guard stayed green.
+  `audit-exams.mjs` now prints the corpus total on success, and `audit-doc-figures.mjs` captures it
+  and pins all four statements. **Proven falsifiable**: restoring `461` to `SESSION-LOG.md` makes the
+  guard name both occurrences and report `document says 461, reality is 489`. A new control covers
+  it, taking that suite to 15 controls.
+- **The GRC/OT paper's domain-count assertion in `test-audit-exams.mjs` was pinned to the old
+  heading text**, so renaming a domain turned a control into a no-op that threw "fixture changed
+  nothing" and aborted the suite mid-run. It now matches the heading by its stable prefix and drifts
+  only the stated count. **The abort had a second cost worth recording:** a crash before the
+  fixture's `finally` left `security-plus.md` carrying the sabotage the previous control had planted
+  (its Q20 heading renamed to Q21), which is the visible-failure mode that file's own comments
+  describe. The file was restored from `git`.
+- **Three GRC/OT questions asserted things their source phases do not say**, all found by reading the
+  cited lines rather than by any guard. Q45 claimed a Suricata threshold "catches the bulk-write
+  codes"; the phase says the opposite — **"Do not turn it into a numeric threshold: code 43 sits
+  above the writes and is a read"** — and the threshold in fact fires on that read and misses write
+  codes 5 and 6, so the option now states the mechanic without the false gloss and the explanation
+  carries the caveat. Q31's premise ("the phase's five case studies") was checked against both places
+  the phase names them. Q7 and Q45 both turn on what the phase's *own table* does with a specific
+  example, and both were re-read against the source. Guards check form; these were content claims,
+  and four such defects were found the same way in the previous pass.
+- **A stale figure and an ungrammatical sentence introduced in the exams README while updating it** —
+  "and focus on decisions learners" had no subject after the inserted clause. Repaired, with the
+  exception stated as its own sentence.
 
 ## [0.1.0] — 2026-09-11
 
