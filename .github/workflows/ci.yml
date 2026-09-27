@@ -169,6 +169,14 @@ jobs:
       # now publish figures, so both are re-derived.
       - name: Verdict counts match the recorded rows (IT)
         run: node scripts/audit-verdict-counts.mjs --track it
+      # The advance track's worklist is generated and its pass has not run, so
+      # this does NOT check a result. It checks that the 508 outstanding rows are
+      # all tracked as outstanding rather than forgotten -- the DNS failure
+      # recorded in D-038, where a class marked done that was not done was
+      # invisible precisely because the totals summed only the classes anyone
+      # remembered to list.
+      - name: Verdict counts match the recorded rows (advance)
+        run: node scripts/audit-verdict-counts.mjs --track advance
       - name: Test verdict-count controls
         run: node scripts/test-audit-verdict-counts.mjs
       # Both tracks, because the bundler is now track-generic and the IT track has
