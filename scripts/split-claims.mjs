@@ -30,6 +30,7 @@ const TRACK_KEY = trackIdx > -1 ? process.argv[trackIdx + 1] : "it";
 const TRACKS = {
   it: { src: "IT-CLAIM-VERIFICATION.md", out: "claims-to-verify" },
   cybersec: { src: "CYBER-CLAIM-VERIFICATION.md", out: "claims-to-verify-cyber" },
+  advance: { src: "ADVANCE-CLAIM-VERIFICATION.md", out: "claims-to-verify-advance" },
 };
 if (!TRACKS[TRACK_KEY]) {
   console.error(`unknown track "${TRACK_KEY}" — expected: ${Object.keys(TRACKS).join(", ")}`);
@@ -99,6 +100,28 @@ const WANTED_BY_TRACK = {
     { title: "Product versions and editions", done: true, doneThrough: 9 },
     { title: "Command and cmdlet usage", done: true, doneThrough: 60 },
   ],
+  advance: [
+    // Nothing is done. Every one of these classes is listed here, which is the
+    // condition audit-verdict-counts.mjs check 0b enforces: a class holding rows
+    // but absent from this list emits no pack, is excluded from every total, and
+    // can never be verified. Listing all fifteen is what makes the "outstanding"
+    // figure in the document mean outstanding rather than forgotten.
+    { title: "Cloud IAM policy and identity artefacts", maxRows: 45 },
+    { title: "MITRE ATT&CK technique identifiers", maxRows: 45 },
+    { title: "SIEM search language (SPL)", maxRows: 40 },
+    { title: "Sigma rule specification", maxRows: 40 },
+    { title: "Cloud and infrastructure CLI syntax", maxRows: 40 },
+    { title: "Detection-as-code tool flags and status", maxRows: 30 },
+    { title: "Windows event IDs, channels and field names", maxRows: 30 },
+    { title: "Living-off-the-land binaries and their command lines" },
+    { title: "Protocol and standard behaviour" },
+    { title: "Security tool commands and flags" },
+    { title: "Standards, frameworks and control identifiers" },
+    { title: "Product versions and editions" },
+    { title: "Rego and OPA semantics" },
+    { title: "Command and cmdlet usage" },
+    { title: "Registry paths, file paths and filenames" },
+  ],
 };
 const WANTED = WANTED_BY_TRACK[TRACK_KEY];
 
@@ -165,6 +188,24 @@ For each row, replace the empty last column with exactly one of:
 9. \`UNVERIFIABLE\` is expected to be common and is not a failure. A great deal
    of this curriculum is teaching method, diagnostic reasoning, and worked
    examples, none of which is a fact about the world.
+10. **A row's text may be cut off with a trailing \`…\` at 260 characters. Read
+    the real line before judging it.** The Location column gives you
+    \`<phase-file>:<line>\`, and the phase files are on disk at
+    \`career-roadmaps/advance-roadmap/\` (IT: \`it-roadmap/\`, cyber:
+    \`cybersec-roadmap/\`). Open that file, go to that line number, and judge the
+    whole claim.
+
+    This rule exists because of a recorded result, not a precaution. An earlier
+    pass returned \`UNVERIFIABLE — text truncated\` on rows that were, in fact,
+    fully checkable, because the pack was the only thing it was given — and an
+    unverifiable row costs a reader the knowledge that nobody checked it. The
+    truncation is a property of the TABLE FORMAT, not of the claim. Use
+    \`UNVERIFIABLE — text truncated\` only when you genuinely cannot retrieve the
+    line, and say that you tried.
+11. **Write the verdict into the table in place.** Edit only the empty Verdict
+    cell of each row. Do not reformat, reorder, re-quote the claim text, or add
+    rows. The file must remain a valid markdown table with the same row numbers,
+    because a script reads the verdicts back out of it by row number.
 
 `;
 
@@ -212,7 +253,6 @@ for (const spec of WANTED) {
   }
   while (kept.length && !kept[kept.length - 1].trim()) kept.pop();
 
-  n++;
   const slug = title
     .toLowerCase()
     .replace(/[^a-z0-9]+/g, "-")
@@ -234,43 +274,66 @@ for (const spec of WANTED) {
   //
   // The row-level filter is deliberately independent of `cut`, so a class with no
   // `doneThrough` at all (never partially cut) still cannot re-send answered rows.
-  const cut = FROM || (spec.doneThrough ? spec.doneThrough + 1 : null);
+  // A class can be too large for one reply. The first oversized pack was the
+  // IT 160-row command table, which stopped at row 152 and said so -- rule 6
+  // working, but expensive to re-paste 45 KB to reach eight rows. `maxRows`
+  // makes that automatic instead of a manual `--from` per continuation, which
+  // matters at the advance track's scale where one class holds 139 rows.
+  //
+  // Chunking is by ROW NUMBER against the source table, and each chunk carries
+  // its own range in the filename and its own heading, so what is on disk says
+  // exactly which rows it wants. The chunks are emitted in one pass from a
+  // single filtered row list rather than by re-running with different cut
+  // points, which is what keeps them from overlapping.
   const answered = (line) => /\|\s*\*\*(OK|WRONG|UNVERIFIABLE)\*\*/.test(line);
-  let suffix = "";
-  let outLines = [];
+  const cut = FROM || (spec.doneThrough ? spec.doneThrough + 1 : null);
+  const startAt = cut || 1;
+  // The surviving rows for this class, in order, each with its source number and
+  // any context line that followed it.
+  const pending = [];
   {
     let keepCtx = false;
     for (const line of kept) {
       const m = /^\| (\d+) \|/.exec(line);
       if (m) {
-        keepCtx = (!cut || Number(m[1]) >= cut) && !answered(line);
-        if (keepCtx) outLines.push(line);
+        keepCtx = Number(m[1]) >= startAt && !answered(line);
+        if (keepCtx) pending.push({ n: Number(m[1]), line, ctx: [] });
         continue;
       }
-      // A context row belongs to the claim directly above it.
-      if (keepCtx && /^\| \| \| <sub>/.test(line)) outLines.push(line);
+      if (keepCtx && /^\| \| \| <sub>/.test(line)) pending[pending.length - 1]?.ctx.push(line);
     }
   }
-  if (cut && cut > 1) suffix = `-from-${cut}`;
 
-  const file = path.join(OUT, `${String(n).padStart(2, "0")}-${slug}${suffix}.md`);
-  const rows = outLines.filter((l) => /^\| \d+ \|/.test(l)).length;
-
-  // A class with fewer rows than the cut point has no continuation. Writing an
-  // empty file would be a file that looks like a task and contains none.
-  if (!rows) {
-    console.log(`  ${path.basename(file).padEnd(46)}    (nothing left at or after row ${cut} — skipped)`);
+  if (!pending.length) {
+    console.log(`  ${title.padEnd(44)}    (nothing left at or after row ${startAt} — skipped)`);
     continue;
   }
 
-  const heading = cut && cut > 1
-    ? `# ${title} — rows ${cut} onward\n\nThis is the CONTINUATION of a table whose earlier rows were already verified. **Verify only the rows below.** Do not restate or re-check earlier rows.\n`
-    : `# ${title}\n`;
+  const size = spec.maxRows || Infinity;
+  const chunks = [];
+  for (let i = 0; i < pending.length; i += size) chunks.push(pending.slice(i, i + size));
+  const suffix = chunks.length === 1 && startAt > 1 ? `-from-${startAt}` : "";
 
-  fs.writeFileSync(file, HEADER + heading + "\n" + outLines.join("\n") + "\n", "utf8");
-  const kb = (fs.statSync(file).size / 1024).toFixed(1);
-  console.log(`  ${path.basename(file).padEnd(46)} ${String(rows).padStart(4)} rows  ${kb} KB`);
-  written++;
+  chunks.forEach((chunk, ci) => {
+    const from = chunk[0].n;
+    const to = chunk[chunk.length - 1].n;
+    const partSuffix =
+      chunks.length > 1 ? `-part-${ci + 1}-of-${chunks.length}-rows-${from}-${to}` : suffix;
+    const file = path.join(OUT, `${String(n).padStart(2, "0")}-${slug}${partSuffix}.md`);
+    const body = chunk.flatMap((p) => [p.line, ...p.ctx]).join("\n");
+    const heading =
+      chunks.length > 1
+        ? `# ${title} — rows ${from}–${to} of this class\n\nThis is part ${ci + 1} of ${chunks.length}. **Verify only the rows below.** The other parts are separate messages and their rows are not repeated here.\n`
+        : startAt > 1
+          ? `# ${title} — rows ${from} onward\n\nThis is the CONTINUATION of a table whose earlier rows were already verified. **Verify only the rows below.** Do not restate or re-check earlier rows.\n`
+          : `# ${title}\n`;
+
+    fs.writeFileSync(file, HEADER + heading + "\n" + body + "\n", "utf8");
+    const kb = (fs.statSync(file).size / 1024).toFixed(1);
+    console.log(`  ${path.basename(file).padEnd(60)} ${String(chunk.length).padStart(4)} rows  ${kb} KB`);
+    written++;
+  });
+  n++;
 }
 
 console.log("");

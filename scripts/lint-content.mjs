@@ -46,7 +46,24 @@ const MARKDOWN_EXT = new Set([".md", ".mdx"]);
 const QUESTION_RULES = [
   { re: /\d\?\d/, what: "digit ? digit — expected an en-dash (–)" },
   { re: / \? /, what: "space ? space — expected an em-dash (—)" },
-  { re: /\?[A-Za-z]/, what: "? immediately followed by a letter — expected an opening curly quote (“)" },
+  // The `(?` carve-out is a real class, not a tolerance. A `?` immediately
+  // PRECEDED by `(` is the opening of a regex group or inline flag — `(?i)`,
+  // `(?:`, `(?=`, `(?<!` — and this corpus teaches KQL, Sigma, Rego and
+  // Sigma-adjacent regexes, all of which use those forms. A curated rule for
+  // "which files treat ? as an operator" is the wrong shape: the discriminator
+  // is lexical, not per-file.
+  //
+  // The lookbehind is on the LEFT, which is the part that is easy to get wrong.
+  // The first attempt used a lookahead — `\?(?![\[(])` — on the reasoning that
+  // `?` is followed by `(` in `(?i)`. It is not: the bracket precedes the
+  // question mark, and the rule fired on the very line it was written for. The
+  // control below is what caught it, and it is the reason the narrowing is
+  // recorded rather than just made.
+  //
+  // The carve-out cannot mask a real corruption: the shape being detected is an
+  // ASCII `?` standing in for `“`, which is preceded by whitespace, a
+  // punctuation mark or a word character — never by an opening parenthesis.
+  { re: /(?<!\()\?[A-Za-z]/, what: "? immediately followed by a letter — expected an opening curly quote (“)" },
   { re: /[,.!]\?\s/, what: ", . or ! before ? — expected a closing curly quote (”)" },
 ];
 

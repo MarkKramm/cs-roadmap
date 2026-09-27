@@ -37,6 +37,16 @@ const TRACKS = {
   cybersec: { dir: "cybersec-roadmap", label: "Cybersecurity", slug: "CYBER", out: "CYBER-CLAIM-VERIFICATION.md" },
   advance: { dir: "advance-roadmap", label: "Advanced", slug: "ADVANCE", out: "ADVANCE-CLAIM-VERIFICATION.md" },
 };
+// Where split-claims.mjs writes the paste-ready packs for each track. Declared
+// here as well so the generated prose can name the right folder: the previous
+// revision hard-coded `claims-to-verify-cyber/` in a sentence emitted for every
+// track, so a run for the advance track pointed the reader at another track's
+// directory.
+const WORKLIST_DIR = {
+  it: "claims-to-verify",
+  cybersec: "claims-to-verify-cyber",
+  advance: "claims-to-verify-advance",
+};
 const trackIdx = process.argv.indexOf("--track");
 const TRACK_KEY = trackIdx > -1 ? process.argv[trackIdx + 1] : "it";
 if (!TRACKS[TRACK_KEY]) {
@@ -155,11 +165,27 @@ const CLASSES = [
   },
 ];
 
-// --- cyber-only classes -----------------------------------------------------
-// The cyber track carries claim types IT has none of, which the density
-// measurement found rather than assumed. Each is a VERBATIM IDENTIFIER that
-// resolves to exactly one published definition, which makes them the most
-// cleanly checkable rows in the whole corpus.
+// --- identifier and security-tooling classes -------------------------------
+// These are not "cyber-only" in the sense of belonging to one directory. The
+// cyber track carries claim types IT has none of, which the density measurement
+// found rather than assumed, and each is a VERBATIM IDENTIFIER that resolves to
+// exactly one published definition — which makes them the most cleanly checkable
+// rows in the whole corpus.
+//
+// The advance track is cyber-only by construction (D-032: there is deliberately
+// no mid-level IT track), and it is the most senior material in the repository.
+// Gating these classes on `cybersec` alone therefore made the advance worklist
+// report **20 claims needing a source** — 3 command rows, 17 protocol, no
+// ATT&CK identifier, no standard number, no CVE — for seven phases that are
+// built almost entirely out of those things. A detector, a query language, a
+// cloud identity policy and a GRC control all name identifiers; the extractor
+// simply was not looking for them.
+//
+// That is the same defect this repository has now recorded several times: an
+// instrument that reports a clean result about the wrong subject. The gate is
+// therefore a set, and a track that inherits the cyber track's subject matter
+// inherits its claim classes.
+const IDENTIFIER_TRACKS = new Set(["cybersec", "advance"]);
 const CYBER_CLASSES = [
   {
     id: "cve",
@@ -203,10 +229,115 @@ const CYBER_CLASSES = [
   },
 ];
 
+// --- advance-track classes --------------------------------------------------
+// The advance track is the most senior material in the repository, and its
+// checkable claims sit in a place neither earlier track has: a detection
+// engineer's rule format, a SIEM's query language, a cloud provider's policy
+// grammar, and Windows event schemas. Measured, not assumed — running the
+// thirteen classes above over the seven phases produced **140 rows, of which
+// zero** were an AWS policy action, a Sigma field, an SPL command or a Windows
+// event field, on 116,000 words that are largely made of those things.
+//
+// The thirteen classes are not wrong. They are aimed at two other tracks. A
+// worklist that reported 140 rows for this material would be the same defect
+// this file has already been rewritten for twice: an instrument reporting a
+// clean result about the wrong subject, which reads as coverage.
+const ADVANCE_CLASSES = [
+  {
+    id: "cloudpolicy",
+    title: "Cloud IAM policy and identity artefacts",
+    why: "A policy action name, a condition key, a managed policy name and a role definition name are all fixed strings in a vendor reference. `iam:CreateUser` paired with the wrong service prefix, or a condition key that does not exist, is a policy that never fires — and it fails silently, which is the worst way for a control to fail.",
+    source: "AWS Service Authorization Reference, AWS IAM policy elements reference and managed policies reference; Microsoft Learn for Azure role definitions, policy effects and app permissions",
+    // `prefix:Action` where the prefix is one AWS actually uses. The prefix
+    // list is not a whitelist of correct prefixes -- it is a filter that keeps
+    // ordinary prose like `note: this` out. Whether each prefix is the RIGHT
+    // one for its action is precisely what the verifier is being asked.
+    //
+    // It deliberately includes condition keys (`aws:MultiFactorAuthPresent`,
+    // `kms:ViaService`) alongside actions, because a line can assert either
+    // and the two are checked against different pages.
+    re: /\b(?:aws|sts|iam|kms|s3|sns|sqs|lambda|ec2|ecs|eks|ecr|logs|cloudtrail|cloudwatch|config|organizations|account|tag|resource-groups|health|support|trustedadvisor|ce|cur|autoscaling|elasticloadbalancing|route53|rds|dynamodb):[A-Z][A-Za-z0-9]*(?:\*)?\b/g,
+  },
+  {
+    id: "cloudcli",
+    title: "Cloud and infrastructure CLI syntax",
+    why: "Flags are fixed by each tool's own reference. A wrong flag name in a policy-as-code pipeline is a command that cannot run, and the reader's first evidence that their control is untested is a CLI error.",
+    source: "AWS CLI command reference, Microsoft Learn for the `az` CLI, the Terraform CLI reference, Conftest and OPA documentation",
+    // Two shapes, and the first is the important one. Almost every command in
+    // this track is a bare line inside a ```bash fence, NOT backticked — so a
+    // pattern anchored on a backtick found 3 rows where the file has 40
+    // command lines, and reported that as the class's size. A reader would have
+    // taken 3 as the measure of how much executable material the phase carries.
+    //
+    // Line-anchored, and requiring a subcommand as well as the tool name, so
+    // prose that opens a sentence with a product name ("Terraform is free...")
+    // does not become a row. The `az` and `aws` subcommands are matched
+    // generically (`[a-z][\w.-]*`) rather than from a list, because the whole
+    // point of the class is to catch verbs a list would not have anticipated.
+    re: /^\s{0,4}(?:az|aws|terraform|tofu|conftest|opa|kubectl|gh|helm)\s+[a-z][\w.:-]*(?:\s+[a-z][\w.:-]*)*[^\n]{0,110}|`(?:az|aws|terraform|tofu|conftest|opa|kubectl|gh|helm)\s+[^`\n]{0,110}`/gm,
+  },
+  {
+    id: "detectionspec",
+    title: "Sigma rule specification",
+    why: "The Sigma specification fixes the field names a rule may carry, the values `status` may take, and the condition syntax. A rule with a field that does not exist validates on nobody's CI and converts to nothing on any backend.",
+    source: "The Sigma specification (SigmaHQ/sigma-specification)",
+    // Two shapes: a field/value pair as YAML (`status: experimental`), and a
+    // backticked field name or status value in prose. The field list is
+    // enumerated rather than pattern-matched, because `status` and `level` are
+    // ordinary English words and a generic pattern matched 400 lines of
+    // curriculum prose in the first attempt.
+    re: /\b(?:logsource|detection|falsepositives|false_positives|fields|fieldModifier|related|license|references|author|date)\s*:|\bstatus\s*:\s*(?:stable|test|experimental|deprecated|unsupported)\b|\bcondition\s*:\s*(?:selection|filter|1 of |all of |any of )[^.\n]{0,40}|`(?:1 of them|all of them|any of them|1 of selection\w*|all of filter\w*|in~|in\b|contains|startswith|endswith|baseoffset|re|windash|cased)`/g,
+  },
+  {
+    id: "detectiontool",
+    title: "Detection-as-code tool flags and status",
+    why: "`sigma check` is the gate a detection-as-code pipeline stands on, and its flags decide whether a bad rule can merge. Whether `--fail-on-issues` is the default is exactly the kind of fact a pipeline gets silently wrong.",
+    source: "The sigma-cli (pySigma) project documentation and source; the pySigma README for the sigmac replacement claim",
+    re: /`sigma(?:-cli)?\s+(?:check|convert|test|plugin|list-targets|list-plugins)[^`\n]{0,90}`|`--(?:fail-on-error|fail-on-issues|validation-config|exclude|file-pattern|junitxml|target|backend|output|processors|yml-output)\b[^`\n]{0,50}|\bsigmac\b[^.\n]{0,90}/g,
+  },
+  {
+    id: "siem",
+    title: "SIEM search language (SPL)",
+    why: "A hunt query that does not parse is a hunt that never runs, and a query that parses but means something else is worse — it returns confident nonsense. Both are invisible to a reader who cannot run Splunk.",
+    source: "Splunk Search Manual (docs.splunk.com) for the named command or function",
+    // Requires the SPL command or function at the START of a pipe stage, which
+    // is how SPL is written, or as a bare backticked command in prose. A bare
+    // mention of "rare" or "table" in a sentence is not a query claim.
+    re: /\|\s*(?:tstats|eventstats|rare|table|dedup|streamstats|transaction|inputlookup|rex|spath|bin|stats|eval|fields|rename|where|head|sort|fillnull|lookup|append|join|search|summary|makeresults|regex|top|chart|timechart|geostats)\b[^|\n]{0,80}|\b(?:tstats|eventstats|streamstats|inputlookup|spath)\s+[a-z=][^|\n]{0,60}|\bhas_any\(|\bmatch\(|\bin~\s*\(|\bbetween\s*\([^)]*\.\.[^)]*\)/g,
+  },
+  {
+    id: "winevent",
+    title: "Windows event IDs, channels and field names",
+    why: "An event ID and its field names are published by Microsoft. A detector built on a field that does not exist compiles, deploys, and matches nothing — the failure a detection engineer can least afford, because it looks like the absence of threats.",
+    source: "Microsoft Learn (audit event IDs, Sysmon schema, process access rights) for the named event or field",
+    // Three shapes, each of which is a distinct claim: an event ID with the
+    // meaning the line gives it, a backticked field name, and a Windows access
+    // right (which names a documented capability, not a number).
+    re: /\b(?:event|Event|code|ID)\s*(?:ID\s*)?(\d{4})\b[^.\n]{0,70}|\b(?:1[0-9]{3}|[1-9]\d{3})\b(?=[^.\n]{0,40}\b(?:Security|System|Application|Sysmon|PowerShell|TaskScheduler)\b)/g,
+  },
+  {
+    id: "lolbin",
+    title: "Living-off-the-land binaries and their command lines",
+    why: "These are signed Windows binaries whose abuse is documented by the LOLBAS project. A wrong command-line claim teaches a reader to search for the wrong thing, which is a rule that never fires.",
+    source: "The LOLBAS project (lolbas-project.github.io) for the named binary and what it can do",
+    re: /`(?:\w+\.exe(?:\s+[^`\n]{0,60})?|[a-z]+(?:\s*\|\s*[a-z]+)?\s*\|\s*iex)`/gi,
+  },
+  {
+    id: "rego",
+    title: "Rego and OPA semantics",
+    why: "A policy-as-code rule's behaviour depends on how the language treats an undefined value. `field == null` and `not field` are not the same test, and the difference decides whether a rule fires on a resource that lacks the field entirely.",
+    source: "The Open Policy Agent policy language reference",
+    re: /\bnot\s+[a-z_][\w.]*\s*(?:!=|==)\s*null|\bjson\.unmarshal\(|\bundefined\b[^.\n]{0,70}\b(?:rego|body|rule|expression)\b|\brego\b[^.\n]{0,50}\b(?:undefined|negation|body)\b/gi,
+  },
+];
+
 // The IT-only classes stay IT-only: `record` is DNS-specific and already
 // verified, and `version`'s IT pattern does not match cyber's products.
-if (TRACK_KEY === "cybersec") {
+if (IDENTIFIER_TRACKS.has(TRACK_KEY)) {
   CLASSES.push(...CYBER_CLASSES);
+}
+if (TRACK_KEY === "advance") {
+  CLASSES.push(...ADVANCE_CLASSES);
 }
 
 // --- read the track ---------------------------------------------------------
@@ -242,6 +373,20 @@ function collect(file, lines, cls) {
   // nothing, and collecting them buried the real claims. The lesson content is
   // where claims live, so that is what gets extracted.
   let inFrontMatter = false;
+  // A trailing backslash continues the command onto the next line, and a
+  // multi-line command is ONE claim. Collected line by line, a four-line
+  // `az account management-group subscription add \` invocation became four
+  // rows: the first naming a verb group with no flags, and the next three
+  // being bare `--name "contoso-corp" \` fragments whose ±1 line of context
+  // shows two more flags rather than the command they belong to. A verifier
+  // cannot check any of the four, so the class silently reported three rows
+  // where there was one.
+  //
+  // Continuation is joined here rather than in the pattern, because the join is
+  // a property of the shell language and not of any one claim class. The
+  // consumed lines are replaced with a blank so the iteration cannot also
+  // collect them as rows of their own.
+  const skipLine = new Set();
   lines.forEach((line, i) => {
     if (i === 0 && /^---\s*$/.test(line)) {
       inFrontMatter = true;
@@ -257,6 +402,7 @@ function collect(file, lines, cls) {
       fence = !fence;
       return;
     }
+    if (skipLine.has(i)) return;
 
     // A HEADING asserts nothing. The first pass emitted "#### Rung 3 — `ping`
     // the gateway" as a claim to verify, and a verifier can only answer
@@ -278,7 +424,20 @@ function collect(file, lines, cls) {
     }
     if (skip) return;
 
-    const hits = [...line.matchAll(cls.re)].map((m) => m[0].trim());
+    // Join a backslash continuation. `text` becomes the whole command, and the
+    // location stays the FIRST line, because that is the line a reader edits.
+    let text = line;
+    let last = i;
+    if (/\\\s*$/.test(line)) {
+      for (let j = i + 1; j < lines.length && j <= i + 8; j++) {
+        text += " " + lines[j].trim();
+        last = j;
+        if (!/\\\s*$/.test(lines[j])) break;
+      }
+      for (let j = i + 1; j <= last; j++) skipLine.add(j);
+    }
+
+    const hits = [...text.matchAll(cls.re)].map((m) => m[0].trim());
     if (!hits.length) return;
     // Dedupe within a line but keep order — a line often repeats one value.
     const seen = new Set();
@@ -288,20 +447,20 @@ function collect(file, lines, cls) {
     // without `nslookup`, using the pair from Part 3" names a tool but asserts
     // nothing about it. These were a large share of the first pass's
     // unverifiable rows.
-    if (/\b(?:from|in|see|per)\s+Part\s+\d|\bas (?:shown|described)\b|\bsee (?:above|below)\b|^\s*(?:Finish|Then|Next|Now)\b[^.]*\b(?:from|using) (?:the )?(?:pair|list|table|steps?)\b/i.test(line)) {
+    if (/\b(?:from|in|see|per)\s+Part\s+\d|\bas (?:shown|described)\b|\bsee (?:above|below)\b|^\s*(?:Finish|Then|Next|Now)\b[^.]*\b(?:from|using) (?:the )?(?:pair|list|table|steps?)\b/i.test(text)) {
       return;
     }
 
     out.push({
       file,
       line: i + 1,
-      text: line.replace(/\s+$/, ""),
+      text: text.replace(/\s+$/, ""),
       // The two lines either side give a verifier the sentence a table cell was
       // cut from. A bare "`ipconfig /all`" in a table row is unanswerable; the
       // claim is in the row's OTHER cells, and in the sentence introducing the
       // table. Carrying context is what turns a dead row into a checkable one.
       before: (lines[i - 1] || "").replace(/\s+$/, "").slice(0, 200),
-      after: (lines[i + 1] || "").replace(/\s+$/, "").slice(0, 200),
+      after: (lines[last + 1] || "").replace(/\s+$/, "").slice(0, 200),
       hits: uniq,
       inFence: fence,
     });
@@ -451,7 +610,7 @@ if (TRACK_KEY === "it") {
   w("> **Why there is no results table here.** Verification verdicts live in a conversation, not in");
   w("> the repository (D-038), so a generator cannot read them back. Rather than print a stale or");
   w("> borrowed number, this file prints none. Record real verdicts in");
-  w("> [`claims-to-verify-cyber/`](claims-to-verify-cyber/) when a pass completes.");
+  w(`> [\`${WORKLIST_DIR[TRACK_KEY]}/\`](${WORKLIST_DIR[TRACK_KEY]}/) when a pass completes.`);
 }
 w();
 // Also IT-only: these two defects, the "48 rows" figure, and the labex.io sourcing

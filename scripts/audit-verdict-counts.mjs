@@ -23,14 +23,19 @@ import fs from "node:fs";
 const track = (() => {
   const i = process.argv.indexOf("--track");
   const t = i === -1 ? "cybersec" : process.argv[i + 1];
-  if (!["it", "cybersec"].includes(t)) {
-    console.error(`usage: node audit-verdict-counts.mjs [--track it|cybersec]`);
+  if (!["it", "cybersec", "advance"].includes(t)) {
+    console.error(`usage: node audit-verdict-counts.mjs [--track it|cybersec|advance]`);
     process.exit(2);
   }
   return t;
 })();
 
-const DOC = track === "it" ? "docs/IT-CLAIM-VERIFICATION.md" : "docs/CYBER-CLAIM-VERIFICATION.md";
+const DOCS = {
+  it: "docs/IT-CLAIM-VERIFICATION.md",
+  cybersec: "docs/CYBER-CLAIM-VERIFICATION.md",
+  advance: "docs/ADVANCE-CLAIM-VERIFICATION.md",
+};
+const DOC = DOCS[track];
 const rows_src = fs.readFileSync(DOC, "utf8");
 const lines = rows_src.split("\n");
 const doc = rows_src;
@@ -85,6 +90,41 @@ console.log(`  | **Total** | **${total}** | **${T.OK}** | **${T.WRONG}** | **${T
 console.log("");
 
 const problems = [];
+
+// Every section in the document, with the number of rows still awaiting a
+// verdict. Derived, not remembered: this is the figure a reader is most likely
+// to trust, and the generator's own prose states it too, so the two are
+// compared rather than one being assumed right.
+const sectionRows = new Map();
+{
+  let s = "";
+  for (const l of lines) {
+    const h = /^## (.+)/.exec(l);
+    if (h) s = h[1].replace(/\s+$/, "");
+    if (!ROW.test(l)) continue;
+    if (!sectionRows.has(s)) sectionRows.set(s, { rows: 0, empty: 0 });
+    const e = sectionRows.get(s);
+    e.rows++;
+    if (!/\*\*(OK|WRONG|UNVERIFIABLE)\*\*/.test(l)) e.empty++;
+  }
+}
+const outstandingTotal = [...sectionRows.values()].reduce((a, c) => a + c.empty, 0);
+
+// A track whose pass has not started has no results table, so there is no
+// printed figure to reconcile and checks 1-4 have nothing to read. Skipping them
+// is correct — but it has to be a DELIBERATE skip, made after the two checks
+// that still apply have run, because a guard that quietly stops checking is
+// indistinguishable from a guard that found nothing. So the outstanding figure
+// is still derived, still compared against the generator's own sentence, and
+// the result is printed either way.
+const resultsPublished = DONE.length > 0;
+
+// Declared outside the results block because the closing summary line reports
+// it, and a variable that exists only inside a conditional is a crash waiting
+// for the one path that does not enter the conditional. That is what happened
+// the first time this gate was added: IT and cyber printed MATCH and then died
+// on the final line, which in CI reads as a red step for a passing check.
+let distinctDone = new Set();
 
 // --- 0. NO class may hold a row with an empty verdict column unless it is
 //        genuinely TRACKED as outstanding work.
@@ -187,74 +227,99 @@ const problems = [];
   }
 }
 
-// --- 1. every class row in the summary table
-for (const r of rows) {
-  const re = new RegExp(
-    `\\| ${r.name.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")} \\| (\\d+) \\| (\\d+) \\| \\*\\*(\\d+)\\*\\* \\| (\\d+) \\|`,
-  );
-  const mm = re.exec(doc);
-  if (!mm) {
-    problems.push(`no summary row found for "${r.name}"`);
-    continue;
-  }
-  const [, n, ok2, wrong, unv] = mm.map(Number);
-  if (n !== r.n || ok2 !== r.OK || wrong !== r.WRONG || unv !== r.UNV) {
+// --- 0c. The OUTSTANDING figure the generator prints must match the rows.
+//
+// The extractor's prose says "*N* claim(s) below need an external source", and
+// the same N appears in the sentence above the class table. Both are generated,
+// so a disagreement means one of the two code paths that print them disagrees
+// with the rows — which is exactly the class of bug this guard exists for, and
+// it is checkable without a results table existing.
+if (!resultsPublished) {
+  const om = /\*\*(\d+) claim\(s\) below need an external source\.\*\*/.exec(doc);
+  if (!om) {
+    problems.push("no pass has been recorded, but the outstanding-claim sentence is absent");
+  } else if (Number(om[1]) !== outstandingTotal) {
     problems.push(
-      `"${r.name}": doc says ${n}/${ok2}/${wrong}/${unv}, rows say ${r.n}/${r.OK}/${r.WRONG}/${r.UNV}`,
+      `outstanding prose says ${om[1]}, derived from the rows ${outstandingTotal}`,
     );
   }
 }
 
-// --- 2. the summary Total row
-const m = /\| \*\*Total(?:[^|]*)\*\* \| \*\*(\d+)\*\* \| \*\*(\d+)\*\* \| \*\*(\d+)\*\* \| \*\*(\d+)\*\* \|/.exec(doc);
-if (!m) {
-  problems.push("could not find the summary Total row");
-} else {
-  const [, dRows, dOK, dWrong, dUnv] = m.map(Number);
-  if (dRows !== total || dOK !== T.OK || dWrong !== T.WRONG || dUnv !== T.UNV) {
-    problems.push(`Total: doc says ${dRows}/${dOK}/${dWrong}/${dUnv}, rows say ${total}/${T.OK}/${T.WRONG}/${T.UNV}`);
-  }
-}
-
-// --- 3. the distinct-location figures, which live in PROSE and were wrong twice.
-// A location can be cited by more than one class, so rows >= locations always.
-let doneCls = "";
-const distinctDone = new Set();
-for (const l of doc.split("\n")) {
-  const h = /^## (.+)/.exec(l);
-  if (h) doneCls = h[1].replace(/\s+$/, "");
-  if (!DONE.includes(doneCls)) continue;
-  const rm = /^\|\s*(\d+)\s*\|\s*`([^`]+?):(\d+)`\s*▶?\s*\|/.exec(l);
-  if (!rm || !/\*\*(OK|UNVERIFIABLE|WRONG)\*\*/.test(l)) continue;
-  distinctDone.add(`${rm[2]}:${rm[3]}`);
-}
-
-if (track === "cybersec") {
-  const pm = /\*\*(\d+) distinct\s+locations fill (\d+) rows\.\*\*/.exec(doc);
-  if (!pm) {
-    problems.push("could not find the distinct-locations sentence");
-  } else {
-    const dLoc = Number(pm[1]);
-    const dRow = Number(pm[2]);
-    if (dLoc !== distinctDone.size || dRow !== total) {
+// --- 1 to 3. The results table, the Total row, and the distinct-location
+// figures all describe COMPLETED classes. A track whose pass has not started
+// publishes none of them, so there is nothing to read and nothing to compare.
+// The `resultsPublished` gate keeps the skip visible in the code and in the
+// closing output rather than leaving three "could not find" failures that look
+// like a broken document.
+if (resultsPublished) {
+  // --- 1. every class row in the summary table
+  for (const r of rows) {
+    const re = new RegExp(
+      `\\| ${r.name.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")} \\| (\\d+) \\| (\\d+) \\| \\*\\*(\\d+)\\*\\* \\| (\\d+) \\|`,
+    );
+    const mm = re.exec(doc);
+    if (!mm) {
+      problems.push(`no summary row found for "${r.name}"`);
+      continue;
+    }
+    const [, n, ok2, wrong, unv] = mm.map(Number);
+    if (n !== r.n || ok2 !== r.OK || wrong !== r.WRONG || unv !== r.UNV) {
       problems.push(
-        `distinct-locations prose says ${dLoc} locations / ${dRow} rows, derived ${distinctDone.size} / ${total}`,
+        `"${r.name}": doc says ${n}/${ok2}/${wrong}/${unv}, rows say ${r.n}/${r.OK}/${r.WRONG}/${r.UNV}`,
       );
     }
   }
-} else {
-  // The IT document states the pair in its table label. Same fact, different phrasing,
-  // so it is checked rather than skipped -- an unchecked figure is the whole problem.
-  const pm = /\*\*Total — (\d+) rows over (\d+) distinct locations\*\*/.exec(doc);
-  if (!pm) {
-    problems.push("could not find the distinct-locations label in the IT summary table");
+
+  // --- 2. the summary Total row
+  const m = /\| \*\*Total(?:[^|]*)\*\* \| \*\*(\d+)\*\* \| \*\*(\d+)\*\* \| \*\*(\d+)\*\* \| \*\*(\d+)\*\* \|/.exec(doc);
+  if (!m) {
+    problems.push("could not find the summary Total row");
   } else {
-    const dRow = Number(pm[1]);
-    const dLoc = Number(pm[2]);
-    if (dLoc !== distinctDone.size || dRow !== total) {
-      problems.push(
-        `distinct-locations label says ${dRow} rows / ${dLoc} locations, derived ${total} / ${distinctDone.size}`,
-      );
+    const [, dRows, dOK, dWrong, dUnv] = m.map(Number);
+    if (dRows !== total || dOK !== T.OK || dWrong !== T.WRONG || dUnv !== T.UNV) {
+      problems.push(`Total: doc says ${dRows}/${dOK}/${dWrong}/${dUnv}, rows say ${total}/${T.OK}/${T.WRONG}/${T.UNV}`);
+    }
+  }
+
+  // --- 3. the distinct-location figures, which live in PROSE and were wrong twice.
+  // A location can be cited by more than one class, so rows >= locations always.
+  let doneCls = "";
+  for (const l of doc.split("\n")) {
+    const h = /^## (.+)/.exec(l);
+    if (h) doneCls = h[1].replace(/\s+$/, "");
+    if (!DONE.includes(doneCls)) continue;
+    const rm = /^\|\s*(\d+)\s*\|\s*`([^`]+?):(\d+)`\s*▶?\s*\|/.exec(l);
+    if (!rm || !/\*\*(OK|UNVERIFIABLE|WRONG)\*\*/.test(l)) continue;
+    distinctDone.add(`${rm[2]}:${rm[3]}`);
+  }
+
+  if (track === "cybersec") {
+    const pm = /\*\*(\d+) distinct\s+locations fill (\d+) rows\.\*\*/.exec(doc);
+    if (!pm) {
+      problems.push("could not find the distinct-locations sentence");
+    } else {
+      const dLoc = Number(pm[1]);
+      const dRow = Number(pm[2]);
+      if (dLoc !== distinctDone.size || dRow !== total) {
+        problems.push(
+          `distinct-locations prose says ${dLoc} locations / ${dRow} rows, derived ${distinctDone.size} / ${total}`,
+        );
+      }
+    }
+  } else {
+    // The IT document states the pair in its table label. Same fact, different phrasing,
+    // so it is checked rather than skipped -- an unchecked figure is the whole problem.
+    const pm = /\*\*Total — (\d+) rows over (\d+) distinct locations\*\*/.exec(doc);
+    if (!pm) {
+      problems.push("could not find the distinct-locations label in the IT summary table");
+    } else {
+      const dRow = Number(pm[1]);
+      const dLoc = Number(pm[2]);
+      if (dLoc !== distinctDone.size || dRow !== total) {
+        problems.push(
+          `distinct-locations label says ${dRow} rows / ${dLoc} locations, derived ${total} / ${distinctDone.size}`,
+        );
+      }
     }
   }
 }
@@ -267,6 +332,18 @@ if (problems.length) {
   for (const p of problems) console.log("  - " + p);
   console.log("\nFIX: correct the document, or correct the rows. Never edit the guard to agree.");
   process.exit(1);
+}
+if (!resultsPublished) {
+  // Said plainly, because the alternative is a green line that reads like a
+  // completed verification. This track has classes and a worklist; it has no
+  // results, and the number below is the size of the job.
+  console.log(`NO RESULTS PUBLISHED — ${outstandingTotal} claim(s) across ${outstandingSections.size} class(es) await a verdict.`);
+  console.log("Checks 0, 0b and 0c ran and passed: every empty row is tracked as outstanding, every");
+  console.log("class holding rows is known to the splitter, and the outstanding figure matches the rows.");
+  console.log("Checks 1-4 (results table, Total, distinct locations, unaccounted rows) were SKIPPED,");
+  console.log("because they describe completed classes and this track has none. That skip is a fact");
+  console.log("about the document, not a pass on its content.");
+  process.exit(0);
 }
 console.log(`MATCH — every published figure agrees with the ${total} recorded rows.`);
 console.log(`  classes checked : ${rows.length}`);
