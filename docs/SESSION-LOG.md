@@ -2,6 +2,87 @@
 
 A chronological record of working sessions. Newest first.
 
+## 2026-09-28 — The advance track gets a claim worklist, and the instrument is found to be aimed elsewhere
+
+**Goal:** open the largest remaining verification gap — the seven-phase advance track
+(116,214 words, the most senior material in the repository) had no external claim
+verification at all, while IT (225 claims) and cyber (411) both did.
+
+**Paused deliberately, mid-pass, at the user's request.** Everything committed, tree
+clean, full suite green. The handoff is [`HANDOFF.md`](HANDOFF.md).
+
+**Done: the instrument, which was the substantive half.**
+
+Running the extractor's thirteen existing classes over the advance phases produced
+**140 rows, of which zero** were an AWS policy action, a Sigma field, an SPL command or
+a Windows event field — on material that is largely made of those things. The classes
+were not wrong; they were aimed at two other tracks, and a worklist reporting 140 rows
+for this material would have read as coverage. **Eight classes added**, taking the
+worklist to **740 claims / 508 needing a source / 21 paste-ready packs**:
+
+| Class | Rows | Source a verifier must use |
+|---|---:|---|
+| Cloud IAM policy and identity artefacts | 139 | AWS Service Authorization Reference, IAM policy elements |
+| SIEM search language (SPL) | 66 | Splunk Search Manual |
+| Sigma rule specification | 65 | the Sigma specification |
+| Cloud and infrastructure CLI syntax | 35 | AWS CLI, `az`, Terraform, Conftest, OPA references |
+| Detection-as-code tool flags and status | 20 | sigma-cli / pySigma |
+| Windows event IDs, channels and field names | 20 | Microsoft Learn (audit events, Sysmon, access rights) |
+| Living-off-the-land binaries | 19 | the LOLBAS project |
+| Rego and OPA semantics | 4 | the OPA policy language reference |
+
+**Not done: the verification.** One 4-row Rego pack was trialled end-to-end to confirm
+subagents with web access produce sourced, quoted verdicts; all four rows came back
+`OK` against the OPA reference. It was never written to a file, so expect to redo it.
+
+**Four defects in the instruments, all found by running them rather than reading them.**
+
+1. **The identifier classes were gated on `cybersec` alone.** The advance track is
+   cyber-only by construction (D-032), so gating on the directory name excluded exactly
+   the classes its material is built from. Now a set, and a track that inherits the
+   cyber track's subject matter inherits its claim classes.
+2. **`collect()` read a backslash-continued command line by line.** A four-line
+   `az account management-group subscription add \` invocation became four rows: one
+   naming a verb group with no flags, and three bare `--name "…"` fragments whose ±1
+   line of context showed two more flags rather than the command they belong to. A
+   verifier can check none of them. Continuations are now joined and the consumed lines
+   suppressed, so they cannot also be collected as rows of their own.
+3. **`cloudcli` was anchored on a backtick**, so it found **3 rows where the file has 40
+   command lines** — every one a bare line in a ```bash fence. The class reported 3 as
+   the measure of the phase's executable material.
+4. **`lint-content.mjs` called KQL's `(?i)` a mojibake character.** The rule was "ASCII
+   `?` followed by a letter"; `(?i)` is a regex inline flag, and "fixing" it to `“i)`
+   would have broken a working hunt query. The first fix used a **lookahead** — the wrong
+   side, because the bracket *precedes* the question mark — and fired on the very line it
+   was written for. Narrowed with a lookbehind and proven in both directions: real
+   corruption still fails, the three regex forms do not.
+
+**Two improvements to the pack format, which is why this pass can produce a better record
+than the last two.** Both are now rules in the generated header. (1) **A row's text may be
+truncated at 260 characters; read the real line from `career-roadmaps/advance-roadmap/`
+at the given line number before judging it.** An earlier pass returned `UNVERIFIABLE —
+text truncated` on rows that were perfectly checkable, because the pack was all it had
+been given — and an unverifiable row costs a reader the knowledge that nobody checked
+it. (2) **Write the verdict into the table in place**, editing only the empty Verdict
+cell, because a script reads the verdicts back by row number.
+
+**`audit-verdict-counts.mjs` now takes `--track advance`** and, for a track with no
+completed classes, prints which checks ran, which were skipped, and that the skip is a
+fact about the document rather than a pass on its content. A green line reading like a
+finished verification is the one output shape this guard must not be able to produce.
+Writing that gate introduced a block-scoped variable that crashed the IT and cyber paths
+*after* they printed MATCH — which in CI is a red step for a passing check.
+
+**Verified:** 22 content guards, 14 control suites, 16 site suites, **148 browser checks**
+in a real engine. IT 225 rows / 208 OK / 0 WRONG / 17 UNVERIFIABLE; cyber 411 / 341 / 0 /
+70; advance **508 outstanding across 15 classes**. `audit-doc-figures` caught this pass's
+own CI step-count drift (64 → 65) on the commit that caused it.
+
+**Next:** the 21 packs in `docs/claims-to-verify-advance/`, in the order `HANDOFF.md`
+gives. The two open ROADMAP items still need a human and no agent can close them — the
+**283 practice tasks, none ever timed**, and the **15–20 posting sample** behind the
+macOS/MDM market claim.
+
 ## 2026-09-26 (latest) — The exam corpus becomes track-complete, and the guard gap a failing control exposed
 
 **Goal:** extend diagnostic coverage to every phase that lacked it.

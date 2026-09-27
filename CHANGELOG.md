@@ -8,6 +8,32 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### Added
 
+- **The advance track has a technical-claim worklist, and the extractor had eight missing classes
+  to produce an honest one** (`docs/ADVANCE-CLAIM-VERIFICATION.md`,
+  `docs/claims-to-verify-advance/`, `scripts/extract-claims.mjs --track advance`).
+  The seven-phase advance track — 116,214 words, the most senior material in the repository — had
+  **no external verification of any kind**, while IT (225 claims) and cyber (411) both did.
+  - **The instrument was aimed at two other tracks, and reported a clean result about the wrong
+    subject.** Running the existing thirteen classes over the advance phases produced **140 rows,
+    of which zero** were an AWS policy action, a Sigma field, an SPL command or a Windows event
+    field — on material largely made of those things. Eight classes were added for the track's
+    real subject matter, taking the worklist to **740 claims / 508 needing a source / 21
+    paste-ready packs**: cloud IAM policy (139), SPL (66), Sigma specification (65), cloud and
+    IaC CLI syntax (35), sigma-cli flags (20), Windows event IDs and fields (20), LOLBins (19),
+    and Rego/OPA semantics (4).
+  - **The verification pass itself has not run.** One 4-row Rego pack was trialled end-to-end to
+    confirm subagents with web access produce sourced, quoted verdicts; all four came back `OK`.
+    It was never written to a file. The next step is named in [`docs/HANDOFF.md`](docs/HANDOFF.md).
+  - **The packs now tell a verifier to read the truncated row before judging it.** A row's text is
+    cut at 260 characters, and an earlier pass returned `UNVERIFIABLE — text truncated` on rows
+    that were perfectly checkable because the pack was all it had been given. An unverifiable row
+    costs a reader the knowledge that nobody checked it. Verdicts are also written into the table
+    in place, because a script reads them back by row number.
+  - `audit-verdict-counts.mjs --track advance` now derives the outstanding figure from the rows,
+    compares it against the generator's own sentence, and **states which checks it skipped and
+    why** — a green line that reads like a finished verification is the one output this guard must
+    not be able to produce.
+
 - **The GRC/OT curriculum paper grew from 20 questions to 49, and the corpus total now has a guard
   that can fail** (`career-roadmaps/exams/curriculum-grc-and-ot.md`). 28 questions were added on the
   industrial-control phase — Modbus, DNP3 and OPC UA on the wire, the monitoring priority list, the
@@ -529,6 +555,26 @@ ed to the Views list that actually exists; the three M2 pages no longer describe
 
 ### Fixed
 
+- **A backslash-continued command was collected one line at a time, so none of the pieces was
+  checkable** (`scripts/extract-claims.mjs`). A four-line
+  `az account management-group subscription add \` invocation became four rows: one naming a verb
+  group with no flags, and three bare `--name "…"` fragments whose surrounding context showed two
+  more flags rather than the command they belong to. Continuations are now joined, and the
+  consumed lines are suppressed so they cannot also be collected as rows of their own.
+- **`lint-content.mjs` reported KQL's `(?i)` regex flag as a mojibake substitute for an opening
+  curly quote.** The character is load-bearing, and "fixing" it would have broken a working hunt
+  query. Narrowed with a lookbehind — the bracket *precedes* the question mark, so the first
+  attempt with a lookahead fired on the very line it was written for — and proven in both
+  directions: a real corruption still fails the build, the three regex forms do not.
+- **The cloud-CLI claim class found 3 rows where a phase carries 40 command lines**, because it
+  was anchored on a backtick and every command in this corpus is a bare line in a `bash` fence.
+- **The extractor gated its identifier classes on the literal track name `cybersec`.** The advance
+  track is cyber-only by construction, so the gate excluded precisely the classes its material is
+  built from. The prose the generator emits also named another track's worklist folder; it now
+  names its own.
+- **The verdict-count guard crashed on the IT and cyber tracks** after printing `MATCH`, because a
+  variable became block-scoped when a conditional was added. In CI that is a red step for a
+  passing check.
 - **Two of the four new papers asserted things about their source phases that were not true, and
   one inherited a defect from the phase it tests** (found by an independent adversarial read of all
   80 questions against the exact phase text, after the guards were already green — **no guard could
