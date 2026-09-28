@@ -761,8 +761,8 @@ falsepositives:
   - Deliberate maintenance or upgrade by the endpoint team
 level: medium
 tags:
-  - attack.defense_evasion
-  - attack.t1562.001
+  - attack.defense_impairment
+  - attack.t1685
 ```
 
 A rule like this one rarely fires, and each firing is a real finding: either maintenance that should have been scheduled, or something switching off the telemetry.
@@ -1155,12 +1155,17 @@ By adversary goal
   Execution                  14         9        2        3
   Persistence                19         8        4        7
   Privilege Escalation       13         4        2        7
-  Defense Evasion            31        10        6       15
+  Stealth                   31        10        6       15
   Credential Access          12         2        2        8
   Discovery                  11         1        1        9
   Lateral Movement            9         3        1        5
   Collection                  7         2        1        4
   Command and Control        13         4        1        8
+
+  The Stealth row was Defense Evasion until ATT&CK v19 split that tactic
+  into Stealth and Defense Impairment. The counts are one estate's own
+  assessment and were not recomputed against the split, so read the row as
+  "the techniques that used to be filed under Defense Evasion".
 
 Decisions needed
   1. Proxy log ingestion — 8 Command and Control techniques have no

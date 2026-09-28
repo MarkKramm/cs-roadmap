@@ -296,7 +296,7 @@ Without a framework, hunting is a random walk: you hunt what you happened to rea
 | Execution | Would we notice code running that should not? |
 | Persistence | Would we notice something surviving a reboot that should not? |
 | Privilege Escalation | Would we notice a user gaining rights they did not have? |
-| Defense Evasion | Would we notice our own tooling being turned off or blinded? |
+| Defense Impairment | Would we notice our own tooling being turned off or blinded? |
 | Credential Access | Would we notice credentials being read in bulk? |
 | Discovery | Would we notice someone mapping the estate? |
 | Lateral Movement | Would we notice a host talking to hosts it never talks to? |
@@ -335,7 +335,7 @@ You do not need a mature ATT&CK assessment. You need a table with four columns.
 | T1218.011 Rundll32 | EDR process events, command lines | No | Never |
 | T1071.001 Web protocols | Proxy, DNS, firewall | Partly — proxy only | 2025-09 |
 | T1021.002 SMB/Admin shares | Security 4624 type 3, 5140 | No | Never |
-| T1562.001 Impair defenses | EDR tamper events, service state | No | Never |
+| T1685 Disable or Modify Tools | EDR tamper events, service state | No | Never |
 | T1055 Process injection | EDR memory events | No | Never |
 | T1098 Account manipulation | Cloud audit log, directory audit | Partly — one rule | Never |
 
@@ -563,7 +563,7 @@ references:
 author: Your Name
 date: 2026-04-06
 tags:
-  - attack.defense_evasion
+  - attack.stealth
   - attack.t1218.011
   - attack.t1218.010
   - attack.t1218.005
