@@ -1,149 +1,109 @@
-# Handoff — the advance track's claim verification pass
+# Handoff — all three tracks claim-verified
 
-**Written 2026-09-28, at the user's request, mid-pass.** Everything below is
-committed, the working tree is clean, and the full suite is green. Nothing is in
-flight. The pass itself is roughly one-fifth done and the next step is named.
+**Written 2026-09-28. The advance track's claim pass is complete, committed as
+`e333ce9`, and pushed.** Nothing is in flight. This file no longer describes work
+to do; it records what was finished and what a later session should know before
+starting something new.
 
 ## Where the repository is
 
 | | |
 |---|---|
-| Branch | `main`, clean tree, **2 commits ahead of the previous checkpoint** |
-| This work | `ffe8445` (the worklist and the classes it needed), `faf733e` (CI registration) |
-| Previous state | `15c3aa4` — the exam corpus repair pass, which was fully pushed |
-| Guards | 22 content guards, 14 control suites, 16 site suites, **148 browser checks** — all green |
-| Nothing lost | The interrupted session had committed all of its work before the interruption |
+| Branch | `main`, clean tree, **fully pushed** — `d83fb25..e333ce9` |
+| This pass | `ffe8445` (worklist and the 8 classes it needed), `50e52f8` (Sigma + the new guard), `ea2d55b` (ATT&CK), `77fe6dd` (queries), `e333ce9` (the 508-row result) |
+| Guards | 23 content guards, 15 control suites, 16 site suites, **148 browser checks** — all green |
+| All three tracks | IT 225 rows, cyber 411 rows, advance 508 rows — **1,144 recorded claim rows** |
 
-## What this pass is
+## The advance track's result
 
-The IT track (225 claims) and the cyber track (411 claims) have both had every
-checkable technical claim verified against a primary source. **The advance track
-had none** — 7 phases, 116,214 words, the most senior material in the repository,
-and no external verification at all. That was the gap this pass opened.
+`docs/ADVANCE-CLAIM-VERIFICATION.md`: **508 rows — 444 `OK`, 17 `WRONG`, 47
+`UNVERIFIABLE`, none outstanding.** All 17 wrong claims are fixed in the corpus.
 
-## What has actually been done
+The figures in that document are **re-derived from its own rows** by
+`audit-verdict-counts.mjs --track advance`, so the record cannot drift from its
+evidence. `scripts/record-advance-verdicts.mjs` reads the verdicts back out of
+the worklist packs rather than carrying a hardcoded copy, which is the
+difference from the IT track — whose header once read "verified" over 225 empty
+verdict columns for sixteen days (D-055).
 
-**The instrument is finished and proven.** This was the substantive half.
+### The 17 wrong claims, by class
 
-Running the extractor's existing thirteen classes over the advance phases
-produced **140 rows, of which zero** were an AWS policy action, a Sigma field, an
-SPL command or a Windows event field — on material that is largely made of those
-things. That is the defect this repository has now recorded several times: an
-instrument reporting a clean result about the wrong subject, which reads as
-coverage. Eight classes were added for the track's actual subject matter, and
-the worklist went from 140 to **740 claims, 508 of which need a source**.
+- `date: 2026/03/14` in **six places** — the spec mandates ISO 8601 with dashes and
+  the schema constrains the value with a regex slashes cannot match. Phase 07 was
+  already conformant, so the corpus contradicted itself.
+- `sigma check --fail-on-issues` **cannot** enforce an empty `falsepositives`
+  list; the phase said it could in four places.
+- A hunt query that **returned nothing** — `where X IN ("*\\rundll32.exe", …)`; the
+  `in` function forbids wildcards.
+- A revoked ATT&CK ID (`T1562.001` → `T1685`) and Defense Evasion's retirement as
+  a tactic.
+- An Entra audit filter missing the `(permanent)` suffix that makes the string real.
+- A `kubectl describe` claim the tool does not support, a NIST publication under
+  its superseded title, an AWS CLI payload with the wrong nesting, a process-tree
+  column off by one generation.
 
-Four defects were found *in the instruments* by running them, not by reading
-them. All four are in the commit message for `ffe8445`; the two worth carrying
-forward:
+**The guard written from the Sigma constraints then found an eighth date instance
+in the *cyber* track**, in a phase whose verification was marked complete since
+2026-09-18. Seven phases of reading missed what a regex catches — the argument
+for a guard over a pass.
 
-- **`collect()` split backslash-continued commands line by line.** A four-line
-  `az account management-group subscription add \` invocation became four rows:
-  one naming a verb group with no flags, and three bare `--name "…"` fragments
-  whose surrounding context showed two more flags rather than the command they
-  belong to. A verifier cannot check any of them. Continuations are now joined.
-- **`lint-content.mjs` called KQL's `(?i)` a mojibake character.** The rule was
-  "ASCII `?` followed by a letter". A first fix used a lookahead — the wrong
-  side; the bracket *precedes* the question mark in `(?i)` — and fired on the very
-  line it was written for. Narrowed with a lookbehind and proven in both
-  directions.
+**A verifier's `WRONG` verdict was also wrong once.** The first report on the
+policy walkthrough concluded a deny statement permits nothing; the JSON beside it
+re-denies five services. D-038's rule is symmetric and this pass is the case that
+proves it.
 
-**The verification itself has not started.** One pack was trialled end-to-end to
-confirm the method works: the 4-row Rego/OPA pack, verified against the OPA
-policy language reference, all four rows `OK`. That trial was **not written back
-to any file** — it exists only in a conversation. Expect to redo it; it took
-minutes.
+## What is settled, and what is not
 
-## The next step, precisely
+**Done and guarded.** The advance track's claims. The Sigma schema guard
+(`audit-sigma.mjs`, 13 controls) is in CI and already found a real defect in a
+"completed" track.
 
-`docs/claims-to-verify-advance/` holds **21 packs, 508 rows**, all with empty
-verdict columns. The packs are self-contained: each carries its own instructions
-and needs nothing added. Fill each one's Verdict column in place, then record
-them.
+**Two rot classes found and deliberately left unguarded**, recorded in the pass
+document rather than left implicit:
 
-Suggested order, cheapest and highest-yield first:
+- **ATT&CK revoked IDs and tactic slugs** — a guard would need a dated snapshot of
+  the matrix, and the snapshot needs its own expiry date.
+- **NIST *retitles*** — the existing `audit-nist-current.mjs` catches *withdrawn*
+  publications only. A retitle is a different rot class (SP 800-50 Rev. 1 was
+  retitled in September 2024).
 
-| # | Pack(s) | Rows | Why first |
-|---|---|---|---|
-| 1 | `03-sigma-rule-specification-*` (2) + `05-detection-as-code-tool-flags-and-status` | 85 | The highest-value single claim in the whole track: whether `sigma check` fails on issues by default. |
-| 2 | `01-mitre-att-ck-*` (2) | 83 | Pure identifier lookup against attack.mitre.org. Cheapest per row in the set. |
-| 3 | `00-cloud-iam-*` (4) | 139 | Largest class. Check `prefix:Action` pairs against the AWS Service Authorization Reference. |
-| 4 | `02-siem-search-language-spl-*` (2) | 66 | Splunk Search Manual per command. |
-| 5 | everything else (11 packs) | 135 | `cloudcli` 35, `winevent` 20, `lolbin` 19, `protocol` 17, `cybercmd` 13, `standard` 12, `version` 10, `rego` 4, `command` 3, `registry` 2. |
+An honest guard for either is a snapshot with an expiry date, and writing that
+snapshot is its own piece of work. **Do not add a version-free guard that looks
+for the current answer** — that is D-066's shape.
 
-### Two instructions that make the pass better than the last two
+**Two open items need a human** and cannot be closed by any agent: the **283
+practice tasks, none ever timed**, and the **15–20 posting sample** behind the
+macOS/MDM market claim. Both are in `docs/ROADMAP.md`.
 
-The pack header now says both of these (rules 10 and 11). They are new, and they
-are the difference between a pass worth recording and a pass that launders the
-table format into a result.
+## Loose ends, both closed 2026-09-28
 
-1. **A row's text may be truncated at 260 characters. Read the real line before
-   judging it** — the Location column gives `<phase-file>:<line>` and the files
-   are on disk. An earlier pass returned `UNVERIFIABLE — text truncated` on rows
-   that were perfectly checkable, because the pack was all it had been given. An
-   unverifiable row costs a reader the knowledge that nobody checked it.
-2. **Write the verdict into the table in place**, editing only the empty Verdict
-   cell. Do not reformat, reorder, or re-quote the claim text — a script reads
-   the verdicts back out by row number.
+- ~~`docs/WORKFLOW.md` describes `extract-claims.mjs` without mentioning `--track advance`.~~ **Fixed**,
+  along with a warning the omission was hiding: **the extractor overwrites the worklist, so running it
+  after a pass has recorded verdicts destroys them.** Its own checklist line said to re-run it after any
+  phase prose change, which on a completed track would have thrown the pass away. The class set is also
+  per-track, and a worklist reporting 140 rows for the senior material was the absence of coverage
+  reading as coverage.
+- ~~`scripts/build-cyber-bundles.mjs:114` hardcodes the track name in its closing message.~~ **Fixed
+  2026-09-28.** It read `TRACK_KEY === "it" ? "IT" : "CYBER"`, which printed a link to
+  `docs/cybersec-CLAIM-VERIFICATION.md` for the default run — a filename that has never existed. The
+  folder key is `cybersec` and the document key is `CYBER`, and deriving one from the other is the
+  whole bug. It is now a lookup that fails loudly if a track has no mapped document.
 
-### The discipline that has not changed
+## The method, if another pass is ever run
 
-- **Verify every `WRONG` against the primary source yourself before changing any
-  content.** D-038: *a model's answer remains not a source.* This is what caught
-  three first-pass defects being real, and what would have caught 145 fabricated
-  verdicts.
-- **`UNVERIFIABLE` is a real result and is expected to be common** — 21% on the
-  IT pass, 17% on cyber. Do not push a verifier to fill a column. An invented URL
-  is worse than a gap, because it will be acted on.
+The discipline that produced three tracks' worth of claims and did not fabricate a
+single one:
+
+- **A `WRONG` is checked against the primary source before any content changes.**
+  D-038: a model's answer remains not a source.
+- **`UNVERIFIABLE` is a real result** and is expected to be common — 21% on IT,
+  17% on cyber, 9% here (the advance track is denser in design reasoning, which
+  no source settles). **An invented URL is worse than a gap**, because it will be
+  acted on.
 - **A wrong `OK` is invisible; a wrong `WRONG` sends someone to re-read correct
   content.** Weight the errors accordingly.
+- **A verdict may only be transcribed from a verifier's results, never authored**
+  (D-057). Keys are read out of the pack or not written at all.
 
-## After the packs are filled
-
-1. **Write the verdicts into `docs/ADVANCE-CLAIM-VERIFICATION.md`**, keyed by
-   `(class, row number)`. The cyber track's recorders do this from a hardcoded
-   list; a recorder that reads the filled packs would remove a whole
-   transcription step and its error class. Whichever is chosen, it must **fail
-   rather than drop a verdict it cannot place.**
-2. **Set `done: true` / `doneThrough`** in the `advance` list in
-   `scripts/split-claims.mjs`, so a class stops regenerating. Until then the
-   splitter will re-emit its pack.
-3. **Rewrite the document's status line and add the results table.** The
-   generated one currently reads *"Status: claims extracted. NO verification pass
-   recorded yet."* and must not be left contradicting the rows.
-4. **`audit-verdict-counts.mjs --track advance` will then start checking the
-   table** instead of reporting outstanding work. It already has the advance
-   track registered; the results-table branch is the only untested path, so
-   expect to fix something there.
-5. **Fix every `WRONG` claim in `career-roadmaps/advance-roadmap/`**, then
-   re-run the guards — several of them (`audit-doc-figures`, `audit-refs`,
-   `lint-content`) will notice the changed text.
-6. **Record it**: `docs/ADVANCE-CLAIM-VERIFICATION.md` prose, a `DECISIONS.md`
-   entry if a new class of defect is named, a `CHANGELOG.md` entry, and the
-   `CHECKPOINT.md` rows that currently say the advance track has no verification
-   pass.
-7. **Two open items will still need a human** and cannot be closed by any agent:
-   the **283 practice tasks, none ever timed**, and the **15–20 posting sample**
-   behind the macOS/MDM market claim. Both are recorded in `docs/ROADMAP.md`.
-
-## The guard that will hold the line
-
-`node scripts/audit-verdict-counts.mjs --track advance` currently prints:
-
-```
-NO RESULTS PUBLISHED — 508 claim(s) across 15 class(es) await a verdict.
-```
-
-and **fails** if any of those 508 rows stops being tracked as outstanding, or if
-a class holding rows is missing from the splitter's list, or if the document's
-printed outstanding figure disagrees with its own rows. That last one is the
-guard the other two tracks' D-038 failure produced, and it is in CI.
-
-## Two loose ends worth knowing about
-
-- **`docs/WORKFLOW.md:149` and `:187`** describe `extract-claims.mjs` without
-  mentioning `--track advance`. Not updated; a one-line fix.
-- **`scripts/build-cyber-bundles.mjs:114`** hardcodes
-  `TRACK_KEY === "it" ? "IT" : "CYBER"` in its closing message — the same
-  per-track-string bug just fixed in `extract-claims.mjs`. Untouched, because
-  that script is not part of this pass.
+The recorders exist so the last point is mechanical rather than a matter of
+restraint.

@@ -16,6 +16,22 @@ Two consequences, since this has caused real confusion:
 - **A phrase like "Current state:" inside a record means the state at that record's date.** It
   is not a claim about today, and D-024's instance (29 phases) has been overtaken twice since.
 
+## D-074 — A recorder must be tested against the real format, and the three ways mine lied
+
+- **Date:** 2026-09-28
+- **Status:** Accepted
+- **Context:** `scripts/record-advance-verdicts.mjs` is the first recorder that **reads verdicts back out of the worklist packs** rather than carrying a hardcoded list, which removes the entire transcription step and its error class. Writing it produced three defects, and **all three were found by running it, not by reading it** — which is the argument for running it.
+- **Decision:** **A recorder is tested against the exact byte format it must parse, and a parser that cannot place a verdict fails rather than storing a fragment of one.** Three specific rules, each from a real failure:
+  1. **Count cells the way the format splits them, not the way it looks.** A markdown table row splits into 6 fields including the empty strings either side of the outer pipes. Comparing against 4 rejected **all 508 rows** and reported a malformed table where none existed. A check written from an assumption about the format rejects correct input, and its failure reads as corruption.
+  2. **Accept every spelling a verifier plausibly writes, then emit one canonical form.** Requiring a closing `**` made 17 finished rows — written `**UNVERIFIABLE — reason` — report as *"has no verdict — a pack with an empty cell is work in progress"*. A subagent caught this and said so rather than working around it: *the rows are invisible to the recorder, not missing.* **A verdict the reader can see and the guard cannot is the exact defect this work exists to prevent**, so the recorder now accepts both forms and normalises to the one `audit-verdict-counts` can read.
+  3. **A keyed store must merge on a duplicate key, never replace.** Packs of one class share a heading, so `packs.set` on the class title made part 2 of a chunked class silently replace part 1 — and 260 rows were reported as having no verdict **in files it had just read**. A keyed store that overwrites is correct for values and wrong for accumulating sets, and the difference only appears once a class is big enough to be chunked.
+- **Why this is D-057 and D-058 together.** D-057: a verdict may be transcribed but never authored. D-058: a test suite may not write into the record it tests. Both are ways machinery produces a *shaped* artefact without a person deciding to — fabricated verdict keys, and `**UNVERIFIABLE** — control fixture` written into real rows. A recorder is the one component that touches every row of a verification record, so it is where those two failure modes would land at scale. Every rule above exists to make it fail loudly instead.
+- **The empty-pack directory is a completed state, not a missing one.** Marking all 15 classes done means the splitter emits nothing, so a recorder that requires a pack would report a pass it never performed. It treats zero packs as *"the work is recorded"* and reconciles the document's row count instead — otherwise finishing a track would read as losing its evidence.
+- **Consequences:**
+  - `audit-recorders-wired.mjs` now requires all five recorders in CI. **It failed on the commit that added the fifth**, which is the guard doing its job on the change that introduced it.
+  - A recorder that cannot place a verdict **fails with the row and its location**, never writes a partial, and never leaves the document half-updated. The document is the artifact whose whole value is provenance; a partial write is worse than none because it looks finished.
+  - This is the second time a recorder in this repository has been wrong about its own format. The first was `record-it-verdicts.mjs` fabricating keys. **The class of bug is not "recorders are buggy" — it is that a recorder is code whose input is prose written by someone else, and prose is not a data format until something parses it.**
+
 ## D-060 — A total that nothing recomputes is a guess with a citation
 
 - **Date:** 2026-09-18

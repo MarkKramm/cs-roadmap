@@ -8,6 +8,19 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### Added
 
+- **`docs/HANDOFF.md` rewritten, and the state it held was stale in the dangerous direction.** The
+  previous version described the advance pass as one-fifth done and instructed a future reader to
+  fill 508 verdict columns that are already filled. A handoff that would have had someone re-do a
+  completed pass — or worse, trust its own opening claim that no verification existed. It now records
+  the result, the two rot classes deliberately left unguarded, and the two items that need a human.
+  **A stale handoff is worse than none**, because nothing in its shape tells a reader it is stale.
+- **`docs/DECISIONS.md` → D-074**, on the three ways the new recorder lied about its own input
+  format. The general form: **a recorder is code whose input is prose written by someone else, and
+  prose is not a data format until something parses it.**
+- **`docs/WORKFLOW.md` documents `extract-claims.mjs --track <it|cyber|advance>`, and carries the
+  warning its omission was hiding — the extractor overwrites the worklist, so re-running it after a
+  pass has recorded verdicts destroys them.** Its own checklist said to re-run it after any phase
+  prose change, which on a completed track would have thrown the pass away.
 - **The advance track has a technical-claim worklist, and the extractor had eight missing classes
   to produce an honest one** (`docs/ADVANCE-CLAIM-VERIFICATION.md`,
   `docs/claims-to-verify-advance/`, `scripts/extract-claims.mjs --track advance`).
@@ -52,9 +65,15 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
       describe` claim the tool does not support**; **a NIST publication under its superseded
       title** (SP 800-50 Rev. 1 was retitled in September 2024); **an AWS CLI payload with the
       wrong nesting**; and **a process-tree column off by one generation**.
-    - **A verifier's `WRONG` verdict needed checking as much as its `OK` verdicts.** The first
-      report on the policy walkthrough concluded a deny statement permits nothing the allow
-      statement permits; the JSON beside it re-denies five services, so the finding was half wrong.
+- **A verifier's `WRONG` verdict needed checking as much as its `OK` verdicts.** The first
+  report on the policy walkthrough concluded a deny statement permits nothing the allow
+  statement permits; the JSON beside it re-denies five services, so the finding was half wrong.
+- **`scripts/build-cyber-bundles.mjs` printed a link to a file that has never existed.** Its
+  closing message read `TRACK_KEY === "it" ? "IT" : "CYBER"`, so the default run pointed at
+  `docs/cybersec-CLAIM-VERIFICATION.md`. The folder key is `cybersec` and the document key is
+  `CYBER`; deriving one from the other is the whole bug, and it survived because the line only
+  prints on the finished state. Now a lookup that fails loudly when a track has no mapped
+  document, and checked against all three tracks.
 - **`scripts/record-advance-verdicts.mjs` — a recorder that reads verdicts back out of the
   worklist packs**, so the document is reproducible from disk. This is the difference from the IT
   track, whose verdicts were never written into its document at all and whose header read

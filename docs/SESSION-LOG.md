@@ -70,6 +70,40 @@ difference only shows up once a class is big enough to be chunked.
 `audit-verdict-counts --track advance` MATCH on all 15 classes and 508 rows. The three tracks now
 stand at **1,144 recorded claim rows** between them (IT 225, cyber 411, advance 508).
 
+**Then the state was audited at the user's request, before any of it was called done — and the
+handoff was the problem.** The pass was complete, committed and pushed; the tree was clean. But
+`docs/HANDOFF.md` still said the pass was one-fifth done and told the next reader to fill 508
+verdict columns that were already filled. **A stale handoff is worse than no handoff**, because
+nothing in its shape distinguishes it from a current one — it had a commit hash in it, it was
+well-written, and its opening claim ("the verification itself has not started") was the exact
+opposite of the truth. A reader checking it against `git log` would have concluded the session log
+was wrong, which is the wrong way round.
+
+Three more state defects surfaced in the same sweep, all from a document describing a *thing*
+rather than a *number*:
+
+- **The CHECKPOINT `Branch` row said "latest commit is the exam-corpus repair"** — true when I
+  typed it, false the moment I committed the pass it was describing. A status line that reports the
+  current commit and is committed in that same state is wrong by construction; it should name the
+  pass, not the hash.
+- **`docs/WORKFLOW.md` told the reader to re-run `extract-claims.mjs` after any phase prose
+  change.** The extractor **overwrites** the worklist. On a completed track, following that
+  instruction destroys every recorded verdict. The checklist was actively dangerous and had been
+  correct only while the track was empty.
+- **`scripts/build-cyber-bundles.mjs` printed a link to `docs/cybersec-CLAIM-VERIFICATION.md`**,
+  a file that has never existed, because it derived the document name from the folder key. The line
+  only prints on the *finished* state, so it had never run in a state where anyone would look.
+
+**The general form, and it is the same one the repository keeps rediscovering:** a number that a
+command recomputes is safe (D-060); **a sentence that a person typed is a claim with no
+referee.** Every one of these four was a sentence, and all four were wrong. The mitigation is not
+"write them more carefully" — it is that where a sentence describes state, it should describe the
+*pass* rather than the *current value*, because the pass does not change and the value does.
+
+**Also added: D-074**, on the three ways the new recorder lied about its own input format. The
+general form is worth carrying to any future tool that reads something a human wrote: **a recorder is
+code whose input is prose, and prose is not a data format until something parses it.**
+
 **Two rot classes found and deliberately NOT guarded**, because the honest guard is a snapshot
 with an expiry date and writing that snapshot is its own piece of work: ATT&CK revoked IDs and
 tactic slugs, and NIST *retitles* (the existing `audit-nist-current.mjs` catches withdrawals

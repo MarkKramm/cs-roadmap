@@ -111,7 +111,15 @@ if (PLAN.length === 0) {
   console.log("  This is the FINISHED state, not a failure: the plan is empty because");
   console.log("  split-claims.mjs withholds every class for this track via `done: true`.");
   if (before.length) console.log(`  Cleared ${before.length} stale bundle(s): ${before.join(", ")}`);
-  console.log(`  See docs/${TRACK_KEY === "it" ? "IT" : "CYBER"}-CLAIM-VERIFICATION.md for the results.`);
+  // The folder key is not the document key: "cybersec" lives in
+  // CYBER-CLAIM-VERIFICATION.md, not in "cybersec-CLAIM-...". Deriving the
+  // suffix from TRACK_KEY is what made this line wrong.
+  const DOC_KEY = { it: "IT", cybersec: "CYBER" }[TRACK_KEY];
+  if (!DOC_KEY) {
+    console.error(`  No claim-verification document mapped for track "${TRACK_KEY}" — add it to DOC_KEY.`);
+    process.exit(1);
+  }
+  console.log(`  See docs/${DOC_KEY}-CLAIM-VERIFICATION.md for the results.`);
   process.exit(0);
 }
 
