@@ -513,12 +513,16 @@ The same hypothesis, against Sysmon event code 1, which is the process creation 
 
 ```spl
 index=windows sourcetype="XmlWinEventLog:Microsoft-Windows-Sysmon/Operational" EventCode=1
-| eval ImageLower = lower(Image)
-| where ImageLower IN ("*\\rundll32.exe", "*\\regsvr32.exe", "*\\mshta.exe", "*\\installutil.exe")
+| eval Leaf = split(Image, "\\")[-1]
+| where Leaf IN ("rundll32.exe", "regsvr32.exe", "mshta.exe", "installutil.exe")
 | where match(CommandLine, "(?i)(\\\\AppData\\\\|\\\\Temp\\\\|\\\\Downloads\\\\|\\\\ProgramData\\\\|\\\\Users\\\\Public\\\\)")
 | table _time, ComputerName, User, Image, CommandLine, ParentImage, ParentCommandLine
 | sort - _time
 ```
+
+**Why the leaf name rather than a wildcard on the whole path.** It is tempting to write `| where ImageLower IN ("*\\rundll32.exe", "*\\regsvr32.exe", …)`, and it is the shape most examples online use. **It does not work in a `where` clause.** Splunk's `in` function explicitly does not accept wildcard characters in its value list, and the `IN` *operator* — which does — is only honoured with the `search` and `tstats` commands. Either reading of that line gives you a query that matches nothing.
+
+That is the worst possible outcome for a hunt. It returns no results, you read that as "no threats", and the control is silently absent from your coverage map. Splitting the path and matching the leaf name exactly needs no wildcard at all, and it is also the faster query.
 
 Then a rarity pass on the same data, which is how SPL earns its place: the `rare` command finds the long tail without you writing a threshold.
 

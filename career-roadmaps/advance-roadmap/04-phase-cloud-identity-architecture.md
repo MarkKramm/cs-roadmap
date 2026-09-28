@@ -474,7 +474,7 @@ Two design choices in that document are the ones to copy.
 
 **The first and third statements are mirror images.** The third denies everything not named in the first, which means adding a service to the first statement is the only way to widen the envelope. That makes the envelope reviewable in one place, and it makes a widening change visible in a diff — which is exactly what you want from a control.
 
-**The fourth statement denies even the things the first allows.** `iam:PassRole` is in the first statement because roles that create compute need it. `iam:CreateUser` and `iam:CreateAccessKey` are not, and the fourth statement makes that explicit rather than relying on a reader to notice an absence. Explicit denies that contradict a broad allow are how you make an intent legible to the next reviewer.
+**The fourth statement denies even the things the first allows.** It re-denies `s3`, `dynamodb`, `lambda`, `logs` and `cloudwatch` after the first statement permitted them, and it denies `iam:PassRole` — which the second statement grants, because roles that create compute need it. `iam:CreateUser` and `iam:CreateAccessKey` appear nowhere above it, and the fourth statement makes that explicit rather than relying on a reader to notice an absence. Explicit denies that contradict a broad allow are how you make an intent legible to the next reviewer.
 
 Attaching it is a single command, and the effect is immediate.
 
@@ -1478,7 +1478,7 @@ AuditLogs
 | where OperationName in (
     "Add member to role",
     "Add eligible member to role",
-    "Add member to role outside of PIM")
+    "Add member to role outside of PIM (permanent)")
 | extend Target = tostring(TargetResources[0].userPrincipalName)
 | extend Actor  = tostring(InitiatedBy.user.userPrincipalName)
 | project TimeGenerated, OperationName, Actor, Target, Result

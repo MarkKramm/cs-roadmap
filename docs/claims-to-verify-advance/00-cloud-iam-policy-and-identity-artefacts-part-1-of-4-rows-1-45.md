@@ -75,90 +75,90 @@ For each row, replace the empty last column with exactly one of:
 
 This is part 1 of 4. **Verify only the rows below.** The other parts are separate messages and their rows are not repeated here.
 
-| 1 | `04-phase-cloud-identity-architecture.md:48` | - Role assumption: trust policies, `sts:AssumeRole`, session duration, external IDs, source identity, and confused-deputy problems | |
-| 2 | `04-phase-cloud-identity-architecture.md:287` ▶ | "organizations:LeaveOrganization", | |
+| 1 | `04-phase-cloud-identity-architecture.md:48` | - Role assumption: trust policies, `sts:AssumeRole`, session duration, external IDs, source identity, and confused-deputy problems | **UNVERIFIABLE** — a phase-objectives line (a topic list), not a falsifiable claim; the one embedded fact, `sts:AssumeRole`, is a real action in the AWS Service Authorization Reference |
+| 2 | `04-phase-cloud-identity-architecture.md:287` ▶ | "organizations:LeaveOrganization", | **OK** — vendor reference (AWS Service Authorization Reference), https://docs.aws.amazon.com/service-authorization/latest/reference/list_organizations.html — "LeaveOrganization Grants permission to remove a member account from its parent organization" |
 | | | <sub>↑ "Action": [<br>↓ "organizations:DeleteOrganization",</sub> | |
-| 3 | `04-phase-cloud-identity-architecture.md:288` ▶ | "organizations:DeleteOrganization", | |
+| 3 | `04-phase-cloud-identity-architecture.md:288` ▶ | "organizations:DeleteOrganization", | **OK** — vendor reference (AWS Service Authorization Reference), https://docs.aws.amazon.com/service-authorization/latest/reference/list_organizations.html — "DeleteOrganization Grants permission to delete the organization" |
 | | | <sub>↑ "organizations:LeaveOrganization",<br>↓ "organizations:RemoveAccountFromOrganization"</sub> | |
-| 4 | `04-phase-cloud-identity-architecture.md:289` ▶ | "organizations:RemoveAccountFromOrganization" | |
+| 4 | `04-phase-cloud-identity-architecture.md:289` ▶ | "organizations:RemoveAccountFromOrganization" | **OK** — vendor reference (AWS Service Authorization Reference), https://docs.aws.amazon.com/service-authorization/latest/reference/list_organizations.html — "RemoveAccountFromOrganization Grants permission to remove the specified account from the organization" |
 | | | <sub>↑ "organizations:DeleteOrganization",<br>↓ ],</sub> | |
-| 5 | `04-phase-cloud-identity-architecture.md:297` ▶ | "cloudtrail:StopLogging", | |
+| 5 | `04-phase-cloud-identity-architecture.md:297` ▶ | "cloudtrail:StopLogging", | **OK** — vendor reference (AWS Service Authorization Reference), https://docs.aws.amazon.com/service-authorization/latest/reference/list_cloudtrail.html — "StopLogging Grants permission to stop the recording of AWS API calls and log file delivery for a trail" |
 | | | <sub>↑ "Action": [<br>↓ "cloudtrail:DeleteTrail",</sub> | |
-| 6 | `04-phase-cloud-identity-architecture.md:298` ▶ | "cloudtrail:DeleteTrail", | |
+| 6 | `04-phase-cloud-identity-architecture.md:298` ▶ | "cloudtrail:DeleteTrail", | **OK** — vendor reference (AWS Service Authorization Reference), https://docs.aws.amazon.com/service-authorization/latest/reference/list_cloudtrail.html — "DeleteTrail Grants permission to delete a trail" |
 | | | <sub>↑ "cloudtrail:StopLogging",<br>↓ "cloudtrail:UpdateTrail",</sub> | |
-| 7 | `04-phase-cloud-identity-architecture.md:299` ▶ | "cloudtrail:UpdateTrail", | |
+| 7 | `04-phase-cloud-identity-architecture.md:299` ▶ | "cloudtrail:UpdateTrail", | **OK** — vendor reference (AWS Service Authorization Reference), https://docs.aws.amazon.com/service-authorization/latest/reference/list_cloudtrail.html — "UpdateTrail Grants permission to update the settings that specify delivery of log files" |
 | | | <sub>↑ "cloudtrail:DeleteTrail",<br>↓ "cloudtrail:PutEventSelectors",</sub> | |
-| 8 | `04-phase-cloud-identity-architecture.md:300` ▶ | "cloudtrail:PutEventSelectors", | |
+| 8 | `04-phase-cloud-identity-architecture.md:300` ▶ | "cloudtrail:PutEventSelectors", | **OK** — vendor reference (AWS Service Authorization Reference), https://docs.aws.amazon.com/service-authorization/latest/reference/list_cloudtrail.html — "PutEventSelectors Grants permission to create and update event selectors for a trail" |
 | | | <sub>↑ "cloudtrail:UpdateTrail",<br>↓ "config:DeleteConfigurationRecorder",</sub> | |
-| 9 | `04-phase-cloud-identity-architecture.md:301` ▶ | "config:DeleteConfigurationRecorder", | |
+| 9 | `04-phase-cloud-identity-architecture.md:301` ▶ | "config:DeleteConfigurationRecorder", | **OK** — vendor reference (AWS Service Authorization Reference), https://docs.aws.amazon.com/service-authorization/latest/reference/list_config.html — "DeleteConfigurationRecorder Grants permission to delete the customer managed configuration recorder" |
 | | | <sub>↑ "cloudtrail:PutEventSelectors",<br>↓ "config:StopConfigurationRecorder",</sub> | |
-| 10 | `04-phase-cloud-identity-architecture.md:302` ▶ | "config:StopConfigurationRecorder", | |
+| 10 | `04-phase-cloud-identity-architecture.md:302` ▶ | "config:StopConfigurationRecorder", | **OK** — vendor reference (AWS Service Authorization Reference), https://docs.aws.amazon.com/service-authorization/latest/reference/list_config.html — "StopConfigurationRecorder Grants permission to the customer managed configuration recorder to stop recording configurations" |
 | | | <sub>↑ "config:DeleteConfigurationRecorder",<br>↓ "config:DeleteDeliveryChannel",</sub> | |
-| 11 | `04-phase-cloud-identity-architecture.md:303` ▶ | "config:DeleteDeliveryChannel", | |
+| 11 | `04-phase-cloud-identity-architecture.md:303` ▶ | "config:DeleteDeliveryChannel", | **OK** — vendor reference (AWS Service Authorization Reference), https://docs.aws.amazon.com/service-authorization/latest/reference/list_config.html — "DeleteDeliveryChannel Grants permission to delete the delivery channel" |
 | | | <sub>↑ "config:StopConfigurationRecorder",<br>↓ "config:PutConfigurationRecorder"</sub> | |
-| 12 | `04-phase-cloud-identity-architecture.md:304` ▶ | "config:PutConfigurationRecorder" | |
+| 12 | `04-phase-cloud-identity-architecture.md:304` ▶ | "config:PutConfigurationRecorder" | **OK** — vendor reference (AWS Service Authorization Reference), https://docs.aws.amazon.com/service-authorization/latest/reference/list_config.html — "PutConfigurationRecorder Grants permission to create or update a customer managed configuration recorder" |
 | | | <sub>↑ "config:DeleteDeliveryChannel",<br>↓ ],</sub> | |
-| 13 | `04-phase-cloud-identity-architecture.md:312` ▶ | "iam:CreateServiceLinkedRole", | |
+| 13 | `04-phase-cloud-identity-architecture.md:312` ▶ | "iam:CreateServiceLinkedRole", | **OK** — vendor reference (AWS Service Authorization Reference), https://docs.aws.amazon.com/service-authorization/latest/reference/list_iam.html — "CreateServiceLinkedRole Grants permission to create an IAM role that allows an AWS service to perform actions on your behalf" |
 | | | <sub>↑ "NotAction": [<br>↓ "iam:DeleteServiceLinkedRole",</sub> | |
-| 14 | `04-phase-cloud-identity-architecture.md:313` ▶ | "iam:DeleteServiceLinkedRole", | |
+| 14 | `04-phase-cloud-identity-architecture.md:313` ▶ | "iam:DeleteServiceLinkedRole", | **OK** — vendor reference (AWS Service Authorization Reference), https://docs.aws.amazon.com/service-authorization/latest/reference/list_iam.html — "DeleteServiceLinkedRole Grants permission to delete an IAM role that is linked to a specific AWS service" |
 | | | <sub>↑ "iam:CreateServiceLinkedRole",<br>↓ "iam:GetAccountSummary",</sub> | |
-| 15 | `04-phase-cloud-identity-architecture.md:314` ▶ | "iam:GetAccountSummary", | |
+| 15 | `04-phase-cloud-identity-architecture.md:314` ▶ | "iam:GetAccountSummary", | **OK** — vendor reference (AWS Service Authorization Reference), https://docs.aws.amazon.com/service-authorization/latest/reference/list_iam.html — "GetAccountSummary Grants permission to retrieve information about IAM entity usage and IAM quotas in the AWS account" |
 | | | <sub>↑ "iam:DeleteServiceLinkedRole",<br>↓ "iam:ListAccountAliases",</sub> | |
-| 16 | `04-phase-cloud-identity-architecture.md:315` ▶ | "iam:ListAccountAliases", | |
+| 16 | `04-phase-cloud-identity-architecture.md:315` ▶ | "iam:ListAccountAliases", | **OK** — vendor reference (AWS Service Authorization Reference), https://docs.aws.amazon.com/service-authorization/latest/reference/list_iam.html — "ListAccountAliases Grants permission to list the account alias that is associated with the AWS account" |
 | | | <sub>↑ "iam:GetAccountSummary",<br>↓ "account:EnableRegion",</sub> | |
-| 17 | `04-phase-cloud-identity-architecture.md:316` ▶ | "account:EnableRegion", | |
+| 17 | `04-phase-cloud-identity-architecture.md:316` ▶ | "account:EnableRegion", | **OK** — vendor reference (AWS Service Authorization Reference), https://docs.aws.amazon.com/service-authorization/latest/reference/list_account.html — "EnableRegion Grants permission to enable use of a Region" |
 | | | <sub>↑ "iam:ListAccountAliases",<br>↓ "account:DisableRegion",</sub> | |
-| 18 | `04-phase-cloud-identity-architecture.md:317` ▶ | "account:DisableRegion", | |
+| 18 | `04-phase-cloud-identity-architecture.md:317` ▶ | "account:DisableRegion", | **OK** — vendor reference (AWS Service Authorization Reference), https://docs.aws.amazon.com/service-authorization/latest/reference/list_account.html — "DisableRegion Grants permission to disable use of a Region" |
 | | | <sub>↑ "account:EnableRegion",<br>↓ "account:ListRegions",</sub> | |
-| 19 | `04-phase-cloud-identity-architecture.md:318` ▶ | "account:ListRegions", | |
+| 19 | `04-phase-cloud-identity-architecture.md:318` ▶ | "account:ListRegions", | **OK** — vendor reference (AWS Service Authorization Reference), https://docs.aws.amazon.com/service-authorization/latest/reference/list_account.html — "ListRegions Grants permission to list the available Regions" |
 | | | <sub>↑ "account:DisableRegion",<br>↓ "account:GetAccountInformation",</sub> | |
-| 20 | `04-phase-cloud-identity-architecture.md:319` ▶ | "account:GetAccountInformation", | |
+| 20 | `04-phase-cloud-identity-architecture.md:319` ▶ | "account:GetAccountInformation", | **OK** — vendor reference (AWS Service Authorization Reference), https://docs.aws.amazon.com/service-authorization/latest/reference/list_account.html — "GetAccountInformation Grants permission to retrieve the account information for an account" |
 | | | <sub>↑ "account:ListRegions",<br>↓ "aws-portal:ViewBilling",</sub> | |
-| 21 | `04-phase-cloud-identity-architecture.md:328` ▶ | "s3:PutAccountPublicAccessBlock", | |
+| 21 | `04-phase-cloud-identity-architecture.md:328` ▶ | "s3:PutAccountPublicAccessBlock", | **OK** — vendor reference (AWS Service Authorization Reference), https://docs.aws.amazon.com/service-authorization/latest/reference/list_s3.html — "PutAccountPublicAccessBlock Grants permission to create or modify the PublicAccessBlock configuration for an AWS account" |
 | | | <sub>↑ "cur:*",<br>↓ "s3:GetAccountPublicAccessBlock"</sub> | |
-| 22 | `04-phase-cloud-identity-architecture.md:329` ▶ | "s3:GetAccountPublicAccessBlock" | |
+| 22 | `04-phase-cloud-identity-architecture.md:329` ▶ | "s3:GetAccountPublicAccessBlock" | **OK** — vendor reference (AWS Service Authorization Reference), https://docs.aws.amazon.com/service-authorization/latest/reference/list_s3.html — "GetAccountPublicAccessBlock Grants permission to retrieve the PublicAccessBlock configuration for an AWS account" |
 | | | <sub>↑ "s3:PutAccountPublicAccessBlock",<br>↓ ],</sub> | |
-| 23 | `04-phase-cloud-identity-architecture.md:334` ▶ | "aws:PrincipalArn": "arn:aws:iam::*:root" | |
+| 23 | `04-phase-cloud-identity-architecture.md:334` ▶ | "aws:PrincipalArn": "arn:aws:iam::*:root" | **OK** — vendor reference (AWS global condition context keys), https://docs.aws.amazon.com/IAM/latest/UserGuide/reference_policies_condition-keys.html — "aws:PrincipalArn Use this key to compare the Amazon Resource Name (ARN) of the principal that made the request"; the same page lists `arn:aws:iam::*:root` as an example value, and StringLike is documented as supporting `*` wildcards |
 | | | <sub>↑ "StringLike": {<br>↓ }</sub> | |
-| 24 | `04-phase-cloud-identity-architecture.md:348` | **`ProtectTheAuditTrail` denies the actions rather than the resource.** `cloudtrail:StopLogging` with `Resource: "*"` denies stopping any trail in the account. Writing `Resource` as a specific trail ARN would leave the next trail unprotected, which is the fail … | |
-| 25 | `04-phase-cloud-identity-architecture.md:411` ▶ | "ec2:Describe*", | |
+| 24 | `04-phase-cloud-identity-architecture.md:348` | **`ProtectTheAuditTrail` denies the actions rather than the resource.** `cloudtrail:StopLogging` with `Resource: "*"` denies stopping any trail in the account. Writing `Resource` as a specific trail ARN would leave the next trail unprotected, which is the fail … | **UNVERIFIABLE** — a design rationale about how broad a deny should be, not a fact about the world; note `cloudtrail:StopLogging` does accept a required `trail` resource type, so the claim is a breadth judgement rather than a technical constraint |
+| 25 | `04-phase-cloud-identity-architecture.md:411` ▶ | "ec2:Describe*", | **OK** — vendor reference (AWS Service Authorization Reference), https://docs.aws.amazon.com/service-authorization/latest/reference/list_ec2.html — `ec2:Describe*` resolves to 194 real EC2 actions, e.g. "DescribeInstances Grants permission to describe one or more instances" |
 | | | <sub>↑ "sqs:*",<br>↓ "ecr:*",</sub> | |
-| 26 | `04-phase-cloud-identity-architecture.md:414` ▶ | "sts:GetCallerIdentity", | |
+| 26 | `04-phase-cloud-identity-architecture.md:414` ▶ | "sts:GetCallerIdentity", | **OK** — vendor reference (AWS Service Authorization Reference), https://docs.aws.amazon.com/service-authorization/latest/reference/list_sts.html — "GetCallerIdentity Grants permission to obtain details about the IAM identity whose credentials are used to call the API" |
 | | | <sub>↑ "ecs:*",<br>↓ "tag:GetResources"</sub> | |
-| 27 | `04-phase-cloud-identity-architecture.md:415` ▶ | "tag:GetResources" | |
+| 27 | `04-phase-cloud-identity-architecture.md:415` ▶ | "tag:GetResources" | **OK** — vendor reference (AWS Service Authorization Reference), https://docs.aws.amazon.com/service-authorization/latest/reference/list_resourcegroupstaggingapi.html — "GetResources Grants permission to return tagged or previously tagged resources in the specified AWS Region"; the prefix is genuinely `tag:`, not a typo |
 | | | <sub>↑ "sts:GetCallerIdentity",<br>↓ ],</sub> | |
-| 28 | `04-phase-cloud-identity-architecture.md:423` ▶ | "iam:Get*", | |
+| 28 | `04-phase-cloud-identity-architecture.md:423` ▶ | "iam:Get*", | **OK** — vendor reference (AWS Service Authorization Reference), https://docs.aws.amazon.com/service-authorization/latest/reference/list_iam.html — `iam:Get*` resolves to 34 real IAM actions, e.g. "GetAccessKeyLastUsed", "GetAccountAuthorizationDetails", "GetAccountSummary" |
 | | | <sub>↑ "Action": [<br>↓ "iam:List*",</sub> | |
-| 29 | `04-phase-cloud-identity-architecture.md:424` ▶ | "iam:List*", | |
+| 29 | `04-phase-cloud-identity-architecture.md:424` ▶ | "iam:List*", | **OK** — vendor reference (AWS Service Authorization Reference), https://docs.aws.amazon.com/service-authorization/latest/reference/list_iam.html — `iam:List*` resolves to 38 real IAM actions, e.g. "ListAccountAliases", "ListAccessKeys", "ListAttachedGroupPolicies" |
 | | | <sub>↑ "iam:Get*",<br>↓ "iam:PassRole"</sub> | |
-| 30 | `04-phase-cloud-identity-architecture.md:425` ▶ | "iam:PassRole" | |
+| 30 | `04-phase-cloud-identity-architecture.md:425` ▶ | "iam:PassRole" | **OK** — vendor reference (AWS Service Authorization Reference), https://docs.aws.amazon.com/service-authorization/latest/reference/list_iam.html — "PassRole Grants permission to pass a role to a service" |
 | | | <sub>↑ "iam:List*",<br>↓ ],</sub> | |
-| 31 | `04-phase-cloud-identity-architecture.md:440` ▶ | "ec2:Describe*", | |
+| 31 | `04-phase-cloud-identity-architecture.md:440` ▶ | "ec2:Describe*", | **OK** — vendor reference (AWS Service Authorization Reference), https://docs.aws.amazon.com/service-authorization/latest/reference/list_ec2.html — `ec2:Describe*` resolves to 194 real EC2 actions, e.g. "DescribeInstances Grants permission to describe one or more instances" |
 | | | <sub>↑ "sqs:*",<br>↓ "ecr:*",</sub> | |
-| 32 | `04-phase-cloud-identity-architecture.md:443` ▶ | "sts:GetCallerIdentity", | |
+| 32 | `04-phase-cloud-identity-architecture.md:443` ▶ | "sts:GetCallerIdentity", | **OK** — vendor reference (AWS Service Authorization Reference), https://docs.aws.amazon.com/service-authorization/latest/reference/list_sts.html — "GetCallerIdentity Grants permission to obtain details about the IAM identity whose credentials are used to call the API" |
 | | | <sub>↑ "ecs:*",<br>↓ "tag:GetResources",</sub> | |
-| 33 | `04-phase-cloud-identity-architecture.md:444` ▶ | "tag:GetResources", | |
+| 33 | `04-phase-cloud-identity-architecture.md:444` ▶ | "tag:GetResources", | **OK** — vendor reference (AWS Service Authorization Reference), https://docs.aws.amazon.com/service-authorization/latest/reference/list_resourcegroupstaggingapi.html — "GetResources Grants permission to return tagged or previously tagged resources in the specified AWS Region"; the prefix is genuinely `tag:` |
 | | | <sub>↑ "sts:GetCallerIdentity",<br>↓ "iam:Get*",</sub> | |
-| 34 | `04-phase-cloud-identity-architecture.md:445` ▶ | "iam:Get*", | |
+| 34 | `04-phase-cloud-identity-architecture.md:445` ▶ | "iam:Get*", | **OK** — vendor reference (AWS Service Authorization Reference), https://docs.aws.amazon.com/service-authorization/latest/reference/list_iam.html — `iam:Get*` resolves to 34 real IAM actions, e.g. "GetAccessKeyLastUsed", "GetAccountAuthorizationDetails", "GetAccountSummary" |
 | | | <sub>↑ "tag:GetResources",<br>↓ "iam:List*",</sub> | |
-| 35 | `04-phase-cloud-identity-architecture.md:446` ▶ | "iam:List*", | |
+| 35 | `04-phase-cloud-identity-architecture.md:446` ▶ | "iam:List*", | **OK** — vendor reference (AWS Service Authorization Reference), https://docs.aws.amazon.com/service-authorization/latest/reference/list_iam.html — `iam:List*` resolves to 38 real IAM actions, e.g. "ListAccountAliases", "ListAccessKeys", "ListAttachedGroupPolicies" |
 | | | <sub>↑ "iam:Get*",<br>↓ "iam:PassRole"</sub> | |
-| 36 | `04-phase-cloud-identity-architecture.md:447` ▶ | "iam:PassRole" | |
+| 36 | `04-phase-cloud-identity-architecture.md:447` ▶ | "iam:PassRole" | **OK** — vendor reference (AWS Service Authorization Reference), https://docs.aws.amazon.com/service-authorization/latest/reference/list_iam.html — "PassRole Grants permission to pass a role to a service" |
 | | | <sub>↑ "iam:List*",<br>↓ ],</sub> | |
-| 37 | `04-phase-cloud-identity-architecture.md:455` ▶ | "iam:CreateUser", | |
+| 37 | `04-phase-cloud-identity-architecture.md:455` ▶ | "iam:CreateUser", | **OK** — vendor reference (AWS Service Authorization Reference), https://docs.aws.amazon.com/service-authorization/latest/reference/list_iam.html — "CreateUser Grants permission to create a new IAM user" |
 | | | <sub>↑ "Action": [<br>↓ "iam:CreateAccessKey",</sub> | |
-| 38 | `04-phase-cloud-identity-architecture.md:456` ▶ | "iam:CreateAccessKey", | |
+| 38 | `04-phase-cloud-identity-architecture.md:456` ▶ | "iam:CreateAccessKey", | **OK** — vendor reference (AWS Service Authorization Reference), https://docs.aws.amazon.com/service-authorization/latest/reference/list_iam.html — "CreateAccessKey Grants permission to create access key and secret access key for the specified IAM user" |
 | | | <sub>↑ "iam:CreateUser",<br>↓ "iam:CreateLoginProfile",</sub> | |
-| 39 | `04-phase-cloud-identity-architecture.md:457` ▶ | "iam:CreateLoginProfile", | |
+| 39 | `04-phase-cloud-identity-architecture.md:457` ▶ | "iam:CreateLoginProfile", | **OK** — vendor reference (AWS Service Authorization Reference), https://docs.aws.amazon.com/service-authorization/latest/reference/list_iam.html — "CreateLoginProfile Grants permission to create a password for the specified IAM user" |
 | | | <sub>↑ "iam:CreateAccessKey",<br>↓ "iam:UpdateLoginProfile",</sub> | |
-| 40 | `04-phase-cloud-identity-architecture.md:458` ▶ | "iam:UpdateLoginProfile", | |
+| 40 | `04-phase-cloud-identity-architecture.md:458` ▶ | "iam:UpdateLoginProfile", | **OK** — vendor reference (AWS Service Authorization Reference), https://docs.aws.amazon.com/service-authorization/latest/reference/list_iam.html — "UpdateLoginProfile Grants permission to change the password for the specified IAM user" |
 | | | <sub>↑ "iam:CreateLoginProfile",<br>↓ "iam:AttachUserPolicy",</sub> | |
-| 41 | `04-phase-cloud-identity-architecture.md:459` ▶ | "iam:AttachUserPolicy", | |
+| 41 | `04-phase-cloud-identity-architecture.md:459` ▶ | "iam:AttachUserPolicy", | **OK** — vendor reference (AWS Service Authorization Reference), https://docs.aws.amazon.com/service-authorization/latest/reference/list_iam.html — "AttachUserPolicy Grants permission to attach a managed policy to the specified IAM user" |
 | | | <sub>↑ "iam:UpdateLoginProfile",<br>↓ "iam:PutUserPolicy",</sub> | |
-| 42 | `04-phase-cloud-identity-architecture.md:460` ▶ | "iam:PutUserPolicy", | |
+| 42 | `04-phase-cloud-identity-architecture.md:460` ▶ | "iam:PutUserPolicy", | **OK** — vendor reference (AWS Service Authorization Reference), https://docs.aws.amazon.com/service-authorization/latest/reference/list_iam.html — "PutUserPolicy Grants permission to create or update an inline policy document that is embedded in the specified IAM user" |
 | | | <sub>↑ "iam:AttachUserPolicy",<br>↓ "iam:AddUserToGroup",</sub> | |
-| 43 | `04-phase-cloud-identity-architecture.md:461` ▶ | "iam:AddUserToGroup", | |
+| 43 | `04-phase-cloud-identity-architecture.md:461` ▶ | "iam:AddUserToGroup", | **OK** — vendor reference (AWS Service Authorization Reference), https://docs.aws.amazon.com/service-authorization/latest/reference/list_iam.html — "AddUserToGroup Grants permission to add an IAM user to the specified IAM group" |
 | | | <sub>↑ "iam:PutUserPolicy",<br>↓ "organizations:*",</sub> | |
-| 44 | `04-phase-cloud-identity-architecture.md:477` | **The fourth statement denies even the things the first allows.** `iam:PassRole` is in the first statement because roles that create compute need it. `iam:CreateUser` and `iam:CreateAccessKey` are not, and the fourth statement makes that explicit rather than r … | |
-| 45 | `04-phase-cloud-identity-architecture.md:508` ▶ | "sts:GetCallerIdentity", | |
+| 44 | `04-phase-cloud-identity-architecture.md:477` | **The fourth statement denies even the things the first allows.** `iam:PassRole` is in the first statement because roles that create compute need it. `iam:CreateUser` and `iam:CreateAccessKey` are not, and the fourth statement makes that explicit rather than r … | **WRONG** — `iam:PassRole` is in the **second** statement (`PermitReadOnlyIdentityContext`, line 425), not the first; the fourth statement therefore overlaps the second, not the first, and denies none of the first statement's actions — https://docs.aws.amazon.com/service-authorization/latest/reference/list_iam.html — "PassRole Grants permission to pass a role to a service" |
+| 45 | `04-phase-cloud-identity-architecture.md:508` ▶ | "sts:GetCallerIdentity", | **OK** — vendor reference (AWS Service Authorization Reference), https://docs.aws.amazon.com/service-authorization/latest/reference/list_sts.html — "GetCallerIdentity Grants permission to obtain details about the IAM identity whose credentials are used to call the API" |
 | | | <sub>↑ "s3:*", "dynamodb:*", "lambda:*", "logs:*", "cloudwatch:*",<br>↓ ]</sub> | |
