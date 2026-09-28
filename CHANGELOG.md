@@ -8,6 +8,26 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### Added
 
+- **`scripts/audit-lesson-code.mjs` and `scripts/test-audit-lesson-code.mjs` — the first guard to
+  ask whether the code in a lesson parses, wired into CI with its 27 controls.** D-036 named the
+  class no guard could see: a fenced block that is internally consistent, perfectly clear, and does
+  not work. The comprehension passes found three real instances by reading — cyber-12's auto-closer
+  printed a name defined nowhere, its `from lookup import` named a file the lesson never created,
+  and cyber-10's Wazuh rule matched positively for the parents it meant to *exclude*. Nothing asked
+  a block whether it was valid. This reads all 62 Markdown files under `career-roadmaps/` and checks
+  all 650 blocks: 22 JSON blocks parse, 14 are checked against the identity-policy grammar that
+  `JSON.parse` cannot see (`valid JSON` and `a working IAM policy` are different claims), and 277
+  shell-dialect blocks are checked for delimiter balance per block. Four findings are reported for a
+  reader rather than failed, because whether a hunt's second stage *should* be narrower than its
+  first is a judgement about the prose. **A guard that fails on correct content gets switched off,
+  which loses the one case worth catching.** The general form: *the report must state what it did not
+  check, or a green run is unreadable.*
+- **`docs/DECISIONS.md` → D-075**, on the four ways the new guard was wrong about its own coverage
+  before it was finished — including that it read 34 of 62 files and reported 649 blocks where the
+  corpus holds 650, and nothing noticed. The denominator is now a control that fails if the file list
+  narrows, and the 650 was reconciled against a second, independently written extractor rather than
+  asserted by the implementation that produced it. **A figure in a comment is a figure that goes
+  stale, and a total asserted by the only implementation that computed it proves nothing.**
 - **`docs/HANDOFF.md` rewritten, and the state it held was stale in the dangerous direction.** The
   previous version described the advance pass as one-fifth done and instructed a future reader to
   fill 508 verdict columns that are already filled. A handoff that would have had someone re-do a
@@ -603,6 +623,34 @@ ed to the Views list that actually exists; the three M2 pages no longer describe
 - `learning-site/README.md` — removed a duplicated `## Layout` section; documented the new pages, hooks, and commands; status brought up to M2.
 
 ### Fixed
+
+- **A hunt's second stage silently dropped two of the first stage's four match criteria, so a
+  stage-1 hit could never reach stage 2** (`advance-roadmap/02-phase-threat-hunting.md`). The two
+  stages share the identifier `HUNT-2026-021` and are linked by *re-typing the same filter*, not
+  by inheriting the first stage's output — KQL cannot reference a previous query's result set. Stage
+  2 named `rundll32.exe`, `regsvr32.exe` and `mshta.exe` where stage 1 also named `installutil.exe`,
+  and four path roots where stage 1 named five, omitting `\Users\Public\`. An `installutil` proxy
+  execution from `C:\Users\Public` was therefore found by stage 1 and unreachable by stage 2, with
+  no error and no empty result to signal it. The filter now matches, and the phase explains that the
+  two lists are load-bearing rather than incidental. **A narrower second stage is the one defect
+  class in a hunt that returns rows and is still wrong**, so `audit-lesson-code.mjs` now reports it.
+- **Real PowerShell sat under a ` ```text ` fence and was therefore checked by nothing**
+  (`it-roadmap/05-phase-sysadmin-basics.md`). The fence is relabelled `powershell`. The lesson-code
+  guard takes a block's language from its info string and never infers it — deliberately, so that
+  teaching evidence is not mistaken for a payload — which means a mislabelled block is invisible to
+  every tier at once. The guard now prints how many blocks sit outside its language set, so the
+  blind spot is a number rather than an assumption.
+- **A dropped `)` inside a `$( )` subexpression was invisible to the balance counter.** PowerShell
+  treats `$( )` inside a double-quoted string as code, and the first version skipped every character
+  once a quote was open — so `"$($x.Count"` was silent while PowerShell's own parser rejected it. The
+  construct occurs six times in the corpus and happened to be balanced six times, which is luck
+  rather than a rule. It is fixed and controlled. **A guard's controls written only by its own
+  author test that author's assumptions**; the defect was found by a second implementation written
+  from the specification.
+- **A bash heredoc body was counted as code.** `advance-03`'s one heredoc is a Markdown decision log
+  and balances today only because it contains no brace or paren; one line of ordinary prose would
+  have turned the build red on a correct file. Here-strings (`@"…"@`) and heredocs (`<<WORD`…) are
+  now treated as DATA regions and skipped, since their contents are never tokenised.
 
 - **A backslash-continued command was collected one line at a time, so none of the pieces was
   checkable** (`scripts/extract-claims.mjs`). A four-line

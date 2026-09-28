@@ -11,7 +11,7 @@ starting something new.
 |---|---|
 | Branch | `main`, clean tree, **fully pushed** — `d83fb25..e333ce9` |
 | This pass | `ffe8445` (worklist and the 8 classes it needed), `50e52f8` (Sigma + the new guard), `ea2d55b` (ATT&CK), `77fe6dd` (queries), `e333ce9` (the 508-row result) |
-| Guards | 23 content guards, 15 control suites, 16 site suites, **148 browser checks** — all green |
+| Guards | 24 content guards, 16 control suites, 16 site suites, **148 browser checks** — all green |
 | All three tracks | IT 225 rows, cyber 411 rows, advance 508 rows — **1,144 recorded claim rows** |
 
 ## The advance track's result
@@ -56,7 +56,38 @@ proves it.
 
 **Done and guarded.** The advance track's claims. The Sigma schema guard
 (`audit-sigma.mjs`, 13 controls) is in CI and already found a real defect in a
-"completed" track.
+"completed" track. **And now the code itself**, which until 2026-09-29 nothing
+had ever parsed: `audit-lesson-code.mjs` (27 controls) reads all 62 Markdown
+files under `career-roadmaps/` and checks all 650 fenced blocks, and it is the
+first guard to cover the defect D-036 named. Three of its four tiers gate; the
+fourth reports, on purpose.
+
+**It found one real defect on its first run, and that defect is now fixed.**
+`advance-02:482` was stage 2 of a hunt and named three proxy binaries where
+stage 1 named four, dropping `installutil.exe` and `\Users\Public\`. Because the
+two stages are linked by re-typing the same filter rather than by inheriting
+stage 1's output, an `installutil` hit that stage 1 returned could never reach
+stage 2 — and the query still returned rows, just never the interesting ones. The
+filter now matches and the phase explains why it must.
+
+**Read that guard's coverage table, not its exit code.** It ends every run with
+an explicit list of what it does *not* check — whether a Python or PowerShell
+block compiles, whether a block *runs*, whether a query is a good detection — and
+a count of how many blocks sit under a fence label that opts them out entirely.
+**The cross-notation tier reports rather than gates**, because whether a hunt's
+second stage *should* be narrower than its first is a judgement about intent,
+not a fact about the text. It reports only the narrowing direction, since a wider
+second stage loses nothing; an earlier version reported any difference at all and
+produced four findings for that one real defect, which is the number that trains
+people to skip a report.
+
+**One blind spot worth knowing about, because it is a design decision and not an
+oversight:** the guard is checked against real PowerShell 5.1 by hand, and an
+independent reimplementation of it found a live false negative — a dropped `)`
+inside a `$( )` subexpression, which occurs six times in the corpus and is
+balanced six times by luck rather than by rule. That is fixed and now has its own
+control. **It is the reason a guard's controls should be written by something that
+is not the guard.**
 
 **Two rot classes found and deliberately left unguarded**, recorded in the pass
 document rather than left implicit:

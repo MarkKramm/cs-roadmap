@@ -300,6 +300,21 @@ jobs:
         run: node scripts/audit-sigma.mjs
       - name: Test sigma-audit controls
         run: node scripts/test-audit-sigma.mjs
+      # A lesson's code block can be internally coherent, clearly written, and
+      # not run. The comprehension passes found that class three times by
+      # reading — cyber-12's auto-closer printed a name defined nowhere, its
+      # `from lookup import` named a file the lesson never created, and
+      # cyber-10's Wazuh rule matched positively for the parents it meant to
+      # EXCLUDE, so it fired on the management tool it was presented as the
+      # inverse of. No other guard asks whether a fenced block parses at all,
+      # so this covers 650 of them for the first time.
+      #
+      # NOT wired with `--report`. That flag always exits 0, so a green step
+      # would mean nothing — the D-022 rule the terms step below also cites.
+      - name: Audit code inside lessons
+        run: node scripts/audit-lesson-code.mjs
+      - name: Test lesson-code guard controls
+        run: node scripts/test-audit-lesson-code.mjs
       # The acronym audit prints a report and exits 0 whatever it finds: whether
       # a reader can decode "SSID" without help is a judgement about the reader,
       # not a claim about the text agreeing with itself, so by D-022 it is a

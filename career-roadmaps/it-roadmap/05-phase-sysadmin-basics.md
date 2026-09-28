@@ -1119,7 +1119,7 @@ The error is a **file lock**: something held a file open at 23:00 and the backup
 
 The failures began on a specific date. Something changed on or shortly before it. Ask, then check:
 
-```text
+```powershell
 Get-WinEvent -FilterHashtable @{LogName='System'; StartTime=(Get-Date).AddDays(-7)} -MaxEvents 200 |
     Where-Object { $_.ProviderName -match 'Service Control Manager|Windows Update|Backup' } |
     Select-Object TimeCreated, ProviderName, Id, Message -First 20

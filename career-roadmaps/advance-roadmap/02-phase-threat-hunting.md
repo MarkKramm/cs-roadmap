@@ -482,12 +482,12 @@ Now the same hypothesis joined to network evidence, which is where a hit becomes
 ```kql
 // HUNT-2026-021, stage 2 — did any of those proxy executions talk out?
 let lookback = 30d;
-let proxies = dynamic(["rundll32.exe", "regsvr32.exe", "mshta.exe"]);
+let proxies = dynamic(["rundll32.exe", "regsvr32.exe", "mshta.exe", "installutil.exe"]);
 let suspicious =
     DeviceProcessEvents
     | where Timestamp > ago(lookback)
     | where FileName in~ (proxies)
-    | where ProcessCommandLine has_any (@"\AppData\", @"\Temp\", @"\Downloads\", @"\ProgramData\")
+    | where ProcessCommandLine has_any (@"\AppData\", @"\Temp\", @"\Downloads\", @"\ProgramData\", @"\Users\Public\")
     | project DeviceId, DeviceName, ProcessId = tostring(ProcessId), Timestamp;
 suspicious
 | join kind=inner (
@@ -506,6 +506,12 @@ suspicious
 ```
 
 **The time bound is the part beginners leave out.** Joining on process ID alone across a 30-day window will match a process ID that was reused by an unrelated process days later. `between (Timestamp .. (Timestamp + 10m))` constrains the join to a plausible causal gap. **Process IDs are recycled, and a join without a time bound is a false-positive generator.**
+
+**The `proxies` list and the path list are identical to stage 1, and that is load-bearing.** Stage 2 does not join against stage 1's *output* — it recomputes `suspicious` from `DeviceProcessEvents` with its own filter, because KQL cannot reference a previous query's result set. So the two stages are linked by **re-typing the same filter**, not by inheritance.
+
+Shorten either list and the join silently stops seeing events. Drop `installutil.exe` and every `installutil` hit stage 1 found disappears from stage 2, with no error and no empty result to warn you. **This is the failure mode a reader is least likely to notice, because the query still returns rows — just fewer, and never the interesting ones.** This phase originally had exactly that defect: stage 2 named three proxies where stage 1 named four.
+
+`scripts/audit-lesson-code.mjs` now checks for it. It reports when a block carrying the same `HUNT-` identifier matches a strict *subset* of the block it follows, because a wider second stage loses nothing and only the narrowing direction does.
 
 #### SPL — Splunk
 
