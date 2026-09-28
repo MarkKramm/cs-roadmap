@@ -2,6 +2,79 @@
 
 A chronological record of working sessions. Newest first.
 
+## 2026-09-28 (resumed) — The advance track's claim pass: 508 rows, 17 wrong claims, and a guard that found an eighth
+
+**Goal:** finish the pass the previous session paused on — verify the advance track's
+508 outstanding technical claims against primary sources, fix what is wrong, and record the result.
+
+**Done. All 508 rows verified: 444 `OK`, 17 `WRONG`, 47 `UNVERIFIABLE`, none outstanding.**
+
+**The 17 wrong claims, and what each one cost a reader.**
+
+- **Four are one defect repeated: `date: 2026/03/14` in six places across three phases.** The
+  specification mandates ISO 8601 with dashes and the normative JSON schema constrains the value
+  with a regex slashes cannot match. **Phase 07 was already conformant, so the corpus contradicted
+  itself** — and no guard could see it, because every guard here checks the text against itself.
+- **The guard written from those two constraints then found an eighth instance in the cyber
+  track**, in a phase whose claim verification has been marked complete since 2026-09-18. Seven
+  phases of careful reading missed what a 160-line regex catches. That is the argument for
+  `audit-sigma.mjs` over another pass, and it is now in CI with 13 controls.
+- **`sigma check --fail-on-issues` cannot enforce an empty `falsepositives` list, and the phase
+  said it could in four places.** pySigma's complete built-in validator list contains no
+  validator that inspects that field. A reader following the phase builds a CI gate that
+  silently passes the rules it was meant to catch.
+- **A hunt query that returned nothing.** `| where X IN ("*\\rundll32.exe", …)` — Splunk's `in`
+  function forbids wildcards in its value list, and the `IN` operator honours them only with
+  `search` and `tstats`. No results reads as "no threats", so the control was silently absent
+  rather than visibly broken. Rewritten to match the leaf filename, and the phase now explains
+  why the shape most online examples use does not work.
+- **A revoked ATT&CK ID and a retired tactic.** `T1562.001` is a bare redirect to `T1685`, and
+  the corpus cited it under its *parent's* name. Separately, Defense Evasion is no longer an
+  Enterprise tactic — TA0005 is Stealth, TA0112 Defense Impairment is new — so three Sigma tags
+  and two prose uses named something the matrix retired.
+- **An audit filter that missed its own target.** `OperationName` was matched against
+  `Add member to role outside of PIM`; the documented string ends `(permanent)`.
+- **A `kubectl describe` claim the tool does not support**, read from kubectl's own source: it
+  prints `<set to the key 'X' in secret 'Y'>`, a reference, never the value.
+- **An AWS CLI payload with the wrong nesting**, a **NIST publication under its superseded
+  title** (SP 800-50 Rev. 1 was retitled in September 2024), and **a process-tree column off by
+  one generation** (`InitiatingProcessParentFileName` names the grandparent).
+
+**Every `WRONG` was re-checked against the primary source before any content changed**, and
+**one verifier's `WRONG` verdict turned out to be wrong too.** The first report on the policy
+walkthrough concluded that a deny statement "denies nothing the allow statement permits" — the
+JSON beside it re-denies five services, so the finding was half wrong and the fix was one
+statement number rather than the argument. D-038's rule cuts both ways, and this pass is the
+case that proves it.
+
+**Two defects in the recorder, both found by running it, and both instructive.**
+
+1. **It compared a row's cell count against 4, when a markdown row splits into 6** — the empty
+   string either side of the outer pipes included. So it rejected all 508 rows and reported a
+   malformed table where there was none. A check written from an assumption about the format
+   rather than from the format rejects correct input, and its failure looks like corruption.
+2. **It required a closing `**` in a verdict**, so 17 finished rows written `**UNVERIFIABLE —
+   reason` were reported as "has no verdict — a pack with an empty cell is work in progress". A
+   subagent caught it and said so rather than working around it: *the rows are invisible to the
+   recorder, not missing.* The recorder now accepts both forms and emits the canonical one,
+   because a verdict the reader can see and the guard cannot is the exact defect this work exists
+   to prevent.
+
+**The recorder also merges chunked packs rather than replacing them.** Four packs of one class
+share a heading, so `packs.set` on the class title meant part 2 silently replaced part 1 — and
+the recorder reported 260 rows as having no verdict, in files it had just read. A keyed store
+that overwrites on a duplicate key is fine for values and wrong for accumulating sets, and the
+difference only shows up once a class is big enough to be chunked.
+
+**Verified:** 23 content guards, 15 control suites, 16 site suites, **148 browser checks**, and
+`audit-verdict-counts --track advance` MATCH on all 15 classes and 508 rows. The three tracks now
+stand at **1,144 recorded claim rows** between them (IT 225, cyber 411, advance 508).
+
+**Two rot classes found and deliberately NOT guarded**, because the honest guard is a snapshot
+with an expiry date and writing that snapshot is its own piece of work: ATT&CK revoked IDs and
+tactic slugs, and NIST *retitles* (the existing `audit-nist-current.mjs` catches withdrawals
+only). Both are recorded in the pass document.
+
 ## 2026-09-28 — The advance track gets a claim worklist, and the instrument is found to be aimed elsewhere
 
 **Goal:** open the largest remaining verification gap — the seven-phase advance track

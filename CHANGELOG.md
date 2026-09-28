@@ -33,6 +33,36 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
     compares it against the generator's own sentence, and **states which checks it skipped and
     why** — a green line that reads like a finished verification is the one output this guard must
     not be able to produce.
+  - **The advance track is now claim-verified: 508 rows, 444 `OK`, 17 `WRONG`, 47 `UNVERIFIABLE`,
+    none outstanding** (`docs/ADVANCE-CLAIM-VERIFICATION.md`). All 17 wrong claims are fixed in the
+    corpus, each re-checked against a primary source before any content changed.
+    - **A hunt query that matched nothing.** `| where X IN ("*\\rundll32.exe", …)` — Splunk's `in`
+      function forbids wildcards in its value list, and the `IN` operator honours them only with
+      `search` and `tstats`, not `where`. No results reads as "no threats", so the control was
+      silently absent rather than visibly broken. Rewritten to match the leaf filename exactly.
+    - **`sigma check --fail-on-issues` does not enforce `falsepositives`**, though the phase said
+      it did in four places. pySigma's complete built-in validator list contains no validator that
+      inspects that field, so the gate a reader would have built passes exactly the rules it was
+      meant to catch. Corrected, with the reasoning kept.
+    - **A revoked ATT&CK technique and a retired tactic.** `T1562.001` is a bare redirect to
+      `T1685`; Defense Evasion is no longer an Enterprise tactic (TA0005 is Stealth, TA0112
+      Defense Impairment is new), so three Sigma tags named a tactic the matrix had retired.
+    - **An Entra audit filter whose literal omitted the `(permanent)` that makes the string real**,
+      so the one operation the phase called "the interesting one" never matched; a **`kubectl
+      describe` claim the tool does not support**; **a NIST publication under its superseded
+      title** (SP 800-50 Rev. 1 was retitled in September 2024); **an AWS CLI payload with the
+      wrong nesting**; and **a process-tree column off by one generation**.
+    - **A verifier's `WRONG` verdict needed checking as much as its `OK` verdicts.** The first
+      report on the policy walkthrough concluded a deny statement permits nothing the allow
+      statement permits; the JSON beside it re-denies five services, so the finding was half wrong.
+- **`scripts/record-advance-verdicts.mjs` — a recorder that reads verdicts back out of the
+  worklist packs**, so the document is reproducible from disk. This is the difference from the IT
+  track, whose verdicts were never written into its document at all and whose header read
+  "verified" over 225 empty verdict columns for sixteen days. It refuses to record a row whose
+  cell count is wrong rather than storing a fragment of a verdict, accepts both `**OK**` and
+  `**OK` spellings, merges chunked packs instead of replacing them, normalises the bold form so
+  the verdict guard can read it, and treats an empty pack directory as the finished state it is.
+  Wired into CI alongside the other four recorders.
 
 - **The GRC/OT curriculum paper grew from 20 questions to 49, and the corpus total now has a guard
   that can fail** (`career-roadmaps/exams/curriculum-grc-and-ot.md`). 28 questions were added on the

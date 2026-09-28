@@ -582,8 +582,10 @@ Suppose a role has been running for a month and you want to know what it actuall
 aws accessanalyzer start-policy-generation \
   --policy-generation-details '{
     "principalArn": "arn:aws:iam::444455556666:role/PaymentsApiTaskRole",
-    "cloudTrailDetails": {
-      "trailArn": "arn:aws:cloudtrail:ap-southeast-1:444455556666:trail/org-trail",
+    "CloudTrailDetails": {
+      "trails": [
+        { "cloudTrailArn": "arn:aws:cloudtrail:ap-southeast-1:444455556666:trail/org-trail" }
+      ],
       "accessRole": "arn:aws:iam::444455556666:role/AccessAnalyzerServiceRole",
       "startTime": "2025-12-14T00:00:00Z",
       "endTime": "2026-03-14T00:00:00Z"
@@ -593,6 +595,8 @@ aws accessanalyzer start-policy-generation \
 # Poll for the job, then retrieve the generated policy.
 aws accessanalyzer get-generated-policy --job-id <job-id>
 ```
+
+**That nesting is not stylistic.** `CloudTrailDetails` holds a `trails` *list*, each entry keyed by `cloudTrailArn` — the singular `trailArn` is not a member at all — and `accessRole`, `startTime` and `endTime` are siblings of that list rather than fields inside a trail. AWS returns a parameter error for the flat shape, and the failure names a missing `trails` rather than the field you got wrong, so it is worth copying the nesting rather than flattening it.
 
 If you do not have Access Analyzer available — and on a personal account you may not — the same result comes from a query over the trail, because the log is the ground truth either way.
 
@@ -1003,7 +1007,7 @@ A pod that needs to read from object storage has three options, and only one of 
 
 | Option | What it does | Verdict |
 |---|---|---|
-| A secret containing a static cloud key | Mounted into the pod as an environment variable or file | The key is now in etcd, in any backup, and in anyone's `kubectl describe` output |
+| A secret containing a static cloud key | Mounted into the pod as an environment variable or file | The key is in etcd in plain sight, and in every backup of etcd that has ever been taken |
 | The node's instance role | Every pod on the node inherits the node's cloud permissions | Any pod that can schedule on the node can reach the cloud |
 | **A service account with a workload identity** | The pod exchanges its projected service account token for cloud credentials | The correct answer: per-pod identity, no static secret, short-lived |
 

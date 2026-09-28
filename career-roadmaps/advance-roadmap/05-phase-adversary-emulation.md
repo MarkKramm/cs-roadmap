@@ -948,7 +948,11 @@ Two deliberate choices in that rule are worth naming.
 
 **The level is `medium`, not `high`.** Registry run keys are written legitimately in almost every environment, by user-installed software and by updaters. A `high` severity here would produce a rule that analysts stop reading. `Medium`, with the two filters reducing volume, is the honest rating — and the emulation is what makes that visible, because you can count how many benign writers exist in your own lab before you ship.
 
-**The two filters reduce volume at the cost of coverage.** A malicious binary copied into `C:\Program Files\` and writing a run key will be filtered out. That is a conscious trade, and it belongs in the rule's description so that the next person to read it knows it was a decision rather than an oversight. **Every filter you add buys quiet at the price of blindness, and the price should be written down.**
+**The two filters reduce volume at the cost of coverage.** They do not filter the same thing, and confusing them is how a tuning decision turns into a blind spot.
+
+`filter_installers` keys on `Image|endswith`, so it drops a write by a *named installer binary*. `filter_signed_paths` keys on `Details|contains` — and `Details` is the registry **value's data**, the path the Run entry points at, not the location of the binary that wrote it. So what gets dropped is a Run entry pointing into a signed or well-known directory.
+
+**A binary sitting in `C:\Program Files\` that writes a Run value pointing somewhere else still alerts**, which is the correct outcome: where the writer lives on disk is not evidence that the writer is legitimate. That is a conscious trade, and it belongs in the rule's description so that the next person to read it knows it was a decision rather than an oversight. **Every filter you add buys quiet at the price of blindness, and the price should be written down.**
 
 #### The re-test, and what it changed
 

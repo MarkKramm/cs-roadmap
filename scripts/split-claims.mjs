@@ -101,26 +101,32 @@ const WANTED_BY_TRACK = {
     { title: "Command and cmdlet usage", done: true, doneThrough: 60 },
   ],
   advance: [
-    // Nothing is done. Every one of these classes is listed here, which is the
-    // condition audit-verdict-counts.mjs check 0b enforces: a class holding rows
-    // but absent from this list emits no pack, is excluded from every total, and
-    // can never be verified. Listing all fifteen is what makes the "outstanding"
-    // figure in the document mean outstanding rather than forgotten.
-    { title: "Cloud IAM policy and identity artefacts", maxRows: 45 },
-    { title: "MITRE ATT&CK technique identifiers", maxRows: 45 },
-    { title: "SIEM search language (SPL)", maxRows: 40 },
-    { title: "Sigma rule specification", maxRows: 40 },
-    { title: "Cloud and infrastructure CLI syntax", maxRows: 40 },
-    { title: "Detection-as-code tool flags and status", maxRows: 30 },
-    { title: "Windows event IDs, channels and field names", maxRows: 30 },
-    { title: "Living-off-the-land binaries and their command lines" },
-    { title: "Protocol and standard behaviour" },
-    { title: "Security tool commands and flags" },
-    { title: "Standards, frameworks and control identifiers" },
-    { title: "Product versions and editions" },
-    { title: "Rego and OPA semantics" },
-    { title: "Command and cmdlet usage" },
-    { title: "Registry paths, file paths and filenames" },
+    // ALL FIFTEEN CLASSES VERIFIED as of 2026-09-28: 508 rows, 444 OK, 17 WRONG,
+    // 47 UNVERIFIABLE, none outstanding. Recorded row by row by
+    // record-advance-verdicts.mjs, which reads them back out of the packs rather
+    // than carrying a hardcoded copy -- so unlike the IT track's record, the
+    // verdicts in the document are reproducible from what is on disk.
+    //
+    // Each `doneThrough` is the FULL row count, checked against the document's
+    // own table rather than remembered. All fifteen are `done: true`, so the
+    // splitter emits no pack for this track at all; the packs that exist in
+    // docs/claims-to-verify-advance/ are the ones that were actually sent, and
+    // they are the recorder's input.
+    { title: "Cloud IAM policy and identity artefacts", done: true, doneThrough: 139 },
+    { title: "MITRE ATT&CK technique identifiers", done: true, doneThrough: 83 },
+    { title: "SIEM search language (SPL)", done: true, doneThrough: 66 },
+    { title: "Sigma rule specification", done: true, doneThrough: 65 },
+    { title: "Cloud and infrastructure CLI syntax", done: true, doneThrough: 35 },
+    { title: "Detection-as-code tool flags and status", done: true, doneThrough: 20 },
+    { title: "Windows event IDs, channels and field names", done: true, doneThrough: 20 },
+    { title: "Living-off-the-land binaries and their command lines", done: true, doneThrough: 19 },
+    { title: "Protocol and standard behaviour", done: true, doneThrough: 17 },
+    { title: "Security tool commands and flags", done: true, doneThrough: 13 },
+    { title: "Standards, frameworks and control identifiers", done: true, doneThrough: 12 },
+    { title: "Product versions and editions", done: true, doneThrough: 10 },
+    { title: "Rego and OPA semantics", done: true, doneThrough: 4 },
+    { title: "Command and cmdlet usage", done: true, doneThrough: 3 },
+    { title: "Registry paths, file paths and filenames", done: true, doneThrough: 2 },
   ],
 };
 const WANTED = WANTED_BY_TRACK[TRACK_KEY];

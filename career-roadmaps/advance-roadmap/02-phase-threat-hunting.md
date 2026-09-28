@@ -463,7 +463,7 @@ DeviceProcessEvents
           InitiatingProcessFileName,
           InitiatingProcessCommandLine,
           InitiatingProcessParentFileName,
-          SHA256
+          SHA1
 | sort by Timestamp desc
 ```
 
@@ -473,9 +473,9 @@ Four details make that query correct and reviewable.
 
 **`has_any`** is a term-level match that respects word boundaries and is much faster than `contains`. For path fragments with backslashes, the verbatim string literal `@"...\"` avoids escaping confusion.
 
-**`InitiatingProcessParentFileName`** is what turns a list of hits into a story. A `rundll32.exe` launched by `explorer.exe` after a user double-clicked a file is a different situation from one launched by `winword.exe` from a document.
+**`InitiatingProcessFileName`** is what turns a list of hits into a story. A `rundll32.exe` launched by `explorer.exe` after a user double-clicked a file is a different situation from one launched by `winword.exe` from a document. Mind the two similarly-named columns: `InitiatingProcessParentFileName` is the parent of *that* process, so it names the grandparent of the LOLBin — one generation too high to answer the question you are asking.
 
-**`SHA256`** is included so that a triaged hit can be pivoted on immediately, without a second query.
+**`SHA1`** is included so that a triaged hit can be pivoted on immediately, without a second query. It is deliberately not `SHA256`: Microsoft documents that column as "usually not populated" and tells you to use `SHA1` when it is available, so a query that pivots on `SHA256` silently finds nothing.
 
 Now the same hypothesis joined to network evidence, which is where a hit becomes an incident:
 

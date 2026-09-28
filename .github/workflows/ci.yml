@@ -188,8 +188,9 @@ jobs:
       # no row. Re-running them here proves every recorded verdict still has a row to
       # live in -- if the splitter re-cuts a class and a location disappears, the
       # verdict would otherwise silently vanish from the document on the next regen.
-      - name: Recorded verdicts still place (both tracks)
+      - name: Recorded verdicts still place (all three tracks)
         run: |
+          node scripts/record-advance-verdicts.mjs
           node scripts/record-cyber-verdicts.mjs
           node scripts/record-cyber-verdicts-dns.mjs
           node scripts/record-it-verdicts.mjs
