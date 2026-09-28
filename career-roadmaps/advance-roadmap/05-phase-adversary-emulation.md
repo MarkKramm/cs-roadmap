@@ -646,7 +646,7 @@ references:
     - https://attack.mitre.org/techniques/T1059/001/
     - https://attack.mitre.org/techniques/T1204/002/
 author: Your Name
-date: 2026/04/08
+date: 2026-04-08
 logsource:
     category: process_creation
     product: windows
@@ -914,7 +914,7 @@ description: |
 references:
     - https://attack.mitre.org/techniques/T1547/001/
 author: Your Name
-date: 2026/04/09
+date: 2026-04-09
 logsource:
     category: registry_set
     product: windows

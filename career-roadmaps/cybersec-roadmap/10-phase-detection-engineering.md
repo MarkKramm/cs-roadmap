@@ -552,7 +552,7 @@ description: Detects PowerShell executed with a base64-encoded command line,
 references:
   - https://attack.mitre.org/techniques/T1059/001/
 author: Your Name
-date: 2026/03/11
+date: 2026-03-11
 tags:
   - attack.execution
   - attack.t1059.001

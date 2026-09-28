@@ -161,8 +161,8 @@ references:
   - https://attack.mitre.org/techniques/T1059/001/
   - https://learn.microsoft.com/en-us/powershell/module/microsoft.powershell.core/about/about_powershell_exe
 author: Your Name
-date: 2026/03/14
-modified: 2026/03/14
+date: 2026-03-14
+modified: 2026-03-14
 logsource:
   category: process_creation
   product: windows
@@ -736,7 +736,7 @@ That failure mode is worth dwelling on, because it is common and it is invisible
 ```yaml
 title: Sysmon Service State Changed to Stopped
 id: 8a2f5c71-3d44-4b90-a1e2-7f9c0d5b6e33
-status: production
+status: stable
 description: >
   Detects the Sysmon service stopping, which removes process-creation
   telemetry from that host and silently disables every rule that depends
@@ -744,7 +744,7 @@ description: >
 references:
   - https://learn.microsoft.com/en-us/sysinternals/downloads/sysmon
 author: Your Name
-date: 2026/03/22
+date: 2026-03-22
 logsource:
   product: windows
   service: sysmon

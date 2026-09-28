@@ -64,6 +64,12 @@ For each row, replace the empty last column with exactly one of:
     cell of each row. Do not reformat, reorder, re-quote the claim text, or add
     rows. The file must remain a valid markdown table with the same row numbers,
     because a script reads the verdicts back out of it by row number.
+12. **Escape every `|` inside a verdict as `\|`.** A verdict that quotes a
+    regex or a JSON schema — `^d{4}-(0[1-9]|1[012])-(0[1-9]|[12][0-9]|3[01])$`
+    is the shape that causes it — puts a literal pipe in the cell, and each one
+    silently becomes a column boundary. The row still starts with a number and
+    still looks plausible; it is simply no longer a four-column row, and a
+    script reading verdicts by row number will read a fragment of one.
 
 # Standards, frameworks and control identifiers
 

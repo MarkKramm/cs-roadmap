@@ -561,7 +561,7 @@ description: Detects rundll32, regsvr32 or mshta launched with an argument
 references:
   - https://attack.mitre.org/techniques/T1218/
 author: Your Name
-date: 2026/04/06
+date: 2026-04-06
 tags:
   - attack.defense_evasion
   - attack.t1218.011

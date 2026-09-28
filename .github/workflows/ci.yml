@@ -288,6 +288,17 @@ jobs:
       # This checks the exact string a reader would copy, not the command name.
       - name: Audit abbreviated commands
         run: node scripts/audit-commands.mjs
+      # A Sigma rule can be internally consistent, clearly written, and invalid.
+      # The advance track's claim pass found `date: 2026/03/14` in six places and
+      # `status: production` in a seventh -- and phase 07 TEACHES the five
+      # permitted status values, so the corpus contradicted its own teaching with
+      # every guard green. Both constraints are transcribed from the specification's
+      # own JSON schema, so this needs no network and cannot fail on a slow vendor
+      # site, which is why it is in CI and verify-ports.mjs is not.
+      - name: Audit Sigma rule fields against the specification
+        run: node scripts/audit-sigma.mjs
+      - name: Test sigma-audit controls
+        run: node scripts/test-audit-sigma.mjs
       # The acronym audit prints a report and exits 0 whatever it finds: whether
       # a reader can decode "SSID" without help is a judgement about the reader,
       # not a claim about the text agreeing with itself, so by D-022 it is a

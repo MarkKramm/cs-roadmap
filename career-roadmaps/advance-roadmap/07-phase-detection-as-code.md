@@ -524,12 +524,15 @@ sigma list backends
 sigma list pipelines
 sigma list validators
 
-# Validate every rule. Fail on parse errors AND on convention issues,
-# so that a rule with an empty falsepositives list cannot merge.
+# Validate every rule. Fail on parse errors AND on convention issues.
 sigma check --fail-on-error --fail-on-issues rules/
 ```
 
 `sigma check` is the real subcommand, and its flags are worth knowing precisely: `--fail-on-error` (the default) fails on parsing errors, `--fail-on-issues` fails on validation issues, `--validation-config` or `-c` points at a YAML configuration file, `--exclude` or `-x` disables a named validator and can be repeated, `--file-pattern` or `-P` controls which files are read, and `--junitxml` writes a machine-readable report. A return code of 1 is what makes it usable as a CI gate.
+
+**What `--fail-on-issues` cannot do, and it is worth being exact about.** No validator in pySigma inspects the `falsepositives` field. The built-in set covers the identifier, the title, condition references, tags, modifiers, values and the log source, and stops there. So the stricter behaviour does **not** make an empty `falsepositives` list block a merge, and a pipeline built on the assumption that it does will pass a rule that is missing the one field your review process cares most about.
+
+**Enforcing that field means writing a validator of your own** (see the custom-validator section below) or adopting `pySigma-validators-SigmaHQ`, the separate strict package the SigmaHQ repository uses. The `falsepositives` list is still the field worth writing; the difference is that a human or a custom check has to be the one enforcing it.
 
 A validation configuration lets you keep every validator except the handful your environment legitimately cannot satisfy, which is how SigmaHQ itself runs it.
 
@@ -651,7 +654,7 @@ Four things in that workflow are deliberate and worth naming.
 
 **`paths:` limits the trigger.** The pipeline runs when rules, tests, or pipelines change, and does not burn a runner on a README typo.
 
-**`--fail-on-issues` is not the default.** `sigma check` fails on errors by default but passes on validation issues unless you ask for the stricter behaviour. If you want an empty `falsepositives` list to block a merge, you must say so.
+**`--fail-on-issues` is not the default.** `sigma check` fails on errors by default but passes on validation issues unless you ask for the stricter behaviour. Note what that stricter behaviour covers: no built-in validator looks at `falsepositives`, so this flag will not make an empty list block a merge — that needs a custom validator.
 
 **`if-no-files-found: error` is the guard that matters most.** Without it, a conversion step that silently produced nothing uploads an empty artifact and the pipeline goes green. That is the failure mode where the guard's pass path and its skip path look identical.
 
@@ -664,7 +667,7 @@ CI will fail the first several times, and the failures are informative.
 | Failure | What it usually means | The fix |
 |---|---|---|
 | `sigma check` reports a parse error | YAML indentation or an unquoted special character | Fix the rule; commonly a backslash or a leading `*` |
-| Validation issues about `falsepositives` | The list is empty or says `None` | Name the real benign causes, or use `Unknown` |
+| Validation issues about `tags` or the log source | A malformed tag, or a specific event ID where a generic log source belongs | Fix the tag; prefer `category`/`product` over a hard-coded event ID |
 | A fixture test fails | The rule changed and the fixture did not | Decide which one is wrong before editing either |
 | Conversion fails for one target | An unsupported modifier or an unknown field | Narrow the target list, or rewrite the modifier |
 | The artifact step fails | Conversion produced no files | Check the input path; `sigma` reads directories, not globs |
@@ -1200,7 +1203,7 @@ The last sentence is the one that lands: naming what you deliberately did not au
 - **Three fixtures per rule is the working minimum:** a positive, a negative, and a near-miss. The near-miss is the one that catches the broadening edit six months from now.
 - **A fixture test proves the logic matches the events you gave it, and nothing more.** It does not prove the telemetry is collected or that the technique is caught. Say so rather than overclaiming.
 - **`sigmac` is the retired legacy toolchain.** pySigma describes itself as its replacement and `sigma-cli` as the command-line equivalent. Use `sigma-cli`.
-- **`sigma check` fails on errors by default but passes on issues unless you pass `--fail-on-issues`.** If you want an empty `falsepositives` list to block a merge, you must ask for the stricter behaviour.
+- **`sigma check` fails on errors by default but passes on issues unless you pass `--fail-on-issues`.** No built-in validator checks `falsepositives`, so that flag will not enforce it — a custom validator will.
 - **A backend and a pipeline are different things.** The backend knows the query language; the pipeline knows your field names. A backend without the right pipeline produces a query that looks correct and matches nothing.
 - **Conversion drift is real and only sometimes a bug.** Unsupported features, missing pipelines, coarser matching, and clock-aligned correlation windows all produce a deployed query that differs from the rule you wrote — so read the output once per new target.
 - **Only the third coverage level is coverage:** telemetry present, then a rule written, then a validated rule with an owned queue. Report the smallest number and explain why the larger ones do not count.
