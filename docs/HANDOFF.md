@@ -1,17 +1,31 @@
 # Handoff — all three tracks claim-verified
 
-**Written 2026-09-28. The advance track's claim pass is complete, committed as
-`e333ce9`, and pushed.** Nothing is in flight. This file no longer describes work
-to do; it records what was finished and what a later session should know before
-starting something new.
+**Last updated 2026-09-29.** The advance track's claim pass described below was
+completed on **2026-09-28** and committed as `e333ce9`; that is a dated record of
+one pass. The two commits since it — `0169b5c` (an audit of this handoff's own
+accuracy, which found it stale) and `090c695` (the lesson-code guard and the four
+content defects it found) — are covered under **What is settled** below rather
+than in the state table. **Nothing is in flight.** This file does not describe
+work to do; it records what was finished and what a later session should know
+before starting something new.
+
+**Why the preamble is shaped this way.** A commit hash in a table headed *current
+state* is wrong the moment the next commit lands, and it can never be
+machine-checked, because the commit that added the check would itself invalidate
+it. So the state table carries a **date** rather than a hash, and hashes appear
+only in rows explicitly about a finished pass. `docs/DECISIONS.md`'s preamble
+already states the rule: a record says what was true when it was written, and
+correcting it would destroy the record.
 
 ## Where the repository is
 
 | | |
 |---|---|
-| Branch | `main`, clean tree, **fully pushed** — `d83fb25..e333ce9` |
-| This pass | `ffe8445` (worklist and the 8 classes it needed), `50e52f8` (Sigma + the new guard), `ea2d55b` (ATT&CK), `77fe6dd` (queries), `e333ce9` (the 508-row result) |
-| Guards | 24 content guards, 16 control suites, 16 site suites, **148 browser checks** — all green |
+| Branch | `main`, clean tree, **fully pushed**, in sync with `origin/main` as of **2026-09-29** |
+| That pass | `ffe8445` (worklist and the 8 classes it needed), `50e52f8` (Sigma + the new guard), `ea2d55b` (ATT&CK), `77fe6dd` (queries), `e333ce9` (the 508-row result) |
+| Since then | `0169b5c` (this handoff audited against reality — it had gone stale), `090c695` (`audit-lesson-code.mjs` + its controls, D-075; four content defects fixed) |
+| Guards | 24 content guards, 16 control suites, 16 site suites — **all green, re-run 2026-09-29** |
+| Browser suite | **148 checks is the last recorded figure and was NOT re-verified.** Playwright and Chromium are not installed on the machine this was written on, so `npm run test:browser` cannot run there. Nothing in the later commits adds or removes a browser assertion, but no check guards the number, so read it as a last-known value rather than a current one |
 | All three tracks | IT 225 rows, cyber 411 rows, advance 508 rows — **1,144 recorded claim rows** |
 
 ## The advance track's result

@@ -624,6 +624,22 @@ ed to the Views list that actually exists; the three M2 pages no longer describe
 
 ### Fixed
 
+- **The handoff went stale again, one commit after the commit that fixed it being stale, and its
+  own shape gave a reader no way to tell** (`docs/HANDOFF.md`, `docs/CHECKPOINT.md`). `0169b5c`
+  rewrote the handoff because it claimed the advance pass was one-fifth done and would have had a
+  reader redo 508 finished verdicts. The very next commit landed `090c695`, and the handoff still
+  opened with *"committed as `e333ce9`… Nothing is in flight"*, its state table still gave the
+  branch as `d83fb25..e333ce9`, and CHECKPOINT's Branch row still called `e333ce9` the latest
+  commit — while asserting, one row below, that the handoff was current. **A document that says it
+  is current is not evidence that it is.** Both files now carry a date rather than a bare hash in
+  their *current-state* rows: a commit hash there is wrong the moment the next commit lands and can
+  never be machine-checked, because the commit adding the check would itself invalidate it. Hashes
+  remain in the rows explicitly about a finished pass, where the repository's own rule — *a record
+  states what was true when it was written* — says they belong. The handoff's one unverifiable
+  figure, the browser suite's check count, is now labelled a last-known value with the reason it
+  could not be re-run, rather than stated flat. **A handoff needs an audit against reality, not a
+  glance** — and this is the second time this repository has had to learn that the same way.
+
 - **A hunt's second stage silently dropped two of the first stage's four match criteria, so a
   stage-1 hit could never reach stage 2** (`advance-roadmap/02-phase-threat-hunting.md`). The two
   stages share the identifier `HUNT-2026-021` and are linked by *re-typing the same filter*, not
