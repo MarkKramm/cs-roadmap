@@ -184,15 +184,37 @@ Do not:
 - **Framework.** React 18 + Vite 6 — see [`DECISIONS.md`](DECISIONS.md) → D-006.
 - **CSS approach.** Plain CSS with custom-property tokens. No utility framework, no CSS-in-JS.
 
+## Control boundaries
+
+**A control's edge is not a separator.** `--border` is for separators, where low contrast is
+the point — a rule between two sections should not compete with the text. It is **1.47:1** on
+`--bg`, and WCAG 2.5.8 asks **3:1** for a control's boundary, so a ring drawn in `--border` is
+not a quiet control. It is an absent one.
+
+`--control-border` (`#6a7180`, **3.76:1** on `--bg`, 3.44:1 on `--bg-elevated`) exists for
+control edges. It is dimmer than `--text-muted` (7.14:1) on purpose: a resting control should
+recede, but it has to be perceivable first. It clears 3:1 with margin on both surfaces rather
+than sitting on the line, so a future surface change does not push it under.
+
+The per-section done control is the worked example, and it took two faults to find. It was
+`opacity: 0` and drawn in `--border`, so a reader saw no circle at all until hovering — and a
+completed section was **5.7× more visible** than an undone one (8.38:1 against 1.47:1), which
+made a half-finished lesson look finished, with nothing to click anywhere in it. The
+"present but quiet" intent was right; the execution defeated it, because a control nobody can
+see is not quiet. It is now always visible at 24px (26px under 560px), still recessive: no
+fill, a 1px ring, and motion only on interaction.
+
+The states are distinguished by the **tick glyph**, not by colour alone, so they survive
+greyscale and colour-blindness.
+
 ## Breakpoints
 
 Three, and all three are load-bearing.
-
 | Width | What changes |
 |---|---|
 | ≥ 1180px | The dashboard becomes two columns: content plus the reference rail, which sticks so a figure you are checking against stays on screen. Below this the rail lays out as cards under the main column, in the same order — nothing is dropped, it just stops being a column. |
 | ≤ 860px | The sidebar becomes an off-canvas drawer behind a hamburger button in a sticky topbar, with Escape, backdrop-click and scroll locking. The reading bar runs the full width, because the sidebar no longer occupies a column. The lesson toolbar stops being sticky — the topbar owns the single `top: 0` slot and would otherwise sit over it. The lesson TOC drops to one column. |
-| ≤ 560px | Phone layout. Spacing tightens, the pager and plan rows stack, page headings step down a size, and the smallest touch target is brought to **40px** — a mis-tap on a 24,000-word lesson loses the reader's place. The per-section done control stops relying on hover and is always visible, since a touch device has no hover to reveal it with. That is the same rule the code-block copy button follows. The phase grid drops to a single column. |
+| ≤ 560px | Phone layout. Spacing tightens, the pager and plan rows stack, page headings step down a size, and the smallest touch target is brought to **40px** — a mis-tap on a 24,000-word lesson loses the reader's place. The per-section done control grows to 26px, since a 24px ring beside a heading is close to the text and benefits from the extra pixels. The phase grid drops to a single column. |
 
 ## Still open
 

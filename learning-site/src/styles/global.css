@@ -1701,43 +1701,55 @@ p em {
 }
 
 /* --- Per-section done control ---
-   In reading mode the control is present but quiet: revealed on hover or
-   keyboard focus. In tick mode it is always visible, because that is the mode's
-   whole purpose. A completed section is marked in the heading itself as well, so
-   the state is readable without hovering. */
+
+   WAS: opacity 0, revealed on hover, drawn in --border.
+
+   Both of those are gone, because together they made the control invisible
+   rather than quiet. The border was the only thing that made it a circle, and
+   --border on --bg is 1.47:1 — WCAG 2.5.8 asks 3:1 for a control boundary. So a
+   first-time reader saw no ring at all, and a done section was 5.7x more
+   visible than an undone one (8.38:1 against 1.47:1), which made a page of
+   half-finished lessons look like a page of finished ones with nothing to
+   click. The "present but quiet" intent was right and the execution defeated
+   it: a control nobody can see is not quiet, it is absent.
+
+   NOW: always visible in --control-border (3.76:1), 24px so the target clears
+   AA 2.5.8's 24x24 minimum, and still recessive — no fill, a 1px ring, and no
+   motion unless the reader interacts. Hover/focus still brighten it to
+   --accent, so "this is a control" and "this is hovered" stay distinct.
+
+   A completed section is marked in the heading itself as well, so the state is
+   readable without hovering, and the tick is what distinguishes the two states
+   rather than colour alone. */
 
 .lesson__done {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 22px;
-  height: 22px;
+  width: 24px;
+  height: 24px;
   margin-right: var(--space-2);
   padding: 0;
   vertical-align: baseline;
   background: none;
-  border: 1px solid var(--border);
+  border: 1px solid var(--control-border);
   border-radius: 50%;
-  color: var(--text-muted);
+  color: var(--control-border);
   font: inherit;
   font-size: var(--text-xs);
   line-height: 1;
   cursor: pointer;
-  opacity: 0;
-  transition: opacity var(--transition-fast), border-color var(--transition-fast),
-    color var(--transition-fast);
-}
-
-.lesson__heading:hover .lesson__done,
-.lesson__done:focus-visible,
-.lesson__body.is-ticking .lesson__done,
-.lesson__done.is-done {
-  opacity: 1;
+  transition: border-color var(--transition-fast), color var(--transition-fast);
 }
 
 .lesson__done:hover {
   border-color: var(--accent);
   color: var(--accent);
+}
+
+.lesson__done:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
 }
 
 .lesson__done.is-done {
@@ -2624,10 +2636,14 @@ p em {
     padding: var(--space-2) var(--space-3);
   }
 
-  /* The done control cannot rely on hover on a touch device, so it is always
-     visible there. This is the same rule the code-block copy button follows. */
+  /* The done control is now always visible at every width, so `opacity: 1` is
+     gone. The size bump stays: on a narrow screen a 24px ring beside a heading
+     is close to the text and benefits from the extra pixels. (The comment here
+     used to claim this was a `(hover: none)` rule for touch devices. It is not —
+     it is the 560px breakpoint, and it was the only place the control was
+     unconditionally visible, which is why it was already the right answer on
+     the screens where nobody noticed the problem.) */
   .lesson__done {
-    opacity: 1;
     width: 26px;
     height: 26px;
   }
@@ -3450,6 +3466,10 @@ p em {
     --text-muted: #333333;
     --border: #999999;
     --accent: #000000;
+    /* The control boundary is an on-screen affordance. On paper it is hidden
+       with the control itself, but the token is still overridden so that if any
+       future print rule draws one it is not a 3.76:1 grey on white. */
+    --control-border: #999999;
   }
 
   body {

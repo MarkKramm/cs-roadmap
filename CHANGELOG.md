@@ -624,6 +624,29 @@ ed to the Views list that actually exists; the three M2 pages no longer describe
 
 ### Fixed
 
+- **The per-section done circle was invisible, and `--border` was why.** A screenshot showed a
+  page whose only visible section markers were the *ticked* ones. The control was `opacity: 0`
+  until hover **and** drawn in `--border`, which is **1.47:1** on `--bg` where WCAG 2.5.8 asks
+  3:1 for a control boundary. Two faults stacked: a reader saw no ring at all, and a completed
+  section was **5.7× more visible** than an undone one (8.38:1 against 1.47:1) — so a
+  half-finished lesson looked finished, with nothing to click anywhere in it.
+  Added **`--control-border`** (`#6a7180`, 3.76:1 on `--bg`, 3.44:1 on `--bg-elevated`, clearing
+  3:1 with margin on both surfaces), made the control **always visible**, and took it from 22px
+  to **24px** to clear the AA target floor (26px under 560px, as before). The "present but
+  quiet" intent was correct and is preserved — no fill, a 1px ring, motion only on interaction —
+  but a control nobody can see is not quiet, it is absent. The states are distinguished by the
+  tick glyph rather than colour alone, so they survive greyscale.
+- **`--border` is for separators, not control edges.** That is the general rule, and it was
+  worth a token: a low-contrast border is correct where a rule should recede, and wrong the
+  moment the same colour draws something the reader is meant to interact with. `--control-border`
+  is dimmer than `--text-muted` (7.14:1) on purpose, so a resting control recedes *after* being
+  perceivable, not instead of it. Recorded in `DESIGN-SYSTEM.md` → **Control boundaries**.
+- **A comment claimed a media query the code was not in.** The 560px block said the done
+  control "cannot rely on hover on a touch device" and cited `(hover: none)`; the block is
+  `max-width: 560px`. It was the only place the control was unconditionally visible, which is
+  why always-visible turned out to be the right answer on the screens where nobody had
+  noticed the problem. Corrected, and `opacity: 1` removed from it as now-dead.
+
 - **The browser suite was declared unverifiable, and that was false — so the product's one
   untested part had a standing excuse instead of a test.** `docs/HANDOFF.md` and
   `docs/CHECKPOINT.md` both said `npm run test:browser` "cannot run here at all" because
