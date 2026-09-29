@@ -624,6 +624,42 @@ ed to the Views list that actually exists; the three M2 pages no longer describe
 
 ### Fixed
 
+- **Ten figures across six documents were wrong, and every one was a number nothing checked.**
+  `audit-doc-figures.mjs` checked 39 figures in 6 documents, and the rot was entirely outside
+  that set. Word counts: the corpus total said **494,386** and is **495,150**, the whole drift in
+  the advance track (**116,214** → **116,978**), whose phases were edited by the claim pass. Site
+  shape: CHECKPOINT said **10 pages / 19 components / 13 hooks** and it is **12 / 21 / 16** — a row
+  that had already rotted once. Site suites: **four** documents said 14 while the one guarded
+  document said 16, which is this guard's whole reason for existing in its purest form. **All are
+  now measured and claimed** — 52 figures across 9 documents — and every new claim has a control
+  proving it can fail, including an inverted one for the per-track word breakdown, because the
+  defect was precisely a total that could not show *where* it had drifted.
+- **The guard understated its own coverage, which is the worst direction for it to be wrong in.**
+  CHECKPOINT said it "reads four documents and checks 25 figures" when it read six and checked
+  thirty-nine. A guard that *understates* its coverage tells a reader to stop looking in the places
+  it already reads, and two of those — `ROADMAP.md`, `DESIGN-SYSTEM.md` — are among the most
+  heavily guarded files here. The document count is now checked; the *figure* count deliberately is
+  not, because it rises on every legitimate rewording and asserting it would make a correct edit
+  fail the build.
+- **A measurement with no claim against it is now named as one.** `lintFiles` and `examPapers`
+  were measured and printed among values that read as covered, when nothing could fail on them.
+  Both now appear under a `Measured but NOT asserted` heading. `lintFiles` is declined on purpose:
+  CHECKPOINT's health-check row argues the count moves with every file added and "says nothing
+  about the content", which is a fair reason to decline a claim and a poor reason to imply one.
+- **The word-count *method* was ambiguous three ways and is now pinned by evidence.** Trim or not,
+  include `00-overview.md` or not, and whether punctuation attaches to a word: three defensible
+  answers, one number in prose. Counting only the files that are phases reproduces the published
+  IT and cyber figures **to the word**, and two independent exact matches is not a coincidence. The
+  first attempt included the overviews and disagreed on all three tracks. **A figure nobody can
+  reproduce is a figure nobody can maintain.**
+- **A stale-figure list that misreports a document is worse than none, because it gets trusted.**
+  The "what is NOT checked" section claimed `IT-CONTENT-AUDIT.md` "says 'across all 31 phases'
+  where it means all". It means all 31. And **two dated sections were made to read as current**:
+  the Health-checks checklist and the summary table's Checks row both carry a rebuild date, so a
+  reader met `validate-ci 45 steps` two lines above a machine-checked `69`. Both are now labelled
+  as dated records with the moved figures named, and otherwise untouched — **correcting a dated
+  record destroys the record, but leaving it undated destroys the reader's ability to tell.**
+
 - **Five defects in the lesson-code balance counter, all found by a second implementation written
   from the specification rather than from the code, and all latent because the corpus contains none
   of the constructs involved.** (1) **The here-string support was dead code.** Detection tested the

@@ -135,16 +135,25 @@ const driftNumber = (text, re, delta, label) => {
   // Find the numeric group. The guard's patterns are not uniform: some put the number in
   // group 1 (`all (\d+) lessons`), some in group 2 with a prefix captured first
   // (`` (`scripts/audit-*.mjs` is **)(\d+)(**) ``). Assuming group 1 threw on the latter.
-  const numIdx = before.slice(1).findIndex((g) => g !== undefined && /^\d+$/.test(g)) + 1;
+  //
+  // Commas are allowed because the documentation writes thousands separators -- "494,386
+  // words", "163,523" per track -- and a pattern that only recognises bare digits cannot
+  // drift them, which would leave the largest figures in the repository both unchecked and
+  // untestable. `Number("163,523")` is NaN, so the arithmetic strips them.
+  const numIdx = before.slice(1).findIndex((g) => g !== undefined && /^[\d,]+$/.test(g)) + 1;
   if (numIdx < 1) throw new Error(`fixture for "${label}": no numeric capture group in the pattern`);
   const numText = before[numIdx];
   const at = before.index + before[0].indexOf(numText);
+  const asNumber = (s) => Number(String(s).replace(/,/g, ""));
 
-  const out = text.slice(0, at) + String(Number(numText) + delta) + text.slice(at + numText.length);
+  // The replacement is written WITHOUT separators. A fixture only has to make the guard
+  // disagree with the document; it does not have to be tidy prose, and re-grouping the
+  // digits would be a second thing to get wrong in a helper whose job is to be boring.
+  const out = text.slice(0, at) + String(asNumber(numText) + delta) + text.slice(at + numText.length);
 
   const after = re.exec(out);
   if (!after) throw new Error(`fixture for "${label}" broke the pattern the guard matches -- it would test nothing`);
-  if (Number(after[numIdx]) === Number(before[numIdx])) {
+  if (asNumber(after[numIdx]) === asNumber(before[numIdx])) {
     throw new Error(`fixture for "${label}" left the number unchanged -- it would test nothing`);
   }
   return out;
@@ -320,6 +329,109 @@ driftInFile(
   /(16 papers \/ )(\d+)( questions)/,
   +11,
 );
+
+// 9. WORD COUNTS, the largest figures in the repository and the ones that were wrong.
+//
+// "494,386 words across the 31 phase files" sat in CHECKPOINT.md and README.md with nothing
+// comparing either to a measurement, and the whole drift was in one track: the advance phases
+// were edited by the claim-verification pass and the total never moved. The method was also
+// ambiguous three ways before it was pinned -- trim or not, include `00-overview.md` or not,
+// and whether punctuation attaches to a word -- and the first attempt at measuring it disagreed
+// with the documentation on ALL THREE tracks, because it counted the overviews. IT and cyber
+// reproducing to the word is what identified the correct scope; two exact matches is not a
+// coincidence, so `00-overview.md` is excluded.
+driftInFile(
+  "the corpus word total drifts -> must FAIL",
+  path.join(ROOT, "README.md"),
+  /(\*\*)([\d,]+)( phase-file words)/,
+  +764,
+);
+
+// 9b. THE PER-TRACK BREAKDOWN, WITH THE TOTAL LEFT ALONE. This is the control that matters most
+//      here, because the defect was specifically a total that could not show WHERE it drifted.
+//      A control that only ever moved the total would pass even if the per-track figures were
+//      decoration -- and they were decoration until this suite was written.
+driftInFile(
+  "the advance word count drifts while the corpus total stays right -> must FAIL",
+  path.join(ROOT, "docs", "CHECKPOINT.md"),
+  /(— IT [\d,]+, cyber [\d,]+, advance )([\d,]+)( —)/,
+  -764,
+);
+
+// 9c. A guard that reads a figure from the wrong sentence is not a weaker check; it is a check
+//      against the wrong thing, and it fails in a direction that reads as the document being at
+//      fault. The first `cyberWords` pattern was `/cyber ([\d,]+), advance/`, which matched the
+//      *task-ID* rows instead -- "IT 99, cyber 181, advance 116" -- and reported 181 against a
+//      real 214,649. So the pattern is now anchored to the word-count phrase, and this control
+//      pins that anchoring by drifting the task-ID figure, which must NOT be flagged: those rows
+//      are a dated record, and a guard that reached into them would be a guard failing on an
+//      archive.
+driftInFile(
+  "the historical per-track TASK-ID figure is not mistaken for a word count -> must PASS",
+  path.join(ROOT, "docs", "CHECKPOINT.md"),
+  /(\*\*\d+\*\* total phase task IDs \(IT \d+, cyber )(\d+)(, advance \d+\))/,
+  -2,
+  false,
+);
+
+// 10. THE SITE'S OWN SHAPE, which has now rotted twice (10/19/13 when it was 12/21/16, and 9/18
+//     before that) with nothing counting it -- the figures a reader uses to picture the
+//     repository, and the ones nobody thought to check.
+driftInFile(
+  "the site page count drifts -> must FAIL",
+  path.join(ROOT, "docs", "CHECKPOINT.md"),
+  /(React \+ Vite; )(\d+)( pages)/,
+  -2,
+);
+
+driftInFile(
+  "the site hook count drifts -> must FAIL",
+  path.join(ROOT, "docs", "CHECKPOINT.md"),
+  /(pages, \d+ components, )(\d+)( hooks)/,
+  -3,
+);
+
+// 11. THE SITE-SUITE COUNT IN A DOCUMENT THAT WAS WRONG. Four documents said 14 while the one
+//     guarded document said 16, which is this guard's entire reason for existing in its purest
+//     form: the correct number sat in the single place being checked. The claim has to be able
+//     to fail in a document the guard did not previously read at all, or "it reads nine
+//     documents" is only a sentence.
+driftInFile(
+  "the site suite count drifts in README.md -> must FAIL",
+  path.join(ROOT, "README.md"),
+  /(CI runs content-integrity checks, \*\*)(\d+)( site test suites)/,
+  -2,
+);
+
+// 12. THE GUARD'S OWN COVERAGE. It read "four documents and 25 figures" in CHECKPOINT while
+//     reading six and checking thirty-nine -- a guard that UNDERSTATES what it covers tells a
+//     reader to stop looking where it already looks. The document count is now checked, and
+//     this is the control proving the claim can fail rather than being a sentence nobody
+//     verifies.
+driftInFile(
+  "the documents-this-guard-reads claim drifts -> must FAIL",
+  path.join(ROOT, "docs", "CHECKPOINT.md"),
+  /(reads \*\*)(\d+)( documents)/,
+  -4,
+);
+
+// 13. A MEASUREMENT WITH NO CLAIM MUST BE NAMED AS ONE. `lintFiles` is measured and nothing
+//     asserts it, deliberately -- CHECKPOINT's health-check row gives the reason, that the count
+//     moves with every file added and says nothing about the content. That is a fair reason to
+//     decline a claim and a poor reason to print the number among values that read as covered,
+//     so the guard reports it under its own heading. This control asserts that heading exists
+//     and names the key, because a report of what is NOT checked is only useful if it is not
+//     itself quietly dropped.
+{
+  const r = run();
+  const namesLint = /Measured but NOT asserted[^\n]*\blintFiles\b/.test(r.out);
+  const exitOk = r.code === 0;
+  results.push({
+    name: "the guard names the measurements it does NOT assert -> must PASS",
+    ok: namesLint && exitOk,
+    out: r.out,
+  });
+}
 
 // The real tree must end exactly as it started -- the check whose absence let a fixture
 // write "all 30 lessons" into the actual document (D-058).

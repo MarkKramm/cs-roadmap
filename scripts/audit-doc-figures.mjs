@@ -68,6 +68,40 @@ captured.ciNodeSteps = (
 ).length;
 captured.ciSteps = (fs.readFileSync(path.join(ROOT, ".github", "workflows", "ci.yml"), "utf8").match(/^\s+- name:/gm) || []).length;
 
+// The site's own shape. These rotted twice -- CHECKPOINT said "10 pages, 19 components, 13
+// hooks" when it was 12/21/16, and had previously said 9/18 -- and nothing counted them, because
+// they are the figures a reader uses to picture the repository and nobody thought to check them.
+captured.sitePages = countFiles("learning-site/src/pages", /\.jsx$/);
+captured.siteComponents = countFiles("learning-site/src/components", /\.jsx$/);
+captured.siteHooks = countFiles("learning-site/src/hooks", /\.[jt]sx?$/);
+
+// Word counts, per track and total.
+//
+// THE METHOD IS THE WHOLE PROBLEM, and it was ambiguous in three separate ways before it was
+// pinned: trim or not (a trailing newline becomes an extra token), include `00-overview.md` or
+// not (+570 / +749 / +2600 words depending on track), and whether markdown punctuation counts as
+// part of a word. Three defensible answers and one number in the prose -- which is the exact shape
+// of every defect this guard was written for.
+//
+// Settled by evidence rather than taste: counting ONLY the files that are phases (`^\d{2}-phase`,
+// so `00-overview.md` is out) reproduces the IT and cyber figures already published EXACTLY, to
+// the word. Two independent exact matches is not a coincidence, so that is the scope. A first
+// attempt included the overviews and disagreed with the documentation on all three tracks, which
+// is why the method is written down here rather than left to whoever runs it next.
+// **A figure nobody can reproduce is a figure nobody can maintain.**
+const phaseWords = (track) =>
+  fs
+    .readdirSync(path.join(ROOT, "career-roadmaps", track))
+    .filter((f) => /^\d{2}-phase.*\.md$/.test(f))
+    .reduce(
+      (n, f) => n + fs.readFileSync(path.join(ROOT, "career-roadmaps", track, f), "utf8").trim().split(/\s+/).length,
+      0,
+    );
+captured.itWords = phaseWords("it-roadmap");
+captured.cyberWords = phaseWords("cybersec-roadmap");
+captured.advanceWords = phaseWords("advance-roadmap");
+captured.corpusWords = captured.itWords + captured.cyberWords + captured.advanceWords;
+
 // Independent recomputation, so the guard is not merely agreeing with another guard.
 const build = (() => {
   try {
@@ -130,7 +164,18 @@ const ASSERTIONS = [
   },
   {
     key: "siteSuites",
-    claims: [DOC("docs/CHECKPOINT.md", /`learning-site\/scripts\/\*\.mjs` is \*\*(\d+)\*\*/, "site suite count")],
+    // FOUR documents said 14 and one said 16, and the 16 was the guarded one. That is the
+    // defect this whole guard exists for, in its purest form: the correct number sat in the
+    // one place being checked while four unchecked places stayed wrong for passes.
+    // Each of these is the ONLY place its document states the figure, so each is `required` --
+    // a reworded sentence should retire the claim loudly rather than silently.
+    claims: [
+      DOC("docs/CHECKPOINT.md", /`learning-site\/scripts\/\*\.mjs` is \*\*(\d+)\*\*/, "site suite count"),
+      DOC("README.md", /CI runs content-integrity checks, \*\*(\d+) site test suites\*\*/, "site suite count", true),
+      DOC("docs/ARCHITECTURE.md", /runs the (\d+) site test suites under/, "site suite count", true),
+      DOC("docs/ROADMAP.md", /runs (\d+) `test-\*\.mjs` suites/, "site suite count", true),
+      DOC("docs/WORKFLOW.md", /the (\d+) `test-\*\.mjs` site suites/, "site suite count", true),
+    ],
     why: "site suites on disk",
   },
   {
@@ -276,6 +321,66 @@ const ASSERTIONS = [
     why: "shared documents the build writes",
   },
   {
+    // Word counts. README.md and CHECKPOINT.md both published a corpus total and both were
+    // wrong by 764 words, with the whole drift in the advance track, whose phases were edited
+    // by the claim-verification pass. IT and cyber were correct -- which is what identified the
+    // counting method, since they only reproduce when `00-overview.md` is excluded.
+    key: "corpusWords",
+    claims: [
+      DOC("README.md", /\*\*([\d,]+) phase-file words\*\*/, "corpus word count", true),
+      DOC("docs/CHECKPOINT.md", /\*\*([\d,]+) words across the 31 phase files\*\*/, "corpus word count", true),
+    ],
+    why: "words across the 31 phase files, per split(/\\s+/) excluding 00-overview.md",
+  },
+  {
+    // The per-track breakdown, not just the total. The total was the only number a reader would
+    // think to re-check, and the reason it was wrong is that the drift was all in one track --
+    // so a total-only check would have caught a sum that happened to agree for the wrong reason.
+    //
+    // Every pattern here is anchored to the phrase `words across the 31 phase files`, and that
+    // anchoring is load-bearing rather than decoration. The first version used a bare
+    // `cyber ([\d,]+), advance` and matched the *task-ID* rows instead -- "IT 99, cyber 181,
+    // advance 116" -- so it reported a word count of 181 against a real 214,649, twice. A loose
+    // pattern is not a weaker check; it is a check against the wrong sentence, and it fails
+    // loudly in a way that looks like the document being wrong.
+    key: "itWords",
+    claims: [DOC("docs/CHECKPOINT.md", /words across the 31 phase files\*\* — IT ([\d,]+),/, "IT word count")],
+    why: "words in the nine IT phase files",
+  },
+  {
+    key: "cyberWords",
+    claims: [DOC("docs/CHECKPOINT.md", /— IT [\d,]+, cyber ([\d,]+), advance/, "cyber word count")],
+    why: "words in the fifteen cyber phase files",
+  },
+  {
+    key: "advanceWords",
+    claims: [DOC("docs/CHECKPOINT.md", /— IT [\d,]+, cyber [\d,]+, advance ([\d,]+) —/, "advance word count")],
+    why: "words in the seven advance phase files",
+  },
+  {
+    // See the note where `docsRead` is computed: the document count is pinned, the figure
+    // count deliberately is not.
+    key: "docsRead",
+    claims: [DOC("docs/CHECKPOINT.md", /reads \*\*(\d+) documents\*\*/, "documents this guard reads", true)],
+    why: "distinct documents carrying at least one claim above",
+  },
+  {
+    // The site's shape, stated once in CHECKPOINT's structure block. It has now rotted twice.
+    key: "sitePages",
+    claims: [DOC("docs/CHECKPOINT.md", /React \+ Vite; (\d+) pages/, "site page count", true)],
+    why: "page components in learning-site/src/pages",
+  },
+  {
+    key: "siteComponents",
+    claims: [DOC("docs/CHECKPOINT.md", /pages, (\d+) components/, "site component count", true)],
+    why: "components in learning-site/src/components",
+  },
+  {
+    key: "siteHooks",
+    claims: [DOC("docs/CHECKPOINT.md", /components, (\d+) hooks/, "site hook count", true)],
+    why: "hooks in learning-site/src/hooks",
+  },
+  {
     key: "phases",
     // The structure block near the top of CHECKPOINT.md states the track sizes. Those are
     // the figures a reader uses to understand the repository's shape, and nothing counted
@@ -303,6 +408,33 @@ captured.phases = captured.itPhases + captured.cyberPhases + captured.advancePha
 // The claim regexes above name a track, so each must be compared against ITS OWN count,
 // not one shared scalar. Map claim -> the key that measures it.
 const TRACK_KEYS = { "IT phase count": "itPhases", "cyber phase count": "cyberPhases", "advance phase count": "advancePhases" };
+
+// THE GUARD'S OWN COVERAGE, AS A CHECKED FIGURE.
+//
+// CHECKPOINT.md said for a long time that this guard "reads four documents and checks 25
+// figures" when it read six and checked thirty-nine. That is the worst kind of stale figure:
+// a guard that UNDERSTATES what it covers tells a reader to stop looking in the places it
+// already reads, and the two documents it was quietly wrong about -- ROADMAP.md and
+// DESIGN-SYSTEM.md -- are among the most heavily guarded files in the repository.
+//
+// Only the DOCUMENT count is pinned, and the omission is deliberate. The figure count moves
+// every time a sentence is reworded or a claim is added, including edits that are entirely
+// legitimate, so asserting it in prose would make a correct edit fail the build. That is
+// D-033's shape: a check whose pass path and fail path cannot be told apart.
+captured.docsRead = new Set(ASSERTIONS.flatMap((a) => a.claims.map((c) => c.file))).size;
+
+// Anything measured but never claimed is a check that CANNOT fail, so it is named rather than
+// left in a list of "measured" values that reads as though each were covered. `lintFiles` is
+// the standing case: it is measured and nothing asserts it, deliberately -- CHECKPOINT.md's
+// health-check row says so, on the grounds that the count moves with every file added and
+// "says nothing about the content", which is a fair reason to decline a claim and a poor
+// reason to imply one exists. Printing it without saying so would be the same mistake as a
+// stale figure, in the other direction.
+const assertedKeys = new Set([
+  ...ASSERTIONS.map((a) => a.key),
+  ...Object.values(TRACK_KEYS),
+]);
+const unasserted = Object.keys(captured).filter((k) => !assertedKeys.has(k));
 
 console.log("Measured from commands and from disk:");
 for (const [k, v] of Object.entries(captured)) console.log(`  ${k.padEnd(16)} ${v}`);
@@ -347,7 +479,7 @@ for (const a of ASSERTIONS) {
         if (!m) return;
         matched++;
         checked++;
-        const stated = Number(m[1]);
+        const stated = Number(String(m[1]).replace(/,/g, ""));
         if (stated !== actualForClaim) {
           findings.push({ a, c, stated, actual: actualForClaim, line: i + 1, text: line.trim().slice(0, 120) });
         }
@@ -379,6 +511,9 @@ for (const a of ASSERTIONS) {
 }
 
 console.log(`Documentation figures checked: ${checked}`);
+if (unasserted.length) {
+  console.log(`Measured but NOT asserted (no claim can fail on these): ${unasserted.join(", ")}`);
+}
 console.log("");
 if (!findings.length) {
   console.log("DOC CLAIMS OK — every checked figure matches the command that produces it.");
