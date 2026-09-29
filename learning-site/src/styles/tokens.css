@@ -22,16 +22,6 @@
      token name was decorative. */
   --accent-soft: rgba(120, 160, 255, 0.28);
   --success: #4ac48a;
-  /* --success is tuned as TEXT on --bg (8.38:1). As a FILL with a dark mark on
-     top, the same green is judged differently: what matters is that --bg on it
-     stays legible, which it does at 8.38:1. Kept as its own token so a fill can
-     be re-tuned without silently changing every green label. */
-  --success-fill: #4ac48a;
-  /* The drawn checkbox. Kept here rather than in global.css so the geometry that
-     the hit area is derived from has exactly one definition. */
-  --check-size: 20px;
-  --check-hit: 44px;
-  --check-tick: #12141a;
   --warning: #d9a441;
   --danger: #e0605e;
   /* --danger as TEXT. The base --danger is a 4.30:1 pairing on --bg-subtle,

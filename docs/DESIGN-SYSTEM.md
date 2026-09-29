@@ -110,40 +110,6 @@ One tool from the tools table: name, purpose, cost badge, mini-task, free altern
 
 Lower-level than `TaskCard` — used inside the phase detail. Saves on toggle.
 
-**The checkbox is drawn, not native.** The `<input type="checkbox">` is kept — invisible, at
-full size, carrying the semantics, the accessible name and the keyboard behaviour — and
-everything visible is painted in CSS. It was previously a native box with
-`accent-color: var(--success)`, and it was the one control on the page a reader could not
-actually see. Three reasons, and **the first is not the one you would guess**:
-
-- **Size, not colour.** Every token passes AA on `--bg` (`--success` is 8.38:1), so darkening
-  the green would have fixed nothing. The native box was ~13px — under WCAG 2.5.8's 24×24
-  minimum target — with a tick of roughly 8px, and next to 15px body text it read as nothing.
-- **`accent-color` sets the fill, not the mark.** The browser then chose its own tick colour
-  for contrast against that fill. White on `--success` is only 2.20:1, so it picked a dark
-  green: two mid-tone greens, neither readable against the other.
-- **State was carried by hue alone.** Green-on-grey is the one distinction a colour-blind
-  reader cannot make.
-
-Now: 20px box, **44px hit area**, mark drawn in `--check-tick` on `--success-fill`
-(8.38:1), unchecked outline in `--text-muted` (7.14:1), and `:focus-visible` re-established
-because `appearance: none` removes the native ring. **Unchecked and checked differ by fill as
-well as by tick**, so the two states survive greyscale.
-
-Two deliberate constraints:
-
-- **The hit area is tight to the box, not the whole row.** Stretching it would make clicking
-  the prose toggle the item, and checklist prose is meant to be selectable — readers copy
-  these lines into their own notes.
-- **On paper, checked is an outline plus a tick, not a filled block.** The print tokens
-  override `--check-tick` and drop the fill, because a solid green block on white paper is
-  2.20:1 and prints as toner rather than ink.
-
-`.tmpl-box` (the read-only marker in the weekly-tracker template) took the size and fill fix
-but **stays non-interactive and `aria-hidden`** — it is a template the reader copies
-elsewhere, so a real control there "would look tickable and do nothing, the same lie as a
-button that goes nowhere." Its 16px box is drawn, not a target.
-
 ### `<EnergyModeSelector mode={...} />`
 
 Radio group: `Low` / `Normal` / `High`. Changes which tasks appear in the daily picker.

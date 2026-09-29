@@ -288,31 +288,7 @@ a:hover {
   white-space: nowrap;
 }
 
-/* --- Checkboxes ---
-   WHY THIS IS DRAWN RATHER THAN NATIVE.
-   This was `<input type="checkbox" accent-color: var(--success)>` — a ~13px box
-   whose tick is painted by the browser. It was the one control on the page a
-   reader could not actually see, and the reason was NOT the green. Every token
-   here passes AA on --bg (--success is 8.38:1), so "darken the green" would have
-   been the wrong fix. The real causes, in order:
-
-     1. SIZE. ~13px is below WCAG 2.5.8's 24x24 minimum target, and the tick
-        inside it was roughly 8px of mark. Next to 15px body text it read as
-        nothing at all.
-     2. THE TICK IS NOT OURS. `accent-color` sets the FILL; the browser then picks
-        its own mark colour for contrast against it. White on --success is only
-        2.20:1, so it chose a dark green — which is why the mark looked muddy
-        rather than clean. Two mid-tone greens, neither readable against the other.
-     3. STATE IS CARRIED BY HUE ALONE. Green-on-grey is the one distinction a
-        colour-blind reader cannot make.
-
-   So: the native input is KEPT, invisible and full-size, because it carries the
-   semantics, the keyboard behaviour and the accessible name for free — the point
-   of a real control. Everything visible is drawn here, and the mark is --check-tick
-   on --success-fill (8.38:1) rather than a colour the UA guesses.
-
-   Unchecked and checked differ by FILL, not only by tick colour, so the two
-   states are distinguishable in greyscale and to a colour-blind reader. */
+/* --- Checkboxes --- */
 
 .check {
   display: flex;
@@ -322,81 +298,10 @@ a:hover {
   cursor: pointer;
 }
 
-/* The label is the hit area for the TEXT, so the box gets its own 44px target
-   rather than stretching the row. Stretching it would mean clicking the prose
-   toggles the item, and the prose of a checklist is meant to be selectable —
-   a reader copies these lines into their own notes. */
-.check__box {
-  position: relative;
-  flex-shrink: 0;
-  width: var(--check-size);
-  height: var(--check-size);
-  margin-top: 0.125em;
-}
-
 .check input {
-  /* Positioned over the drawn box rather than inside it, so the click target is
-     the full 44px while the box stays 20px. `appearance: none` is what removes
-     the UA's own painting; opacity alone would leave the native tick visible. */
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  width: var(--check-hit);
-  height: var(--check-hit);
-  margin: 0;
-  appearance: none;
-  -webkit-appearance: none;
-  background: transparent;
-  border: 0;
-  cursor: pointer;
-  opacity: 0;
-}
-
-.check__box::before {
-  content: "";
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  width: var(--check-size);
-  height: var(--check-size);
-  border: 1.5px solid var(--text-muted);
-  border-radius: 4px;
-  background: transparent;
-  transition: background-color var(--transition-fast), border-color var(--transition-fast);
-}
-
-.check__box::after {
-  content: "";
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  width: 9px;
-  height: 5px;
-  margin-top: -3px;
-  margin-left: -4px;
-  border-left: 2px solid var(--check-tick);
-  border-bottom: 2px solid var(--check-tick);
-  transform: rotate(-45deg);
-  opacity: 0;
-  transition: opacity var(--transition-fast);
-}
-
-.check--done .check__box::before {
-  background: var(--success-fill);
-  border-color: var(--success-fill);
-}
-
-.check--done .check__box::after {
-  opacity: 1;
-}
-
-/* The native ring is gone with `appearance: none`, so the focus indicator has to
-   be re-established or the control becomes unreachable by keyboard. */
-.check input:focus-visible + .check__box::before {
-  outline: 2px solid var(--focus);
-  outline-offset: 2px;
+  margin-top: 0.25em;
+  flex-shrink: 0;
+  accent-color: var(--success);
 }
 
 .check__text {
@@ -1805,8 +1710,8 @@ p em {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 24px;
-  height: 24px;
+  width: 22px;
+  height: 22px;
   margin-right: var(--space-2);
   padding: 0;
   vertical-align: baseline;
@@ -3107,40 +3012,21 @@ p em {
 .tmpl-box {
   flex-shrink: 0;
   display: inline-block;
-  width: 16px;
-  height: 16px;
-  border: 1.5px solid var(--text-muted);
-  border-radius: 3px;
+  width: 13px;
+  height: 13px;
+  border: 1px solid var(--text-muted);
+  border-radius: 2px;
   position: relative;
-  top: 2px;
-  transition: background-color var(--transition-fast), border-color var(--transition-fast);
-}
-
-/* A read-only marker, so this is a size and legibility fix only — it stays
-   `aria-hidden`, stays non-interactive, and still states "this is a checkbox"
-   without promising it works. The change is that CHECKED and UNCHECKED now
-   differ by FILL as well as by tick, because the previous version showed a 13px
-   empty outline that all but vanished on --bg and left the two states
-   distinguishable only by a mid-tone green the reader had to already be able
-   to see. Fill survives greyscale and colour-blindness; a green-on-grey tick
-   does not. */
-.tmpl-box.is-checked {
-  background: var(--success-fill);
-  border-color: var(--success-fill);
+  top: 1px;
 }
 
 .tmpl-box.is-checked::after {
-  content: "";
+  content: "✓";
   position: absolute;
-  top: 50%;
-  left: 50%;
-  width: 7px;
-  height: 4px;
-  margin-top: -2px;
-  margin-left: -3px;
-  border-left: 1.5px solid var(--check-tick);
-  border-bottom: 1.5px solid var(--check-tick);
-  transform: rotate(-45deg);
+  inset: -4px 0 0 1px;
+  font-size: var(--text-xs);
+  line-height: 1;
+  color: var(--text-muted);
 }
 
 /* --- Your work: the read-back of the reader's own writing ---
@@ -3564,20 +3450,6 @@ p em {
     --text-muted: #333333;
     --border: #999999;
     --accent: #000000;
-    /* The check tokens are overridden here for the same reason the others are:
-       the screen versions assume a dark page. Left alone, a checked box prints
-       as a SOLID #4ac48a block on white paper — 2.20:1, and a toner-dark patch
-       on a checklist the reader may well print. */
-    --check-tick: #000000;
-  }
-
-  /* On paper, "checked" is an outline plus a tick, not a filled block. It reads
-     at any printer, costs ink instead of toner, and survives a photocopy. */
-  .check--done .check__box::before,
-  .tmpl-box.is-checked {
-    background: transparent;
-    border-color: #000000;
-    border-width: 2px;
   }
 
   body {
