@@ -624,6 +624,35 @@ ed to the Views list that actually exists; the three M2 pages no longer describe
 
 ### Fixed
 
+- **The one control on the site a reader could not see was the checklist checkbox, and the cause
+  was not its colour.** A screenshot showed a ticked item whose check was a faint smudge next to
+  bold body text. It was `<input type="checkbox" accent-color: var(--success)>` — a ~13px native
+  box with the browser painting the mark. Every token passes AA on `--bg` (`--success` is
+  8.38:1), so **darkening the green would have fixed nothing**; measuring first is what stopped
+  the obvious repair. The real causes were size (under WCAG 2.5.8's 24×24 minimum target, with
+  an ~8px tick), `accent-color` setting only the *fill* so the UA picked its own mark colour
+  against it (white on that green is 2.20:1, so it chose a muddy dark green), and state being
+  carried by hue alone — the one distinction a colour-blind reader cannot make.
+  Now a drawn checkbox: 20px box, **44px hit area**, explicit tick in `--check-tick` on
+  `--success-fill`, `--text-muted` outline when empty, and **unchecked and checked differ by
+  fill as well as by tick** so the two states survive greyscale. The native input is kept,
+  invisible and full-size, so semantics, keyboard behaviour and the accessible name are
+  unchanged; `:focus-visible` is re-established because `appearance: none` removes the native
+  ring. Verified in a real browser, not assumed: hit area 44×44, `input.checked` still `true`,
+  fill `transparent` → `rgb(74,196,138)`.
+- **A size audit of every interactive target found three, and they were not the same kind of
+  thing — so the fix was not uniform.** The checklist box (real control, fixed above);
+  `.tmpl-box` in the weekly-tracker template, which is `aria-hidden` and deliberately
+  non-interactive, so it took the size and fill fix but **stays a marker** — a real input there
+  "would look tickable and do nothing, the same lie as a button that goes nowhere"; and
+  `.lesson__done`, a real button at 22px, just under the 24px AA floor, now 24px.
+  **A sweep that treated all three alike would have destroyed a deliberate accessibility
+  decision**, which is why the audit was read before it was applied.
+- **The drawn checkbox would have printed as a toner-dark green block.** The print tokens
+  override `--bg` to white but not `--check-tick` or the fill, so a checked box came out as a
+  solid `#4ac48a` patch at 2.20:1 on paper. On paper "checked" is now an outline plus a tick —
+  it reads on any printer, costs ink rather than toner, and survives a photocopy.
+
 - **The browser suite was declared unverifiable, and that was false — so the product's one
   untested part had a standing excuse instead of a test.** `docs/HANDOFF.md` and
   `docs/CHECKPOINT.md` both said `npm run test:browser` "cannot run here at all" because
