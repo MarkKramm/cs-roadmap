@@ -624,6 +624,25 @@ ed to the Views list that actually exists; the three M2 pages no longer describe
 
 ### Fixed
 
+- **The browser suite was declared unverifiable, and that was false — so the product's one
+  untested part had a standing excuse instead of a test.** `docs/HANDOFF.md` and
+  `docs/CHECKPOINT.md` both said `npm run test:browser` "cannot run here at all" because
+  "Playwright and Chromium are not installed on this machine". The script imports no Playwright
+  and never has: it finds a browser on the machine, probing Edge before Chrome, and drives it over
+  CDP with Node 24's global `WebSocket`. Playwright was **deliberately declined** in **D-023** as
+  a few hundred megabytes of download for about twenty CDP commands. Edge was installed the whole
+  time, at the first path probed. **Ran it: 148 checks, 0 failed**, against a fresh `dist/`. The
+  whole suite is now verified in one place for the first time.
+  **A stale "cannot" is worse than a stale "can"** — a wrong figure misinforms one reader once,
+  while a wrong *impossibility* gets copied forward until it is a property of the project and
+  nobody re-tests it. Every other figure audit in this project catches over-claiming; none could
+  have caught this, because it was an *under*-claim. **D-076** records the rule: a claim that
+  something cannot be verified is a claim, and the stated reason is the part a command settles.
+  Getting there also nearly went wrong in the other direction — the first run failed on a stale
+  `dist/` and a port collision left by an earlier session's preview server, which looks exactly
+  like confirmation. Only `Get-NetTCPConnection` distinguished "the script is broken" from
+  "something else holds the port". **A verification attempt that fails for an unrelated reason is
+  not evidence.**
 - **Ten figures across six documents were wrong, and every one was a number nothing checked.**
   `audit-doc-figures.mjs` checked 39 figures in 6 documents, and the rot was entirely outside
   that set. Word counts: the corpus total said **494,386** and is **495,150**, the whole drift in
