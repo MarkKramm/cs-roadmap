@@ -9,15 +9,15 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 ### Added
 
 - **`scripts/audit-lesson-code.mjs` and `scripts/test-audit-lesson-code.mjs` — the first guard to
-  ask whether the code in a lesson parses, wired into CI with its 27 controls.** D-036 named the
+  ask whether the code in a lesson parses, wired into CI with its 36 controls.** D-036 named the
   class no guard could see: a fenced block that is internally consistent, perfectly clear, and does
   not work. The comprehension passes found three real instances by reading — cyber-12's auto-closer
   printed a name defined nowhere, its `from lookup import` named a file the lesson never created,
   and cyber-10's Wazuh rule matched positively for the parents it meant to *exclude*. Nothing asked
   a block whether it was valid. This reads all 62 Markdown files under `career-roadmaps/` and checks
   all 650 blocks: 22 JSON blocks parse, 14 are checked against the identity-policy grammar that
-  `JSON.parse` cannot see (`valid JSON` and `a working IAM policy` are different claims), and 277
-  shell-dialect blocks are checked for delimiter balance per block. Four findings are reported for a
+  `JSON.parse` cannot see (`valid JSON` and `a working IAM policy` are different claims), and 278
+  shell-dialect blocks are checked for delimiter balance per block. Four findings were reported for a
   reader rather than failed, because whether a hunt's second stage *should* be narrower than its
   first is a judgement about the prose. **A guard that fails on correct content gets switched off,
   which loses the one case worth catching.** The general form: *the report must state what it did not
@@ -623,6 +623,34 @@ ed to the Views list that actually exists; the three M2 pages no longer describe
 - `learning-site/README.md` — removed a duplicated `## Layout` section; documented the new pages, hooks, and commands; status brought up to M2.
 
 ### Fixed
+
+- **Five defects in the lesson-code balance counter, all found by a second implementation written
+  from the specification rather than from the code, and all latent because the corpus contains none
+  of the constructs involved.** (1) **The here-string support was dead code.** Detection tested the
+  line for `@"` only *after* the character loop had already set `quote` on that same quote, so the
+  test could never run — and the comment above it claimed the feature worked. Every here-string body
+  was tokenised as code, which made `Don't panic` inside `@'…'@` a false unclosed quote. (2) The
+  same defect read from the other side: an unbalanced brace in a here-string body was counted. (3)
+  **The heredoc pattern required the delimiter to end the line**, so `cat <<EOF > out` and
+  `cat <<EOF | grep x` — both ordinary — reported the body as unterminated. (4) **A comment that
+  merely mentioned a construct opened a phantom DATA region**, because the opener was tested against
+  the whole line; moving detection inside the character loop makes a `#` end the line first, so a
+  comment cannot open one. (5) `case`/`esac` and `$'...'` are false positives for this tier — a
+  `case` pattern's `)` is not a bracket closer, and `$'a\'b'` closes on the escaped quote — and a
+  coverage note claimed both "were checked against the rule by hand". They were not. **They are now
+  DECLINED and counted as skipped**, so `278 of 278` is never read as *278 analysable*, which is the
+  honest reading. Half-implementing a bash grammar is how this tier produced ten apostrophe findings
+  in the first place.
+  A sixth was mine alone: the pending-opener flag was scoped per block instead of per line, so
+  closing a heredoc on its terminator immediately re-opened it on the next line, and **the corpus's
+  only heredoc reported as unterminated**. A guard that has never been clean in a code path it ships
+  is the worst kind. Nine controls now cover these, including the opposite direction in each case,
+  so declining or skipping cannot quietly become the default. **A guard's coverage is exactly as good
+  as the constructs someone thought to test, and "the corpus has none" is not a safety claim.**
+- **The guard contradicted itself on the number of PowerShell blocks**, printing 164 in the
+  by-language table and 163 in its own blind-spot list, thirty lines apart, on a single run. Both
+  were typed by hand. Every such count is now read from the measured map, because a guard that is
+  wrong about a number it is right about stops being trusted with the numbers it gets right.
 
 - **The handoff went stale again, one commit after the commit that fixed it being stale, and its
   own shape gave a reader no way to tell** (`docs/HANDOFF.md`, `docs/CHECKPOINT.md`). `0169b5c`

@@ -71,7 +71,7 @@ proves it.
 **Done and guarded.** The advance track's claims. The Sigma schema guard
 (`audit-sigma.mjs`, 13 controls) is in CI and already found a real defect in a
 "completed" track. **And now the code itself**, which until 2026-09-29 nothing
-had ever parsed: `audit-lesson-code.mjs` (27 controls) reads all 62 Markdown
+had ever parsed: `audit-lesson-code.mjs` (36 controls) reads all 62 Markdown
 files under `career-roadmaps/` and checks all 650 fenced blocks, and it is the
 first guard to cover the defect D-036 named. Three of its four tiers gate; the
 fourth reports, on purpose.

@@ -126,6 +126,35 @@ function withFixture(name, file, find, replace, expect) {
   );
 }
 
+// For a construct the CORPUS DOES NOT CONTAIN. Several of the defects this
+// suite now guards were latent precisely because the corpus has no here-string,
+// no `case`, and no `cat <<EOF > out` — so a control that mutates an existing
+// block cannot reach them. This appends a whole fenced block, runs the guard,
+// and restores the file byte-for-byte.
+//
+// `mode` is "pass" (correct code, guard must be silent) or "fail" (broken code,
+// guard must name it) or "declined" (correct code the tier cannot analyse, so
+// the guard must SAY it skipped rather than pass over it in silence).
+function withAddedBlock(name, file, block, expect, mode) {
+  const target = TARGETS.find((b) => b.t === file);
+  if (!target) throw new Error(`control names a file that is not a target: ${file}`);
+
+  fs.writeFileSync(target.p, `${target.text}\n${block}\n`, "utf8");
+  const r = run();
+  restore();
+
+  const named = r.out.includes(expect);
+  const ok =
+    mode === "pass" ? named === false && r.code === 0
+    : mode === "declined" ? named && r.code === 0
+    : named && r.code !== 0;
+  check(
+    name,
+    ok,
+    `exit=${r.code} expectedBranchPresent=${named}\n${r.out.slice(-600)}`,
+  );
+}
+
 // --- 0. the real corpus, untouched ------------------------------------------
 
 {
@@ -565,7 +594,109 @@ withFixture(
   "DATA region is never closed",
 );
 
-// --- 7. the working tree is exactly as it was found ---------------------------
+// --- 7. the five defects an independent re-implementation found ---------------
+//
+// Every control so far tests a construct the corpus HAPPENS to contain. These
+// test five that it does not, which is why they were all latent: a here-string,
+// a `case`, and a heredoc with trailing redirection are all absent today, and
+// absent means untested. The first three were FALSE POSITIVES — correct code
+// turned red — which is the failure that gets a guard switched off, and the
+// fourth was a documented feature that was in fact DEAD CODE.
+//
+// The general form: **a guard's coverage is exactly as good as the constructs
+// someone thought to test, and "the corpus has none" is not a safety claim.**
+
+// D1. A here-string body is DATA. The `'` in `Don't` is text, and a version
+// that tokenised the body called it a string delimiter and then reported the
+// real closing `'@` as an unclosed quote — correct PowerShell, red build.
+withAddedBlock(
+  "a PowerShell here-string whose body contains an apostrophe -> must still PASS",
+  SCRIPT12,
+  "```powershell\n$n = @'\nDon't panic — the policy is read-only.\n'@\n```",
+  "does not balance",
+  "pass",
+);
+
+// D2. The same defect read from the other side: the body is DATA, so an
+// unbalanced bracket in it is not an unbalanced bracket in the block.
+withAddedBlock(
+  "an unbalanced brace inside a here-string body -> must still PASS (DATA, not code)",
+  SCRIPT12,
+  "```powershell\n$p = @\"\npayload: { unbalanced ( in prose\n\"@\n```",
+  "does not balance",
+  "pass",
+);
+
+// D3. A heredoc whose delimiter is NOT at the end of the line. `cat <<EOF > out`
+// and `cat <<EOF | grep x` are ordinary bash; requiring end-of-line made both
+// look like an unterminated body.
+withAddedBlock(
+  "a heredoc with trailing redirection `<<EOF > out` -> must still PASS",
+  INCIDENT,
+  "```bash\ncat <<EOF > out\nlog line with { a brace\nEOF\n```",
+  "does not balance",
+  "pass",
+);
+
+withAddedBlock(
+  "a heredoc piped into another command `<<EOF | grep x` -> must still PASS",
+  INCIDENT,
+  "```bash\ncat <<EOF | grep x\nlog line with ( a paren\nEOF\n```",
+  "does not balance",
+  "pass",
+);
+
+// D4. A comment that merely MENTIONS the construct must not open one. A `#`
+// ends the line before the opener is reached, which is why detection happens
+// inside the character loop and not by testing the line up front.
+withAddedBlock(
+  "a PowerShell comment that mentions `@\"` -> must still PASS (a comment cannot open a DATA region)",
+  SCRIPT12,
+  "```powershell\n# The payload is written with @\"\nWrite-Output \"ok\"\n```",
+  "does not balance",
+  "pass",
+);
+
+withAddedBlock(
+  "a bash comment that mentions `<<EOF` -> must still PASS (same reason)",
+  INCIDENT,
+  "```bash\n# see the <<EOF example in the manual\ngrep x file\n```",
+  "does not balance",
+  "pass",
+);
+
+// D5. `case`/`esac` and `$'...'`. Both are false positives for this tier: a
+// `case` pattern's `)` is not a bracket closer, and `$'a\'b'` closes on the
+// escaped quote. Rather than half-implement a bash grammar — which is how the
+// ten apostrophe findings happened in the first place — the tier DECLINES such
+// a block and says so, so `278 of 278` is never read as `278 analysable`.
+withAddedBlock(
+  "a bash `case` block -> must be DECLINED as unchecked, not silently analysed",
+  INCIDENT,
+  "```bash\ncase $x in\n  a) echo 1 ;;\nesac\n```",
+  "DECLINED and counted as skipped",
+  "declined",
+);
+
+withAddedBlock(
+  "bash `$'...'` ANSI-C quoting -> must be DECLINED as unchecked",
+  INCIDENT,
+  "```bash\nx=$'it\\'s fine'\n```",
+  "DECLINED and counted as skipped",
+  "declined",
+);
+
+// The opposite of D5, so DECLINING cannot quietly become "skip everything":
+// a here-string containing the same text is analysed, not declined.
+withAddedBlock(
+  "a here-string containing `case` and `!` -> must still PASS (declining is not a blanket skip)",
+  SCRIPT12,
+  "```powershell\n$t = @'\ncase $x in\n  a) echo ! ;;\nesac\n'@\n```",
+  "does not balance",
+  "pass",
+);
+
+// --- 8. the working tree is exactly as it was found ---------------------------
 
 {
   const intact = TARGETS.every((b) => fs.readFileSync(b.p, "utf8") === b.text);

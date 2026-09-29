@@ -139,7 +139,7 @@ node scripts/audit-commands.mjs          # DISM/sfc/chkdsk written in a form tha
 node scripts/audit-terms.mjs --self-test # the acronym DETECTOR — 16 controls, gates
 node scripts/audit-terms.mjs             # the acronym CORPUS — measurement, always exits 0
 node scripts/audit-lesson-code.mjs       # the 650 fenced blocks: do they parse, and are they shaped as claimed
-node scripts/test-audit-lesson-code.mjs  # the lesson-code guard's own 27 controls, gates
+node scripts/test-audit-lesson-code.mjs  # the lesson-code guard's own 36 controls, gates
 ```
 
 **The two `verify-*` scripts are no longer the only checks here that test whether the content is *true*** (D-036). Most guards ask "do two places in this repository say the same thing". Those two recompute claims with an answer independent of the document — subnet arithmetic, and a worked example whose stated result must follow from its own data — and `audit-lesson-code.mjs` now does the same for the code: whether a block parses is a fact about the block, not a fact about whether the prose agrees with the block. The strongest tier is no longer two scripts, and that is worth recording because the sentence above claimed otherwise for as long as it was true.
@@ -187,7 +187,7 @@ The smoke test renders the lesson for every phase and asserts that the table and
 - [ ] `node scripts/audit-quiz.mjs` reports `findings: 0` (after any edit to a `## Quiz` section, or to the quiz parser).
 - [ ] `node scripts/verify-cidr.mjs` and `node scripts/verify-metrics.mjs` both pass (after any edit to a subnet table, a worked networking example, or IT 06's ticket data).
 - [ ] `node scripts/audit-commands.mjs` passes (after any edit that adds or shortens a `DISM`, `sfc`, or `chkdsk` invocation — especially inside a table cell, which is where the shortening happens).
-- [ ] `node scripts/audit-lesson-code.mjs` reports no finding that fails the build, and `node scripts/test-audit-lesson-code.mjs` reports `27 passed, 0 failed` (after any edit that adds, removes, or edits a fenced code block — and after any edit to either script). **Read its coverage table, not just its exit code.** It prints what it did *not* check, and a `T0.x` line reading `0 of 12 checked` is a smaller result, not a green one.
+- [ ] `node scripts/audit-lesson-code.mjs` reports no finding that fails the build, and `node scripts/test-audit-lesson-code.mjs` reports `36 passed, 0 failed` (after any edit that adds, removes, or edits a fenced code block — and after any edit to either script). **Read its coverage table, not just its exit code.** It prints what it did *not* check, and a `T0.x` line reading `0 of 12 checked` is a smaller result, not a green one.
 - [ ] `node scripts/verify-ports.mjs --refresh` passes (after any edit to a port table — run by hand, since it needs the network).
 - [ ] If phase prose changed, `node scripts/extract-claims.mjs --track <it|cyber|advance>` was re-run so that track's worklist matches the content — **but only before a pass starts.** After verdicts are recorded, re-running the extractor wipes them, and the packs the recorder needs have been emptied on purpose.
 - [ ] `node scripts/validate-ci.mjs` reports `0 problems` (after any edit to `.github/workflows/`, or after renaming any script a workflow names).

@@ -726,22 +726,48 @@ const totalBlocks = corpus.reduce((n, c) => n + c.blocks.length, 0);
 
   // A DATA frame is a run of lines that is text rather than code, and it exists
   // because the earlier version counted it as code. Both forms are
-  // line-delimited, so both are detected at the END of the line that opens them
-  // and the START of the line that closes them:
+  // line-delimited, so both are detected at the line that opens them and the line
+  // that closes them:
   //
   //   - PowerShell here-strings, `@"` … `"@` and `@'` … `'@` (zero in the corpus).
+  //     The opener MUST be the last thing on its line, which is PowerShell's own
+  //     rule, not a simplification.
   //   - bash heredocs, `<<WORD` … `WORD` and `<<-WORD` … `WORD`, whose body may
-  //     hold any quote or bracket because it is never tokenised.
+  //     hold any quote or bracket because it is never tokenised. The delimiter
+  //     does NOT have to end the line: `cat <<EOF > out` and `cat <<EOF | grep x`
+  //     are both ordinary, and an earlier version of this regex required
+  //     end-of-line and therefore flagged both as unbalanced. The `(-)?` honours
+  //     `<<-`, the one form whose terminator may be indented with tabs.
   //
   // The corpus's one heredoc is a Markdown decision log, and it balances today
   // only because it happens to contain no brace or paren. It is prose and it
   // will grow prose, so one line of ordinary English would have turned the build
-  // red on a correct file. The `-` in `<<-` is honoured because that is the one
-  // form whose terminator may be indented with tabs.
-  const HEREDOC = /<<(-)?\s*(?:'([^']*)'|"([^"]*)"|([A-Za-z_][A-Za-z0-9_]*))\s*$/;
-  const HERESTRING = /@("|')\s*$/;
+  // red on a correct file.
+  //
+  // Both openers are detected INSIDE the character loop rather than by testing
+  // the line up front, and that ordering is the whole fix for a second defect:
+  // testing the line first meant a comment that merely mentioned the construct
+  // opened a phantom DATA region, so `# see the <<EOF` reported the rest of the
+  // block as an unterminated heredoc. Inside the loop, a `#` has already ended
+  // the line before the opener can be reached, so a comment cannot open one.
+  const HEREDOC = /<<(-)?[ \t]*(?:'([^'\n]*)'|"([^"\n]*)"|([A-Za-z_][A-Za-z0-9_]*))/;
+  const HERESTRING = /^@("|')[ \t]*$/;
+
+  // Bash constructs this tier CANNOT count correctly, detected so that a block
+  // using one is loudly reported as unchecked rather than silently mis-analysed.
+  // An earlier version of this file claimed in its coverage note that `case`/
+  // `esac` and `$'...'` "were checked against the rule by hand"; they were not,
+  // and both produce false positives — a `case` pattern's `)` is not a bracket,
+  // and `$'a\'b'` closes on the escaped quote. Half-implementing a bash grammar
+  // is how this tier got the ten apostrophe findings in the first place, so the
+  // honest move is to decline the block and say so in the coverage table.
+  const BASH_TOO_HARD = [
+    { re: /(?:^|\n)[ \t]*case[^\n]*\bin\b/, what: "`case`/`esac`, where a pattern's `)` is not a bracket closer" },
+    { re: /\$'/, what: "bash `$'...'` ANSI-C quoting, where `\\'` is a literal quote and not a closer" },
+  ];
 
   const perLang = new Map();
+  const declined = new Map();
   let checked = 0;
   let skipped = 0;
   const why = [];
@@ -753,6 +779,19 @@ const totalBlocks = corpus.reduce((n, c) => n + c.blocks.length, 0);
       if (b.unterminated) {
         skipped++;
         continue;
+      }
+
+      // Declined, loudly. A block this tier cannot count correctly is not
+      // checked and not silently passed — it is counted here and named in the
+      // coverage table, so a reader can see that "278 of 278" is not the same
+      // claim as "278 of 278 were analysable".
+      if (wordStart.has(b.lang)) {
+        const hit = BASH_TOO_HARD.find((r) => r.re.test(b.body.join("\n")));
+        if (hit) {
+          skipped++;
+          declined.set(hit.what, (declined.get(hit.what) ?? 0) + 1);
+          continue;
+        }
       }
 
       checked++;
@@ -811,6 +850,15 @@ const totalBlocks = corpus.reduce((n, c) => n + c.blocks.length, 0);
           if (probe === data.end || probe.trim() === data.end) data = null;
           continue;
         }
+
+        // A DATA opener seen on THIS line, held rather than applied immediately
+        // so the ordering against `#` stays explicit. It MUST be per line, not
+        // per block: declared per block, a stale opener from the line that
+        // started a heredoc was re-applied on every following line, so closing
+        // the region on its terminator immediately re-opened it on the next line
+        // and the corpus's one heredoc reported as unterminated. A guard that
+        // has itself never been clean in a code path is the worst kind.
+        let pendingData = null;
 
         for (let j = 0; j < line.length; j++) {
           const ch = line[j];
@@ -877,26 +925,46 @@ const totalBlocks = corpus.reduce((n, c) => n + c.blocks.length, 0);
             quoteAt = at;
             continue;
           }
+
+          // DATA openers, reached only in real code. Both require a token
+          // boundary before them so `x@"` or `a<<EOF` cannot match.
+          if (ch === "@" && (j === 0 || /[\s=(,]/.test(line[j - 1])) && HERESTRING.test(line.slice(j))) {
+            // Consume the opener WITHOUT setting `quote`. This is the fix for a
+            // dead branch: an earlier version tested the line for `@"` only
+            // after the character loop had already set `quote` on that same
+            // quote character, so the test could never run and every here-string
+            // body was tokenised as code.
+            pendingData = { end: line[j + 1] + "@", dash: false };
+            j += 1;
+            continue;
+          }
+          if (
+            ch === "<" &&
+            line[j + 1] === "<" &&
+            wordStart.has(b.lang) &&
+            sub === 0 &&
+            (j === 0 || /\s/.test(line[j - 1]))
+          ) {
+            const hd = HEREDOC.exec(line.slice(j));
+            if (hd) {
+              const end = hd[2] ?? hd[3] ?? hd[4];
+              // A delimiter that is a number is a shift, not a heredoc. The
+              // pattern already requires a letter or underscore to start, so
+              // `2 << 3` cannot match; this is the belt to that braces.
+              if (end) {
+                pendingData = { end, dash: Boolean(hd[1]) };
+                j += hd[0].length - 1;
+                continue;
+              }
+            }
+          }
+
           bracket(ch, at);
         }
 
-        // A DATA frame is only opened by a line that finished outside any
-        // string and outside any block comment, so a `@"` appearing in prose
-        // inside a quoted string cannot open one.
-        if (data || quote || blockComment) continue;
-        const hs = HERESTRING.exec(line);
-        if (hs && !wordStart.has(b.lang)) {
-          data = { end: hs[1] + "@", dash: false };
+        if (pendingData) {
+          data = pendingData;
           dataAt = at;
-          continue;
-        }
-        const hd = wordStart.has(b.lang) ? HEREDOC.exec(line) : null;
-        if (hd) {
-          const end = hd[2] ?? hd[3] ?? hd[4];
-          if (end) {
-            data = { end, dash: Boolean(hd[1]) };
-            dataAt = at;
-          }
         }
       }
 
@@ -951,18 +1019,28 @@ const totalBlocks = corpus.reduce((n, c) => n + c.blocks.length, 0);
   why.push(
     `counted per block, not per line, across ${[...perLang].map(([k, v]) => `${v} ${k}`).join(", ")} — six individually-odd lines in this corpus are collectively correct and are why per-line checking is not done`,
   );
-  // CORRECTED 2026-09-29 after an independent verification pass. This note used
-  // to say the corpus "contains no `${#...}` length expansion, which is the one
-  // construct that would make that rule wrong". That was wrong in both halves,
-  // and it is recorded here rather than deleted because the error is the useful
-  // part: `${#var}` is handled CORRECTLY by the word-start rule, since the `{`
-  // follows `#` immediately and the rule keys on the character BEFORE the `#`.
-  // What would actually break the rule is a `#` glued to a non-space character
-  // inside what a reader would call a comment — `echo a#b` is genuinely literal
-  // in bash and this guard genuinely counts it as code, which is right.
+  // CORRECTED TWICE on 2026-09-29, by independent verification passes, and both
+  // corrections are recorded rather than deleted because the errors are the
+  // useful part.
+  //
+  // Version 1 said the corpus "contains no `${#...}` length expansion, which is
+  // the one construct that would make that rule wrong". Wrong in both halves:
+  // `${#var}` is handled CORRECTLY, because the `{` follows the `#` immediately
+  // and the rule keys on the character BEFORE the `#`.
+  //
+  // Version 2 said `case`/`esac` and `$'...'` "were checked against the rule by
+  // hand rather than assumed". They were not, and both are live false positives —
+  // a `case` pattern's `)` is not a bracket closer, and `$'a\'b'` closes on the
+  // escaped quote. So they are now DECLINED and counted, rather than claimed as
+  // handled. **A coverage note that asserts a construct was verified is a claim
+  // about someone's memory, and memory is what the tier above it exists to
+  // distrust.**
   why.push(
-    "bash `#` opens a comment only at the start of a word, so `foo#bar` is counted as literal code. The corpus contains no `${#...}`, `case`/`esac` or `$'...'` construct, and each of those was checked against the rule by hand rather than assumed",
+    "bash `#` opens a comment only at the start of a word, so `foo#bar` is counted as literal code; `${#var}` is handled correctly by that rule and was verified as such",
   );
+  for (const [what, n] of declined) {
+    why.push(`${n} bash block(s) DECLINED and counted as skipped rather than analysed: ${what}`);
+  }
 
   // The label is the ONLY thing that gets a block into this tier, and a label
   // outside the set opts out silently. That is a real surface rather than a
@@ -1006,14 +1084,20 @@ console.log("not checked by this guard, and not by any other");
 console.log("  These are real blind spots, listed here so that a green run above cannot be read");
 console.log("  as more than it is. Each was considered and not built; the reason is given.");
 console.log("");
+// Every count in this block is read from `byLang` rather than typed. They were
+// typed once, and within a day the same run printed "163" here and "164" in the
+// by-language table fourteen lines above — a guard contradicting itself on one
+// run is a guard nobody trusts with the numbers it is right about.
+const nOf = (...langs) => langs.reduce((n, l) => n + (byLang.get(l) ?? 0), 0);
+
 console.log("  - Whether a python block COMPILES. T0.4 counts its delimiters, which catches");
 console.log("    an unclosed bracket and nothing else. `python -m py_compile` would catch a");
 console.log("    syntax error, but no `python` exists on a default Windows install and");
 console.log("    `scripts/` may not take a dependency (AGENTS.md rule 3), so there is nothing");
-console.log("    to call. 28 blocks are affected. NOT BUILT rather than built untested: a tier");
+console.log(`    to call. ${nOf("python", "python3")} blocks are affected. NOT BUILT rather than built untested: a tier`);
 console.log("    that has never been executed is a guess, and a guard that is wrong in an");
 console.log("    untested path is worse than an admitted gap.");
-console.log("  - The same for powershell (163 blocks) and bash (86), via `pwsh` and `bash -n`.");
+console.log(`  - The same for powershell (${nOf("powershell", "pwsh", "ps1", "posh")} blocks) and bash (${nOf("bash", "sh", "shell", "zsh", "shell-session")}), via \`pwsh\` and \`bash -n\`.`);
 console.log("  - Whether a block RUNS, as opposed to parsing. The comprehension pass found");
 console.log("    cyber-12 printing a name that is defined nowhere — a real defect, found by");
 console.log("    reading, and still not caught by anything. Running a lesson's code means");
