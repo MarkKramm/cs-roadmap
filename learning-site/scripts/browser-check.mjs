@@ -1888,7 +1888,174 @@ async function main() {
     );
 
     // ---------------------------------------------------------------------
-    // 11. Console cleanliness across the whole run
+    // 11. Every interactive control on the site is hittable
+    //
+    // WHY THIS IS SITE-WIDE. A screenshot showed one control that worked and
+    // could not be seen. The four checks in section 3a-bis measure that one
+    // control. This one sweeps all of them, on every run, so the NEXT control
+    // to be built too small is caught by CI rather than by a reader noticing.
+    //
+    // It is deliberately a hard gate, not a report. The whole point is that a
+    // number nobody re-derives goes stale -- and an unenforced sweep is a
+    // measurement that prints a clean result, which is the failure mode this
+    // repository has now hit five separate times.
+    //
+    // WHAT IT CHECKS, and what it deliberately does NOT check:
+    //
+    //   - TARGET SIZE >= 24x24 (WCAG 2.5.8). Checked.
+    //   - A control painted invisibly. Checked, via computed opacity.
+    //   - CONTRAST. Deliberately NOT checked, and the reason is the important
+    //     part. A first draft of this sweep reported "1050 of 1142 controls
+    //     have no visible edge", which is nonsense: those controls have no
+    //     border and no fill and are identified by their TEXT, at 4.76:1 to
+    //     13.85:1. WCAG 1.4.11 asks 3:1 for a boundary only where the
+    //     boundary is what identifies the control. This site is deliberately
+    //     quiet-surface and loud-text, which is coherent, and flagging it would
+    //     train people to ignore the check. A draft also compared every
+    //     element's background against ITSELF -- walking up from the element
+    //     instead of its parent -- and reported 19 controls at exactly 1:1,
+    //     which is a bug report about the bug reporter.
+    //
+    //   - INLINE LINKS. WCAG 2.5.8 exempts a target that is in a sentence or
+    //     is otherwise constrained by the line-height of non-target text. A
+    //     link with non-empty surrounding text in its own block is treated as
+    //     inline and skipped. A bare link with nothing around it is counted,
+    //     because that is the one a reader has to aim at.
+    // ---------------------------------------------------------------------
+    const SWEEP_VIEWS = [
+      'Dashboard', 'Search', 'Schedule', 'Tools',
+      'Certifications', 'Practice exams', 'Your work',
+    ];
+
+    // The sweep function, defined once and used for both the nav views and the
+    // lesson, because the lesson is a surface in its own right and NOT a
+    // sidebar destination.
+    const SWEEP_FN = `(() => {
+      const sel = 'a[href], button, input, select, textarea, [role="button"], [onclick], [tabindex]:not([tabindex="-1"])';
+      const out = [];
+      for (const el of document.querySelectorAll(sel)) {
+        const cs = getComputedStyle(el);
+        if (cs.display === 'none' || cs.visibility === 'hidden') continue;
+        if (cs.pointerEvents === 'none') continue;
+        const r = el.getBoundingClientRect();
+        if (r.width < 1 || r.height < 1) continue;
+
+        // THE EFFECTIVE TARGET, not the element. A radio input is 13x13 but it
+        // is wrapped in a <label> measuring 139x31, and clicking anywhere on
+        // that label activates the radio -- so the label is the target a
+        // reader actually aims at. Measuring the input reported six failures
+        // on the Dashboard's time and energy groups that do not exist.
+        const label = el.closest('label');
+        const box = label ? label.getBoundingClientRect() : r;
+
+        // The inline exemption, decided from the element's own text rather
+        // than guessed: a link with words around it in the same block is
+        // constrained by the surrounding line-height and is exempt.
+        const block = el.closest('p, li, td, th, dd, figcaption, blockquote');
+        const own = (el.textContent || '').trim();
+        let inline = false;
+        if (el.tagName.toLowerCase() === 'a' && block) {
+          const around = (block.textContent || '').replace(own, '').trim();
+          inline = around.length > 0;
+        }
+
+        out.push({
+          tag: el.tagName.toLowerCase(),
+          cls: (typeof el.className === 'string' ? el.className : (label ? label.className : '')).slice(0, 40),
+          label: (el.getAttribute('aria-label') || own || (label ? label.textContent : '') || el.title || '')
+            .trim().replace(/\\s+/g, ' ').slice(0, 28),
+          w: Math.round(box.width), h: Math.round(box.height),
+          viaLabel: !!label,
+          opacity: Math.round(parseFloat(cs.opacity) * 100) / 100,
+          inline,
+        });
+      }
+      return out;
+    })()`;
+
+    const sweep = async (label) => {
+      for (const c of await cdp.eval(SWEEP_FN)) {
+        // A control at zero opacity is a control nobody can see, whatever its
+        // size. This is the exact defect section 3a-bis catches for one
+        // control, generalised.
+        if (c.opacity < 0.05) {
+          sweepResults.push({ view: label, why: 'invisible (opacity ' + c.opacity + ')', ...c });
+          continue;
+        }
+        if (c.inline) continue;
+        if (c.w < 24 || c.h < 24) {
+          sweepResults.push({
+            view: label,
+            why: 'target ' + c.w + 'x' + c.h + (c.viaLabel ? ' via label' : '') + ' (needs 24x24)',
+            ...c,
+          });
+        }
+      }
+    };
+
+    const sweepResults = [];
+    let sweptTotal = 0;
+
+    for (const view of SWEEP_VIEWS) {
+      const landed = await goToView(view);
+      if (!landed) continue;
+      await sleep(600);
+      sweptTotal += (await cdp.eval(SWEEP_FN)).length;
+      await sweep(view);
+    }
+
+    // THE LESSON, which is the largest surface on the site and the one the
+    // original defect lived on. It is not a sidebar destination, so the loop
+    // above cannot reach it, and leaving it out is how a green suite reported
+    // 154 passing with a control hidden at opacity 0: the first version of
+    // this sweep omitted it, which was caught by mutation rather than by
+    // reading, and is the reason the lesson is added with a comment.
+    const openedLesson = await cdp.eval(`(() => {
+      const b = [...document.querySelectorAll('a,button')].find(x => /computer fundamentals/i.test(x.textContent));
+      if (b) { b.click(); return true; }
+      return false;
+    })()`);
+    if (openedLesson) {
+      await sleep(2600);
+      sweptTotal += (await cdp.eval(SWEEP_FN)).length;
+      await sweep('Lesson');
+    }
+
+    // A sweep that silently found nothing is indistinguishable from a sweep
+    // that did not run -- the exact shape of every "reported a clean result"
+    // failure in this repository. So the TOTAL is asserted, not just the count
+    // of failures, and it is the aggregate across every surface swept. This
+    // number is a floor, well below the real one, so a broken selector fails
+    // loudly instead of passing on an empty sweep. The lesson is included
+    // because omitting it is precisely what let a hidden control through.
+    check(
+      'control sweep: actually found controls to measure',
+      sweptTotal > 200,
+      'measured ' + sweptTotal + ' interactives across ' +
+        SWEEP_VIEWS.length + ' views' + (openedLesson ? ' + Lesson' : ' (LESSON NOT SWEPT)'),
+    );
+    check(
+      'the lesson was actually reached by the sweep',
+      !!openedLesson,
+      openedLesson ? 'lesson swept' : 'could not open a lesson -- its controls went unmeasured',
+    );
+    check(
+      'every interactive control is hittable (>=24x24, not invisible)',
+      sweepResults.length === 0,
+      sweepResults.length
+        ? sweepResults.length + ' problem(s): ' +
+            sweepResults.slice(0, 5)
+              .map(
+                (c) =>
+                  c.view + ' ' + (c.cls ? '.' + c.cls.split(/\s+/).join('.') : '<' + c.tag + '>') +
+                  ' "' + (c.label || '(no label)') + '" ' + c.why,
+              )
+              .join(' | ')
+        : 'no undersized or invisible control across ' + sweptTotal + ' controls',
+    );
+
+    // ---------------------------------------------------------------------
+    // 12. Console cleanliness across the whole run
     // ---------------------------------------------------------------------
     const errs = cdp.consoleErrors.filter((e) => e && e.trim() !== '');
     check(

@@ -195,11 +195,15 @@ export default function PhaseDetail({
       {phase.resources && phase.resources.length > 0 && (
         <section className="card">
           <h2>Free and cheap resources</h2>
-          <ul>
+          <ul className="resource-list">
             {phase.resources.map((r, i) => (
               <li key={i}>
                 {r.url ? (
-                  <a href={r.url} target="_blank" rel="noreferrer">
+                  /* A class, because this link was previously unstyled and
+                     unaddressable: it is a bare <a> at 21px, under WCAG 2.5.8's
+                     24px minimum, and nothing could target it. Found by the
+                     site-wide control sweep, which reaches the lesson. */
+                  <a className="resource-link" href={r.url} target="_blank" rel="noreferrer">
                     {renderInline(r.name, `resource-${i}`)}
                   </a>
                 ) : (

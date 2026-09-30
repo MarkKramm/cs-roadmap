@@ -624,6 +624,37 @@ ed to the Views list that actually exists; the three M2 pages no longer describe
 
 ### Fixed
 
+- **The target-size audit was a throwaway script run once. It is now a check that runs on every
+  commit, and it found 14 more problems the one-off had missed.** `browser-check.mjs` now sweeps
+  **every interactive control across seven views and a lesson — 1,118 of them** — asserting none
+  is under 24×24 and none is painted invisible. It is a hard gate rather than a report, because
+  an unenforced sweep is a measurement that prints a clean result, which is the failure this
+  repository has now hit repeatedly. **The total is asserted as well as the failures**, so a
+  broken selector fails loudly instead of passing on an empty sweep, and the lesson's being
+  reached is a check in its own right.
+- **The first version of that sweep passed GREEN with a control hidden at `opacity: 0`.** It
+  swept the seven sidebar destinations and nothing else, so it never saw the lesson — the largest
+  surface on the site, and the one the original defect lived on. **Mutation testing is the only
+  thing that found it**; reading the code would not have. With the lesson included, the same
+  hidden control is caught and named: `Lesson [Copy code to clipboard] invisible (opacity 0)`,
+  60 findings. The lesson is now opened explicitly, with a comment saying why, and
+  "the lesson was actually reached" is its own check.
+- **Eleven resource links were 21px, and nothing could have found them.** The phase's "Free and
+  cheap resources" links were **bare `<a>` elements with no class** — so no stylesheet could
+  target them and no selector could measure them. They now carry `resource-link` and are padded
+  to 24px, and padding on a non-replaced inline box leaves the list's rhythm untouched. **This is
+  the same shape as the section-done control: a control that nobody styled because nobody could
+  address it.**
+- **A sweep that reports "11 problems" without naming the class cannot be acted on**, and I spent
+  a probe rediscovering that. The failure message now carries the selector, the label and the
+  measurement, so the next person to hit it does not have to re-derive it.
+- **The sweep measures the EFFECTIVE TARGET, and the first draft got that wrong too.** It
+  reported six failures on the Dashboard's time and energy groups: those are radio inputs at
+  13×13, but each is wrapped in a `<label>` measuring 139×31, and clicking anywhere on the label
+  activates the radio. **The label is what a reader aims at.** Same family as the two errors in
+  the previous entry — a whole-site audit finds the audit's own assumptions first, because it is
+  the only thing here making claims nobody has checked.
+
 - **A whole-site target-size audit of every interactive control, and three real gaps.** 1,142
   controls measured in a real engine across nine views, enumerated from the live DOM rather than
   from a selector list — so a control added later is measured without editing anything. Four were

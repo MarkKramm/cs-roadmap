@@ -209,14 +209,31 @@ greyscale and colour-blindness.
 
 ## Target size, and what the audit deliberately did not fix
 
-Every interactive control on the site was measured in a real engine — 1,142 of them across
-nine views, enumerated from the live DOM rather than from a selector list, so a control added
-later is measured without any file being edited. **Four were under 24px**; three are fixed:
+**This is enforced.** `browser-check.mjs` sweeps every interactive control across seven views and
+a lesson, and fails if any is under 24x24 (WCAG 2.5.8) or painted invisible. The **total** is
+asserted as well as the failure count, so a broken selector cannot pass on an empty sweep, and
+reaching the lesson is a check in its own right: the first version of the sweep omitted the
+lesson and **passed green with a control hidden at `opacity: 0`**, which only mutation testing
+found.
+
+Three rules the sweep has to encode, each of which is a false positive if you skip it:
+
+- **Measure the effective target, not the element.** A radio input is 13x13, but it is wrapped in
+  a `<label>` measuring 139x31, and clicking anywhere on the label activates the radio. The label
+  is what a reader aims at. Measuring the input reported six failures that did not exist.
+- **The inline exemption is decided from the element's own text, not guessed.** A link with words
+  around it in the same block is constrained by the surrounding line-height and is exempt under
+  2.5.8; a bare link with nothing around it is counted.
+- **A control needs a class to be fixable.** Eleven resource links were bare `<a>` elements at
+  21px that no stylesheet could target and no selector could measure.
+
+Controls that were under 24px, all fixed by padding the hit area with **no visual change**:
 
 | Control | Was | Now | How |
 |---|---|---|---|
 | `.link-btn` — a bare text button, used 12+ times including inline in prose | 21px | 25px | `padding: 2px 0` with an equal `margin: -2px 0` |
 | `.tool-card__link` — "Official site" | 19px | 25px | `padding: 3px 0`; padding on a non-replaced inline box does not move the line box, so no compensation is needed |
+| `.resource-link` - the phase's resource links, previously classless | 21px | 24px | `padding: 3px 0` |
 | `.tool-result__from` | 22px | 24px | top padding, growing into space that was already empty |
 
 **The compensation on `.link-btn` is not optional.** It is a `button`, so vertical padding
@@ -231,9 +248,9 @@ link in lesson prose, which is a broad change to the reading column for a border
 **A named non-fix is better than a silent one** — a future pass that disagrees has something to
 disagree with, rather than having to rediscover that the option was considered.
 
-### What the audit got wrong twice, which is the part worth keeping
+### What the audit got wrong, which is the part worth keeping
 
-Running it produced **two false positives, and both were the audit's own reasoning**:
+Running it produced **three false positives, and all three were the audit's own reasoning**:
 
 - **Every element's background was compared against itself** (the walk for "what is behind
   this" started at the element rather than its parent), so 19 controls reported a boundary
@@ -244,10 +261,13 @@ Running it produced **two false positives, and both were the audit's own reasoni
   *where the boundary is what identifies the control*; a text button at 13.85:1 is about as
   visible as anything on the page. **The site has no contrast defects. Its surfaces are
   deliberately quiet and its text deliberately loud, and that is a coherent choice, not a bug.**
+  Contrast is therefore **not** in the enforced sweep, with this paragraph as the reason.
+- **The radio inputs described above**, which are a failure to identify the target rather than a
+  failure of the site.
 
 **The general form:** a whole-site audit finds the audit's own assumptions first, because the
-audit is the only thing in the repository making claims it has not checked. The three findings
-that survived were the three that survived a second look.
+audit is the only thing in the repository making claims it has not checked. The findings that
+survived were the ones that survived a second look.
 
 ## Breakpoints
 
