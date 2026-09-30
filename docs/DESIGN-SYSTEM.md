@@ -207,6 +207,48 @@ fill, a 1px ring, and motion only on interaction.
 The states are distinguished by the **tick glyph**, not by colour alone, so they survive
 greyscale and colour-blindness.
 
+## Target size, and what the audit deliberately did not fix
+
+Every interactive control on the site was measured in a real engine — 1,142 of them across
+nine views, enumerated from the live DOM rather than from a selector list, so a control added
+later is measured without any file being edited. **Four were under 24px**; three are fixed:
+
+| Control | Was | Now | How |
+|---|---|---|---|
+| `.link-btn` — a bare text button, used 12+ times including inline in prose | 21px | 25px | `padding: 2px 0` with an equal `margin: -2px 0` |
+| `.tool-card__link` — "Official site" | 19px | 25px | `padding: 3px 0`; padding on a non-replaced inline box does not move the line box, so no compensation is needed |
+| `.tool-result__from` | 22px | 24px | top padding, growing into space that was already empty |
+
+**The compensation on `.link-btn` is not optional.** It is a `button`, so vertical padding
+expands the line box, and it sits inside prose in several places. Without the negative margin
+the vertical rhythm of a paragraph changes — which is not a trade worth making for a target-size
+win. The hit area grows; nothing moves.
+
+**One was left unfixed, on purpose.** A bare "Read the source" link in lesson prose measures
+21px. WCAG 2.5.8 exempts a target that *is in a sentence or is otherwise constrained by the
+line-height of non-target text*, and this one plausibly is. The alternative was to pad every
+link in lesson prose, which is a broad change to the reading column for a borderline case.
+**A named non-fix is better than a silent one** — a future pass that disagrees has something to
+disagree with, rather than having to rediscover that the option was considered.
+
+### What the audit got wrong twice, which is the part worth keeping
+
+Running it produced **two false positives, and both were the audit's own reasoning**:
+
+- **Every element's background was compared against itself** (the walk for "what is behind
+  this" started at the element rather than its parent), so 19 controls reported a boundary
+  contrast of exactly 1:1. A ratio of 1.00 is a bug report about the bug reporter.
+- **A control with no border and no fill was counted as having "no visible edge"** — 1,050 of
+  1,142, which is a nonsense number that would have filled this file. Those controls are
+  identified by their **text**, at 4.76:1 to 13.85:1. WCAG 1.4.11 requires 3:1 for the boundary
+  *where the boundary is what identifies the control*; a text button at 13.85:1 is about as
+  visible as anything on the page. **The site has no contrast defects. Its surfaces are
+  deliberately quiet and its text deliberately loud, and that is a coherent choice, not a bug.**
+
+**The general form:** a whole-site audit finds the audit's own assumptions first, because the
+audit is the only thing in the repository making claims it has not checked. The three findings
+that survived were the three that survived a second look.
+
 ## Breakpoints
 
 Three, and all three are load-bearing.

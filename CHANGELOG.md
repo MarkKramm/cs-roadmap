@@ -624,6 +624,36 @@ ed to the Views list that actually exists; the three M2 pages no longer describe
 
 ### Fixed
 
+- **A whole-site target-size audit of every interactive control, and three real gaps.** 1,142
+  controls measured in a real engine across nine views, enumerated from the live DOM rather than
+  from a selector list — so a control added later is measured without editing anything. Four were
+  under 24px (WCAG 2.5.8). `.link-btn`, a bare text button used 12+ times including inline in
+  prose, was **21px**; `.tool-card__link` ("Official site") was **19px**, the smallest target on
+  the site; `.tool-result__from` was **22px**. All three fixed **by padding the hit area only,
+  with no visual change at all** — and on `.link-btn` the padding needs an equal negative
+  margin, because it is a `button` whose vertical padding would otherwise expand the line box
+  and change the vertical rhythm of a paragraph. The hit area grows; nothing moves. Verified by
+  screenshot: card positions and spacing identical, `tool-card__link` 19 → 25px.
+- **The audit itself produced two false positives, and both are worth more than the three
+  fixes.** It compared every element's background against *itself* — the "what is behind this"
+  walk started at the element rather than its parent — so 19 controls reported a boundary
+  contrast of exactly **1:1**, which is a bug report about the bug reporter. And it counted a
+  control with no border and no fill as having "no visible edge", producing **1,050 of 1,142** —
+  a nonsense number. Those controls are identified by their *text*, at 4.76:1 to 13.85:1, and
+  WCAG 1.4.11 requires 3:1 for a boundary only where the boundary is what identifies the
+  control. **The site has no contrast defects: its surfaces are deliberately quiet and its text
+  deliberately loud, which is a coherent choice.** Filing either number would have been a false
+  alarm dressed as a finding, and it is the third such error in two days — after a "cannot be
+  verified" claim that was true and a verification script that reported four fixed defects as
+  open. **A whole-site audit finds the audit's own assumptions first, because it is the only
+  thing here making claims nobody has checked.**
+- **One control left unfixed on purpose, and named rather than quietly ignored.** A "Read the
+  source" link in lesson prose measures 21px. WCAG 2.5.8 exempts a target that is in a sentence
+  or constrained by surrounding line-height, and this one plausibly is; the alternative was
+  padding every link in the reading column, which is a broad change for a borderline case.
+  **A named non-fix gives the next pass something to disagree with instead of making it
+  rediscover that the option was considered.**
+
 - **A screenshot found a defect that 148 browser checks could not, because none of them looked.**
   The per-section done control was `opacity: 0` and drawn in `--border` at 1.47:1, where WCAG
   2.5.8 asks 3:1 for a control boundary. A done section measured 8.38:1 against an undone one's

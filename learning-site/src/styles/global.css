@@ -451,6 +451,11 @@ a:hover {
 
 .tool-card__link {
   font-size: var(--text-sm);
+  /* Measured 19px — the smallest target on the site. An inline <a> takes
+     vertical padding without moving anything, because padding on a non-replaced
+     inline box does not affect the line box, so unlike .link-btn this needs no
+     compensating margin. */
+  padding: 3px 0;
 }
 
 /* --- Tools library --- */
@@ -536,7 +541,15 @@ a:hover {
 .link-btn {
   background: none;
   border: none;
-  padding: 0;
+  /* The hit area is padded out past 24px with an equal NEGATIVE margin, so the
+     layout is exactly what it was. Without the compensation the padding expands
+     the line box, and this class sits inline in prose in several places — the
+     vertical rhythm of a paragraph is not a thing to trade away for an
+     accessibility win. Measured 21px tall before, 25px after.
+     A bare text button is the hardest control to hit and the easiest to never
+     notice exists, and this is the repair that costs no visual design at all. */
+  padding: 2px 0;
+  margin: -2px 0;
   font: inherit;
   color: var(--accent);
   cursor: pointer;
@@ -554,12 +567,17 @@ a:hover {
   text-align: left;
   background: none;
   border: none;
+  /* Measured 22px. `display: block` means vertical padding here DOES grow the
+     box, so the 1px shortfall is absorbed by the existing bottom padding rather
+     than by a negative margin — nothing moves. */
   font: inherit;
   font-size: var(--text-xs);
   text-transform: uppercase;
   letter-spacing: 0.06em;
   color: var(--text-muted);
-  padding: 0 0 var(--space-1);
+  /* Top padding added to clear 24px; the bottom stays as it was, so the control
+     grows upward into space that was already empty. */
+  padding: 2px 0 var(--space-1);
   cursor: pointer;
 }
 
