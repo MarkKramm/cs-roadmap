@@ -541,19 +541,39 @@ a:hover {
 .link-btn {
   background: none;
   border: none;
-  /* The hit area is padded out past 24px with an equal NEGATIVE margin, so the
-     layout is exactly what it was. Without the compensation the padding expands
-     the line box, and this class sits inline in prose in several places — the
-     vertical rhythm of a paragraph is not a thing to trade away for an
-     accessibility win. Measured 21px tall before, 25px after.
-     A bare text button is the hardest control to hit and the easiest to never
-     notice exists, and this is the repair that costs no visual design at all. */
-  padding: 2px 0;
-  margin: -2px 0;
+  position: relative;
   font: inherit;
   color: var(--accent);
   cursor: pointer;
   text-decoration: none;
+}
+
+/* THE HIT AREA IS A PSEUDO-ELEMENT, not padding. The first attempt used
+   `padding: 2px 0; margin: -2px 0`, which is the standard trick for an inline
+   element and is exactly wrong for everything else this class is used as:
+
+     - `.rail-links` is a flex column with `gap: 8px`. A -2px margin on both
+       edges ate 4px of that gap, so the air halved to 4px — defeating the
+       comment on `.rail-links` that says the spacing exists so three titles do
+       not read as one paragraph.
+     - `.rail-card__cta` is `display: block` with its own padding, so vertical
+       margins do affect its layout. The -2px pulled it up over the element
+       above, overlapping it, and pulled the stacked CTAs into each other.
+
+   An absolutely-positioned ::after extends the clickable area (a pointer event
+   on a child box dispatches to its parent) and participates in NO layout at
+   all. So the control becomes hittable to 24px everywhere — inline, in a flex
+   column, as a block — and the page does not move anywhere. That property is
+   the whole reason for this rewrite. */
+.link-btn::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 100%;
+  height: 24px;
+  min-width: 24px;
 }
 
 .link-btn:hover {
@@ -567,6 +587,13 @@ a:hover {
   text-align: left;
   background: none;
   border: none;
+  /* The next `.tool-card` is painted after this one and overlaps its lower
+     padding, so a click near the bottom of this control was landing on the CARD
+     rather than the button — the hit-area sweep found it by asking the engine
+     what sat at 11px below the label and being told `div.tool-card`. Raised in
+     paint order rather than shrunk, because the control needs the height. */
+  position: relative;
+  z-index: 1;
   /* Measured 22px. `display: block` means vertical padding here DOES grow the
      box, so the 1px shortfall is absorbed by the existing bottom padding rather
      than by a negative margin — nothing moves. */
@@ -3004,15 +3031,40 @@ p em {
    which is how eleven of them sat at 21px, under WCAG 2.5.8's 24px minimum,
    unnoticed until the site-wide control sweep reached the lesson. Padding on a
    non-replaced inline box does not affect the line box, so the hit area grows
-   and the list's rhythm is untouched. */
-.resource-list {
-  list-style: none;
-  margin: 0;
-  padding: 0;
+   and the list's rhythm is untouched.
+
+   THERE IS NO `.resource-list` RULE, and that is deliberate. The first version
+   added one with `list-style: none; margin: 0; padding: 0`, and every one of
+   those three declarations was collateral damage I had not considered: this
+   list is a bare <ul> inside a .card, and no rule anywhere in this file styles
+   a bare <ul>, so it was rendering on UA defaults — a disc marker and a 40px
+   indent. Adding the class deleted both, so the resource list became the only
+   bulleted list on the page that lost its bullets, and the commit message and
+   CHANGELOG both claimed the rhythm was untouched. The class was never needed:
+   the accessibility fix is entirely the padding on the link itself. */
+.resource-link {
+  /* `inline-block`, and that is load-bearing rather than incidental. Vertical
+     padding on a plain INLINE box paints outside it but does NOT grow the line
+     box, so a 27px link sat on 21px line boxes and every link's lower 11px was
+     covered by the NEXT link — the hit-area sweep reported
+     "below it is a.resource-link", ten times. An inline-block box contributes
+     its padding to the line box, so the list spacing grows by the 6px and each
+     link is genuinely its own target. */
+  display: inline-block;
+  padding: 3px 0;
 }
 
-.resource-link {
-  padding: 3px 0;
+/* The Shared view's 42 resource links and the on-this-page table of contents,
+   both of which were classless anchors measuring 19–21px. The phase-detail
+   resource list had the identical defect and was fixed a component earlier;
+   the sweep did not visit Shared, so 42 of the same problem survived a fix that
+   looked complete. `inline-block` for the same reason as `.resource-link` above:
+   an inline box's vertical padding does not grow its line box, so consecutive
+   links overlap and each one's lower half is the next one's target. */
+.shared__link,
+.lesson__toc a {
+  display: inline-block;
+  padding: 2px 0;
 }
 
 /* The resource list is 42 links, so it is two columns above the reading

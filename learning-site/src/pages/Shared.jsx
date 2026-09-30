@@ -42,7 +42,18 @@ function Resources({ doc }) {
           <ul className="shared__resources">
             {group.resources.map((r) => (
               <li key={r.url}>
-                <a href={r.url} target="_blank" rel="noreferrer">
+                {/* Classless until the hit-area sweep reached this view: 42 of
+                    these measured 21px, under WCAG 2.5.8's 24px minimum, and
+                    nothing could target them because they had no class. The
+                    phase-detail resource list had the identical defect and was
+                    fixed a component earlier; the sweep did not visit Shared,
+                    so it went unfixed until someone added the view. */}
+                <a
+                  className="shared__link"
+                  href={r.url}
+                  target="_blank"
+                  rel="noreferrer"
+                >
                   {r.name}
                 </a>
               </li>

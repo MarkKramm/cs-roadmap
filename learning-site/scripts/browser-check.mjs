@@ -1923,13 +1923,32 @@ async function main() {
     //     because that is the one a reader has to aim at.
     // ---------------------------------------------------------------------
     const SWEEP_VIEWS = [
-      'Dashboard', 'Search', 'Schedule', 'Tools',
+      'Dashboard', 'Search', 'Schedule', 'Tools', 'Shared',
       'Certifications', 'Practice exams', 'Your work',
     ];
 
     // The sweep function, defined once and used for both the nav views and the
     // lesson, because the lesson is a surface in its own right and NOT a
     // sidebar destination.
+    // THE EFFECTIVE TARGET, not the element, and not the box.
+    //
+    // This measures the thing that actually matters — whether a click 12px
+    // above or below a control's text lands on that control — by asking the
+    // engine with elementFromPoint. Measuring the box was the previous
+    // approach and it is wrong in two ways:
+    //
+    //   1. A radio input is 13x13 but is wrapped in a <label> measuring
+    //      139x31, and clicking anywhere on that label activates the radio.
+    //   2. A control can extend its hit area with an absolutely-positioned
+    //      ::after, which participates in no layout and is invisible to
+    //      getBoundingClientRect. `.link-btn` does exactly this, because a
+    //      padding-and-negative-margin approach is correct for inline text and
+    //      wrong for the flex-column and block uses the same class has. A box
+    //      measurement would have reported it as 21px forever while a reader
+    //      clicked it without trouble.
+    //
+    // So the box is still read (it tells us the control is laid out at all),
+    // but the verdict comes from the engine.
     const SWEEP_FN = `(() => {
       const sel = 'a[href], button, input, select, textarea, [role="button"], [onclick], [tabindex]:not([tabindex="-1"])';
       const out = [];
@@ -1940,11 +1959,6 @@ async function main() {
         const r = el.getBoundingClientRect();
         if (r.width < 1 || r.height < 1) continue;
 
-        // THE EFFECTIVE TARGET, not the element. A radio input is 13x13 but it
-        // is wrapped in a <label> measuring 139x31, and clicking anywhere on
-        // that label activates the radio -- so the label is the target a
-        // reader actually aims at. Measuring the input reported six failures
-        // on the Dashboard's time and energy groups that do not exist.
         const label = el.closest('label');
         const box = label ? label.getBoundingClientRect() : r;
 
@@ -1959,6 +1973,55 @@ async function main() {
           inline = around.length > 0;
         }
 
+        // A hidden control is a control nobody can see, whatever its size.
+        if (parseFloat(cs.opacity) < 0.05) {
+          out.push({ cls: (typeof el.className === 'string' ? el.className : '').slice(0, 40),
+                     label: (el.getAttribute('aria-label') || own || el.title || '').trim().replace(/\\s+/g,' ').slice(0,28),
+                     w: Math.round(box.width), h: Math.round(box.height), inline, invisible: true });
+          continue;
+        }
+        if (inline) continue;
+
+        // Probe the engine. scrollIntoView because elementFromPoint only answers
+        // for points inside the viewport, and a lesson is 50,000px tall.
+        //
+        // The probe distance is 11px, NOT 12. A 24px hit area spans +/-12 from
+        // the centre, and probing at exactly +/-12 tests the BOUNDARY PIXEL,
+        // where sub-pixel rounding decides the answer: a control that meets the
+        // requirement exactly was reported as failing, 165 times, because a
+        // 23px box sits precisely on that knife-edge. 11px requires a hittable
+        // band of 23px or more, which is the 24px requirement with one pixel of
+        // tolerance. Stated rather than hidden, because a threshold is a choice
+        // and this one is chosen to be stable rather than to be maximal.
+        //
+        // THE TARGET IS THE LABEL WHEN THERE IS ONE, and this was the bug that
+        // made the whole probe worthless. The first version accepted a hit when
+        // the element at the probe point CONTAINED the control - on the reasoning
+        // that a bigger clickable ancestor is good enough. It is not: clicking a
+        // card that contains a button fires the CARD, not the button. With that
+        // clause in place, deleting the link-btn hit area entirely still passed
+        // 155 checks, because every probe point landed on an ancestor. Mutation
+        // testing is the only thing that found it, exactly as it found the
+        // missing lesson surface earlier. A probe that cannot fail proves nothing.
+        el.scrollIntoView({ block: 'center' });
+        const target = label || el;
+        const b2 = target.getBoundingClientRect();
+        const cx = Math.round(b2.left + b2.width / 2);
+        const cy = Math.round(b2.top + b2.height / 2);
+        const N = 11;
+        const hits = (x, y) => {
+          const n = document.elementFromPoint(x, y);
+          return !!n && (n === target || target.contains(n));
+        };
+        const who = (x, y) => {
+          const n = document.elementFromPoint(x, y);
+          if (!n) return 'nothing';
+          return n.tagName.toLowerCase() +
+            (typeof n.className === 'string' && n.className ? '.' + n.className.split(/\\s+/).slice(0,2).join('.') : '');
+        };
+        const up = hits(cx, cy - N);
+        const down = hits(cx, cy + N);
+
         out.push({
           tag: el.tagName.toLowerCase(),
           cls: (typeof el.className === 'string' ? el.className : (label ? label.className : '')).slice(0, 40),
@@ -1966,8 +2029,14 @@ async function main() {
             .trim().replace(/\\s+/g, ' ').slice(0, 28),
           w: Math.round(box.width), h: Math.round(box.height),
           viaLabel: !!label,
-          opacity: Math.round(parseFloat(cs.opacity) * 100) / 100,
-          inline,
+          inline: false,
+          invisible: false,
+          up, down,
+          // What is actually sitting on the missed point, so a failure names a
+          // cause instead of asking the reader to guess between "too small" and
+          // "something is on top of it".
+          upWho: up ? '' : who(cx, cy - N),
+          downWho: down ? '' : who(cx, cy + N),
         });
       }
       return out;
@@ -1976,17 +2045,26 @@ async function main() {
     const sweep = async (label) => {
       for (const c of await cdp.eval(SWEEP_FN)) {
         // A control at zero opacity is a control nobody can see, whatever its
-        // size. This is the exact defect section 3a-bis catches for one
-        // control, generalised.
-        if (c.opacity < 0.05) {
-          sweepResults.push({ view: label, why: 'invisible (opacity ' + c.opacity + ')', ...c });
+        // size. This is the exact defect section 3a-bis catches for one control,
+        // generalised.
+        if (c.invisible) {
+          sweepResults.push({ view: label, why: "invisible (opacity 0)", ...c });
           continue;
         }
         if (c.inline) continue;
-        if (c.w < 24 || c.h < 24) {
+        // The engine says whether a click 12px above and below lands here. A
+        // control that is already taller than 24px passes trivially because the
+        // probe points are inside it.
+        if (!c.up || !c.down) {
+          const miss = [];
+          if (!c.up) miss.push("above");
+          if (!c.down) miss.push("below");
           sweepResults.push({
             view: label,
-            why: 'target ' + c.w + 'x' + c.h + (c.viaLabel ? ' via label' : '') + ' (needs 24x24)',
+            why:
+              "a click 11px " + miss.join(" and ") + " the label misses it (box " + c.w + "x" + c.h +
+              (c.viaLabel ? " via label" : "") + "; needs 24)" +
+              (miss.map((m) => (m === "above" ? ", above it is " + c.upWho : ", below it is " + c.downWho)).join("")),
             ...c,
           });
         }

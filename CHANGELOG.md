@@ -624,6 +624,46 @@ ed to the Views list that actually exists; the three M2 pages no longer describe
 
 ### Fixed
 
+- **A `.resource-list` class I added deleted the bullets from the phase's resource list, and
+  both the commit message and this changelog claimed the opposite.** The class carried
+  `list-style: none; margin: 0; padding: 0` for no reason I had considered: that `<ul>` is a bare
+  element inside a `.card`, and **no rule in the stylesheet targets a bare `<ul>`**, so it had been
+  rendering on UA defaults — a disc marker and a 40px indent. Adding the class removed both, making
+  the resource list the only bulleted list on the phase page to lose its bullets, while the entry
+  above it said "padding on a non-replaced inline box leaves the list's rhythm untouched". The class
+  was never needed: the fix is entirely the padding on the link. Removed, and both the comment and
+  this entry now say why.
+- **A negative margin on `.link-btn` was correct for exactly one of its twelve uses.** Padding with
+  an equal negative margin is the standard trick for an inline element and is wrong everywhere else.
+  `.rail-links` is a flex column with `gap: 8px` and the `-2px` ate 4px of that, halving the air
+  that the rule's own comment says exists so three titles do not read as one paragraph.
+  `.rail-card__cta` is `display: block` with its own padding, so its margins do affect layout — it
+  was pulled **2px up over the element above it**, and the stacked CTAs into each other. The hit
+  area is now an absolutely-positioned `::after`, which extends the clickable region (a pointer
+  event on a child box dispatches to its parent) and participates in **no layout at all**. The
+  control is hittable to 24px inline, in a flex column, and as a block, and the page does not move
+  anywhere.
+- **The control sweep now asks the engine whether a click lands, instead of measuring a box — and
+  that immediately found two real overlaps.** A box measurement cannot see a `::after` hit area at
+  all, so `.link-btn` would have been reported as 21px forever while a reader clicked it without
+  trouble. The probe asks `elementFromPoint` 11px above and below each control's centre.
+- **Two controls were genuinely un-clickable in their lower halves.** The next `.tool-card` is
+  painted after `.tool-result__from` and covered its lower padding, so a click near the bottom of
+  that control fired the *card* — the sweep reported it by naming what was sitting there. Raised in
+  paint order. And consecutive `.resource-link`s overlapped for the same reason, because vertical
+  padding on an **inline** box paints outside it without growing its line box; they are now
+  `inline-block`, which does. Both were invisible to a box measurement and obvious to a probe.
+- **The Shared view's 42 resource links and its table of contents were still 19–21px.** The
+  phase-detail resource list had the identical defect and was fixed a component earlier, and the
+  sweep **did not visit Shared**, so 42 of the same problem survived a fix that looked complete.
+  Both are classed and padded; the sweep now visits eight views and a lesson, 1,157 controls.
+- **The probe accepted a hit when the element at the probe point CONTAINED the control** — on the
+  reasoning that a larger clickable ancestor is good enough. It is not: clicking a card that
+  contains a button fires the card. With that clause in place, **deleting the `.link-btn` hit area
+  entirely still passed all 155 checks**, because every probe point landed on an ancestor. Found by
+  mutation testing, as the missing lesson surface was earlier in the same day. **A probe that cannot
+  fail proves nothing**, and this one could not fail for a whole commit.
+
 - **Bundle size is now checked, and it had already rotted.** `scripts/audit-build-figures.mjs`
   measures the build and compares four figures against `CHECKPOINT.md`: the initial chunk's byte
   size and KiB, the lesson-chunk count and the total lazy-chunk count. The row published

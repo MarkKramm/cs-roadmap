@@ -144,40 +144,44 @@ mustFail("the initial chunk size is wrong", "document says", (t) =>
 // CORRECT document — worse than not existing, because it trains people to
 // distrust it.
 //
-// The first version of this pair was `mustPass(..., (t) => t)`, which is the
-// identity function: it planted no condition and duplicated control 1. And its
-// partner claimed to test "the same digits without a separator" while writing
-// 1527506, a different and wrong number. So nothing tested the case that
-// actually matters. These four are the real thing — the CORRECT digits, in both
-// spellings, must pass, and the WRONG digits in both spellings must fail.
+// The figure is DERIVED, not typed. The first version hardcoded 1,527,558 in
+// nine places, so the suite broke every time the bundle changed by a byte — and
+// it broke on the very first real edit, which is the definition of a control
+// suite that tests the wrong thing. What each control needs is "the number that
+// is currently correct", and the only honest source for that is the document
+// paired with the build, read here.
 {
-  const correct = (t) => /Initial chunk \*\*1,527,558 bytes raw\*\*/.test(t);
-  if (!correct(original)) {
+  const published = original.match(/Initial chunk \*\*([\d,]+) bytes raw\*\*/);
+  if (!published) {
     console.error(
-      "PRECONDITION FAILED — the document does not currently publish 1,527,558, so the\n" +
-        "comma controls below cannot be written against it. Update them with the figure.",
+      "PRECONDITION FAILED — docs/CHECKPOINT.md no longer publishes an initial-chunk\n" +
+        "  figure in the form 'Initial chunk **N bytes raw**'. The comma controls below\n" +
+        "  cannot be written against a claim that is not there.",
     );
     process.exit(1);
   }
-  // Correct digits, no separator -> must PASS. This is the case that was untested,
-  // and the one that matters: it is the case where the guard must NOT fail a
-  // document that is right.
+  const CORRECT = published[1]; // as written, with separators
+  const CORRECT_BARE = CORRECT.replace(/,/g, "");
+  // A wrong number that is definitely not the right one, in both spellings.
+  const WRONG_BARE = String(Number(CORRECT_BARE) - 52);
+  const WRONG = WRONG_BARE.replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+
+  // Correct digits, no separator -> must PASS. This is the case that was never
+  // tested, and the one that matters: the guard must NOT fail a right document.
   //
-  // There is deliberately no "correct digits WITH a separator" control here. The
-  // document already holds them, so any such mutation is a no-op — and the
-  // first draft of this file included one anyway. `applyMutation` threw on it,
-  // which is the guard working: the honest move was to delete the control, since
-  // that case is already covered by control 1 running against the real file.
+  // There is deliberately no "correct digits WITH a separator" control. The
+  // document already holds them, so any such mutation is a no-op — and the first
+  // draft included one anyway. `applyMutation` threw on it, which is the guard
+  // working: the honest move was to delete the control, since that case is
+  // already covered by control 1 against the real file.
   mustPass("the CORRECT digits written without a separator", (t) =>
-    t.replace("**1,527,558 bytes raw**", "**1527558 bytes raw**"),
+    t.replace("**" + CORRECT + " bytes raw**", "**" + CORRECT_BARE + " bytes raw**"),
   );
-  // Wrong digits, separator -> must FAIL.
   mustFail("WRONG digits with a separator", "document says", (t) =>
-    t.replace("**1,527,558 bytes raw**", "**1,527,506 bytes raw**"),
+    t.replace("**" + CORRECT + " bytes raw**", "**" + WRONG + " bytes raw**"),
   );
-  // Wrong digits, no separator -> must FAIL.
   mustFail("WRONG digits without a separator", "document says", (t) =>
-    t.replace("**1,527,558 bytes raw**", "**1527506 bytes raw**"),
+    t.replace("**" + CORRECT + " bytes raw**", "**" + WRONG_BARE + " bytes raw**"),
   );
 }
 

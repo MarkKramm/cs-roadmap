@@ -195,7 +195,12 @@ export default function PhaseDetail({
       {phase.resources && phase.resources.length > 0 && (
         <section className="card">
           <h2>Free and cheap resources</h2>
-          <ul className="resource-list">
+          {/* The <ul> is left unclassed ON PURPOSE. A `.resource-list` class was
+              added here and removed again: its `list-style: none` deleted the
+              bullets this list had been rendering on UA defaults, because no
+              rule in the stylesheet targets a bare <ul>. Only the link needed
+              styling. */}
+          <ul>
             {phase.resources.map((r, i) => (
               <li key={i}>
                 {r.url ? (
