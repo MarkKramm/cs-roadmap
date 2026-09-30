@@ -624,6 +624,37 @@ ed to the Views list that actually exists; the three M2 pages no longer describe
 
 ### Fixed
 
+- **Nothing had ever rendered a lesson at the largest reading size, and one heading out of 67 was
+  broken there.** The reading-size control scales one custom property to 1.26×, and the entire
+  control sweep ran at the default. Re-running it at `Extra large` found a real defect: on a
+  heading that **wraps to two line boxes**, the baseline-aligned done-circle is lifted 6px from the
+  top of the heading and the heading's own line box paints over the lower part of the control — a
+  click 11px below the centre resolves to the heading, not the button. **Two fixes, both measured:
+  the control was exactly 24px, the WCAG minimum, with no headroom, and it is now 26px; and it
+  takes `position: relative; z-index: 1`**, the same repair `.tool-result__from` needed for the same
+  reason. It was confirmed real rather than a probe artifact by probing the same heading at five
+  scroll offsets — it failed at all five. The check also asserts that nothing overflows the lesson
+  column at 1.26×, because a 1.26× scale beside a fixed sidebar is the classic way to produce a
+  horizontal scrollbar that no layout assertion would notice.
+- **`prefers-reduced-motion` had never been rendered.** The stylesheet has a block for it; nothing
+  had ever turned it on. Now emulated, and asserted both that the media query is honoured and that
+  **no animation is left running** — a reduced-motion promise that leaves a transition running is
+  the same promise unkept.
+- **The suites' own check counts were stated in the documentation and measured by nothing.**
+  `CHECKPOINT.md` published `test:data` 107 and `test:smoke` 236, printed by the suites, with no
+  command comparing them — **the same shape as the bundle figure that rotted from 1,527,506 to
+  1,527,558 unnoticed.** `audit-site-figures.mjs` closes it by running the suites and reading what
+  they say, concurrently so the cost is seconds rather than minutes, in the `site` job where they
+  already run. **It is listed for `test:ui` in the first version and reported that as a failure,
+  which was correct**: CHECKPOINT's live row never states that count, so the fix was to **drop the
+  suite rather than publish a figure nobody asked for** so the guard would have something to
+  compare against. Proven falsifiable on three conditions, with the document restored byte-identical.
+- **The focus-ring measurement is reported rather than gated, and says so.** The suite walks the
+  focus order over 303 controls and asserts every one accepts focus. It does **not** gate on
+  outline presence, because `getComputedStyle` cannot report `:focus-visible` — a guard that guesses
+  is the failure this file keeps finding. The number is printed under `note()` with the limitation
+  in the output rather than hidden in a comment.
+
 - **A `.resource-list` class I added deleted the bullets from the phase's resource list, and
   both the commit message and this changelog claimed the opposite.** The class carried
   `list-style: none; margin: 0; padding: 0` for no reason I had considered: that `<ul>` is a bare

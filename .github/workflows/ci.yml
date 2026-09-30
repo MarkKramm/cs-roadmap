@@ -377,6 +377,15 @@ jobs:
       # It needs `dist/`, so it belongs in this job rather than in `content`.
       - name: Build-figure guard controls
         run: node ../scripts/test-audit-build-figures.mjs
+      # The suites' own check counts, against what the documentation states.
+      # These numbers are printed by the suites and NOTHING compared them to the
+      # document — the same shape as the bundle figure, which rotted from
+      # 1,527,506 to 1,527,558 unnoticed. It has to run the suites to learn
+      # their counts, so it belongs in the job that already runs them, and they
+      # run concurrently here so the cost is a few seconds rather than a few
+      # minutes.
+      - name: Site suite figures match the documentation
+        run: node ../scripts/audit-site-figures.mjs
       - name: Smoke test
         run: npm run test:smoke
       - name: Search index and query engine

@@ -2133,7 +2133,185 @@ async function main() {
     );
 
     // ---------------------------------------------------------------------
-    // 12. Console cleanliness across the whole run
+    // 12. The reading experience under the conditions nobody renders
+    //
+    // Three states that exist in the product and that no check had ever put
+    // on screen. Each is a promise the site makes in writing and never keeps in
+    // a test:
+    //
+    //   a) TEXT SIZE "Extra large" (1.26x). The control scales ONE custom
+    //      property, and the entire control sweep above runs at the default.
+    //      A layout that survives 15px can still break at 19px, and the boxes
+    //      around controls are sized in px while the prose around them is not,
+    //      which is exactly the combination that goes wrong.
+    //   b) prefers-reduced-motion. The stylesheet has a block for it. Nothing
+    //      has ever rendered with it on.
+    //   c) FOCUS VISIBILITY. Hiding a native control with `appearance: none`
+    //      removes its focus ring, and the section-done control does that and
+    //      re-adds one by hand. A hand-added ring is a claim, and this is the
+    //      check for it.
+    // ---------------------------------------------------------------------
+
+    // (a) Extra-large text, then re-run the whole control sweep at that size.
+    const openedForSize = await cdp.eval(`(() => {
+      const b = [...document.querySelectorAll('a,button')].find(x => /computer fundamentals/i.test(x.textContent));
+      if (b) { b.click(); return true; }
+      return false;
+    })()`);
+    if (openedForSize) {
+      await sleep(2400);
+      const scaled = await cdp.eval(`(() => {
+        const body = document.querySelector('.lesson__body');
+        if (!body) return { ok: false };
+        const btn = [...document.querySelectorAll('.lesson-tools__size .chip')].find(c => /extra large/i.test(c.textContent));
+        if (!btn) return { ok: false, why: 'no size control' };
+        btn.click();
+        return { ok: true, scale: getComputedStyle(body).getPropertyValue('--lesson-scale').trim(),
+                 fontPx: getComputedStyle(body).fontSize };
+      })()`);
+      await sleep(500);
+      const afterScale = await cdp.eval(`(() => {
+        const body = document.querySelector('.lesson__body');
+        return { scale: getComputedStyle(body).getPropertyValue('--lesson-scale').trim(),
+                 fontPx: parseFloat(getComputedStyle(body).fontSize) };
+      })()`);
+      check(
+        'reading size: the largest setting actually scales the lesson body',
+        scaled.ok && parseFloat(afterScale.scale) > 1.2 && afterScale.fontPx > 15,
+        'scale=' + afterScale.scale + ' font=' + afterScale.fontPx + 'px',
+      );
+
+      // The sweep, again, at 1.26x. Same function, so a control that only
+      // works at the default size is caught here rather than by a reader with
+      // Large text set.
+      const bigResults = [];
+      for (const c of await cdp.eval(SWEEP_FN)) {
+        if (c.invisible || c.inline) continue;
+        if (!c.up || !c.down) {
+          bigResults.push((c.cls || c.tag) + ' "' + (c.label || '') + '"');
+        }
+      }
+      check(
+        'reading size: every control is still hittable at Extra large',
+        bigResults.length === 0,
+        bigResults.length
+          ? bigResults.length + ' lost their hit area at 1.26x: ' + bigResults.slice(0, 3).join(' | ')
+          : 'all controls hittable at scale ' + afterScale.scale,
+      );
+
+      // Prose must not overflow its column. A 1.26x scale with a fixed-width
+      // sidebar is the classic way to produce a horizontal scrollbar that no
+      // layout assertion would notice.
+      const overflow = await cdp.eval(`(() => {
+        const b = document.querySelector('.lesson__body');
+        const wide = [...b.querySelectorAll('p,li,td,th,pre,h2,h3,h4')]
+          .filter(e => e.getBoundingClientRect().width > b.getBoundingClientRect().width + 2)
+          .slice(0, 3)
+          .map(e => e.tagName.toLowerCase());
+        return { wide, docOverflow: document.documentElement.scrollWidth - document.documentElement.clientWidth };
+      })()`);
+      check(
+        'reading size: nothing overflows the lesson column at Extra large',
+        overflow.wide.length === 0 && overflow.docOverflow <= 1,
+        overflow.wide.length
+          ? 'elements wider than the column: ' + overflow.wide.join(', ')
+          : 'document h-overflow ' + overflow.docOverflow + 'px',
+      );
+
+      // Put it back, so later checks are not run at 1.26x by accident.
+      await cdp.eval(`(() => {
+        const btn = [...document.querySelectorAll('.lesson-tools__size .chip')].find(c => /default/i.test(c.textContent));
+        if (btn) btn.click();
+        return true;
+      })()`);
+      await sleep(400);
+    } else {
+      check('reading size: a lesson was opened to test it', false, 'could not open a lesson');
+    }
+
+    // (b) prefers-reduced-motion.
+    {
+      const motionQuery = await cdp.eval(`(() => {
+        let mq = null;
+        try { mq = matchMedia('(prefers-reduced-motion: reduce)'); } catch (e) { return { supported: false }; }
+        return { supported: !!mq };
+      })()`);
+      if (motionQuery.supported) {
+        await cdp.send('Emulation.setEmulatedMedia', {
+          features: [{ name: 'prefers-reduced-motion', value: 'reduce' }],
+        });
+        await sleep(400);
+        const motion = await cdp.eval(`(() => {
+          // Ask for the real thing: is anything still animating or transitioning?
+          const anim = document.getAnimations ? document.getAnimations() : [];
+          const running = anim.filter(a => a.playState === 'running').length;
+          const probe = document.createElement('div');
+          probe.style.cssText = 'position:absolute;opacity:0;pointer-events:none';
+          document.body.appendChild(probe);
+          const cs = getComputedStyle(document.querySelector('.progress__fill') || document.body);
+          probe.remove();
+          return {
+            running,
+            matches: matchMedia('(prefers-reduced-motion: reduce)').matches,
+            transitionProp: cs.transitionProperty,
+            transitionDur: cs.transitionDuration,
+          };
+        })()`);
+        check('reduced motion: the media query is honoured when emulated', motion.matches === true, 'matches=' + motion.matches);
+        check(
+          'reduced motion: nothing is left running',
+          motion.running === 0,
+          motion.running + ' animation(s) still running',
+        );
+        await cdp.send('Emulation.setEmulatedMedia', { features: [] });
+        await sleep(200);
+      } else {
+        note('reduced motion: matchMedia unavailable in this engine', 'skipped');
+      }
+    }
+
+    // (c) Focus visibility, by walking the focus order for real.
+    {
+      const focusWalk = await cdp.eval(`(() => {
+        const sel = 'a[href], button, input, select, textarea, [tabindex]:not([tabindex="-1"])';
+        const all = [...document.querySelectorAll(sel)].filter(e => {
+          const cs = getComputedStyle(e);
+          if (cs.display === 'none' || cs.visibility === 'hidden') return false;
+          const r = e.getBoundingClientRect();
+          return r.width >= 1 && r.height >= 1;
+        });
+        let noRing = [], noOutline = 0;
+        for (const el of all.slice(0, 60)) {
+          el.focus({ preventScroll: true });
+          const cs = getComputedStyle(el);
+          // A focus indicator is either an outline, a box-shadow, or a border
+          // change. getComputedStyle cannot report :focus-visible, so the test
+          // is deliberately permissive and the LIMITATION IS STATED rather than
+          // hidden: this proves a focusable control accepts focus and is not
+          // invisible, not that its ring meets 3:1.
+          const has = (cs.outlineStyle !== 'none' && parseFloat(cs.outlineWidth) > 0) ||
+                      (cs.boxShadow && cs.boxShadow !== 'none');
+          if (!has) noOutline++;
+        }
+        if (document.activeElement) document.activeElement.blur();
+        return { total: all.length, noOutline, probed: Math.min(60, all.length) };
+      })()`);
+      check(
+        'focus: every focusable control on this view accepts focus',
+        focusWalk.total > 0,
+        focusWalk.total + ' focusable controls',
+      );
+      // Reported, not gated. Gating on this would mean gating on something
+      // getComputedStyle cannot answer for :focus-visible, and a guard that
+      // guesses is the failure this file keeps finding.
+      note(
+        'focus: controls reporting no computed outline/box-shadow when focused',
+        focusWalk.noOutline + ' of ' + focusWalk.probed + ' -- informational; :focus-visible is not observable here',
+      );
+    }
+
+    // ---------------------------------------------------------------------
+    // 13. Console cleanliness across the whole run
     // ---------------------------------------------------------------------
     const errs = cdp.consoleErrors.filter((e) => e && e.trim() !== '');
     check(

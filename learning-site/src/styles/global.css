@@ -1767,12 +1767,32 @@ p em {
    readable without hovering, and the tick is what distinguishes the two states
    rather than colour alone. */
 
+/* 26px, not 24px, and `z-index` is not decoration either.
+
+   Two separate things were measured here, and both were real.
+
+   SIZE. WCAG 2.5.8's minimum is 24px and this was exactly 24, leaving no
+   headroom at all.
+
+   PAINT ORDER. At the "Extra large" reading size (1.26x) a heading that wraps
+   to two line boxes lifts this baseline-aligned control to 6px from the top of
+   the heading, and 11px below the control's centre then resolves to the HEADING
+   rather than to the control. One heading out of 67 was affected, at every
+   scroll offset, so it was not a probe artifact and not a boundary rounding
+   problem — the heading's own line box paints over the lower part of the
+   control. `position: relative; z-index: 1` puts the control back on top, which
+   is the same repair `.tool-result__from` needed for the same reason.
+
+   Both defects were found by running the whole control sweep again at 1.26x.
+   Nothing had ever rendered a lesson at that size. */
 .lesson__done {
+  position: relative;
+  z-index: 1;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 24px;
-  height: 24px;
+  width: 26px;
+  height: 26px;
   margin-right: var(--space-2);
   padding: 0;
   vertical-align: baseline;
@@ -2681,17 +2701,15 @@ p em {
     padding: var(--space-2) var(--space-3);
   }
 
-  /* The done control is now always visible at every width, so `opacity: 1` is
-     gone. The size bump stays: on a narrow screen a 24px ring beside a heading
-     is close to the text and benefits from the extra pixels. (The comment here
-     used to claim this was a `(hover: none)` rule for touch devices. It is not —
-     it is the 560px breakpoint, and it was the only place the control was
-     unconditionally visible, which is why it was already the right answer on
-     the screens where nobody noticed the problem.) */
-  .lesson__done {
-    width: 26px;
-    height: 26px;
-  }
+  /* The per-section done control used to be resized here, 24px -> 26px, and to
+     carry `opacity: 1` so it was always visible. Both are gone: the control is
+     now always visible at EVERY width, and 26px is its one size everywhere, so a
+     rule that only applied under 560px was a second definition of a value that
+     no longer varied. It is kept here as a note because the comment it replaced
+     claimed to be a `(hover: none)` rule for touch devices, and it was not — it
+     was this breakpoint, and it was the only place the control was
+     unconditionally visible, which is why always-visible turned out to be the
+     right answer on the screens where nobody noticed the problem. */
 
   .phase-nav__grid {
     grid-template-columns: 1fr;
