@@ -624,6 +624,32 @@ ed to the Views list that actually exists; the three M2 pages no longer describe
 
 ### Fixed
 
+- **A screenshot found a defect that 148 browser checks could not, because none of them looked.**
+  The per-section done control was `opacity: 0` and drawn in `--border` at 1.47:1, where WCAG
+  2.5.8 asks 3:1 for a control boundary. A done section measured 8.38:1 against an undone one's
+  1.47:1, so **the done state was 5.7× more visible** and a half-finished lesson looked finished
+  with nothing to click. Searching the suite for `.lesson__done` returns **nothing** — all 148
+  checks asked whether the control *works*, and not one asked whether a reader can *see* it.
+  **Those are different questions and the suite only had one of them.** Four checks now assert
+  perceptibility in a real engine: not transparent, border ≥ 3:1 against the *measured*
+  background, target ≥ 24×24, and that an **undone** control is present at all — a suite that
+  only measured the done state would pass on a page where everything was already ticked. The
+  contrast maths runs in the page against the walked-up background rather than against a colour
+  remembered in a token comment, because a token can be edited and the comment left behind, and
+  then the comment is the stale figure. **Both new checks were proven falsifiable** by
+  reintroducing each defect and watching the suite go red — reporting `opacity=0` and
+  `1.47:1` respectively. **148 → 152 checks, 0 failed.**
+- **Every "deliberately not gated" claim in the documentation was checked, and all of them are
+  sound.** `verify-ports.mjs` ("needs network; run by hand"), the plain `audit-terms.mjs` form
+  (always exits 0), `audit-markdown-render.mjs` (exits 0 whatever it finds) and `FORWARD_AS_PRIOR`
+  (a non-mechanical judgement) were each run or reasoned through, and each has a real reason.
+  **Zero false impossibilities, which is a clean result and not a disappointing one.**
+  I nearly filed `verify-ports` as a second instance of D-076: it ran here, passed 19/19, and
+  looked like the same shape. It is not. **`.cache/` is gitignored, so a fresh CI runner has no
+  cache and must fetch IANA** — the documented failure mode is real. I had substituted *"it runs
+  on my machine"* for *"is the stated reason true"*, which are different questions, and only
+  reading the script and the `.gitignore` separated them.
+
 - **`COMPREHENSION-AUDIT.md` was a record of completed passes written in the present tense, so
   it read as a live list of open defects.** Its own table column says "Findings fixed" and line 32
   says every finding was applied before writing — but the five-class summary described all of them

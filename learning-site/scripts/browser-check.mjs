@@ -709,7 +709,99 @@ async function main() {
     );
 
     // ---------------------------------------------------------------------
-    // 3a. Reset copy matches the checklist-only behavior
+    // 3a-bis. The per-section done control must be PERCEIVABLE
+    //
+    // WHY THESE EXIST, and why they are in the browser suite and not a unit
+    // test. A screenshot showed a lesson page where the only visible section
+    // markers were the TICKED ones. The control had two faults stacked:
+    // `opacity: 0` (revealed only on hover) and a border in `--border`, which
+    // is 1.47:1 on `--bg` where WCAG 2.5.8 asks 3:1 for a control boundary. A
+    // done section measured 8.38:1 and an undone one 1.47:1, so the done state
+    // was 5.7x more visible and a half-finished lesson looked finished.
+    //
+    // 148 checks passed throughout, and none of them noticed, because nothing
+    // here ever referenced `.lesson__done`. Every one of them asked whether the
+    // control WORKS; not one asked whether a reader can SEE it. Those are
+    // different questions and this suite only had one of them.
+    //
+    // So these assert perceptibility, in a real engine, on the computed style:
+    //   - not transparent (the `opacity: 0` regression)
+    //   - a border at >= 3:1 against the surface behind it (the `--border` one)
+    //   - a target of at least 24x24 (WCAG 2.5.8 minimum)
+    //   - and that a NOT-done control is actually present, since a suite that
+    //     only ever measures the done state would pass on a page where every
+    //     section was already ticked.
+    //
+    // The contrast maths is done HERE, in the page, against the measured
+    // background, rather than against a colour remembered in a token comment.
+    // A token can be edited and the comment left behind, and then the comment
+    // is the stale figure -- the exact failure this repository keeps finding.
+    // ---------------------------------------------------------------------
+    const sectionCtl = await cdp.eval(`(() => {
+      const all = [...document.querySelectorAll('.lesson__done')];
+      const undone = all.find(e => !e.classList.contains('is-done'));
+      if (!undone) return { found: false, total: all.length };
+
+      const cs = getComputedStyle(undone);
+      const r = undone.getBoundingClientRect();
+
+      // Walk up for the first opaque background actually painted behind it.
+      // --bg is the fallback; a card or elevated surface is the real answer and
+      // must be measured, not assumed.
+      let el = undone, bg = null;
+      while (el) {
+        const c = getComputedStyle(el).backgroundColor;
+        const m = c.match(/rgba?\\(([^)]+)\\)/);
+        if (m) { const p = m[1].split(',').map(s => parseFloat(s)); if (p.length < 4 || p[3] > 0.05) { bg = p; break; } }
+        el = el.parentElement;
+      }
+      if (!bg) bg = [18, 20, 26];
+
+      const parse = (s) => { const m = s.match(/rgba?\\(([^)]+)\\)/); if (!m) return null;
+        const p = m[1].split(',').map(x => parseFloat(x)); return p.slice(0, 3); };
+      const border = parse(cs.borderTopColor);
+      const lin = (c) => { c /= 255; return c <= 0.04045 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4); };
+      const lum = (p) => 0.2126 * lin(p[0]) + 0.7152 * lin(p[1]) + 0.0722 * lin(p[2]);
+      let ratio = null;
+      if (border) {
+        const a = lum(border), b = lum(bg);
+        const [hi, lo] = a > b ? [a, b] : [b, a];
+        ratio = (hi + 0.05) / (lo + 0.05);
+      }
+      return {
+        found: true, total: all.length,
+        opacity: parseFloat(cs.opacity),
+        w: r.width, h: r.height,
+        ratio: ratio === null ? null : Math.round(ratio * 100) / 100,
+        border: cs.borderTopColor, bg: 'rgb(' + bg.join(',') + ')',
+      };
+    })()`);
+
+    check('section done control: an UNDONE one is present to measure', sectionCtl.found, 'total=' + sectionCtl.total);
+    if (sectionCtl.found) {
+      // The regression that started this: opacity 0 until hover.
+      check(
+        'section done control: is not hidden until hover',
+        sectionCtl.opacity > 0.99,
+        'opacity=' + sectionCtl.opacity,
+      );
+      // WCAG 2.5.8: 3:1 for a control boundary. The border is the ONLY thing
+      // that makes it a circle, so this is the whole of its visibility.
+      check(
+        'section done control: border is perceptible (>= 3:1, WCAG 2.5.8)',
+        sectionCtl.ratio !== null && sectionCtl.ratio >= 3,
+        sectionCtl.ratio + ':1  border=' + sectionCtl.border + ' on ' + sectionCtl.bg,
+      );
+      // WCAG 2.5.8 minimum target size, which 22px was under.
+      check(
+        'section done control: target is at least 24x24',
+        sectionCtl.w >= 24 && sectionCtl.h >= 24,
+        sectionCtl.w + 'x' + sectionCtl.h,
+      );
+    }
+
+    // ---------------------------------------------------------------------
+    // 3b. Reset copy matches the checklist-only behavior
     // ---------------------------------------------------------------------
     const resetCopy = await cdp.eval(`(() => {
       const button = [...document.querySelectorAll('.sidebar__link')]
