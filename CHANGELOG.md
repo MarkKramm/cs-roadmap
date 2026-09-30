@@ -624,6 +624,42 @@ ed to the Views list that actually exists; the three M2 pages no longer describe
 
 ### Fixed
 
+- **Bundle size is now checked, and it had already rotted.** `scripts/audit-build-figures.mjs`
+  measures the build and compares four figures against `CHECKPOINT.md`: the initial chunk's byte
+  size and KiB, the lesson-chunk count and the total lazy-chunk count. The row published
+  **1,527,506 bytes; the build emits 1,527,558** — 52 bytes of drift that no guard could see,
+  because every guard runs in a job with no `dist/`. **The row's own instruction for fixing this
+  was unfollowable as written**: it said to add a measurement to `audit-doc-figures.mjs`, which
+  executes in the `content` job and cannot see a build. So the guard is a separate file, wired
+  into the **`site`** job after `npm run build`. That is the one figure verified in a different job
+  from the other 52, and it is paid on purpose: a split check beats no check. The guard **fails
+  loudly if `dist/` is absent** rather than measuring nothing and reporting success.
+- **The first version scanned every line of the document, which is a trap this repository already
+  has a section about.** The "Health checks" section is a **dated record that is supposed to keep
+  its old figures**, and it carries "29 on-demand lesson chunks". It escaped only because the 29
+  was not bolded. Bold it — a purely cosmetic edit to a record — and the guard goes red on a
+  document that is entirely correct, with a failure message instructing the reader to "correct the
+  document", which for that line would mean **falsifying a dated record**. Every claim is now
+  **anchored to the row it lives in**, so a correctly-stale historical figure is out of reach. A
+  control bolds that historical 29 and requires the guard to **stay quiet**, which is the one that
+  would have caught the design flaw rather than a typo.
+- **The guard printed five measurements while asserting two, and hardcoded the unasserted list to
+  the one key nobody publishes.** `initialKb` and `lazyChunks` are in the measurement table and in
+  the document, and no claim could fail on either — while the file's own header states that
+  printing an unasserted measurement as covered "is the same error as a stale figure". All four
+  published figures are now asserted, and the unasserted list is **derived** from which keys lack
+  a claim rather than written by hand.
+- **A control suite that could not fail in three separate ways.** Its `mustPass` helper did not
+  check that the mutation had actually changed the file, so a fixture whose search string had
+  drifted reported a pass while testing nothing; one control was the identity function, planting
+  no condition at all; and the control named "the same digits without a separator" wrote a
+  *different, wrong* number, so the case that actually matters — **the correct digits written
+  without separators, which must not fail a right document** — was never tested. All fixed, and
+  `applyMutation` now throws rather than let a no-op pass. **It threw on a fourth tautology I wrote
+  while fixing the third**, which is the argument for having it.
+- **The control suite shipped with no CI step**, so a guard's controls had never run in CI — the
+  exact hazard the suite's own header cites. It now runs in the same `site` job.
+
 - **The target-size audit was a throwaway script run once. It is now a check that runs on every
   commit, and it found 14 more problems the one-off had missed.** `browser-check.mjs` now sweeps
   **every interactive control across seven views and a lesson — 1,118 of them** — asserting none

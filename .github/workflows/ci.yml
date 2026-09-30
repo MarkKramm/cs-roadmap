@@ -359,6 +359,24 @@ jobs:
         run: npm ci
       - name: Build
         run: npm run build
+      # The build's own figures, checked against the documentation, and run HERE
+      # rather than in `content` because `audit-doc-figures.mjs` executes in a
+      # job that has no `dist/` and therefore cannot measure a bundle at all.
+      #
+      # This closes the last figure in the repository that nothing could
+      # re-derive. It had already rotted: CHECKPOINT published 1,527,506 bytes
+      # and the build emitted 1,527,558 -- 52 bytes of drift no guard could see,
+      # on a row that carried its own (unfollowable) instruction to fix it. The
+      # cost is that one figure is verified in a different job from the other
+      # 52, which is paid on purpose: a split check beats no check.
+      - name: Build figures match the documentation
+        run: node ../scripts/audit-build-figures.mjs
+      # Its controls. Fifteen sibling suites have a step here and this one
+      # shipped without one, which meant a guard whose controls had never run in
+      # CI — the exact hazard the suite's own header says it exists to prevent.
+      # It needs `dist/`, so it belongs in this job rather than in `content`.
+      - name: Build-figure guard controls
+        run: node ../scripts/test-audit-build-figures.mjs
       - name: Smoke test
         run: npm run test:smoke
       - name: Search index and query engine
