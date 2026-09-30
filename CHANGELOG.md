@@ -624,6 +624,36 @@ ed to the Views list that actually exists; the three M2 pages no longer describe
 
 ### Fixed
 
+- **`COMPREHENSION-AUDIT.md` was a record of completed passes written in the present tense, so
+  it read as a live list of open defects.** Its own table column says "Findings fixed" and line 32
+  says every finding was applied before writing — but the five-class summary described all of them
+  in the present ("Cyber 12's auto-closer **prints** `evaluated`, which is **never defined**"). A
+  reader who opened cyber 12 and found working code had no way to tell a finished audit from a
+  failing one. Re-verified line by line on 2026-09-30: **34 findings, 32 already fixed, 2 still
+  open and now fixed.** The tense is corrected throughout, a
+  [status section](#status-of-every-finding) states the result and its date, and a header
+  announces that the file is a record and not a worklist.
+- **Two of the thirty-four were genuinely still open, and both were the same class as a defect
+  already named in the file.** IT 02's macOS section, inside Part 4, twice pointed at a check
+  taught in Part 8 — roughly 155 lines later — so the reader was told to apply something not yet
+  taught; both references now name the check as well as the part. And advance 05 still ran
+  `Get-Service SysmonDrv`: Sysmon registers one service, `sysmon64`, so that line returns nothing
+  and teaches a false shape sitting directly beneath the correct command. **The audit's own
+  "a phase defers to something it has not taught" pattern, found again by the audit.**
+- **Six of the thirty-four first looked open and four were the checking script being wrong** —
+  cyber 11's "2 minutes 58 seconds" is correct in context (it is the gap from the payload write,
+  not from receipt, and the file now says so), IT 06's remaining `VLOOKUP` is prose explaining
+  why `INDEX`/`MATCH` was chosen, IT 05's sysprep ordering is fixed with both terms on one line,
+  and advance 04's `DenyOutsideRegionAndBreakGlass` returned *zero* mentions because the
+  reference was removed rather than left broken. **A finding is a claim about two places that
+  disagree, so verifying it means reading both — and a verification pass has its own
+  false-positive rate, which is not zero.** Recorded in the file, because a future pass that trusts
+  a grep instead of a read will repeat all four.
+- **The word-count guard caught this pass's own content edits.** The two fixes added 44 words, and
+  `audit-doc-figures.mjs` reported the corpus total as 495,194 against the 495,150 written
+  yesterday. That is the first time that guard has fired on a deliberate content change rather
+  than on rot, which is the outcome it was built for.
+
 - **The per-section done circle was invisible, and `--border` was why.** A screenshot showed a
   page whose only visible section markers were the *ticked* ones. The control was `opacity: 0`
   until hover **and** drawn in `--border`, which is **1.47:1** on `--bg` where WCAG 2.5.8 asks

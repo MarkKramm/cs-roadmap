@@ -557,10 +557,10 @@ This is the topic listed at the top of this phase, and it deserves its own recip
 |---|---|---|
 | Pop-ups saying "your PC is infected, call this number" | **Scareware** — a web page, not an infection | Close the browser, do not call the number. Nothing is installed. Clear the site data and check the extension list |
 | Browser opens pages you did not ask for; search engine changed | **Browser hijack** — a malicious extension or a changed shortcut | Remove the extension; check the shortcut's target for a trailing URL; reset the browser's search settings |
-| Machine is genuinely slow, fan runs constantly, unknown processes present | **Possible real infection** | Do not start deleting files. Disconnect it from the network first, then read the evidence (Part 8) |
+| Machine is genuinely slow, fan runs constantly, unknown processes present | **Possible real infection** | Do not start deleting files. Disconnect it from the network first, then read the evidence (the Automatic-but-stopped check in Part 8) |
 | Antivirus already reported something and quarantined it | **A handled detection** | Confirm what it found, when, and that the user did not click "allow". Then scan again |
 
-**One symptom that is a trap, and it comes from Part 8.** The stopped-Automatic-service check you learned there is one of the best proactive checks in this phase — but when the stopped service is the antivirus, the EDR agent, or Windows Update, treat it as a *malware symptom* rather than a fault to fix.
+**One symptom that is a trap, and it comes from Part 8.** The stopped-Automatic-service check taught there is one of the best proactive checks in this phase — but when the stopped service is the antivirus, the EDR agent, or Windows Update, treat it as a *malware symptom* rather than a fault to fix. If you are reading in order, keep going: Part 8 is where that check is set out.
 
 Disabling the protection is one of the first things most malware families do, so "Defender is set to Automatic and is not running" is a finding to investigate, not a service to start and walk away from. Read why it stopped, in the event log, before you restart anything.
 

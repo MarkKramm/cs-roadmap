@@ -380,9 +380,10 @@ It does, however, generate an enormous volume of events with its default configu
 # 2. Install with the configuration applied.
 sysmon64.exe -accepteula -i sysmonconfig-export.xml
 
-# 3. Confirm the service is running and the driver is loaded.
+# 3. Confirm the service is running.
 Get-Service sysmon64
-Get-Service SysmonDrv
+# The driver is not a separate service, so it does not appear in Get-Service.
+# Confirm it loaded by checking that Sysmon is writing events at all - step 4.
 
 # 4. Check that events are arriving. Event ID 1 is process creation.
 Get-WinEvent -LogName "Microsoft-Windows-Sysmon/Operational" -MaxEvents 5 |

@@ -1,5 +1,13 @@
 # Beginner-comprehension audit — findings
 
+> **All four passes are complete and every finding has been applied. This is a record, not a
+> worklist.** It was re-verified line by line on **2026-09-30**: 34 findings checked, 32 already
+> fixed, 2 found still open and fixed by that pass. See
+> [Status of every finding](#status-of-every-finding). The only two named limitations are at the
+> bottom of the second-pass section: **the verdicts are advisory and two passes disagreed on
+> 2 of 23 phases**, and **no curriculum time budget has ever been timed by a reader** — the
+> largest untested claim in the repository.
+
 A read of all 23 entry-level phases asking one question the existing guards structurally cannot:
 **where does a motivated beginner with no IT background stop reading, and why?**
 
@@ -70,57 +78,68 @@ file. Read both together; neither is final on its own.
 All 23 phases are covered. 18 of them needed at least one fix; one (cyber 07) came back
 clean and was checked rather than trusted; one (IT 02) was judged **would abandon**.
 
-Five classes of real defect came out of it, and none of them is a term-density problem:
+Five classes of real defect came out of it, and none of them is a term-density problem.
+**Everything in this list is fixed** — the audit's table column is "Findings fixed" and every
+one was applied. It is written in the past tense below for that reason, and it is written in the
+past tense *here* on 2026-09-30 after a line-by-line re-verification, because the previous
+version described all five in the present tense and read as a live list of open defects to
+anyone who opened the files and found working code. See
+[Status of every finding](#status-of-every-finding) for the verification.
 
-1. **A demonstration that silently fails.** IT 05 Check 5 denies read on
-   `C:\P5-AccessLab\Child`, then reads a file in the *parent* folder and tells the reader
-   the Deny won. The reader's own output contradicts the lesson.
+1. **A demonstration that silently fails.** IT 05 Check 5 denied read on
+   `C:\P5-AccessLab\Child`, then read a file in the *parent* folder and told the reader
+   the Deny won. The reader's own output contradicted the lesson.
 2. **A worked artefact that is arithmetically or syntactically impossible.** Cyber 05's
-   weighted totals (82/63/88/61) cannot be produced from its own table, whose weights sum
-   to 14 — a ceiling of 70. Cyber 06's `I2` formula encodes 6 of the grid's 16 impact/urgency
-   pairs, returns `P2` where the grid says `P1`, and indexes a 4-row range with entries 5–6.
-   Cyber 14 states a CVSS of 7.1 for a vector that computes to 6.5, against its own band
+   weighted totals (82/63/88/61) could not be produced from its own table, whose weights sum
+   to 14 — a ceiling of 70. Cyber 06's `I2` formula encoded 6 of the grid's 16 impact/urgency
+   pairs, returned `P2` where the grid said `P1`, and indexed a 4-row range with entries 5–6.
+   Cyber 14 stated a CVSS of 7.1 for a vector that computes to 6.5, against its own band
    table that calls 6.5 Medium.
-3. **A cross-reference to a section that does not exist**, or that says the opposite:
-   IT 06 sends the reader to "Part 5's structure" for the escalation note, which is in
-   Part 4; IT 07 refers to a nonexistent "Part 8"; cyber 03 claims Phase 1 defined least
+3. **A cross-reference to a section that did not exist**, or that said the opposite:
+   IT 06 sent the reader to "Part 5's structure" for the escalation note, which is in
+   Part 4; IT 07 referred to a nonexistent "Part 8"; cyber 03 claimed Phase 1 defined least
    privilege and access review, and Phase 1 never does.
-4. **A contradiction inside one phase.** IT 09 sets two different application targets,
+4. **A contradiction inside one phase.** IT 09 set two different application targets,
    three different follow-up intervals, and two different tracker column lists. Cyber 09
-   advertises a conditional-access lab that it later says needs a paid licence. Cyber 11
-   states a gap of "2 minutes 58 seconds after the document was received" when receipt to
+   advertised a conditional-access lab that it later said needs a paid licence. Cyber 11
+   stated a gap of "2 minutes 58 seconds after the document was received" when receipt to
    execution is 6m29s — 2m58s is the gap from the file write two rows later.
-5. **Executable code that cannot run.** This class only emerged from the last three reports,
+5. **Executable code that could not run.** This class only emerged from the last three reports,
    and it is the one that wastes the most reader time because the failure looks like the
-   reader's own mistake. Cyber 12's corrected auto-closer prints `evaluated`, which is never
+   reader's own mistake. Cyber 12's corrected auto-closer printed `evaluated`, which was never
    defined — a `NameError` in the centrepiece of the lesson. Cyber 12's `from lookup import`
-   has no `lookup.py` to import from, because the earlier example was never given a filename.
-   Cyber 12's README setup is Unix-only (`export`, `grep`, `cut`) in a Windows-targeted
-   curriculum. Cyber 10's Wazuh rule uses a positive `<field>` match for the parents it means
-   to *exclude*, so it fires when the parent **is** the management tool — the inverse of the
-   Sigma and SPL versions it is presented as equivalent to. Cyber 10's auditd rules are handed
-   over with no target file and no load command, so the exercise cannot be performed at all.
-   IT 03's "break it on purpose" walkthrough calls `Disable-NetAdapter` without saying the
+   had no `lookup.py` to import from, because the earlier example was never given a filename.
+   Cyber 12's README setup was Unix-only (`export`, `grep`, `cut`) in a Windows-targeted
+   curriculum. Cyber 10's Wazuh rule used a positive `<field>` match for the parents it meant
+   to *exclude*, so it fired when the parent **was** the management tool — the inverse of the
+   Sigma and SPL versions it is presented as equivalent to. Cyber 10's auditd rules were handed
+   over with no target file and no load command, so the exercise could not be performed at all.
+   IT 03's "break it on purpose" walkthrough called `Disable-NetAdapter` without saying the
    shell must be elevated.
 
-Plus one genuine "would abandon": IT 02 Ticket 2 is built entirely on a Windows domain,
-Active Directory and `Get-ADPrincipalGroupMembership`, for a reader whose stated machine is
-a home PC.
+The one genuine "would abandon" also stands corrected: IT 02 Ticket 2 is built on a Windows
+domain, Active Directory and `Get-ADPrincipalGroupMembership`, for a reader whose stated
+machine is a home PC. It now says so at the point of use and asks the reader to read it as an
+illustration of the technique rather than something to run tonight.
 
 ### The recurring shape
 
 Two cross-phase patterns the separate readers found independently, which is why they are
-worth naming rather than fixing once:
+worth naming rather than fixing once. **Both were fixed in the passes that found them; they are
+recorded because the shape recurs, and because a later edit can reintroduce either.**
 
-- **A phase defers to a later phase that does not cover the thing.** IT 03 sends the reader
+- **A phase defers to a later phase that does not cover the thing.** IT 03 sent the reader
   to "Phase 4 (VPN)" five times (lines 841, 957, 1407, 1409, 1419). Phase 4 is Helpdesk
-  Skills: it has a VPN *ticket* and no VPN *teaching*, and it uses "split tunnelling" at
-  line 1107 as though it were already defined. Cyber 03 cites Phase 1 as having defined
+  Skills: it has a VPN *ticket* and no VPN *teaching*, and it used "split tunnelling" at
+  line 1107 as though it were already defined. Cyber 03 cited Phase 1 as having defined
   `least privilege` and `access review`; Phase 1 never does. This is the defect
   `scripts/audit-refs.mjs` now catches when it is a plain name, and prints when it is a
-  forward-phase claim.
-- **Elevation is assumed by phases that come before the phases that teach it.** IT 03 issues
-  `Disable-NetAdapter` and `Set-DnsClientServerAddress`; IT 04 sets a DNS server to
+  forward-phase claim. **The same shape is what the 2026-09-30 pass found still open in IT 02**,
+  where a Part 4 section pointed at a check taught in Part 8 — 155 lines later. Naming a part is
+  not enough; the reference has to name the thing as well, or the reader is told to apply
+  something they have not been shown.
+- **Elevation is assumed by phases that come before the phases that teach it.** IT 03 issued
+  `Disable-NetAdapter` and `Set-DnsClientServerAddress`; IT 04 set a DNS server to
   `127.0.0.1`. All need an Administrator shell. IT 02 line 185 and IT 05 line 745 do teach
   elevation — both after the reader first needs it.
 
@@ -153,6 +172,65 @@ class split rather than against the audit.
 A clean bill was also returned for cyber 07, and it was checked rather than assumed: CVSS/CVE
 is taught in cyber 03, the setuid bit in cyber 02, Sysmon and Event IDs in cyber 03, the
 20-job-post discipline and the risk register in cyber 05.
+
+---
+
+## Status of every finding
+
+**Verified 2026-09-30, line by line, against the corpus as it stands.** Thirty-four findings from
+the four passes were re-checked by resolving each phase by track and number and testing the
+specific claim each one makes. **Thirty-two are fixed. Two were still open and are fixed by this
+pass.** The reason this section exists at all: the summary above used to describe every finding
+in the **present tense**, so a reader who opened IT 02 and found working code had no way to tell
+a completed audit from a failing one, and the file read as a live list of open defects. **A
+findings document that does not record which findings are still open is a document that cannot
+be trusted either way.**
+
+**The two that were still open, both real and both of the same class:**
+
+| Finding | What was actually wrong | Fix |
+|---|---|---|
+| IT 02 "cites Part 8" | The macOS section sits inside Part 4 and twice pointed at Part 8, which does not begin until line 715 — roughly 155 lines later. A reader told to apply a check that has not been taught yet cannot act on it | Both references now name the check itself ("the Automatic-but-stopped check in Part 8") and say the part is taught later in the phase. The third reference, at line 1272, is *after* Part 8 and was always correct |
+| advance 05 `Get-Service SysmonDrv` | Sysmon installs one service, `sysmon64`. The driver is not separately registered, so the second command returns nothing and teaches a false shape — sitting directly beneath the correct one | The line is replaced by a note that the driver is not a separate service, with the reader pointed at step 4 (do events arrive?) as the check that actually proves it loaded |
+
+**What the re-verification taught, which is worth more than the two fixes.** Six of the
+thirty-four first appeared to be still open, and on inspection **four were the checking script
+being wrong, not the corpus**:
+
+- **cyber 11** still printed "2 minutes 58 seconds", but only because the script looked for the
+  string without reading its context. Line 1096 now states *both* figures correctly and
+  distinguishes them: 2m58s is the gap from the payload write, 6m29s from receipt. The finding
+  was the conflation, and the conflation is gone.
+- **IT 06** still printed `VLOOKUP`, because the remaining occurrence is prose explaining *why*
+  `INDEX`/`MATCH` was chosen and naming `VLOOKUP` as the honest alternative. The fix is
+  self-documenting.
+- **IT 05** "sysprep before snapshot" looked open because both terms land on the same line —
+  which is exactly the fix: the step now reads "**Snapshot before you sysprep**" as step 3, with
+  `sysprep /generalize` as step 4.
+- **advance 04** `DenyOutsideRegionAndBreakGlass` returned zero mentions, which the script read
+  as "the cross-reference still points at nothing". Zero mentions means the reference *and* the
+  bad citation were both removed.
+
+**A finding is not a string, it is a claim about two places that disagree — so checking it means
+reading both places.** All four of those were found by a script that grepped for one side of the
+pair, which is the same failure this audit was written to catch, committed by the checking
+itself. **A verification pass has its own false-positive rate and it is not zero.**
+
+Six more needed a human read rather than a regex and all six were also already fixed: cyber 06's
+`I2` formula (no longer present in any form), cyber 13's risk IDs (Part 2 renumbered to
+R-11…R-15), IT 04's softphone order (now opens with "**Start with scope**" before the hardware
+list, where the finding was that it came fifth), IT 09's application targets (one consistent
+target), advance 07's negative fixtures (the file grew to 1,476 lines and now teaches them
+across several sections), and IT 01's `alt-mode`.
+
+**This section is not guarded, and that is a known gap.** A finding here is a prose claim about
+two other files, which is the one class `audit-doc-figures.mjs` cannot check — it compares a
+number to a measurement, and most of these findings are not about a number. The re-verification
+above was done by a script written for the purpose and then thrown away, deliberately: keeping
+it would mean maintaining 34 brittle claim-specific regexes, and **a check that breaks on
+unrelated edits gets switched off**, which is the outcome D-070 records. The honest position is
+that this file is a **dated record, re-verified on the date above**, and a future pass should
+re-verify it again rather than trust it.
 
 ---
 
