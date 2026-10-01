@@ -12,13 +12,25 @@
 // everything into one string lets digits from adjacent blocks run together (a
 // table ending "0.6" followed by a paragraph starting "0.6 GB" reads as one
 // number in one stream and another in the other), which produces phantom
-// mismatches. This was verified by hand against all 18 phases.
+// mismatches. This was verified by hand against all 18 phases — the count was
+// true when written and stale for a long time after, since the corpus grew to
+// 31. See the note at the foot of this header, and the mutation controls in
+// scripts/test-audit-lesson-ast.mjs, which are the durable form of that check.
 //
 // A NOTE ON GETTING THIS WRONG
 // The first version of this script over-counted table delimiter rows and
 // under-counted wrapped blockquotes, so it reported losses in every phase. A
 // guard that always fails gets ignored, which is worse than having none. If you
 // change the counting here, re-verify against a phase you have read by hand.
+//
+// The line above this one used to say the comparison was "verified by hand
+// against all 18 phases". It was true when written and had been stale for a
+// long time: the corpus is 31 phases, and 13 of them did not exist then. A
+// count in a comment about how much was checked is a figure nobody re-derives,
+// which is the defect this repository has recorded most often. The controls in
+// scripts/test-audit-lesson-ast.mjs are the durable form of that verification:
+// they break the parser and require this script to notice, which is a stronger
+// claim than having read 18 files by hand.
 //
 // Run: node scripts/audit-lesson-ast.mjs
 import fs from 'node:fs';

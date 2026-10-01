@@ -43,6 +43,27 @@ jobs:
         run: node scripts/test-audit-content.mjs
       - name: Audit lesson parser (no content loss)
         run: node scripts/audit-lesson-ast.mjs
+      # Its controls, and these are shaped differently from every other suite
+      # here. This is the only guard that can CAUSE harm rather than report it: a
+      # parser bug does not crash the build, it makes lesson content disappear
+      # from the site, and 84-95% of every phase file passes through the parser.
+      # A lesson that loses a paragraph still renders and still looks like a page.
+      #
+      # So the load-bearing controls are MUTATIONS. They break lesson-ast.mjs in
+      # a scratch copy -- paragraphs stop being emitted, a code block's body is
+      # emptied, table cells stop reaching the comparison, a blockquote loses its
+      # paragraphs -- and require the guard to notice. "Does it exit 1 on bad
+      # input" is nearly the least interesting question here, because the guard's
+      # own header records that its first version reported losses in EVERY phase,
+      # and a guard that always fails gets ignored.
+      #
+      # Two of these controls were first written without their mutation applied
+      # and could only ever fail; the explicit variants beside them passed, which
+      # is how it was caught. Both mutation hooks now THROW if the replace is a
+      # no-op, so an anchor that stops existing is an error rather than a control
+      # that silently tests nothing.
+      - name: Test lesson-parser guard controls
+        run: node scripts/test-audit-lesson-ast.mjs
       - name: Audit readability
         run: node scripts/audit-readability.mjs
       # Its controls. The guard has TWO thresholds and ONE gate -- the 110-word

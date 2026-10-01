@@ -8,6 +8,45 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### Added
 
+- **`scripts/test-audit-lesson-ast.mjs` — 13 controls for the one guard that can cause harm rather
+  than report it, and they are mutation-based rather than input-based.** Every other guard here
+  fails the build or stays quiet. This one exists because **a parser bug does not crash anything** —
+  it makes lesson content quietly disappear from the site, and 84–95% of every phase file passes
+  through `lesson-ast.mjs`. A lesson that loses a paragraph still builds, still renders, and still
+  looks like a page. Wired into CI. The guard is sound; nothing here found a defect in it.
+  - **The load-bearing controls break the parser and require the guard to notice.** Four mutations,
+    each dropping real words: paragraphs stop being emitted, a code block's body is emptied, table
+    cells stop reaching the comparison, and a blockquote loses its paragraphs. *"Does it exit 1 on
+    bad input"* is nearly the least interesting question here, because the guard's own header records
+    that its first version **reported losses in every phase** — and a guard that always fails gets
+    ignored, which that header calls "worse than having none." A mutation is the only test that
+    distinguishes a guard which *detects content loss* from one that merely counts characters.
+  - **Two mutation hooks, because there are two files and the distinction matters.** `mutateParser`
+    breaks the subject; `mutateGuard` breaks the guard's own reader, which is the *instrument*
+    failing rather than the subject — also tested, because a reader that quietly stopped enumerating
+    a block type would report a loss that never happened, or miss one that did.
+  - **Both hooks throw if the replacement is a no-op.** Two of these controls were first written
+    without their mutation applied, so they ran the unmutated parser against valid content and
+    required exit 1 — they could only ever fail. The explicit variants beside them passed, which is
+    how it was caught, and the guard's own `replace`-anchored mutations hit the same thing when two
+    anchors used double quotes against a single-quoted source. **A control whose mutation silently
+    does not apply is a control that cannot fail**, which is the defect this whole pass exists to
+    remove — now it throws rather than passing.
+  - **Three controls guard against crying wolf**, since a guard that fires on legitimate content gets
+    switched off: a hard-wrapped paragraph, a hard-wrapped blockquote, and a table delimiter row
+    must all read as *no* content loss. That property is what the whitespace-insensitive comparison
+    exists to provide, and it was the failure mode of the guard's first version.
+  - **The `^0[0-9]-` regression is held open in the direction that matters**: a parser dropping
+    paragraphs in a **phase 10 file** must fail, because that pattern bug left phases 10 and above
+    never checked and the guard reporting clean over four fifths of the curriculum.
+  - **A passing run must name its subject.** "all 31 lessons parse with no content loss" is asserted
+    as a *count*, because an empty corpus otherwise produces "all 0 lessons parse" and exit 0 — a
+    green result about no subject at all, which is the exact shape of the `^0[1-9]-` bug.
+  - **A stale figure in the guard's own header, corrected.** It said the comparison was *"verified by
+    hand against all 18 phases."* True when written, stale for a long time since — the corpus is 31
+    phases and 13 of them did not exist then. **A count in a comment about how much was checked is a
+    figure nobody re-derives**, and the mutation controls are the durable form of that verification.
+
 - **`scripts/test-audit-readability.mjs` — 14 controls for the two-threshold readability guard, and a
   documentation claim that had been false for several passes.** The guard has two thresholds and one
   gate: the 110-word paragraph ceiling fails the build, while the 90-word editorial target and the
