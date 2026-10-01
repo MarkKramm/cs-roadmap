@@ -63,6 +63,24 @@ jobs:
       # judgement, and it gates.
       - name: Audit time budgets
         run: node scripts/audit-time-budget.mjs
+      # Its controls. This guard's own header records that three of its five
+      # classes were WRONG on the first attempt -- class 1 once summed bare
+      # "4-6" cells out of a schedule table, class 4 used a live "am I in a
+      # table" flag that is always false by a file's last line and so "never
+      # cross-checked a single week count", and class 5 compared two budgets
+      # with overlaps(), which accepts 40-55 against 41-58 and therefore passed
+      # the exact defect it was written for.
+      #
+      # Writing the controls found two more silent skips, both in class 1 and
+      # both about tables the guard never looked at: a `Hours/month` column
+      # header was not recognised (the matcher required exactly `Hours`), and a
+      # bolded `**Total**` row was invisible twice over -- the row was not
+      # detected, and its `**618.5**` value could not be read because every
+      # number pattern is anchored on a digit. advance 01's capacity table has
+      # that exact shape, so it had never once been checked. It is correct, and
+      # it is now verified rather than skipped.
+      - name: Test time-budget guard controls
+        run: node scripts/test-audit-time-budget.mjs
       # The same structural defect appeared three times and nothing ever failed
       # because of it. Keep a Changelog permits ONE of each section heading per
       # release; `[Unreleased]` accumulated eleven â€” four `Fixed`, four `Changed`,

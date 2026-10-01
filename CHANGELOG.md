@@ -47,6 +47,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
     non-corpus classes of `audit-quiz`. `audit-site-figures.mjs` is the sharpest — added in the last
     two commits to close "the last two figures nothing could re-derive", never proven falsifiable,
     while its sibling `audit-build-figures.mjs` shipped with 15 controls in the same commit.
+    **`audit-time-budget` is now covered too** — see below; the gap is six guards, not eight.
   - **The figure guard caught this pass's own CI edit.** Adding a step made `validate-ci`'s documented
     count stale, exactly as it is designed to: three figures in `CHECKPOINT.md` moved from 46/72/17 to
     47/73/18 and the guard failed until they were corrected by measurement rather than by memory.
@@ -61,6 +62,51 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
     anywhere and nothing in the repository stores the corruption.** Two controls in
     `test-audit-encoding.mjs` assert the surviving property — rule 3 fires in a document *and* inside
     a script, the case an exemption would have silenced.
+
+- **`scripts/test-audit-time-budget.mjs` — 24 controls for the five-class time-budget guard, and a
+  real budget table in the corpus that it had never once looked at.** The guard's own header records
+  that three of its five classes were wrong on the first attempt: class 1 once summed bare `4-6`
+  cells out of a schedule table, class 4 used a live "am I inside a table" flag that is always false
+  by a file's last line — so it "never cross-checked a single week count" — and class 5 compared two
+  budgets with `overlaps()`, which accepts 40-55 against 41-58 and so passed the exact defect it was
+  written for. A class wrong three times and never shown to fail is the hazard D-077 records. Wired
+  into CI.
+  - **A real budget table was skipped, for two independent reasons, and had to have both fixed before
+    either was visible.** `advance-roadmap/01-phase-detection-at-scale.md:564` carries a
+    `Hours/month` column and the column matcher required a header of exactly `Hour`/`Hours`, so the
+    table was **out of scope and skipped without a word.** Its total row is
+    `| **Total** | **3,100** | — | **618.5** | **100%** |`, and that was invisible twice over: the
+    total-row detector matched only a bare `Total` (the cell is `" **Total** "`, and a leading space
+    defeats `^\**`), and its `**618.5**` value could not be read, because every number pattern is
+    anchored on a digit and the asterisks sat in between. **The table is correct** — its parts sum to
+    exactly 618.5 — and it is now verified rather than skipped. Proven against the real file:
+    changing that one cell to 700.0 now reports
+    `parts sum to 618.5-618.5 hours but the Total row says 700-700`, and nothing did before.
+  - **Three fixes, each narrower than the problem.** The column matcher accepts a qualified header
+    (`/^hours?\b/`) so `Hours/month` is in scope while `Alerts/month` and `Minutes each` are not; the
+    total-row detector trims the cell and tolerates emphasis on both sides; and emphasis is stripped
+    once in `cellRange`/`hoursIn`/`weeksIn` rather than by adding an optional group to three
+    patterns, so a figure may be bold, italic or code-spanned in any of these tables.
+  - **A second silent skip, which only became visible once the row was detected.** The Total row was
+    read with `hoursIn(totalRow.line)`, which requires the literal word "hours" — so a total stated
+    in a column whose *header* carries the unit read as no total at all. It is now read from its own
+    Hours cell, falling back to the line, and only then reported as uncheckable.
+  - **Class 5 is held to the corrected rule, and the wrong rule is named in the control.** A separate
+    control asserts that 40-55 and 41-58 really do *overlap*, so an `overlaps()`-based rule would let
+    the drift through — which is what the guard did.
+  - **Six negative controls**, because a guard that flags valid usage gets switched off: a schedule
+    table, an inverted number pair with no time unit, `duration_weeks` inside its range, an agreeing
+    overview, a rounding difference of 1 hour at both bounds, an `N-M focused hours a week` rate, and
+    two mentions on one line.
+  - **The fixture was at fault four times, and the file says so.** The guard prefers the Total row
+    over the line above it, and its messages carry the tail of the matched line, so three controls
+    first asserted the wrong wording; and the table fixture was initially built by string replacement
+    over a 2-column template, where the edits silently matched nothing and only one part row was ever
+    read. **A fixture whose edits quietly do not apply is indistinguishable from a correct one**, so
+    that table is now built explicitly with its expected sum written out. That is the twelfth
+    fixture-side error in this repository, against a guard-side defect rate of one.
+  - **The figure guard caught this pass's CI edit too**: three figures in `CHECKPOINT.md` moved from
+    47/73/18 to 48/74/19 and were corrected by measurement.
 
 
 - **`scripts/audit-lesson-code.mjs` and `scripts/test-audit-lesson-code.mjs` — the first guard to

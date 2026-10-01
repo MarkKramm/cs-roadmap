@@ -66,16 +66,36 @@ const TIME_CELL = new RegExp('^\\s*(?:~|about\\s+)?' + NUM + '\\s*(?:hours?|h)?\
 const HOURS_IN_TEXT = new RegExp(NUM + '\\s*hours?', 'i');
 const WEEKS_IN_TEXT = new RegExp(NUM + '\\s*weeks?', 'i');
 
+// Strip Markdown emphasis before reading a number out of the text.
+//
+// The number patterns above are all anchored on DIGITS, and a bolded figure in
+// a table is written `**41-58**` — so the asterisks sat between the anchor and
+// the digits and every reader returned null. That made a bolded Total row
+// invisible in two independent ways: the row was not recognised as a total (see
+// the detector in checkBudgetTables) and its value could not be read once it
+// was. It is not a hypothetical shape — `01-phase-detection-at-scale.md:572`
+// carries `| **Total** | **3,100** |`, and when the detector was fixed the guard
+// immediately reported that table as having "no hour total to check against",
+// which is the detector working and the reader failing.
+//
+// Stripping the markers once, here, is narrower than adding an optional
+// emphasis group to three separate patterns, and it means a figure can be
+// written bold, italic, or code-spanned in any of these tables without the
+// guard needing to know which. Only `*` and `_` and backticks are removed; a
+// number written with a comma (`3,100`) is still not a time figure and is still
+// not matched, which is correct — this guard checks hours and weeks.
+const deEmphasise = (s) => String(s).replace(/[*_`]/g, '');
+
 const cellRange = (s) => {
-  const m = String(s).match(TIME_CELL);
+  const m = deEmphasise(s).match(TIME_CELL);
   return m ? [Number(m[1]), m[2] ? Number(m[2]) : Number(m[1])] : null;
 };
 const hoursIn = (s) => {
-  const m = String(s).match(HOURS_IN_TEXT);
+  const m = deEmphasise(s).match(HOURS_IN_TEXT);
   return m ? [Number(m[1]), m[2] ? Number(m[2]) : Number(m[1])] : null;
 };
 const weeksIn = (s) => {
-  const m = String(s).match(WEEKS_IN_TEXT);
+  const m = deEmphasise(s).match(WEEKS_IN_TEXT);
   return m ? [Number(m[1]), m[2] ? Number(m[2]) : Number(m[1])] : null;
 };
 const overlaps = (a, b) => a[0] <= b[1] && b[0] <= a[1];
@@ -128,10 +148,32 @@ function checkBudgetTables(file, rel, lines) {
     if (body.length < 2) continue;
 
     const headerCells = body[0].line.split('|').map((c) => c.trim());
-    const hoursCol = headerCells.findIndex((c) => /^hours?$/i.test(c));
+    // The Hours column may be qualified: "Hours/month", "Hours per week",
+    // "Est. hours". Requiring the header to be exactly `Hour`/`Hours` meant
+    // such a table was never in scope at all — it was skipped silently, so
+    // `01-phase-detection-at-scale.md:564` (header `Hours/month`, a real
+    // budget table whose parts sum to its stated 618.5) had never once been
+    // checked by this class. The column must still start with the word, so
+    // "Alerts/month" and "Minutes each" are not mistaken for it.
+    const hoursCol = headerCells.findIndex((c) => /^hours?\b/i.test(c));
 
     // A Total row makes it a budget table whatever the column headers say.
-    const totalRow = body.find((r) => /^\**\s*Total/i.test(r.line.split('|')[1] ?? ''));
+    //
+    // The cell is trimmed before matching, and the emphasis markers are allowed
+    // on BOTH sides. It was `^\**\s*Total` against an untrimmed cell, so
+    // `| **Total** |` was not recognised: the cell is " **Total** ", the
+    // leading space defeated `^\**` (which can match zero asterisks but not a
+    // space), and the closing `**` would not have matched either. Only a bare
+    // `| Total |` was found. The corpus happens to use the bare form in five
+    // places, so nothing was missed today — but the class-1 rule's job is to
+    // recognise the total, and a bolded total is the form a writer reaches for
+    // when the total is the point of the table. Found by the control that plants
+    // a Total row with no claim above it: the guard reported "prints no hour
+    // total to check against" for a table whose total was right there.
+    const totalRow = body.find((r) => {
+      const cell = (r.line.split('|')[1] ?? '').trim();
+      return /^\**\s*Total\s*\**(\s|$)/i.test(cell);
+    });
     if (hoursCol === -1 && !totalRow) continue; // schedule table, out of scope
 
     const claim = hoursIn(lines[startIdx - 1] ?? '') ?? hoursIn(lines[startIdx - 2] ?? '');
@@ -146,7 +188,22 @@ function checkBudgetTables(file, rel, lines) {
       if (rr) parts.push(rr);
     }
 
-    const stated = totalRow ? hoursIn(totalRow.line) : claim;
+    // A Total row states its figure in the Hours column, not necessarily as
+    // "N hours" in prose. `hoursIn(totalRow.line)` required the literal word, so
+    // a Total row in a table whose Hours column header supplies the unit — the
+    // commonest shape there is — read as no total at all.
+    //
+    // This matters because it is a silent skip in the dangerous direction: the
+    // table is now RECOGNISED (the detector above was fixed to see a bolded
+    // `**Total**`), so the guard no longer skips it, but it has nothing to check
+    // against and reports "prints no hour total to check against" for a table
+    // whose total is right there in the column. Prefer the cell, fall back to
+    // the line, and only then give up.
+    const totalCell = totalRow
+      ? cellRange((totalRow.line.split('|')[hoursCol !== -1 ? hoursCol : 1] ?? '')) ??
+        hoursIn(totalRow.line)
+      : null;
+    const stated = totalCell ?? claim;
     if (!stated) {
       note(rel, startIdx + 1, 'has an Hours column or a Total row but prints no hour total to check against');
       continue;
