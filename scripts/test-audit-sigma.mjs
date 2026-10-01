@@ -70,9 +70,20 @@ function withFixture(name, file, find, replace, expectFail) {
     check(name, false, `FIXTURE MATCHED NOTHING — the guard's control tests a string the corpus no longer contains. A control that cannot be applied proves nothing.`);
     return;
   }
-  fs.writeFileSync(target.p, original.replace(find, replace), "utf8");
-  const r = run();
-  restore();
+  // The restore is in `finally`. It was not, and on 2026-10-02 a sibling suite
+  // (`test-audit-framework-claims.mjs`) was found to have left a probe line
+  // appended to a real phase file because of exactly this shape -- the run
+  // finished abnormally, the restore never ran, and the next guard reported a
+  // content defect the suite had itself written. `docs/DECISIONS.md` records this
+  // hazard as D-058. Restoring from a process-level `exit` handler is not enough
+  // either: a write is what loses work, so the write is what must be paired.
+  let r;
+  try {
+    fs.writeFileSync(target.p, original.replace(find, replace), "utf8");
+    r = run();
+  } finally {
+    restore();
+  }
   const sawIt = r.out.includes("the Sigma specification does not permit") || r.out.includes("not one of the five permitted");
   check(
     name,

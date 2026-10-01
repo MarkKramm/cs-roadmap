@@ -144,13 +144,25 @@ jobs:
       # anything would print the same green line as a healthy corpus.
       - name: Audit CHANGELOG guard (self-test)
         run: node scripts/test-audit-changelog.mjs
-      # The build fails on a malformed question â€” no marked answer, two marked
-      # answers, a missing **Why:**, a duplicate id. What it CANNOT see is a
-      # defect of the SET: the first quiz written for this repository put seven
-      # of its ten correct answers in position C. Every question was
-      # individually valid and the build was green, yet a reader answering "C"
-      # every time scored 70% without reading the questions. That is a property
-      # of the collection, so it needs a check that sees the whole set.
+      # The build fails on a malformed question — no marked answer, or fewer than
+      # three options. What it CANNOT see is a defect of the SET: the first quiz
+      # written for this repository put seven of its ten correct answers in
+      # position C. Every question was individually valid and the build was green,
+      # yet a reader answering "C" every time scored 70% without reading the
+      # questions. That is a property of the collection, so it needs a check that
+      # sees the whole set.
+      #
+      # IT DOES NOT catch the other three defects this step used to be credited
+      # with, and the comment said so until 2026-10-02. Measured, not assumed: this
+      # guard parses a `**Why:**` flag and then never reads it, so a missing one is
+      # invisible here; it does `q.answer = q.options` on every [x] it meets, so a
+      # second mark silently OVERWRITES the first instead of being counted; and it
+      # never compares question ids. All three are enforced elsewhere and always
+      # were — `audit-quiz-sourcing.mjs` for the `**Why:**` and its length,
+      # `build-content.mjs` for exactly one mark and duplicate ids — so the
+      # requirement was never unenforced. What was wrong was the attribution, which
+      # is the more dangerous error of the two: a reader debugging a quiz would have
+      # looked here, found nothing, and concluded the check did not exist.
       - name: Audit quiz answer balance
         run: node scripts/audit-quiz.mjs
       # The corpus-level half of the same rule. A phase can balance perfectly
@@ -163,6 +175,26 @@ jobs:
       # called it working.
       - name: Test corpus answer-balance controls
         run: node scripts/test-audit-quiz-corpus.mjs
+      # The two per-phase classes, which had no controls, plus the attribution.
+      #
+      # Writing them found a MISATTRIBUTION rather than a bug. This step's comment
+      # claimed the build fails on "no marked answer, two marked answers, a missing
+      # **Why:**, a duplicate id". Measured, it catches one of the four: it parsed a
+      # `why` flag and never read it (now removed), it overwrites the answer index on
+      # every [x] so a second mark is invisible, and it never compares ids. All three
+      # were enforced elsewhere and always were -- audit-quiz-sourcing.mjs and
+      # build-content.mjs -- so nothing was ever unenforced. The comment was the
+      # dangerous error: a reader debugging a quiz would have looked here, seen
+      # nothing, and concluded the check did not exist.
+      #
+      # So these controls do something the other suites here do not: rather than
+      # testing this guard for a defect it cannot see, they plant each unclaimed
+      # defect and require the guard that DOES claim it to catch it. Every fixture is
+      # the balanced A,B,C,D baseline with one property changed, because the first
+      # draft put all four answers at A and every case then failed on the balance rule
+      # with the rule under test never reached.
+      - name: Test quiz guard controls
+        run: node scripts/test-audit-quiz.mjs
       # The workflow that runs every other check had no check of its own. No YAML
       # parser is vendored, so a malformed step is invisible locally: CI would
       # fail to start, which reads as "no CI ran" rather than "CI is broken".
@@ -338,6 +370,30 @@ jobs:
       # noise, because failing on infrastructure teaches people to ignore it.
       - name: Audit NIST publications for withdrawal
         run: node scripts/audit-nist-current.mjs
+      # The two control suites added for the narrow guards, which are small and were
+      # the cheapest to close.
+      #
+      # audit-commands: 25 controls. All seven rules fire on the broken form and stay
+      # silent on the correct one, and -- the control that matters -- the ORIGINAL
+      # defect is re-injected into a scratch corpus: the correct full DISM invocation
+      # in the lesson and the abbreviated `DISM /RestoreHealth` in a summary table,
+      # which is the shape IT 02 actually shipped. The corpus is now clean, so a rule
+      # that had quietly stopped matching would be indistinguishable from a rule
+      # working, and re-injection is the only honest test of a rule list.
+      - name: Test command-audit guard controls
+        run: node scripts/test-audit-commands.mjs
+      # audit-nist-current: 14 controls, and the only network-dependent guard here.
+      # Its failure branches CANNOT be reached with a real network -- the pages that
+      # would exercise the withdrawal path are pages that are not withdrawn -- so
+      # these stub `fetch` through `node --import` and run the guard's real logic
+      # against invented responses. The stub is a string inside the suite rather than
+      # a second committed file, so it cannot drift from the controls that use it.
+      # A stub cannot prove NIST's real pages parse; the step above does that, every
+      # commit. What these establish is that a confirmed withdrawal fails with its
+      # date and replacement, and that every network failure shape is reported
+      # UNCHECKED rather than as a pass or a false alarm.
+      - name: Test NIST-currency guard controls
+        run: node scripts/test-audit-nist-current.mjs
       # A stale LESSON misinforms a reader. A stale ANSWER KEY tells a learner
       # they are WRONG for being right, which is the worst outcome a self-study
       # curriculum can produce. The 2021->2025 OWASP renumbering moved six of

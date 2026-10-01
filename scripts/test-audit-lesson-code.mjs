@@ -139,9 +139,18 @@ function withAddedBlock(name, file, block, expect, mode) {
   const target = TARGETS.find((b) => b.t === file);
   if (!target) throw new Error(`control names a file that is not a target: ${file}`);
 
-  fs.writeFileSync(target.p, `${target.text}\n${block}\n`, "utf8");
-  const r = run();
-  restore();
+  // The restore is in `finally`, for the reason recorded in `test-audit-sigma.mjs`
+  // and `test-audit-framework-claims.mjs`: on 2026-10-02 one of those suites was
+  // found to have left a probe appended to a real phase file after an abnormal
+  // exit, and the guard then reported a content defect the suite had itself
+  // written. `docs/DECISIONS.md` records this hazard as D-058.
+  let r;
+  try {
+    fs.writeFileSync(target.p, `${target.text}\n${block}\n`, "utf8");
+    r = run();
+  } finally {
+    restore();
+  }
 
   const named = r.out.includes(expect);
   const ok =

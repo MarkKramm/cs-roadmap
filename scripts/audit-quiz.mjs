@@ -93,7 +93,7 @@ function parseQuiz(text) {
     const h3 = line.match(/^###\s+(.*)$/);
     if (h3) {
       const idm = h3[1].match(/<!--\s*id:\s*([^\s]+)/);
-      questions.push({ id: idm ? idm[1] : '(no id)', line: i + 1, answer: -1, options: 0, why: false });
+      questions.push({ id: idm ? idm[1] : '(no id)', line: i + 1, answer: -1, options: 0 });
       continue;
     }
     if (questions.length === 0) continue;
@@ -105,8 +105,27 @@ function parseQuiz(text) {
       q.options++;
       continue;
     }
-    if (/^\*\*Why:\*\*/.test(line)) q.why = true;
   }
+  // A `**Why:**` line used to be recorded here as `q.why` and then never read by
+  // anything -- a field that reads like a check and is not one. It is removed, and
+  // the requirement is enforced where it can afford to look at the text:
+  // `audit-quiz-sourcing.mjs` requires a `**Why:**` on a single line AND at least 60
+  // characters of it, and `build-content.mjs` requires exactly one marked option and
+  // rejects a duplicate question id.
+  //
+  // The CI workflow comment attributed all four of "no marked answer, two marked
+  // answers, a missing **Why:**, a duplicate id" to THIS guard. Measured on
+  // 2026-10-02 it catches only the first. It does `q.answer = q.options` on every [x] it
+  // meets, so a second mark silently OVERWRITES the first rather than being
+  // counted, and neither **Why:** nor duplicate ids are examined here at all. The
+  // comment now names the guard that owns each claim, and
+  // `scripts/test-audit-quiz.mjs` asserts that attribution by requiring the owning
+  // guard to catch each defect this one cannot.
+  //
+  // The overwrite is not cosmetic. It decides which option the key points at, so a
+  // question with two marks is answered against the last one, and a learner who
+  // chose the other is told they are wrong for being right -- which this repository
+  // records as the worst outcome a self-study curriculum can produce.
   return questions;
 }
 

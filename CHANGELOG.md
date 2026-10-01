@@ -3,6 +3,84 @@
 ### Added
 
 
+- **`scripts/test-audit-commands.mjs` — 25 controls for the narrowest guard in the repository, and
+  all seven rules hold.** `audit-commands.mjs` checks seven specific DISM/sfc/chkdsk invocations that
+  were once abbreviated into invalid syntax. The corpus is clean, so there is no defect to find here;
+  what the controls establish is that the rules can still catch it.
+  - **The control that matters is the re-injection.** The original defect is restored in the shape IT
+    02 actually shipped — the correct full `DISM /Online /Cleanup-Image /RestoreHealth` in the lesson
+    and the abbreviated `DISM /RestoreHealth` in a summary table 300 lines later — and both the DISM
+    and the `sfc scannow` rule must fire. **A rule list whose subject no longer contains the defect
+    cannot be validated by running it against the corpus**: a rule that had quietly stopped matching
+    would be indistinguishable from a rule working.
+  - **Every rule is paired** — fires on the broken form, silent on the correct one — because a guard
+    that flags valid usage gets ignored, which loses the one case worth catching. The `chkdsk` rule's
+    trailing lookahead (so it does not match its own fix string) is asserted from both sides, and
+    case-insensitivity is exercised at its lower bound, since a reader may type `dism /restorehealth`
+    mid-sentence.
+  - **Scope boundaries are pinned too**: the bare tool name, a scoped invocation with no switch, and
+    a correct form inside a table cell must all stay silent. The header is candid that this guard
+    knows three tools and nothing else, and that is a feature rather than a gap to close here.
+
+- **`scripts/test-audit-nist-current.mjs` — 14 controls for the only network-dependent guard, whose
+  failure branches cannot be reached with a real network.** The guard retrieves every cited
+  `csrc.nist.gov` page and reads NIST's own withdrawal sentence out of it. **The pages that would
+  exercise the withdrawal path are pages that are not withdrawn**, and those that would exercise the
+  network-failure path usually work — so a suite hitting the real NIST could only ever assert the
+  happy path, which already reads green. `fetch` is therefore stubbed through `node --import` and the
+  guard runs its real logic against invented responses. The stub is a string inside the suite rather
+  than a second committed file, so it cannot drift from the controls that use it.
+  - **A confirmed withdrawal fails and reports the date, the replacement, and the citing line** — and
+    the sentence must be read out of the page's *plain text*. A decoy withdrawal sentence inside a
+    `<script>` tag on the same page must lose to the real one, which is what makes the parse
+    trustworthy.
+  - **Every network failure shape is reported UNCHECKED, never as a pass and never as a false alarm**:
+    a thrown fetch, HTTP 503, HTTP 404. That is the guard's stated design — "failing on
+    infrastructure noise trains people to ignore the guard" — and it is now proven rather than
+    asserted. A partial run passes *and* prints the caveat and the denominator.
+  - **The failure direction that matters most:** a confirmed withdrawal must still fail when another
+    link in the same run timed out. A version returning early on the timeout would report clean and
+    leave a retired citation in the curriculum.
+  - **The worklist exclusion is tested from both sides.** A URL cited *only* by a claim worklist is
+    excluded, because those files quote retired links on purpose — but a worklist mention does not
+    launder a real citation of the same URL, or the exclusion becomes a loophole.
+  - **A stub cannot prove NIST's real pages parse**, and the file says so: the guard's own CI step does
+    that, every commit. What these controls establish is that each branch can fire.
+
+- **`scripts/test-audit-quiz.mjs` — 13 controls for the two per-phase quiz classes, and a
+  MISATTRIBUTION found on the way.** (The corpus-level class already had controls in
+  `test-audit-quiz-corpus.mjs`, whose own header records that its rule was dead code twice before they
+  caught it. Not duplicated here.)
+  - **The CI comment credited this guard with four defects — "no marked answer, two marked answers, a
+    missing `**Why:**`, a duplicate id" — and it catches one.** Measured on 2026-10-02: a `why` flag
+    was parsed into every question and **never read by anything** (removed, with the requirement
+    attributed to the guard that enforces it); the parser does `q.answer = q.options` on every `[x]`
+    it meets, so a second mark silently **overwrites** the first instead of being counted; and
+    question ids are parsed but never compared. **All three were enforced elsewhere and always
+    were** — `audit-quiz-sourcing.mjs` for the `**Why:**` and its 60-character minimum,
+    `build-content.mjs` for exactly one mark and duplicate ids — so no requirement was ever
+    unenforced.
+  - **The attribution was the more dangerous error of the two.** A reader debugging a broken quiz
+    would have looked at the guard named in the comment, seen nothing, and concluded the check did not
+    exist. The comment now names the guard that owns each claim, and the reason is recorded in the
+    guard's own source.
+  - **The overwrite is not cosmetic**, and the comment says why: it decides which option the key
+    points at, so a question with two marks is answered against the last one, and a learner who chose
+    the other is told they are wrong for being right.
+  - **The attribution controls assert the OWNER, not the absence.** Each unclaimed defect is planted
+    and the guard that *does* claim it must catch it — so if that guard ever stops catching it, the
+    requirement has genuinely become unenforced and the suite goes red. A control asserting only "this
+    guard does not report it" would pass forever while the rule rotted somewhere else. Two further
+    controls assert that `audit-quiz.mjs` genuinely cannot see those defects, so the attribution stays
+    honest rather than becoming true for a different reason than stated.
+  - **Every fixture is the balanced A,B,C,D baseline with one property changed.** The first draft put
+    all four answers at A, so every case failed on the balance rule with the rule under test never
+    reached — and `audit-quiz-sourcing.mjs` turned out to *crash* without all three track directories
+    present, so the first attribution controls were satisfied by a stack trace. **An exit code is not
+    evidence that the branch under test is the branch that ran**, and here the branch that ran was
+    none of them.
+
+
 - **`scripts/test-audit-markdown-render.mjs` — 15 controls, including a staleness check that was
   itself broken twice before it could fail.** The guard's `HANDLED` set is *declared* rather than
   imported, because `renderInline.jsx` is JSX and a plain Node script cannot import it. That is real
@@ -768,6 +846,7 @@
 ### Changed
 
 
+
 - **`scripts/audit-markdown-render.mjs` is REPLACED, and it is now a gate that works.** The old file
   reported the right class of problem against a premise that had been false for a long time, so it was
   counting **1,458 correctly-rendered spans as defects**. It is rewritten to ask the question that is
@@ -884,6 +963,30 @@ ed to the Views list that actually exists; the three M2 pages no longer describe
 - `learning-site/README.md` — removed a duplicated `## Layout` section; documented the new pages, hooks, and commands; status brought up to M2.
 
 ### Fixed
+
+
+- **A control suite left a defect in the corpus it was validating, and the guard then reported it
+  as a real finding.** `test-audit-framework-claims.mjs` appends a probe line to a real phase file,
+  runs the guard, and restores. On a run with a failing control it did not restore — and
+  `audit-framework-claims.mjs` reported a stale OWASP claim at
+  `cybersec-roadmap/01-phase-foundations.md:934` **that the suite itself had written minutes
+  earlier.** Same file, same line, same phrasing as a genuine finding. **D-079**.
+  - **The cause was not a crash.** The suite restored correctly on every run that completed, and it
+    has a restoration check at the foot of the file — which sat **below `process.exit(1)`**. So a
+    failing run exited before reaching its own verification. **The check was never wrong; it was
+    unreachable in exactly the case it existed for.**
+  - **The restore moved into `finally` in all three affected suites** —
+    `test-audit-framework-claims.mjs`, `test-audit-sigma.mjs`, `test-audit-lesson-code.mjs` — and the
+    restoration check moved above every early exit. Restoring from a process-level `exit` handler is
+    not enough: a *write* is what loses work, so the write is what must be paired. This is D-058's
+    rule, already fixed in a sibling suite and reintroduced here.
+  - **Proven rather than asserted**: a scratch copy of the suite is run with one control inverted so
+    it exits 1 — the exact shape that caused the damage — and the real corpus is required to be
+    byte-identical afterwards.
+  - **This is the most expensive defect of the pass, and the work meant to prevent defects produced
+    it.** The general form is the same one this repository has now recorded four times in different
+    guises: *a check placed after the exit it should survive does not gate anything.*
+
 
 
 - **Nothing had ever rendered a lesson at the largest reading size, and one heading out of 67 was

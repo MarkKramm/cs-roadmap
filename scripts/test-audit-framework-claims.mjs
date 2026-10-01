@@ -31,9 +31,24 @@ const results = [];
 
 function control(name, line, expectFail) {
   // Append the probe as its own paragraph, then restore.
-  fs.writeFileSync(PROBE_FILE, Buffer.concat([original, Buffer.from(`\n${line}\n`, "utf8")]));
-  const code = runGuard();
-  fs.writeFileSync(PROBE_FILE, original);
+  //
+  // THE RESTORE IS IN `finally`, AND THAT IS THE WHOLE FIX. It was not, and the
+  // consequence was found on 2026-10-02 while running the last of this pass's
+  // suites: a probe line was left appended to the real
+  // `career-roadmaps/cybersec-roadmap/01-phase-foundations.md`, and
+  // `audit-framework-claims.mjs` then failed on a corpus defect this suite had
+  // itself written. A control suite that can leave a defect in the artifact it
+  // validates is worse than no control suite, because the failure it produces is
+  // indistinguishable from a real finding — and `docs/DECISIONS.md` already
+  // records this exact hazard as D-058, fixed in a sibling suite, and reintroduced
+  // here. The warning at the foot of this file noticed; it did not prevent.
+  let code;
+  try {
+    fs.writeFileSync(PROBE_FILE, Buffer.concat([original, Buffer.from(`\n${line}\n`, "utf8")]));
+    code = runGuard();
+  } finally {
+    fs.writeFileSync(PROBE_FILE, original);
+  }
   const failed = code !== 0;
   results.push({ name, expectFail, failed, ok: failed === expectFail });
 }
@@ -45,9 +60,16 @@ function control(name, line, expectFail) {
 const ISOLATED = path.join(ROOT, "career-roadmaps", "cybersec-roadmap", "__probe-phase.md");
 
 function controlIsolated(name, body, expectFail) {
-  fs.writeFileSync(ISOLATED, body, "utf8");
-  const code = runGuard();
-  fs.unlinkSync(ISOLATED);
+  // `finally` for the same reason as `control()` above: an interrupted run must not
+  // strand `__probe-phase.md` in the real corpus, where the next build would pick it
+  // up as a phase.
+  let code;
+  try {
+    fs.writeFileSync(ISOLATED, body, "utf8");
+    code = runGuard();
+  } finally {
+    if (fs.existsSync(ISOLATED)) fs.unlinkSync(ISOLATED);
+  }
   const failed = code !== 0;
   results.push({ name, expectFail, failed, ok: failed === expectFail });
 }
@@ -228,6 +250,26 @@ for (const r of results) {
   const want = r.expectFail ? "must fail" : "must pass";
   console.log(`  ${r.ok ? "PASS" : "FAIL"}  ${r.name.padEnd(52)} (${want})`);
 }
+// Confirm the probe left the file exactly as it was -- BEFORE any early exit.
+//
+// The order of these two blocks was the actual bug, and it is worth stating because
+// the restoration check looked like it covered this: it sat BELOW `process.exit(1)`,
+// so a run with any failing control exited before reaching it, leaving the probe
+// appended to a real phase file. The check was never wrong; it was unreachable in
+// precisely the case it existed for. **A check placed after the exit it should
+// survive does not gate anything.**
+const after = fs.readFileSync(PROBE_FILE);
+if (!after.equals(original)) {
+  console.error("FATAL: the probe file was not restored exactly. Restoring from git is required.");
+  fs.writeFileSync(PROBE_FILE, original);
+  process.exit(1);
+}
+if (fs.existsSync(ISOLATED)) {
+  console.error("FATAL: the isolated probe file was left behind. Removing it.");
+  fs.unlinkSync(ISOLATED);
+  process.exit(1);
+}
+
 const bad = results.filter((r) => !r.ok);
 console.log("");
 if (bad.length) {
@@ -236,10 +278,3 @@ if (bad.length) {
 }
 console.log(`All ${results.length} controls behaved as documented.`);
 console.log("");
-
-// Confirm the probe left the file exactly as it was.
-const after = fs.readFileSync(PROBE_FILE);
-if (!after.equals(original)) {
-  console.log("WARNING: probe file was not restored exactly. Restoring from git is required.");
-  process.exit(1);
-}
