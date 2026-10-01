@@ -1,12 +1,36 @@
-# Changelog
-
-All notable changes to this repository are documented here.
-
-The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
-
 ## [Unreleased]
 
 ### Added
+
+
+- **`scripts/test-audit-markdown-render.mjs` — 15 controls, including a staleness check that was
+  itself broken twice before it could fail.** The guard's `HANDLED` set is *declared* rather than
+  imported, because `renderInline.jsx` is JSX and a plain Node script cannot import it. That is real
+  duplication: if the renderer learns a new construct, the guard keeps treating it as unhandled and
+  starts failing the build on correct content. The control decodes the renderer's own regexes —
+  splitting `TOKEN`'s alternation and classifying each branch — and fails on divergence.
+  - **Both earlier versions of that control passed while being unable to detect anything.** The first
+    searched the renderer's source for a link pattern, which can never match a regex *literal*: the
+    characters are escaped, so the file contains `]\(` and not `](`. The second stripped the leading
+    `/` but not the trailing `/g`, so the enclosing group was never opened as a branch boundary and
+    the entire alternation returned as one unclassified branch — `italicStar` disappeared from the
+    decoded set with no error at all. **A classifier that quietly classifies less than it appears to
+    is worse than one that fails**, because the set it feeds looks complete.
+  - **Found only by proving the control could fail**, against a copy of the renderer extended with a
+    link branch. A third bug was in the harness: the suite printed `FAIL` and **exited 0**, which is a
+    control suite that cannot fail the build. It now does, and the proof is repeatable.
+  - **Five gate controls** — a Markdown link, strikethrough and underscore-italic each fail, and the
+    finding **names the field** rather than just the file, so it can be found without re-running the
+    guard by hand.
+  - **Four negative controls**, because a guard that flags valid usage gets switched off: a bare URL
+    is ordinary prose here; a code span containing an asterisk is the exact case `renderInline`'s
+    masking pass exists to fix; bold containing a code span is legitimate; and the awkward shapes the
+    real corpus is full of must all pass.
+  - **Three precondition controls.** A missing generated directory, an **empty** one, and a file that
+    will not parse are each a named failure. The empty case is the shape of the `^0[1-9]-` bug — a
+    guard with nothing to read must not print a healthy line about no subject at all.
+  - **The denominator is asserted on the real corpus**: all six generated files are read, and the
+    handled-span count is required to be non-zero, so `OK` means *clean* rather than *blind*.
 
 - **`scripts/test-audit-lesson-ast.mjs` — 13 controls for the one guard that can cause harm rather
   than report it, and they are mutation-based rather than input-based.** Every other guard here
@@ -743,6 +767,39 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### Changed
 
+
+- **`scripts/audit-markdown-render.mjs` is REPLACED, and it is now a gate that works.** The old file
+  reported the right class of problem against a premise that had been false for a long time, so it was
+  counting **1,458 correctly-rendered spans as defects**. It is rewritten to ask the question that is
+  still true, and it fails the build. **D-078**.
+  - **The old premise was "learning-site has no Markdown renderer."** It has had
+    `renderInline.jsx` since that module landed, with **15 components importing it**, formatting
+    `**bold**`, `*italic*` and `` `code` ``. The guard reported 299 of those spans in the IT track
+    alone as problems.
+  - **It never gated — there is no `process.exit` in the old file at all.** Every finding was printed
+    and ignored, which is why `CHECKPOINT.md` named it as the one guard deliberately outside CI and
+    the CHANGELOG noted "exits 0 whatever it finds." Both observations were correct; nobody had
+    connected them to the premise.
+  - **It read two of six generated files**, so the **advance track** — 7 phases, 117,002 words, the
+    most senior material in the repository — was never examined.
+  - **The new guard checks a claim that was true and unchecked.** `renderInline.jsx` says it does not
+    handle links, headings, lists or block structure *"because the JSON contains none."* If a practice
+    task or deliverable ever acquired a Markdown link, the renderer would leave it alone and the
+    reader would see `[text](url)` on a lesson page — while the content build succeeded, the render
+    smoke test succeeded, and the page merely looked wrong. Nothing in CI would have caught it. The
+    guard now scans **all six generated files, 23,242 content strings**, and fails on any inline
+    construct outside the handled set.
+  - **The decision to replace rather than delete rests on a measurement.** Every construct in every
+    generated file was classified: **not one link, strikethrough or underscore-italic exists**,
+    including in the advance track the old guard never read. Had one been present the correct action
+    would have been to fix the content, not retire the guard.
+  - **The guard moved from the `content` CI job to `site`, and that was nearly a mistake.** It reads
+    `learning-site/src/data/generated/`, which is gitignored build output
+    (`learning-site/.gitignore:12`), and the `content` job never builds — a step there would have
+    failed on `MISSING BUILD ARTIFACT` on every run. Its precondition is now a named failure rather
+    than a skip, and both the missing-directory and empty-directory cases are controls.
+
+
 - **`audit-time-budget.mjs` gained a fifth class: two hour-claims for the same phase that disagree.** Classes 1–4 all compare a claim against *its own parts* — a table against its total, a range against itself, frontmatter against prose, a phase against its overview. Advance 02 satisfied every one of them correctly, and still stated its budget two different ways, because **nothing compared two claims to each other**. The new class collects the phase's own total from the two positions that genuinely state one — the prose of `## Estimated time`, and a bold lead introducing a breakdown table — and requires them to be the *same* range. Contributed three real findings beyond the one that prompted it (advance 03, 04 and 06). Two false-positive classes were removed during development and are recorded in the source: a figure rounded twice in one sentence (IT 06 line 968, *"about 6.1 hours … roughly 6 hours"*), and a difference of an hour or less at both bounds. **The first version of this rule passed the very defect it was written for** — it used range *overlap*, which accepts `40–55` against `41–58` because they share `41–55`; and it scanned only bold spans, which finds the table's lead but misses the `## Estimated time` prose entirely, whose only bold span is the week count. Both were caught by running the rule against the pre-fix corpus rather than by reading it.
 
 
@@ -827,6 +884,7 @@ ed to the Views list that actually exists; the three M2 pages no longer describe
 - `learning-site/README.md` — removed a duplicated `## Layout` section; documented the new pages, hooks, and commands; status brought up to M2.
 
 ### Fixed
+
 
 - **Nothing had ever rendered a lesson at the largest reading size, and one heading out of 67 was
   broken there.** The reading-size control scales one custom property to 1.26×, and the entire

@@ -448,6 +448,37 @@ jobs:
       # 52, which is paid on purpose: a split check beats no check.
       - name: Build figures match the documentation
         run: node ../scripts/audit-build-figures.mjs
+      # The site renders **bold**, *italic* and `code` through renderInline.jsx,
+      # which 15 components import. Anything else in a content string -- a
+      # Markdown link, strikethrough, underscore italic -- reaches the reader
+      # with its syntax visible, and nothing else in CI would notice: the build
+      # succeeds, the render smoke test succeeds, and the page simply looks wrong.
+      #
+      # HERE, in the `site` job, and not in `content`, because this reads
+      # `learning-site/src/data/generated/`, which is gitignored build output --
+      # `learning-site/.gitignore:12`. The `content` job never builds, so a step
+      # there would fail on MISSING BUILD ARTIFACT on every run. Placed here it
+      # runs after the build that produces its subject.
+      #
+      # This REPLACED a file that reported the same class without gating. The old
+      # audit-markdown-render.mjs had no process.exit at all, so every finding it
+      # printed was ignored; it read only it.json and cyber.json, leaving the
+      # advance track -- 7 phases, 117,002 words -- unexamined; and its premise,
+      # "learning-site has no Markdown renderer", had been false since
+      # renderInline.jsx landed, so it counted 1,458 correctly-rendered spans as
+      # defects. CHECKPOINT named it as the one guard deliberately outside CI,
+      # which was a correct observation about a file that should not have existed.
+      #
+      # It now scans all six generated files, 23,242 content strings, and gates.
+      # Its controls include a staleness check that decodes renderInline's own
+      # regexes and fails if the renderer has learned a construct the guard still
+      # treats as unhandled -- necessary because HANDLED is declared rather than
+      # imported, since renderInline is JSX. That control was proven able to fail
+      # by extending a copy of the renderer; its first two versions could not.
+      - name: Audit inline Markdown the site would render literally
+        run: node ../scripts/audit-markdown-render.mjs
+      - name: Test markdown-render guard controls
+        run: node ../scripts/test-audit-markdown-render.mjs
       # Its controls. Fifteen sibling suites have a step here and this one
       # shipped without one, which meant a guard whose controls had never run in
       # CI — the exact hazard the suite's own header says it exists to prevent.
