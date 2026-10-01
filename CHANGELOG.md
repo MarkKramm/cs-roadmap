@@ -108,6 +108,38 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
   - **The figure guard caught this pass's CI edit too**: three figures in `CHECKPOINT.md` moved from
     47/73/18 to 48/74/19 and were corrected by measurement.
 
+- **`scripts/test-audit-site-figures.mjs` — 10 controls for the suite-figure guard, the one that
+  shipped from the last two commits with none while its sibling arrived with 15.** Every failure
+  branch is now proven to fire, and the guard turns out to be sound: nothing here found a defect in
+  it. Wired into CI.
+  - **The controls stub `npm` on PATH rather than running the real suites**, because the guard's
+    entire method is to run them — it cannot know a check count any other way, which is why it
+    exists. A dozen real `npm run` invocations would cost minutes to test string matching. The guard
+    is unmodified and takes its real code path: it spawns, reads stdout, and parses. Only the suite
+    is replaced, so this is testing the guard rather than reimplementing it, and the whole suite runs
+    in about a second against a 4.1s real run. **What a stub cannot prove is that the real suites
+    print what the guard expects** — that is what the guard's own CI step does, on every commit, in
+    the same job. The trade is stated in the file rather than left for a reader to discover.
+  - **Four failure branches proven:** a drifted `test:data` count; a drifted `test:smoke` render
+    count; the document **stopping to state a count at all** (an absent check, which the guard's
+    header says "must not read as a pass"); and a suite that exits non-zero or prints no count, both
+    of which must leave the figure **unchecked rather than verified** — the distinction that keeps a
+    broken test suite from certifying every figure in the document.
+  - **The `checked N of M` denominator is asserted in both directions.** It is the only thing
+    separating "all figures verified" from "one suite quietly stopped being counted", so a control
+    requires it to read `1 of 2` when a suite cannot be run, and `2 of 2` on the healthy path.
+  - **One control failed for the fourteenth time on the fixture side, and the way it failed is the
+    point.** The first version of the "prints no count" control set the stub to emit `0 checks` —
+    which still parses as a count, so the guard correctly reported *"the suite prints 0"* and the
+    control failed against a guard doing exactly the right thing. The stub is now **replaced** for
+    that one run with a variant printing no summary line at all. **A stub that exercises the wrong
+    branch is worse than no stub**, because it looks like coverage of the branch it misses.
+  - **A control asserts the anchors the mutating controls search for are still present** in
+    `CHECKPOINT.md`. Without it, a future edit to that document would make every mutation a silent
+    no-op — the control writes an unchanged file, the guard reports the healthy path, and the control
+    passes while testing nothing. That is a guard that cannot fail, one level up, and the sibling
+    suite has already recorded an instance of exactly it.
+
 
 - **`scripts/audit-lesson-code.mjs` and `scripts/test-audit-lesson-code.mjs` — the first guard to
   ask whether the code in a lesson parses, wired into CI with its 36 controls.** D-036 named the

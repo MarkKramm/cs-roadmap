@@ -424,6 +424,20 @@ jobs:
       # minutes.
       - name: Site suite figures match the documentation
         run: node ../scripts/audit-site-figures.mjs
+      # Its controls. This guard shipped in the same two commits as its sibling
+      # audit-build-figures.mjs, which arrived with 15 controls; this one
+      # arrived with none, so nothing had ever established that any of its
+      # failure branches could fire.
+      #
+      # The controls stub `npm` on PATH rather than running the real suites,
+      # because the guard's whole method is to RUN them -- a dozen real
+      # invocations would cost minutes to test string matching. The guard is
+      # unmodified and takes its real code path: it spawns, reads stdout, and
+      # parses. What a stub cannot prove is that the real suites print what the
+      # guard expects, and that is what the step above does, every commit, in
+      # this same job.
+      - name: Site-figure guard controls
+        run: node ../scripts/test-audit-site-figures.mjs
       - name: Smoke test
         run: npm run test:smoke
       - name: Search index and query engine
