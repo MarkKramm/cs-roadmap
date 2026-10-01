@@ -41,6 +41,56 @@ import { execFileSync } from "node:child_process";
 
 const ROOT = path.resolve(import.meta.dirname, "..");
 const GUARD = path.join(ROOT, "scripts", "audit-lesson-code.mjs");
+const BT = String.fromCharCode(96);
+
+/**
+ * Every Markdown file under `career-roadmaps/`, and how many fence OPENERS it holds.
+ *
+ * An INDEPENDENT count, which is the property that matters. The guard's own
+ * denominator was reconciled once, in D-075, against a second extractor precisely
+ * because "a total asserted by the only implementation that computed it proves
+ * nothing" -- so this counts independently rather than asking the guard what it
+ * thinks it read.
+ */
+function walkMarkdownFiles() {
+  const root = path.join(ROOT, "career-roadmaps");
+  const files = [];
+  const walk = (dir) => {
+    for (const e of fs.readdirSync(dir, { withFileTypes: true })) {
+      const p = path.join(dir, e.name);
+      if (e.isDirectory()) walk(p);
+      else if (e.name.endsWith(".md")) files.push(p);
+    }
+  };
+  walk(root);
+  return { files, paths: files };
+}
+
+/**
+ * Count fenced BLOCKS independently, by toggling on each fence line.
+ *
+ * Counting fence LINES gives 1300 where the guard reports 650 blocks, and the
+ * first version of this helper did exactly that -- so the control failed on a
+ * correct corpus for the difference between a line and a block. Each block is an
+ * opener and a closer, and the state has to be tracked across the FILE rather than
+ * the block, since a block can legitimately span lines that look like fences.
+ */
+function countFenceOpeners(onDisk) {
+  let n = 0;
+  for (const f of onDisk.paths) {
+    let inFence = false;
+    for (const line of fs.readFileSync(f, "utf8").split("\n")) {
+      if (!line.trimStart().startsWith(BT + BT + BT)) continue;
+      if (!inFence) {
+        n++;
+        inFence = true;
+      } else {
+        inFence = false;
+      }
+    }
+  }
+  return n;
+}
 
 let pass = 0;
 let failed = 0;
@@ -114,9 +164,24 @@ function withFixture(name, file, find, replace, expect) {
     return;
   }
 
-  fs.writeFileSync(target.p, original.replace(find, replace), "utf8");
-  const r = run();
-  restore();
+  // `finally`, for the reason in the header of `test-audit-sigma.mjs`.
+  //
+  // This line was NOT in a `finally`, and on 2026-10-02 that left a mutated SCP
+  // policy block in `advance-roadmap/04-phase-cloud-identity-architecture.md`:
+  // `"Version": "2012-10-17"` had become `"2012-10-17T00:00:00Z"` and an
+  // `Action` had become a `Resource`. The next run of `audit-lesson-code.mjs`
+  // then reported the file as a genuine T0.2 finding -- **a defect the test suite
+  // had written, reported as a defect in the content.** D-079 records that hazard
+  // and records two suites fixed for it; this was a third, in the same file where
+  // the fix had already been applied to a *different* helper. Every write/restore
+  // pair in this file is now paired.
+  let r;
+  try {
+    fs.writeFileSync(target.p, original.replace(find, replace), "utf8");
+    r = run();
+  } finally {
+    restore();
+  }
 
   const named = expect === null || r.out.includes(expect);
   check(
@@ -211,10 +276,28 @@ function withAddedBlock(name, file, block, expect, mode) {
   const r = run();
   const total = /fenced blocks found\s*:\s*(\d+)/.exec(r.out);
   const files = /markdown files read\s*:\s*(\d+)/.exec(r.out);
+
+  // DERIVED FROM THE FILESYSTEM, not hardcoded.
+  //
+  // This control asserted 62 files and 650 blocks, and it failed on 2026-10-02 for
+  // the right reason: `career-roadmaps/shared/GLOSSARY.md` was added, so the
+  // corpus is 63 files. **A hardcoded denominator is a figure that goes stale the
+  // next time content is written**, and the fix is not to bump the number -- it is
+  // to assert the RELATIONSHIP the check exists for: the guard must read every
+  // Markdown file under `career-roadmaps/`. A guard that narrowed its file list
+  // would still read *some* files, and only a count derived from what is on disk
+  // can tell the difference.
+  const onDisk = walkMarkdownFiles();
+  const blocksOnDisk = countFenceOpeners(onDisk);
+  const diskFileCount = onDisk.paths.length;
+
   check(
-    "the guard's own denominator is 62 files and 650 blocks -> a narrowed file list fails here",
-    total !== null && Number(total[1]) === 650 && files !== null && Number(files[1]) === 62,
-    `files=${files?.[1]} blocks=${total?.[1]} (expected files=62 blocks=650)`,
+    "the guard reads EVERY markdown file under career-roadmaps/ (denominator derived, not hardcoded)",
+    total !== null &&
+      files !== null &&
+      Number(files[1]) === diskFileCount &&
+      Number(total[1]) === blocksOnDisk,
+    `guard: files=${files?.[1]} blocks=${total?.[1]} | on disk: files=${diskFileCount} blocks=${blocksOnDisk}`,
   );
 }
 
@@ -467,9 +550,15 @@ function withReport(name, file, find, replace, expect, mode) {
     return;
   }
 
-  fs.writeFileSync(target.p, original.replace(find, replace), "utf8");
-  const r = run();
-  restore();
+  // `finally` — see the note on the other fixture helper above. This is the third
+  // unguarded write/restore pair that has been found in this one file.
+  let r;
+  try {
+    fs.writeFileSync(target.p, original.replace(find, replace), "utf8");
+    r = run();
+  } finally {
+    restore();
+  }
 
   const named = r.out.includes(expect);
   const ok = mode === "present" ? named && r.code === 0 : !named && r.code === 0;

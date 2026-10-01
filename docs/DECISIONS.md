@@ -16,6 +16,25 @@ Two consequences, since this has caused real confusion:
 - **A phrase like "Current state:" inside a record means the state at that record's date.** It
   is not a claim about today, and D-024's instance (29 phases) has been overtaken twice since.
 
+## D-080 — A glossary entry must be quoted from its source, never paraphrased
+
+- **Date:** 2026-10-02
+- **Status:** Accepted
+
+- **Context:** `docs/DESIGN-SYSTEM.md` carried a glossary as the one open item, blocked on *"new build tooling to produce the data first"*. Writing the tooling showed the blocker was misdiagnosed. The tooling was easy; **the data was not there to be extracted.**
+  - `scripts/extract-glossary-candidates.mjs` finds an expansion string for **64 of 309** domain terms. A large minority are confidently wrong: `KQL` → "Microsoft Sentinel and Defender XDR", `ICS` → "The incident command system", `CSF` → "task 7", `CISA` → "audit". The cause is structural — a term's line also holds whatever the sentence continues with, and "expansion" is whichever shape the pattern matched first.
+  - **A glossary that prints those is worse than no glossary.** It converts a term a beginner could look up into a wrong fact they will repeat in an interview. This repository's own doctrine says a stale answer key is the worst outcome a self-study curriculum can produce, and an unverified expansion is exactly that.
+- **Decision:** **Extract, then adjudicate by hand, then quote verbatim.**
+  - **The extractor is a worklist, never content.** Its output is `candidates`, `backlog` and a `shape` per candidate — the shape is carried through because a reviewer checks a table-cell match in seconds and a "is-a" match needs domain knowledge, and the reviewer should know which kind of check they are doing.
+  - **Every expansion is quoted from the corpus, including its spelling.** The corpus writes "Annualised"; so does the glossary. The first hand-written version wrote "Annual" and the new guard refused all 47 entries, correctly. The fix was to change the document, **not the check.**
+  - **Rejected candidates are recorded in the document, with the reason.** They are not waste: a rejected candidate is a place where the corpus currently implies something wrong, which is content work on the source line rather than glossary work.
+  - **Coverage is not gated, and the backlog is printed on every run.** Gating would mean either refusing the 47 verified entries or inventing the other 262 — and inventing an expansion is the failure the whole exercise exists to prevent.
+- **Consequences:**
+  - **A citation that is derived from the text cannot be wrong about where the text is**, so every entry carries `file:line` and `scripts/audit-glossary.mjs` fails the build if the expansion is no longer at that line. The guard caught a real extractor bug doing this: a citation gives the line of the **acronym**, which is not the line of the **expansion** when a definition wraps.
+  - **The glossary is excluded from its own population.** It is the output of the process, so scanning it as subject counts a term documented only in the glossary as a term the curriculum fails to explain — a gap that could never be closed, because closing it would mean adding the term to the glossary. The guard and the extractor were made to agree on this population, and on the shared documents, after reporting 307 and 310 against the extractor's 312.
+  - **A partial glossary is a better artefact than a complete wrong one**, and the document says which it is. 15% coverage, with the other 85% accounted for by reason, is a number that can be improved. A glossary claiming completeness at 39% extraction accuracy is not.
+  - **The same discipline as the claim worklists.** Extract candidates, record verdicts against them, guard the record against drift — the pattern already used for 1,144 claim rows, applied to 309 terms.
+
 ## D-079 — A control suite must not be able to leave a defect in the artifact it validates
 
 - **Date:** 2026-10-02

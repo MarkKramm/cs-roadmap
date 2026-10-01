@@ -290,11 +290,10 @@ that already exists, and it did so for a version of this file's whole lifetime.
 
 - **Icon set.** None. Components use text labels and a single check glyph.
 - **Animation library.** None. Transitions are CSS-only and under 150ms, per the anti-patterns above. A `prefers-reduced-motion` block zeroes the duration for readers who ask the system for less motion.
-- **A glossary.** The curriculum defines **274** domain acronyms and a guard
-  (`scripts/audit-terms.mjs`) verifies each is explained **where it is used**, but
-  there is no way to look one up on its own. Closing this is more than a page: the
-  guard checks explanations in context and never extracts them, so it needs new
-  build tooling to produce the data first. **The count here read 272 and was stale** —
-  the guard prints 274, and `CHECKPOINT.md` said 274, so two documents in this
-  repository carried different totals for one number. It is checked by
-  `audit-doc-figures.mjs` now, which is why it can no longer drift.
+- ~~**A glossary.**~~ **Shipped on 2026-10-02, partially, and the way it shipped matters more than that it did.** `career-roadmaps/shared/GLOSSARY.md` holds **47 verified entries**, is rendered in the site beside the other shared documents, and is listed second in `scripts/shared-content.mjs` because it is the one a reader reaches for by name rather than in order.
+
+  This entry previously said the glossary needed "new build tooling to produce the data first", which was the wrong blocker. The tooling was straightforward; **the extraction was not trustworthy.** `scripts/extract-glossary-candidates.mjs` proposes an expansion for **64** of the **309** domain terms, and a large minority are confidently wrong — `KQL` came back as "Microsoft Sentinel and Defender XDR", `ICS` as "The incident command system", `CSF` as "task 7". A glossary that says those is worse than no glossary, because it converts a term a beginner can look up into a wrong fact they repeat in an interview.
+
+  So every entry was checked by hand against the line it came from, **17 were rejected with the reason recorded in the document**, and the rest are quoted from the corpus verbatim — including its spelling, so that a citation can be checked against its own source. `scripts/audit-glossary.mjs` fails the build if an entry's expansion is no longer at the line it cites, and `test-audit-glossary.mjs` holds that to 12 controls.
+
+  **What remains open, stated rather than implied:** coverage is **15%**, and the document accounts for the other 262 by reason — no expansion findable, an expansion found and wrong, or a gloss where an expansion belongs. Fixing group 2 is content work on the *source lines*, not glossary work. Coverage is deliberately not gated: refusing the 47 verified entries or inventing the other 262 are both worse than a partial glossary that is true.

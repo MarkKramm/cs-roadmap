@@ -2,6 +2,49 @@
 
 ### Added
 
+- **`career-roadmaps/shared/GLOSSARY.md` — 47 verified entries, and the reason it is 47 and not 309
+  matters more than the number.** `docs/DESIGN-SYSTEM.md` listed a glossary as the one open item
+  blocked on "new build tooling to produce the data first". That was the wrong blocker. The tooling was
+  straightforward; **the extraction was not trustworthy.**
+  - **`scripts/extract-glossary-candidates.mjs` proposes an expansion for 64 of the 309 domain terms,
+    and a large minority are confidently wrong.** Not near-misses: `KQL` came back as "Microsoft
+    Sentinel and Defender XDR", `ICS` as "The incident command system" (the wrong sense entirely),
+    `CSF` as "task 7" (a cross-reference), `CISA` as "audit" (a gloss). **A glossary that says those
+    is worse than no glossary**, because it turns a term a beginner can look up into a wrong fact they
+    will repeat in an interview — the outcome this repository records as the worst thing a self-study
+    curriculum can produce.
+  - **So every entry was checked by hand against the line it came from, and 17 were rejected with the
+    reason recorded in the document.** The rejected list is retained because it is information: those
+    are places where the *corpus* currently implies something wrong, and fixing them is content work
+    on the source lines rather than glossary work.
+  - **Every expansion is quoted from the corpus verbatim, including its spelling** — the corpus writes
+    "Annualised" and so does the glossary. A glossary that paraphrases its own citations cannot be
+    checked against them, and being checkable is the only property that makes it worth having.
+  - **`scripts/audit-glossary.mjs` earned its place before it had any controls.** It refused all 47
+    entries of the first hand-written glossary because it normalised spellings ("Annual" where the
+    corpus writes "Annualised") — correctly, and the fix was to quote the corpus rather than loosen the
+    check. It then caught a real extractor bug (**a citation gives the line of the ACRONYM, which is
+    not the line of the EXPANSION when a definition wraps across lines**), and two entries mangled by
+    a line break in the source. `test-audit-glossary.mjs` holds it to 12 controls, covering every
+    fail-loud path.
+  - **Coverage is deliberately not gated.** Refusing the 47 verified entries or inventing the other 262
+    are both worse than a partial glossary that is true. The backlog is printed on every run so it
+    moves rather than sitting in prose.
+  - **A measurable side effect: 19 terms left `audit-terms.mjs`'s "never expanded anywhere" list**
+    (274 → 255), because the glossary is now part of the corpus that guard reads. They moved to
+    *expanded somewhere later*, not *at first use*, since `shared/` sorts after the phases — a reader
+    still meets the term before the glossary does, and both documents say so.
+  - Rendered in the site as the seventh shared document, listed second in `shared-content.mjs` because
+    it is the one a reader reaches for by name rather than in order. The smoke render went 236 → 237.
+
+- **A tracked document was emptied by a text edit, and the fix was to stop using one.** While adding
+  the glossary row to `docs/CHECKPOINT.md`, an editor-tool replacement against a single very long table
+  row left the file at **0 lines**. `git checkout` restored all 401. Every subsequent change to that
+  file went through a script that asserts each anchor is present, asserts the result is not implausibly
+  small, and verifies the line count **before** writing — so a failed match is a non-event rather than
+  a truncated document. It is the **D-058 / D-079 hazard reached by a different route**: the write is
+  what loses work, so the write is what has to be checked, and a check that runs *after* the write has
+  already lost it.
 
 - **`scripts/test-audit-commands.mjs` — 25 controls for the narrowest guard in the repository, and
   all seven rules hold.** `audit-commands.mjs` checks seven specific DISM/sfc/chkdsk invocations that

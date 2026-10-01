@@ -62,6 +62,18 @@ const DOCS = [
     blurb: "The rules that make a 34–112 week plan survivable. Read this first.",
   },
   {
+    // The glossary, listed second because it is the one document a reader reaches
+    // for BY NAME rather than in order — which is also why the blurb says so
+    // plainly. It is a starter set, 47 of 310 domain terms, and the document says
+    // which and why; the blurb must not oversell it as complete.
+    dir: "shared",
+    file: "GLOSSARY.md",
+    id: "glossary",
+    kind: "doc",
+    blurb:
+      "What the capitalised forms stand for. A starter set — 47 of 310, with the rest accounted for.",
+  },
+  {
     dir: "shared",
     file: "weekly-tracker-template.md",
     id: "weekly-tracker-template",

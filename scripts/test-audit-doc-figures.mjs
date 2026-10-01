@@ -205,10 +205,17 @@ const driftInFile = (label, file, re, delta, expectFail = true) => {
 // 5c. A figure in a DIFFERENT document. The first sweep guarded CHECKPOINT.md only, which
 //     is exactly how DESIGN-SYSTEM.md carried 272 domain terms against CHECKPOINT's 274.
 //     This control runs against DESIGN-SYSTEM.md to prove the guard reads more than one file.
+//
+//     The anchor moved TWICE on 2026-10-02, and both times `driftNumber` refused rather
+//     than passing: first because the glossary rewrite removed "defines **274** domain
+//     acronyms", and then because the replacement pattern matched the sentence but did not
+//     match a figure the guard actually reads. **A control whose anchor has gone silently
+//     tests nothing**, and the helper throws instead -- which is the whole reason it
+//     exists. The anchor below is a figure `audit-doc-figures.mjs` genuinely asserts.
 driftInFile(
   "a figure in a second document drifts -> must FAIL",
   path.join(ROOT, "docs", "DESIGN-SYSTEM.md"),
-  /(defines \*\*)(\d+)(\*\* domain acronyms)/,
+  /(holds\s*\*\*)(\d+)(\s*verified entries)/,
   +3,
 );
 

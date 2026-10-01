@@ -465,6 +465,25 @@ jobs:
       # having run.
       - name: Audit acronym detector (self-test)
         run: node scripts/audit-terms.mjs --self-test
+      # The glossary: 47 verified entries out of 310 domain terms, each citing the
+      # line its expansion came from.
+      #
+      # The citation check is the point. This guard earned its place before it had
+      # any controls — it refused all 47 entries of the first hand-written glossary
+      # because it normalised spellings ("Annual" where the corpus writes
+      # "Annualised"), and the fix was to quote the corpus rather than loosen the
+      # check. It then caught a real extractor bug (a citation gives the line of the
+      # ACRONYM, which is not the line of the EXPANSION when a definition wraps) and
+      # two entries mangled by a line break in the source.
+      #
+      # Coverage is deliberately NOT gated. The glossary is a starter set by design,
+      # and gating on it would mean either refusing the 47 verified entries or
+      # inventing expansions for the other 263 — which is the exact failure the
+      # document exists to avoid. The backlog is printed so it moves.
+      - name: Audit the glossary against the corpus
+        run: node scripts/audit-glossary.mjs
+      - name: Test glossary guard controls
+        run: node scripts/test-audit-glossary.mjs
       # cyber-restructure-check.mjs is deliberately NOT run here. It compares the
       # cyber phases against a "before" snapshot captured at the start of the
       # 2026 restructure pass, and reads it from process.env.TEMP â€” a

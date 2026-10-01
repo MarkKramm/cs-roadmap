@@ -56,6 +56,19 @@ runCapture("lintFiles", ["scripts/lint-content.mjs"], /(\d+) files checked/);
 runCapture("examPapers", ["scripts/audit-exams.mjs"], /OK — (\d+) paper\(s\)/);
 runCapture("examQuestions", ["scripts/audit-exams.mjs"], /OK — \d+ paper\(s\) \/ (\d+) questions/);
 
+// The glossary's own figures, read from its guard. DESIGN-SYSTEM.md's "Still open"
+// section now states how many entries the glossary holds, and that sentence is a
+// claim about a build artifact in exactly the way the other figures here are.
+//
+// It replaces a claim that silently stopped existing. The guard used to read
+// "defines **274** domain acronyms" from DESIGN-SYSTEM.md, and when the glossary
+// shipped that sentence was rewritten -- at which point the claim matched nothing
+// and the guard reported DOC CLAIMS OK. **An absent claim and a satisfied claim
+// were indistinguishable**, which is the `^0[1-9]-` bug in a document rather than a
+// file list: a check that quietly stops being a check.
+runCapture("glossaryEntries", ["scripts/audit-glossary.mjs"], /entries in GLOSSARY\.md:\s+(\d+)/);
+runCapture("glossaryDomain", ["scripts/audit-glossary.mjs"], /domain terms in the corpus:\s+(\d+)/);
+
 // Directory counts are read from disk, which is the strongest form: the substrate itself.
 const countFiles = (dir, re) =>
   fs.readdirSync(path.join(ROOT, dir)).filter((f) => re.test(f)).length;
@@ -244,11 +257,25 @@ const ASSERTIONS = [
     key: "terms",
     claims: [
       DOC("docs/CHECKPOINT.md", /emits \*\*(\d+) domain terms\*\*/, "term count"),
-      // Found stale by the claim sweep: this said 272 while CHECKPOINT said 274.
-      // Two documents, one number, two different values, nothing comparing them.
-      DOC("docs/DESIGN-SYSTEM.md", /defines \*\*(\d+)\*\* domain acronyms/, "term count"),
     ],
     why: "domain terms the detector emits",
+  },
+  {
+    // The glossary's own size, measured by its own guard.
+    //
+    // It replaces a claim that SILENTLY STOPPED EXISTING. This assertion used to
+    // read "defines **274** domain acronyms" from DESIGN-SYSTEM.md, and when the
+    // glossary shipped that sentence was rewritten — at which point the pattern
+    // matched nothing and the guard reported DOC CLAIMS OK. **An absent claim and a
+    // satisfied claim were indistinguishable**, which is the `^0[1-9]-` bug in a
+    // document rather than in a file list: a check that quietly stops being a
+    // check. `required: true` is what makes the difference visible, and the
+    // DESIGN-SYSTEM sentence now names the figure this measures.
+    key: "glossaryEntries",
+    claims: [
+      DOC("docs/DESIGN-SYSTEM.md", /holds\s*\*\*(\d+)\s*verified entries\*\*/, "glossary entry count", true),
+    ],
+    why: "entries the glossary guard verifies",
   },
   {
     key: "banded",
