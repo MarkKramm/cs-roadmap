@@ -21,6 +21,26 @@ jobs:
         run: node scripts/lint-content.mjs
       - name: Audit phase structure
         run: node scripts/audit-content.mjs
+      # This guard had 20 defect classes and NO controls, which is the worst
+      # ratio in the repository: it gates the `content` job and two of its rules
+      # (DUPLICATE_PART, PART_GAP) had already been dead code on the day the file
+      # was written, because they matched a `### ` marker that the heading
+      # collector strips. They stayed green for the file's entire life.
+      #
+      # Writing the controls found the SAME class a seventh time: PLACEHOLDER
+      # could not match "TODO: fix this" at all, because its trailing \b sat
+      # after the colon and demanded a word character where a space always
+      # follows. It only fired on "TODO:no space" and the lorem string — two
+      # shapes nobody writes. Now fixed, and it is the reason a rule that
+      # prints nothing reads as green is worth a control per class.
+      #
+      # Every control plants a REAL instance of one class and asserts WHICH
+      # class fired, never that the exit code was non-zero — several of these
+      # defects trip two rules at once, so a non-zero exit can come from the
+      # wrong one. Three controls are negatives on legitimate Markdown, because
+      # a guard that flags valid usage gets switched off.
+      - name: Test phase-structure guard controls
+        run: node scripts/test-audit-content.mjs
       - name: Audit lesson parser (no content loss)
         run: node scripts/audit-lesson-ast.mjs
       - name: Audit readability

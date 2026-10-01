@@ -8,6 +8,61 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### Added
 
+- **`scripts/test-audit-content.mjs` — 26 controls for the oldest guard in the repository, and the
+  first one found a live defect on its first run.** `audit-content.mjs` has 20 defect classes, gates
+  the `content` CI job, and had **no controls at all**: nothing proved that a defect of the class it
+  claims to catch could actually make it fail. Every one of the 20 classes now has a control that
+  plants a real instance and asserts **which class fired** — never merely that the exit code was
+  non-zero, because several of these defects trip two rules at once and a non-zero exit can come
+  from the wrong one. Three further controls are negatives on legitimate Markdown, since a guard that
+  flags valid usage gets switched off. Wired into CI. See **D-077**.
+  - **`PLACEHOLDER` could never fire — it was dead code for the file's entire life.** The rule read
+    `/\b(TODO:|FIXME:|XXX:|Lorem ipsum dolor)\b/i`, with a word boundary placed *after* the
+    alternation. For the three colon-terminated alternatives that demands a word character
+    immediately after a colon, where a real marker always has a space, so **the rule could not match
+    `"TODO: fix this"` at all.** It fired only on `"TODO:no space"` and the lorem string — two shapes
+    nobody writes. Fixed by moving the boundary to the start of each alternative, and the corpus is
+    clean under the corrected rule, so nothing was hiding behind it.
+  - **This is the seventh recorded instance of a single class, and the third in this one file.**
+    `DUPLICATE_PART` and `PART_GAP` matched a `### ` marker that the heading collector strips at
+    collection time, so both filtered an empty array from the day the file was created and were only
+    found by planting a real duplicate heading and watching the guard exit 0. Three rules in one
+    guard, none able to fail, none noticed — each printing nothing, which is what a healthy result
+    looks like.
+  - **The `^0[1-9]-` regression is now guarded in both directions.** Two controls assert that a
+    two-digit phase file is counted *and* that a defect planted inside one is actually caught.
+    Counting files is not checking them: the original bug counted only 01–09 and reported clean over
+    four fifths of the content, so a control that only watched the count would pass against a guard
+    that enumerated phase 10 and never examined it.
+  - **Fixtures are built in a scratch tree rather than by mutating repository files.** The sibling
+    suites mutate a real file and restore it in a `finally`, which is right for a one-file target and
+    wrong here: this guard only reports clean across all 31 phases, so a planted defect in a real file
+    arrives with 30 other files of context and a failure is hard to attribute. Control 0 asserts the
+    synthetic phase is clean before anything is planted, because an invalid baseline makes every
+    later failure ambiguous between a broken guard and a broken fixture — and the fixture has been at
+    fault six times in this repository's history.
+  - **Nine of the 26 content guards had no controls at all.** Named in D-077 so the gap is measured
+    rather than assumed: `audit-commands`, `audit-lesson-ast`, `audit-markdown-render`,
+    `audit-nist-current`, `audit-readability`, `audit-site-figures`, `audit-time-budget`, and the four
+    non-corpus classes of `audit-quiz`. `audit-site-figures.mjs` is the sharpest — added in the last
+    two commits to close "the last two figures nothing could re-derive", never proven falsifiable,
+    while its sibling `audit-build-figures.mjs` shipped with 15 controls in the same commit.
+  - **The figure guard caught this pass's own CI edit.** Adding a step made `validate-ci`'s documented
+    count stale, exactly as it is designed to: three figures in `CHECKPOINT.md` moved from 46/72/17 to
+    47/73/18 and the guard failed until they were corrected by measurement rather than by memory.
+  - **A fixture that needed a guard exemption was the wrong fixture, and the exemption was removed
+    rather than shipped.** The `REPLACEMENT_CHAR` control must plant a U+FFFD, so the character first
+    lived as a literal in the suite's own source — and two independent guards correctly flagged it:
+    `audit-encoding.mjs` rule 3 and `lint-content.mjs`, which both scan `scripts/`. An exemption was
+    added to the first, which **left the second still failing**, and cutting a hole in rule 3
+    specifically means cutting it in the one check whose entire purpose is noticing a lost byte. The
+    real fault was the fixture: a source file containing a literal U+FFFD *is* a file with a lost
+    byte. It now builds the character at runtime with `String.fromCharCode`, so **no exemption exists
+    anywhere and nothing in the repository stores the corruption.** Two controls in
+    `test-audit-encoding.mjs` assert the surviving property — rule 3 fires in a document *and* inside
+    a script, the case an exemption would have silenced.
+
+
 - **`scripts/audit-lesson-code.mjs` and `scripts/test-audit-lesson-code.mjs` — the first guard to
   ask whether the code in a lesson parses, wired into CI with its 36 controls.** D-036 named the
   class no guard could see: a fenced block that is internally consistent, perfectly clear, and does

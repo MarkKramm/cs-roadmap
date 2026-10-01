@@ -153,6 +153,31 @@ control(
   scriptProbe,
 );
 
+// --- a U+FFFD is caught everywhere, and no exemption is needed ------------
+//
+// The first version of this suite needed an exemption on rule 3, because
+// test-audit-content.mjs had to CONTAIN a U+FFFD in order to plant one in a
+// scratch phase file. That was the wrong fix, and this comment is why.
+//
+// Two independent guards scan scripts/ -- this one and lint-content.mjs -- and
+// both correctly flagged that file. An exemption cut into one of them would
+// have left the other disagreeing, and an exemption in rule 3 specifically is
+// a hole cut in the one rule whose entire purpose is noticing a lost byte.
+// The real problem was the fixture: a source file containing a literal U+FFFD
+// IS a file with a lost byte. So the fixture now builds the character at
+// runtime with String.fromCharCode, and nothing in the repository stores it.
+//
+// These two controls assert the property that survives: rule 3 fires in a
+// document, and it fires inside a SCRIPT too -- which is the case the
+// exemption would have silenced.
+control("U+FFFD in a document                            (must fail)", enc("# Title\n\nlost \ufffd here\n"), true);
+control(
+  "U+FFFD inside a SCRIPT                            (must fail)",
+  enc("// a comment with \ufffd a lost byte\nexport const q = 4;\n"),
+  true,
+  scriptProbe,
+);
+
 console.log("");
 console.log("Encoding-guard controls");
 console.log("=".repeat(64));

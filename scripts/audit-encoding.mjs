@@ -45,6 +45,17 @@ const MOJIBAKE_EXEMPT = new Set([
   "scripts/test-audit-encoding.mjs",
 ]);
 
+// NOTE: there is deliberately no exemption for rule 3 (U+FFFD), even though a
+// control suite might want one. test-audit-content.mjs plants a U+FFFD to prove
+// audit-content.mjs can detect one, and the first version of that suite stored
+// the character as a literal in its own source — which this rule correctly
+// flagged, and which lint-content.mjs ALSO flagged. Rather than widen two
+// guards to accommodate a fixture, the fixture was changed to build the
+// character at runtime with String.fromCharCode. **The rule was not wrong; the
+// fixture was storing real corruption in the repository.** An exemption here
+// would have been a hole cut for a test convenience, in the one rule whose
+// whole purpose is noticing a lost byte.
+
 function walk(dir, out = []) {
   for (const e of fs.readdirSync(dir, { withFileTypes: true })) {
     if (SKIP_DIRS.has(e.name)) continue;
@@ -103,6 +114,7 @@ for (const base of SCAN) {
     }
 
     // 3. U+FFFD, the replacement character. Something was already lost.
+    //    No exemption, deliberately — see the note above MOJIBAKE_EXEMPT.
     const fffd = (text.match(/\uFFFD/g) || []).length;
     if (fffd) {
       findings.push(`${rel}: contains ${fffd} U+FFFD replacement character(s) — bytes were lost`);

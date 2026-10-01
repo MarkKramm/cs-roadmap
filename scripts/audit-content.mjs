@@ -192,8 +192,16 @@ for (const { track, file } of files) {
   // "PLACEHOLDER" is a risky word to match, because legitimate prose uses it
   // ("a placeholder value in the config"). Only flag the unmistakable markers,
   // and only as a standalone token in a comment-like position.
+  // The boundary belongs at the START of each alternative, not after it. A
+  // trailing \b after `TODO:` demands a word character immediately after a
+  // colon, and a space always follows a colon in a real marker — so the rule
+  // could not match "TODO: fix this" at all. It only fired on the two shapes
+  // nobody writes: "TODO:no space" and the lorem string. It was therefore dead
+  // code for the whole life of the file, found by the control that plants a
+  // marker in scripts/test-audit-content.mjs. This is the seventh recorded
+  // instance of the same class: a rule that prints nothing and reads as green.
   lines.forEach((line, i) => {
-    if (/\b(TODO:|FIXME:|XXX:|Lorem ipsum dolor)\b/i.test(line)) {
+    if (/\b(?:TODO|FIXME|XXX):|\bLorem ipsum dolor\b/i.test(line)) {
       add('PLACEHOLDER', rel, `line ${i + 1}: ${line.trim().slice(0, 90)}`);
     }
   });
