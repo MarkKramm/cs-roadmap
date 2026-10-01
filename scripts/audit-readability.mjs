@@ -199,6 +199,23 @@ for (const k of ['IT', 'CYBER', 'ADVANCE']) {
 }
 
 console.log('\nReadability targets: avg para <= 45 words, avg sentence <= 18, at least 8 tables/phase.');
+// The three averages above are REPORTED, not gated — only the paragraph ceiling
+// fails the build, and the reason is the same as EDITORIAL versus CEILING: a
+// sentence that averages 19 words is worth fixing and is not a broken build.
+//
+// That distinction is easy to lose, because nothing in this file's output says
+// it. The count below is the number of phases outside those averages, and it is
+// non-zero on the current corpus (six, all in the advance track, on sentence
+// length). `docs/WORKFLOW.md` claimed this guard "reports no phase outside the
+// target", which was false and had been for several passes; the claim is
+// corrected there, and asserted rather than assumed by
+// `scripts/test-audit-readability.mjs`, which plants an over-target average and
+// requires exit 0.
+//
+// If you are here to make one of these averages fail the build, clear the
+// backlog first. Moving CEILING from 150 to 110 is what the header above
+// describes, and it only worked because the four paragraphs over the editorial
+// target had already been split.
 const problems = rows.filter((r) => r.avgPara > 45 || r.avgSent > 18 || r.tables < 8);
 console.log(`\nPhases outside the target: ${problems.length} of ${rows.length}`);
 for (const p of problems) {

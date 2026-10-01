@@ -45,6 +45,24 @@ jobs:
         run: node scripts/audit-lesson-ast.mjs
       - name: Audit readability
         run: node scripts/audit-readability.mjs
+      # Its controls. The guard has TWO thresholds and ONE gate -- the 110-word
+      # paragraph ceiling fails the build, the 90-word editorial target and the
+      # three averages are reported -- and nothing had established that any of
+      # them could fire, or which side of that line any of them sat on.
+      #
+      # The controls measure both boundaries at three points each, because a
+      # threshold is `>` and not `>=` is a claim worth pinning: 110 words passes
+      # and 111 fails, 90 is not reported and 91 is. They also assert that code
+      # fences, tables, lists and blockquotes are not counted as paragraphs,
+      # since a guard that fails on a wide table gets switched off.
+      #
+      # The finding was in the documentation, not the guard. WORKFLOW.md claimed
+      # this guard "reports no phase outside the target"; six phases are outside
+      # the sentence-length target right now and the guard exits 0, which is its
+      # documented contract. Corrected there, and the contract is now asserted by
+      # a control rather than left to be inferred from an exit code.
+      - name: Test readability guard controls
+        run: node scripts/test-audit-readability.mjs
       # A comprehension audit found defects no existing guard could see: text
       # sending the reader to a "Part 5" that is really Part 4, or to a "Part 8"
       # that does not exist at all. Those are arithmetic on the text, so a script

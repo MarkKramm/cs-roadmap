@@ -8,6 +8,38 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### Added
 
+- **`scripts/test-audit-readability.mjs` — 14 controls for the two-threshold readability guard, and a
+  documentation claim that had been false for several passes.** The guard has two thresholds and one
+  gate: the 110-word paragraph ceiling fails the build, while the 90-word editorial target and the
+  three averages (avg paragraph ≤ 45, avg sentence ≤ 18, ≥ 8 tables/phase) are reported. Nothing had
+  established that any of them could fire, or which side of that line any of them sat on. Wired into
+  CI.
+  - **The guard is sound; the claim describing it was not.** `docs/WORKFLOW.md` said this guard
+    *"reports no phase outside the target."* **Six phases are outside it right now** — IT/cyber/
+    advance phases at 19–21 words per sentence, all on average sentence length — and the guard exits
+    0. That is its documented and deliberate contract, so the checklist item was the defect, and it is
+    now corrected to say what the guard actually does and why (a 19-word average sentence is worth
+    fixing and is not a broken build). A control plants an over-target average and **requires exit 0**,
+    so the contract is asserted rather than left to be inferred from an exit code. Were the guard ever
+    "fixed" to gate its averages, that control fails.
+  - **Both boundaries measured at three points, because `>` versus `>=` is a claim worth pinning.**
+    110 words passes and 111 fails; 90 is not reported and 91 is. A guard that fired *at* its own
+    threshold would pass a two-point test and fail this one.
+  - **Four controls assert that non-prose is not a paragraph**: a fenced code block, a wide table, a
+    long list item and a blockquote. A guard that fails on a wide table gets switched off, which loses
+    the one case worth catching.
+  - **The `^0[1-9]-` regression is guarded in the direction that matters** — a 130-word wall in a phase
+    10 file must fail the build — and `00-overview.md` is asserted excluded, since a strategy document
+    has no lesson region to measure.
+  - **The track average must come from the path.** The guard's header records this bug: the summary
+    hardcoded the original eight cyber phase names, so the six modules added as 09–14 were averaged
+    into IT. A control now puts a phase in the advance track and requires the `ADVANCE` line to move.
+  - **The fixture was at fault twice more, and the file records why.** A full stop written as its own
+    whitespace-separated token made a "90-word" paragraph 98 words, so both boundary controls failed
+    against a guard doing exactly the right thing; and the first EDITORIAL expectation asserted the
+    opposite of the rule (`>=` rather than `>`). **Sixteen fixture-side errors across the three guards
+    in this work, against two guard-side defects.**
+
 - **`scripts/test-audit-content.mjs` — 26 controls for the oldest guard in the repository, and the
   first one found a live defect on its first run.** `audit-content.mjs` has 20 defect classes, gates
   the `content` CI job, and had **no controls at all**: nothing proved that a defect of the class it

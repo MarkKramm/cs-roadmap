@@ -180,7 +180,14 @@ The smoke test renders the lesson for every phase and asserts that the table and
 
 - [ ] `node scripts/lint-content.mjs` reports no issues.
 - [ ] `node scripts/audit-lesson-ast.mjs` reports no content loss (for any change touching the parser or a lesson).
-- [ ] `node scripts/audit-readability.mjs` reports no phase outside the target.
+- [ ] `node scripts/audit-readability.mjs` exits 0 — i.e. no paragraph exceeds the **110-word
+  ceiling**. Read its two average-based targets as reporting, not gating: it prints
+  "avg para <= 45 words, avg sentence <= 18, at least 8 tables/phase" and lists every
+  phase outside them, and **six phases are outside the sentence target right now** (all
+  in the advance track, 19–21 words per sentence) with the guard exiting 0. That is the
+  documented contract, asserted by a control in `test-audit-readability.mjs` — do not
+  "fix" a failing average by gating it without first clearing the backlog, which is
+  what happened to the paragraph ceiling when it moved from 150 to 110.
 - [ ] `node scripts/audit-refs.mjs` reports no broken cross-reference (for any change to a phase file).
 - [ ] `node scripts/audit-time-budget.mjs` reports `findings: 0` (for any change to a phase file or a track overview).
 - [ ] `node scripts/audit-changelog.mjs` reports `findings: 0`, and `node scripts/test-audit-changelog.mjs` reports `13 passed, 0 failed` (after any edit to `CHANGELOG.md`, and after any edit to either script).
