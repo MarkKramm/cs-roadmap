@@ -290,10 +290,31 @@ that already exists, and it did so for a version of this file's whole lifetime.
 
 - **Icon set.** None. Components use text labels and a single check glyph.
 - **Animation library.** None. Transitions are CSS-only and under 150ms, per the anti-patterns above. A `prefers-reduced-motion` block zeroes the duration for readers who ask the system for less motion.
-- ~~**A glossary.**~~ **Shipped on 2026-10-02, partially, and the way it shipped matters more than that it did.** `career-roadmaps/shared/GLOSSARY.md` holds **47 verified entries**, is rendered in the site beside the other shared documents, and is listed second in `scripts/shared-content.mjs` because it is the one a reader reaches for by name rather than in order.
+- ~~**A glossary.**~~ **Shipped on 2026-10-02, partially, and the way it shipped matters more than that it did.** `career-roadmaps/shared/GLOSSARY.md` holds **52 verified entries**, is rendered in the site beside the other shared documents, and is listed second in `scripts/shared-content.mjs` because it is the one a reader reaches for by name rather than in order.
 
   This entry previously said the glossary needed "new build tooling to produce the data first", which was the wrong blocker. The tooling was straightforward; **the extraction was not trustworthy.** `scripts/extract-glossary-candidates.mjs` proposes an expansion for **64** of the **309** domain terms, and a large minority are confidently wrong — `KQL` came back as "Microsoft Sentinel and Defender XDR", `ICS` as "The incident command system", `CSF` as "task 7". A glossary that says those is worse than no glossary, because it converts a term a beginner can look up into a wrong fact they repeat in an interview.
 
-  So every entry was checked by hand against the line it came from, **17 were rejected with the reason recorded in the document**, and the rest are quoted from the corpus verbatim — including its spelling, so that a citation can be checked against its own source. `scripts/audit-glossary.mjs` fails the build if an entry's expansion is no longer at the line it cites, and `test-audit-glossary.mjs` holds that to 12 controls.
+  So every entry was checked by hand against the line it came from, and **the rest are quoted from the
+  corpus verbatim** — including its spelling, so that a citation can be checked against its own source.
+  `scripts/audit-glossary.mjs` fails the build if an entry's expansion is no longer at the line it cites, and
+  `test-audit-glossary.mjs` holds that to 12 controls.
 
-  **What remains open, stated rather than implied:** coverage is **15%**, and the document accounts for the other 262 by reason — no expansion findable, an expansion found and wrong, or a gloss where an expansion belongs. Fixing group 2 is content work on the *source lines*, not glossary work. Coverage is deliberately not gated: refusing the 47 verified entries or inventing the other 262 are both worse than a partial glossary that is true.
+  **The rejection list was itself wrong, and re-checking it is the more useful half of this entry.** The first
+  version of `GLOSSARY.md` listed **17 terms** as left out because "the corpus implies something wrong", and it
+  rejected `ICS` on the grounds that "`ICS` is Industrial Control Systems" — when `incident-command:199` expands
+  it correctly as *incident command system*. Checking each rejection against the corpus on 2026-10-03 found
+  **16 of the 17 were not corpus defects at all**. Most were **artifacts of the extractor**, which matches
+  whatever follows a term *on the same line*: `ATT&CK` yielded a spurious `CK`, a port table yielded
+  `Port 445`, and a cross-reference yielded `task 6`. Four terms were expanded correctly elsewhere in the
+  corpus and are now entries — `BSOD`, `CSF`, `CSRF` and `ICS`. **One was a real defect and is fixed**:
+  `threat-hunting.md` headed a section `KQL — Microsoft Sentinel and Defender XDR`, which reads as though
+  the product were the expansion, and left the term unexplained everywhere it is used.
+
+  **The rule restored:** an unexplained rejection is a claim about the corpus, so it has to be checked against
+  the corpus before it ships. That table had asserted fourteen false things about this curriculum, in the one
+  document whose entire argument is that a reader can trust what a source says.
+
+  **What remains open, stated rather than implied:** coverage is **17%**, and the document accounts for the other 257 by reason — no expansion findable, an expansion proposed and rejected, or a gloss where an expansion belongs. Only one of
+  those was ever a corpus defect, so most of this backlog is extractor work rather than writing. Coverage is
+  deliberately not gated: refusing the 52 verified entries or inventing the other 257 are both worse than a
+  partial glossary that is true.

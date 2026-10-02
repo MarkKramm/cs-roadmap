@@ -60,13 +60,15 @@ real defects rather than confirming what was already believed:
   did not exist.
 
 **The glossary is shipped, partially, and says so.**
-`career-roadmaps/shared/GLOSSARY.md` holds **47 verified entries of 309 domain
-terms (15%)** and is rendered in the site as the seventh shared document. It is
+`career-roadmaps/shared/GLOSSARY.md` holds **52 verified entries of 309 domain
+terms (17%)** and is rendered in the site as the seventh shared document. It is
 partial **by design**: the extractor proposes an expansion for 64 terms and a large
-minority are confidently wrong (`KQL` → "Microsoft Sentinel and Defender XDR",
-`ICS` → "The incident command system"). 17 were rejected with the reason recorded
-in the document, because a rejected candidate is a place where the **corpus**
-currently implies something wrong. `scripts/audit-glossary.mjs` fails the build if
+minority are confidently wrong (`KQL` → "Microsoft Sentinel and Defender XDR").
+Re-checking all 17 rejections against the corpus on 2026-10-03 found **16 of 17 were not
+corpus defects at all** — most were artifacts of the extractor matching whatever follows a
+term on the same line. Five terms were added as entries, the one real defect (`KQL`, whose
+heading paired it with the products it runs in) was fixed in the corpus, and the table now
+attributes each rejection to the extractor or the corpus correctly. `scripts/audit-glossary.mjs` fails the build if
 an entry's expansion is no longer at the line it cites. Coverage is deliberately not
 gated. **D-080.**
 

@@ -2,6 +2,24 @@
 
 ### Added
 
+- **The glossary's rejection table was wrong about 16 of its 17 rows, and one entry it excluded was correct.** It claimed all 17
+  rejected terms were places where "the corpus implies something wrong", and rejected `ICS` on the grounds that "`ICS` is Industrial
+  Control Systems" — when `incident-command:199` expands it correctly as *incident command system*. Checking each rejection against the
+  corpus found **only `KQL` was a real corpus defect**; the rest were **artifacts of the extractor**, which matches whatever follows a
+  term *on the same line*, so `ATT&CK` yielded a spurious `CK`, a port table yielded `Port 445`, and a cross-reference yielded `task 6`.
+
+  **Fixed:** `threat-hunting.md:445` was headed `KQL — Microsoft Sentinel and Defender XDR`, which reads as though the product were the
+  expansion and left the term unexplained wherever it is used. It now reads `KQL (Kusto Query Language) in Microsoft Sentinel and
+  Defender XDR`. **Added:** `BSOD`, `CSF`, `CSRF`, `ICS` and `KQL` as entries, taking the glossary from **47 to 52 of 309**
+  (**17%**), each citing the line the corpus actually expands it on — `BSOD` is mentioned 220 lines before it is expanded, and the
+  entry says so. The rejection table now attributes each row to the extractor or the corpus, and the `ICS` entry notes the sense collision
+  with Industrial Control Systems rather than pretending one meaning is the only one.
+
+  **Why it matters beyond the five terms.** A reader of that table was being told fourteen untrue things about this curriculum, in the one
+  document whose entire argument is that a reader can trust what a source says. The rule restored: *an unexplained rejection is a claim
+  about the corpus, so it has to be checked against the corpus before it ships.* I asserted a count — "17 places" — from a table I had
+  written myself, which is the exact failure this repository's figure guards exist to prevent.
+
 - **`career-roadmaps/shared/GLOSSARY.md` — 47 verified entries, and the reason it is 47 and not 309
   matters more than the number.** `docs/DESIGN-SYSTEM.md` listed a glossary as the one open item
   blocked on "new build tooling to produce the data first". That was the wrong blocker. The tooling was

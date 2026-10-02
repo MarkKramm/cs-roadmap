@@ -442,7 +442,7 @@ Take a single concrete hypothesis and express it in the formats you will actuall
 
 This maps to ATT&CK **T1218 — System Binary Proxy Execution** and its sub-techniques T1218.011 (Rundll32), T1218.010 (Regsvr32), and T1218.005 (Mshta).
 
-#### KQL — Microsoft Sentinel and Defender XDR
+#### KQL (Kusto Query Language) in Microsoft Sentinel and Defender XDR
 
 ```kql
 // Hunt HUNT-2026-021 — T1218 System Binary Proxy Execution

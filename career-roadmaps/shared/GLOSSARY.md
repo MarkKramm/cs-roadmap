@@ -13,7 +13,7 @@ finding it meant searching for a phrase you did not yet know.
 ## What this is, and what it is not
 
 **This is a starter set, and it is deliberately partial.** It holds the
-**47 entries** below, of the 309 domain terms the curriculum
+**52 entries** below, of the 309 domain terms the curriculum
 uses. The rest are not here, and the reason is worth stating rather than leaving a
 reader to assume the absence means a term is unimportant.
 
@@ -65,12 +65,24 @@ The software a recruiter uses to record, filter and progress applications.
 
 ### B
 
+**BSOD** — Blue Screen of Death.
+Formally a *bug check*: Windows saying it cannot safely continue. The stop code names the driver or subsystem that failed, which is what makes a BSOD useful rather than just alarming.
+*Sourced from `it-roadmap/01-phase-computer-fundamentals.md:410`.*
+
 **BEC** — Business email compromise.
 An attack where the target is the person, not the machine: the attacker writes as a trusted colleague or a supplier and asks for money or credentials.
 *Sourced from `cybersec-roadmap/01-phase-foundations.md:278`.*
 
 
 ### C
+
+**CSRF** — Cross-site request forgery.
+An attack that makes a logged-in victim's browser send a request the victim never intended, so the server acts on their authority. Distinct from XSS: no script needs to run.
+*Sourced from `cybersec-roadmap/14-phase-web-app-security.md:44`.*
+
+**CSF** — Cybersecurity Framework.
+NIST's framework, used here to structure programme functions rather than to gate anything. Cited from the resource list, because the phases write `NIST CSF` without spelling it out.
+*Sourced from `cybersec-roadmap/01-phase-foundations.md:765`.*
 
 **CIDR** — Classless Inter-Domain Routing.
 The notation that writes a network range as a prefix, which is why an address block can be split without renumbering.
@@ -123,6 +135,10 @@ The three functions that decide what is allowed, what could go wrong, and whethe
 
 ### I
 
+**ICS** — incident command system.
+The structure emergency services use to run a response, borrowed here for security incidents. **Note the collision**: `ICS` also means Industrial Control Systems elsewhere in this curriculum, and the two are unrelated — which one a reader meets first depends on the track they are on.
+*Sourced from `advance-roadmap/03-phase-incident-command.md:199`.*
+
 **IDOR** — Insecure Direct Object Reference — is the vulnerability where.
 A vulnerability where a request references a record by its own identifier and the server does not check that the caller is allowed that record.
 *Sourced from `cybersec-roadmap/03-phase-security-fundamentals.md:633`.*
@@ -148,6 +164,10 @@ A signed, self-contained token a client stores and presents, so the server does 
 
 
 ### K
+
+**KQL** — Kusto Query Language.
+The query language Microsoft Sentinel and Defender XDR run, not the products themselves. The heading introducing it previously read `KQL — Microsoft Sentinel and Defender XDR`, which a reader could reasonably take for the expansion; corrected in the corpus on 2026-10-03.
+*Sourced from `advance-roadmap/02-phase-threat-hunting.md:445`.*
 
 **KEV** — Known Exploited Vulnerabilities.
 CISA's list of flaws with confirmed real-world exploitation. A patch for one of these is urgent in a way an equal severity score on an unused path is not.
@@ -296,39 +316,53 @@ Getting script to run in another user's browser, in the context of a site they t
 
 ## What is not here, and why
 
-**262 of the 309 domain terms have no entry**, for three different
+**257 of the 309 domain terms have no entry**, for three different
 reasons, and they are worth separating because only two are fixable by writing.
 
 1. **No expansion could be found** — 248 terms. Usually the term is used in prose
    without ever being spelled out. That is the readability problem this document
    exists to relieve, not a glossary problem.
-2. **An expansion was found and it was wrong** — 17 terms, below. Fixing
-   these properly means correcting the **source line** in the phase, so the
-   curriculum stops implying the wrong thing, or sourcing the real expansion from a
-   primary reference. Both are content work rather than tooling work.
-3. **The corpus gives a gloss, not an expansion** — part of group 2. `CISA (audit)`
-   is a useful gloss and not a certification's name; a human can adjudicate these
-   quickly, and the extractor cannot, because the information is not on the line.
+2. **An expansion was proposed and it was rejected** — 16 terms, itemised below.
+   Most were **extractor artifacts**, not corpus defects: the extractor matches
+   whatever follows a term *on the same line*, so `ATT&CK` yields a spurious `CK`
+   and a cross-reference yields `task 6`. One was a genuine corpus defect, and it
+   is fixed.
+3. **The corpus gives a gloss, not an expansion** — `CISA (audit)` is a useful gloss
+   and not a certification's name. A human can adjudicate these quickly; the
+   extractor cannot, because the information is not on the line.
 
-| Term | Why it was left out |
+**This breakdown was wrong when first written, and the error is worth recording.**
+It claimed all 17 rejections were corpus defects, and rejected `ICS` on the grounds
+that "`ICS` is Industrial Control Systems" — when `incident-command:199` expands it
+correctly as *incident command system*. Checking each rejection against the corpus on
+2026-10-03 found **16 of 17 were not corpus defects at all**.
+
+| Term | Why it was left out — and what was actually true |
 |---|---|
-| `BSOD` | the corpus glosses it as 'Blue screens'; the full form is not on the line |
-| `BSSID` | truncated mid-sentence |
-| `CISA` | a gloss ('audit'), not the certification's name |
-| `CISM` | a gloss ('management') |
-| `CK` | not a real term on that line; it extracted an ATT&CK technique id |
-| `CRISC` | a gloss ('risk') |
-| `CSF` | extracted 'task 7', a cross-reference |
-| `CSRF` | extracted 'task 6', a cross-reference |
-| `ICS` | extracted the wrong sense entirely — ICS is Industrial Control Systems |
-| `IMAP` | a gloss ('mail') |
-| `KQL` | extracted a usage context, not an expansion |
-| `MDM` | extracted a question fragment |
-| `MSP` | extracted a lower-case plural, not the expansion |
-| `OSCP` | extracted a description ('the demanding industry benchmark') |
-| `PSU` | extracted 'The power supply'; the unit name is not on the line |
-| `SMB` | extracted 'Port 445', which is a port number and not an expansion |
-| `SPL` | extracted 'Splunk'; the language's own name is not on the line |
+| `KQL` | **a real corpus defect, now fixed.** It appeared only as the heading `KQL — Microsoft Sentinel and Defender XDR`, never expanded anywhere. The heading now reads `KQL (Kusto Query Language) in Microsoft Sentinel and Defender XDR`, and the term has an entry. |
+| `ICS` | **a correct expansion that was wrongly rejected.** This table claimed the wrong sense; `incident-command:199` expands it correctly as *incident command system*. `ICS` also means Industrial Control Systems elsewhere in the curriculum — both senses are real, which is why the entry says which is which. |
+| `BSOD` | correct, but 220 lines from the first mention — expanded as Blue Screen of Death at `computer-fundamentals:410`. Now an entry. |
+| `CSF` | `task 7` is a cross-reference, not a phrase. Expanded at `foundations:765`. Now an entry. |
+| `CSRF` | `task 6` is a cross-reference, not a phrase. Expanded at `web-app-security:44`. Now an entry. |
+| `CK` | **extractor artifact.** No literal `CK` exists in the corpus — it matched the tail of `ATT&CK`. |
+| `CISA` | **extractor artifact.** `audit` is a gloss in a certification list, not an attempted expansion. |
+| `CISM` | **extractor artifact**, on the same line as `CISA`. |
+| `CRISC` | **extractor artifact**, on the same line as `CISA`. |
+| `IMAP` | **extractor artifact** — a port-table gloss. |
+| `MSP` | **extractor artifact** — a lower-case plural in prose. |
+| `SMB` | **extractor artifact** — line 275 is a *port table*, which never claimed 445 was an expansion. |
+| `SPL` | **extractor artifact** — a vendor name, not the language's name. |
+| `PSU` | **extractor artifact.** |
+| `OSCP` | **extractor artifact** — a description, not an expansion. |
+| `BSSID` | **extractor artifact** — the capture ran past the end of the sentence. |
+| `MDM` | **extractor artifact** — it captured a heading phrased as a question. |
+
+**The rule this restores.** An unexplained rejection is a claim about the corpus, so
+it has to be checked against the corpus before it ships. This table had asserted
+fourteen false things about the curriculum — in the document whose whole argument is
+that a reader can trust what a source says. It is now wrong in the opposite
+direction: fourteen rejections that looked like content defects were my own regex's,
+and only `KQL` was ever the corpus's fault.
 
 `scripts/audit-glossary.mjs` reports all three groups on every run, so the gap is
 a number that moves rather than a claim in prose.
