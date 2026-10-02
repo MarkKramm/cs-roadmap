@@ -30,8 +30,8 @@ correcting it would destroy the record.
 |---|---|
 | Branch | `main`, clean tree, **fully pushed**, in sync with `origin/main` as of **2026-10-02** |
 | That pass | `ffe8445` (worklist and the 8 classes it needed), `50e52f8` (Sigma + the new guard), `ea2d55b` (ATT&CK), `77fe6dd` (queries), `e333ce9` (the 508-row result) |
-| Since then | **Everything from `7a3ff17` to `90e052e`** — 22 commits, listed newest-first in `git log 090c695..HEAD`. Deliberately a range rather than a list: the two previous versions of this row enumerated commits and were both wrong, because a list goes stale the moment the next commit lands. The three that change what a reader should do next are `04206b5` (a guard replaced), `0841f22` (the last guards, and a suite that dirtied the corpus), and `90e052e` (the glossary) |
-| Guards | **27 content guards, 27 control suites, 16 site suites — all green, re-run 2026-10-02.** Every content guard now has a controls suite; the 26th and 27th are `audit-markdown-render.mjs` (replaced, see below) and `audit-glossary.mjs`. The 18th through 27th control suites came from the 2026-10-01/02 work, and **writing them found four real defects** — see **What is settled** |
+| Since then | **Everything from `7a3ff17` to `b248bc7`** — 25 commits, listed newest-first in `git log 090c695..HEAD`. Deliberately a range rather than a list: the two previous versions of this row enumerated commits and were both wrong, because a list goes stale the moment the next commit lands. The three that change what a reader should do next are `04206b5` (a guard replaced), `0841f22` (the last guards, and a suite that dirtied the corpus), and `90e052e` (the glossary) |
+| Guards | **28 content guards, 28 control suites, 16 site suites — all green, re-run 2026-10-02.** Every content guard now has a controls suite; the 26th and 27th are `audit-markdown-render.mjs` (replaced, see below) and `audit-glossary.mjs`. The 18th through 27th control suites came from the 2026-10-01/02 work, and **writing them found four real defects** — see **What is settled** |
 | Browser suite | **152 checks, 0 failed — re-run 2026-09-30 against a fresh `dist/`, driving local Edge over CDP.** Four of the 152 are new and were added after a screenshot found a defect all 148 had missed: the per-section done control was `opacity: 0` and drawn in a border at 1.47:1, so a done section was 5.7× more visible than an undone one. **Nothing in the suite referenced `.lesson__done` at all** — every check asked whether the control works, none asked whether a reader can see it. The new checks assert perceptibility in a real engine and were proven falsifiable by reintroducing each defect in turn. **This row previously said the suite could not run here at all, and the reason it gave was wrong.** It said "Playwright and Chromium are not installed", but `browser-check.mjs` never needed Playwright: it imports only `node:child_process`, `node:fs`, `node:os` and `node:path`, and drives whichever Chromium-family browser it finds on the machine over the DevTools protocol using Node 24's global `WebSocket`. Playwright was **deliberately declined** under the zero-new-dependencies rule (see **D-023** in `docs/DECISIONS.md` — a few hundred megabytes of browser download for about twenty CDP commands). Edge was installed here the whole time, at the first path the script probes. **The cost of the wrong reason was that the one unverified part of the product was written off as unverifiable**, when it took one command to check. |
 | All three tracks | IT 225 rows, cyber 411 rows, advance 508 rows — **1,144 recorded claim rows** |
 
@@ -64,7 +64,7 @@ real defects rather than confirming what was already believed:
 terms (17%)** and is rendered in the site as the seventh shared document. It is
 partial **by design**: the extractor proposes an expansion for 64 terms and a large
 minority are confidently wrong (`KQL` → "Microsoft Sentinel and Defender XDR").
-Re-checking all 17 rejections against the corpus on 2026-10-03 found **16 of 17 were not
+Re-checking all 17 rejections against the corpus on 2026-10-02 found **16 of 17 were not
 corpus defects at all** — most were artifacts of the extractor matching whatever follows a
 term on the same line. Five terms were added as entries, the one real defect (`KQL`, whose
 heading paired it with the products it runs in) was fixed in the corpus, and the table now
@@ -131,16 +131,27 @@ proves it.
 **Three bodies of work remain.** None is urgent, and all three are recorded so a
 new session does not have to rediscover them.
 
-1. **The glossary backlog — 262 domain terms with no entry.** 248 have no findable
-   expansion; **17 have one that is wrong and should be fixed at the source line**;
-   the rest are glosses where an expansion belongs. The 17 are the best-value
-   content work available, because the corpus is currently misleading readers in 17
-   places and fixing a phase is better than annotating the mistake.
-2. **Two rot classes still unguarded** — ATT&CK revoked IDs and tactic slugs, and
-   NIST *retitles* (`audit-nist-current.mjs` catches *withdrawn* only; SP 800-50
-   Rev. 1 was retitled in September 2024 and stayed live). Both need a dated
-   snapshot with its own expiry, which the handoff already names as its own piece
-   of work. Do not add a version-free guard; that is D-066's shape.
+1. **The glossary backlog — 257 domain terms with no entry.** Most have no findable expansion;
+   a smaller group had one proposed and it was **rejected**, and on re-checking all 17 rejections against the
+   corpus only **one** (`KQL`) turned out to be a real corpus defect — the rest were artifacts of the
+   extractor matching whatever follows a term on the same line. **Do not go "fixing" the other 16**; they were
+   never broken. The remainder are glosses where an expansion belongs (`CISA (audit)`), which a human can
+   adjudicate and the extractor cannot, because the information is not on the line.
+
+2. ~~**Two rot classes still unguarded**~~ — **CLOSED on 2026-10-02 in `b248bc7`.** Both are now guarded, and
+   they needed opposite solutions, which is recorded as **D-081**:
+   - **ATT&CK** (`audit-attack-refs.mjs`) reads a **committed, dated snapshot** (`attack-snapshot.json`). A revoked
+     ATT&CK technique is *deleted* from the dataset, so "not found" means "retired" and also means "the network
+     failed" — indistinguishable live, and a live check would cry wolf on network noise. **Expiry is enforced**:
+     past `expiresOn` the guard fails, because an expired snapshot is a check that cannot fail.
+   - **NIST retitles** were added to the existing `audit-nist-current.mjs`, which could see *withdrawal* but not
+     *renaming*. SP 800-50 Rev. 1 was retitled "Building a Cybersecurity and Privacy Learning Program" — and
+     nothing about a renamed document is broken, so only comparing the name the corpus teaches against the name on
+     the page finds it. This one stays **live**, because NIST keeps the page.
+   - **Measured, and both classes turned out CLEAN**: 35 ATT&CK IDs all live, 10 NIST publications none withdrawn
+     and none retitled. Nothing was fixed because nothing was broken; what was added is the ability to notice.
+   - **Rebuild the ATT&CK snapshot before 2026-11-13** —
+     after that the guard fails by design.
 3. **Routing (D-007)** — views are local state, so there is no URL and no history
    entry, and refreshing or sharing a link loses the reader's place in a 495,000-word
    curriculum. This reverses a recorded decision, so it is deliberately last.

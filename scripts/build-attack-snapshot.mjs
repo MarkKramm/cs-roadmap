@@ -27,7 +27,7 @@
 //      a snapshot that has fallen behind shows up as "an ID in the snapshot the corpus
 //      no longer uses" rather than sitting unnoticed.
 //
-// WHAT WAS MEASURED WHEN THIS WAS FIRST BUILT (2026-10-03)
+// WHAT WAS MEASURED WHEN THIS WAS FIRST BUILT (2026-10-02)
 //
 //   35 distinct technique IDs, every one live.
 //   15 active enterprise tactics; "Defense Evasion" is NOT among them -- ATT&CK v19

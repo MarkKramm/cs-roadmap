@@ -18,7 +18,7 @@ Two consequences, since this has caused real confusion:
 
 ## D-081 — Committed snapshot or live read, decided by which failure mode the source has
 
-- **Date:** 2026-10-03
+- **Date:** 2026-10-02
 - **Status:** Accepted
 
 - **Context:** Two rot classes were unguarded. ATT&CK technique IDs (a retired one is
@@ -52,7 +52,7 @@ Two consequences, since this has caused real confusion:
      slow decay.
 - **Why a snapshot may record an absence:** ATT&CK revoked objects are *removed*, so
   "this ID is not in the dataset" IS the revocation signal — there is no flag to read.
-  Measured 2026-10-03: zero revoked techniques remain in the dataset, which is consistent
+  Measured 2026-10-02: zero revoked techniques remain in the dataset, which is consistent
   with removal rather than marking. The builder therefore fails if it resolves fewer than
   half the corpus's IDs, because "everything is unknown" is far more likely a broken
   reader than a fictional curriculum — and that is exactly the failure a mistyped STIX

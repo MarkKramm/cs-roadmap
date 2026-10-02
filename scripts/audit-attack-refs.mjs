@@ -23,7 +23,7 @@
 //      `advance-roadmap/01-phase-detection-at-scale.md:1165` that ATT&CK v19 split
 //      Defense Evasion into Stealth and Defense Impairment. That is a claim about a
 //      taxonomy, and it rots silently -- the sentence stays true-looking while the
-//      tactic comes back. Measured 2026-10-03: the claim is CORRECT. "Defense Evasion"
+//      tactic comes back. Measured 2026-10-02: the claim is CORRECT. "Defense Evasion"
 //      is not an active tactic, "Stealth" (TA0005) and "Defense Impairment" (TA0112)
 //      both are. The corpus also says its own counts were "not recomputed against the
 //      split", which is the honest framing and is why the check is on the NAME, not

@@ -166,7 +166,7 @@ A signed, self-contained token a client stores and presents, so the server does 
 ### K
 
 **KQL** — Kusto Query Language.
-The query language Microsoft Sentinel and Defender XDR run, not the products themselves. The heading introducing it previously read `KQL — Microsoft Sentinel and Defender XDR`, which a reader could reasonably take for the expansion; corrected in the corpus on 2026-10-03.
+The query language Microsoft Sentinel and Defender XDR run, not the products themselves. The heading introducing it previously read `KQL — Microsoft Sentinel and Defender XDR`, which a reader could reasonably take for the expansion; corrected in the corpus on 2026-10-02.
 *Sourced from `advance-roadmap/02-phase-threat-hunting.md:445`.*
 
 **KEV** — Known Exploited Vulnerabilities.
@@ -335,7 +335,7 @@ reasons, and they are worth separating because only two are fixable by writing.
 It claimed all 17 rejections were corpus defects, and rejected `ICS` on the grounds
 that "`ICS` is Industrial Control Systems" — when `incident-command:199` expands it
 correctly as *incident command system*. Checking each rejection against the corpus on
-2026-10-03 found **16 of 17 were not corpus defects at all**.
+2026-10-02 found **16 of 17 were not corpus defects at all**.
 
 | Term | Why it was left out — and what was actually true |
 |---|---|

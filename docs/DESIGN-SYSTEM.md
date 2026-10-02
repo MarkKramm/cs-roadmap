@@ -302,7 +302,7 @@ that already exists, and it did so for a version of this file's whole lifetime.
   **The rejection list was itself wrong, and re-checking it is the more useful half of this entry.** The first
   version of `GLOSSARY.md` listed **17 terms** as left out because "the corpus implies something wrong", and it
   rejected `ICS` on the grounds that "`ICS` is Industrial Control Systems" — when `incident-command:199` expands
-  it correctly as *incident command system*. Checking each rejection against the corpus on 2026-10-03 found
+  it correctly as *incident command system*. Checking each rejection against the corpus on 2026-10-02 found
   **16 of the 17 were not corpus defects at all**. Most were **artifacts of the extractor**, which matches
   whatever follows a term *on the same line*: `ATT&CK` yielded a spurious `CK`, a port table yielded
   `Port 445`, and a cross-reference yielded `task 6`. Four terms were expanded correctly elsewhere in the
