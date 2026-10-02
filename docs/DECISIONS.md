@@ -16,6 +16,51 @@ Two consequences, since this has caused real confusion:
 - **A phrase like "Current state:" inside a record means the state at that record's date.** It
   is not a claim about today, and D-024's instance (29 phases) has been overtaken twice since.
 
+## D-081 — Committed snapshot or live read, decided by which failure mode the source has
+
+- **Date:** 2026-10-03
+- **Status:** Accepted
+
+- **Context:** Two rot classes were unguarded. ATT&CK technique IDs (a retired one is
+  removed from the dataset) and NIST publication titles (a renamed one keeps its page).
+  The obvious implementation for both is a live fetch, and for one of them that is
+  actively wrong.
+- **Decision:** **The storage follows the failure mode.**
+  - **`audit-attack-refs.mjs` reads a committed, dated snapshot.** A revoked ATT&CK
+    technique is *deleted* from the dataset, so "not found" means "retired" and also means
+    "the network failed". A live check cannot tell those apart without failing on
+    infrastructure noise, which trains people to ignore a guard. So the data is committed.
+  - **`audit-nist-current.mjs` stays live.** A retitled publication's page stays, its URL
+    resolves, and the title on it changes. A live read sees that immediately. This is the
+    SAME guard, extended — not a second network guard — because both classes need the same
+    fetch, the same plain-text parse, and the same UNCHECKED convention. A second guard
+    would refetch every publication and create two guards that could disagree about one
+    page.
+- **The cost of committed data is that it goes stale, and three things prevent that
+  becoming a fossil:**
+  1. **Expiry is ENFORCED, not remembered.** Past `expiresOn` the guard fails. An expired
+     snapshot is a check that *cannot fail*, so it reports success over an unexamined
+     subject — worse than no guard, because a reader believes it ran.
+  2. **Expiry is a finding, not an exit.** The first version called `process.exit` on
+     expiry before printing anything else, so a reader who had *both* an expired snapshot
+     and a retired ID was told to rebuild the snapshot — and then met the retired ID again
+     on the next run, having been sent away from the real problem. Both are now reported
+     together, with the note that the findings were found against expired data.
+  3. **The snapshot is cross-checked against the corpus in BOTH directions.** A row for an
+     ID the curriculum no longer cites fails as `STALE_SNAPSHOT_ROW`, so the file cannot
+     accumulate entries nobody looks up, and drift shows up by name rather than as a
+     slow decay.
+- **Why a snapshot may record an absence:** ATT&CK revoked objects are *removed*, so
+  "this ID is not in the dataset" IS the revocation signal — there is no flag to read.
+  Measured 2026-10-03: zero revoked techniques remain in the dataset, which is consistent
+  with removal rather than marking. The builder therefore fails if it resolves fewer than
+  half the corpus's IDs, because "everything is unknown" is far more likely a broken
+  reader than a fictional curriculum — and that is exactly the failure a mistyped STIX
+  object type produced (`x-mitre-attack-pattern` instead of `attack-pattern`, resolving
+  0 of 35 while exiting 0).
+- **Consequence:** a network-dependent guard and a snapshot-dependent guard now coexist,
+  which is not an inconsistency to be resolved later — it is the decision.
+
 ## D-080 — A glossary entry must be quoted from its source, never paraphrased
 
 - **Date:** 2026-10-02

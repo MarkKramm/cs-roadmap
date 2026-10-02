@@ -1,0 +1,340 @@
+{
+  "_why": "Dated snapshot of the ATT&CK facts the curriculum asserts. Committed because a revoked ATT&CK technique is REMOVED from the dataset rather than marked, so absence is the only signal and absence is indistinguishable from a network failure. Read by scripts/audit-attack-refs.mjs, which fails once this file is past takenOn + expiryDays.",
+  "source": "https://raw.githubusercontent.com/mitre-attack/attack-stix-data/master/enterprise-attack/enterprise-attack.json",
+  "takenOn": "2026-10-02",
+  "expiryDays": 42,
+  "expiresOn": "2026-11-13",
+  "datasetId": "bundle--6198013c-6f02-42a4-9713-38ea1301a1aa",
+  "counts": {
+    "corpusIds": 35,
+    "inDataset": 35,
+    "unknown": [],
+    "retired": [],
+    "tactics": 15,
+    "activeTactics": 15
+  },
+  "techniques": {
+    "T1003": {
+      "name": "OS Credential Dumping",
+      "revoked": false,
+      "deprecated": false,
+      "uses": 1,
+      "firstUse": "cybersec-roadmap/10-phase-detection-engineering.md:938"
+    },
+    "T1003.001": {
+      "name": "LSASS Memory",
+      "revoked": false,
+      "deprecated": false,
+      "uses": 7,
+      "firstUse": "advance-roadmap/02-phase-threat-hunting.md:1161"
+    },
+    "T1021.002": {
+      "name": "SMB/Windows Admin Shares",
+      "revoked": false,
+      "deprecated": false,
+      "uses": 2,
+      "firstUse": "advance-roadmap/02-phase-threat-hunting.md:221"
+    },
+    "T1036": {
+      "name": "Masquerading",
+      "revoked": false,
+      "deprecated": false,
+      "uses": 1,
+      "firstUse": "cybersec-roadmap/03-phase-security-fundamentals.md:387"
+    },
+    "T1041": {
+      "name": "Exfiltration Over C2 Channel",
+      "revoked": false,
+      "deprecated": false,
+      "uses": 1,
+      "firstUse": "cybersec-roadmap/10-phase-detection-engineering.md:941"
+    },
+    "T1053": {
+      "name": "Scheduled Task/Job",
+      "revoked": false,
+      "deprecated": false,
+      "uses": 1,
+      "firstUse": "cybersec-roadmap/10-phase-detection-engineering.md:935"
+    },
+    "T1053.005": {
+      "name": "Scheduled Task",
+      "revoked": false,
+      "deprecated": false,
+      "uses": 11,
+      "firstUse": "advance-roadmap/02-phase-threat-hunting.md:333"
+    },
+    "T1055": {
+      "name": "Process Injection",
+      "revoked": false,
+      "deprecated": false,
+      "uses": 4,
+      "firstUse": "advance-roadmap/01-phase-detection-at-scale.md:633"
+    },
+    "T1059": {
+      "name": "Command and Scripting Interpreter",
+      "revoked": false,
+      "deprecated": false,
+      "uses": 10,
+      "firstUse": "cybersec-roadmap/10-phase-detection-engineering.md:553"
+    },
+    "T1059.001": {
+      "name": "PowerShell",
+      "revoked": false,
+      "deprecated": false,
+      "uses": 35,
+      "firstUse": "cybersec-roadmap/10-phase-detection-engineering.md:152"
+    },
+    "T1059.003": {
+      "name": "Windows Command Shell",
+      "revoked": false,
+      "deprecated": false,
+      "uses": 4,
+      "firstUse": "cybersec-roadmap/10-phase-detection-engineering.md:920"
+    },
+    "T1059.005": {
+      "name": "Visual Basic",
+      "revoked": false,
+      "deprecated": false,
+      "uses": 1,
+      "firstUse": "advance-roadmap/01-phase-detection-at-scale.md:681"
+    },
+    "T1071": {
+      "name": "Application Layer Protocol",
+      "revoked": false,
+      "deprecated": false,
+      "uses": 1,
+      "firstUse": "cybersec-roadmap/10-phase-detection-engineering.md:940"
+    },
+    "T1071.001": {
+      "name": "Web Protocols",
+      "revoked": false,
+      "deprecated": false,
+      "uses": 4,
+      "firstUse": "advance-roadmap/01-phase-detection-at-scale.md:685"
+    },
+    "T1078.004": {
+      "name": "Cloud Accounts",
+      "revoked": false,
+      "deprecated": false,
+      "uses": 1,
+      "firstUse": "advance-roadmap/01-phase-detection-at-scale.md:686"
+    },
+    "T1087": {
+      "name": "Account Discovery",
+      "revoked": false,
+      "deprecated": false,
+      "uses": 1,
+      "firstUse": "cybersec-roadmap/10-phase-detection-engineering.md:939"
+    },
+    "T1098": {
+      "name": "Account Manipulation",
+      "revoked": false,
+      "deprecated": false,
+      "uses": 3,
+      "firstUse": "cybersec-roadmap/10-phase-detection-engineering.md:937"
+    },
+    "T1105": {
+      "name": "Ingress Tool Transfer",
+      "revoked": false,
+      "deprecated": false,
+      "uses": 7,
+      "firstUse": "advance-roadmap/07-phase-detection-as-code.md:288"
+    },
+    "T1110": {
+      "name": "Brute Force",
+      "revoked": false,
+      "deprecated": false,
+      "uses": 3,
+      "firstUse": "cybersec-roadmap/04-phase-hands-on-labs.md:494"
+    },
+    "T1136": {
+      "name": "Create Account",
+      "revoked": false,
+      "deprecated": false,
+      "uses": 1,
+      "firstUse": "cybersec-roadmap/10-phase-detection-engineering.md:936"
+    },
+    "T1136.001": {
+      "name": "Local Account",
+      "revoked": false,
+      "deprecated": false,
+      "uses": 7,
+      "firstUse": "advance-roadmap/05-phase-adversary-emulation.md:239"
+    },
+    "T1204": {
+      "name": "User Execution",
+      "revoked": false,
+      "deprecated": false,
+      "uses": 1,
+      "firstUse": "advance-roadmap/05-phase-adversary-emulation.md:648"
+    },
+    "T1204.002": {
+      "name": "Malicious File",
+      "revoked": false,
+      "deprecated": false,
+      "uses": 1,
+      "firstUse": "advance-roadmap/05-phase-adversary-emulation.md:683"
+    },
+    "T1218": {
+      "name": "System Binary Proxy Execution",
+      "revoked": false,
+      "deprecated": false,
+      "uses": 4,
+      "firstUse": "advance-roadmap/02-phase-threat-hunting.md:443"
+    },
+    "T1218.005": {
+      "name": "Mshta",
+      "revoked": false,
+      "deprecated": false,
+      "uses": 2,
+      "firstUse": "advance-roadmap/02-phase-threat-hunting.md:443"
+    },
+    "T1218.010": {
+      "name": "Regsvr32",
+      "revoked": false,
+      "deprecated": false,
+      "uses": 2,
+      "firstUse": "advance-roadmap/02-phase-threat-hunting.md:443"
+    },
+    "T1218.011": {
+      "name": "Rundll32",
+      "revoked": false,
+      "deprecated": false,
+      "uses": 4,
+      "firstUse": "advance-roadmap/02-phase-threat-hunting.md:335"
+    },
+    "T1543": {
+      "name": "Create or Modify System Process",
+      "revoked": false,
+      "deprecated": false,
+      "uses": 1,
+      "firstUse": "cybersec-roadmap/10-phase-detection-engineering.md:934"
+    },
+    "T1543.003": {
+      "name": "Windows Service",
+      "revoked": false,
+      "deprecated": false,
+      "uses": 6,
+      "firstUse": "cybersec-roadmap/10-phase-detection-engineering.md:508"
+    },
+    "T1547": {
+      "name": "Boot or Logon Autostart Execution",
+      "revoked": false,
+      "deprecated": false,
+      "uses": 2,
+      "firstUse": "advance-roadmap/05-phase-adversary-emulation.md:805"
+    },
+    "T1547.001": {
+      "name": "Registry Run Keys / Startup Folder",
+      "revoked": false,
+      "deprecated": false,
+      "uses": 12,
+      "firstUse": "advance-roadmap/01-phase-detection-at-scale.md:682"
+    },
+    "T1560": {
+      "name": "Archive Collected Data",
+      "revoked": false,
+      "deprecated": false,
+      "uses": 2,
+      "firstUse": "advance-roadmap/07-phase-detection-as-code.md:1024"
+    },
+    "T1566": {
+      "name": "Phishing",
+      "revoked": false,
+      "deprecated": false,
+      "uses": 6,
+      "firstUse": "cybersec-roadmap/01-phase-foundations.md:502"
+    },
+    "T1569.002": {
+      "name": "Service Execution",
+      "revoked": false,
+      "deprecated": false,
+      "uses": 1,
+      "firstUse": "advance-roadmap/02-phase-threat-hunting.md:222"
+    },
+    "T1685": {
+      "name": "Disable or Modify Tools",
+      "revoked": false,
+      "deprecated": false,
+      "uses": 2,
+      "firstUse": "advance-roadmap/01-phase-detection-at-scale.md:765"
+    }
+  },
+  "tactics": [
+    {
+      "id": "TA0001",
+      "name": "Initial Access",
+      "active": true
+    },
+    {
+      "id": "TA0002",
+      "name": "Execution",
+      "active": true
+    },
+    {
+      "id": "TA0003",
+      "name": "Persistence",
+      "active": true
+    },
+    {
+      "id": "TA0004",
+      "name": "Privilege Escalation",
+      "active": true
+    },
+    {
+      "id": "TA0005",
+      "name": "Stealth",
+      "active": true
+    },
+    {
+      "id": "TA0006",
+      "name": "Credential Access",
+      "active": true
+    },
+    {
+      "id": "TA0007",
+      "name": "Discovery",
+      "active": true
+    },
+    {
+      "id": "TA0008",
+      "name": "Lateral Movement",
+      "active": true
+    },
+    {
+      "id": "TA0009",
+      "name": "Collection",
+      "active": true
+    },
+    {
+      "id": "TA0010",
+      "name": "Exfiltration",
+      "active": true
+    },
+    {
+      "id": "TA0011",
+      "name": "Command and Control",
+      "active": true
+    },
+    {
+      "id": "TA0040",
+      "name": "Impact",
+      "active": true
+    },
+    {
+      "id": "TA0042",
+      "name": "Resource Development",
+      "active": true
+    },
+    {
+      "id": "TA0043",
+      "name": "Reconnaissance",
+      "active": true
+    },
+    {
+      "id": "TA0112",
+      "name": "Defense Impairment",
+      "active": true
+    }
+  ]
+}

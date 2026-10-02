@@ -305,10 +305,181 @@ for (const [label, spec] of [
 
 // =============================================================================
 
+// =============================================================================
+// THE SECOND ROT CLASS: a RETITLE.
+//
+// A withdrawal check cannot see this. A retitled publication carries no withdrawal
+// banner, resolves normally, and is current in every way except its NAME -- so a corpus
+// can cite a live document by a title it no longer has, teach that title, and leave
+// every other guard green.
+//
+// SP 800-50 is the live example, and the reason this was found at all: its replacement
+// was not reissued under the old name but RENAMED, from "Information Security
+// Awareness and Training" to "Building a Cybersecurity and Privacy Learning Program".
+// A corpus citing the WITHDRAWN url would have been caught by the class above. A
+// corpus citing the LIVE url under the old name would not have been caught by
+// anything, because nothing about it is broken.
+// =============================================================================
+
+const SP50 = "https://csrc.nist.gov/pubs/sp/800/50/r1/final";
+
+/** An HTML page carrying a title, with no withdrawal banner. */
+const titledPage = (title) =>
+  `<html><head><title>${title} | CSRC</title></head><body><p>Some publication.</p></body></html>`;
+
+{
+  // The rot class: the corpus names the document by a title it no longer has.
+  const files = {
+    "01-phase-a.md": `SP 800-50 Rev. 1, Information Security Awareness and Training - ${SP50}\n`,
+  };
+  const spec = {
+    "800/50": {
+      status: 200,
+      body: titledPage("SP 800-50 Rev. 1, Building a Cybersecurity and Privacy Learning Program"),
+    },
+  };
+  const r = runOn(files, spec);
+  const ok = r.code === 1 && /RETITLED NIST PUBLICATIONS/.test(r.out) && /Building a Cybersecurity/.test(r.out);
+  record("a citation naming a document by a title it no longer has is caught", ok, [
+    /RETITLED/.test(r.out) ? "RETITLED fired and named the current title" : `exit ${r.code}, no finding`,
+  ]);
+}
+{
+  // The message must say WHERE, or a reader cannot act on it.
+  const files = {
+    "01-phase-a.md": `SP 800-50 Rev. 1, Information Security Awareness and Training - ${SP50}\n`,
+  };
+  const spec = {
+    "800/50": {
+      status: 200,
+      body: titledPage("SP 800-50 Rev. 1, Building a Cybersecurity and Privacy Learning Program"),
+    },
+  };
+  const r = runOn(files, spec);
+  const ok = /01-phase-a\.md:1/.test(r.out);
+  record("the retitle finding names the file and line that states it", ok, [
+    ok ? "location reported" : "no location in the finding",
+  ]);
+}
+{
+  // THE FALSE POSITIVE THAT MATTERS MOST, because the corpus writes titles this way on
+  // purpose: it states the SHORT form and NIST's page carries a subtitle. "Managing
+  // Information Security Risk" against
+  // "Managing Information Security Risk: Organization, Mission, and Information System
+  // Views". Reported as a retitle that would be wrong, and a check wrong about correct
+  // content is a check nobody keeps.
+  const url = "https://csrc.nist.gov/pubs/sp/800/39/final";
+  const files = { "01-phase-a.md": `SP 800-39, Managing Information Security Risk - ${url}\n` };
+  const spec = {
+    "800/39": {
+      status: 200,
+      body: titledPage(
+        "SP 800-39, Managing Information Security Risk: Organization, Mission, and Information System Views",
+      ),
+    },
+  };
+  const r = runOn(files, spec);
+  record(
+    "a corpus stating the SHORT title against a page carrying a subtitle is NOT a retitle",
+    r.code === 0,
+    [r.code === 0 ? "silent" : `exit ${r.code}: ${/RETITLED/.test(r.out) ? "FALSE POSITIVE" : "unexpected"}`],
+  );
+}
+{
+  // The corpus's CURRENT SP 800-50 citation, verbatim. This is the shape that must stay
+  // green, and the previous control is the general case of it.
+  const files = {
+    "01-phase-a.md": `SP 800-50 Rev. 1, Building a Cybersecurity and Privacy Learning Program - ${SP50}\n`,
+  };
+  const spec = {
+    "800/50": {
+      status: 200,
+      body: titledPage("SP 800-50 Rev. 1, Building a Cybersecurity and Privacy Learning Program"),
+    },
+  };
+  const r = runOn(files, spec);
+  record("the corpus's CURRENT SP 800-50 title passes", r.code === 0, [
+    r.code === 0 ? "silent" : `exit ${r.code}: ${/RETITLED/.test(r.out) ? "FALSE POSITIVE" : "unexpected"}`,
+  ]);
+}
+{
+  // A citation that states NO title. The corpus writes bare links and descriptions
+  // ("SP 800-53 control catalogue - https://...") constantly, and reporting those would
+  // be the guard reporting its own parser rather than a defect.
+  const url = "https://csrc.nist.gov/pubs/sp/800/53/r5/upd1/final";
+  const files = { "01-phase-a.md": `SP 800-53 control catalogue - ${url}\n` };
+  const spec = {
+    "800/53": {
+      status: 200,
+      body: titledPage(
+        "SP 800-53 Rev. 5, Security and Privacy Controls for Information Systems and Organizations",
+      ),
+    },
+  };
+  const r = runOn(files, spec);
+  record("a citation that states no title is not a finding", r.code === 0, [
+    r.code === 0 ? "silent" : `exit ${r.code}: ${/RETITLED/.test(r.out) ? "FALSE POSITIVE" : "unexpected"}`],
+  );
+}
+{
+  // A WITHDRAWN publication whose page still carries the old title. Both classes can
+  // describe the same document, and reporting the retitle too would bury the actionable
+  // finding under the one already being fixed.
+  const url = "https://csrc.nist.gov/pubs/sp/800/61/r2/final";
+  const files = {
+    "01-phase-a.md": `SP 800-61 Rev. 2, Computer Security Incident Handling Guide - ${url}\n`,
+  };
+  const spec = {
+    "61/r2": {
+      status: 200,
+      body: titledPage("SP 800-61 Rev. 2, Computer Security Incident Handling Guide").replace(
+        "<body>",
+        "<body><p>Withdrawn on April 3, 2025. Superseded by SP 800-61 Rev. 3.</p>",
+      ),
+    },
+  };
+  const r = runOn(files, spec);
+  const ok = r.code === 1 && /WITHDRAWN/.test(r.out) && !/RETITLED NIST/.test(r.out);
+  record("a withdrawn page is reported as withdrawn, NOT as a retitle", ok, [
+    ok
+      ? "WITHDRAWN fired alone"
+      : `exit ${r.code}; WITHDRAWN=${/WITHDRAWN/.test(r.out)} RETITLED=${/RETITLED NIST/.test(r.out)}`,
+  ]);
+}
+{
+  // A network failure must not become a retitle finding. This is the shape that would
+  // make the guard cry wolf on infrastructure noise, which is the documented reason the
+  // guard reports UNCHECKED rather than failing on anything it cannot read.
+  const files = {
+    "01-phase-a.md": `SP 800-50 Rev. 1, Information Security Awareness and Training - ${SP50}\n`,
+  };
+  const spec = { "800/50": { throw: "TypeError" } };
+  const r = runOn(files, spec);
+  const ok = r.code === 0 && /could not be checked/.test(r.out) && !/RETITLED NIST/.test(r.out);
+  record("a fetch failure is UNCHECKED, never a retitle", ok, [
+    ok ? "reported UNCHECKED" : `exit ${r.code}; UNCHECKED=${/could not be checked/.test(r.out)}`,
+  ]);
+}
+{
+  // A page with no <title> at all: nothing to compare against, so nothing to report.
+  const files = {
+    "01-phase-a.md": `SP 800-50 Rev. 1, Information Security Awareness and Training - ${SP50}\n`,
+  };
+  const spec = { "800/50": { status: 200, body: "<html><body>no title element</body></html>" } };
+  const r = runOn(files, spec);
+  record("a page with no title element yields no finding and does not fail", r.code === 0 && !/RETITLED NIST/.test(r.out), [
+    r.code === 0 ? "silent" : `exit ${r.code}`,
+  ]);
+}
+
+// =============================================================================
+
 const failed = results.filter((r) => !r.ok);
 console.log("");
 console.log(failed.length
   ? `${failed.length} of ${results.length} controls FAILED.`
   : `All ${results.length} controls passed: a confirmed withdrawal fails with the date and the replacement,\n` +
-    `and every network failure shape is reported as UNCHECKED rather than as a pass or a false alarm.`);
+    `a RETITLE fails with the current title and where it is stated -- a class invisible to every other\n` +
+    `check, because nothing about a renamed document is broken -- and every network failure shape is\n` +
+    `reported as UNCHECKED rather than as a pass or a false alarm.`);
 process.exit(failed.length === 0 ? 0 : 1);

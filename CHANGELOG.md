@@ -2,6 +2,54 @@
 
 ### Added
 
+- **Both remaining rot classes now have a guard, and they need opposite solutions — which is why this is a decision rather
+  than a pair of commits (D-081).**
+
+  - **The ATT&CK rot class.** `scripts/audit-attack-refs.mjs`, reading a **committed, dated snapshot**
+    (`scripts/attack-snapshot.json`, built by `scripts/build-attack-snapshot.mjs`). Checks that every technique ID the
+    curriculum cites is one the dataset has, that no snapshot row has fallen out of use, that the name the corpus
+    gives each ID is still current, that every tactic name used is an active tactic, and that the corpus's own
+    Defense Evasion split claim agrees with the dataset. **18 controls**, including four that keep the false
+    positives its first draft produced silent.
+  - **The NIST retitle class.** Extended `audit-nist-current.mjs`, which caught *withdrawn* and could not see a
+    *rename* — SP 800-50 Rev. 1 replaced "Information Security Awareness and Training" and was **retitled**
+    "Building a Cybersecurity and Privacy Learning Program". **Nothing about a renamed document is broken**: the page
+    resolves, the publication is current, no banner appears. Only comparing the name the corpus *teaches* against
+    the name on the *page* finds it. Controls 14 → **22**.
+  - **Why one is committed and one is live.** NIST keeps a retitled publication's page, so a live read sees the new
+    title immediately. ATT&CK **deletes** a revoked technique, so "not found" means "retired" *and* "the network
+    failed" — indistinguishable live, and a live check would cry wolf on network noise. So the ATT&CK data is
+    committed, and **its expiry is enforced**: past `expiresOn` the guard fails, because an expired snapshot is a
+    check that cannot fail and would report success over an unexamined subject.
+
+- **Four real defects, all found by writing the checks rather than by reading the code.**
+
+  - **`audit-attack-refs.mjs` resolved 0 of 35 technique IDs and exited 0.** It filtered on `x-mitre-attack-pattern`
+    — the prefix ATT&CK uses for tactics and analytics — where techniques are `attack-pattern`. It would have
+    committed a snapshot asserting the entire curriculum cites 35 techniques that do not exist. "0 resolved" was
+    printed as a count rather than treated as a failure, so **the zero case is now an assertion**.
+  - **Its rename check was dead code.** It scanned for Title-Case phrases near each ID, counted them, and then had
+    an empty `if`. It printed a number and could never produce a finding — a check in the position of a check that
+    cannot fail.
+  - **With that fixed, all four of its findings were false positives**: two CLI flags (`-ShowDetailsBrief`) read as
+    technique names, one prose lookbehind, and three names character-for-character identical to the snapshot's —
+    because it filtered "and" out of "Command and Scripting Interpreter" and then required a contiguous run, so a
+    string could not match itself.
+  - **It also missed `T1204.002` entirely**, because the ID pattern was case-sensitive and that ID appears only as
+    lowercase `t1204.002` inside YAML `tags:` fields — 35 occurrences. **A guard that checks half its subject and
+    reports "all clear" is worse than no guard.**
+  - **Its retired-tactic heading check could not match "### Defense Evasion"** — the exact case it was written for,
+    because its lazy group required a space before an optional "tactic".
+
+- **Measured before anything was built, and both classes turned out clean.** 35 ATT&CK IDs, all live; 15 active
+  tactics, with "Defense Evasion" genuinely absent and the corpus's claim about the v19 split **correct**. Ten NIST
+  publications, none withdrawn and none retitled. **Nothing was fixed because nothing was broken** — what was added
+  is the ability to notice next time, and both documents now say so rather than implying a defect was found.
+
+- **A CI-comment figure drift, self-inflicted and caught.** An earlier figure script replaced `**27**` with `28`,
+  dropping the bold, while two of the four figures on the line never moved at all. The paragraph is now verified
+  as a well-formed four-figure sentence *after* the edit rather than trusted.
+
 - **The glossary's rejection table was wrong about 16 of its 17 rows, and one entry it excluded was correct.** It claimed all 17
   rejected terms were places where "the corpus implies something wrong", and rejected `ICS` on the grounds that "`ICS` is Industrial
   Control Systems" — when `incident-command:199` expands it correctly as *incident command system*. Checking each rejection against the
