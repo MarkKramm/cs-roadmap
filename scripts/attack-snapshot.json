@@ -1,10 +1,10 @@
 {
   "_why": "Dated snapshot of the ATT&CK facts the curriculum asserts. Committed because a revoked ATT&CK technique is REMOVED from the dataset rather than marked, so absence is the only signal and absence is indistinguishable from a network failure. Read by scripts/audit-attack-refs.mjs, which fails once this file is past takenOn + expiryDays.",
   "source": "https://raw.githubusercontent.com/mitre-attack/attack-stix-data/master/enterprise-attack/enterprise-attack.json",
-  "takenOn": "2026-10-02",
+  "takenOn": "2026-10-18",
   "expiryDays": 42,
-  "expiresOn": "2026-11-13",
-  "datasetId": "bundle--6198013c-6f02-42a4-9713-38ea1301a1aa",
+  "expiresOn": "2026-11-29",
+  "datasetId": "bundle--fc207382-c9d1-4ece-bce2-6ef555c62d0a",
   "counts": {
     "corpusIds": 35,
     "inDataset": 35,

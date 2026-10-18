@@ -150,8 +150,7 @@ new session does not have to rediscover them.
      the page finds it. This one stays **live**, because NIST keeps the page.
    - **Measured, and both classes turned out CLEAN**: 35 ATT&CK IDs all live, 10 NIST publications none withdrawn
      and none retitled. Nothing was fixed because nothing was broken; what was added is the ability to notice.
-   - **Rebuild the ATT&CK snapshot before 2026-11-13** —
-     after that the guard fails by design.
+   - ~~**Rebuild the ATT&CK snapshot before 2026-11-13**~~ — **CLOSED 2026-10-18.** Rebuilt against the current MITRE STIX bundle: `takenOn` 2026-10-18, `expiresOn` 2026-11-29, `datasetId` changed (a new bundle shipped), 35 of 35 corpus IDs still resolve, 15 active tactics, no retired or unknown. The guard and its 18 controls pass. Next rebuild due 2026-11-29.
 3. **Routing (D-007)** — views are local state, so there is no URL and no history
    entry, and refreshing or sharing a link loses the reader's place in a 495,000-word
    curriculum. This reverses a recorded decision, so it is deliberately last.
