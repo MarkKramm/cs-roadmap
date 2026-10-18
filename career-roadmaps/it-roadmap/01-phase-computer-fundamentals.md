@@ -114,7 +114,7 @@ The same information is available without a terminal: press **Ctrl+Shift+Esc** f
 #### What the numbers mean
 
 - **Cores** are independent processing units on the same chip. A 4-core CPU can genuinely work on four things at once. More cores help with multitasking and with workloads that can be split up.
-- **Logical processors** (threads) are what the operating system sees. Intel's Hyper-Threading and AMD's SMT let one physical core present two logical processors, so a 4-core chip often reports 8. Threads improve throughput but are not as good as real cores.
+- **Logical processors** (threads) are what the operating system sees. Intel's Hyper-Threading and AMD's SMT (Simultaneous Multithreading) let one physical core present two logical processors, so a 4-core chip often reports 8. Threads improve throughput but are not as good as real cores.
 - **Clock speed** is measured in GHz and describes how many cycles per second the chip runs at. Higher is generally faster, but only when comparing chips of the same generation and architecture. A modern 2.0 GHz chip routinely beats an old 3.5 GHz one. Never compare clock speed across generations — this is one of the most common beginner mistakes.
 - **Max clock speed** is reported in MHz by Windows, so 1800 means 1.8 GHz. That is the base or rated speed, not the turbo speed the chip can briefly reach.
 
@@ -330,7 +330,7 @@ Also built in:
 
 #### What the numbers mean
 
-- **Form factor** — ATX, micro-ATX, and mini-ITX determine what fits in a case. Irrelevant for troubleshooting, essential for any upgrade conversation.
+- **Form factor** — ATX (Advanced Technology eXtended), micro-ATX, and mini-ITX determine what fits in a case. Irrelevant for troubleshooting, essential for any upgrade conversation.
 - **Chipset** — determines supported CPU generations, RAM speed limits, and available ports. This is why "which CPU can I install?" always starts with the motherboard model number.
 - **BIOS/UEFI version and date** — an old firmware date can explain hardware compatibility problems and is often the fix for a new CPU or new RAM not being detected. Updating firmware is a genuine fix, but it is also risky: a power loss mid-update can brick the board. Never start a firmware update on a laptop with a low battery.
 - **CMOS battery** — a small coin cell (usually CR2032) that keeps the clock and firmware settings alive when the machine is unplugged. It lasts roughly five to ten years.
@@ -360,7 +360,7 @@ Understanding boot order turns "it won't turn on" from one problem into a sequen
 1. **Power on.** You press the button. The power supply (PSU) delivers stable voltages. Desktop PSUs are rated in watts because every component draws from that budget; an underpowered PSU shows up as shutdowns under load, not as a refusal to start.
 2. **Firmware (UEFI or legacy BIOS) initialises.** The motherboard runs the firmware, which wakes the CPU, trains the memory, and enumerates the hardware. This is the **POST** (Power-On Self-Test). If POST fails here, you get a beep code, a diagnostic LED, or silence with spinning fans — and never a display.
 3. **Firmware selects a boot device.** The boot order decides whether the machine looks for an internal drive, a USB device, or the network. A USB drive left plugged in is a classic unbootable-machine cause, because the firmware tries it first.
-4. **The bootloader starts.** UEFI loads the Windows Boot Manager from the EFI System Partition. A corrupt boot configuration produces "Boot device not found", "Operating system not found", or a recovery screen — all *before* Windows begins to load.
+4. **The bootloader starts.** UEFI loads the Windows Boot Manager from the EFI (Extensible Firmware Interface) System Partition. A corrupt boot configuration produces "Boot device not found", "Operating system not found", or a recovery screen — all *before* Windows begins to load.
 5. **The operating system loads.** Windows initialises drivers, starts services, and presents the sign-in screen. Failures past this point look different: they are Windows-level problems — BSODs, update failures, endless repair loops — not firmware or hardware ones.
 
 That sequence is a diagnostic tool. If the failure happens before the Windows logo, you are looking at power, firmware, or boot configuration. If it happens after, you are looking at Windows itself. Splitting the problem at the logo saves a great deal of time.
@@ -702,7 +702,7 @@ You live in a country with typhoon seasons, scheduled and unscheduled brownouts,
 - **A UPS for the router and modem.** A UPS (Uninterruptible Power Supply) is a battery box that sits between the wall socket and your equipment. A small one will keep a router and modem alive for a while during a short outage, which is often all you need — if the internet is delivered over fibre that stays powered at the other end, your connection can survive the brownout even if your PC does not. Put the router and modem on it first; those are the two devices you cannot swap quickly.
 - **A UPS for the PC, or a laptop instead of a desktop.** A laptop *is* a built-in UPS. This is the single strongest argument for doing remote support work from a laptop: when the power drops, you keep working for a few hours, and you can move to somewhere with power. If you use a desktop, a UPS sized to your PC plus monitor gives you time to save work and shut down cleanly.
 - **Mobile data as a backup path.** Keep a phone with a data plan and enough hotspot allowance to cover a full shift. Test it *before* you need it: connect your laptop through the hotspot, run a call, and see whether it holds. An untested backup is not a backup. Also know that a hotspot is usually a worse connection than your wired or fibre line, so treat it as a lifeline for voice and chat, not for heavy remote sessions.
-- **A second ISP where available.** If your area has two providers — for example a fibre provider and a fixed wireless or cable provider — a second line is the real fix for the recurring-outage problem. It costs money, so most beginners do not start here, but it is the upgrade to plan for once you have income. Some providers offer a prepaid or lower-tier backup line that is cheap enough to justify.
+- **A second ISP (Internet Service Provider) where available.** If your area has two providers — for example a fibre provider and a fixed wireless or cable provider — a second line is the real fix for the recurring-outage problem. It costs money, so most beginners do not start here, but it is the upgrade to plan for once you have income. Some providers offer a prepaid or lower-tier backup line that is cheap enough to justify.
 - **Working from a coworking space, a café, or a relative's place during outages.** Coworking spaces in Philippine cities sell day passes and have generator backup and business-grade internet. If your area has frequent brownouts, a day-pass budget is often cheaper than a second ISP. A relative's house with a different provider is the free version of the same idea. Ask your employer in advance whether they allow it, and let your supervisor know when you are relocating so nobody thinks you have vanished.
 - **Plan around known events.** Typhoon warnings and scheduled maintenance are usually announced. If you know a storm is coming, charge everything, download what you need offline, and tell your team lead early. Warning your supervisor is always better than disappearing.
 
@@ -1157,7 +1157,7 @@ Two displays, side by side, second one not primary. That is exactly right, and i
 
 > **Reported:** User reported the second monitor showing "No Signal" and sleeping since that morning; primary monitor unaffected. User initially reported no changes.
 > **Changed recently:** On further questioning, the desk was cleaned the previous day and both monitors were moved.
-> **Observed:** Monitor power light blue (powered on). `Win32_VideoController` reported only one active resolution (1920×1080), so Windows was detecting a single display. Monitor OSD showed the active input as HDMI 2.
+> **Observed:** Monitor power light blue (powered on). `Win32_VideoController` reported only one active resolution (1920×1080), so Windows was detecting a single display. Monitor OSD (On-Screen Display) showed the active input as HDMI 2.
 > **Action:** Walked the user through the monitor's input selection. Physical cable was connected to HDMI 1; the monitor had been left on HDMI 2, most likely during the desk clean. User switched the input to HDMI 1. No cable reseat, driver change, or hardware replacement was needed.
 > **Verified:** User dragged a window between the two screens successfully. `[System.Windows.Forms.Screen]::AllScreens` confirmed two displays at 1920×1080 side by side, DISPLAY1 primary.
 > **Cause:** Monitor input source set to the wrong port after the monitors were moved.

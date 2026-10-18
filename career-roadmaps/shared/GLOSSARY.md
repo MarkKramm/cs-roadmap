@@ -13,7 +13,7 @@ finding it meant searching for a phrase you did not yet know.
 ## What this is, and what it is not
 
 **This is a starter set, and it is deliberately partial.** It holds the
-**52 entries** below, of the 309 domain terms the curriculum
+**57 entries** below, of the 309 domain terms the curriculum
 uses. The rest are not here, and the reason is worth stating rather than leaving a
 reader to assume the absence means a term is unimportant.
 
@@ -61,6 +61,10 @@ How a machine on a local network finds the hardware address for an IP address it
 **ATS** — Applicant tracking systems.
 The software a recruiter uses to record, filter and progress applications.
 *Sourced from `it-roadmap/08-phase-portfolio-and-resume.md:217`.*
+
+**ATX** — Advanced Technology eXtended.
+The standard desktop motherboard form factor; micro-ATX and mini-ITX are smaller variants.
+*Sourced from `it-roadmap/01-phase-computer-fundamentals.md:333`.*
 
 
 ### B
@@ -110,6 +114,10 @@ A deliberately insecure application you run locally, so you can practise finding
 
 ### E
 
+**EFI** — Extensible Firmware Interface.
+The firmware interface the bootloader uses before Windows begins to load.
+*Sourced from `it-roadmap/01-phase-computer-fundamentals.md:363`.*
+
 **EPSS** — Exploit Prediction Scoring System.
 A public estimate of how likely a given vulnerability is to be exploited in the wild, which is a better prioritisation signal than severity alone.
 *Sourced from `cybersec-roadmap/03-phase-security-fundamentals.md:725`.*
@@ -150,6 +158,10 @@ Passive: it watches traffic or logs and raises an alert, without blocking. Contr
 **IPS** — Intrusion Prevention System.
 Active: it sits inline and blocks what it judges to be an attack. Contrast `IDS`.
 *Sourced from `cybersec-roadmap/03-phase-security-fundamentals.md:482`.*
+
+**ISP** — Internet Service Provider.
+The company that provides your connection to the internet.
+*Sourced from `it-roadmap/01-phase-computer-fundamentals.md:705`.*
 
 **ITSM** — IT Service Management.
 The discipline of running IT as a service: catalogue, incidents, changes, and the measures that show whether any of it is working.
@@ -206,6 +218,10 @@ The Philippine data-privacy regulator, named in that jurisdiction's breach notif
 A general-purpose policy engine; its policy language is `Rego`.
 *Sourced from `advance-roadmap/04-phase-cloud-identity-architecture.md:1188`.*
 
+**OSD** — On-Screen Display.
+The monitor's own menu, used to check input selection and signal.
+*Sourced from `it-roadmap/01-phase-computer-fundamentals.md:1160`.*
+
 **OU** — Organisational Unit.
 A container in Active Directory that objects live in, so rules can be applied to a group of them.
 *Sourced from `it-roadmap/05-phase-sysadmin-basics.md:105`.*
@@ -246,6 +262,10 @@ Windows' internal identifier for a user or group. Every permission decision on W
 **SLE** — Single loss expectancy.
 The cost of one occurrence of a risk event, before frequency is applied. `ALE` is this multiplied by `ARO`.
 *Sourced from `advance-roadmap/06-phase-programme-and-influence.md:50`.*
+
+**SMT** — Simultaneous Multithreading.
+One physical core presenting two logical processors; Intel's Hyper-Threading is an implementation.
+*Sourced from `it-roadmap/01-phase-computer-fundamentals.md:117`.*
 
 **SPF** — Sender Policy Framework.
 A DNS record listing which hosts may send mail for a domain.
@@ -316,7 +336,7 @@ Getting script to run in another user's browser, in the context of a site they t
 
 ## What is not here, and why
 
-**257 of the 309 domain terms have no entry**, for three different
+**252 of the 309 domain terms have no entry**, for three different
 reasons, and they are worth separating because only two are fixable by writing.
 
 1. **No expansion could be found** — 248 terms. Usually the term is used in prose
