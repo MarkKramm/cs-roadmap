@@ -1,5 +1,6 @@
-// App shell. Navigation is a single `view` string held in local state — no
-// router, see docs/DECISIONS.md → D-007. Content is rendered from the JSON
+// App shell. Navigation state (view, track, open phase, shared doc) is held in
+// `useState` and mirrored to the URL hash — see docs/DECISIONS.md → D-082.
+// Content is rendered from the JSON
 // emitted by scripts/build-content.mjs; see docs/CONTENT-SCHEMA.md.
 //
 // This file owns three pieces of cross-cutting state that individual pages read
@@ -15,6 +16,7 @@ import { useReadingSize, scaleFor } from "./hooks/useReadingSize.js";
 import { useTimeBudget } from "./hooks/useTimeBudget.js";
 import { useShortcuts } from "./hooks/useShortcuts.js";
 import { useFocusTrap } from "./hooks/useFocusTrap.js";
+import { parseHash, buildHash } from "./lib/route.js";
 import Dashboard from "./pages/Dashboard.jsx";
 import PhaseDetail from "./pages/PhaseDetail.jsx";
 import ToolsLibrary from "./pages/ToolsLibrary.jsx";
@@ -89,6 +91,34 @@ export default function App() {
   // here rather than in PhaseDetail because the keyboard shortcuts need the same
   // answer without the phase being mounted.
   const { prev, next, index, count } = neighbours(track, openPhaseId);
+
+  // --- Routing (D-082): keep view/track/phase/shared-doc in the URL hash ---
+  // State -> URL. Runs on every navigation; writing the same hash is a no-op,
+  // so this does not fight the URL -> state effect below.
+  const syncingFromHash = useRef(false);
+  useEffect(() => {
+    if (syncingFromHash.current) return;
+    const next = buildHash({ trackId, view, phaseId: openPhaseId, sharedDocId });
+    if (window.location.hash !== next) {
+      window.location.hash = next;
+    }
+  }, [trackId, view, openPhaseId, sharedDocId]);
+
+  // URL -> state. Runs on load and on back/forward.
+  useEffect(() => {
+    function applyHash() {
+      syncingFromHash.current = true;
+      const r = parseHash(window.location.hash);
+      setTrackId(r.trackId);
+      setView(r.view);
+      setOpenPhaseId(r.phaseId);
+      setSharedDocId(r.sharedDocId);
+      syncingFromHash.current = false;
+    }
+    window.addEventListener("hashchange", applyHash);
+    applyHash();
+    return () => window.removeEventListener("hashchange", applyHash);
+  }, []);
 
   // Opening a phase keeps whatever scroll position the dashboard was at, which
   // lands the reader in the middle of a lesson. Reset on every view change.

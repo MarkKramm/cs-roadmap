@@ -16,6 +16,15 @@ Two consequences, since this has caused real confusion:
 - **A phrase like "Current state:" inside a record means the state at that record's date.** It
   is not a claim about today, and D-024's instance (29 phases) has been overtaken twice since.
 
+## D-082 — Routing returns, hash-based and dependency-free
+
+- **Date:** 2026-10-18
+- **Status:** Accepted
+- **Context:** D-007 kept navigation as local state because the site was a single-user local tool with no shareable URLs. The curriculum has grown to 495,000 words across 31 phases and 7 shared documents; a reader who refreshes, follows a link from elsewhere, or wants to send a phase to a colleague loses their place. The cost of no URL is now larger than the cost of one. Reversing D-007 is deliberate and late, which is the shape D-007 itself asked for ("the single seam to replace").
+- **Decision:** **Hash-based routing with no new dependency.** The History API's `hashchange` event plus `window.location.hash` is enough: no router library, no server config, and it survives GitHub Pages' static hosting (a path-based router would 404 on refresh). The hash encodes track, view, phase id and shared-document id (`#/<track>/<view>[/<id>]`). `App.jsx` keeps its `view`/`trackId`/`openPhaseId`/`sharedDocId` state; a pure `src/lib/route.js` parses and serialises the hash, and two effects keep state and URL in sync in both directions. No component below `App.jsx` changes.
+- **Consequences:** Back/forward, refresh and shared links now work. The browser's back button moves between views for the first time. Storage keys, progress and reading position are untouched. Hash routing means URLs carry a `#`; that is the price of zero server config.
+- **Amends:** D-007 (status → Superseded), D-014 (keyboard shortcuts still work; they now also leave a history entry).
+
 ## D-081 — Committed snapshot or live read, decided by which failure mode the source has
 
 - **Date:** 2026-10-02
@@ -1007,7 +1016,7 @@ Two consequences, since this has caused real confusion:
 ## D-007 — View navigation is local state, not a router
 
 - **Date:** 2026-09-11
-- **Status:** Accepted
+- **Status:** Superseded by D-082 (2026-10-18)
 - **Context:** M2 adds three destinations (tools library, portfolio tracker, application tracker) alongside the dashboard and the per-phase detail view. D-006 left routing open. The site is a single-user local tool: no server, no shareable URLs, no deep links, no analytics. A router would add a dependency and a URL surface to solve problems this tool does not have.
 - **Decision:** Keep navigation in `App.jsx` as a single `view` string — `dashboard` | `phase` | `tools` | `portfolio` | `applications` — alongside the existing `trackId` and `openPhaseId`. No router dependency.
 - **Consequences:** No new dependency. The browser's back and forward buttons do not move between views; the sidebar and the in-page Back button are the only navigation, which is why both stay visible on every view. If deep links are ever wanted, the switch in `App.jsx` is the single seam to replace — no component below it needs to change.

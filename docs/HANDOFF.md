@@ -128,8 +128,7 @@ proves it.
 
 ## Still open, as of 2026-10-02
 
-**Three bodies of work remain.** None is urgent, and all three are recorded so a
-new session does not have to rediscover them.
+**One body of work remains** (the glossary backlog); the ATT&CK snapshot rebuild and routing are closed above. None is urgent.
 
 1. **The glossary backlog — 257 domain terms with no entry.** Most have no findable expansion;
    a smaller group had one proposed and it was **rejected**, and on re-checking all 17 rejections against the
@@ -151,9 +150,7 @@ new session does not have to rediscover them.
    - **Measured, and both classes turned out CLEAN**: 35 ATT&CK IDs all live, 10 NIST publications none withdrawn
      and none retitled. Nothing was fixed because nothing was broken; what was added is the ability to notice.
    - ~~**Rebuild the ATT&CK snapshot before 2026-11-13**~~ — **CLOSED 2026-10-18.** Rebuilt against the current MITRE STIX bundle: `takenOn` 2026-10-18, `expiresOn` 2026-11-29, `datasetId` changed (a new bundle shipped), 35 of 35 corpus IDs still resolve, 15 active tactics, no retired or unknown. The guard and its 18 controls pass. Next rebuild due 2026-11-29.
-3. **Routing (D-007)** — views are local state, so there is no URL and no history
-   entry, and refreshing or sharing a link loses the reader's place in a 495,000-word
-   curriculum. This reverses a recorded decision, so it is deliberately last.
+3. ~~**Routing (D-007)**~~ — **CLOSED 2026-10-18 (D-082).** Hash-based routing with no new dependency: the URL hash encodes track/view/phase/shared-doc, `App.jsx` keeps its state and mirrors it via `src/lib/route.js`, back/forward/refresh/share now work. D-007 amended to Superseded.
 
 **And the two items that need a human, unchanged and still open:** the **283
 practice tasks, none ever timed**, and the **15–20 posting sample** behind the
