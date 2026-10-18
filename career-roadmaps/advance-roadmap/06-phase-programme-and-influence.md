@@ -24,7 +24,7 @@ Learn to own a piece of the security programme rather than a piece of the toolin
 ## Skills you'll gain
 
 - Tell a metric from a vanity metric, and defend the difference to someone who disagrees with you.
-- Define a KPI or a KRI with a numerator, a denominator, a source, an owner, and a cadence.
+- Define a KPI or a KRI (Key Risk Indicator) with a numerator, a denominator, a source, an owner, and a cadence.
 - Report a number that moved in the wrong direction without hiding it and without panicking about it.
 - Write a one-page executive brief that a non-technical reader can act on in ninety seconds.
 - Build a business case with real options, real costs, and a stated consequence of refusal.

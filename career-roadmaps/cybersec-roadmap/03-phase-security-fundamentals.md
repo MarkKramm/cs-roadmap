@@ -527,7 +527,7 @@ The **secure ports and protocols** question is really the question “is this tr
 | Insecure | Secure | Notes |
 |---|---|---|
 | HTTP (80) | HTTPS (443) | TLS |
-| FTP (21) | SFTP (22) / FTPS | Credentials in plaintext over FTP |
+| FTP (21) | SFTP (22) / FTPS (FTP over TLS) | Credentials in plaintext over FTP |
 | Telnet (23) | SSH (22) | Telnet sends everything, including passwords, in the clear |
 | SMTP (25) | SMTPS (465) / submission (587) | Encryption in transit |
 | LDAP (389) | LDAPS (636) | Directory queries carry credentials |

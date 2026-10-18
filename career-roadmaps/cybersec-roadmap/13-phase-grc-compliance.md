@@ -26,7 +26,7 @@ Learn how organisations decide what risk to accept, how controls are chosen and 
 - Distinguish governance, risk, and compliance, and explain what each produces.
 - Identify and classify assets, and describe risk in language a business reader can act on.
 - Build and score a risk register with a defined, defensible scale.
-- Map a control to a framework such as ISO 27001, NIST CSF, SOC 2, PCI DSS, or HIPAA.
+- Map a control to a framework such as ISO 27001, NIST CSF, SOC 2, PCI DSS (Payment Card Industry Data Security Standard), or HIPAA.
 - Write a policy a real employee could follow, and the standard it enforces.
 - Collect evidence for an audit and describe what an auditor will ask for.
 - Assess a vendor's security posture with a questionnaire and a documented decision.

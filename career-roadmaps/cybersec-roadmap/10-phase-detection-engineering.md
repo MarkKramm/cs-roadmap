@@ -648,7 +648,7 @@ That is the point of learning the logic rather than the syntax.
 | **Splunk SPL** | Extremely expressive, huge community | Licensing cost at scale; SPL is not portable |
 | **Sentinel KQL** | Clean syntax, integrates with Microsoft estate | Azure dependency; ingestion cost |
 | **Wazuh rules** | Free and open source, XML, integrates with decoders | Less expressive; the rule language is idiosyncratic |
-| **Elastic EQL / DSL** | Powerful sequence matching, open source | Steeper learning curve, JSON-heavy |
+| **Elastic EQL (Event Query Language) / DSL** | Powerful sequence matching, open source | Steeper learning curve, JSON-heavy |
 
 **The practical route for a learner on $0:** write in Sigma, keep the rules in a Git repository, and convert them into Wazuh rules for your lab. You demonstrate portability, version control, and a working SIEM in one artefact.
 

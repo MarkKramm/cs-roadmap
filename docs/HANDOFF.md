@@ -60,7 +60,7 @@ real defects rather than confirming what was already believed:
   did not exist.
 
 **The glossary is shipped, partially, and says so.**
-`career-roadmaps/shared/GLOSSARY.md` holds **77 verified entries of 309 domain
+`career-roadmaps/shared/GLOSSARY.md` holds **81 verified entries of 309 domain
 terms (17%)** and is rendered in the site as the seventh shared document. It is
 partial **by design**: the extractor proposes an expansion for 64 terms and a large
 minority are confidently wrong (`KQL` → "Microsoft Sentinel and Defender XDR").

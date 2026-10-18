@@ -13,7 +13,7 @@ finding it meant searching for a phrase you did not yet know.
 ## What this is, and what it is not
 
 **This is a starter set, and it is deliberately partial.** It holds the
-**77 entries** below, of the 309 domain terms the curriculum
+**81 entries** below, of the 309 domain terms the curriculum
 uses. The rest are not here, and the reason is worth stating rather than leaving a
 reader to assume the absence means a term is unimportant.
 
@@ -155,6 +155,10 @@ A network segment between two trust zones, where traffic is inspected before it 
 The person accountable for an organisation's data-protection compliance; the route for privacy questions.
 *Sourced from `cybersec-roadmap/11-phase-incident-response.md:1337`.*
 
+**DSS** — Data Security Standard.
+The twelve requirements behind PCI DSS, the card-payment security standard.
+*Sourced from `cybersec-roadmap/13-phase-grc-compliance.md:29`.*
+
 **DVWA** — Damn Vulnerable Web Application — a deliberately insecure web app you run locally.
 A deliberately insecure application you run locally, so you can practise finding its flaws without breaking anything that matters.
 *Sourced from `cybersec-roadmap/03-phase-security-fundamentals.md:1033`.*
@@ -174,6 +178,14 @@ Windows' per-file encryption; files encrypted with it are tied to the user's cre
 A public estimate of how likely a given vulnerability is to be exploited in the wild, which is a better prioritisation signal than severity alone.
 *Sourced from `cybersec-roadmap/03-phase-security-fundamentals.md:725`.*
 
+**EQL** — Event Query Language.
+Elastic's query language for matching sequences of events; the open-source alternative to Splunk's SPL.
+*Sourced from `cybersec-roadmap/10-phase-detection-engineering.md:651`.*
+
+**EVTX** — Windows Event Log.
+The file format Windows writes its event log in; a single file can hold the entire timeline of a machine.
+*Sourced from `cybersec-roadmap/06-phase-portfolio-projects.md:967`.*
+
 
 ### F
 
@@ -189,6 +201,9 @@ The share of tickets resolved on first contact, without a handover. Its companio
 A forensic imaging and analysis suite; its free `FTK Imager` component is the standard tool for taking a disk image.
 *Sourced from `cybersec-roadmap/11-phase-incident-response.md:625`.*
 
+**FTPS** — FTP over TLS.
+File Transfer Protocol wrapped in TLS, so credentials and data are encrypted in transit. Contrast with plaintext FTP on port 21.
+*Sourced from `cybersec-roadmap/03-phase-security-fundamentals.md:530`.*
 
 ### G
 
@@ -418,7 +433,7 @@ Getting script to run in another user's browser, in the context of a site they t
 
 ## What is not here, and why
 
-**232 of the 309 domain terms have no entry**, for three different
+**228 of the 309 domain terms have no entry**, for three different
 reasons, and they are worth separating because only two are fixable by writing.
 
 1. **No expansion could be found** — 248 terms. Usually the term is used in prose

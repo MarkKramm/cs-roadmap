@@ -964,7 +964,7 @@ secrets/
 node_modules/
 ```
 
-The `.gitignore` is not housekeeping. A pcap or an EVTX file can contain real network data, real usernames and real hostnames. Committing one is the most common way a beginner leaks something.
+The `.gitignore` is not housekeeping. A pcap or an EVTX (Windows Event Log) file can contain real network data, real usernames and real hostnames. Committing one is the most common way a beginner leaks something.
 
 **Check yourself:** `git status` should show the directories and the `.gitignore`, and nothing else.
 

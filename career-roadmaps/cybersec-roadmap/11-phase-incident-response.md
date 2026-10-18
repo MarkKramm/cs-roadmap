@@ -1390,7 +1390,7 @@ Volatility 3, Autopsy and The Sleuth Kit, FTK Imager, dc3dd, Eric Zimmerman's pa
 
 ### What's paid and why you'd upgrade
 
-Commercial forensic suites such as EnCase, Magnet AXIOM, and Cellebrite add automation, wider artefact support, mobile extraction, and validated workflows that hold up more easily in court, plus vendor support when a case is on a deadline. Enterprise DFIR platforms add remote triage at scale and threat-intelligence enrichment. Paid challenge subscriptions add more scenarios and guided answers. Paid training and certifications such as the SANS GIAC courses are the most expensive items in the entire field and are almost always employer-funded rather than self-funded.
+Commercial forensic suites such as EnCase, Magnet AXIOM, and Cellebrite add automation, wider artefact support, mobile extraction, and validated workflows that hold up more easily in court, plus vendor support when a case is on a deadline. Enterprise DFIR platforms add remote triage at scale and threat-intelligence enrichment. Paid challenge subscriptions add more scenarios and guided answers. Paid training and certifications such as the SANS GIAC (Global Information Assurance Certification) courses are the most expensive items in the entire field and are almost always employer-funded rather than self-funded.
 
 ### When it's worth paying
 
