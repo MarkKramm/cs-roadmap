@@ -1334,7 +1334,7 @@ Create `portfolio/cyber/11-incident-response.md` with:
 
 ### Q10. Personal data may have been accessed, and you are unsure whether it must be notified. What does this phase say your job is? <!-- id: cyber-11-q10 energy: normal -->
 
-- [x] Recognise that an obligation may exist and route the question to counsel or the DPO
+- [x] Recognise that an obligation may exist and route the question to counsel or the DPO (Data Protection Officer)
 - [ ] Decide whether the breach is notifiable so the report is complete
 - [ ] State the deadline from the Data Privacy Act from memory
 - [ ] Wait until the investigation closes before mentioning it to anyone

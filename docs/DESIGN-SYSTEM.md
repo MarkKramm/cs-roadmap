@@ -290,7 +290,7 @@ that already exists, and it did so for a version of this file's whole lifetime.
 
 - **Icon set.** None. Components use text labels and a single check glyph.
 - **Animation library.** None. Transitions are CSS-only and under 150ms, per the anti-patterns above. A `prefers-reduced-motion` block zeroes the duration for readers who ask the system for less motion.
-- ~~**A glossary.**~~ **Shipped on 2026-10-02, partially, and the way it shipped matters more than that it did.** `career-roadmaps/shared/GLOSSARY.md` holds **63 verified entries**, is rendered in the site beside the other shared documents, and is listed second in `scripts/shared-content.mjs` because it is the one a reader reaches for by name rather than in order.
+- ~~**A glossary.**~~ **Shipped on 2026-10-02, partially, and the way it shipped matters more than that it did.** `career-roadmaps/shared/GLOSSARY.md` holds **70 verified entries**, is rendered in the site beside the other shared documents, and is listed second in `scripts/shared-content.mjs` because it is the one a reader reaches for by name rather than in order.
 
   This entry previously said the glossary needed "new build tooling to produce the data first", which was the wrong blocker. The tooling was straightforward; **the extraction was not trustworthy.** `scripts/extract-glossary-candidates.mjs` proposes an expansion for **64** of the **309** domain terms, and a large minority are confidently wrong — `KQL` came back as "Microsoft Sentinel and Defender XDR", `ICS` as "The incident command system", `CSF` as "task 7". A glossary that says those is worse than no glossary, because it converts a term a beginner can look up into a wrong fact they repeat in an interview.
 
@@ -316,5 +316,5 @@ that already exists, and it did so for a version of this file's whole lifetime.
 
   **What remains open, stated rather than implied:** coverage is **17%**, and the document accounts for the other 257 by reason — no expansion findable, an expansion proposed and rejected, or a gloss where an expansion belongs. Only one of
   those was ever a corpus defect, so most of this backlog is extractor work rather than writing. Coverage is
-  deliberately not gated: refusing the 63 verified entries or inventing the other 246 are both worse than a
+  deliberately not gated: refusing the 70 verified entries or inventing the other 239 are both worse than a
   partial glossary that is true.

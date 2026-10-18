@@ -224,7 +224,7 @@ The **same-origin policy** is a browser rule: a script from one origin cannot re
 |---|---|
 | Same origin | Full access |
 | Different origin, simple request | The request is sent; the response cannot be read by the script |
-| Different origin, with CORS headers allowing it | The response can be read |
+| Different origin, with CORS (Cross-Origin Resource Sharing) headers allowing it | The response can be read |
 | An image, script, or stylesheet from another origin | Can be loaded, but not read |
 | A form submission to another origin | Can be sent, but the response cannot be read |
 | An `iframe` from another origin | Rendered, but not scripted into |

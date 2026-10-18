@@ -663,7 +663,7 @@ Four improvements turn that into a policy a reviewer will accept.
 | Change | Why |
 |---|---|
 | Drop `s3:PutObject` if the workload only ever wrote during a migration | Observation includes the migration; the steady state is narrower |
-| Scope the KMS grant to the specific key and add `kms:ViaService` | Prevents the key being used from anywhere except S3, DynamoDB, or Lambda as intended |
+| Scope the KMS (Key Management Service) grant to the specific key and add `kms:ViaService` | Prevents the key being used from anywhere except S3, DynamoDB, or Lambda as intended |
 | Split log-stream creation from log writing | The two are different risk levels, and the API needs only one of them at start-up |
 | Add a `Condition` on `aws:PrincipalArn` or a source VPC endpoint | Makes the policy useless if the role's credentials are lifted and used from elsewhere |
 

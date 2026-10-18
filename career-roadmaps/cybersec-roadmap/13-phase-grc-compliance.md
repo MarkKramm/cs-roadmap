@@ -30,7 +30,7 @@ Learn how organisations decide what risk to accept, how controls are chosen and 
 - Write a policy a real employee could follow, and the standard it enforces.
 - Collect evidence for an audit and describe what an auditor will ask for.
 - Assess a vendor's security posture with a questionnaire and a documented decision.
-- Explain the privacy obligations in the Philippine Data Privacy Act and the GDPR in outline.
+- Explain the privacy obligations in the Philippine Data Privacy Act and the GDPR (General Data Protection Regulation) in outline.
 - Describe how a junior GRC analyst actually spends their working day.
 
 ## Specific topics to learn

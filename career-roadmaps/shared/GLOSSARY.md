@@ -13,7 +13,7 @@ finding it meant searching for a phrase you did not yet know.
 ## What this is, and what it is not
 
 **This is a starter set, and it is deliberately partial.** It holds the
-**63 entries** below, of the 309 domain terms the curriculum
+**70 entries** below, of the 309 domain terms the curriculum
 uses. The rest are not here, and the reason is worth stating rather than leaving a
 reader to assume the absence means a term is unimportant.
 
@@ -73,6 +73,10 @@ The standard desktop motherboard form factor; micro-ATX and mini-ITX are smaller
 
 ### B
 
+**BGP** — Border Gateway Protocol.
+The routing protocol that carries reachability between autonomous systems on the internet; a missing route here is a network-engineer problem, not a help-desk one.
+*Sourced from `it-roadmap/03-phase-networking-basics.md:966`.*
+
 **BSOD** — Blue Screen of Death.
 Formally a *bug check*: Windows saying it cannot safely continue. The stop code names the driver or subsystem that failed, which is what makes a BSOD useful rather than just alarming.
 *Sourced from `it-roadmap/01-phase-computer-fundamentals.md:410`.*
@@ -83,6 +87,14 @@ An attack where the target is the person, not the machine: the attacker writes a
 
 
 ### C
+
+**CNAME** — Canonical Name.
+A DNS record that aliases one name to another, common in phishing infrastructure.
+*Sourced from `cybersec-roadmap/02-phase-networking-and-linux.md:296`.*
+
+**CORS** — Cross-Origin Resource Sharing.
+The mechanism by which a server tells a browser which other origins may read its responses.
+*Sourced from `cybersec-roadmap/14-phase-web-app-security.md:227`.*
 
 **CRLF** — Carriage Return Line Feed.
 The two bytes that end a line in HTTP; injecting them into a response is how header injection works.
@@ -115,9 +127,17 @@ A support metric: the share of tickets closed with the customer satisfied.
 A DNS record that lets a receiver check a message was really sent by that domain.
 *Sourced from `cybersec-roadmap/02-phase-networking-and-linux.md:298`.*
 
+**DMARC** — Domain-based Message Authentication, Reporting, and Conformance.
+The email standard that tells receivers what to do when SPF or DKIM fails.
+*Sourced from `cybersec-roadmap/02-phase-networking-and-linux.md:298`.*
+
 **DMZ** — Demilitarized Zone.
 A network segment between two trust zones, where traffic is inspected before it crosses.
 *Sourced from `cybersec-roadmap/15-phase-ot-ics-security.md:44`.*
+
+**DPO** — Data Protection Officer.
+The person accountable for an organisation's data-protection compliance; the route for privacy questions.
+*Sourced from `cybersec-roadmap/11-phase-incident-response.md:1337`.*
 
 **DVWA** — Damn Vulnerable Web Application — a deliberately insecure web app you run locally.
 A deliberately insecure application you run locally, so you can practise finding its flaws without breaking anything that matters.
@@ -147,6 +167,10 @@ The share of tickets resolved on first contact, without a handover. Its companio
 
 
 ### G
+
+**GDPR** — General Data Protection Regulation.
+The EU privacy law; its obligations (lawful basis, data subject rights, breach notification) are the template most other jurisdictions borrow from.
+*Sourced from `cybersec-roadmap/13-phase-grc-compliance.md:33`.*
 
 **GPO** — Group Policy Object.
 A stored set of Windows settings applied automatically to machines or users in an `OU`.
@@ -202,6 +226,10 @@ A signed, self-contained token a client stores and presents, so the server does 
 
 
 ### K
+
+**KMS** — Key Management Service.
+The cloud service that creates and holds encryption keys, so data can be encrypted without the application holding the key.
+*Sourced from `advance-roadmap/04-phase-cloud-identity-architecture.md:666`.*
 
 **KQL** — Kusto Query Language.
 The query language Microsoft Sentinel and Defender XDR run, not the products themselves. The heading introducing it previously read `KQL — Microsoft Sentinel and Defender XDR`, which a reader could reasonably take for the expansion; corrected in the corpus on 2026-10-02.
@@ -362,7 +390,7 @@ Getting script to run in another user's browser, in the context of a site they t
 
 ## What is not here, and why
 
-**246 of the 309 domain terms have no entry**, for three different
+**239 of the 309 domain terms have no entry**, for three different
 reasons, and they are worth separating because only two are fixable by writing.
 
 1. **No expansion could be found** — 248 terms. Usually the term is used in prose

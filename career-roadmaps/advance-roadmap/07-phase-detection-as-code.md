@@ -1378,7 +1378,7 @@ The self-check in Part 1 asked you to *name* these things from nothing. This ask
 
 - [ ] Only the first — the payload download
 - [ ] The first and the third
-- [x] The first and the second — the CRL retrieval matches too, and that is correct behaviour
+- [x] The first and the second — the CRL (Certificate Revocation List) retrieval matches too, and that is correct behaviour
 - [ ] All three, because the rule only requires certutil
 
 **Why:** The second fixture runs `certutil.exe -p CRL -urlcache http://crl.example-ca.internal/root.crl`, which contains both `urlcache` and `http://`, so the rule fires exactly as designed — the phase stresses that this apparent negative is really a false positive a human closes, and it is how a rule acquires a blind spot if you treat it as proof of narrowness. Only the third fixture is a genuine near-miss: `certutil.exe -hashfile … SHA256` has no URL and no `urlcache`, so it must not match. The last option misreads the condition, which is an `and`, not certutil alone.

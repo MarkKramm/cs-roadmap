@@ -293,9 +293,9 @@ You can see your own ARP table with `ip neigh` on Linux or `arp -a` on Windows. 
 |---|---|---|
 | **A** | Name → IPv4 address | Where traffic actually goes |
 | **AAAA** | Name → IPv6 address | Same, for IPv6 |
-| **CNAME** | Alias to another name | Common in phishing infrastructure |
+| **CNAME** (Canonical Name) | Alias to another name | Common in phishing infrastructure |
 | **MX** | Mail server for the domain | Used to judge whether email *could* be legitimate |
-| **TXT** | Arbitrary text | Holds **SPF** (Sender Policy Framework), **DKIM** (DomainKeys Identified Mail), and **DMARC** anti-spoofing records |
+| **TXT** | Arbitrary text | Holds **SPF** (Sender Policy Framework), **DKIM** (DomainKeys Identified Mail), and **DMARC** (Domain-based Message Authentication, Reporting, and Conformance) anti-spoofing records |
 | **NS** | Authoritative nameservers | Who controls the domain |
 
 #### Recursive resolvers versus authoritative servers
