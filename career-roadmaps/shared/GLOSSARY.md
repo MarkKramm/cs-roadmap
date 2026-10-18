@@ -13,7 +13,7 @@ finding it meant searching for a phrase you did not yet know.
 ## What this is, and what it is not
 
 **This is a starter set, and it is deliberately partial.** It holds the
-**70 entries** below, of the 309 domain terms the curriculum
+**77 entries** below, of the 309 domain terms the curriculum
 uses. The rest are not here, and the reason is worth stating rather than leaving a
 reader to assume the absence means a term is unimportant.
 
@@ -96,6 +96,10 @@ A DNS record that aliases one name to another, common in phishing infrastructure
 The mechanism by which a server tells a browser which other origins may read its responses.
 *Sourced from `cybersec-roadmap/14-phase-web-app-security.md:227`.*
 
+**CRL** — Certificate Revocation List.
+The list a certificate authority publishes of certificates it has revoked before expiry; clients check it to avoid trusting a compromised cert.
+*Sourced from `advance-roadmap/07-phase-detection-as-code.md:1381`.*
+
 **CRLF** — Carriage Return Line Feed.
 The two bytes that end a line in HTTP; injecting them into a response is how header injection works.
 *Sourced from `cybersec-roadmap/14-phase-web-app-security.md:407`.*
@@ -103,6 +107,10 @@ The two bytes that end a line in HTTP; injecting them into a response is how hea
 **CSRF** — Cross-site request forgery.
 An attack that makes a logged-in victim's browser send a request the victim never intended, so the server acts on their authority. Distinct from XSS: no script needs to run.
 *Sourced from `cybersec-roadmap/14-phase-web-app-security.md:44`.*
+
+**CTF** — Capture The Flag.
+A competition where you find and exploit vulnerabilities in provided systems; the standard way beginners practise offensive skills legally.
+*Sourced from `cybersec-roadmap/02-phase-networking-and-linux.md:91`.*
 
 **CSF** — Cybersecurity Framework.
 NIST's framework, used here to structure programme functions rather than to gate anything. Cited from the resource list, because the phases write `NIST CSF` without spelling it out.
@@ -123,6 +131,10 @@ A support metric: the share of tickets closed with the customer satisfied.
 
 ### D
 
+**DAST** — Dynamic Application Security Testing.
+Scanning a running application for vulnerabilities, as opposed to reading its source.
+*Sourced from `cybersec-roadmap/14-phase-web-app-security.md:1515`.*
+
 **DKIM** — DomainKeys Identified Mail.
 A DNS record that lets a receiver check a message was really sent by that domain.
 *Sourced from `cybersec-roadmap/02-phase-networking-and-linux.md:298`.*
@@ -130,6 +142,10 @@ A DNS record that lets a receiver check a message was really sent by that domain
 **DMARC** — Domain-based Message Authentication, Reporting, and Conformance.
 The email standard that tells receivers what to do when SPF or DKIM fails.
 *Sourced from `cybersec-roadmap/02-phase-networking-and-linux.md:298`.*
+
+**DFIR** — Digital Forensics and Incident Response.
+The work after an incident: preserving evidence, reconstructing a timeline, writing the report.
+*Sourced from `cybersec-roadmap/01-phase-foundations.md:464`.*
 
 **DMZ** — Demilitarized Zone.
 A network segment between two trust zones, where traffic is inspected before it crosses.
@@ -161,9 +177,17 @@ A public estimate of how likely a given vulnerability is to be exploited in the 
 
 ### F
 
+**FAIR** — Factor Analysis of Information Risk.
+A quantitative risk method: express loss in dollars, with a frequency and a magnitude, instead of a red/amber/green label.
+*Sourced from `advance-roadmap/06-phase-programme-and-influence.md:1232`.*
+
 **FCR** — First contact resolution.
 The share of tickets resolved on first contact, without a handover. Its companion metric is `MTTR`.
 *Sourced from `it-roadmap/06-phase-tools-and-ticketing.md:413`.*
+
+**FTK** — Forensic Toolkit.
+A forensic imaging and analysis suite; its free `FTK Imager` component is the standard tool for taking a disk image.
+*Sourced from `cybersec-roadmap/11-phase-incident-response.md:625`.*
 
 
 ### G
@@ -182,6 +206,10 @@ The three functions that decide what is allowed, what could go wrong, and whethe
 
 
 ### H
+
+**HMI** — Human-Machine Interface.
+The screen or panel an operator uses to view and control a process; in an OT environment it is the thing an attacker wants to blind.
+*Sourced from `cybersec-roadmap/15-phase-ot-ics-security.md:530`.*
 
 **HSTS** — HTTP Strict Transport Security.
 A response header that tells browsers to use HTTPS for this host for the stated duration, blocking downgrade attacks.
@@ -390,7 +418,7 @@ Getting script to run in another user's browser, in the context of a site they t
 
 ## What is not here, and why
 
-**239 of the 309 domain terms have no entry**, for three different
+**232 of the 309 domain terms have no entry**, for three different
 reasons, and they are worth separating because only two are fixable by writing.
 
 1. **No expansion could be found** — 248 terms. Usually the term is used in prose

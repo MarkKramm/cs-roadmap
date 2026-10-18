@@ -88,7 +88,7 @@ They are paired for a practical reason: Linux is where the networking becomes vi
 
 On Windows, network configuration is buried in GUI dialogs, and logging is abstracted away. On Linux, you type `ip a` and see your interfaces. You type `ss -tulpn` and see every listening service with the process that owns it. You read `/var/log/auth.log` to watch authentication attempts scroll past in real time.
 
-Linux gives you the observability that makes the concepts concrete. It is also, not coincidentally, the operating system that runs most of the internet's servers, most security tooling, and most CTF environments. Fluency with it compounds across everything that follows.
+Linux gives you the observability that makes the concepts concrete. It is also, not coincidentally, the operating system that runs most of the internet's servers, most security tooling, and most CTF (Capture The Flag) environments. Fluency with it compounds across everything that follows.
 
 #### How the time breaks down
 

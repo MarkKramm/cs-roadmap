@@ -1229,7 +1229,7 @@ Then open `portfolio/advance/06-programme-and-influence.md` and assemble the del
 - CIS Critical Security Controls — https://www.cisecurity.org/controls
 - OWASP Risk Rating Methodology — https://owasp.org/www-community/OWASP_Risk_Rating_Methodology
 - OWASP Security Culture project — https://owasp.org/www-project-security-culture/
-- FAIR Institute, What is FAIR — https://www.fairinstitute.org/what-is-fair
+- FAIR (Factor Analysis of Information Risk) Institute, What is FAIR — https://www.fairinstitute.org/what-is-fair
 - FIRST CVSS specification — https://www.first.org/cvss/
 - Google SRE Book — https://sre.google/sre-book/table-of-contents/
 - PagerDuty Incident Response, Writing Runbooks — https://response.pagerduty.com/before/runbooks/

@@ -527,7 +527,7 @@ Two cautions before you start. First, **detail varies in quality across public a
 |---|---|
 | It targeted a specific industrial process, not a company | The malware was written to recognise particular hardware configurations |
 | It reached through to level 1 devices | A compromise of IT systems became a change to physical equipment |
-| It replayed recorded normal readings to the HMI | The operators had no way to see what was happening |
+| It replayed recorded normal readings to the HMI (Human-Machine Interface) | The operators had no way to see what was happening |
 | It used multiple Windows zero-days | It was a funded, long-running, purpose-built operation |
 | It used valid but stolen signing certificates | Trust mechanisms were turned into a delivery mechanism |
 

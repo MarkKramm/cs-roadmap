@@ -622,7 +622,7 @@ Anything less is how a learner infects their employer's network.
 | **Autopsy** | Disk image analysis with a graphical interface | Free, open source |
 | **The Sleuth Kit** | Command-line disk forensics underneath Autopsy | Free, open source |
 | **Volatility 3** | Memory analysis | Free, open source |
-| **FTK Imager** | Imaging and image mounting | Free |
+| **FTK (Forensic Toolkit) Imager** | Imaging and image mounting | Free |
 | **dc3dd / dd** | Command-line imaging with hashing | Free |
 | **KAPE** | Targeted artefact collection | Free version |
 | **Eric Zimmerman's tools** | Individual artefact parsers: MFTECmd, PECmd, LECmd, JLECmd, AmcacheParser | Free |

@@ -1512,7 +1512,7 @@ PortSwigger Web Security Academy is free and is the best structured web security
 
 ### What's paid and why you'd upgrade
 
-Burp Suite Professional adds the automated scanner, unrestricted Intruder, and the BApp Store extensions that make large assessments faster — and it is what most consulting teams run, so familiarity helps. PortSwigger's Burp Suite Certified Practitioner exam is a practical assessment with real weight in web security hiring, and it is far cheaper than most certification routes because the training material is free. Commercial DAST and SAST platforms such as Invicti, Acunetix, Snyk, and Checkmarx integrate scanning into a pipeline, which matters for a team shipping continuously. Paid lab platforms add more machines and less guidance once the Academy is finished.
+Burp Suite Professional adds the automated scanner, unrestricted Intruder, and the BApp Store extensions that make large assessments faster — and it is what most consulting teams run, so familiarity helps. PortSwigger's Burp Suite Certified Practitioner exam is a practical assessment with real weight in web security hiring, and it is far cheaper than most certification routes because the training material is free. Commercial DAST (Dynamic Application Security Testing) and SAST platforms such as Invicti, Acunetix, Snyk, and Checkmarx integrate scanning into a pipeline, which matters for a team shipping continuously. Paid lab platforms add more machines and less guidance once the Academy is finished.
 
 ### When it's worth paying
 
