@@ -13,7 +13,7 @@ finding it meant searching for a phrase you did not yet know.
 ## What this is, and what it is not
 
 **This is a starter set, and it is deliberately partial.** It holds the
-**81 entries** below, of the 309 domain terms the curriculum
+**83 entries** below, of the 309 domain terms the curriculum
 uses. The rest are not here, and the reason is worth stating rather than leaving a
 reader to assume the absence means a term is unimportant.
 
@@ -211,6 +211,10 @@ File Transfer Protocol wrapped in TLS, so credentials and data are encrypted in 
 The EU privacy law; its obligations (lawful basis, data subject rights, breach notification) are the template most other jurisdictions borrow from.
 *Sourced from `cybersec-roadmap/13-phase-grc-compliance.md:33`.*
 
+**GIAC** — Global Information Assurance Certification.
+SANS's certification family, employer-funded in practice; the most expensive route in the field.
+*Sourced from `cybersec-roadmap/11-phase-incident-response.md:1393`.*
+
 **GPO** — Group Policy Object.
 A stored set of Windows settings applied automatically to machines or users in an `OU`.
 *Sourced from `it-roadmap/05-phase-sysadmin-basics.md:108`.*
@@ -277,6 +281,10 @@ The cloud service that creates and holds encryption keys, so data can be encrypt
 **KQL** — Kusto Query Language.
 The query language Microsoft Sentinel and Defender XDR run, not the products themselves. The heading introducing it previously read `KQL — Microsoft Sentinel and Defender XDR`, which a reader could reasonably take for the expansion; corrected in the corpus on 2026-10-02.
 *Sourced from `advance-roadmap/02-phase-threat-hunting.md:445`.*
+
+**KRI** — Key Risk Indicator.
+A measurable signal that a risk is materialising, defined with a numerator, a denominator, a source, an owner, and a cadence.
+*Sourced from `advance-roadmap/06-phase-programme-and-influence.md:27`.*
 
 **KEV** — Known Exploited Vulnerabilities.
 CISA's list of flaws with confirmed real-world exploitation. A patch for one of these is urgent in a way an equal severity score on an unused path is not.
@@ -433,7 +441,7 @@ Getting script to run in another user's browser, in the context of a site they t
 
 ## What is not here, and why
 
-**228 of the 309 domain terms have no entry**, for three different
+**226 of the 309 domain terms have no entry**, for three different
 reasons, and they are worth separating because only two are fixable by writing.
 
 1. **No expansion could be found** — 248 terms. Usually the term is used in prose
