@@ -13,7 +13,7 @@ finding it meant searching for a phrase you did not yet know.
 ## What this is, and what it is not
 
 **This is a starter set, and it is deliberately partial.** It holds the
-**57 entries** below, of the 309 domain terms the curriculum
+**63 entries** below, of the 309 domain terms the curriculum
 uses. The rest are not here, and the reason is worth stating rather than leaving a
 reader to assume the absence means a term is unimportant.
 
@@ -45,6 +45,10 @@ if an entry's expansion is no longer at the line it cites.
 
 
 ### A
+
+**AES** — Advanced Encryption Standard.
+The symmetric cipher behind "AES-256" at rest and in transit; the number is the key size in bits.
+*Sourced from `cybersec-roadmap/13-phase-grc-compliance.md:1270`.*
 
 **ALE** — Annualised loss expectancy.
 The expected cost of one occurrence of a risk event, before frequency is applied.
@@ -80,6 +84,10 @@ An attack where the target is the person, not the machine: the attacker writes a
 
 ### C
 
+**CRLF** — Carriage Return Line Feed.
+The two bytes that end a line in HTTP; injecting them into a response is how header injection works.
+*Sourced from `cybersec-roadmap/14-phase-web-app-security.md:407`.*
+
 **CSRF** — Cross-site request forgery.
 An attack that makes a logged-in victim's browser send a request the victim never intended, so the server acts on their authority. Distinct from XSS: no script needs to run.
 *Sourced from `cybersec-roadmap/14-phase-web-app-security.md:44`.*
@@ -107,6 +115,10 @@ A support metric: the share of tickets closed with the customer satisfied.
 A DNS record that lets a receiver check a message was really sent by that domain.
 *Sourced from `cybersec-roadmap/02-phase-networking-and-linux.md:298`.*
 
+**DMZ** — Demilitarized Zone.
+A network segment between two trust zones, where traffic is inspected before it crosses.
+*Sourced from `cybersec-roadmap/15-phase-ot-ics-security.md:44`.*
+
 **DVWA** — Damn Vulnerable Web Application — a deliberately insecure web app you run locally.
 A deliberately insecure application you run locally, so you can practise finding its flaws without breaking anything that matters.
 *Sourced from `cybersec-roadmap/03-phase-security-fundamentals.md:1033`.*
@@ -117,6 +129,10 @@ A deliberately insecure application you run locally, so you can practise finding
 **EFI** — Extensible Firmware Interface.
 The firmware interface the bootloader uses before Windows begins to load.
 *Sourced from `it-roadmap/01-phase-computer-fundamentals.md:363`.*
+
+**EFS** — Encrypting File System.
+Windows' per-file encryption; files encrypted with it are tied to the user's credentials.
+*Sourced from `it-roadmap/02-phase-operating-systems.md:695`.*
 
 **EPSS** — Exploit Prediction Scoring System.
 A public estimate of how likely a given vulnerability is to be exploited in the wild, which is a better prioritisation signal than severity alone.
@@ -141,7 +157,17 @@ The three functions that decide what is allowed, what could go wrong, and whethe
 *Sourced from `cybersec-roadmap/05-phase-specialization-choice.md:195`.*
 
 
+### H
+
+**HSTS** — HTTP Strict Transport Security.
+A response header that tells browsers to use HTTPS for this host for the stated duration, blocking downgrade attacks.
+*Sourced from `cybersec-roadmap/02-phase-networking-and-linux.md:463`.*
+
 ### I
+
+**ICMP** — Internet Control Message Protocol.
+The protocol behind ping and traceroute, used to report errors and test reachability.
+*Sourced from `it-roadmap/03-phase-networking-basics.md:27`.*
 
 **ICS** — incident command system.
 The structure emergency services use to run a response, borrowed here for security incidents. **Note the collision**: `ICS` also means Industrial Control Systems elsewhere in this curriculum, and the two are unrelated — which one a reader meets first depends on the track they are on.
@@ -336,7 +362,7 @@ Getting script to run in another user's browser, in the context of a site they t
 
 ## What is not here, and why
 
-**252 of the 309 domain terms have no entry**, for three different
+**246 of the 309 domain terms have no entry**, for three different
 reasons, and they are worth separating because only two are fixable by writing.
 
 1. **No expansion could be found** — 248 terms. Usually the term is used in prose

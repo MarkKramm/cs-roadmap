@@ -1267,7 +1267,7 @@ The weak ending is "approved". The strong ending states what you are carrying.
 | Where is data stored? | Singapore and Ireland | Acceptable — both in the agreed jurisdictions |
 | Who can access it? | Support staff in two regions | **Condition** — confirm access logging is enabled for support sessions |
 | Is access logged and retained? | "Yes" — no retention period stated | **Condition** — obtain the retention period in writing |
-| Encryption at rest? | AES-256 | Acceptable |
+| Encryption at rest? | AES-256 (Advanced Encryption Standard) | Acceptable |
 | Breach notification timeframe? | "As soon as practicable" | **Condition** — amend to a fixed 48-hour contractual notice |
 | Sub-processors? | Uses one cloud provider | Acceptable — provider named and assessed |
 | Independent assurance? | SOC 2 report from 2023 | Acceptable with **condition** — request the current report at renewal |

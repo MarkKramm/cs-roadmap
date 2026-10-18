@@ -460,7 +460,7 @@ strict-transport-security: max-age=31536000
 | `HTTP/2 200` | The request succeeded, and the server speaks HTTP/2 |
 | `content-type: text/html; charset=UTF-8` | The body is HTML in UTF-8 — no MIME confusion expected here |
 | `server: ECS (dcb/7F84)` | The software is identifiable. That is a version-disclosure decision the owner made, and attackers read it the same way |
-| `strict-transport-security: max-age=31536000` | HSTS is on. Browsers will refuse plain HTTP to this host for a year, which blocks downgrade attacks |
+| `strict-transport-security: max-age=31536000` | HSTS (HTTP Strict Transport Security) is on. Browsers will refuse plain HTTP to this host for a year, which blocks downgrade attacks |
 
 Notice what is *absent*. There is no `set-cookie` here, so this response establishes no session. On a login response, a missing `HttpOnly` or `Secure` flag on that cookie would be the finding.
 

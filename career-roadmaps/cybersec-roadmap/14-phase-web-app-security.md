@@ -404,7 +404,7 @@ Injection happens when untrusted data is interpreted as code by whatever process
 | **Template injection** | A template engine | `{{7*7}}` |
 | **NoSQL injection** | A document database | `{"$ne": null}` |
 | **Log injection** | A log parser downstream | A newline that forges a log entry |
-| **Header injection** | The HTTP response | A CRLF sequence that adds a header |
+| **Header injection** | The HTTP response | A CRLF (Carriage Return Line Feed) sequence that adds a header |
 
 **SQL injection has a shape you can recognise**, and seeing it as code is faster than reading about it.
 

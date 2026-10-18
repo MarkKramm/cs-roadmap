@@ -24,7 +24,7 @@ Understand the networking topics that appear constantly in helpdesk, NOC, sysadm
 ## Skills you'll gain
 
 - Explain LAN, WAN, internet, router, switch, firewall, modem, access point, and ISP.
-- Understand IPv4, IPv6 basics, subnet mask, gateway, DNS, DHCP, NAT, TCP, UDP, ICMP, ports, and Wi-Fi.
+- Understand IPv4, IPv6 basics, subnet mask, gateway, DNS, DHCP, NAT, TCP, UDP, ICMP (Internet Control Message Protocol), ports, and Wi-Fi.
 - Use `ping`, `tracert/traceroute`, `ipconfig/ifconfig/ip`, `nslookup`, `arp -a`, `route print`, and Wireshark.
 - Build a simple network in Packet Tracer.
 - Troubleshoot “no internet,” “DNS not working,” “slow connection,” and “VPN issue.”

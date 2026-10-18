@@ -41,7 +41,7 @@ Learn how industrial control systems are built, why their security priorities ar
 - Recognise a write to a control register in a capture, and explain why that is the event worth alerting on.
 - Explain the role of a safety instrumented system, and why attacking one is categorically different from attacking a business system.
 - Trace a real incident from initial access to physical consequence, and name the control that would have interrupted it.
-- Describe the IT/OT DMZ, the data diode, and where a firewall actually belongs in a plant.
+- Describe the IT/OT DMZ (Demilitarized Zone), the data diode, and where a firewall actually belongs in a plant.
 - State the safety and legal boundary of OT work without hesitating, and refuse a request to scan a live control network.
 
 ## Specific topics to learn
